@@ -70,7 +70,7 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
             switch (column) {
                 case 0 -> {
                     //date
-                    return Util1.toDateStr(his.getSaleDate(), "dd/MM/yyyy");
+                    return Util1.toDateStr(his.getVouDate(), "dd/MM/yyyy");
                 }
                 case 1 -> {
                     //vou-no

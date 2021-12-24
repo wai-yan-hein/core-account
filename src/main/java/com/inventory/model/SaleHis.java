@@ -22,7 +22,7 @@ public class SaleHis implements java.io.Serializable {
     private Trader trader;
     private SaleMan saleMan;
     @NonNull
-    private Date saleDate;
+    private Date vouDate;
     private Date creditTerm;
     @NonNull
     private Currency currency;
@@ -35,6 +35,8 @@ public class SaleHis implements java.io.Serializable {
     private Boolean deleted;
     private Float paid;
     private Float balance;
+    @NonNull
+    private Date createdDate;
     @NonNull
     private AppUser createdBy;
     private Integer session;

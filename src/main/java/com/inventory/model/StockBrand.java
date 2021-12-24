@@ -14,6 +14,7 @@ import lombok.Data;
  */
 @Data
 public class StockBrand implements java.io.Serializable {
+
     private String brandCode;
     private String brandName;
     private Integer migId;
@@ -24,4 +25,13 @@ public class StockBrand implements java.io.Serializable {
     private Integer macId;
     private String userCode;
     private String compCode;
+
+    public StockBrand() {
+    }
+
+    public StockBrand(String brandCode, String brandName) {
+        this.brandCode = brandCode;
+        this.brandName = brandName;
+    }
+
 }

@@ -12,5 +12,5 @@ import java.awt.event.KeyEvent;
  * @author winswe
  */
 public interface KeyPropagate {
-    public void keyEvent(KeyEvent e);
+    void keyEvent(KeyEvent e);
 }

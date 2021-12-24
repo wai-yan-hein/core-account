@@ -22,7 +22,7 @@ public class StockCompleterTableModel extends AbstractTableModel {
 
     static Logger log = LoggerFactory.getLogger(StockCompleterTableModel.class.getName());
     private List<Stock> listStock = new ArrayList();
-    private String[] columnNames = {"Code", "Description"};
+    private String[] columnNames = {"Code", "Name", "Group", "Category", "Brand"};
 
     public StockCompleterTableModel(List<Stock> listStock) {
         this.listStock = listStock;
@@ -40,11 +40,7 @@ public class StockCompleterTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        if (column == 2) {
-            return Boolean.class;
-        } else {
-            return String.class;
-        }
+        return String.class;
     }
 
     @Override
@@ -53,9 +49,18 @@ public class StockCompleterTableModel extends AbstractTableModel {
             Stock med = listStock.get(row);
 
             return switch (column) {
-                case 0 -> med.getUserCode();
-                case 1 -> med.getStockName();
-                default -> null;
+                case 0 ->
+                    med.getUserCode();
+                case 1 ->
+                    med.getStockName();
+                case 2 ->
+                    med.getStockType().getStockTypeName();
+                case 3 ->
+                    med.getCategory() == null ? null : med.getCategory().getCatName();
+                case 4 ->
+                    med.getBrand() == null ? null : med.getBrand().getBrandName();
+                default ->
+                    null;
             }; //Code
             //Name
         } catch (Exception ex) {

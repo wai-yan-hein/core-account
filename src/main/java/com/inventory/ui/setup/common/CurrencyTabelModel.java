@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CurrencyTabelModel extends AbstractTableModel {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CurrencyTabelModel.class);
+    private static final Logger log = LoggerFactory.getLogger(CurrencyTabelModel.class);
     private List<Currency> listCurrency = new ArrayList();
     private String[] columnNames = {"Code", "Name", "Symbol", "Active"};
 
@@ -73,7 +73,7 @@ public class CurrencyTabelModel extends AbstractTableModel {
                     return null;
             }
         } catch (Exception ex) {
-            LOGGER.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
+            log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
 
         return null;

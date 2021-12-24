@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
  */
 public class CurrencyEditor extends AbstractCellEditor implements TableCellEditor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CurrencyEditor.class);
     private JComponent component = null;
     private CurrencyAutoCompleter completer;
     private final FocusAdapter fa = new FocusAdapter() {
@@ -84,7 +83,7 @@ public class CurrencyEditor extends AbstractCellEditor implements TableCellEdito
         if (value != null) {
             jtf.setText(value.toString());
         }
-        completer = new CurrencyAutoCompleter(jtf, Global.listCurrency, this);
+        completer = new CurrencyAutoCompleter(jtf, Global.listCurrency, this, false);
 
         return component;
     }
@@ -115,11 +114,8 @@ public class CurrencyEditor extends AbstractCellEditor implements TableCellEdito
         } else if (anEvent instanceof KeyEvent) {
             KeyEvent ke = (KeyEvent) anEvent;
 
-            if (ke.isActionKey()) {//Function key
-                return false;
-            } else {
-                return true;
-            }
+            //Function key
+            return !ke.isActionKey();
         } else {
             return true;
         }

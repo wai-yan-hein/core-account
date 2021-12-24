@@ -35,7 +35,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class RelationSetupDialog extends javax.swing.JDialog implements KeyListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RelationSetupDialog.class);
+    private static final Logger log = LoggerFactory.getLogger(RelationSetupDialog.class);
     @Autowired
     private RelationTableModel relationTableModel;
     @Autowired

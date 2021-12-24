@@ -9,6 +9,8 @@ import com.inventory.common.Global;
 import com.inventory.common.SelectionObserver;
 import com.inventory.common.TableCellRender;
 import com.inventory.model.Location;
+import com.inventory.model.OptionModel;
+import com.inventory.ui.setup.dialog.OptionDialog;
 import com.inventory.ui.setup.dialog.common.LocationTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -17,6 +19,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
@@ -29,6 +32,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.RowFilter;
+import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
@@ -45,8 +49,8 @@ import org.slf4j.LoggerFactory;
 public class LocationAutoCompleter implements KeyListener, SelectionObserver {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(LocationAutoCompleter.class);
-    private JTable table = new JTable();
-    private JPopupMenu popup = new JPopupMenu();
+    private final JTable table = new JTable();
+    private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER";
     private LocationTableModel locationTableModel;
@@ -56,18 +60,45 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
     private int x = 0;
     private int y = 0;
     private SelectionObserver selectionObserver;
+    private List<String> listOption = new ArrayList<>();
+    private OptionDialog optionDialog;
+
+    public List<String> getListOption() {
+        return listOption;
+    }
+
+    public void setListOption(List<String> listOption) {
+        this.listOption = listOption;
+    }
 
     public void setSelectionObserver(SelectionObserver selectionObserver) {
         this.selectionObserver = selectionObserver;
+    }
+
+    private void initOption() {
+        Global.listLocation.forEach(t -> {
+            listOption.add(t.getLocationCode());
+        });
     }
 
     public LocationAutoCompleter() {
     }
 
     public LocationAutoCompleter(JTextComponent comp, List<Location> list,
-            AbstractCellEditor editor) {
+            AbstractCellEditor editor, boolean filter, boolean custom) {
         this.textComp = comp;
         this.editor = editor;
+        initOption();
+        if (filter) {
+            Location loc = new Location("-", "All");
+            list = new ArrayList<>(list);
+            list.add(0, loc);
+            setLocation(loc);
+        }
+        if (custom) {
+            list = new ArrayList<>(list);
+            list.add(1, new Location("C", "Custom"));
+        }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
@@ -75,10 +106,11 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
         locationTableModel = new LocationTableModel(list);
         table.setModel(locationTableModel);
         table.setSize(50, 50);
-        table.setTableHeader(null);
         table.setFont(Global.textFont); // NOI18N
-        table.setRowHeight(Global.tblRowHeight);
+        table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setDefaultRenderer(Object.class, new TableCellRender());
+        table.setRowHeight(Global.tblRowHeight);
+        table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
@@ -151,7 +183,7 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
         return location;
     }
 
-    public void setLocation(Location location) {
+    public final void setLocation(Location location) {
         this.location = location;
         if (this.location != null) {
             this.textComp.setText(location.getLocationName());
@@ -164,7 +196,27 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
         if (table.getSelectedRow() != -1) {
             location = locationTableModel.getLocation(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            ((JTextField) textComp).setText(location.getLocationName());
+            textComp.setText(location.getLocationName());
+            switch (location.getLocationCode()) {
+                case "C" -> {
+                    optionDialog = new OptionDialog(Global.parentForm, "Location");
+                    List<OptionModel> listOP = new ArrayList<>();
+                    Global.listLocation.forEach(t -> {
+                        listOP.add(new OptionModel(t.getLocationCode(), t.getLocationName()));
+                    });
+                    optionDialog.setOptionList(listOP);
+                    optionDialog.setLocationRelativeTo(null);
+                    optionDialog.setVisible(true);
+                    if (optionDialog.isSelect()) {
+                        listOption = optionDialog.getOptionList();
+                    }
+                    //open
+                }
+                case "-" ->
+                    initOption();
+                default ->
+                    listOption.add(location.getLocationCode());
+            }
             if (editor == null) {
                 if (selectionObserver != null) {
                     selectionObserver.selected("Location", location.getLocationName());
@@ -179,7 +231,7 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
 
     }
 
-    private Action acceptAction = new AbstractAction() {
+    private final Action acceptAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             mouseSelect();

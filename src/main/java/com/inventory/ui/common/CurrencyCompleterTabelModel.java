@@ -19,9 +19,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class CurrencyCompleterTabelModel extends AbstractTableModel {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CurrencyCompleterTabelModel.class);
+    private static final Logger log = LoggerFactory.getLogger(CurrencyCompleterTabelModel.class);
     private List<Currency> listCurrency = new ArrayList();
-    private String[] columnNames = {"Code"};
+    private String[] columnNames = {"Name"};
 
     public CurrencyCompleterTabelModel(List<Currency> listCurrency) {
         this.listCurrency = listCurrency;
@@ -39,12 +39,12 @@ public class CurrencyCompleterTabelModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        switch (column) {
-            case 0:
-                return String.class;
-            default:
-                return Object.class;
-        }
+        return switch (column) {
+            case 0 ->
+                String.class;
+            default ->
+                Object.class;
+        };
 
     }
 
@@ -54,14 +54,14 @@ public class CurrencyCompleterTabelModel extends AbstractTableModel {
         try {
             Currency currency = listCurrency.get(row);
 
-            switch (column) {
-                case 0: //Id
-                    return currency.getCurCode();
-                default:
-                    return null;
-            }
+            return switch (column) {
+                case 0 ->
+                    currency.getCurrencyName();
+                default ->
+                    null;
+            }; //Id
         } catch (Exception ex) {
-            LOGGER.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
+            log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
 
         return null;

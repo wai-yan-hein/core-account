@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 public class StockUnitEditor extends AbstractCellEditor implements TableCellEditor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StockUnitEditor.class);
+    private static final Logger log = LoggerFactory.getLogger(StockUnitEditor.class);
     private JComponent component = null;
     private UnitAutoCompleter completer;
     private Object oldValue;
@@ -120,11 +120,8 @@ public class StockUnitEditor extends AbstractCellEditor implements TableCellEdit
         } else if (anEvent instanceof KeyEvent) {
             KeyEvent ke = (KeyEvent) anEvent;
 
-            if (ke.isActionKey()) {//Function key
-                return false;
-            } else {
-                return true;
-            }
+            //Function key
+            return !ke.isActionKey();
         } else {
             return true;
         }

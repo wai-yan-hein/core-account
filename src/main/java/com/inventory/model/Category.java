@@ -26,4 +26,12 @@ public class Category implements java.io.Serializable {
     private String userCode;
     private String compCode;
 
+    public Category() {
+    }
+
+    public Category(String catCode, String catName) {
+        this.catCode = catCode;
+        this.catName = catName;
+    }
+
 }

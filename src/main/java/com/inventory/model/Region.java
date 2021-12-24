@@ -27,4 +27,12 @@ public class Region implements java.io.Serializable {
     private Integer macId;
     private String userCode;
 
+    public Region(String regCode, String regionName) {
+        this.regCode = regCode;
+        this.regionName = regionName;
+    }
+
+    public Region() {
+    }
+
 }

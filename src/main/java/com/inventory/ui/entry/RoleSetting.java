@@ -9,6 +9,7 @@ import com.inventory.common.Global;
 import com.inventory.common.TableCellRender;
 import com.inventory.model.UserRole;
 import com.inventory.ui.common.UserRoleTableModel;
+import com.inventory.ui.system.RoleProperty;
 import java.awt.event.KeyEvent;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -28,7 +29,7 @@ import reactor.core.publisher.Mono;
 public class RoleSetting extends javax.swing.JPanel {
 
     @Autowired
-    private Default defaultSetting;
+    private RoleProperty roleProperty;
     @Autowired
     private UserRoleTableModel userRoleTableModel;
     @Autowired
@@ -54,7 +55,7 @@ public class RoleSetting extends javax.swing.JPanel {
                     selectRow = tblRole.convertRowIndexToModel(tblRole.getSelectedRow());
                     UserRole role = userRoleTableModel.getRole(selectRow);
                     String roleCode = role.getRoleCode();
-                    defaultSetting.loadDefaultData(roleCode);
+                    roleProperty.searchRoleProperty(roleCode);
                 }
 
             }
@@ -65,8 +66,8 @@ public class RoleSetting extends javax.swing.JPanel {
     }
 
     private void initTabMain() {
-        defaultSetting.initMain();
-        tabMain.add("Default", defaultSetting);
+        roleProperty.initTable();
+        tabMain.add("Property", roleProperty);
 
     }
 

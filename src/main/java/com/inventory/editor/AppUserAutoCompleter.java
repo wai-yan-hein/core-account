@@ -27,6 +27,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.RowFilter;
+import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
@@ -41,11 +42,11 @@ import org.slf4j.LoggerFactory;
 public class AppUserAutoCompleter implements KeyListener {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(AppUserAutoCompleter.class);
-    private JTable table = new JTable();
-    private JPopupMenu popup = new JPopupMenu();
-    private JTextComponent textComp;
+    private final JTable table = new JTable();
+    private final JPopupMenu popup = new JPopupMenu();
+    private final JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private UserTableModel userTableModel;
+    private final UserTableModel userTableModel;
     private AppUser appUser;
     public AbstractCellEditor editor;
     private final TableRowSorter<TableModel> sorter;
@@ -66,10 +67,11 @@ public class AppUserAutoCompleter implements KeyListener {
         userTableModel = new UserTableModel(list);
         table.setModel(userTableModel);
         table.setSize(50, 50);
-        table.getTableHeader().setFont(Global.textFont);
+        table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
         table.setDefaultRenderer(Object.class, new TableCellRender());
+        table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
@@ -144,7 +146,7 @@ public class AppUserAutoCompleter implements KeyListener {
         if (table.getSelectedRow() != -1) {
             appUser = userTableModel.getUser(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            ((JTextField) textComp).setText(appUser.getUserName());
+            textComp.setText(appUser.getUserName());
         }
 
         popup.setVisible(false);
@@ -153,7 +155,7 @@ public class AppUserAutoCompleter implements KeyListener {
         }
     }
 
-    private Action acceptAction = new AbstractAction() {
+    private final Action acceptAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
@@ -162,7 +164,7 @@ public class AppUserAutoCompleter implements KeyListener {
             if (completer.table.getSelectedRow() != -1) {
                 appUser = userTableModel.getUser(completer.table.convertRowIndexToModel(
                         completer.table.getSelectedRow()));
-                ((JTextField) completer.textComp).setText(appUser.getUserName());
+                completer.textComp.setText(appUser.getUserName());
             }
 
             completer.popup.setVisible(false);

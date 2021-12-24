@@ -6,6 +6,7 @@
 package com.inventory.model;
 
 import java.util.Date;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
@@ -26,6 +27,14 @@ public class Location implements java.io.Serializable {
     private Integer macId;
     private String userCode;
     private String compCode;
+
+    public Location(String locationCode, String locationName) {
+        this.locationCode = locationCode;
+        this.locationName = locationName;
+    }
+
+    public Location() {
+    }
 
     @Override
     public String toString() {

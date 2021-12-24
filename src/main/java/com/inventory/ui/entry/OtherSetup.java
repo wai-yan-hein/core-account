@@ -10,10 +10,12 @@ import com.inventory.ui.setup.dialog.CurrencySetupDialog;
 import com.inventory.ui.setup.dialog.LocationSetupDialog;
 import com.inventory.ui.setup.dialog.RegionSetup;
 import com.inventory.ui.setup.dialog.SaleManSetupDialog;
+import com.inventory.ui.setup.dialog.VouStatusSetupDialog;
 import java.awt.Image;
 import javax.swing.ImageIcon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
@@ -22,9 +24,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class OtherSetup extends javax.swing.JPanel {
 
-    private final Image icon = new ImageIcon(getClass().getResource("/images/settings_26px.png")).getImage();
-
+    private final Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
     @Autowired
+    private WebClient webClient;
     private RegionSetup regionSetup;
     @Autowired
     private LocationSetupDialog locationSetup;
@@ -32,6 +34,8 @@ public class OtherSetup extends javax.swing.JPanel {
     private CurrencySetupDialog currencySetup;
     @Autowired
     private SaleManSetupDialog smDialog;
+    @Autowired
+    private VouStatusSetupDialog vsDialog;
 
     /**
      * Creates new form OtherSetup
@@ -41,7 +45,8 @@ public class OtherSetup extends javax.swing.JPanel {
     }
 
     private void regionSetup() {
-        regionSetup.setIconImage(icon);
+        regionSetup = new RegionSetup(Global.parentForm);
+        regionSetup.setWebClient(webClient);
         regionSetup.initMain();
         regionSetup.setSize(Global.width / 2, Global.height / 2);
         regionSetup.setLocationRelativeTo(null);
@@ -72,6 +77,14 @@ public class OtherSetup extends javax.swing.JPanel {
         smDialog.setVisible(true);
     }
 
+    private void vouStatusSetup() {
+        vsDialog.setIconImage(icon);
+        vsDialog.initMain();
+        vsDialog.setSize(Global.width / 2, Global.height / 2);
+        vsDialog.setLocationRelativeTo(null);
+        vsDialog.setVisible(true);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -87,6 +100,7 @@ public class OtherSetup extends javax.swing.JPanel {
         jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
 
+        btnRegion.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
         btnRegion.setText("Region");
         btnRegion.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -94,6 +108,7 @@ public class OtherSetup extends javax.swing.JPanel {
             }
         });
 
+        btnLocation.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
         btnLocation.setText("Location");
         btnLocation.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -101,6 +116,7 @@ public class OtherSetup extends javax.swing.JPanel {
             }
         });
 
+        jButton3.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
         jButton3.setText("Currency");
         jButton3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -108,6 +124,7 @@ public class OtherSetup extends javax.swing.JPanel {
             }
         });
 
+        jButton4.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
         jButton4.setText("Sale Man");
         jButton4.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -115,7 +132,13 @@ public class OtherSetup extends javax.swing.JPanel {
             }
         });
 
-        jButton5.setText("Region");
+        jButton5.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        jButton5.setText("Voucher Status");
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -134,6 +157,9 @@ public class OtherSetup extends javax.swing.JPanel {
                 .addComponent(jButton5)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnLocation, btnRegion, jButton3, jButton4, jButton5});
+
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
@@ -167,6 +193,11 @@ public class OtherSetup extends javax.swing.JPanel {
         // TODO add your handling code here:
         saleManSetup();
     }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+        // TODO add your handling code here:
+        vouStatusSetup();
+    }//GEN-LAST:event_jButton5ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MachineInfoCompleterTableModel extends AbstractTableModel {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LocationCompleterTableModel.class);
+    private static final Logger log = LoggerFactory.getLogger(LocationCompleterTableModel.class);
     private List<MachineInfo> listMachine = new ArrayList();
     private final String[] columnNames = {"Name"};
 
@@ -53,7 +53,7 @@ public class MachineInfoCompleterTableModel extends AbstractTableModel {
                     return null;
             }
         } catch (Exception ex) {
-            LOGGER.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
+            log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
 
         return null;

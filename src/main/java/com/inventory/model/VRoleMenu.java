@@ -25,5 +25,6 @@ public class VRoleMenu implements java.io.Serializable {
     private Integer orderBy;
     private String soureAccCode;
     private Boolean isAllow;
+    private String apiUrl;
     private List<VRoleMenu> child;
 }

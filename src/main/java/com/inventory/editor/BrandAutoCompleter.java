@@ -6,8 +6,11 @@
 package com.inventory.editor;
 
 import com.inventory.common.Global;
+import com.inventory.common.SelectionObserver;
 import com.inventory.common.TableCellRender;
+import com.inventory.model.OptionModel;
 import com.inventory.model.StockBrand;
+import com.inventory.ui.setup.dialog.OptionDialog;
 import com.inventory.ui.setup.dialog.common.StockBrandTableModel;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -15,6 +18,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
@@ -26,6 +30,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.RowFilter;
+import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
@@ -37,11 +42,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author Lenovo
  */
-public class BrandAutoCompleter implements KeyListener {
+public final class BrandAutoCompleter implements KeyListener {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(BrandAutoCompleter.class);
-    private JTable table = new JTable();
-    private JPopupMenu popup = new JPopupMenu();
+    private final JTable table = new JTable();
+    private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
     private StockBrandTableModel brandTableModel;
@@ -50,25 +55,61 @@ public class BrandAutoCompleter implements KeyListener {
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
+    private List<String> listOption = new ArrayList<>();
+    private OptionDialog optionDialog;
+    private SelectionObserver observer;
+
+    public SelectionObserver getObserver() {
+        return observer;
+    }
+
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
+    }
+
+    public List<String> getListOption() {
+        return listOption;
+    }
+
+    public void setListOption(List<String> listOption) {
+        this.listOption = listOption;
+    }
+
+    private void initOption() {
+        Global.listStockBrand.forEach(t -> {
+            listOption.add(t.getBrandCode());
+        });
+    }
 
     //private CashFilter cashFilter = Global.allCash;
     public BrandAutoCompleter() {
     }
 
     public BrandAutoCompleter(JTextComponent comp, List<StockBrand> list,
-            AbstractCellEditor editor) {
+            AbstractCellEditor editor, boolean filter, boolean custom) {
         this.textComp = comp;
         this.editor = editor;
+        initOption();
+        if (filter) {
+            StockBrand sb = new StockBrand("-", "All");
+            list = new ArrayList<>(list);
+            list.add(0, sb);
+            setBrand(sb);
+        }
+        if (custom) {
+            list = new ArrayList<>(list);
+            list.add(1, new StockBrand("C", "Custom"));
+        }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
         brandTableModel = new StockBrandTableModel(list);
         table.setModel(brandTableModel);
-        table.getTableHeader().setFont(Global.lableFont);
+        table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
-        table.getTableHeader().setFont(Global.lableFont);
         table.setDefaultRenderer(Object.class, new TableCellRender());
+        table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
@@ -135,7 +176,7 @@ public class BrandAutoCompleter implements KeyListener {
         table.setRequestFocusEnabled(false);
 
         if (list != null) {
-            if (list.size() > 0) {
+            if (!list.isEmpty()) {
                 table.setRowSelectionInterval(0, 0);
             }
         }
@@ -145,7 +186,31 @@ public class BrandAutoCompleter implements KeyListener {
         if (table.getSelectedRow() != -1) {
             brand = brandTableModel.getItemBrand(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            ((JTextField) textComp).setText(brand.getBrandName());
+            textComp.setText(brand.getBrandName());
+            switch (brand.getBrandCode()) {
+                case "C" -> {
+                    optionDialog = new OptionDialog(Global.parentForm, "Stock Brand");
+                    List<OptionModel> listOP = new ArrayList<>();
+                    Global.listStockBrand.forEach(t -> {
+                        listOP.add(new OptionModel(t.getBrandCode(), t.getBrandName()));
+                    });
+                    optionDialog.setOptionList(listOP);
+                    optionDialog.setLocationRelativeTo(null);
+                    optionDialog.setVisible(true);
+                    if (optionDialog.isSelect()) {
+                        listOption = optionDialog.getOptionList();
+                    }
+                    //open
+                }
+                case "-" ->
+                    initOption();
+                default -> {
+                    if (observer != null) {
+                        observer.selected("ST", brand.getBrandCode());
+                    }
+                    listOption.add(brand.getBrandCode());
+                }
+            }
         }
 
         popup.setVisible(false);
@@ -154,7 +219,7 @@ public class BrandAutoCompleter implements KeyListener {
         }
     }
 
-    private Action acceptAction = new AbstractAction() {
+    private final Action acceptAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             mouseSelect();
@@ -231,7 +296,6 @@ public class BrandAutoCompleter implements KeyListener {
 
             }
         }
-
         Rectangle rect = table.getCellRect(table.getSelectedRow(), 0, true);
         table.scrollRectToVisible(rect);
     }
@@ -296,8 +360,6 @@ public class BrandAutoCompleter implements KeyListener {
         if (filter.length() == 0) {
             sorter.setRowFilter(null);
         } else {
-            //String value = Util1.getPropValue("system.iac.filter");
-
             if ("N".equals("Y")) {
                 sorter.setRowFilter(RowFilter.regexFilter(filter));
             } else {
@@ -316,25 +378,11 @@ public class BrandAutoCompleter implements KeyListener {
     private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
         @Override
         public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
-            //for (int i = entry.getValueCount() - 1; i >= 0; i--) {
-            /*
-             * if (NumberUtil.isNumber(textComp.getText())) { if
-             * (entry.getStringValue(0).toUpperCase().startsWith(
-             * textComp.getText().toUpperCase())) { return true; } } else {
-             *
-             * if (entry.getStringValue(1).toUpperCase().contains(
-             * textComp.getText().toUpperCase())) { return true; } else if
-             * (entry.getStringValue(2).toUpperCase().contains(
-             * textComp.getText().toUpperCase())) { return true; }
-             }
-             */
-
             String tmp1 = entry.getStringValue(0).toUpperCase();
             String tmp2 = entry.getStringValue(1).toUpperCase();
             String tmp3 = entry.getStringValue(3).toUpperCase();
             String tmp4 = entry.getStringValue(4).toUpperCase();
             String text = textComp.getText().toUpperCase();
-
             return tmp1.startsWith(text) || tmp2.startsWith(text) || tmp3.startsWith(text) || tmp4.startsWith(text);
         }
     };

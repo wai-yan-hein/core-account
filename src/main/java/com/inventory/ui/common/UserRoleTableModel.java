@@ -6,7 +6,7 @@ package com.inventory.ui.common;
 
 import com.inventory.common.Global;
 import com.inventory.common.Util1;
-import com.inventory.model.SaleHis;
+import com.inventory.model.StockInOut;
 import com.inventory.model.UserRole;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,13 +101,13 @@ public class UserRoleTableModel extends AbstractTableModel {
                 hasMenu = true;
             } else {
                 user.setCompCode(Global.compCode);
-                user.setMacId(Global.machineId);
+                user.setMacId(Global.macId);
                 user.setCreatedBy(Global.loginUser);
                 user.setCreatedDate(Util1.getTodayDate());
             }
             Mono<UserRole> result = webClient.post()
                     .uri("/user/save-role")
-                    .body(Mono.just(user), SaleHis.class)
+                    .body(Mono.just(user), StockInOut.class)
                     .retrieve()
                     .bodyToMono(UserRole.class);
             result.subscribe((t) -> {

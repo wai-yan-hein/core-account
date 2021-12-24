@@ -8,8 +8,10 @@ package com.inventory.editor;
 import com.inventory.common.Global;
 import com.inventory.common.SelectionObserver;
 import com.inventory.common.TableCellRender;
+import com.inventory.model.OptionModel;
 import com.inventory.model.Trader;
 import com.inventory.ui.common.TraderTableModel;
+import com.inventory.ui.setup.dialog.OptionDialog;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -28,6 +30,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.RowFilter;
+import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
@@ -42,8 +45,8 @@ import org.slf4j.LoggerFactory;
 public class TraderAutoCompleter implements KeyListener {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(TraderAutoCompleter.class);
-    private JTable table = new JTable();
-    private JPopupMenu popup = new JPopupMenu();
+    private final JTable table = new JTable();
+    private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
     private TraderTableModel traderTableModel;
@@ -53,6 +56,16 @@ public class TraderAutoCompleter implements KeyListener {
     private int x = 0;
     private int y = 0;
     private SelectionObserver selectionObserver;
+    private List<String> listOption = new ArrayList<>();
+    private OptionDialog optionDialog;
+
+    public List<String> getListOption() {
+        return listOption;
+    }
+
+    public void setListOption(List<String> listOption) {
+        this.listOption = listOption;
+    }
 
     public void setSelectionObserver(SelectionObserver selectionObserver) {
         this.selectionObserver = selectionObserver;
@@ -62,42 +75,56 @@ public class TraderAutoCompleter implements KeyListener {
     }
 
     public TraderAutoCompleter(JTextComponent comp, List<Trader> list,
-            AbstractCellEditor editor, boolean filter, int max) {
+            AbstractCellEditor editor, boolean filter, int max, boolean custom) {
         this.textComp = comp;
         this.editor = editor;
         textComp.putClientProperty(AUTOCOMPLETER, this);
+        initOption();
         if (filter) {
+            Trader t = new Trader("-", "All");
             switch (max) {
                 case 1 -> {
                     list = new ArrayList<>(list);
-                    list.add(0, new Trader("-", "All"));
+                    list.add(0, t);
+                    setTrader(t);
                 }
                 case 2 -> {
                     list = new ArrayList<>(list);
-                    list.add(0, new Trader("-", "All"));
+                    list.add(0, t);
                     list.add(1, new Trader("-", "All Customer"));
                     list.add(2, new Trader("-", "All Supplier"));
+                    setTrader(t);
                 }
                 default -> {
+                    Trader t2 = new Trader(null, "Default Customer");
+                    list = new ArrayList<>(list);
+                    list.add(0, t2);
+                    setTrader(t2);
                 }
             }
+        }
+        if (custom) {
+            list = new ArrayList<>(list);
+            list.add(1, new Trader("C", "Custom"));
         }
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
         traderTableModel = new TraderTableModel(list);
         table.setModel(traderTableModel);
-        table.getTableHeader().setFont(Global.textFont);
+        table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
-        table.setRowHeight(Global.tblRowHeight);
         table.setDefaultRenderer(Object.class, new TableCellRender());
+        table.setRowHeight(Global.tblRowHeight);
+        table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
 
         scroll.setBorder(null);
         table.setFocusable(false);
-        table.getColumnModel().getColumn(0).setPreferredWidth(10);//Code
-        table.getColumnModel().getColumn(1).setPreferredWidth(120);//Name
+        table.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
+        table.getColumnModel().getColumn(1).setPreferredWidth(150);//Name
+        table.getColumnModel().getColumn(2).setPreferredWidth(100);//Region
 
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -111,7 +138,7 @@ public class TraderAutoCompleter implements KeyListener {
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
 
-        popup.setPopupSize(400, 200);
+        popup.setPopupSize(500, 200);
 
         popup.add(scroll);
 
@@ -157,17 +184,48 @@ public class TraderAutoCompleter implements KeyListener {
         table.setRequestFocusEnabled(false);
 
         if (list != null) {
-            if (list.size() > 0) {
+            if (!list.isEmpty()) {
                 table.setRowSelectionInterval(0, 0);
             }
         }
+    }
+
+    private void initOption() {
+        Global.listTrader.forEach(t -> {
+            listOption.add(t.getCode());
+        });
     }
 
     public void mouseSelect() {
         if (table.getSelectedRow() != -1) {
             trader = traderTableModel.getTrader(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            ((JTextField) textComp).setText(trader.getTraderName());
+            textComp.setText(trader.getTraderName());
+            listOption = new ArrayList<>();
+            switch (trader.getCode()) {
+                case "C" -> {
+                    optionDialog = new OptionDialog(Global.parentForm, "Trader");
+                    List<OptionModel> listOP = new ArrayList<>();
+                    Global.listTrader.forEach(t -> {
+                        listOP.add(new OptionModel(t.getCode(), t.getTraderName()));
+                    });
+                    optionDialog.setOptionList(listOP);
+                    optionDialog.setLocationRelativeTo(null);
+                    optionDialog.setVisible(true);
+                    if (optionDialog.isSelect()) {
+                        listOption = optionDialog.getOptionList();
+                    }
+                    //open
+                }
+                case "-" ->
+                    initOption();
+                default ->
+                    listOption.add(trader.getCode());
+            }
+            for (String str : listOption) {
+                log.info(str);
+            }
+
             if (editor == null) {
                 if (selectionObserver != null) {
                     selectionObserver.selected("Trader", trader);
@@ -179,9 +237,10 @@ public class TraderAutoCompleter implements KeyListener {
         if (editor != null) {
             editor.stopCellEditing();
         }
+
     }
 
-    private Action acceptAction = new AbstractAction() {
+    private final Action acceptAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             mouseSelect();
@@ -204,8 +263,6 @@ public class TraderAutoCompleter implements KeyListener {
                 }
 
                 popup.show(textComp, x, y);
-                log.info("Show Popup...");
-
             } else {
                 popup.setVisible(false);
             }
@@ -288,12 +345,10 @@ public class TraderAutoCompleter implements KeyListener {
         return trader;
     }
 
-    public void setTrader(Trader trader) {
+    public final void setTrader(Trader trader) {
         this.trader = trader;
         if (trader != null) {
             this.textComp.setText(trader.getTraderName());
-        } else {
-            this.textComp.setText(null);
         }
     }
 

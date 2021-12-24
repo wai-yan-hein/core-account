@@ -20,10 +20,14 @@ import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
 import com.inventory.model.UnitPattern;
 import com.inventory.model.UnitRelation;
+import com.inventory.model.VouStatus;
+import java.awt.Color;
 import java.awt.Font;
+import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.JFrame;
 
 /**
@@ -32,7 +36,8 @@ import javax.swing.JFrame;
  */
 public class Global {
 
-    public static Font lableFont = new java.awt.Font("Arial Nova Light", 1, 12);
+    public static ServerSocket sock;
+    public static Font lableFont = new java.awt.Font("Arial", 1, 12);
     public static Font amtFont = new java.awt.Font("Arial Nova Light", 1, 13);
     public static Font textFont = new java.awt.Font("Zawgyi-One", 0, 12);
     public static Font menuFont = new java.awt.Font("Zawgyi-One", 1, 13);
@@ -40,6 +45,7 @@ public class Global {
     public static Font shortCutFont = new java.awt.Font("Arial Nova Light", 0, 12);
     public static int tblRowHeight = 24;
     public static Font tblHeaderFont = new java.awt.Font("Arial Nova Light", 1, 13);
+    public static Color selectionColor;
     public static String uuid;
     public static boolean synceFinish = true;
     public static AppUser loginUser;
@@ -48,9 +54,8 @@ public class Global {
     public static int sessionId;
     public static String sessionName;
     public static String loginDate;
-    public static Integer machineId;
+    public static Integer macId;
     public static String machineName;
-    public static SystemSetting setting;
     public static boolean mqConStatus = false;
     public static int x;
     public static int y;
@@ -58,7 +63,10 @@ public class Global {
     public static int height;
     public static JFrame parentForm;
     public static String companyName;
-    public static HashMap<String, String> sysProperties = new HashMap<>();
+    public static String reportPath = "report";
+    public static String fontPath = "font";
+    //public static HashMap<String, String> sysProperties = new HashMap<>();
+    public static List<VouStatus> listVouStatus = new ArrayList<>();
     public static List<Category> listCategory = new ArrayList<>();
     public static List<StockBrand> listStockBrand = new ArrayList<>();
     public static List<SaleMan> listSaleMan = new ArrayList<>();
@@ -76,4 +84,11 @@ public class Global {
     public static List<Currency> listCurrency = new ArrayList<>();
     public static List<AppUser> listAppUser = new ArrayList<>();
     public static List<MachineInfo> listMachine = new ArrayList<>();
+    public static Map<String, String> hmRoleProperty = new HashMap<>();
+    public static Currency defaultCurrency;
+    public static Location defaultLocation;
+    public static Trader defaultCustomer;
+    public static Trader defaultSupplier;
+    public static SaleMan defaultSaleMan;
+
 }

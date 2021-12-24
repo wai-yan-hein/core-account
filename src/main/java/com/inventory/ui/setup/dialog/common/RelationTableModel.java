@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class RelationTableModel extends AbstractTableModel {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RelationTableModel.class);
+    private static final Logger log = LoggerFactory.getLogger(RelationTableModel.class);
     private final String[] columnNames = {"From Unit", "To Unit", "Factor"};
     private List<UnitRelation> listRelation = new ArrayList<>();
     private JTable parent;
@@ -88,7 +88,7 @@ public class RelationTableModel extends AbstractTableModel {
                 if (aValue != null) {
                     if (aValue instanceof StockUnit) {
                         StockUnit stock = (StockUnit) aValue;
-                        relation.getUnitKey().setFromUnit(stock.getItemUnitCode());
+                        relation.getUnitKey().setFromUnit(stock.getUnitCode());
                     }
                     parent.setColumnSelectionInterval(1, 1);
                 }
@@ -97,7 +97,8 @@ public class RelationTableModel extends AbstractTableModel {
                 if (aValue != null) {
                     if (aValue instanceof StockUnit) {
                         StockUnit stock = (StockUnit) aValue;
-                        relation.getUnitKey().setToUnit(stock.getItemUnitCode());
+                        relation.getUnitKey().setToUnit(stock.getUnitCode()
+                        );
                     }
                     parent.setColumnSelectionInterval(2, 2);
                 }
@@ -126,7 +127,7 @@ public class RelationTableModel extends AbstractTableModel {
                 }*/
             }
         } catch (Exception e) {
-            LOGGER.info("Save Relation :" + e.getMessage());
+            log.info("Save Relation :" + e.getMessage());
             JOptionPane.showMessageDialog(Global.parentForm, "LOST SERVER CONNECTION");
         }
     }

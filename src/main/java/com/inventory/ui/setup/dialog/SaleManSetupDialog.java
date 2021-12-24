@@ -51,25 +51,25 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
     public SaleManSetupDialog() {
         super(Global.parentForm, true);
         initComponents();
+        initKeyListener();
         lblStatus.setForeground(Color.green);
     }
 
     public void initMain() {
         initTable();
         searchSaleMan();
-        initKeyListener();
         txtId.requestFocus();
     }
 
     private void initTable() {
         swrf = new StartWithRowFilter(txtFilter);
-
         tblSaleMan.setModel(saleManTableModel);
         tblSaleMan.getTableHeader().setFont(Global.lableFont);
         tblSaleMan.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblSaleMan.getColumnModel().getColumn(0).setPreferredWidth(1);
         tblSaleMan.getColumnModel().getColumn(1).setPreferredWidth(100);
         tblSaleMan.setDefaultRenderer(Object.class, new TableCellRender());
+        tblSaleMan.setRowHeight(Global.tblRowHeight);
         sorter = new TableRowSorter<>(tblSaleMan.getModel());
         tblSaleMan.setRowSorter(sorter);
         tblSaleMan.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
@@ -112,7 +112,7 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
         boolean status = true;
         if (Util1.isNull(txtName.getText())) {
             status = false;
-            JOptionPane.showMessageDialog(Global.parentForm, "Invalid Name");
+            JOptionPane.showMessageDialog(this, "Invalid Name");
         } else {
             saleMan.setUserCode(txtId.getText());
             saleMan.setSaleManName(txtName.getText());
@@ -120,7 +120,7 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
             saleMan.setPhone(txtPhone.getText());
             saleMan.setAddress(txtAddress.getText());
             if (lblStatus.getText().equals("NEW")) {
-                saleMan.setMacId(Global.machineId);
+                saleMan.setMacId(Global.macId);
                 saleMan.setCompCode(Global.compCode);
                 saleMan.setCreatedDate(Util1.getTodayDate());
                 saleMan.setCreatedBy(Global.loginUser);
@@ -141,7 +141,7 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
                     .bodyToMono(SaleMan.class);
             result.subscribe((t) -> {
                 if (t != null) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Saved");
+                    JOptionPane.showMessageDialog(this, "Saved");
                     if (lblStatus.getText().equals("EDIT")) {
                         Global.listSaleMan.set(selectRow, t);
                     } else {
@@ -150,7 +150,7 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
                     clear();
                 }
             }, (e) -> {
-                JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+                JOptionPane.showMessageDialog(this, e.getMessage());
             });
         }
     }
@@ -169,9 +169,9 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
                     .queryParam("code", code).build())
                     .retrieve().bodyToMono(ReturnObject.class);
             result.subscribe((t) -> {
-                JOptionPane.showMessageDialog(Global.parentForm, t.getMeesage());
+                JOptionPane.showMessageDialog(this, t.getMessage());
             }, (e) -> {
-                JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+                JOptionPane.showMessageDialog(this, e.getMessage());
             });
             clear();
         }
@@ -185,7 +185,6 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
         chkActive.addKeyListener(this);
         btnSave.addKeyListener(this);
         btnClear.addKeyListener(this);
-        btnDelete.addKeyListener(this);
     }
 
     /**
@@ -212,8 +211,8 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
         chkActive = new javax.swing.JCheckBox();
         lblStatus = new javax.swing.JLabel();
         btnClear = new javax.swing.JButton();
-        btnDelete = new javax.swing.JButton();
         btnSave = new javax.swing.JButton();
+        jSeparator1 = new javax.swing.JSeparator();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Sale Man Setup");
@@ -281,16 +280,9 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
             }
         });
 
-        btnDelete.setFont(Global.lableFont);
-        btnDelete.setText("Delete");
-        btnDelete.setName("btnDelete"); // NOI18N
-        btnDelete.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnDeleteActionPerformed(evt);
-            }
-        });
-
+        btnSave.setBackground(Global.selectionColor);
         btnSave.setFont(Global.lableFont);
+        btnSave.setForeground(new java.awt.Color(255, 255, 255));
         btnSave.setText("Save");
         btnSave.setName("btnSave"); // NOI18N
         btnSave.addActionListener(new java.awt.event.ActionListener() {
@@ -303,18 +295,17 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jSeparator1)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                         .addComponent(lblStatus)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 54, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnDelete)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnClear))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel2)
                             .addComponent(jLabel3)
@@ -325,12 +316,15 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(chkActive)
                                 .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(txtPhone)
+                            .addComponent(txtPhone, javax.swing.GroupLayout.DEFAULT_SIZE, 244, Short.MAX_VALUE)
                             .addComponent(txtName, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtId, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtAddress))))
                 .addContainerGap())
         );
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel1, jLabel2, jLabel3, jLabel4});
+
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
@@ -352,13 +346,14 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
                     .addComponent(jLabel4))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(chkActive)
+                .addGap(2, 2, 2)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 4, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblStatus)
                     .addComponent(btnClear)
-                    .addComponent(btnDelete)
                     .addComponent(btnSave))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(139, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -385,7 +380,7 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 335, Short.MAX_VALUE)
                         .addGap(5, 5, 5))))
         );
 
@@ -396,7 +391,7 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
         try {
             save();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+            JOptionPane.showMessageDialog(this, e.getMessage());
             log.error("Save SaleMan :" + e.getMessage());
         }
 
@@ -405,15 +400,6 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
     private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
         clear();
     }//GEN-LAST:event_btnClearActionPerformed
-
-    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-        try {
-            delete();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-            log.error("Delete SaleMan :" + e.getMessage());
-        }
-    }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         // TODO add your handling code here:
@@ -435,7 +421,6 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClear;
-    private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnSave;
     private javax.swing.JCheckBox chkActive;
     private javax.swing.JLabel jLabel1;
@@ -444,6 +429,7 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
     private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JTable tblSaleMan;
     private javax.swing.JTextField txtAddress;
@@ -478,87 +464,42 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
             ctrlName = ((JCheckBox) sourceObj).getName();
         }
         switch (ctrlName) {
-            case "txtId":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
+            case "txtId" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtName.requestFocus();
                 }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    btnClear.requestFocus();
-                }
-                tabToTable(e);
-                break;
-            case "txtName":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
+            }
+            case "txtName" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtPhone.requestFocus();
                 }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    txtId.requestFocus();
-                }
-                tabToTable(e);
-                break;
-            case "txtPhone":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
+            }
+            case "txtPhone" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtAddress.requestFocus();
                 }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    txtName.requestFocus();
-                }
-                tabToTable(e);
-                break;
-            case "txtAddress":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
+            }
+            case "txtAddress" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     chkActive.requestFocus();
                 }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    txtPhone.requestFocus();
-                }
-                tabToTable(e);
-                break;
-            case "chkActive":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
+            }
+            case "chkActive" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     btnSave.requestFocus();
                 }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    txtAddress.requestFocus();
-                }
-                tabToTable(e);
-                break;
-            case "btnSave":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    btnDelete.requestFocus();
-                }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    chkActive.requestFocus();
-                }
-                tabToTable(e);
-                break;
-            case "btnDelete":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
+            }
+            case "btnSave" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     btnClear.requestFocus();
                 }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    btnSave.requestFocus();
-                }
-                tabToTable(e);
-                break;
-            case "btnClear":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
+            }
+            case "btnClear" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtId.requestFocus();
                 }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    btnDelete.requestFocus();
-                }
-                tabToTable(e);
-                break;
-        }
-    }
-
-    private void tabToTable(KeyEvent e) {
-        if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            tblSaleMan.requestFocus();
-            if (tblSaleMan.getRowCount() >= 0) {
-                tblSaleMan.setRowSelectionInterval(0, 0);
             }
         }
     }
+
 }

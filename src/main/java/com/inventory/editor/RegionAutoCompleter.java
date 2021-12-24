@@ -8,7 +8,9 @@ package com.inventory.editor;
 import com.inventory.common.Global;
 import com.inventory.common.SelectionObserver;
 import com.inventory.common.TableCellRender;
+import com.inventory.model.OptionModel;
 import com.inventory.model.Region;
+import com.inventory.ui.setup.dialog.OptionDialog;
 import com.inventory.ui.setup.dialog.common.RegionTableModel;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -16,6 +18,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
@@ -27,6 +30,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.RowFilter;
+import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
@@ -38,11 +42,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author Lenovo
  */
-public class RegionAutoCompleter implements KeyListener {
+public final class RegionAutoCompleter implements KeyListener {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(RegionAutoCompleter.class);
-    private JTable table = new JTable();
-    private JPopupMenu popup = new JPopupMenu();
+    private final JTable table = new JTable();
+    private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
     private RegionTableModel regionTableModel;
@@ -53,6 +57,22 @@ public class RegionAutoCompleter implements KeyListener {
     private int y = 0;
     private boolean popupOpen = false;
     private SelectionObserver selectionObserver;
+    private List<String> listOption = new ArrayList<>();
+    private OptionDialog optionDialog;
+
+    public List<String> getListOption() {
+        return listOption;
+    }
+
+    public void setListOption(List<String> listOption) {
+        this.listOption = listOption;
+    }
+
+    private void initOption() {
+        Global.listRegion.forEach(t -> {
+            listOption.add(t.getRegCode());
+        });
+    }
 
     public void setSelectionObserver(SelectionObserver selectionObserver) {
         this.selectionObserver = selectionObserver;
@@ -62,17 +82,29 @@ public class RegionAutoCompleter implements KeyListener {
     }
 
     public RegionAutoCompleter(JTextComponent comp, List<Region> list,
-            AbstractCellEditor editor) {
+            AbstractCellEditor editor, boolean filter, boolean custom) {
         this.textComp = comp;
         this.editor = editor;
         this.textComp.addKeyListener(this);
+        initOption();
+        if (filter) {
+            Region reg = new Region("-", "All");
+            list = new ArrayList<>(list);
+            list.add(0, reg);
+            setRegion(reg);
+        }
+        if (custom) {
+            list = new ArrayList<>(list);
+            list.add(1, new Region("C", "Custom"));
+        }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         regionTableModel = new RegionTableModel(list);
         table.setModel(regionTableModel);
-        table.getTableHeader().setFont(Global.textFont);
+        table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
+        table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
         table.setDefaultRenderer(Object.class, new TableCellRender());
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
@@ -154,7 +186,27 @@ public class RegionAutoCompleter implements KeyListener {
         if (table.getSelectedRow() != -1) {
             region = regionTableModel.getRegion(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            ((JTextField) textComp).setText(region.getRegionName());
+            textComp.setText(region.getRegionName());
+            switch (region.getRegCode()) {
+                case "C" -> {
+                    optionDialog = new OptionDialog(Global.parentForm, "Region");
+                    List<OptionModel> listOP = new ArrayList<>();
+                    Global.listRegion.forEach(t -> {
+                        listOP.add(new OptionModel(t.getRegCode(), t.getRegionName()));
+                    });
+                    optionDialog.setOptionList(listOP);
+                    optionDialog.setLocationRelativeTo(null);
+                    optionDialog.setVisible(true);
+                    if (optionDialog.isSelect()) {
+                        listOption = optionDialog.getOptionList();
+                    }
+                    //open
+                }
+                case "-" ->
+                    initOption();
+                default ->
+                    listOption.add(region.getRegCode());
+            }
             if (editor == null) {
                 if (selectionObserver != null) {
                     selectionObserver.selected("RegionList", region.getRegCode());
@@ -169,7 +221,7 @@ public class RegionAutoCompleter implements KeyListener {
         }
     }
 
-    private Action acceptAction = new AbstractAction() {
+    private final Action acceptAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             mouseSelect();

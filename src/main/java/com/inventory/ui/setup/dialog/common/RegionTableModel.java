@@ -11,18 +11,19 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 public class RegionTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(RegionTableModel.class);
     private List<Region> listRegion = new ArrayList<>();
     private final String[] columnNames = {"Code", "Name"};
+
+    public RegionTableModel() {
+    }
 
     public RegionTableModel(List<Region> listRegion) {
         this.listRegion = listRegion;
@@ -56,14 +57,12 @@ public class RegionTableModel extends AbstractTableModel {
         try {
             Region record = listRegion.get(row);
 
-            switch (column) {
-                case 0: //Code
-                    return record.getUserCode();
-                case 1: //Description
-                    return record.getRegionName();
-                default:
-                    return null;
-            }
+            return switch (column) {
+                case 0 -> record.getUserCode();
+                case 1 -> record.getRegionName();
+                default -> null;
+            }; //Code
+            //Description
         } catch (Exception ex) {
             log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }

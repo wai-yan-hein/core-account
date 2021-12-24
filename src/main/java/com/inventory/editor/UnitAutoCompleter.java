@@ -28,6 +28,9 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.RowFilter;
+import javax.swing.UIManager;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
@@ -42,8 +45,8 @@ import org.slf4j.LoggerFactory;
 public class UnitAutoCompleter implements KeyListener {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(UnitAutoCompleter.class);
-    private JTable table = new JTable();
-    private JPopupMenu popup = new JPopupMenu();
+    private final JTable table = new JTable();
+    private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
 
@@ -64,23 +67,22 @@ public class UnitAutoCompleter implements KeyListener {
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
+        textComp.getDocument().addDocumentListener(documentListener);
         unitTableModel = new StockUnitTableModel(list);
         table.setModel(unitTableModel);
         table.setSize(50, 50);
-        table.getTableHeader().setFont(Global.textFont);
-        table.setFont(Global.lableFont); // NOI18N
+        table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
-        table.setFont(Global.textFont);
-
+        table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setDefaultRenderer(Object.class, new TableCellRender());
+        table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
 
         scroll.setBorder(null);
         table.setFocusable(false);
-        table.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
-        table.getColumnModel().getColumn(1).setPreferredWidth(50);//Name
+        table.getColumnModel().getColumn(0).setPreferredWidth(40);//Code
 
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -95,7 +97,7 @@ public class UnitAutoCompleter implements KeyListener {
         scroll.getHorizontalScrollBar().setFocusable(false);
 
         popup.setBorder(BorderFactory.createLineBorder(Color.black));
-        popup.setPopupSize(150, 200);
+        popup.setPopupSize(400, 200);
 
         popup.add(scroll);
 
@@ -109,6 +111,9 @@ public class UnitAutoCompleter implements KeyListener {
                 }
 
             });
+        } else {
+            textComp.registerKeyboardAction(showAction, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE,
+                    KeyEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
         }
 
         textComp.registerKeyboardAction(upAction, KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
@@ -124,23 +129,45 @@ public class UnitAutoCompleter implements KeyListener {
             @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                 textComp.unregisterKeyboardAction(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0));
+
             }
 
             @Override
             public void popupMenuCanceled(PopupMenuEvent e) {
             }
         });
+
         table.setRequestFocusEnabled(false);
+
         if (list.size() > 0) {
             table.setRowSelectionInterval(0, 0);
         }
     }
+    private final DocumentListener documentListener = new DocumentListener() {
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            if (editor != null) {
+                showPopup();
+            }
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            if (editor != null) {
+                showPopup();
+            }
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+        }
+    };
 
     public void mouseSelect() {
         if (table.getSelectedRow() != -1) {
             stockUnit = unitTableModel.getStockUnit(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            ((JTextField) textComp).setText(stockUnit.getItemUnitName());
+            textComp.setText(stockUnit.getUnitName());
             if (editor == null) {
             }
         }
@@ -153,7 +180,7 @@ public class UnitAutoCompleter implements KeyListener {
 
     }
 
-    private Action acceptAction = new AbstractAction() {
+    private final Action acceptAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             mouseSelect();
@@ -260,7 +287,7 @@ public class UnitAutoCompleter implements KeyListener {
 
     public void setStockUnit(StockUnit stockUnit) {
         this.stockUnit = stockUnit;
-        this.textComp.setText(this.stockUnit == null ? null : this.stockUnit.getItemUnitCode());
+        this.textComp.setText(this.stockUnit == null ? null : this.stockUnit.getUnitName());
     }
 
     /*

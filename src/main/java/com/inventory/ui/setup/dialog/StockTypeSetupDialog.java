@@ -54,25 +54,23 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
     public StockTypeSetupDialog() {
         super(Global.parentForm, true);
         initComponents();
+        initKeyListener();
         lblStatus.setForeground(Color.GREEN);
     }
 
     public void initMain() {
         swrf = new StartWithRowFilter(txtFilter);
         initTable();
-        initKeyListener();
         searchItemType();
-
+        txtUserCode.requestFocus();
     }
 
     private void initKeyListener() {
-        txtCode.addKeyListener(this);
+        txtUserCode.addKeyListener(this);
         txtName.addKeyListener(this);
         btnClear.addKeyListener(this);
-        btnDelete.addKeyListener(this);
         btnSave.addKeyListener(this);
         tblItemType.addKeyListener(this);
-        txtCode.requestFocus();
     }
 
     private void searchItemType() {
@@ -85,6 +83,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         tblItemType.setRowSorter(sorter);
         tblItemType.getTableHeader().setFont(Global.lableFont);
         tblItemType.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblItemType.setRowHeight(Global.tblRowHeight);
         tblItemType.setDefaultRenderer(Object.class, new TableCellRender());
         tblItemType.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
             if (e.getValueIsAdjusting()) {
@@ -99,11 +98,11 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
 
     private void setItemType(StockType item) {
         stockType = item;
-        txtCode.setText(stockType.getUserCode());
+        txtUserCode.setText(stockType.getUserCode());
         txtName.setText(stockType.getStockTypeName());
         lblStatus.setText("EDIT");
         lblStatus.setForeground(Color.blue);
-        txtCode.requestFocus();
+        txtUserCode.requestFocus();
     }
 
     private void save() {
@@ -115,31 +114,31 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
                     .bodyToMono(StockType.class);
             result.subscribe((t) -> {
                 if (t != null) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Saved");
                     if (lblStatus.getText().equals("EDIT")) {
                         Global.listStockType.set(selectRow, t);
                     } else {
                         Global.listStockType.add(t);
                     }
                     clear();
+                    JOptionPane.showMessageDialog(this, "Saved");
                 }
             }, (e) -> {
-                JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+                JOptionPane.showMessageDialog(this, e.getMessage());
             });
         }
     }
 
     private void clear() {
-        txtCode.setText(null);
+        txtUserCode.setText(null);
         txtFilter.setText(null);
         txtName.setText(null);
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.GREEN);
-        txtCode.setEnabled(true);
+        txtUserCode.setEnabled(true);
         stockType = new StockType();
         stockTypeTableModel.refresh();
         tblItemType.requestFocus();
-        txtCode.requestFocus();
+        txtUserCode.requestFocus();
     }
 
     private void delete() {
@@ -151,9 +150,9 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
                     .uri(builder -> builder.path("/setup/delete-type").queryParam("code", saleManCode).build())
                     .retrieve().bodyToMono(ReturnObject.class);
             result.subscribe((t) -> {
-                JOptionPane.showMessageDialog(Global.parentForm, t.getMeesage());
+                JOptionPane.showMessageDialog(this, t.getMessage());
             }, (e) -> {
-                JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+                JOptionPane.showMessageDialog(this, e.getMessage());
             });
             clear();
         }
@@ -163,17 +162,17 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         boolean status = true;
         if (Util1.isNull(txtName.getText())) {
             status = false;
-            JOptionPane.showMessageDialog(this, "Name cannot be blank or null.",
-                    "Name null error.", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Invalid Name",
+                    "Invalid Name.", JOptionPane.ERROR_MESSAGE);
             txtName.requestFocus();
         } else {
+            stockType.setUserCode(txtUserCode.getText().trim());
             stockType.setStockTypeName(txtName.getText());
             if (lblStatus.getText().equals("NEW")) {
-                stockType.setUserCode(txtCode.getText().trim());
                 stockType.setCompCode(Global.compCode);
                 stockType.setCreatedBy(Global.loginUser);
                 stockType.setCreatedDate(Util1.getTodayDate());
-                stockType.setMacId(Global.machineId);
+                stockType.setMacId(Global.macId);
             } else {
                 stockType.setUpdatedBy(Global.loginUser);
             }
@@ -181,19 +180,16 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
 
         return status;
     }
-    private RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
+    private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
         @Override
         public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
             if (Util1.isNumber(txtFilter.getText())) {
-                if (entry.getStringValue(0).toUpperCase().startsWith(
-                        txtFilter.getText().toUpperCase())) {
-                    return true;
-                }
-            } else if (entry.getStringValue(1).toUpperCase().startsWith(
-                    txtFilter.getText().toUpperCase())) {
-                return true;
+                return entry.getStringValue(0).toUpperCase().startsWith(
+                        txtFilter.getText().toUpperCase());
+            } else {
+                return entry.getStringValue(1).toUpperCase().startsWith(
+                        txtFilter.getText().toUpperCase());
             }
-            return false;
         }
     };
 
@@ -210,18 +206,18 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         tblItemType = new javax.swing.JTable();
         txtFilter = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        txtCode = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         txtName = new javax.swing.JTextField();
         btnSave = new javax.swing.JButton();
-        btnDelete = new javax.swing.JButton();
         btnClear = new javax.swing.JButton();
         lblStatus = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        txtUserCode = new javax.swing.JTextField();
+        jSeparator1 = new javax.swing.JSeparator();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Stock Type Setup");
-        setModalityType(java.awt.Dialog.ModalityType.DOCUMENT_MODAL);
+        setModalityType(java.awt.Dialog.ModalityType.TOOLKIT_MODAL);
 
         tblItemType.setFont(Global.textFont);
         tblItemType.setModel(new javax.swing.table.DefaultTableModel(
@@ -247,17 +243,6 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        jLabel1.setFont(Global.lableFont);
-        jLabel1.setText("Code");
-
-        txtCode.setFont(Global.textFont);
-        txtCode.setName("txtCode"); // NOI18N
-        txtCode.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                txtCodeFocusGained(evt);
-            }
-        });
-
         jLabel2.setFont(Global.lableFont);
         jLabel2.setText("Name");
 
@@ -274,21 +259,14 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
             }
         });
 
+        btnSave.setBackground(Global.selectionColor);
         btnSave.setFont(Global.lableFont);
+        btnSave.setForeground(new java.awt.Color(255, 255, 255));
         btnSave.setText("Save");
         btnSave.setName("btnSave"); // NOI18N
         btnSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSaveActionPerformed(evt);
-            }
-        });
-
-        btnDelete.setFont(Global.lableFont);
-        btnDelete.setText("Delete");
-        btnDelete.setName("btnDelete"); // NOI18N
-        btnDelete.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnDeleteActionPerformed(evt);
             }
         });
 
@@ -304,50 +282,68 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         lblStatus.setFont(Global.lableFont);
         lblStatus.setText("NEW");
 
+        jLabel3.setFont(Global.lableFont);
+        jLabel3.setText("Code");
+
+        txtUserCode.setFont(Global.textFont);
+        txtUserCode.setName("txtUserCode"); // NOI18N
+        txtUserCode.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtUserCodeFocusGained(evt);
+            }
+        });
+        txtUserCode.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtUserCodeActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
-                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(12, 12, 12)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(txtName, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 236, Short.MAX_VALUE)
+                    .addComponent(jSeparator1)
                     .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE))
+                        .addGap(12, 12, 12)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(txtName, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtUserCode, javax.swing.GroupLayout.Alignment.LEADING)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnSave)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnDelete)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnClear))
-                    .addComponent(txtCode))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
 
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel1, jLabel2});
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnClear, btnSave});
 
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(txtCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(jLabel3)
+                    .addComponent(txtUserCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnSave)
-                        .addComponent(lblStatus))
-                    .addComponent(btnDelete)
-                    .addComponent(btnClear))
-                .addContainerGap(271, Short.MAX_VALUE))
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnClear)
+                    .addComponent(btnSave)
+                    .addComponent(lblStatus))
+                .addContainerGap(249, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -358,7 +354,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtFilter)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 301, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -372,41 +368,12 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 351, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void txtNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNameActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtNameActionPerformed
-
-    private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
-        // TODO add your handling code here:
-        try {
-            save();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-            log.error("Save StockType :" + e.getMessage());
-        }
-    }//GEN-LAST:event_btnSaveActionPerformed
-
-    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-        // TODO add your handling code here:
-        try {
-            delete();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-            log.error("Delete StockType :" + e.getMessage());
-        }
-    }//GEN-LAST:event_btnDeleteActionPerformed
-
-    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
-        // TODO add your handling code here:
-        clear();
-    }//GEN-LAST:event_btnClearActionPerformed
 
     private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
         // TODO add your handling code here:
@@ -417,15 +384,37 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         }
     }//GEN-LAST:event_txtFilterKeyReleased
 
-    private void txtCodeFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCodeFocusGained
-        // TODO add your handling code here:
-        txtCode.selectAll();
-    }//GEN-LAST:event_txtCodeFocusGained
-
     private void txtNameFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtNameFocusGained
         // TODO add your handling code here:
         txtName.selectAll();
     }//GEN-LAST:event_txtNameFocusGained
+
+    private void txtNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNameActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtNameActionPerformed
+
+    private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
+        // TODO add your handling code here:
+        try {
+            save();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Save Category", JOptionPane.ERROR_MESSAGE);
+            log.error("Save Categor :" + e.getMessage());
+        }
+    }//GEN-LAST:event_btnSaveActionPerformed
+
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        // TODO add your handling code here:
+        clear();
+    }//GEN-LAST:event_btnClearActionPerformed
+
+    private void txtUserCodeFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtUserCodeFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtUserCodeFocusGained
+
+    private void txtUserCodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtUserCodeActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtUserCodeActionPerformed
 
     /**
      * @param args the command line arguments
@@ -433,17 +422,17 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClear;
-    private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnSave;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JTable tblItemType;
-    private javax.swing.JTextField txtCode;
     private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtName;
+    private javax.swing.JTextField txtUserCode;
     // End of variables declaration//GEN-END:variables
 
     @Override
@@ -460,81 +449,38 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         Object sourceObj = e.getSource();
         String ctrlName = "-";
 
-        if (sourceObj instanceof JTable) {
-            ctrlName = ((JTable) sourceObj).getName();
-        } else if (sourceObj instanceof JTextField) {
-            ctrlName = ((JTextField) sourceObj).getName();
-        } else if (sourceObj instanceof JButton) {
-            ctrlName = ((JButton) sourceObj).getName();
+        if (sourceObj instanceof JTable jTable) {
+            ctrlName = jTable.getName();
+        } else if (sourceObj instanceof JTextField jTextField) {
+            ctrlName = jTextField.getName();
+        } else if (sourceObj instanceof JButton jButton) {
+            ctrlName = jButton.getName();
         }
         switch (ctrlName) {
-            case "txtCode":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
+            case "txtUserCode" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtName.requestFocus();
                 }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
+            }
+            case "txtName" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    btnSave.requestFocus();
+                }
+            }
+            case "txtAccId" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    btnSave.requestFocus();
+                }
+            }
+            case "btnSave" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     btnClear.requestFocus();
                 }
-                tabToTable(e);
-                break;
-            case "txtName":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    btnSave.requestFocus();
+            }
+            case "btnClear" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    txtUserCode.requestFocus();
                 }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    txtCode.requestFocus();
-                }
-                tabToTable(e);
-
-                break;
-            case "txtAccId":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    btnSave.requestFocus();
-                }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    txtName.requestFocus();
-                }
-                tabToTable(e);
-
-                break;
-            case "btnSave":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    btnDelete.requestFocus();
-                }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    txtName.requestFocus();
-                }
-                tabToTable(e);
-
-                break;
-            case "btnDelete":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    btnClear.requestFocus();
-                }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    btnSave.requestFocus();
-                }
-                tabToTable(e);
-
-                break;
-            case "btnClear":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    txtCode.requestFocus();
-                }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    btnDelete.requestFocus();
-                }
-                tabToTable(e);
-
-                break;
-        }
-    }
-
-    private void tabToTable(KeyEvent e) {
-        if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            tblItemType.requestFocus();
-            if (tblItemType.getRowCount() >= 0) {
-                tblItemType.setRowSelectionInterval(0, 0);
             }
         }
     }

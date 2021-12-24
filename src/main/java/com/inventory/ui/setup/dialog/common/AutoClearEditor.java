@@ -106,10 +106,6 @@ public class AutoClearEditor extends javax.swing.AbstractCellEditor implements T
      */
     @Override
     public boolean isCellEditable(EventObject anEvent) {
-        if (anEvent instanceof MouseEvent) {
-            return false;
-        } else {
-            return true;
-        }
+        return !(anEvent instanceof MouseEvent);
     }
 }

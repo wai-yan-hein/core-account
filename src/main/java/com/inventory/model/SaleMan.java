@@ -29,4 +29,13 @@ public class SaleMan implements Serializable {
     private Date createdDate;
     private AppUser createdBy;
     private AppUser updatedBy;
+
+    public SaleMan() {
+    }
+
+    public SaleMan(String saleManCode, String saleManName) {
+        this.saleManCode = saleManCode;
+        this.saleManName = saleManName;
+    }
+
 }

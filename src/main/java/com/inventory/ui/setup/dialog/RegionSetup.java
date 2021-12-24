@@ -16,6 +16,7 @@ import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -27,7 +28,6 @@ import javax.swing.table.TableRowSorter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -35,45 +35,51 @@ import reactor.core.publisher.Mono;
  *
  * @author Lenovo
  */
-@Component
 public class RegionSetup extends javax.swing.JDialog implements KeyListener {
 
     private static final Logger log = LoggerFactory.getLogger(RegionSetup.class);
 
     private int selectRow = - 1;
     private Region region = new Region();
-    @Autowired
-    private RegionTableModel regionTableModel;
-    @Autowired
+    private RegionTableModel regionTableModel = new RegionTableModel();
     private WebClient webClient;
+
+    public WebClient getWebClient() {
+        return webClient;
+    }
+
+    public void setWebClient(WebClient webClient) {
+        this.webClient = webClient;
+    }
 
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
 
     /**
      * Creates new form ItemTypeSetupDialog
+     *
+     * @param frame
      */
-    public RegionSetup() {
-        super(Global.parentForm, true);
+    public RegionSetup(JFrame frame) {
+        super(frame, true);
         initComponents();
+        initKeyListener();
         lblStatus.setForeground(Color.green);
     }
 
     public void initMain() {
         swrf = new StartWithRowFilter(txtFilter);
         initTable();
-        initKeyListener();
         searchCategory();
-
+        txtUserCode.requestFocus();
     }
 
     private void initKeyListener() {
+        txtUserCode.addKeyListener(this);
         txtName.addKeyListener(this);
         btnClear.addKeyListener(this);
-        btnDelete.addKeyListener(this);
         btnSave.addKeyListener(this);
-        tblCategory.addKeyListener(this);
-        txtUserCode.requestFocus();
+        tblLocation.addKeyListener(this);
     }
 
     private void searchCategory() {
@@ -81,20 +87,21 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
     }
 
     private void initTable() {
-        tblCategory.setModel(regionTableModel);
-        sorter = new TableRowSorter<>(tblCategory.getModel());
-        tblCategory.setRowSorter(sorter);
-        tblCategory.getTableHeader().setFont(Global.lableFont);
-        tblCategory.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblCategory.setDefaultRenderer(Object.class, new TableCellRender());
-        tblCategory.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
+        tblLocation.setModel(regionTableModel);
+        sorter = new TableRowSorter<>(tblLocation.getModel());
+        tblLocation.setRowSorter(sorter);
+        tblLocation.getTableHeader().setFont(Global.lableFont);
+        tblLocation.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblLocation.setDefaultRenderer(Object.class, new TableCellRender());
+        tblLocation.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
             if (e.getValueIsAdjusting()) {
-                if (tblCategory.getSelectedRow() >= 0) {
-                    selectRow = tblCategory.convertRowIndexToModel(tblCategory.getSelectedRow());
+                if (tblLocation.getSelectedRow() >= 0) {
+                    selectRow = tblLocation.convertRowIndexToModel(tblLocation.getSelectedRow());
                     setCategory(regionTableModel.getRegion(selectRow));
                 }
             }
         });
+        tblLocation.setRowHeight(Global.tblRowHeight);
 
     }
 
@@ -116,16 +123,16 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
                     .bodyToMono(Region.class);
             result.subscribe((t) -> {
                 if (t != null) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Saved");
                     if (lblStatus.getText().equals("EDIT")) {
                         Global.listRegion.set(selectRow, t);
                     } else {
                         Global.listRegion.add(t);
                     }
                     clear();
+                    JOptionPane.showMessageDialog(this, "Saved");
                 }
             }, (e) -> {
-                JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+                JOptionPane.showMessageDialog(this, e.getMessage());
             });
         }
     }
@@ -150,9 +157,9 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
                     .uri(builder -> builder.path("/setup/delete-region").queryParam("code", catCode).build())
                     .retrieve().bodyToMono(ReturnObject.class);
             result.subscribe((t) -> {
-                JOptionPane.showMessageDialog(Global.parentForm, t.getMeesage());
+                JOptionPane.showMessageDialog(this, t.getMessage());
             }, (e) -> {
-                JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+                JOptionPane.showMessageDialog(this, e.getMessage());
             });
             clear();
         }
@@ -162,35 +169,32 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
         boolean status = true;
         if (txtName.getText().isEmpty()) {
             status = false;
-            JOptionPane.showMessageDialog(Global.parentForm, "Invalid Name");
+            JOptionPane.showMessageDialog(this, "Invalid Name");
             txtName.requestFocus();
         } else {
+            region.setUserCode(txtUserCode.getText());
             region.setRegionName(txtName.getText());
             if (lblStatus.getText().equals("NEW")) {
                 region.setCompCode(Global.compCode);
                 region.setCreatedBy(Global.loginUser);
                 region.setCreatedDate(Util1.getTodayDate());
-                region.setUserCode(txtUserCode.getText());
-                region.setMacId(Global.machineId);
+                region.setMacId(Global.macId);
             } else {
                 region.setUpdatedBy(Global.loginUser);
             }
         }
         return status;
     }
-    private RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
+    private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
         @Override
         public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
             if (Util1.isNumber(txtFilter.getText())) {
-                if (entry.getStringValue(0).toUpperCase().startsWith(
-                        txtFilter.getText().toUpperCase())) {
-                    return true;
-                }
-            } else if (entry.getStringValue(1).toUpperCase().startsWith(
-                    txtFilter.getText().toUpperCase())) {
-                return true;
+                return entry.getStringValue(0).toUpperCase().startsWith(
+                        txtFilter.getText().toUpperCase());
+            } else {
+                return entry.getStringValue(1).toUpperCase().startsWith(
+                        txtFilter.getText().toUpperCase());
             }
-            return false;
         }
     };
 
@@ -204,13 +208,12 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
     private void initComponents() {
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        tblCategory = new javax.swing.JTable();
+        tblLocation = new javax.swing.JTable();
         txtFilter = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         txtName = new javax.swing.JTextField();
         btnSave = new javax.swing.JButton();
-        btnDelete = new javax.swing.JButton();
         btnClear = new javax.swing.JButton();
         lblStatus = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -220,8 +223,8 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
         setTitle("Region Setup");
         setModalityType(java.awt.Dialog.ModalityType.DOCUMENT_MODAL);
 
-        tblCategory.setFont(Global.textFont);
-        tblCategory.setModel(new javax.swing.table.DefaultTableModel(
+        tblLocation.setFont(Global.textFont);
+        tblLocation.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -232,8 +235,8 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        tblCategory.setName("tblCategory"); // NOI18N
-        jScrollPane1.setViewportView(tblCategory);
+        tblLocation.setName("tblLocation"); // NOI18N
+        jScrollPane1.setViewportView(tblLocation);
 
         txtFilter.setName("txtFilter"); // NOI18N
         txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -260,21 +263,14 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
             }
         });
 
+        btnSave.setBackground(Global.selectionColor);
         btnSave.setFont(Global.lableFont);
+        btnSave.setForeground(new java.awt.Color(255, 255, 255));
         btnSave.setText("Save");
         btnSave.setName("btnSave"); // NOI18N
         btnSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSaveActionPerformed(evt);
-            }
-        });
-
-        btnDelete.setFont(Global.lableFont);
-        btnDelete.setText("Delete");
-        btnDelete.setName("btnDelete"); // NOI18N
-        btnDelete.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnDeleteActionPerformed(evt);
             }
         });
 
@@ -294,7 +290,7 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
         jLabel3.setText("Code");
 
         txtUserCode.setFont(Global.textFont);
-        txtUserCode.setName("txtName"); // NOI18N
+        txtUserCode.setName("txtUserCode"); // NOI18N
         txtUserCode.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 txtUserCodeFocusGained(evt);
@@ -320,10 +316,9 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(txtName, javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(0, 72, Short.MAX_VALUE)
                         .addComponent(btnSave)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnDelete)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnClear))
                     .addComponent(txtUserCode, javax.swing.GroupLayout.Alignment.LEADING))
                 .addContainerGap())
@@ -341,11 +336,10 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
                     .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblStatus)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnSave)
-                        .addComponent(lblStatus))
-                    .addComponent(btnDelete)
-                    .addComponent(btnClear))
+                        .addComponent(btnClear)
+                        .addComponent(btnSave)))
                 .addContainerGap(261, Short.MAX_VALUE))
         );
 
@@ -356,7 +350,7 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFilter)
+                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -387,20 +381,10 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
         try {
             save();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage(), "Save Region", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Save Region", JOptionPane.ERROR_MESSAGE);
             log.error("Save Categor :" + e.getMessage());
         }
     }//GEN-LAST:event_btnSaveActionPerformed
-
-    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-        // TODO add your handling code here:
-        try {
-            delete();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage(), "Delete Region", JOptionPane.ERROR_MESSAGE);
-            log.error("Delete Region :" + e.getMessage());
-        }
-    }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
         // TODO add your handling code here:
@@ -435,14 +419,13 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClear;
-    private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnSave;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblStatus;
-    private javax.swing.JTable tblCategory;
+    private javax.swing.JTable tblLocation;
     private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtName;
     private javax.swing.JTextField txtUserCode;
@@ -462,64 +445,49 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
         Object sourceObj = e.getSource();
         String ctrlName = "-";
 
-        if (sourceObj instanceof JTable) {
-            ctrlName = ((JTable) sourceObj).getName();
-        } else if (sourceObj instanceof JTextField) {
-            ctrlName = ((JTextField) sourceObj).getName();
-        } else if (sourceObj instanceof JButton) {
-            ctrlName = ((JButton) sourceObj).getName();
+        if (sourceObj instanceof JTable jTable) {
+            ctrlName = jTable.getName();
+        } else if (sourceObj instanceof JTextField jTextField) {
+            ctrlName = jTextField.getName();
+        } else if (sourceObj instanceof JButton jButton) {
+            ctrlName = jButton.getName();
         }
         switch (ctrlName) {
-
-            case "txtName":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    btnSave.requestFocus();
-                }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    btnClear.requestFocus();
-                }
-                tabToTable(e);
-
-                break;
-
-            case "btnSave":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    btnDelete.requestFocus();
-                }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
+            case "txtUserCode" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtName.requestFocus();
                 }
-                tabToTable(e);
-
-                break;
-            case "btnDelete":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    btnClear.requestFocus();
-                }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
+            }
+            case "txtName" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     btnSave.requestFocus();
                 }
                 tabToTable(e);
+            }
 
-                break;
-            case "btnClear":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
+            case "btnSave" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    btnClear.requestFocus();
+                }
+            }
+            case "btnDelete" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    btnClear.requestFocus();
+                }
+            }
+            case "btnClear" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtName.requestFocus();
                 }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    btnDelete.requestFocus();
-                }
-                tabToTable(e);
-
-                break;
+            }
         }
     }
 
     private void tabToTable(KeyEvent e) {
         if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            tblCategory.requestFocus();
-            if (tblCategory.getRowCount() >= 0) {
-                tblCategory.setRowSelectionInterval(0, 0);
+            tblLocation.requestFocus();
+            if (tblLocation.getRowCount() >= 0) {
+                tblLocation.setRowSelectionInterval(0, 0);
             }
         }
     }

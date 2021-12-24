@@ -12,6 +12,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.table.DefaultTableCellRenderer;
 
 /**
@@ -21,7 +22,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 public class TableCellRender extends DefaultTableCellRenderer {
 
     private final JCheckBox check = new JCheckBox();
-    private final Color bgColor = new Color(245, 245, 245);
+    private final Color bgColor = new Color(213, 235, 226);
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -31,9 +32,8 @@ public class TableCellRender extends DefaultTableCellRenderer {
         c.setBackground(new Color(38, 117, 191));
         }*/
         if (isSelected) {
-            c.setBackground(new Color(38, 117, 191));
+            c.setBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
         }
-
         String s;
         if (value instanceof Double double1) {
             DecimalFormat dFormat = new DecimalFormat("#,##0.###");

@@ -16,6 +16,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
@@ -27,6 +28,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.RowFilter;
+import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
@@ -41,8 +43,8 @@ import org.slf4j.LoggerFactory;
 public class CurrencyAutoCompleter implements KeyListener, SelectionObserver {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(CurrencyAutoCompleter.class);
-    private JTable table = new JTable();
-    private JPopupMenu popup = new JPopupMenu();
+    private final JTable table = new JTable();
+    private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
     private CurrencyCompleterTabelModel currencyTabelModel;
@@ -62,9 +64,15 @@ public class CurrencyAutoCompleter implements KeyListener, SelectionObserver {
     }
 
     public CurrencyAutoCompleter(JTextComponent comp, List<Currency> list,
-            AbstractCellEditor editor) {
+            AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
+        if (filter) {
+            Currency cur = new Currency("-", "All");
+            list = new ArrayList<>(list);
+            list.add(cur);
+            setCurrency(cur);
+        }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
@@ -72,8 +80,9 @@ public class CurrencyAutoCompleter implements KeyListener, SelectionObserver {
         table.setModel(currencyTabelModel);
         table.setFont(Global.lableFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
-        table.getTableHeader().setFont(Global.lableFont);
         table.setDefaultRenderer(Object.class, new TableCellRender());
+        table.getTableHeader().setFont(Global.tblHeaderFont);
+               table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
@@ -148,7 +157,7 @@ public class CurrencyAutoCompleter implements KeyListener, SelectionObserver {
         if (table.getSelectedRow() != -1) {
             currency = currencyTabelModel.getCurrency(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            ((JTextField) textComp).setText(currency.getCurrencyName());
+            textComp.setText(currency.getCurrencyName());
             if (editor == null) {
                 if (selectionObserver != null) {
                     selectionObserver.selected("Currency", currency.getCurCode());
@@ -158,12 +167,11 @@ public class CurrencyAutoCompleter implements KeyListener, SelectionObserver {
         popup.setVisible(false);
         if (editor != null) {
             editor.stopCellEditing();
-
         }
 
     }
 
-    private Action acceptAction = new AbstractAction() {
+    private final Action acceptAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             mouseSelect();
@@ -269,7 +277,7 @@ public class CurrencyAutoCompleter implements KeyListener, SelectionObserver {
         return currency;
     }
 
-    public void setCurrency(Currency currency) {
+    public final void setCurrency(Currency currency) {
         this.currency = currency;
         if (this.currency != null) {
             textComp.setText(this.currency.getCurrencyName());
@@ -345,11 +353,7 @@ public class CurrencyAutoCompleter implements KeyListener, SelectionObserver {
             String tmp4 = entry.getStringValue(4).toUpperCase();
             String text = textComp.getText().toUpperCase();
 
-            if (tmp1.startsWith(text) || tmp2.startsWith(text) || tmp3.startsWith(text) || tmp4.startsWith(text)) {
-                return true;
-            } else {
-                return false;
-            }
+            return tmp1.startsWith(text) || tmp2.startsWith(text) || tmp3.startsWith(text) || tmp4.startsWith(text);
         }
     };
 
@@ -357,7 +361,7 @@ public class CurrencyAutoCompleter implements KeyListener, SelectionObserver {
     public void selected(Object source, Object selectObj) {
         if (source != null) {
             if (source.toString().equals("DatePickerDialog")) {
-                ((JTextField) textComp).setText(selectObj.toString());
+                textComp.setText(selectObj.toString());
                 popup.setVisible(false);
                 if (editor != null) {
                     editor.stopCellEditing();

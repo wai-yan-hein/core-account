@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomerGridTabelModel extends AbstractTableModel {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CustomerGridTabelModel.class);
+    private static final Logger log = LoggerFactory.getLogger(CustomerGridTabelModel.class);
     private List<Trader> listCustomer = new ArrayList();
     private String[] columnNames = {"Code", "Name", "Phone", "Account", "Address"};
 
@@ -62,7 +62,7 @@ public class CustomerGridTabelModel extends AbstractTableModel {
                     return null;
             }
         } catch (Exception ex) {
-            LOGGER.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
+            log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
 
         return null;

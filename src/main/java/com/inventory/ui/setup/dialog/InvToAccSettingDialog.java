@@ -189,7 +189,7 @@ public class InvToAccSettingDialog extends javax.swing.JDialog {
                 .addContainerGap())
         );
 
-        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {lblDis, lblPay, lblTax});
+        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, lblDis, lblPay, lblTax);
 
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

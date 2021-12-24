@@ -37,12 +37,21 @@ public class Stock implements java.io.Serializable {
     private Float salePriceB;
     private Float salePriceC;
     private Float salePriceD;
-    private Float sttCostPrice;
+    private Float salePriceE;
     private Date updatedDate;
     private Date createdDate;
     private String migCode;
     private String compCode;
     private String userCode;
     private Integer macId;
+
+    public Stock() {
+    }
+    
+
+    public Stock(String stockCode, String stockName) {
+        this.stockCode = stockCode;
+        this.stockName = stockName;
+    }
 
 }

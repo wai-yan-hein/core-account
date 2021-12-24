@@ -23,4 +23,12 @@ public class Currency {
     private String updatedBy;
     private Date updatedDt;
 
+    public Currency() {
+    }
+
+    public Currency(String curCode, String currencyName) {
+        this.curCode = curCode;
+        this.currencyName = currencyName;
+    }
+
 }

@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserTableModel extends AbstractTableModel {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserTableModel.class);
+    private static final Logger log = LoggerFactory.getLogger(UserTableModel.class);
     private List<AppUser> listUser = new ArrayList();
     private String[] columnNames = {"User Short", "Name"};
 
@@ -59,7 +59,7 @@ public class UserTableModel extends AbstractTableModel {
                     return null;
             }
         } catch (Exception ex) {
-            LOGGER.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
+            log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
 
         return null;

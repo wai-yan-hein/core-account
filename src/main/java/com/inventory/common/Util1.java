@@ -4,10 +4,17 @@
  */
 package com.inventory.common;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
@@ -15,20 +22,17 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.TimeZone;
+import java.util.*;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
+
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author WSwe
  */
 public class Util1 {
@@ -49,29 +53,25 @@ public class Util1 {
 
     public static boolean isNumber(Object obj) {
         boolean status = false;
-
         try {
             if (!Util1.isNull(obj)) {
                 Double.parseDouble(obj.toString());
                 status = true;
             }
         } catch (NumberFormatException ex) {
-            status = false;
             logger.error("NumberUtil.isNumber : " + ex.getMessage());
         }
         return status;
     }
 
-    /*public static String getPropValue(String key) {
-        String strFilter = "v.propKey = '" + key + "'";
-        List<SystemProperty> listSP = HibernateUtil.findAllHSQL("SystemProperty", strFilter);
+    public static String getPropValue(String key) {
+        return Global.hmRoleProperty.get(key);
+    }
 
-        if (!listSP.isEmpty()) {
-            return listSP.get(0).getPropValue();
-        } else {
-            return null;
-        }
-    }*/
+    public static boolean isProperValid(String key) {
+        return Util1.getBoolean(Global.hmRoleProperty.get(key));
+    }
+
     public static Date toDate(Object objDate) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         Date date = null;
@@ -132,9 +132,8 @@ public class Util1 {
     public static boolean isMySqLDate(String strDate) {
         boolean status = true;
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        String date = null;
         try {
-            date = formatter.format(toDate(strDate));
+            formatter.format(toDate(strDate));
         } catch (Exception ex) {
             status = false;
             logger.info("toDateTimeStrMYSQL : " + ex.getMessage());
@@ -163,7 +162,7 @@ public class Util1 {
         try {
             date = formatter.format(new Date());
         } catch (Exception ex) {
-
+            throw new IllegalStateException(ex.getMessage());
         }
 
         return date;
@@ -253,8 +252,14 @@ public class Util1 {
     }
 
     public static Date getTodayDate() {
-        Date todayDate = Calendar.getInstance().getTime();
-        return todayDate;
+        return Calendar.getInstance(TimeZone.getDefault()).getTime();
+    }
+
+    public static String getTodayDateTime() {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy h:mm a");
+        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Yangon"));
+        String strDateTime = sdf.format(new Date());
+        return strDateTime;
     }
 
     public static String toDateStrMYSQL(String strDate, String format) {
@@ -304,12 +309,14 @@ public class Util1 {
     }
 
     public static String isNull(String strValue, String value) {
-        if (strValue == null) {
-            return value;
-        } else if (strValue.isEmpty() || strValue.equals("")) {
-            return value;
+        if (null != strValue) {
+            if (!strValue.isEmpty() && !strValue.equals("")) {
+                return strValue;
+            } else {
+                return value;
+            }
         } else {
-            return strValue;
+            return value;
         }
     }
 
@@ -370,26 +377,8 @@ public class Util1 {
         return intValue;
     }
 
-    public static Double NZeroDouble(Object number) {
-        Double value = 0.0;
-
-        try {
-            if (number == null) {
-                return new Double(0);
-            } else {
-                return value = Double.parseDouble(number.toString());
-            }
-        } catch (NumberFormatException ex) {
-            return new Double(0);
-        }
-    }
-
     public static int isNullZero(Integer value) {
-        if (value == null) {
-            return 0;
-        } else {
-            return value;
-        }
+        return Objects.requireNonNullElse(value, 0);
     }
 
     public static double nullZero(String value) {
@@ -405,11 +394,7 @@ public class Util1 {
     }
 
     public static boolean getNullTo(Boolean value) {
-        if (value == null) {
-            return false;
-        } else {
-            return value;
-        }
+        return Objects.requireNonNullElse(value, false);
     }
 
     public static String getPeriod(String strDate, String format) {
@@ -436,35 +421,35 @@ public class Util1 {
     }
 
     public static String getZawgyiText(HashMap<Integer, Integer> hmIngZgy, String text) {
-        String tmpStr = "";
+        StringBuilder tmpStr = new StringBuilder();
 
         if (text != null) {
             for (int i = 0; i < text.length(); i++) {
                 String tmpS = Character.toString(text.charAt(i));
-                int tmpChar = (int) text.charAt(i);
+                int tmpChar = text.charAt(i);
 
                 if (hmIngZgy.containsKey(tmpChar)) {
                     char tmpc = (char) hmIngZgy.get(tmpChar).intValue();
-                    if (tmpStr.isEmpty()) {
-                        tmpStr = Character.toString(tmpc);
+                    if (tmpStr.length() == 0) {
+                        tmpStr = new StringBuilder(Character.toString(tmpc));
                     } else {
-                        tmpStr = tmpStr + Character.toString(tmpc);
+                        tmpStr.append(tmpc);
                     }
                 } else if (tmpS.equals("ƒ")) {
-                    if (tmpStr.isEmpty()) {
-                        tmpStr = "ႏ";
+                    if (tmpStr.length() == 0) {
+                        tmpStr = new StringBuilder("ႏ");
                     } else {
-                        tmpStr = tmpStr + "ႏ";
+                        tmpStr.append("ႏ");
                     }
-                } else if (tmpStr.isEmpty()) {
-                    tmpStr = tmpS;
+                } else if (tmpStr.length() == 0) {
+                    tmpStr = new StringBuilder(tmpS);
                 } else {
-                    tmpStr = tmpStr + tmpS;
+                    tmpStr.append(tmpS);
                 }
             }
         }
 
-        return tmpStr;
+        return tmpStr.toString();
     }
 
     public static Double getDouble(Object number) {
@@ -479,17 +464,20 @@ public class Util1 {
 
     public static Float getFloat(Object number) {
         float value = 0.0f;
-        if (number != null) {
-            if (!number.toString().isEmpty()) {
-                value = Float.parseFloat(number.toString());
+        try {
+            if (number != null) {
+                if (!number.toString().isEmpty()) {
+                    value = Float.parseFloat(number.toString());
+                }
             }
+        } catch (NumberFormatException e) {
         }
         return value;
     }
 
     public static Float gerFloatOne(Object number) {
         float value = 1.0f;
-        if (!Util1.isNull(number)) {
+        if (Util1.getFloat(number) > 0) {
             value = Float.parseFloat(number.toString());
         }
         return value;
@@ -542,10 +530,9 @@ public class Util1 {
     public static boolean getBoolean(String obj) {
         boolean status = false;
         if (!Util1.isNull(obj)) {
-            status = obj.equals("1") || obj.toLowerCase().equals("true");
+            status = obj.equals("1") || obj.equalsIgnoreCase("true");
         }
         return status;
-
     }
 
     public static DefaultFormatterFactory getDecimalFormat() {
@@ -576,18 +563,6 @@ public class Util1 {
             status = false;
         }
         return status;
-    }
-
-    public static String toFormatDate(String obj) {
-        String[] arr = null;
-        //int year = Calendar.getInstance().get(Calendar.YEAR);
-        //String strYear = String.valueOf(year).substring(0, 2);
-        //logger.info("String year .." + strYear);
-        arr = obj.split("(?<=\\G.{2})");
-
-        String format = arr[0] + "/" + arr[1] + "/" + arr[2] + arr[3];
-        return format;
-
     }
 
     public static JDialog getLoading(JDialog owner, ImageIcon icon) {
@@ -624,9 +599,7 @@ public class Util1 {
     public static Dimension getScreenSize() {
         //Calculate dialog position to centre.
         Toolkit toolkit = Toolkit.getDefaultToolkit();
-        Dimension screen = toolkit.getScreenSize();
-
-        return screen;
+        return toolkit.getScreenSize();
     }
 
     public static String getComputerName() {
@@ -635,7 +608,7 @@ public class Util1 {
         try {
             computerName = InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException e) {
-            logger.info("getComputerName : " + e.toString());
+            logger.info("getComputerName : " + e);
         }
 
         return computerName;
@@ -647,7 +620,7 @@ public class Util1 {
         try {
             iPAddress = InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
-            logger.info("getIPAddress : " + e.toString());
+            logger.info("getIPAddress : " + e);
         }
 
         return iPAddress;
@@ -661,18 +634,24 @@ public class Util1 {
 
     }
 
+    public static String toFormatDate(String obj) {
+        String[] arr = obj.split("(?<=\\G.{2})");
+        return arr[0] + "/" + arr[1] + "/" + arr[2] + arr[3];
+    }
+
     public static String getString(boolean value) {
         return value ? "true" : "false";
     }
 
     public static boolean isPositive(Float value) {
-        return value > 0;
+        return Util1.getFloat(value) > 0;
     }
 
-    /* public static Date getTodayDate() {
-    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy h:mm a");
-    sdf.setTimeZone(TimeZone.getTimeZone("Asia/Yangon"));
-    String strDateTime = sdf.format(new Date());
-    return Util1.toDate(strDateTime, "dd/MM/yyyy");
-    }*/
+    public static void writeJsonFile(Object data, String exportPath) throws IOException {
+        try (Writer writer = new FileWriter(exportPath)) {
+            Gson gson = new GsonBuilder().serializeNulls().create();
+            gson.toJson(data, writer);
+        }
+    }
+
 }

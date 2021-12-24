@@ -8,14 +8,17 @@ package com.inventory.editor;
 import com.inventory.common.Global;
 import com.inventory.common.SelectionObserver;
 import com.inventory.common.TableCellRender;
+import com.inventory.model.OptionModel;
 import com.inventory.model.Stock;
 import com.inventory.ui.common.StockCompleterTableModel;
+import com.inventory.ui.setup.dialog.OptionDialog;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
@@ -27,10 +30,12 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.RowFilter;
+import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
@@ -40,11 +45,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author Lenovo
  */
-public class StockAutoCompleter implements KeyListener {
+public final class StockAutoCompleter implements KeyListener {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(StockAutoCompleter.class);
-    private JTable table = new JTable();
-    private JPopupMenu popup = new JPopupMenu();
+    private final JTable table = new JTable();
+    private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
     private StockCompleterTableModel stockTableModel;
@@ -54,10 +59,21 @@ public class StockAutoCompleter implements KeyListener {
     private int x = 0;
     private int y = 0;
     boolean popupOpen = false;
-    private SelectionObserver selectionObserver;
+    private List<String> listOption = new ArrayList<>();
+    private OptionDialog optionDialog;
 
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
+    public List<String> getListOption() {
+        return listOption;
+    }
+
+    public void setListOption(List<String> listOption) {
+        this.listOption = listOption;
+    }
+
+    private void initOption() {
+        Global.listStock.forEach(t -> {
+            listOption.add(t.getStockCode());
+        });
     }
 
     //private CashFilter cashFilter = Global.allCash;
@@ -65,9 +81,20 @@ public class StockAutoCompleter implements KeyListener {
     }
 
     public StockAutoCompleter(JTextComponent comp, List<Stock> list,
-            AbstractCellEditor editor) {
+            AbstractCellEditor editor, boolean filter, boolean custom) {
         this.textComp = comp;
         this.editor = editor;
+        initOption();
+        if (filter) {
+            Stock reg = new Stock("-", "All");
+            list = new ArrayList<>(list);
+            list.add(0, reg);
+            setStock(reg);
+        }
+        if (custom) {
+            list = new ArrayList<>(list);
+            list.add(1, new Stock("C", "Custom"));
+        }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         stockTableModel = new StockCompleterTableModel(list);
@@ -75,12 +102,16 @@ public class StockAutoCompleter implements KeyListener {
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
-        table.setDefaultRenderer(Object.class, new TableCellRender());
+        table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
         table.getColumnModel().getColumn(0).setPreferredWidth(100);//Code
-        table.getColumnModel().getColumn(1).setPreferredWidth(200);//Name
+        table.getColumnModel().getColumn(1).setPreferredWidth(300);//Name
+        table.getColumnModel().getColumn(2).setPreferredWidth(200);//Type
+        table.getColumnModel().getColumn(3).setPreferredWidth(200);//Cat
+        table.getColumnModel().getColumn(4).setPreferredWidth(200);//Brand
+        table.setDefaultRenderer(Object.class, new TableCellRender());
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -93,7 +124,7 @@ public class StockAutoCompleter implements KeyListener {
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
 
-        popup.setPopupSize(400, 200);
+        popup.setPopupSize(800, 350);
         popup.add(scroll);
 
         if (textComp instanceof JTextField) {
@@ -143,7 +174,7 @@ public class StockAutoCompleter implements KeyListener {
 
         table.setRequestFocusEnabled(false);
 
-        if (list.size() > 0) {
+        if (!list.isEmpty()) {
             table.setRowSelectionInterval(0, 0);
         }
     }
@@ -152,7 +183,27 @@ public class StockAutoCompleter implements KeyListener {
         if (table.getSelectedRow() != -1) {
             stock = stockTableModel.getStock(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            ((JTextField) textComp).setText(stock.getStockName());
+            textComp.setText(stock.getStockName());
+            switch (stock.getStockCode()) {
+                case "C" -> {
+                    optionDialog = new OptionDialog(Global.parentForm, "Stock");
+                    List<OptionModel> listOP = new ArrayList<>();
+                    Global.listStock.forEach(t -> {
+                        listOP.add(new OptionModel(t.getStockCode(), t.getStockName()));
+                    });
+                    optionDialog.setOptionList(listOP);
+                    optionDialog.setLocationRelativeTo(null);
+                    optionDialog.setVisible(true);
+                    if (optionDialog.isSelect()) {
+                        listOption = optionDialog.getOptionList();
+                    }
+                    //open
+                }
+                case "-" ->
+                    initOption();
+                default ->
+                    listOption.add(stock.getStockCode());
+            }
             if (editor == null) {
             }
         }
@@ -164,7 +215,7 @@ public class StockAutoCompleter implements KeyListener {
         }
     }
 
-    private Action acceptAction = new AbstractAction() {
+    private final Action acceptAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             mouseSelect();
@@ -303,7 +354,7 @@ public class StockAutoCompleter implements KeyListener {
         return stock;
     }
 
-    public void setCoa(Stock stock) {
+    public void setStock(Stock stock) {
         this.stock = stock;
         if (this.stock != null) {
             textComp.setText(stock.getStockName());
@@ -362,11 +413,7 @@ public class StockAutoCompleter implements KeyListener {
             String tmp1 = entry.getStringValue(0).toUpperCase();
             String tmp2 = entry.getStringValue(1).toUpperCase();
             String text = textComp.getText().toUpperCase();
-            if (tmp1.startsWith(text) || tmp2.startsWith(text)) {
-                return true;
-            } else {
-                return false;
-            }
+            return tmp1.startsWith(text) || tmp2.startsWith(text);
         }
     };
 }

@@ -20,8 +20,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class StockUnitTableModel extends AbstractTableModel {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StockUnitTableModel.class);
-    private String[] columnNames = {"Unit-S", "Unit-Name"};
+    private static final Logger log = LoggerFactory.getLogger(StockUnitTableModel.class);
+    private final String[] columnNames = {"Unit-S", "Unit-Name"};
     private List<StockUnit> listUnit = new ArrayList<>();
 
     public StockUnitTableModel(List<StockUnit> listUnit) {
@@ -48,9 +48,9 @@ public class StockUnitTableModel extends AbstractTableModel {
         StockUnit itemUnit = listUnit.get(rowIndex);
         switch (columnIndex) {
             case 0:
-                return itemUnit.getItemUnitCode();
+                return itemUnit.getUnitCode();
             case 1:
-                return itemUnit.getItemUnitName();
+                return itemUnit.getUnitName();
             default:
                 return null;
         }

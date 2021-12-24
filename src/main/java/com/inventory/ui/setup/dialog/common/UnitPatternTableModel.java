@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UnitPatternTableModel extends AbstractTableModel {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UnitPatternTableModel.class);
+    private static final Logger log = LoggerFactory.getLogger(UnitPatternTableModel.class);
     private final String[] columnNames = {"Pattern Name"};
     private List<UnitPattern> listPattern = new ArrayList<>();
 
@@ -64,7 +64,7 @@ public class UnitPatternTableModel extends AbstractTableModel {
                         status = "EDIT";
                     }
                     up.setPatternName(aValue.toString());
-                    up.setMacId(Global.machineId);
+                    up.setMacId(Global.macId);
                     up.setCompCode(Global.compCode);
                     up.setCreatedDate(Util1.getTodayDate());
                     up.setCreatedBy(Global.loginUser);

@@ -53,7 +53,7 @@ public class CustomerOrderSetup extends javax.swing.JDialog implements KeyListen
     }
 
     public void initAutoCompleter() {
-        regionAutoCompleter = new RegionAutoCompleter(txtRegion, Global.listRegion, null);
+        regionAutoCompleter = new RegionAutoCompleter(txtRegion, Global.listRegion, null, false, false);
         regionAutoCompleter.setRegion(null);
     }
 
@@ -96,7 +96,7 @@ public class CustomerOrderSetup extends javax.swing.JDialog implements KeyListen
             trader.setActive(Boolean.TRUE);
             trader.setCreatedBy(Global.loginUser);
             trader.setCreatedDate(Util1.getTodayDate());
-            trader.setMacId(Global.machineId);
+            trader.setMacId(Global.macId);
             trader.setCompCode(Global.compCode);
         }
         return status;
@@ -274,7 +274,7 @@ public class CustomerOrderSetup extends javax.swing.JDialog implements KeyListen
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
-        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel1, jLabel2, jLabel3, jLabel4, jLabel5});
+        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, jLabel1, jLabel2, jLabel3, jLabel4, jLabel5);
 
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

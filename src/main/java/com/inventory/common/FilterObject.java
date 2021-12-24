@@ -6,6 +6,7 @@
 package com.inventory.common;
 
 import lombok.Data;
+import lombok.NonNull;
 
 /**
  *
@@ -19,4 +20,13 @@ public class FilterObject {
     private String cusCode;
     private String vouNo;
     private String userCode;
+    private String desp;
+    private String remark;
+    @NonNull
+    private String compCode;
+
+    public FilterObject(String compCode) {
+        this.compCode = compCode;
+    }
+
 }

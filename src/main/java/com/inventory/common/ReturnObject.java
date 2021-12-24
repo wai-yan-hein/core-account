@@ -16,7 +16,9 @@ import lombok.Data;
 public class ReturnObject {
 
     private String status;
-    private String meesage;
-    private List list;
+    private String message;
+    private String errorMessage;
+    private List<Object> list;
     private Object obj;
+    private byte[] file;
 }

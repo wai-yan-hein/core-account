@@ -4,13 +4,22 @@
  */
 package com.inventory.ui.common;
 
-import com.inventory.model.StockBalanceTmp;
+import com.inventory.common.Global;
+import com.inventory.common.SettingKey;
+import com.inventory.common.Util1;
+import com.inventory.model.VStockBalance;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
 import javax.swing.table.AbstractTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 /**
  *
@@ -20,8 +29,19 @@ import org.springframework.stereotype.Component;
 public class StockBalanceTableModel extends AbstractTableModel {
 
     static Logger log = LoggerFactory.getLogger(StockBalanceTableModel.class.getName());
-    private List<StockBalanceTmp> listStockBalance = new ArrayList();
-    private final String[] columnNames = {"Locaiton", " Balance"};
+    private List<VStockBalance> listStockBalance = new ArrayList();
+    private final String[] columnNames = {"Locaiton", "Qty", "Unit"};
+    @Autowired
+    private WebClient webClient;
+    private JProgressBar progress;
+
+    public JProgressBar getProgress() {
+        return progress;
+    }
+
+    public void setProgress(JProgressBar progress) {
+        this.progress = progress;
+    }
 
     @Override
     public String getColumnName(int column) {
@@ -35,37 +55,41 @@ public class StockBalanceTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        switch (column) {
-            case 0: //code
-                return String.class;
-            case 1: //description
-                return String.class;
-            default:
-                return Object.class;
-        }
+        return switch (column) {
+            case 1 ->
+                Float.class;
+            default ->
+                String.class;
+        }; //code
+        //description
     }
 
     @Override
     public Object getValueAt(int row, int column) {
         if (listStockBalance != null) {
             try {
-                StockBalanceTmp stock = listStockBalance.get(row);
-
+                VStockBalance stock = listStockBalance.get(row);
                 switch (column) {
-                    case 0: //Code
-                        if (stock.getLocation() == null) {
+                    case 0 -> {
+                        //Location
+                        if (stock.getLocationName() == null) {
                             return "No Stock";
                         } else {
-                            return stock.getLocation();
+                            return stock.getLocationName();
                         }
-                    case 1: //Desp
-                        if (stock.getTotalWt() == null && stock.getUnit() == null) {
-                            return "No Stock";
+                    }
+                    case 1 -> {
+                        //qty
+                        return stock.getTotalQty();
+                    }
+                    case 2 -> {
+                        //Unit
+                        if (stock.getUnitName() == null) {
+                            return "No Unit";
                         } else {
-                            return stock.getTotalWt() + "-" + stock.getUnit();
+                            return stock.getUnitName();
                         }
-                    default:
-                        return new Object();
+                    }
                 }
             } catch (Exception ex) {
                 log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
@@ -80,11 +104,11 @@ public class StockBalanceTableModel extends AbstractTableModel {
 
     }
 
-    public List<StockBalanceTmp> getListStockBalance() {
+    public List<VStockBalance> getListStockBalance() {
         return listStockBalance;
     }
 
-    public void setListStockBalance(List<StockBalanceTmp> listStockBalance) {
+    public void setListStockBalance(List<VStockBalance> listStockBalance) {
         this.listStockBalance = listStockBalance;
         fireTableDataChanged();
     }
@@ -106,5 +130,21 @@ public class StockBalanceTableModel extends AbstractTableModel {
         }
     }
 
+    public void calStockBalance(String stockCode) {
+        if (Util1.isProperValid(SettingKey.IS_CALCULATE_STOCK.name())) {
+            progress.setIndeterminate(true);
+            Mono<ResponseEntity<List<VStockBalance>>> result = webClient.get()
+                    .uri(builder -> builder.path("/report/get-stock-balance")
+                    .queryParam("stockCode", stockCode)
+                    .build())
+                    .retrieve().toEntityList(VStockBalance.class);
+            result.subscribe((t) -> {
+                setListStockBalance(t.getBody());
+                progress.setIndeterminate(false);
+            }, (e) -> {
+                progress.setIndeterminate(false);
+                JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+            });
+        }
+    }
 }
- 

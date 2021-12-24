@@ -84,7 +84,7 @@ public class BrandEditor extends AbstractCellEditor implements TableCellEditor {
         if (value != null) {
             jtf.setText(value.toString());
         }
-        completer = new BrandAutoCompleter(jtf, Global.listStockBrand, this);
+        completer = new BrandAutoCompleter(jtf, Global.listStockBrand, this, false,false);
         return component;
     }
 

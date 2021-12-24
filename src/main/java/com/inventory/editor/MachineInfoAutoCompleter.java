@@ -29,6 +29,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.RowFilter;
+import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
@@ -44,7 +45,7 @@ public class MachineInfoAutoCompleter implements KeyListener, SelectionObserver 
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(MachineInfoAutoCompleter.class);
     private final JTable table = new JTable();
-    private JPopupMenu popup = new JPopupMenu();
+    private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER";
     private MachineInfoCompleterTableModel machTableModel;
@@ -77,6 +78,8 @@ public class MachineInfoAutoCompleter implements KeyListener, SelectionObserver 
         table.setFont(Global.lableFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
         table.setDefaultRenderer(Object.class, new TableCellRender());
+        table.getTableHeader().setFont(Global.tblHeaderFont);
+               table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
@@ -149,7 +152,7 @@ public class MachineInfoAutoCompleter implements KeyListener, SelectionObserver 
         if (table.getSelectedRow() != -1) {
             machInto = machTableModel.getMachineInfo(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            ((JTextField) textComp).setText(machInto.getMachineName());
+            textComp.setText(machInto.getMachineName());
             if (editor == null) {
                 if (selectionObserver != null) {
                     selectionObserver.selected("MachineInfo", machInto.getMachineName());
@@ -164,7 +167,7 @@ public class MachineInfoAutoCompleter implements KeyListener, SelectionObserver 
 
     }
 
-    private Action acceptAction = new AbstractAction() {
+    private final Action acceptAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             mouseSelect();

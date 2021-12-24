@@ -10,10 +10,10 @@ package com.inventory.common;
  * @author Lenovo
  */
 public interface PanelControl {
-    public void save();
-    public void delete();
-    public void newForm();
-    public void history();
-    public void print();
-    public void refresh();
+    void save();
+    void delete();
+    void newForm();
+    void history();
+    void print();
+    void refresh();
 }

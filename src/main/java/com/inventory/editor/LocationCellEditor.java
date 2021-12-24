@@ -10,7 +10,6 @@ import com.inventory.model.Location;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
 import javax.swing.AbstractCellEditor;
@@ -57,7 +56,7 @@ public class LocationCellEditor extends AbstractCellEditor implements TableCellE
         if (value != null) {
             jtf.setText(value.toString());
         }
-        completer = new LocationAutoCompleter(jtf, Global.listLocation, this);
+        completer = new LocationAutoCompleter(jtf, Global.listLocation, this, false, false);
         return component;
     }
 

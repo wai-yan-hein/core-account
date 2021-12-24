@@ -54,24 +54,23 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
     public StockUnitSetupDailog() {
         super(Global.parentForm, true);
         initComponents();
+        initKeyListener();
         lblStatus.setForeground(Color.green);
     }
 
     public void initMain() {
         swrf = new StartWithRowFilter(txtFilter);
         initTable();
-        initKeyListener();
         searchItemUnit();
-
+        txtUnitShort.requestFocus();
     }
 
     private void initKeyListener() {
         txtUnitShort.addKeyListener(this);
+        txtUnitDesp.addKeyListener(this);
         btnClear.addKeyListener(this);
-        btnDelete.addKeyListener(this);
         btnSave.addKeyListener(this);
         tblUnit.addKeyListener(this);
-        txtUnitShort.requestFocus();
     }
 
     private void searchItemUnit() {
@@ -84,6 +83,7 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
         tblUnit.setRowSorter(sorter);
         tblUnit.getTableHeader().setFont(Global.lableFont);
         tblUnit.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblUnit.setRowHeight(Global.tblRowHeight);
         tblUnit.setDefaultRenderer(Object.class, new TableCellRender());
         tblUnit.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
             if (e.getValueIsAdjusting()) {
@@ -98,8 +98,9 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
 
     private void setItemUnit(StockUnit unit) {
         stockUnit = unit;
-        txtUnitShort.setText(stockUnit.getItemUnitCode());
-        txtUnitDesp.setText(stockUnit.getItemUnitName());
+        txtUnitShort.setEditable(false);
+        txtUnitShort.setText(stockUnit.getUnitCode());
+        txtUnitDesp.setText(stockUnit.getUnitName());
         lblStatus.setText("EDIT");
         lblStatus.setForeground(Color.blue);
         txtUnitShort.requestFocus();
@@ -114,17 +115,19 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
                     .bodyToMono(StockUnit.class);
             result.subscribe((t) -> {
                 if (t != null) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Saved");
                     if (lblStatus.getText().equals("EDIT")) {
                         Global.listStockUnit.set(selectRow, t);
                     } else {
                         Global.listStockUnit.add(t);
                     }
                     clear();
+                    JOptionPane.showMessageDialog(this, "Saved");
                 }
             }, (e) -> {
-                JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+
+                JOptionPane.showMessageDialog(this, e.getLocalizedMessage());
             });
+
         }
     }
 
@@ -149,26 +152,25 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
         boolean status = true;
         if (Util1.isNull(txtUnitShort.getText())) {
             status = false;
-            JOptionPane.showMessageDialog(Global.parentForm, "Invalid Unit Short.");
+            JOptionPane.showMessageDialog(this, "Invalid Unit Short.");
             txtUnitShort.requestFocus();
         } else if (Util1.isNull(txtUnitDesp.getText())) {
             status = false;
-            JOptionPane.showMessageDialog(Global.parentForm, "Invalid Unit Description.");
+            JOptionPane.showMessageDialog(this, "Invalid Unit Description.");
             txtUnitDesp.requestFocus();
         } else {
-            stockUnit.setItemUnitCode(txtUnitShort.getText());
-            stockUnit.setItemUnitName(txtUnitDesp.getText());
+            stockUnit.setUnitCode(txtUnitShort.getText());
+            stockUnit.setUnitName(txtUnitDesp.getText());
             if (lblStatus.getText().equals("NEW")) {
                 stockUnit.setCreatedBy(Global.loginUser);
                 stockUnit.setCreatedDate(Util1.getTodayDate());
-                stockUnit.setMacId(Global.machineId);
+                stockUnit.setMacId(Global.macId);
                 stockUnit.setCompCode(Global.compCode);
                 stockUnit.setUserCode(Global.loginUser.getAppUserCode());
             } else {
                 stockUnit.setUpdatedBy(Global.loginUser);
             }
         }
-
         return status;
     }
 
@@ -188,7 +190,6 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
         jLabel2 = new javax.swing.JLabel();
         txtUnitShort = new javax.swing.JTextField();
         btnSave = new javax.swing.JButton();
-        btnDelete = new javax.swing.JButton();
         btnClear = new javax.swing.JButton();
         lblStatus = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -237,21 +238,14 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
             }
         });
 
+        btnSave.setBackground(Global.selectionColor);
         btnSave.setFont(Global.lableFont);
+        btnSave.setForeground(new java.awt.Color(255, 255, 255));
         btnSave.setText("Save");
         btnSave.setName("btnSave"); // NOI18N
         btnSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSaveActionPerformed(evt);
-            }
-        });
-
-        btnDelete.setFont(Global.lableFont);
-        btnDelete.setText("Delete");
-        btnDelete.setName("btnDelete"); // NOI18N
-        btnDelete.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnDeleteActionPerformed(evt);
             }
         });
 
@@ -271,7 +265,7 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
         jLabel3.setText("Unit Desp");
 
         txtUnitDesp.setFont(Global.textFont);
-        txtUnitDesp.setName("txtName"); // NOI18N
+        txtUnitDesp.setName("txtUnitDesp"); // NOI18N
         txtUnitDesp.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 txtUnitDespFocusGained(evt);
@@ -297,9 +291,8 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(txtUnitShort, javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(0, 78, Short.MAX_VALUE)
                         .addComponent(btnSave)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnDelete)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnClear))
                     .addComponent(txtUnitDesp, javax.swing.GroupLayout.Alignment.LEADING))
@@ -318,12 +311,11 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
                     .addComponent(txtUnitDesp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblStatus)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnSave)
-                        .addComponent(lblStatus))
-                    .addComponent(btnDelete)
-                    .addComponent(btnClear))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(btnClear)
+                        .addComponent(btnSave)))
+                .addContainerGap(271, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -333,7 +325,7 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFilter)
+                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 301, Short.MAX_VALUE)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 301, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -364,20 +356,10 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
         try {
             save();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+            JOptionPane.showMessageDialog(this, e.getMessage());
             log.error("Save StockUnit :" + e.getMessage());
         }
     }//GEN-LAST:event_btnSaveActionPerformed
-
-    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-        // TODO add your handling code here:
-        try {
-            delete();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-            log.error("Delete StockUnit :" + e.getMessage());
-        }
-    }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
         // TODO add your handling code here:
@@ -413,7 +395,6 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClear;
-    private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnSave;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -440,74 +421,38 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
         Object sourceObj = e.getSource();
         String ctrlName = "-";
 
-        if (sourceObj instanceof JTable) {
-            ctrlName = ((JTable) sourceObj).getName();
-        } else if (sourceObj instanceof JTextField) {
-            ctrlName = ((JTextField) sourceObj).getName();
-        } else if (sourceObj instanceof JButton) {
-            ctrlName = ((JButton) sourceObj).getName();
+        if (sourceObj instanceof JTable jTable) {
+            ctrlName = jTable.getName();
+        } else if (sourceObj instanceof JTextField jTextField) {
+            ctrlName = jTextField.getName();
+        } else if (sourceObj instanceof JButton jButton) {
+            ctrlName = jButton.getName();
         }
         switch (ctrlName) {
-
-            case "txtUnitShort":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
+            case "txtUnitShort" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtUnitDesp.requestFocus();
                 }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    btnClear.requestFocus();
-                }
-                tabToTable(e);
-
-                break;
-            case "txtUnitDesp":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
+            }
+            case "txtUnitDesp" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     btnSave.requestFocus();
                 }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    btnClear.requestFocus();
-                }
-                tabToTable(e);
-
-                break;
-
-            case "btnSave":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    btnDelete.requestFocus();
-                }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
+            }
+            case "btnSave" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtUnitShort.requestFocus();
                 }
-                tabToTable(e);
-
-                break;
-            case "btnDelete":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
+            }
+            case "btnDelete" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     btnClear.requestFocus();
                 }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    btnSave.requestFocus();
-                }
-                tabToTable(e);
-
-                break;
-            case "btnClear":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
+            }
+            case "btnClear" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtUnitShort.requestFocus();
                 }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    btnDelete.requestFocus();
-                }
-                tabToTable(e);
-
-                break;
-        }
-    }
-
-    private void tabToTable(KeyEvent e) {
-        if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            tblUnit.requestFocus();
-            if (tblUnit.getRowCount() >= 0) {
-                tblUnit.setRowSelectionInterval(0, 0);
             }
         }
     }

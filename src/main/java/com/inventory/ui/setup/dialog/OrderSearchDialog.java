@@ -33,7 +33,7 @@ public class OrderSearchDialog extends javax.swing.JDialog implements KeyListene
     /**
      * Creates new form purVouSearchDialog
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(OrderSearchDialog.class);
+    private static final Logger log = LoggerFactory.getLogger(OrderSearchDialog.class);
     @Autowired
     private OrderSearchTableModel orderSearchTableModel;
     private TraderAutoCompleter traderAutoCompleter;
@@ -62,7 +62,7 @@ public class OrderSearchDialog extends javax.swing.JDialog implements KeyListene
     }
 
     private void initCombo() {
-        traderAutoCompleter = new TraderAutoCompleter(txtCus, Global.listTrader, null, false, 0);
+        traderAutoCompleter = new TraderAutoCompleter(txtCus, Global.listTrader, null, false, 0, true);
     }
 
     private void initTableVoucher() {
@@ -87,7 +87,7 @@ public class OrderSearchDialog extends javax.swing.JDialog implements KeyListene
     }
 
     private void search() {
-        LOGGER.info("Search Order History.");
+        log.info("Search Order History.");
         String customerId;
         String orderCode;
         String fromDate = Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd");
@@ -233,7 +233,7 @@ public class OrderSearchDialog extends javax.swing.JDialog implements KeyListene
                 .addContainerGap(273, Short.MAX_VALUE))
         );
 
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel11, jLabel3, txtFromDate, txtToDate});
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, jLabel11, jLabel3, txtFromDate, txtToDate);
 
         tblVoucher.setFont(Global.textFont);
         tblVoucher.setModel(new javax.swing.table.DefaultTableModel(

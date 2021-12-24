@@ -11,5 +11,5 @@ package com.inventory.common;
  */
 public interface SelectionObserver {
 
-    public void selected(Object source, Object selectObj);
+    void selected(Object source, Object selectObj);
 }
