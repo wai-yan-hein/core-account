@@ -11,7 +11,7 @@ import lombok.Data;
 
 /**
  *
- * @author Mg Kyaw Thura Aung
+ * @author wai yan
  */
 @Data
 public class SaleMan implements Serializable {
@@ -27,8 +27,8 @@ public class SaleMan implements Serializable {
     private String compCode;
     private String userCode;
     private Date createdDate;
-    private AppUser createdBy;
-    private AppUser updatedBy;
+    private String createdBy;
+    private String updatedBy;
 
     public SaleMan() {
     }

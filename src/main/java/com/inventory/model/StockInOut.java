@@ -21,8 +21,8 @@ public class StockInOut implements Serializable {
     private String remark;
     private String description;
     private Date updatedDate;
-    private AppUser createdBy;
-    private AppUser updatedBy;
+    private String createdBy;
+    private String updatedBy;
     private Date createdDate;
     private String compCode;
     private Integer macId;

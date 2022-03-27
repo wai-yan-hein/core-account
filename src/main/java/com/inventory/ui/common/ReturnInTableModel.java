@@ -5,27 +5,25 @@
  */
 package com.inventory.ui.common;
 
-import com.inventory.common.Global;
-import com.inventory.common.SelectionObserver;
-import com.inventory.common.Util1;
+import com.common.Global;
+import com.common.SelectionObserver;
+import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
-import com.inventory.model.General;
 import com.inventory.model.Location;
 import com.inventory.model.RetInHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
+import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
- * @author Mg Kyaw Thura Aung
+ * @author wai yan
  */
 @Slf4j
 public class ReturnInTableModel extends AbstractTableModel {
@@ -37,14 +35,23 @@ public class ReturnInTableModel extends AbstractTableModel {
     private SelectionObserver selectionObserver;
     private final List<String> deleteList = new ArrayList();
     private LocationAutoCompleter locationAutoCompleter;
-    private WebClient webClient;
+    private InventoryRepo inventoryRepo;
+    private JDateChooser vouDate;
 
-    public WebClient getWebClient() {
-        return webClient;
+    public JDateChooser getVouDate() {
+        return vouDate;
     }
 
-    public void setWebClient(WebClient webClient) {
-        this.webClient = webClient;
+    public void setVouDate(JDateChooser vouDate) {
+        this.vouDate = vouDate;
+    }
+
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
     }
 
     public JTable getParent() {
@@ -181,7 +188,6 @@ public class ReturnInTableModel extends AbstractTableModel {
                             record.setUnit(stock.getSaleUnit());
                             record.setPrice(stock.getPurPrice());
                             record.setLocation(locationAutoCompleter.getLocation());
-                            record.setCostPrice(getPurAvgPrice(record.getStock().getStockCode()));
                             addNewRow();
                         }
                     }
@@ -263,6 +269,12 @@ public class ReturnInTableModel extends AbstractTableModel {
                     }
                 }
             }
+            if (column != 7) {
+                if (record.getStock() != null && record.getUnit() != null) {
+                    record.setPrice(inventoryRepo.getPurRecentPrice(record.getStock().getStockCode(),
+                            Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnit().getUnitCode()));
+                }
+            }
             calculateAmount(record);
             fireTableRowsUpdated(row, row);
             selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
@@ -275,9 +287,8 @@ public class ReturnInTableModel extends AbstractTableModel {
 
     public void addNewRow() {
         if (listDetail != null) {
-            if (hasEmptyRow()) {
+            if (!hasEmptyRow()) {
                 RetInHisDetail pd = new RetInHisDetail();
-                pd.setStock(new Stock());
                 pd.setLocation(locationAutoCompleter.getLocation());
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
@@ -286,11 +297,11 @@ public class ReturnInTableModel extends AbstractTableModel {
     }
 
     private boolean hasEmptyRow() {
-        boolean status = true;
-        if (listDetail.size() > 1) {
+        boolean status = false;
+        if (listDetail.size() >= 1) {
             RetInHisDetail get = listDetail.get(listDetail.size() - 1);
-            if (get.getStock().getStockCode() == null) {
-                status = false;
+            if (get.getStock() == null) {
+                status = true;
             }
         }
         return status;
@@ -321,7 +332,7 @@ public class ReturnInTableModel extends AbstractTableModel {
     public boolean isValidEntry() {
         boolean status = true;
         for (RetInHisDetail sdh : listDetail) {
-            if (sdh.getStock().getStockCode() != null) {
+            if (sdh.getStock() != null) {
                 if (Util1.getFloat(sdh.getAmount()) <= 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
                             "Invalid.", JOptionPane.ERROR_MESSAGE);
@@ -330,6 +341,10 @@ public class ReturnInTableModel extends AbstractTableModel {
                     break;
                 } else if (sdh.getLocation() == null) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Location.");
+                    status = false;
+                    parent.requestFocus();
+                } else if (sdh.getUnit() == null) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Stock Unit.");
                     status = false;
                     parent.requestFocus();
                 }
@@ -361,6 +376,7 @@ public class ReturnInTableModel extends AbstractTableModel {
         } else {
             parent.setRowSelectionInterval(0, 0);
         }
+        parent.requestFocus();
     }
 
     public void addSale(RetInHisDetail sd) {
@@ -377,12 +393,4 @@ public class ReturnInTableModel extends AbstractTableModel {
         }
     }
 
-    public Float getPurAvgPrice(String stockCode) {
-        Mono<General> result = webClient.get()
-                .uri(builder -> builder.path("/report/get-purchase-price")
-                .queryParam("stockCode", stockCode)
-                .build())
-                .retrieve().bodyToMono(General.class);
-        return Util1.getFloat(result.block().getAmount());
-    }
 }

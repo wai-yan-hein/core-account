@@ -19,9 +19,9 @@ public class StockType implements java.io.Serializable {
     private String stockTypeName;
     private String accountId;
     private Date updatedDate;
-    private AppUser updatedBy;
+    private String updatedBy;
     private Date createdDate;
-    private AppUser createdBy;
+    private String createdBy;
     private Integer macId;
     private String userCode;
     private String compCode;

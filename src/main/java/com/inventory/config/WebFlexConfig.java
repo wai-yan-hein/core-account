@@ -27,15 +27,41 @@ public class WebFlexConfig {
     private Environment environment;
 
     @Bean
-    public WebClient webClient() {
-        log.info("webClient : " + environment.getProperty("base.url"));
+    public WebClient inventoryApi() {
+        log.info("inventoryApi : " + environment.getProperty("inventory.url"));
         return WebClient.builder()
                 .exchangeStrategies(ExchangeStrategies.builder()
                         .codecs(configurer -> configurer
                         .defaultCodecs()
                         .maxInMemorySize(16 * 1024 * 1024))
                         .build())
-                .baseUrl(environment.getProperty("base.url"))
+                .baseUrl(environment.getProperty("inventory.url"))
+                .build();
+    }
+
+    @Bean
+    public WebClient accountApi() {
+        log.info("account : " + environment.getProperty("account.url"));
+        return WebClient.builder()
+                .exchangeStrategies(ExchangeStrategies.builder()
+                        .codecs(configurer -> configurer
+                        .defaultCodecs()
+                        .maxInMemorySize(16 * 1024 * 1024))
+                        .build())
+                .baseUrl(environment.getProperty("account.url"))
+                .build();
+    }
+
+    @Bean
+    public WebClient userApi() {
+        log.info("user api : " + environment.getProperty("user.url"));
+        return WebClient.builder()
+                .exchangeStrategies(ExchangeStrategies.builder()
+                        .codecs(configurer -> configurer
+                        .defaultCodecs()
+                        .maxInMemorySize(16 * 1024 * 1024))
+                        .build())
+                .baseUrl(environment.getProperty("user.url"))
                 .build();
     }
 }

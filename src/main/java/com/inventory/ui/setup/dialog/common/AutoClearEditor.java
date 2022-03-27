@@ -6,8 +6,8 @@
 package com.inventory.ui.setup.dialog.common;
 
 
-import com.inventory.common.Global;
-import com.inventory.common.KeyPropagate;
+import com.common.Global;
+import com.common.KeyPropagate;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.KeyEvent;

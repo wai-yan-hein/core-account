@@ -19,9 +19,9 @@ public class Category implements java.io.Serializable {
     private String catName;
     private Integer migId;
     private Date updatedDate;
-    private AppUser updatedBy;
+    private String updatedBy;
     private Date createdDate;
-    private AppUser createdBy;
+    private String createdBy;
     private Integer macId;
     private String userCode;
     private String compCode;

@@ -5,9 +5,9 @@
  */
 package com.inventory.ui;
 
-import com.inventory.common.Global;
-import com.inventory.common.TableCellRender;
-import com.inventory.model.VUsrCompAssign;
+import com.common.Global;
+import com.common.TableCellRender;
+import com.user.model.VRoleCompany;
 import com.inventory.ui.common.CompanyNameTableModel;
 import java.util.List;
 import org.slf4j.Logger;
@@ -20,14 +20,14 @@ import org.slf4j.LoggerFactory;
 public class CompanyDialog extends javax.swing.JDialog {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationMainFrame.class);
-    private List<VUsrCompAssign> listCompany;
+    private List<VRoleCompany> listCompany;
     private CompanyNameTableModel companyTableModel;
 
-    public List<VUsrCompAssign> getListCompany() {
+    public List<VRoleCompany> getListCompany() {
         return listCompany;
     }
 
-    public void setListCompany(List<VUsrCompAssign> listCompany) {
+    public void setListCompany(List<VRoleCompany> listCompany) {
         this.listCompany = listCompany;
     }
 
@@ -49,9 +49,9 @@ public class CompanyDialog extends javax.swing.JDialog {
     private void select() {
         if (tblCompany.getSelectedRow() >= 0) {
             int row = tblCompany.convertRowIndexToModel(tblCompany.getSelectedRow());
-            VUsrCompAssign company = companyTableModel.getCompany(row);
-            Global.roleCode = company.getKey().getRoleCode();
-            Global.compCode = company.getKey().getCompCode();
+            VRoleCompany company = companyTableModel.getCompany(row);
+            Global.roleCode = company.getRoleCode();
+            Global.compCode = company.getCompCode();
             Global.companyName = company.getCompName();
             log.info("Role Id : " + Global.roleCode);
             log.info("Company Id : " + Global.compCode);

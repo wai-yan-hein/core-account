@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.common;
 
-import com.inventory.common.Util1;
+import com.common.Util1;
 import com.inventory.model.Order;
 import java.util.ArrayList;
 import java.util.List;

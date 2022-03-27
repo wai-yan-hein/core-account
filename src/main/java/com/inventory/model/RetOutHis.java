@@ -4,6 +4,7 @@
  */
 package com.inventory.model;
 
+import com.user.model.Currency;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
@@ -24,9 +25,9 @@ public class RetOutHis implements java.io.Serializable {
     private Float paid;
     private Float discount;
     private Float balance;
-    private AppUser createdBy;
+    private String createdBy;
     private Date createdDate;
-    private AppUser updatedBy;
+    private String updatedBy;
     private Date updatedDate;
     private String remark;
     private Integer session;

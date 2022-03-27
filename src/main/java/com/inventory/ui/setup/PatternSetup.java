@@ -7,16 +7,19 @@ package com.inventory.ui.setup;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.inventory.common.Global;
-import com.inventory.common.PanelControl;
-import com.inventory.common.ReturnObject;
-import com.inventory.common.TableCellRender;
-import com.inventory.common.Util1;
+import com.common.Global;
+import com.common.PanelControl;
+import com.common.ReturnObject;
+import com.common.SelectionObserver;
+import com.common.TableCellRender;
+import com.common.Util1;
 import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.model.Pattern;
 import com.inventory.model.PatternDetail;
-import com.inventory.ui.ApplicationMainFrame;
+import com.inventory.model.Stock;
+import com.inventory.model.StockUnit;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.PatternDetailTableModel;
 import com.inventory.ui.common.PatternTableModel;
 import com.inventory.ui.setup.dialog.PatterCreateDialog;
@@ -28,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
@@ -47,11 +51,31 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl {
     private final PatternTableModel patternTableModel = new PatternTableModel();
     private final PatternDetailTableModel patternDetailTableModel = new PatternDetailTableModel();
     private PatterCreateDialog dialog;
-    @Autowired
-    private ApplicationMainFrame mainFrame;
+    private SelectionObserver observer;
+    private JProgressBar progress;
+    private List<Stock> listStock = new ArrayList<>();
+    private List<StockUnit> lisetStockUnit = new ArrayList<>();
 
     @Autowired
-    private WebClient webClient;
+    private WebClient inventoryApi;
+    @Autowired
+    private InventoryRepo inventoryRepo;
+
+    public JProgressBar getProgress() {
+        return progress;
+    }
+
+    public void setProgress(JProgressBar progress) {
+        this.progress = progress;
+    }
+
+    public SelectionObserver getObserver() {
+        return observer;
+    }
+
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
+    }
 
     /**
      * Creates new form PatternSetup
@@ -85,7 +109,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl {
     }
 
     private void searchPattern() {
-        Mono<ReturnObject> result = webClient
+        Mono<ReturnObject> result = inventoryApi
                 .get()
                 .uri(builder -> builder.path("/setup/get-pattern")
                 .queryParam("compCode", Global.compCode)
@@ -97,15 +121,13 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl {
             List<Pattern> listOP = gson.fromJson(gson.toJsonTree(t.getList()), listType);
             patternTableModel.setListPattern(listOP);
             lblRecord.setText(listOP.size() + "");
-            //patternTableModel.addNewRow();
-
         }, (e) -> {
             JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
         });
     }
 
     private void initTablePattern() {
-        patternTableModel.setWebClient(webClient);
+        patternTableModel.setWebClient(inventoryApi);
         tblPattern.setModel(patternTableModel);
         tblPattern.getTableHeader().setFont(Global.tblHeaderFont);
         tblPattern.setRowHeight(Global.tblRowHeight);
@@ -123,7 +145,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl {
     }
 
     private void searchPD(String patternCode) {
-        Mono<ReturnObject> result = webClient
+        Mono<ReturnObject> result = inventoryApi
                 .get()
                 .uri(builder -> builder.path("/setup/get-pattern-detail")
                 .queryParam("patternCode", patternCode)
@@ -146,24 +168,18 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl {
             if (Objects.isNull(p.getPatternCode())) {
                 p.setCompCode(Global.compCode);
                 p.setMacId(Global.macId);
-                p.setCreatedBy(Global.loginUser);
+                p.setCreatedBy(Global.loginUser.getUserCode());
                 p.setCreatedDate(Util1.getTodayDate());
             } else {
-                p.setUpdatedBy(Global.loginUser);
+                p.setUpdatedBy(Global.loginUser.getUserCode());
             }
-            Mono<ReturnObject> result = webClient.post()
-                    .uri("/setup/save-pattern")
-                    .body(Mono.just(p), Pattern.class)
-                    .retrieve()
-                    .bodyToMono(ReturnObject.class);
-            ReturnObject ro = result.block();
-            if (!Objects.isNull(ro)) {
-                Pattern patten = gson.fromJson(gson.toJson(ro.getObj()), Pattern.class);
+            p = inventoryRepo.savePattern(p);
+            if (p.getPatternCode() != null) {
                 if (dialog.getStatus().equals("NEW")) {
-                    patternTableModel.addPattern(patten);
+                    patternTableModel.addPattern(p);
                 } else {
                     int selectRow = tblPattern.convertRowIndexToModel(tblPattern.getSelectedRow());
-                    patternTableModel.setPattern(patten, selectRow);
+                    patternTableModel.setPattern(p, selectRow);
                 }
                 int size = patternTableModel.getListPattern().size();
                 lblRecord.setText(String.valueOf(size));
@@ -180,21 +196,23 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl {
     }
 
     private void initTablePD() {
+        listStock = inventoryRepo.getStock(true);
+        lisetStockUnit = inventoryRepo.getStockUnit();
         patternDetailTableModel.setTable(tblPD);
         patternDetailTableModel.setPanel(this);
-        patternDetailTableModel.setWebClient(webClient);
+        patternDetailTableModel.setWebClient(inventoryApi);
         tblPD.setModel(patternDetailTableModel);
         tblPD.getTableHeader().setFont(Global.tblHeaderFont);
         tblPD.setRowHeight(Global.tblRowHeight);
         tblPD.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblPD.setFont(Global.textFont);
-        tblPD.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor());
-        tblPD.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor());
-        tblPD.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor());
+        tblPD.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(listStock));
+        tblPD.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(listStock));
+        tblPD.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(inventoryRepo.getLocation()));
         tblPD.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
-        tblPD.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor());
+        tblPD.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(lisetStockUnit));
         tblPD.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
-        tblPD.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor());
+        tblPD.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(lisetStockUnit));
         tblPD.getColumnModel().getColumn(0).setPreferredWidth(50);
         tblPD.getColumnModel().getColumn(1).setPreferredWidth(150);
         tblPD.getColumnModel().getColumn(2).setPreferredWidth(100);
@@ -364,6 +382,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here
         dialog = new PatterCreateDialog(Global.parentForm);
+        dialog.setInventoryRepo(inventoryRepo);
         dialog.initCombo();
         dialog.setStatus("NEW");
         dialog.setLocationRelativeTo(null);
@@ -388,7 +407,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl {
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         // TODO add your handling code here:
-        mainFrame.setControl(this);
+        observer.selected("control", this);
     }//GEN-LAST:event_formComponentShown
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -397,6 +416,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl {
         if (row >= 0) {
             Pattern p = patternTableModel.getPattern(row);
             dialog = new PatterCreateDialog(Global.parentForm);
+            dialog.setInventoryRepo(inventoryRepo);
             dialog.initCombo();
             dialog.setPattern(p);
             dialog.setStatus("EDIT");
@@ -432,6 +452,15 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl {
     @Override
     public void refresh() {
         searchPattern();
+    }
+
+    @Override
+    public String panelName() {
+        return this.getName();
+    }
+
+    @Override
+    public void filter() {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -21,9 +21,9 @@ public class Pattern {
     private String userCode;
     private String compCode;
     private Date createdDate;
-    private AppUser createdBy;
+    private String createdBy;
     private Date updatedDate;
-    private AppUser updatedBy;
+    private String updatedBy;
     private boolean active;
     private Integer macId;
     private List<PatternDetail> detailList;

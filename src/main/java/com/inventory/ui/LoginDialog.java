@@ -5,22 +5,29 @@
  */
 package com.inventory.ui;
 
-import com.inventory.common.Global;
-import com.inventory.common.ReturnObject;
-import com.inventory.common.Util1;
+import com.common.Global;
+import com.user.common.UserRepo;
+import com.common.Util1;
 import com.inventory.model.AppUser;
 import com.inventory.model.MachineInfo;
+import java.awt.Color;
 import java.awt.HeadlessException;
 import java.awt.event.FocusAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Arrays;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -29,37 +36,41 @@ import reactor.core.publisher.Mono;
  *
  * @author winswe
  */
+@PropertySource(value = {"file:config/application.properties"})
 @Component
 @Slf4j
 public class LoginDialog extends javax.swing.JDialog implements KeyListener {
-    
+
+    @Value("${src.path}")
+    private String srcPath;
     private boolean login = false;
     private int loginAttempt = 0;
+    @Autowired
+    private UserRepo userRepo;
+    @Autowired
+    private TaskExecutor taskExecutor;
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusGained(java.awt.event.FocusEvent evt) {
             Object sourceObj = evt.getSource();
-            if (sourceObj instanceof JComboBox) {
-                JComboBox jcb = (JComboBox) sourceObj;
+            if (sourceObj instanceof JComboBox jcb) {
                 log.info("Control Name : " + jcb.getName());
-            } else if (sourceObj instanceof JFormattedTextField) {
-                JFormattedTextField jftf = (JFormattedTextField) sourceObj;
+            } else if (sourceObj instanceof JFormattedTextField jftf) {
                 jftf.selectAll();
                 log.info("Control Name : " + jftf.getName());
-            } else if (sourceObj instanceof JTextField) {
-                JTextField jtf = (JTextField) sourceObj;
+            } else if (sourceObj instanceof JTextField jtf) {
                 jtf.selectAll();
                 log.info("Control Name : " + jtf.getName());
             }
         }
-        
+
         @Override
         public void focusLost(java.awt.event.FocusEvent evt) {
-            
+
         }
     };
     @Autowired
-    private WebClient webClient;
+    private WebClient userApi;
 
     /**
      * Creates new form LoginDialog
@@ -71,83 +82,105 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
         initKeyListener();
         initFocusListener();
     }
-    
+
     public void checkMachineRegister() {
         try {
-            
             Global.machineName = Util1.getComputerName();
-            Mono<ReturnObject> result = webClient.get()
-                    .uri(builder -> builder.path("/get-mac-id").queryParam("macName", Global.machineName).build())
-                    .retrieve().bodyToMono(ReturnObject.class);
-            result.subscribe((t) -> {
-                Global.macId = Util1.getInteger(t.getObj());
-                //Global.macId = machineInfoService.getMax(Global.machineName);
-                if (Global.macId == 0) {
-                    SecurityDialog dialog = new SecurityDialog();
-                    dialog.setLocationRelativeTo(null);
-                    dialog.setVisible(true);
-                    String inputKey = dialog.getKey();
-                    String toDayKey = Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd");
-                    toDayKey = toDayKey.replaceAll("-", "");
-                    if (inputKey.equals(toDayKey)) {
-                        register();
-                    } else {
-                        JOptionPane.showMessageDialog(Global.parentForm, "Invalid Security Key.");
-                        System.exit(1);
-                    }
+            MachineInfo mac = userRepo.register(Global.machineName);
+            int macId = mac.getMacId();
+            if (macId == 0) {
+                SecurityDialog dialog = new SecurityDialog();
+                dialog.setLocationRelativeTo(null);
+                dialog.setVisible(true);
+                String inputKey = dialog.getKey();
+                String toDayKey = Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd");
+                toDayKey = toDayKey.replaceAll("-", "");
+                if (inputKey.equals(toDayKey)) {
+                    register();
+                } else {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Security Key.");
+                    System.exit(1);
                 }
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
-            
+            } else {
+                if (!mac.isProUpdate()) {
+                    formEnable(false);
+                    lblStatus.setForeground(Color.blue);
+                    lblStatus.setText("Please wait program is updating...");
+                    taskExecutor.execute(() -> {
+                        String replacStr = srcPath.replaceAll("\"", "//");
+                        log.info(replacStr);
+                        try {
+                            String distPath = "core-inventory.jar";
+                            FileChannel src = new FileInputStream(
+                                    replacStr)
+                                    .getChannel();
+                            FileChannel dest
+                                    = new FileOutputStream(
+                                            distPath)
+                                            .getChannel();
+                            dest.transferFrom(src, 0, src.size());
+                            lblStatus.setForeground(Color.BLACK);
+                            lblStatus.setText("Program is updated. Exit program and open.");
+                            mac.setProUpdate(true);
+                            userRepo.register(mac);
+                        } catch (IOException ex) {
+                            formEnable(true);
+                            lblStatus.setForeground(Color.red);
+                            lblStatus.setText(String.format("Program updating error :%s", ex.getMessage()));
+                        }
+                    });
+                    //JOptionPane.showMessageDialog(new JFrame(), "Program is updating... Please Wait..", "Update Alert", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    lblStatus.setText("Latest version.");
+                }
+                Global.macId = macId;
+            }
         } catch (HeadlessException ex) {
             log.error("getMachineInfo Error : {}", ex.getMessage());
             JOptionPane.showMessageDialog(this, "Database not found.", "System Error", JOptionPane.ERROR_MESSAGE);
             System.exit(1);
         }
     }
-    
-    private void errorHandler(String msg) throws Exception {
-        
+
+    private void formEnable(boolean status) {
+        btnLogin.setEnabled(status);
+        txtLoginName.setEnabled(status);
+        txtPassword.setEnabled(status);
+        btnClear.setEnabled(status);
+
     }
-    
+
     private void register() {
-        try {
-            String machineName = Util1.getComputerName();
-            String ipAddress = Util1.getIPAddress();
-            MachineInfo machine = new MachineInfo();
-            machine.setIpAddress(ipAddress);
-            machine.setMachineName(machineName);
-            Mono<MachineInfo> result = webClient.post()
-                    .uri("/save-machine")
-                    .body(Mono.just(machine), MachineInfo.class)
-                    .retrieve()
-                    .bodyToMono(MachineInfo.class);
-            MachineInfo block = result.block();
-            if (block != null) {
-                Global.macId = block.getMachineId();
-            }
-        } catch (Exception ex) {
-            log.error("Register Error : {}", ex.getMessage());
+        String machineName = Util1.getComputerName();
+        String ipAddress = Util1.getIPAddress();
+        MachineInfo machine = new MachineInfo();
+        machine.setMachineIp(ipAddress);
+        machine.setMachineName(machineName);
+        MachineInfo mac = userRepo.register(machine);
+        if (mac.getMacId() != null) {
+            Global.macId = mac.getMacId();
+        } else {
+            System.exit(0);
         }
+
     }
 
     //KeyListener implementation
     @Override
     public void keyTyped(KeyEvent e) {
-        
+
     }
-    
+
     @Override
     public void keyPressed(KeyEvent e) {
-        
+
     }
-    
+
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
         String ctrlName = "-";
-        
+
         if (sourceObj instanceof JComboBox) {
             ctrlName = ((JComboBox) sourceObj).getName();
         } else if (sourceObj instanceof JFormattedTextField) {
@@ -155,13 +188,13 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
         } else if (sourceObj instanceof JTextField) {
             ctrlName = ((JTextField) sourceObj).getName();
         }
-        
+
         switch (ctrlName) {
             case "txtLoginName":
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
                     txtPassword.requestFocus();
                 } else if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    butClear.requestFocus();
+                    btnClear.requestFocus();
                 }
                 break;
             case "txtPassword":
@@ -170,7 +203,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
                         login();
                         break;
                     case KeyEvent.VK_DOWN:
-                        butLogin.requestFocus();
+                        btnLogin.requestFocus();
                         break;
                     case KeyEvent.VK_UP:
                         txtLoginName.requestFocus();
@@ -183,7 +216,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
                         login();
                         break;
                     case KeyEvent.VK_DOWN:
-                        butClear.requestFocus();
+                        btnClear.requestFocus();
                         break;
                 }
                 break;
@@ -196,7 +229,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
                         txtLoginName.requestFocus();
                         break;
                     case KeyEvent.VK_UP:
-                        butLogin.requestFocus();
+                        btnLogin.requestFocus();
                         break;
                 }
         }
@@ -206,7 +239,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
     public boolean isLogin() {
         return login;
     }
-    
+
     private void login() {
         //register();
         if (txtLoginName.getText().isEmpty() || txtPassword.getPassword().length == 0) {
@@ -215,50 +248,47 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
             loginAttempt++;
         } else {
             try {
-                Mono<AppUser> result = webClient.get()
+                Mono<AppUser> result = userApi.get()
                         .uri(builder -> builder.path("/user/login")
-                        .queryParam("username", txtLoginName.getText())
-                        .queryParam("password", Arrays.toString(txtPassword.getPassword()))
+                        .queryParam("userName", txtLoginName.getText())
+                        .queryParam("password", String.valueOf(txtPassword.getPassword()))
                         .build())
                         .retrieve().bodyToMono(AppUser.class);
-                result.subscribe((t) -> {
-                    if (Util1.isNull(t)) {
-                        JOptionPane.showMessageDialog(this, "Invalid user name or password.",
-                                "Authentication error.", JOptionPane.ERROR_MESSAGE);
-                        loginAttempt++;
-                    } else {
-                        Global.loginUser = t;
-                        login = true;
-                        this.dispose();
-                    }
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                });
+                AppUser user = result.block();
+                if (Util1.isNull(user)) {
+                    JOptionPane.showMessageDialog(this, "Invalid user name or password.",
+                            "Authentication error.", JOptionPane.ERROR_MESSAGE);
+                    loginAttempt++;
+                } else {
+                    Global.loginUser = user;
+                    login = true;
+                    this.dispose();
+                }
             } catch (HeadlessException ex) {
                 log.error("login : " + ex.getMessage());
                 JOptionPane.showMessageDialog(this, ex.getMessage(),
                         "Authentication error.", JOptionPane.ERROR_MESSAGE);
             }
         }
-        
+
         if (loginAttempt >= 3) {
             this.dispose();
         }
     }
-    
+
     public void clear() {
         txtLoginName.setText(null);
         txtPassword.setText(null);
         txtLoginName.requestFocus();
     }
-    
+
     private void initKeyListener() {
         txtLoginName.addKeyListener(this);
         txtPassword.addKeyListener(this);
-        butClear.addKeyListener(this);
-        butLogin.addKeyListener(this);
+        btnClear.addKeyListener(this);
+        btnLogin.addKeyListener(this);
     }
-    
+
     private void initFocusListener() {
         txtLoginName.addFocusListener(fa);
         txtPassword.addFocusListener(fa);
@@ -277,16 +307,23 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
         jLabel2 = new javax.swing.JLabel();
         txtLoginName = new javax.swing.JTextField();
         txtPassword = new javax.swing.JPasswordField();
-        butClear = new javax.swing.JButton();
-        butLogin = new javax.swing.JButton();
+        btnClear = new javax.swing.JButton();
+        btnLogin = new javax.swing.JButton();
         lblStatus = new javax.swing.JLabel();
+        jSeparator1 = new javax.swing.JSeparator();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Login Core Inventory");
         setFont(Global.lableFont);
+        setResizable(false);
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
                 formComponentShown(evt);
+            }
+        });
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosed(java.awt.event.WindowEvent evt) {
+                formWindowClosed(evt);
             }
         });
 
@@ -307,22 +344,23 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
         txtPassword.setFont(Global.lableFont);
         txtPassword.setName("txtPassword"); // NOI18N
 
-        butClear.setFont(Global.lableFont);
-        butClear.setText("Clear");
-        butClear.setName("butClear"); // NOI18N
+        btnClear.setFont(Global.lableFont);
+        btnClear.setText("Clear");
+        btnClear.setName("btnClear"); // NOI18N
 
-        butLogin.setBackground(Global.selectionColor);
-        butLogin.setFont(Global.lableFont);
-        butLogin.setForeground(new java.awt.Color(255, 255, 255));
-        butLogin.setText("Login");
-        butLogin.setName("butLogin"); // NOI18N
-        butLogin.addActionListener(new java.awt.event.ActionListener() {
+        btnLogin.setBackground(Global.selectionColor);
+        btnLogin.setFont(Global.lableFont);
+        btnLogin.setForeground(new java.awt.Color(255, 255, 255));
+        btnLogin.setText("Login");
+        btnLogin.setName("btnLogin"); // NOI18N
+        btnLogin.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                butLoginActionPerformed(evt);
+                btnLoginActionPerformed(evt);
             }
         });
 
-        lblStatus.setFont(Global.lableFont);
+        lblStatus.setFont(Global.menuFont);
+        lblStatus.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -331,20 +369,21 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 184, Short.MAX_VALUE)
-                        .addComponent(butLogin)
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnLogin)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(butClear))
+                        .addComponent(btnClear))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 112, Short.MAX_VALUE)
                             .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtPassword, javax.swing.GroupLayout.DEFAULT_SIZE, 258, Short.MAX_VALUE)
-                            .addComponent(txtLoginName, javax.swing.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE))))
+                            .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 258, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtLoginName, javax.swing.GroupLayout.PREFERRED_SIZE, 258, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 376, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -360,11 +399,13 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
                     .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(butLogin, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(butClear, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(15, 15, 15)
-                .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btnLogin, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnClear, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel1, jLabel2, txtLoginName, txtPassword});
@@ -372,9 +413,9 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void butLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butLoginActionPerformed
+    private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
         login();
-    }//GEN-LAST:event_butLoginActionPerformed
+    }//GEN-LAST:event_btnLoginActionPerformed
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         // TODO add your handling code here:
@@ -384,11 +425,17 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtLoginNameKeyReleased
 
+    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
+        // TODO add your handling code here:
+        //System.exit(0);
+    }//GEN-LAST:event_formWindowClosed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton butClear;
-    private javax.swing.JButton butLogin;
+    private javax.swing.JButton btnClear;
+    private javax.swing.JButton btnLogin;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JTextField txtLoginName;
     private javax.swing.JPasswordField txtPassword;

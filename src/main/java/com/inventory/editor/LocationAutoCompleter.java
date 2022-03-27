@@ -5,9 +5,9 @@
  */
 package com.inventory.editor;
 
-import com.inventory.common.Global;
-import com.inventory.common.SelectionObserver;
-import com.inventory.common.TableCellRender;
+import com.common.Global;
+import com.common.SelectionObserver;
+import com.common.TableCellRender;
 import com.inventory.model.Location;
 import com.inventory.model.OptionModel;
 import com.inventory.ui.setup.dialog.OptionDialog;
@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Mg Kyaw Thura Aung
+ * @author wai yan
  */
 public class LocationAutoCompleter implements KeyListener, SelectionObserver {
 
@@ -62,6 +62,15 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
     private SelectionObserver selectionObserver;
     private List<String> listOption = new ArrayList<>();
     private OptionDialog optionDialog;
+    private List<Location> listLocation;
+
+    public List<Location> getListLocation() {
+        return listLocation;
+    }
+
+    public void setListLocation(List<Location> listLocation) {
+        this.listLocation = listLocation;
+    }
 
     public List<String> getListOption() {
         return listOption;
@@ -76,7 +85,8 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
     }
 
     private void initOption() {
-        Global.listLocation.forEach(t -> {
+        listOption.clear();
+        listLocation.forEach(t -> {
             listOption.add(t.getLocationCode());
         });
     }
@@ -88,6 +98,7 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
             AbstractCellEditor editor, boolean filter, boolean custom) {
         this.textComp = comp;
         this.editor = editor;
+        this.listLocation = list;
         initOption();
         if (filter) {
             Location loc = new Location("-", "All");
@@ -174,7 +185,7 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
 
         table.setRequestFocusEnabled(false);
 
-        if (list.size() > 0) {
+        if (!list.isEmpty()) {
             table.setRowSelectionInterval(0, 0);
         }
     }
@@ -201,7 +212,7 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
                 case "C" -> {
                     optionDialog = new OptionDialog(Global.parentForm, "Location");
                     List<OptionModel> listOP = new ArrayList<>();
-                    Global.listLocation.forEach(t -> {
+                    listLocation.forEach(t -> {
                         listOP.add(new OptionModel(t.getLocationCode(), t.getLocationName()));
                     });
                     optionDialog.setOptionList(listOP);
@@ -214,8 +225,10 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
                 }
                 case "-" ->
                     initOption();
-                default ->
+                default -> {
+                    listOption.clear();
                     listOption.add(location.getLocationCode());
+                }
             }
             if (editor == null) {
                 if (selectionObserver != null) {
@@ -345,28 +358,6 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
         }
 
     }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        String filter = textComp.getText();
-        if (filter.length() == 0) {
-            sorter.setRowFilter(null);
-        } else {
-            //String value = Util1.getPropValue("system.iac.filter");
-
-            if ("N".equals("Y")) {
-                sorter.setRowFilter(RowFilter.regexFilter(filter));
-            } else {
-                sorter.setRowFilter(startsWithFilter);
-            }
-            if (e.getKeyCode() != KeyEvent.VK_DOWN && e.getKeyCode() != KeyEvent.VK_UP) {
-                if (table.getSelectedRow() >= 0) {
-                    table.setRowSelectionInterval(0, 0);
-                }
-            }
-
-        }
-    }
     private final DocumentListener documentListener = new DocumentListener() {
         @Override
         public void insertUpdate(DocumentEvent e) {
@@ -392,30 +383,40 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
 
     }
 
+    @Override
+    public void keyReleased(KeyEvent e) {
+        String filter = textComp.getText();
+        if (filter.length() == 0) {
+            sorter.setRowFilter(null);
+        } else {
+            sorter.setRowFilter(startsWithFilter);
+            try {
+                if (!containKey(e)) {
+                    if (table.getRowCount() >= 0) {
+                        table.setRowSelectionInterval(0, 0);
+                    }
+                }
+            } catch (Exception ex) {
+            }
+
+        }
+    }
     private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
         @Override
         public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
-            //for (int i = entry.getValueCount() - 1; i >= 0; i--) {
-            /*
-             * if (NumberUtil.isNumber(textComp.getText())) { if
-             * (entry.getStringValue(0).toUpperCase().startsWith(
-             * textComp.getText().toUpperCase())) { return true; } } else {
-             *
-             * if (entry.getStringValue(1).toUpperCase().contains(
-             * textComp.getText().toUpperCase())) { return true; } else if
-             * (entry.getStringValue(2).toUpperCase().contains(
-             * textComp.getText().toUpperCase())) { return true; }
-             }
-             */
-
-            String tmp1 = entry.getStringValue(0).toUpperCase();
-            String tmp2 = entry.getStringValue(1).toUpperCase();
-            String tmp3 = entry.getStringValue(3).toUpperCase();
-            String tmp4 = entry.getStringValue(4).toUpperCase();
-            String text = textComp.getText().toUpperCase();
-
-            return tmp1.startsWith(text) || tmp2.startsWith(text) || tmp3.startsWith(text) || tmp4.startsWith(text);
+            String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
+            String tmp2 = entry.getStringValue(1).toUpperCase().replace(" ", "");
+            String tmp3 = entry.getStringValue(3).toUpperCase().replace(" ", "");
+            String tmp4 = entry.getStringValue(4).toUpperCase().replace(" ", "");
+            String tmp5 = entry.getStringValue(4).toUpperCase().replace(" ", "");
+            String text = textComp.getText().toUpperCase().replace(" ", "");
+            return tmp1.startsWith(text) || tmp2.startsWith(text)
+                    || tmp3.startsWith(text) || tmp4.startsWith(text) || tmp5.startsWith(text);
         }
     };
+
+    private boolean containKey(KeyEvent e) {
+        return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;
+    }
 
 }

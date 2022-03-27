@@ -5,16 +5,17 @@
  */
 package com.inventory.ui.setup.dialog;
 
-import com.inventory.common.Global;
-import com.inventory.common.ReturnObject;
-import com.inventory.common.StartWithRowFilter;
-import com.inventory.common.TableCellRender;
-import com.inventory.common.Util1;
+import com.common.Global;
+import com.common.StartWithRowFilter;
+import com.common.TableCellRender;
+import com.common.Util1;
 import com.inventory.model.Location;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.LocationTableModel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -26,28 +27,29 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 public class LocationSetupDialog extends javax.swing.JDialog implements KeyListener {
 
     private static final Logger log = LoggerFactory.getLogger(LocationSetupDialog.class);
     private int selectRow = - 1;
     private Location location = new Location();
-    @Autowired
-    private LocationTableModel locationTableModel;
-    @Autowired
-    private WebClient webClient;
+    private final LocationTableModel locationTableModel = new LocationTableModel();
+    private InventoryRepo inventoryRepo;
 
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
+
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
 
     /**
      * Creates new form ItemTypeSetupDialog
@@ -75,7 +77,7 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
     }
 
     private void searchCategory() {
-        locationTableModel.setListLocation(Global.listLocation);
+        locationTableModel.setListLocation(inventoryRepo.getLocation());
     }
 
     private void initTable() {
@@ -109,24 +111,13 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
 
     private void save() {
         if (isValidEntry()) {
-            Mono<Location> result = webClient.post()
-                    .uri("/setup/save-location")
-                    .body(Mono.just(location), Location.class)
-                    .retrieve()
-                    .bodyToMono(Location.class);
-            result.subscribe((t) -> {
-                if (t != null) {
-                    if (lblStatus.getText().equals("EDIT")) {
-                        Global.listLocation.set(selectRow, t);
-                    } else {
-                        Global.listLocation.add(t);
-                    }
-                    clear();
-                    JOptionPane.showMessageDialog(this, "Saved");
-                }
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+            location = inventoryRepo.saveLocaiton(location);
+            if (lblStatus.getText().equals("EDIT")) {
+                locationTableModel.setLocation(location,selectRow);
+            } else {
+                locationTableModel.addLocation(location);
+            }
+            clear();
         }
     }
 
@@ -141,23 +132,6 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
         txtUserCode.requestFocus();
     }
 
-    private void delete() {
-        Location loc = locationTableModel.getLocation(selectRow);
-        if (loc != null) {
-            Global.listLocation.remove(selectRow);
-            String catCode = loc.getLocationCode();
-            Mono<ReturnObject> result = webClient.delete()
-                    .uri(builder -> builder.path("/setup/delete-location").queryParam("code", catCode).build())
-                    .retrieve().bodyToMono(ReturnObject.class);
-            result.subscribe((t) -> {
-                JOptionPane.showMessageDialog(this, t.getMessage());
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
-            clear();
-        }
-    }
-
     private boolean isValidEntry() {
         boolean status = true;
         if (txtName.getText().isEmpty()) {
@@ -169,11 +143,11 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
             location.setLocationName(txtName.getText());
             if (lblStatus.getText().equals("NEW")) {
                 location.setCompCode(Global.compCode);
-                location.setCreatedBy(Global.loginUser);
+                location.setCreatedBy(Global.loginUser.getUserCode());
                 location.setCreatedDate(Util1.getTodayDate());
                 location.setMacId(Global.macId);
             } else {
-                location.setUpdatedBy(Global.loginUser);
+                location.setUpdatedBy(Global.loginUser.getUserCode());
             }
         }
         return status;

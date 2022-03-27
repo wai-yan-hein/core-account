@@ -17,7 +17,6 @@ import lombok.Data;
 public class Trader implements java.io.Serializable {
 
     private String code;
-
     private String compCode;
     private String traderName;
     private String address;
@@ -31,15 +30,19 @@ public class Trader implements java.io.Serializable {
     private String appTraderCode; //Original trader id from integration app
     private String migCode;
     private Date updatedDate;
-    private AppUser updatedBy;
+    private String updatedBy;
     private Date createdDate;
-    private AppUser createdBy;
+    private String createdBy;
     private Integer macId;
     private String userCode;
     private Integer creditLimit;
     private Integer creditDays;
     private String contactPerson;
     private String type;
+    private String account;
+    private boolean cashDown;
+    private boolean multi;
+
 
     public Trader(String code, String traderName) {
         this.code = code;

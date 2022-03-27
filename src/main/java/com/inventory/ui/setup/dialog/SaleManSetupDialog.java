@@ -18,35 +18,50 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import com.inventory.common.Global;
-import com.inventory.common.ReturnObject;
-import com.inventory.common.StartWithRowFilter;
-import com.inventory.common.TableCellRender;
-import com.inventory.common.Util1;
+import com.common.Global;
+import com.common.StartWithRowFilter;
+import com.common.TableCellRender;
+import com.common.Util1;
 import com.inventory.model.SaleMan;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.SaleManTableModel;
 import java.awt.Color;
+import java.util.List;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
- * @author Mg Kyaw Thura Aung
+ * @author wai yan
  */
 @Component
 public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListener {
 
     private static final Logger log = LoggerFactory.getLogger(SaleManSetupDialog.class);
-    @Autowired
-    private WebClient webClient;
+    private InventoryRepo inventoryRepo;
     @Autowired
     private SaleManTableModel saleManTableModel;
     private int selectRow = - 1;
     private SaleMan saleMan = new SaleMan();
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
+    private List<SaleMan> listSaleMan;
+
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public List<SaleMan> getListSaleMan() {
+        return listSaleMan;
+    }
+
+    public void setListSaleMan(List<SaleMan> listSaleMan) {
+        this.listSaleMan = listSaleMan;
+    }
 
     public SaleManSetupDialog() {
         super(Global.parentForm, true);
@@ -123,10 +138,9 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
                 saleMan.setMacId(Global.macId);
                 saleMan.setCompCode(Global.compCode);
                 saleMan.setCreatedDate(Util1.getTodayDate());
-                saleMan.setCreatedBy(Global.loginUser);
+                saleMan.setCreatedBy(Global.loginUser.getUserCode());
             } else {
-                saleMan.setUpdatedBy(Global.loginUser);
-
+                saleMan.setUpdatedBy(Global.loginUser.getUserCode());
             }
         }
         return status;
@@ -134,47 +148,18 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
 
     private void save() {
         if (isValidEntry()) {
-            Mono<SaleMan> result = webClient.post()
-                    .uri("/setup/save-saleman")
-                    .body(Mono.just(saleMan), SaleMan.class)
-                    .retrieve()
-                    .bodyToMono(SaleMan.class);
-            result.subscribe((t) -> {
-                if (t != null) {
-                    JOptionPane.showMessageDialog(this, "Saved");
-                    if (lblStatus.getText().equals("EDIT")) {
-                        Global.listSaleMan.set(selectRow, t);
-                    } else {
-                        Global.listSaleMan.add(t);
-                    }
-                    clear();
-                }
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+            inventoryRepo.saveSaleMan(saleMan);
+            if (lblStatus.getText().equals("EDIT")) {
+                listSaleMan.set(selectRow, saleMan);
+            } else {
+                listSaleMan.add(saleMan);
+            }
+            clear();
         }
     }
 
     private void searchSaleMan() {
-        saleManTableModel.setListSaleMan(Global.listSaleMan);
-    }
-
-    private void delete() {
-        SaleMan b = saleManTableModel.getSaleMan(selectRow);
-        if (b != null) {
-            Global.listSaleMan.remove(selectRow);
-            String code = b.getSaleManCode();
-            Mono<ReturnObject> result = webClient.delete()
-                    .uri(builder -> builder.path("/setup/delete-saleman")
-                    .queryParam("code", code).build())
-                    .retrieve().bodyToMono(ReturnObject.class);
-            result.subscribe((t) -> {
-                JOptionPane.showMessageDialog(this, t.getMessage());
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
-            clear();
-        }
+        saleManTableModel.setListSaleMan(listSaleMan);
     }
 
     private void initKeyListener() {
@@ -265,6 +250,7 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
         txtAddress.setName("txtAddress"); // NOI18N
 
         chkActive.setFont(Global.lableFont);
+        chkActive.setSelected(true);
         chkActive.setText("Active");
         chkActive.setName("chkActive"); // NOI18N
 

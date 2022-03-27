@@ -7,8 +7,8 @@ package com.inventory.ui.common;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.inventory.common.ReturnObject;
-import com.inventory.common.Util1;
+import com.common.ReturnObject;
+import com.common.Util1;
 import com.inventory.model.Location;
 import com.inventory.model.PatternDetail;
 import com.inventory.model.Stock;
@@ -36,7 +36,7 @@ public class PatternDetailTableModel extends AbstractTableModel {
     public static final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     private final String[] columnNames = {"Stock Code", "Stock Name", "Location", "In Qty", "In Unit", "Out Qty", "Out Unit"};
     private List<PatternDetail> listPattern = new ArrayList<>();
-    private WebClient webClient;
+    private WebClient inventoryApi;
     private String patternCode;
     private JPanel panel;
     private JTable table;
@@ -66,11 +66,11 @@ public class PatternDetailTableModel extends AbstractTableModel {
     }
 
     public WebClient getWebClient() {
-        return webClient;
+        return inventoryApi;
     }
 
-    public void setWebClient(WebClient webClient) {
-        this.webClient = webClient;
+    public void setWebClient(WebClient inventoryApi) {
+        this.inventoryApi = inventoryApi;
     }
 
     @Override
@@ -195,7 +195,7 @@ public class PatternDetailTableModel extends AbstractTableModel {
 
     private void save(PatternDetail pd) {
         if (isValidEntry(pd)) {
-            Mono<ReturnObject> result = webClient.post()
+            Mono<ReturnObject> result = inventoryApi.post()
                     .uri("/setup/save-pattern-detail")
                     .body(Mono.just(pd), PatternDetail.class)
                     .retrieve()
@@ -204,7 +204,7 @@ public class PatternDetailTableModel extends AbstractTableModel {
             if (!Util1.isNull(ro.getErrorMessage())) {
                 JOptionPane.showMessageDialog(panel, ro.getErrorMessage());
             }
-            PatternDetail pattern = gson.fromJson(gson.toJson(ro.getObj()), PatternDetail.class);
+            PatternDetail pattern = gson.fromJson(gson.toJson(ro.getData()), PatternDetail.class);
             pd.setPtCode(pattern.getPtCode());
 
         }

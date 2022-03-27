@@ -5,7 +5,7 @@
  */
 package com.inventory.ui;
 
-import com.inventory.common.Global;
+import com.common.Global;
 
 
 /**

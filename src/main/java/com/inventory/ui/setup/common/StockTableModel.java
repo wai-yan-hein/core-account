@@ -59,18 +59,15 @@ public class StockTableModel extends AbstractTableModel {
         try {
             Stock med = listStock.get(row);
 
-            switch (column) {
-                case 0: //Code
-                    return med.getUserCode();
-                case 1: //Name
-                    return med.getStockName();
-                case 2: //Active
-                    return med.getIsActive();
-                case 3:
-                    return med.getBarcode();
-                default:
-                    return null;
-            }
+            return switch (column) {
+                case 0 -> med.getUserCode();
+                case 1 -> med.getStockName();
+                case 2 -> med.isActive();
+                case 3 -> med.getBarcode();
+                default -> null;
+            }; //Code
+            //Name
+            //Active
         } catch (Exception ex) {
             log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }

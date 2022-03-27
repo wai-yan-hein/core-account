@@ -5,17 +5,18 @@
  */
 package com.inventory.ui.entry;
 
-import com.inventory.common.Global;
+import com.common.Global;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.CurrencySetupDialog;
 import com.inventory.ui.setup.dialog.LocationSetupDialog;
 import com.inventory.ui.setup.dialog.RegionSetup;
+import com.inventory.ui.setup.dialog.RelationSetupDialog;
 import com.inventory.ui.setup.dialog.SaleManSetupDialog;
 import com.inventory.ui.setup.dialog.VouStatusSetupDialog;
 import java.awt.Image;
 import javax.swing.ImageIcon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
@@ -26,10 +27,10 @@ public class OtherSetup extends javax.swing.JPanel {
 
     private final Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
     @Autowired
-    private WebClient webClient;
+    private InventoryRepo inventoryRepo;
     private RegionSetup regionSetup;
-    @Autowired
     private LocationSetupDialog locationSetup;
+    private RelationSetupDialog relationSetupDialog;
     @Autowired
     private CurrencySetupDialog currencySetup;
     @Autowired
@@ -46,7 +47,8 @@ public class OtherSetup extends javax.swing.JPanel {
 
     private void regionSetup() {
         regionSetup = new RegionSetup(Global.parentForm);
-        regionSetup.setWebClient(webClient);
+        regionSetup.setInventoryRepo(inventoryRepo);
+        regionSetup.setListRegion(inventoryRepo.getRegion());
         regionSetup.initMain();
         regionSetup.setSize(Global.width / 2, Global.height / 2);
         regionSetup.setLocationRelativeTo(null);
@@ -54,6 +56,8 @@ public class OtherSetup extends javax.swing.JPanel {
     }
 
     private void locationSetup() {
+        locationSetup = new LocationSetupDialog();
+        locationSetup.setInventoryRepo(inventoryRepo);
         locationSetup.setIconImage(icon);
         locationSetup.initMain();
         locationSetup.setSize(Global.width / 2, Global.height / 2);
@@ -71,6 +75,8 @@ public class OtherSetup extends javax.swing.JPanel {
 
     private void saleManSetup() {
         smDialog.setIconImage(icon);
+        smDialog.setInventoryRepo(inventoryRepo);
+        smDialog.setListSaleMan(inventoryRepo.getSaleMan());
         smDialog.initMain();
         smDialog.setSize(Global.width / 2, Global.height / 2);
         smDialog.setLocationRelativeTo(null);
@@ -79,10 +85,22 @@ public class OtherSetup extends javax.swing.JPanel {
 
     private void vouStatusSetup() {
         vsDialog.setIconImage(icon);
+        vsDialog.setListVou(inventoryRepo.getVoucherStatus());
         vsDialog.initMain();
         vsDialog.setSize(Global.width / 2, Global.height / 2);
         vsDialog.setLocationRelativeTo(null);
         vsDialog.setVisible(true);
+    }
+
+    private void relationSetup() {
+        relationSetupDialog = new RelationSetupDialog();
+        relationSetupDialog.setIconImage(icon);
+        relationSetupDialog.setInventoryRepo(inventoryRepo);
+        relationSetupDialog.setListUnitRelation(inventoryRepo.getUnitRelation());
+        relationSetupDialog.initMain();
+        relationSetupDialog.setSize(Global.width / 2, Global.height / 2);
+        relationSetupDialog.setLocationRelativeTo(null);
+        relationSetupDialog.setVisible(true);
     }
 
     /**
@@ -99,6 +117,7 @@ public class OtherSetup extends javax.swing.JPanel {
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
+        jButton6 = new javax.swing.JButton();
 
         btnRegion.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
         btnRegion.setText("Region");
@@ -140,6 +159,14 @@ public class OtherSetup extends javax.swing.JPanel {
             }
         });
 
+        jButton6.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        jButton6.setText("Relation");
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -155,10 +182,12 @@ public class OtherSetup extends javax.swing.JPanel {
                 .addComponent(jButton4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButton6)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnLocation, btnRegion, jButton3, jButton4, jButton5});
+        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnLocation, btnRegion, jButton3, jButton4, jButton5, jButton6});
 
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -169,7 +198,8 @@ public class OtherSetup extends javax.swing.JPanel {
                     .addComponent(btnLocation, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(221, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -199,6 +229,11 @@ public class OtherSetup extends javax.swing.JPanel {
         vouStatusSetup();
     }//GEN-LAST:event_jButton5ActionPerformed
 
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        // TODO add your handling code here:
+        relationSetup();
+    }//GEN-LAST:event_jButton6ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnLocation;
@@ -206,5 +241,6 @@ public class OtherSetup extends javax.swing.JPanel {
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
+    private javax.swing.JButton jButton6;
     // End of variables declaration//GEN-END:variables
 }

@@ -13,6 +13,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.command.ActiveMQTopic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.jms.annotation.EnableJms;
@@ -28,6 +29,7 @@ import org.springframework.jms.listener.MessageListenerContainer;
 @Slf4j
 @AllArgsConstructor
 @Configuration
+@Conditional(ActiveMqCondition.class)
 @EnableJms
 public class ActiveMQConfig {
 
@@ -38,6 +40,7 @@ public class ActiveMQConfig {
 
     @Bean
     public ActiveMQConnectionFactory connectionFactory() {
+        log.info("active mq used.");
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory();
         connectionFactory.setBrokerURL(environment.getRequiredProperty("activemq.url"));
         connectionFactory.setTrustedPackages(List.of("com.inventory"));

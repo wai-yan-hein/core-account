@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.common;
 
-import com.inventory.model.VUsrCompAssign;
+import com.user.model.VRoleCompany;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -19,10 +19,10 @@ import org.slf4j.LoggerFactory;
 public class CompanyNameTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(CompanyNameTableModel.class);
-    private List<VUsrCompAssign> listCompany = new ArrayList<>();
+    private List<VRoleCompany> listCompany = new ArrayList<>();
     private final String[] columnNames = {"Company Name"};
 
-    public CompanyNameTableModel(List<VUsrCompAssign> listCompany) {
+    public CompanyNameTableModel(List<VRoleCompany> listCompany) {
         this.listCompany = listCompany;
         fireTableDataChanged();
     }
@@ -53,7 +53,7 @@ public class CompanyNameTableModel extends AbstractTableModel {
         }
 
         try {
-            VUsrCompAssign auto = listCompany.get(row);
+            VRoleCompany auto = listCompany.get(row);
 
             switch (column) {
                 case 0: //Code
@@ -86,7 +86,7 @@ public class CompanyNameTableModel extends AbstractTableModel {
         return columnNames.length;
     }
 
-    public VUsrCompAssign getCompany(int row) {
+    public VRoleCompany getCompany(int row) {
         if (listCompany == null) {
             return null;
         } else if (listCompany.isEmpty()) {

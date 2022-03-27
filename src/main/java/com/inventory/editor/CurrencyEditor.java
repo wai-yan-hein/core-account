@@ -5,21 +5,20 @@
  */
 package com.inventory.editor;
 
-import com.inventory.common.Global;
-import com.inventory.model.Currency;
+import com.common.Global;
+import com.user.model.Currency;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
+import java.util.List;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.TableCellEditor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -29,6 +28,7 @@ public class CurrencyEditor extends AbstractCellEditor implements TableCellEdito
 
     private JComponent component = null;
     private CurrencyAutoCompleter completer;
+    private List<Currency> listCurrency;
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusLost(FocusEvent e) {
@@ -42,8 +42,8 @@ public class CurrencyEditor extends AbstractCellEditor implements TableCellEdito
 
     };
 
-    //private List<Medicine> listTrader = new ArrayList();
-    public CurrencyEditor() {
+    public CurrencyEditor(List<Currency> listCurrency) {
+        this.listCurrency = listCurrency;
     }
 
     @Override
@@ -83,7 +83,7 @@ public class CurrencyEditor extends AbstractCellEditor implements TableCellEdito
         if (value != null) {
             jtf.setText(value.toString());
         }
-        completer = new CurrencyAutoCompleter(jtf, Global.listCurrency, this, false);
+        completer = new CurrencyAutoCompleter(jtf, listCurrency, this, false);
 
         return component;
     }

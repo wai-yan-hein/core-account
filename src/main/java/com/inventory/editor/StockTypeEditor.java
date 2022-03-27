@@ -5,7 +5,7 @@
  */
 package com.inventory.editor;
 
-import com.inventory.common.Global;
+import com.common.Global;
 import com.inventory.model.StockType;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -13,13 +13,12 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
+import java.util.List;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.TableCellEditor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -27,9 +26,9 @@ import org.slf4j.LoggerFactory;
  */
 public class StockTypeEditor extends AbstractCellEditor implements TableCellEditor {
 
-    private static final Logger log = LoggerFactory.getLogger(StockTypeEditor.class);
     private JComponent component = null;
     private StockTypeAutoCompleter completer;
+    private List<StockType> listStockType;
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusLost(FocusEvent e) {
@@ -42,10 +41,9 @@ public class StockTypeEditor extends AbstractCellEditor implements TableCellEdit
         }
 
     };
-    //private List<Medicine> listCOA = new ArrayList();
 
-    public StockTypeEditor() {
-
+    public StockTypeEditor(List<StockType> listStockType) {
+        this.listStockType = listStockType;
     }
 
     @Override
@@ -84,7 +82,7 @@ public class StockTypeEditor extends AbstractCellEditor implements TableCellEdit
         if (value != null) {
             jtf.setText(value.toString());
         }
-        completer = new StockTypeAutoCompleter(jtf, Global.listStockType, this, false, false);
+        completer = new StockTypeAutoCompleter(jtf, listStockType, this, false, false);
         return component;
     }
 

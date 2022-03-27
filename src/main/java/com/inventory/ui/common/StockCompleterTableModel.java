@@ -54,7 +54,7 @@ public class StockCompleterTableModel extends AbstractTableModel {
                 case 1 ->
                     med.getStockName();
                 case 2 ->
-                    med.getStockType().getStockTypeName();
+                    med.getStockType() == null ? null : med.getStockType().getStockTypeName();
                 case 3 ->
                     med.getCategory() == null ? null : med.getCategory().getCatName();
                 case 4 ->

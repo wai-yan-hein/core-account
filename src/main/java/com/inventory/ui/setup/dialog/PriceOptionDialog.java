@@ -5,13 +5,13 @@
  */
 package com.inventory.ui.setup.dialog;
 
-import com.inventory.common.Global;
-import com.inventory.common.TableCellRender;
+import com.common.Global;
+import com.common.TableCellRender;
+import com.inventory.model.PriceOption;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.PriceTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
@@ -26,14 +26,23 @@ import lombok.extern.slf4j.Slf4j;
 public class PriceOptionDialog extends javax.swing.JDialog {
 
     private final PriceTableModel tableModel = new PriceTableModel();
-    private String priceType;
+    private PriceOption option;
+    private InventoryRepo inventoryRepo;
 
-    public String getPriceType() {
-        return priceType;
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
     }
 
-    public void setPriceType(String priceType) {
-        this.priceType = priceType;
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public PriceOption getOption() {
+        return option;
+    }
+
+    public void setOption(PriceOption option) {
+        this.option = option;
     }
 
     /**
@@ -46,13 +55,6 @@ public class PriceOptionDialog extends javax.swing.JDialog {
     }
 
     private void initTable() {
-        List<String> priceList = new ArrayList<>();
-        priceList.add("A");
-        priceList.add("B");
-        priceList.add("C");
-        priceList.add("D");
-        priceList.add("E");
-        tableModel.setListPrice(priceList);
         tblPrice.setModel(tableModel);
         tblPrice.getTableHeader().setFont(Global.tblHeaderFont);
         tblPrice.setRowHeight(Global.tblRowHeight);
@@ -62,10 +64,16 @@ public class PriceOptionDialog extends javax.swing.JDialog {
         tblPrice.setShowHorizontalLines(true);
         tblPrice.setShowVerticalLines(true);
         tblPrice.setRequestFocusEnabled(false);
-        tblPrice.setRowSelectionInterval(0, 0);
+        tblPrice.getColumnModel().getColumn(0).setPreferredWidth(10);
+        tblPrice.getColumnModel().getColumn(1).setPreferredWidth(30);
         tblPrice.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "Enter-Action");
         tblPrice.getActionMap().put("Enter-Action", actionEnter);
         tblPrice.setDefaultRenderer(Object.class, new TableCellRender());
+    }
+
+    public void initData() {
+        tableModel.setListPrice(inventoryRepo.getPriceOption());
+        tblPrice.setRowSelectionInterval(0, 0);
     }
     private final Action actionEnter = new AbstractAction() {
         @Override
@@ -77,7 +85,7 @@ public class PriceOptionDialog extends javax.swing.JDialog {
     private void select() {
         int row = tblPrice.getSelectedRow();
         if (row >= 0) {
-            priceType = tableModel.getPriceType(row);
+            option = tableModel.getPriceOption(row);
             dispose();
         }
     }
@@ -124,11 +132,13 @@ public class PriceOptionDialog extends javax.swing.JDialog {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 154, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE)
         );
 
         pack();

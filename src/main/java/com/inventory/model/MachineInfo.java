@@ -14,9 +14,9 @@ import lombok.Data;
 @Data
 public class MachineInfo implements java.io.Serializable {
 
-    private Integer machineId;
+    private Integer macId;
     private String machineName;
-    private String ipAddress;
-    private Date regDate;
+    private String machineIp;
     private Date updatedDate;
+    private boolean proUpdate;
 }

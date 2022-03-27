@@ -6,21 +6,19 @@
 package com.inventory.ui.setup.dialog.common;
 
 import com.inventory.editor.UnitAutoCompleter;
-import com.inventory.common.Global;
+import com.common.Global;
 import com.inventory.model.StockUnit;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
+import java.util.List;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.TableCellEditor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -28,10 +26,9 @@ import org.slf4j.LoggerFactory;
  */
 public class StockUnitEditor extends AbstractCellEditor implements TableCellEditor {
 
-    private static final Logger log = LoggerFactory.getLogger(StockUnitEditor.class);
     private JComponent component = null;
     private UnitAutoCompleter completer;
-    private Object oldValue;
+    private final List<StockUnit> listUnit;
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusLost(FocusEvent e) {
@@ -39,16 +36,19 @@ public class StockUnitEditor extends AbstractCellEditor implements TableCellEdit
 
         @Override
         public void focusGained(FocusEvent e) {
-            JTextField jtf = (JTextField) e.getSource();
-            String lastString = jtf.getText().substring(jtf.getText().length() - 1);
-            jtf.setText("");
-            jtf.setText(lastString);
+            try {
+                JTextField jtf = (JTextField) e.getSource();
+                String lastString = jtf.getText().substring(jtf.getText().length() - 1);
+                jtf.setText("");
+                jtf.setText(lastString);
+            } catch (Exception ex) {
+            }
         }
 
     };
 
-    //private List<Medicine> listDepartment = new ArrayList();
-    public StockUnitEditor() {
+    public StockUnitEditor(List<StockUnit> listUnit) {
+        this.listUnit = listUnit;
     }
 
     @Override
@@ -61,7 +61,7 @@ public class StockUnitEditor extends AbstractCellEditor implements TableCellEdit
         if (value != null) {
             jtf.setText(value.toString());
         }
-        completer = new UnitAutoCompleter(jtf, Global.listStockUnit, this);
+        completer = new UnitAutoCompleter(jtf, listUnit, this);
         return component;
     }
 
@@ -69,7 +69,6 @@ public class StockUnitEditor extends AbstractCellEditor implements TableCellEdit
     public Object getCellEditorValue() {
         Object obj;
         StockUnit stock = completer.getStockUnit();
-
         if (stock != null) {
             obj = stock;
         } else {
@@ -88,9 +87,7 @@ public class StockUnitEditor extends AbstractCellEditor implements TableCellEdit
     public boolean isCellEditable(EventObject anEvent) {
         if (anEvent instanceof MouseEvent) {
             return false;
-        } else if (anEvent instanceof KeyEvent) {
-            KeyEvent ke = (KeyEvent) anEvent;
-
+        } else if (anEvent instanceof KeyEvent ke) {
             //Function key
             return !ke.isActionKey();
         } else {

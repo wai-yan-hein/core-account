@@ -5,9 +5,9 @@
  */
 package com.inventory.editor;
 
-import com.inventory.common.Global;
-import com.inventory.common.SelectionObserver;
-import com.inventory.common.TableCellRender;
+import com.common.Global;
+import com.common.SelectionObserver;
+import com.common.TableCellRender;
 import com.inventory.model.Category;
 import com.inventory.model.OptionModel;
 import com.inventory.ui.setup.dialog.OptionDialog;
@@ -58,6 +58,8 @@ public final class CategoryAutoCompleter implements KeyListener {
     private List<String> listOption = new ArrayList<>();
     private OptionDialog optionDialog;
     private SelectionObserver observer;
+    private List<Category> listCategory;
+    private boolean custom;
 
     public SelectionObserver getObserver() {
         return observer;
@@ -68,7 +70,8 @@ public final class CategoryAutoCompleter implements KeyListener {
     }
 
     private void initOption() {
-        Global.listCategory.forEach(t -> {
+        listOption.clear();
+        listCategory.forEach(t -> {
             listOption.add(t.getCatCode());
         });
     }
@@ -88,6 +91,8 @@ public final class CategoryAutoCompleter implements KeyListener {
             AbstractCellEditor editor, boolean filter, boolean custom) {
         this.textComp = comp;
         this.editor = editor;
+        this.listCategory = list;
+        this.custom = custom;
         initOption();
         if (filter) {
             Category c = new Category("-", "All");
@@ -187,28 +192,31 @@ public final class CategoryAutoCompleter implements KeyListener {
             type = categoryTableModel.getCategory(table.convertRowIndexToModel(
                     table.getSelectedRow()));
             textComp.setText(type.getCatName());
-            switch (type.getCatCode()) {
-                case "C" -> {
-                    optionDialog = new OptionDialog(Global.parentForm, "Stock Category");
-                    List<OptionModel> listOP = new ArrayList<>();
-                    Global.listCategory.forEach(t -> {
-                        listOP.add(new OptionModel(t.getCatCode(), t.getCatName()));
-                    });
-                    optionDialog.setOptionList(listOP);
-                    optionDialog.setLocationRelativeTo(null);
-                    optionDialog.setVisible(true);
-                    if (optionDialog.isSelect()) {
-                        listOption = optionDialog.getOptionList();
+            if (custom) {
+                switch (type.getCatCode()) {
+                    case "C" -> {
+                        optionDialog = new OptionDialog(Global.parentForm, "Stock Category");
+                        List<OptionModel> listOP = new ArrayList<>();
+                        listCategory.forEach(t -> {
+                            listOP.add(new OptionModel(t.getCatCode(), t.getCatName()));
+                        });
+                        optionDialog.setOptionList(listOP);
+                        optionDialog.setLocationRelativeTo(null);
+                        optionDialog.setVisible(true);
+                        if (optionDialog.isSelect()) {
+                            listOption = optionDialog.getOptionList();
+                        }
+                        //open
                     }
-                    //open
-                }
-                case "-" ->
-                    initOption();
-                default -> {
-                    if (observer != null) {
-                        observer.selected("SC", type.getCatCode());
+                    case "-" ->
+                        initOption();
+                    default -> {
+                        if (observer != null) {
+                            observer.selected("SC", type.getCatCode());
+                        }
+                        listOption.clear();
+                        listOption.add(type.getCatCode());
                     }
-                    listOption.add(type.getCatCode());
                 }
             }
         }
@@ -360,46 +368,33 @@ public final class CategoryAutoCompleter implements KeyListener {
         if (filter.length() == 0) {
             sorter.setRowFilter(null);
         } else {
-            //String value = Util1.getPropValue("system.iac.filter");
-
-            if ("N".equals("Y")) {
-                sorter.setRowFilter(RowFilter.regexFilter(filter));
-            } else {
-                sorter.setRowFilter(startsWithFilter);
-            }
+            sorter.setRowFilter(startsWithFilter);
             try {
-                if (e.getKeyCode() != KeyEvent.VK_DOWN && e.getKeyCode() != KeyEvent.VK_UP) {
-                    if (table.getSelectedRow() >= 0) {
+                if (!containKey(e)) {
+                    if (table.getRowCount() >= 0) {
                         table.setRowSelectionInterval(0, 0);
                     }
                 }
             } catch (Exception ex) {
             }
+
         }
     }
     private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
         @Override
         public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
-            //for (int i = entry.getValueCount() - 1; i >= 0; i--) {
-            /*
-             * if (NumberUtil.isNumber(textComp.getText())) { if
-             * (entry.getStringValue(0).toUpperCase().startsWith(
-             * textComp.getText().toUpperCase())) { return true; } } else {
-             *
-             * if (entry.getStringValue(1).toUpperCase().contains(
-             * textComp.getText().toUpperCase())) { return true; } else if
-             * (entry.getStringValue(2).toUpperCase().contains(
-             * textComp.getText().toUpperCase())) { return true; }
-             }
-             */
-
-            String tmp1 = entry.getStringValue(0).toUpperCase();
-            String tmp2 = entry.getStringValue(1).toUpperCase();
-            String tmp3 = entry.getStringValue(3).toUpperCase();
-            String tmp4 = entry.getStringValue(4).toUpperCase();
-            String text = textComp.getText().toUpperCase();
-
-            return tmp1.startsWith(text) || tmp2.startsWith(text) || tmp3.startsWith(text) || tmp4.startsWith(text);
+            String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
+            String tmp2 = entry.getStringValue(1).toUpperCase().replace(" ", "");
+            String tmp3 = entry.getStringValue(3).toUpperCase().replace(" ", "");
+            String tmp4 = entry.getStringValue(4).toUpperCase().replace(" ", "");
+            String tmp5 = entry.getStringValue(4).toUpperCase().replace(" ", "");
+            String text = textComp.getText().toUpperCase().replace(" ", "");
+            return tmp1.startsWith(text) || tmp2.startsWith(text)
+                    || tmp3.startsWith(text) || tmp4.startsWith(text) || tmp5.startsWith(text);
         }
     };
+
+    private boolean containKey(KeyEvent e) {
+        return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;
+    }
 }

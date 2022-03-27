@@ -6,7 +6,7 @@
 package com.inventory.model;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.util.List;
 import lombok.Data;
 
 /**
@@ -16,8 +16,15 @@ import lombok.Data;
 @Data
 public class UnitRelation implements Serializable {
 
-    private RelationKey unitKey;
-    private Float factor;
-    private Date updatedDate;
+    private String relCode;
+    private String relName;
+    private List<UnitRelationDetail> detailList;
 
+    public UnitRelation(String relCode, String relName) {
+        this.relCode = relCode;
+        this.relName = relName;
+    }
+
+    public UnitRelation() {
+    }
 }

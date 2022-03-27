@@ -5,25 +5,24 @@
  */
 package com.inventory.ui.entry.dialog.common;
 
-import com.inventory.common.Util1;
-import com.inventory.model.SaleHis;
+import com.common.Global;
+import com.inventory.model.VSale;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /**
  *
- * @author Mg Kyaw Thura Aung
+ * @author wai yan
  */
-@Component
 @Slf4j
 public class SaleVouSearchTableModel extends AbstractTableModel {
 
-    private List<SaleHis> listSaleHis = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Customer", "Created By", "V-Total"};
+    private List<VSale> listSaleHis = new ArrayList();
+    private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Created By", "Paid Amt", "V-Total"};
+
     private JTable parent;
 
     public JTable getParent() {
@@ -59,38 +58,51 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        return column == 4 ? Float.class : String.class;
+        switch (column) {
+            case 6,5 -> {
+                return Float.class;
+            }
+        }
+        return String.class;
     }
 
     @Override
     public Object getValueAt(int row, int column) {
         try {
-            SaleHis his = listSaleHis.get(row);
-
-            switch (column) {
-                case 0 -> {
-                    //date
-                    return Util1.toDateStr(his.getVouDate(), "dd/MM/yyyy");
-                }
-                case 1 -> {
-                    //vou-no
-                    if (Util1.getBoolean(his.getDeleted())) {
-                        return his.getVouNo() + "***";
-                    } else {
-                        return his.getVouNo();
+            if (!listSaleHis.isEmpty()) {
+                VSale his = listSaleHis.get(row);
+                switch (column) {
+                    case 0 -> {
+                        //date
+                        return his.getVouDate();
                     }
-                }
-                case 2 -> {
-                    //customer
-                    return his.getTrader() == null ? null : his.getTrader().getTraderName();
-                }
-                case 3 -> {
-                    //user
-                    return his.getCreatedBy().getUserShort();
-                }
-                case 4 -> {
-                    //v-total
-                    return his.getVouTotal();
+                    case 1 -> {
+                        //vou-no
+                        if (his.isDeleted()) {
+                            return his.getVouNo() + "***";
+                        } else {
+                            return his.getVouNo();
+                        }
+                    }
+                    case 2 -> {
+                        //customer
+                        return his.getTraderName();
+                    }
+                    case 3 -> {
+                        //user
+                        return his.getRemark();
+                    }
+                    case 4 -> {
+                        //user
+                        return Global.hmUser.get(his.getCreatedBy());
+                    }
+                    case 5 -> {
+                        //paid
+                        return his.getPaid();
+                    }
+                    case 6 -> {
+                        return his.getVouTotal();
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -99,16 +111,16 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
         return null;
     }
 
-    public List<SaleHis> getListSaleHis() {
+    public List<VSale> getListSaleHis() {
         return listSaleHis;
     }
 
-    public void setListSaleHis(List<SaleHis> listSaleHis) {
+    public void setListSaleHis(List<VSale> listSaleHis) {
         this.listSaleHis = listSaleHis;
         fireTableDataChanged();
     }
 
-    public SaleHis getSelectVou(int row) {
+    public VSale getSelectVou(int row) {
         if (listSaleHis != null) {
             if (!listSaleHis.isEmpty()) {
                 return listSaleHis.get(row);

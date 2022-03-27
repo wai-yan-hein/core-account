@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.setup.dialog;
 
-import com.inventory.common.Global;
+import com.common.Global;
 import com.inventory.model.OptionModel;
 import com.inventory.ui.entry.dialog.common.OptionTableModel;
 import java.awt.event.KeyEvent;

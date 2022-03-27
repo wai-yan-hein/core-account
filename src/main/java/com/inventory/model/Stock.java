@@ -16,13 +16,13 @@ import lombok.Data;
 public class Stock implements java.io.Serializable {
 
     private String stockCode;
-    private Boolean isActive;
+    private boolean active;
     private StockBrand brand;
     private String stockName;
     private Category category;
     private StockType stockType;
-    private AppUser createdBy;
-    private AppUser updatedBy;
+    private String createdBy;
+    private String updatedBy;
     private String barcode;
     private String shortName;
     private Float purWeight;
@@ -43,6 +43,7 @@ public class Stock implements java.io.Serializable {
     private String migCode;
     private String compCode;
     private String userCode;
+    private UnitRelation unitRelation;
     private Integer macId;
 
     public Stock() {

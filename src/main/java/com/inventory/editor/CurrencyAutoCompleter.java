@@ -5,10 +5,10 @@
  */
 package com.inventory.editor;
 
-import com.inventory.common.Global;
-import com.inventory.common.SelectionObserver;
-import com.inventory.common.TableCellRender;
-import com.inventory.model.Currency;
+import com.common.Global;
+import com.common.SelectionObserver;
+import com.common.TableCellRender;
+import com.user.model.Currency;
 import com.inventory.ui.common.CurrencyCompleterTabelModel;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -54,6 +54,7 @@ public class CurrencyAutoCompleter implements KeyListener, SelectionObserver {
     private int x = 0;
     private int y = 0;
     private SelectionObserver selectionObserver;
+    private List<Currency> listCurrency;
 
     public void setSelectionObserver(SelectionObserver selectionObserver) {
         this.selectionObserver = selectionObserver;
@@ -67,6 +68,7 @@ public class CurrencyAutoCompleter implements KeyListener, SelectionObserver {
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
+        this.listCurrency = list;
         if (filter) {
             Currency cur = new Currency("-", "All");
             list = new ArrayList<>(list);
@@ -82,7 +84,7 @@ public class CurrencyAutoCompleter implements KeyListener, SelectionObserver {
         table.setRowHeight(Global.tblRowHeight);
         table.setDefaultRenderer(Object.class, new TableCellRender());
         table.getTableHeader().setFont(Global.tblHeaderFont);
-               table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
+        table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
@@ -148,7 +150,7 @@ public class CurrencyAutoCompleter implements KeyListener, SelectionObserver {
 
         table.setRequestFocusEnabled(false);
 
-        if (list.size() > 0) {
+        if (!list.isEmpty()) {
             table.setRowSelectionInterval(0, 0);
         }
     }
@@ -312,50 +314,38 @@ public class CurrencyAutoCompleter implements KeyListener, SelectionObserver {
     @Override
     public void keyReleased(KeyEvent e) {
         String filter = textComp.getText();
-
         if (filter.length() == 0) {
             sorter.setRowFilter(null);
         } else {
-            //String value = Util1.getPropValue("system.iac.filter");
-
-            if ("N".equals("Y")) {
-                sorter.setRowFilter(RowFilter.regexFilter(filter));
-            } else {
-                sorter.setRowFilter(startsWithFilter);
-            }
+            sorter.setRowFilter(startsWithFilter);
             try {
-                if (e.getKeyCode() != KeyEvent.VK_DOWN && e.getKeyCode() != KeyEvent.VK_UP) {
-                    table.setRowSelectionInterval(0, 0);
+                if (!containKey(e)) {
+                    if (table.getRowCount() >= 0) {
+                        table.setRowSelectionInterval(0, 0);
+                    }
                 }
             } catch (Exception ex) {
             }
+
         }
     }
     private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
         @Override
         public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
-            //for (int i = entry.getValueCount() - 1; i >= 0; i--) {
-            /*
-             * if (NumberUtil.isNumber(textComp.getText())) { if
-             * (entry.getStringValue(0).toUpperCase().startsWith(
-             * textComp.getText().toUpperCase())) { return true; } } else {
-             *
-             * if (entry.getStringValue(1).toUpperCase().contains(
-             * textComp.getText().toUpperCase())) { return true; } else if
-             * (entry.getStringValue(2).toUpperCase().contains(
-             * textComp.getText().toUpperCase())) { return true; }
-             }
-             */
-
-            String tmp1 = entry.getStringValue(0).toUpperCase();
-            String tmp2 = entry.getStringValue(1).toUpperCase();
-            String tmp3 = entry.getStringValue(3).toUpperCase();
-            String tmp4 = entry.getStringValue(4).toUpperCase();
-            String text = textComp.getText().toUpperCase();
-
-            return tmp1.startsWith(text) || tmp2.startsWith(text) || tmp3.startsWith(text) || tmp4.startsWith(text);
+            String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
+            String tmp2 = entry.getStringValue(1).toUpperCase().replace(" ", "");
+            String tmp3 = entry.getStringValue(3).toUpperCase().replace(" ", "");
+            String tmp4 = entry.getStringValue(4).toUpperCase().replace(" ", "");
+            String tmp5 = entry.getStringValue(4).toUpperCase().replace(" ", "");
+            String text = textComp.getText().toUpperCase().replace(" ", "");
+            return tmp1.startsWith(text) || tmp2.startsWith(text)
+                    || tmp3.startsWith(text) || tmp4.startsWith(text) || tmp5.startsWith(text);
         }
     };
+
+    private boolean containKey(KeyEvent e) {
+        return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;
+    }
 
     @Override
     public void selected(Object source, Object selectObj) {

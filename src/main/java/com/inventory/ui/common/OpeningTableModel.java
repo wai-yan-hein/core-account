@@ -5,9 +5,9 @@
  */
 package com.inventory.ui.common;
 
-import com.inventory.common.Global;
-import com.inventory.common.SelectionObserver;
-import com.inventory.common.Util1;
+import com.common.Global;
+import com.common.SelectionObserver;
+import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.model.OPHisDetail;
 import com.inventory.model.Stock;
@@ -32,7 +32,7 @@ public class OpeningTableModel extends AbstractTableModel {
         "Qty", "Std-Wt", "Unit", "Price", "Amount"};
     private JTable parent;
     private List<OPHisDetail> listDetail = new ArrayList();
-    private SelectionObserver selectionObserver;
+    private SelectionObserver observer;
     private final List<String> deleteList = new ArrayList();
     private LocationAutoCompleter locationAutoCompleter;
 
@@ -52,12 +52,12 @@ public class OpeningTableModel extends AbstractTableModel {
         this.locationAutoCompleter = locationAutoCompleter;
     }
 
-    public SelectionObserver getSelectionObserver() {
-        return selectionObserver;
+    public SelectionObserver getObserver() {
+        return observer;
     }
 
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
     }
 
     @Override
@@ -156,6 +156,7 @@ public class OpeningTableModel extends AbstractTableModel {
                             record.setStock(stock);
                             record.setQty(1.0f);
                             record.setStdWt(Util1.gerFloatOne(stock.getPurWeight()));
+                            record.setStockUnit(stock.getPurUnit());
                             addNewRow();
                         }
                     }
@@ -175,7 +176,7 @@ public class OpeningTableModel extends AbstractTableModel {
                         parent.setColumnSelectionInterval(column, column);
                     }
                     parent.setRowSelectionInterval(row, row);
-                    parent.setColumnSelectionInterval(3, 3);
+                    parent.setColumnSelectionInterval(4, 4);
                 }
                 case 3 -> {
                     //Std-Wt
@@ -209,6 +210,7 @@ public class OpeningTableModel extends AbstractTableModel {
                             record.setPrice(Util1.getFloat(value));
                             parent.setColumnSelectionInterval(0, 0);
                             parent.setRowSelectionInterval(row + 1, row + 1);
+                            calculateAmount(record);
                         } else {
                             showMessageBox("Input value must be positive");
                             parent.setColumnSelectionInterval(column, column);
@@ -225,6 +227,7 @@ public class OpeningTableModel extends AbstractTableModel {
                             record.setAmount(Util1.getFloat(value));
                             parent.setColumnSelectionInterval(0, 0);
                             parent.setRowSelectionInterval(row + 1, row + 1);
+                            calculatePrice(record);
                         } else {
                             showMessageBox("Input value must be number.");
                         }
@@ -233,7 +236,7 @@ public class OpeningTableModel extends AbstractTableModel {
             }
             calculateAmount(record);
             fireTableRowsUpdated(row, row);
-            //selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
+            observer.selected("CAL-TOTAL", "CAL-TOTAL");
             parent.requestFocusInWindow();
             //   fireTableCellUpdated(row, 8);
         } catch (Exception ex) {
@@ -244,16 +247,13 @@ public class OpeningTableModel extends AbstractTableModel {
     public boolean isValidEntry() {
         boolean status = true;
         for (OPHisDetail op : listDetail) {
+            op.setAmount(Util1.getFloat(op.getAmount()));
+            op.setPrice(Util1.getFloat(op.getPrice()));
+            op.setQty(Util1.getFloat(op.getQty()));
             if (op.getStock() != null) {
-                if (Util1.getFloat(op.getQty()) <= 0) {
-                    status = false;
-                    JOptionPane.showMessageDialog(parent, "Invalid Qty");
-                } else if (op.getStockUnit() == null) {
+                if (op.getStockUnit() == null) {
                     status = false;
                     JOptionPane.showMessageDialog(parent, "Invalid Unit.");
-                } else if (Util1.getFloat(op.getAmount()) <= 0) {
-                    status = false;
-                    JOptionPane.showMessageDialog(parent, "Invalid Amount");
                 }
             }
         }
@@ -290,20 +290,22 @@ public class OpeningTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
+    private void calculatePrice(OPHisDetail pd) {
+        if (pd.getStock() != null) {
+            float qty = Util1.getFloat(pd.getQty());
+            float purAmt = Util1.getFloat(pd.getAmount());
+            float price = purAmt / qty;
+            pd.setPrice(price);
+        }
+    }
+
     private void calculateAmount(OPHisDetail pur) {
         float price = Util1.getFloat(pur.getPrice());
         float qty = Util1.getFloat(pur.getQty());
-        float purAmt = Util1.getFloat(pur.getAmount());
         if (pur.getStock() != null) {
-            if (purAmt > 0) {
-                price = purAmt / qty;
-                pur.setPrice(price);
-                pur.setAmount(purAmt);
-            } else {
-                float amount = qty * price;
-                pur.setPrice(price);
-                pur.setAmount(amount);
-            }
+            float amount = qty * price;
+            pur.setPrice(price);
+            pur.setAmount(amount);
         }
     }
 
@@ -334,6 +336,7 @@ public class OpeningTableModel extends AbstractTableModel {
         } else {
             parent.setRowSelectionInterval(0, 0);
         }
+        parent.requestFocus();
     }
 
     public void addSale(OPHisDetail sd) {

@@ -5,55 +5,59 @@
  */
 package com.inventory.ui.entry.dialog;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-import com.inventory.common.FilterObject;
-import com.inventory.common.Global;
-import com.inventory.common.ReturnObject;
-import com.inventory.common.SelectionObserver;
-import com.inventory.common.TableCellRender;
-import com.inventory.common.Util1;
+import com.common.FilterObject;
+import com.common.Global;
+import com.common.SelectionObserver;
+import com.common.TableCellRender;
+import com.user.common.UserRepo;
+import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
 import com.inventory.model.AppUser;
 import com.inventory.model.OPHis;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.OPVouSearchTableModel;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.text.DateFormat;
-import java.util.ArrayList;
+import java.time.Duration;
 import java.util.List;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.table.TableModel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
  *
- * @author Mg Kyaw Thura Aung
+ * @author wai yan
  */
 @Slf4j
 public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
-
-    private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
 
     /**
      * Creates new form SaleVouSearchDialog
      */
     private final OPVouSearchTableModel tableModel = new OPVouSearchTableModel();
-    private WebClient webClient;
+    private WebClient inventoryApi;
+    private InventoryRepo inventoryRepo;
+    private UserRepo userRepo;
     private AppUserAutoCompleter appUserAutoCompleter;
     private SelectionObserver observer;
 
-    public WebClient getWebClient() {
-        return webClient;
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
     }
 
-    public void setWebClient(WebClient webClient) {
-        this.webClient = webClient;
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public WebClient getWebClient() {
+        return inventoryApi;
+    }
+
+    public void setWebClient(WebClient inventoryApi) {
+        this.inventoryApi = inventoryApi;
     }
 
     public SelectionObserver getObserver() {
@@ -64,10 +68,19 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
         this.observer = observer;
     }
 
-    public OPSearchDialog() {
-        super(Global.parentForm, true);
+    public UserRepo getUserRepo() {
+        return userRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+
+    public OPSearchDialog(JFrame frame) {
+        super(frame, true);
         initComponents();
         initKeyListener();
+        txtTotalAmt.setFormatterFactory(Util1.getDecimalFormat());
         progess.setIndeterminate(false);
     }
 
@@ -75,11 +88,11 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
         initCombo();
         initTableVoucher();
         setTodayDate();
-        search();
+        //search();
     }
 
     private void initCombo() {
-        appUserAutoCompleter = new AppUserAutoCompleter(txtUser, Global.listAppUser, null, true);
+        appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
         appUserAutoCompleter.setAppUser(new AppUser("-", "All"));
     }
 
@@ -109,29 +122,18 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
         FilterObject filter = new FilterObject(Global.compCode);
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
-        filter.setUserCode(appUserAutoCompleter.getAppUser().getAppUserCode());
+        filter.setUserCode(appUserAutoCompleter.getAppUser().getUserCode());
         filter.setVouNo(txtVouNo.getText());
         //
-        Mono<ReturnObject> result = webClient
+        Mono<ResponseEntity<List<OPHis>>> result = inventoryApi
                 .post()
                 .uri("/setup/get-opening")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.subscribe((t) -> {
-            java.lang.reflect.Type listType = new TypeToken<ArrayList<OPHis>>() {
-            }.getType();
-            List<OPHis> listOP = gson.fromJson(gson.toJsonTree(t.getList()), listType);
-            tableModel.setListDetail(listOP);
-            progess.setIndeterminate(false);
-        }, (e) -> {
-            progess.setIndeterminate(false);
-            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-        });
-    }
-
-    private void calAmount() {
-
+                .toEntityList(OPHis.class);
+        List<OPHis> listOP = result.block(Duration.ofMinutes(1)).getBody();
+        tableModel.setListDetail(listOP);
+        progess.setIndeterminate(false);
     }
 
     private void select() {
@@ -139,7 +141,7 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
         if (row >= 0) {
             OPHis his = tableModel.getSelectVou(row);
             observer.selected("OP-HISTORY", his);
-            this.dispose();
+            setVisible(false);
         } else {
             JOptionPane.showMessageDialog(this, "Please select the voucher.",
                     "No Voucher Selected", JOptionPane.ERROR_MESSAGE);
@@ -185,7 +187,6 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
         progess = new javax.swing.JProgressBar();
         jSeparator1 = new javax.swing.JSeparator();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Opening Voucher Search Dialog");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());

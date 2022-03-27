@@ -5,27 +5,26 @@
  */
 package com.inventory.ui.common;
 
-import com.inventory.common.Global;
-import com.inventory.common.SelectionObserver;
-import com.inventory.common.Util1;
+import com.common.Global;
+import com.common.SelectionObserver;
+import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.PurHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
+import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /**
  *
- * @author Mg Kyaw Thura Aung
+ * @author wai yan
  */
-@Component
 @Slf4j
 public class PurchaseTableModel extends AbstractTableModel {
 
@@ -36,6 +35,24 @@ public class PurchaseTableModel extends AbstractTableModel {
     private SelectionObserver selectionObserver;
     private final List<String> deleteList = new ArrayList();
     private LocationAutoCompleter locationAutoCompleter;
+    private InventoryRepo inventoryRepo;
+    private JDateChooser vouDate;
+
+    public JDateChooser getVouDate() {
+        return vouDate;
+    }
+
+    public void setVouDate(JDateChooser vouDate) {
+        this.vouDate = vouDate;
+    }
+
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
 
     public JTable getParent() {
         return parent;
@@ -105,46 +122,48 @@ public class PurchaseTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
         try {
-            PurHisDetail record = listDetail.get(row);
-            switch (column) {
-                case 0 -> {
-                    //code
-                    return record.getStock() == null ? null : record.getStock().getUserCode();
-                }
-                case 1 -> {
-                    //Name
-                    return record.getStock() == null ? null : record.getStock().getStockName();
-                }
-                case 2 -> {
-                    //loc
-                    return record.getLocation();
-                }
-                case 3 -> {
-                    //qty
-                    return record.getQty();
-                }
-                case 4 -> {
-                    //Std-Wt
-                    return record.getStdWeight();
-                }
-                case 5 -> {
-                    //avg-Wt
-                    return record.getAvgWeight();
-                }
-                case 6 -> {
-                    //unit
-                    return record.getPurUnit();
-                }
-                case 7 -> {
-                    //price
-                    return record.getPrice();
-                }
-                case 8 -> {
-                    //amount
-                    return record.getAmount();
-                }
-                default -> {
-                    return new Object();
+            if (!listDetail.isEmpty()) {
+                PurHisDetail record = listDetail.get(row);
+                switch (column) {
+                    case 0 -> {
+                        //code
+                        return record.getStock() == null ? null : record.getStock().getUserCode();
+                    }
+                    case 1 -> {
+                        //Name
+                        return record.getStock() == null ? null : record.getStock().getStockName();
+                    }
+                    case 2 -> {
+                        //loc
+                        return record.getLocation();
+                    }
+                    case 3 -> {
+                        //qty
+                        return record.getQty();
+                    }
+                    case 4 -> {
+                        //Std-Wt
+                        return record.getStdWeight();
+                    }
+                    case 5 -> {
+                        //avg-Wt
+                        return record.getAvgWeight();
+                    }
+                    case 6 -> {
+                        //unit
+                        return record.getPurUnit();
+                    }
+                    case 7 -> {
+                        //price
+                        return record.getPrice();
+                    }
+                    case 8 -> {
+                        //amount
+                        return record.getAmount();
+                    }
+                    default -> {
+                        return new Object();
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -166,8 +185,8 @@ public class PurchaseTableModel extends AbstractTableModel {
                             record.setQty(1.0f);
                             record.setStdWeight(Util1.gerFloatOne(stock.getPurWeight()));
                             record.setAvgWeight(Util1.gerFloatOne(stock.getPurWeight()));
-                            record.setPurUnit(stock.getSaleUnit());
-                            record.setPrice(stock.getPurPrice());
+                            StockUnit purUnit = stock.getPurUnit();
+                            record.setPurUnit(purUnit);
                             record.setLocation(locationAutoCompleter.getLocation());
                             addNewRow();
                         }
@@ -261,6 +280,12 @@ public class PurchaseTableModel extends AbstractTableModel {
                     }
                 }
             }
+            if (column != 7) {
+                if (record.getStock() != null && record.getPurUnit() != null) {
+                    record.setPrice(inventoryRepo.getPurRecentPrice(record.getStock().getStockCode(),
+                            Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getPurUnit().getUnitCode()));
+                }
+            }
             calculateAmount(record);
             fireTableRowsUpdated(row, row);
             selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
@@ -273,7 +298,7 @@ public class PurchaseTableModel extends AbstractTableModel {
 
     public void addNewRow() {
         if (listDetail != null) {
-            if (hasEmptyRow()) {
+            if (!hasEmptyRow()) {
                 PurHisDetail pd = new PurHisDetail();
                 pd.setLocation(locationAutoCompleter.getLocation());
                 listDetail.add(pd);
@@ -283,11 +308,11 @@ public class PurchaseTableModel extends AbstractTableModel {
     }
 
     private boolean hasEmptyRow() {
-        boolean status = true;
-        if (listDetail.size() > 1) {
+        boolean status = false;
+        if (listDetail.size() >= 1) {
             PurHisDetail get = listDetail.get(listDetail.size() - 1);
             if (get.getStock() == null) {
-                status = false;
+                status = true;
             }
         }
         return status;
@@ -311,7 +336,7 @@ public class PurchaseTableModel extends AbstractTableModel {
         if (pur.getStock() != null) {
             float amount = qty * price;
             pur.setPrice(price);
-            pur.setAmount(amount);
+            pur.setAmount(Util1.getFloat(Math.round(amount)));
         }
     }
 
@@ -331,6 +356,10 @@ public class PurchaseTableModel extends AbstractTableModel {
                     break;
                 } else if (sdh.getLocation() == null) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Location.");
+                    status = false;
+                    parent.requestFocus();
+                } else if (sdh.getPurUnit() == null) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Purchase Unit.");
                     status = false;
                     parent.requestFocus();
                 }
@@ -362,6 +391,7 @@ public class PurchaseTableModel extends AbstractTableModel {
         } else {
             parent.setRowSelectionInterval(0, 0);
         }
+        parent.requestFocus();
     }
 
     public void addSale(PurHisDetail sd) {

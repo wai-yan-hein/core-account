@@ -5,8 +5,8 @@
  */
 package com.inventory.ui.setup.dialog.common;
 
-import com.inventory.common.Global;
-import com.inventory.common.Util1;
+import com.common.Global;
+import com.common.Util1;
 import com.inventory.model.UnitPattern;
 import java.util.ArrayList;
 import java.util.List;

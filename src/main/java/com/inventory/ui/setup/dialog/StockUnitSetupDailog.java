@@ -5,15 +5,17 @@
  */
 package com.inventory.ui.setup.dialog;
 
-import com.inventory.common.Global;
-import com.inventory.common.StartWithRowFilter;
-import com.inventory.common.TableCellRender;
-import com.inventory.common.Util1;
+import com.common.Global;
+import com.common.StartWithRowFilter;
+import com.common.TableCellRender;
+import com.common.Util1;
 import com.inventory.model.StockUnit;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.StockUnitTableModel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -26,8 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -44,9 +44,18 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
     @Autowired
     private StockUnitTableModel stockUnitTableModel;
     @Autowired
-    private WebClient webClient;
+    private InventoryRepo inventoryRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
+    private List<StockUnit> listStockUnit;
+
+    public List<StockUnit> getListStockUnit() {
+        return listStockUnit;
+    }
+
+    public void setListStockUnit(List<StockUnit> listStockUnit) {
+        this.listStockUnit = listStockUnit;
+    }
 
     /**
      * Creates new form ItemTypeSetupDialog
@@ -74,7 +83,7 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
     }
 
     private void searchItemUnit() {
-        stockUnitTableModel.setListUnit(Global.listStockUnit);
+        stockUnitTableModel.setListUnit(listStockUnit);
     }
 
     private void initTable() {
@@ -108,26 +117,13 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
 
     private void save() {
         if (isValidEntry()) {
-            Mono<StockUnit> result = webClient.post()
-                    .uri("/setup/save-unit")
-                    .body(Mono.just(stockUnit), StockUnit.class)
-                    .retrieve()
-                    .bodyToMono(StockUnit.class);
-            result.subscribe((t) -> {
-                if (t != null) {
-                    if (lblStatus.getText().equals("EDIT")) {
-                        Global.listStockUnit.set(selectRow, t);
-                    } else {
-                        Global.listStockUnit.add(t);
-                    }
-                    clear();
-                    JOptionPane.showMessageDialog(this, "Saved");
-                }
-            }, (e) -> {
-
-                JOptionPane.showMessageDialog(this, e.getLocalizedMessage());
-            });
-
+            stockUnit = inventoryRepo.saveStockUnit(stockUnit);
+            if (lblStatus.getText().equals("EDIT")) {
+                listStockUnit.set(selectRow, stockUnit);
+            } else {
+                listStockUnit.add(stockUnit);
+            }
+            clear();
         }
     }
 
@@ -162,13 +158,13 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
             stockUnit.setUnitCode(txtUnitShort.getText());
             stockUnit.setUnitName(txtUnitDesp.getText());
             if (lblStatus.getText().equals("NEW")) {
-                stockUnit.setCreatedBy(Global.loginUser);
+                stockUnit.setCreatedBy(Global.loginUser.getUserCode());
                 stockUnit.setCreatedDate(Util1.getTodayDate());
                 stockUnit.setMacId(Global.macId);
                 stockUnit.setCompCode(Global.compCode);
-                stockUnit.setUserCode(Global.loginUser.getAppUserCode());
+                stockUnit.setUserCode(Global.loginUser.getUserCode());
             } else {
-                stockUnit.setUpdatedBy(Global.loginUser);
+                stockUnit.setUpdatedBy(Global.loginUser.getUserCode());
             }
         }
         return status;

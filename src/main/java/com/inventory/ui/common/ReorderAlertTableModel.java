@@ -26,7 +26,7 @@ public class ReorderAlertTableModel extends AbstractTableModel {
     public static final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     private final String[] columnNames = {"Stock Code", "Stock Name", "Min Qty", "Min Unit", "Bal Qty", "Bal Unit", "Reorder Qty", "Reorder Unit"};
     private List<ReorderLevel> listReorder = new ArrayList<>();
-    private WebClient webClient;
+    private WebClient inventoryApi;
     private String patternCode;
     private JTable table;
 
@@ -47,11 +47,11 @@ public class ReorderAlertTableModel extends AbstractTableModel {
     }
 
     public WebClient getWebClient() {
-        return webClient;
+        return inventoryApi;
     }
 
-    public void setWebClient(WebClient webClient) {
-        this.webClient = webClient;
+    public void setWebClient(WebClient inventoryApi) {
+        this.inventoryApi = inventoryApi;
     }
 
     @Override
@@ -110,7 +110,7 @@ public class ReorderAlertTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return true;
+        return false;
     }
 
     public List<ReorderLevel> getListPattern() {

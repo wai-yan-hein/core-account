@@ -4,23 +4,21 @@
  */
 package com.inventory.ui.common;
 
+import com.inventory.model.PriceOption;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
-@Component
+@Slf4j
 public class PriceTableModel extends AbstractTableModel {
 
-    private Logger log = LoggerFactory.getLogger(PriceTableModel.class.getName());
-    private List<String> listPrice = new ArrayList();
-    private final String[] columnNames = {"Sale Price"};
+    private List<PriceOption> listPrice = new ArrayList();
+    private final String[] columnNames = {"Price", "Description"};
 
     @Override
     public String getColumnName(int column) {
@@ -40,12 +38,15 @@ public class PriceTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
         try {
-            String price = listPrice.get(row);
+            PriceOption price = listPrice.get(row);
 
             switch (column) {
                 case 0 -> {
                     //Code
-                    return price;
+                    return price.getPriceType();
+                }
+                case 1 -> {
+                    return price.getDescription();
                 }
             }
         } catch (Exception ex) {
@@ -69,18 +70,17 @@ public class PriceTableModel extends AbstractTableModel {
         return columnNames.length;
     }
 
-    public String getPriceType(int row) {
-        return listPrice.get(row);
-    }
-
-    public List<String> getListPrice() {
+    public List<PriceOption> getListPrice() {
         return listPrice;
     }
 
-    public void setListPrice(List<String> listPrice) {
+    public void setListPrice(List<PriceOption> listPrice) {
         this.listPrice = listPrice;
         fireTableDataChanged();
+    }
 
+    public PriceOption getPriceOption(int row) {
+        return listPrice.get(row);
     }
 
 }

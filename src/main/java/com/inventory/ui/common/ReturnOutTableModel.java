@@ -5,27 +5,26 @@
  */
 package com.inventory.ui.common;
 
-import com.inventory.common.Global;
-import com.inventory.common.SelectionObserver;
-import com.inventory.common.Util1;
+import com.common.Global;
+import com.common.SelectionObserver;
+import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.RetOutHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
+import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /**
  *
- * @author Mg Kyaw Thura Aung
+ * @author wai yan
  */
-@Component
 @Slf4j
 public class ReturnOutTableModel extends AbstractTableModel {
 
@@ -36,6 +35,24 @@ public class ReturnOutTableModel extends AbstractTableModel {
     private SelectionObserver selectionObserver;
     private final List<String> deleteList = new ArrayList();
     private LocationAutoCompleter locationAutoCompleter;
+    private InventoryRepo inventoryRepo;
+    private JDateChooser vouDate;
+
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public JDateChooser getVouDate() {
+        return vouDate;
+    }
+
+    public void setVouDate(JDateChooser vouDate) {
+        this.vouDate = vouDate;
+    }
 
     public JTable getParent() {
         return parent;
@@ -239,6 +256,12 @@ public class ReturnOutTableModel extends AbstractTableModel {
                     }
                 }
             }
+            if (column != 6) {
+                if (record.getStock() != null && record.getUnit() != null) {
+                    record.setPrice(inventoryRepo.getPurRecentPrice(record.getStock().getStockCode(),
+                            Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnit().getUnitCode()));
+                }
+            }
             calculateAmount(record);
             fireTableRowsUpdated(row, row);
             selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
@@ -251,9 +274,8 @@ public class ReturnOutTableModel extends AbstractTableModel {
 
     public void addNewRow() {
         if (listDetail != null) {
-            if (hasEmptyRow()) {
+            if (!hasEmptyRow()) {
                 RetOutHisDetail pd = new RetOutHisDetail();
-                pd.setStock(new Stock());
                 pd.setLocation(locationAutoCompleter.getLocation());
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
@@ -262,11 +284,11 @@ public class ReturnOutTableModel extends AbstractTableModel {
     }
 
     private boolean hasEmptyRow() {
-        boolean status = true;
-        if (listDetail.size() > 1) {
+        boolean status = false;
+        if (listDetail.size() >= 1) {
             RetOutHisDetail get = listDetail.get(listDetail.size() - 1);
-            if (get.getStock().getStockCode() == null) {
-                status = false;
+            if (get.getStock() == null) {
+                status = true;
             }
         }
         return status;
@@ -297,7 +319,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
     public boolean isValidEntry() {
         boolean status = true;
         for (RetOutHisDetail sdh : listDetail) {
-            if (sdh.getStock().getStockCode() != null) {
+            if (sdh.getStock() != null) {
                 if (Util1.getFloat(sdh.getAmount()) <= 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
                             "Invalid.", JOptionPane.ERROR_MESSAGE);
@@ -306,6 +328,10 @@ public class ReturnOutTableModel extends AbstractTableModel {
                     break;
                 } else if (sdh.getLocation() == null) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Location.");
+                    status = false;
+                    parent.requestFocus();
+                } else if (sdh.getUnit() == null) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Stock Unit.");
                     status = false;
                     parent.requestFocus();
                 }
@@ -326,7 +352,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
 
     public void delete(int row) {
         RetOutHisDetail sdh = listDetail.get(row);
-        if (sdh.getRoKey()!= null) {
+        if (sdh.getRoKey() != null) {
             deleteList.add(sdh.getRoKey().getRdCode());
         }
         listDetail.remove(row);
@@ -337,6 +363,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
         } else {
             parent.setRowSelectionInterval(0, 0);
         }
+        parent.requestFocus();
     }
 
     public void addSale(RetOutHisDetail sd) {

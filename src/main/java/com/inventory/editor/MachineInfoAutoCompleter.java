@@ -5,9 +5,9 @@
  */
 package com.inventory.editor;
 
-import com.inventory.common.Global;
-import com.inventory.common.SelectionObserver;
-import com.inventory.common.TableCellRender;
+import com.common.Global;
+import com.common.SelectionObserver;
+import com.common.TableCellRender;
 import com.inventory.model.MachineInfo;
 import com.inventory.ui.common.MachineInfoCompleterTableModel;
 import java.awt.Color;
@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Mg Kyaw Thura Aung
+ * @author wai yan
  */
 public class MachineInfoAutoCompleter implements KeyListener, SelectionObserver {
 

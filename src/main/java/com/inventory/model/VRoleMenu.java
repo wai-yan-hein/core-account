@@ -1,7 +1,6 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.inventory.model;
 
@@ -10,21 +9,35 @@ import lombok.Data;
 
 /**
  *
- * @author winswe
+ * @author Lenovo
  */
 @Data
-public class VRoleMenu implements java.io.Serializable {
+public class VRoleMenu {
 
-    private VRoleMenuKey key;
-    private String menuClass;
+    private String menuCode;
+    private String roleCode;
+    private boolean allow;
     private String menuName;
-    private String menuNameMM;
-    private String menuUrl;
-    private String parent;
     private String menuType;
-    private Integer orderBy;
-    private String soureAccCode;
-    private Boolean isAllow;
-    private String apiUrl;
+    private String menuUrl;
+    private String menuClass;
+    private String account;
+    private String parentMenuCode;
     private List<VRoleMenu> child;
+
+    public VRoleMenu() {
+    }
+
+    public VRoleMenu(String menuType, String menuName, boolean allow, List<VRoleMenu> child) {
+        this.allow = allow;
+        this.menuName = menuName;
+        this.menuType = menuType;
+        this.child = child;
+    }
+
+    @Override
+    public String toString() {
+        return menuName;
+    }
+
 }

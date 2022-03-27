@@ -5,43 +5,49 @@
  */
 package com.inventory.ui.setup;
 
-import com.inventory.common.Global;
-import com.inventory.common.PanelControl;
-import com.inventory.common.TableCellRender;
-import com.inventory.common.Util1;
+import com.common.Global;
+import com.common.PanelControl;
+import com.common.SelectionObserver;
+import com.common.TableCellRender;
+import com.common.Util1;
 import com.inventory.editor.RegionAutoCompleter;
+import com.inventory.model.Region;
 import com.inventory.model.Trader;
-import com.inventory.ui.ApplicationMainFrame;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.common.CustomerTabelModel;
 import com.inventory.ui.setup.dialog.CustomerImportDialog;
 import com.inventory.ui.setup.dialog.RegionSetup;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.RowFilter;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 @Component
 public class CustomerSetup extends javax.swing.JPanel implements KeyListener, PanelControl {
 
-    private static final Logger log = LoggerFactory.getLogger(CustomerSetup.class);
     private int selectRow = -1;
     private Trader customer = new Trader();
     @Autowired
@@ -49,14 +55,29 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     @Autowired
     private TaskExecutor taskExecutor;
     @Autowired
-    private ApplicationMainFrame mainFrame;
+    private WebClient inventoryApi;
     @Autowired
-    private WebClient webClient;
-    private boolean isShown = false;
+    private InventoryRepo inventoryRepo;
     private RegionAutoCompleter regionAutoCompleter;
+    private SelectionObserver observer;
+    private JProgressBar progress;
+    private List<Region> listRegion = new ArrayList<>();
+    private TableRowSorter<TableModel> sorter;
 
-    public void setIsShown(boolean isShown) {
-        this.isShown = isShown;
+    public JProgressBar getProgress() {
+        return progress;
+    }
+
+    public void setProgress(JProgressBar progress) {
+        this.progress = progress;
+    }
+
+    public SelectionObserver getObserver() {
+        return observer;
+    }
+
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
     }
 
     /**
@@ -67,14 +88,17 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         initKeyListener();
     }
 
-    private void initMain() {
+    public void initMain() {
+        progress.setIndeterminate(true);
         initCombo();
         initTable();
-        isShown = true;
+        searchCustomer();
+        log.info("ok");
     }
 
     private void initCombo() {
-        regionAutoCompleter = new RegionAutoCompleter(txtRegion, Global.listRegion, null, false, false);
+        listRegion = inventoryRepo.getRegion();
+        regionAutoCompleter = new RegionAutoCompleter(txtRegion, listRegion, null, false, false);
         regionAutoCompleter.setRegion(null);
     }
 
@@ -95,12 +119,21 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
 
             }
         });
-        customerTabelModel.setListCustomer(Global.listCustomer);
-        lblRecord.setText(String.valueOf(Global.listCustomer.size()));
+        sorter = new TableRowSorter(tblCustomer.getModel());
+        tblCustomer.setRowSorter(sorter);
+    }
+
+    private void searchCustomer() {
+        progress.setIndeterminate(true);
+        customerTabelModel.setListCustomer(inventoryRepo.getCustomer());
+        lblRecord.setText(String.valueOf(customerTabelModel.getListCustomer().size() + ""));
+        progress.setIndeterminate(false);
+
     }
 
     private void setCustomer(Trader cus) {
         customer = cus;
+        txtSysCode.setText(customer.getCode());
         txtCusCode.setText(customer.getUserCode());
         txtConPerson.setText(customer.getContactPerson());
         txtCusName.setText(customer.getTraderName());
@@ -111,9 +144,10 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         chkActive.setSelected(customer.isActive());
         txtCreditLimit.setText(Util1.getString(cus.getCreditLimit()));
         txtCreditTerm.setText(Util1.getString(cus.getCreditDays()));
+        chkCD.setSelected(customer.isCashDown());
+        chkMulti.setSelected(customer.isMulti());
         txtCusName.requestFocus();
         lblStatus.setText("EDIT");
-
     }
 
     private boolean isValidEntry() {
@@ -139,12 +173,14 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
             customer.setCreditDays(Util1.getInteger(txtCreditTerm.getText()));
             customer.setRegion(regionAutoCompleter.getRegion());
             customer.setType("CUS");
+            customer.setCashDown(chkCD.isSelected());
+            customer.setMulti(chkMulti.isSelected());
             if (lblStatus.getText().equals("NEW")) {
                 customer.setMacId(Global.macId);
-                customer.setCreatedBy(Global.loginUser);
+                customer.setCreatedBy(Global.loginUser.getUserCode());
                 customer.setCreatedDate(Util1.getTodayDate());
             } else {
-                customer.setUpdatedBy(Global.loginUser);
+                customer.setUpdatedBy(Global.loginUser.getUserCode());
             }
             status = true;
         }
@@ -153,44 +189,49 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private void saveCustomer() {
         if (isValidEntry()) {
-            Mono<Trader> result = webClient.post()
-                    .uri("/setup/save-trader")
-                    .body(Mono.just(customer), Trader.class)
-                    .retrieve()
-                    .bodyToMono(Trader.class);
-            result.subscribe((t) -> {
-                if (t != null) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Saved");
-                    if (lblStatus.getText().equals("EDIT")) {
-                        Global.listCustomer.set(selectRow, t);
-                    } else {
-                        Global.listCustomer.add(t);
-                    }
-                    clear();
+            customer = inventoryRepo.saveTrader(customer);
+            if (!Util1.isNull(customer.getCode())) {
+                if (lblStatus.getText().equals("EDIT")) {
+                    customerTabelModel.setCustomer(selectRow, customer);
+                } else {
+                    customerTabelModel.addCustomer(customer);
                 }
-            }, (e) -> {
-                JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-            });
+                clear();
+            }
         }
     }
 
     public void clear() {
         customer = new Trader();
+        txtSysCode.setText(null);
         txtCusCode.setText(null);
         txtCusName.setText(null);
         txtCusEmail.setText(null);
         txtCusPhone.setText(null);
         regionAutoCompleter.setRegion(null);
         txtCusAddress.setText(null);
-        chkActive.setSelected(Boolean.TRUE);
+        chkActive.setSelected(true);
+        chkCD.setSelected(false);
+        chkMulti.setSelected(false);
         txtCreditLimit.setText(null);
         lblStatus.setText("NEW");
         txtConPerson.setText(null);
         txtCreditTerm.setText(null);
         customerTabelModel.refresh();
         txtCusCode.requestFocus();
-        lblRecord.setText(String.valueOf(Global.listCustomer.size()));
+        lblRecord.setText(String.valueOf(customerTabelModel.getListCustomer().size()));
     }
+    private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
+        @Override
+        public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
+            String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
+            String tmp2 = entry.getStringValue(1).toUpperCase().replace(" ", "");
+            String tmp3 = entry.getStringValue(3).toUpperCase().replace(" ", "");
+            String tmp4 = entry.getStringValue(4).toUpperCase().replace(" ", "");
+            String text = txtFilter.getText().toUpperCase().replace(" ", "");
+            return tmp1.startsWith(text) || tmp2.startsWith(text) || tmp3.startsWith(text) || tmp4.startsWith(text);
+        }
+    };
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -224,10 +265,15 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         jButton1 = new javax.swing.JButton();
         txtRegion = new javax.swing.JTextField();
         jButton2 = new javax.swing.JButton();
+        jLabel10 = new javax.swing.JLabel();
+        txtSysCode = new javax.swing.JTextField();
+        chkCD = new javax.swing.JCheckBox();
+        chkMulti = new javax.swing.JCheckBox();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblCustomer = new javax.swing.JTable();
         jLabel6 = new javax.swing.JLabel();
         lblRecord = new javax.swing.JLabel();
+        txtFilter = new javax.swing.JTextField();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -334,6 +380,31 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
             }
         });
 
+        jLabel10.setFont(Global.lableFont);
+        jLabel10.setText("Sys Code");
+
+        txtSysCode.setEditable(false);
+        txtSysCode.setFont(Global.textFont);
+        txtSysCode.setName("txtCusCode"); // NOI18N
+        txtSysCode.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtSysCodeKeyReleased(evt);
+            }
+        });
+
+        chkCD.setFont(Global.lableFont);
+        chkCD.setText("Cash Down");
+        chkCD.setName("chkActive"); // NOI18N
+
+        chkMulti.setFont(Global.lableFont);
+        chkMulti.setText("Multi Use");
+        chkMulti.setName("chkActive"); // NOI18N
+        chkMulti.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkMultiActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelEntryLayout = new javax.swing.GroupLayout(panelEntry);
         panelEntry.setLayout(panelEntryLayout);
         panelEntryLayout.setHorizontalGroup(
@@ -350,7 +421,8 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelEntryLayout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -369,8 +441,11 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                                         .addComponent(txtRegion, javax.swing.GroupLayout.DEFAULT_SIZE, 233, Short.MAX_VALUE)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addComponent(txtCusAddress, javax.swing.GroupLayout.Alignment.LEADING))
-                                .addContainerGap())))
+                                    .addComponent(txtCusAddress, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtSysCode))
+                                .addContainerGap())
+                            .addComponent(chkCD, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(chkMulti, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelEntryLayout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton1)
@@ -380,6 +455,10 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
             panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelEntryLayout.createSequentialGroup()
                 .addContainerGap()
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel10)
+                    .addComponent(txtSysCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(txtCusCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -413,20 +492,25 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                     .addComponent(jLabel7)
                     .addComponent(txtCreditLimit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel11)
-                    .addComponent(txtCreditTerm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(txtCreditTerm, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(chkMulti)
+                .addGap(2, 2, 2)
+                .addComponent(chkCD)
+                .addGap(2, 2, 2)
                 .addComponent(chkActive)
                 .addGap(2, 2, 2)
                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblStatus)
                     .addComponent(jButton1))
-                .addContainerGap(235, Short.MAX_VALUE))
+                .addContainerGap(136, Short.MAX_VALUE))
         );
 
         panelEntryLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {txtConPerson, txtCreditLimit, txtCusAddress, txtCusCode, txtCusEmail, txtCusName, txtCusPhone});
 
+        tblCustomer.setAutoCreateRowSorter(true);
         tblCustomer.setFont(Global.textFont);
         tblCustomer.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -452,6 +536,18 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
 
         lblRecord.setText("0");
 
+        txtFilter.setFont(Global.textFont);
+        txtFilter.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtFilterFocusGained(evt);
+            }
+        });
+        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtFilterKeyReleased(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -463,7 +559,8 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(lblRecord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(lblRecord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(txtFilter))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -475,6 +572,8 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
+                        .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -491,11 +590,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         // TODO add your handling code here:
-        mainFrame.setControl(this);
-        if (!isShown) {
-            initMain();
-        }
-        clear();
+        observer.selected("control", this);
     }//GEN-LAST:event_formComponentShown
 
     private void tblCustomerKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblCustomerKeyReleased
@@ -507,7 +602,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         // TODO add your handling code here:
         CustomerImportDialog dialog = new CustomerImportDialog(Global.parentForm);
         dialog.setTaskExecutor(taskExecutor);
-        dialog.setWebClient(webClient);
+        dialog.setWebClient(inventoryApi);
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
 
@@ -523,7 +618,8 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
         RegionSetup regionSetup = new RegionSetup(Global.parentForm);
-        regionSetup.setWebClient(webClient);
+        regionSetup.setListRegion(listRegion);
+        regionSetup.setInventoryRepo(inventoryRepo);
         regionSetup.initMain();
         regionSetup.setSize(Global.width / 2, Global.height / 2);
         regionSetup.setLocationRelativeTo(null);
@@ -534,12 +630,38 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         // TODO add your handling code here:
     }//GEN-LAST:event_txtCusAddressKeyReleased
 
+    private void txtSysCodeKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSysCodeKeyReleased
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtSysCodeKeyReleased
+
+    private void chkMultiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkMultiActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_chkMultiActionPerformed
+
+    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
+        // TODO add your handling code here:
+        String filter = txtFilter.getText();
+        if (filter.length() == 0) {
+            sorter.setRowFilter(null);
+        } else {
+            sorter.setRowFilter(startsWithFilter);
+        }
+    }//GEN-LAST:event_txtFilterKeyReleased
+
+    private void txtFilterFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtFilterFocusGained
+        // TODO add your handling code here:
+        txtFilter.selectAll();
+    }//GEN-LAST:event_txtFilterFocusGained
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkActive;
+    private javax.swing.JCheckBox chkCD;
+    private javax.swing.JCheckBox chkMulti;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -562,7 +684,9 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     private javax.swing.JTextField txtCusEmail;
     private javax.swing.JTextField txtCusName;
     private javax.swing.JTextField txtCusPhone;
+    private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtRegion;
+    private javax.swing.JTextField txtSysCode;
     // End of variables declaration//GEN-END:variables
 
     private void initKeyListener() {
@@ -810,7 +934,6 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     @Override
     public void newForm() {
         clear();
-        isShown = false;
     }
 
     @Override
@@ -823,5 +946,16 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     @Override
     public void refresh() {
+        searchCustomer();
     }
+
+    @Override
+    public void filter() {
+    }
+
+    @Override
+    public String panelName() {
+        return this.getName();
+    }
+
 }

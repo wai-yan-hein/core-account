@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.entry.dialog.common;
 
-import com.inventory.common.Util1;
+import com.common.Util1;
 import com.inventory.model.OPHis;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  *
- * @author Mg Kyaw Thura Aung
+ * @author wai yan
  */
 @Slf4j
 public class OPVouSearchTableModel extends AbstractTableModel {
@@ -81,7 +81,7 @@ public class OPVouSearchTableModel extends AbstractTableModel {
                 }
                 case 4 -> {
                     //user
-                    return his.getCreatedBy().getUserShort();
+                    return null;
                 }
             }
         } catch (Exception ex) {

@@ -5,10 +5,11 @@
  */
 package com.inventory.ui.setup.dialog;
 
-import com.inventory.common.Global;
-import com.inventory.common.TableCellRender;
-import com.inventory.common.Util1;
-import com.inventory.model.Currency;
+import com.common.Global;
+import com.common.TableCellRender;
+import com.common.Util1;
+import com.user.model.Currency;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.common.CurrencyTabelModel;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -23,8 +24,6 @@ import javax.swing.event.ListSelectionEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -39,7 +38,7 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
     @Autowired
     private CurrencyTabelModel currencyTabelModel;
     @Autowired
-    private WebClient webClient;
+    private InventoryRepo inventoryRepo;
     boolean status = true;
 
     /**
@@ -80,7 +79,7 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
         });
         tblCurrency.setRowHeight(Global.tblRowHeight);
         tblCurrency.setDefaultRenderer(Object.class, new TableCellRender());
-        currencyTabelModel.setListCurrency(Global.listCurrency);
+        currencyTabelModel.setListCurrency(inventoryRepo.getCurrency());
     }
 
     private void saveCurrency() {
@@ -90,24 +89,7 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
         currency.setCurrencyName(txtCurrName.getText());
         currency.setCurrencySymbol(txtCurrSymbol.getText());
         if (isValidCurrency(currency, lblStatus.getText())) {
-            Mono<Currency> result = webClient.post()
-                    .uri("/setup/save-currency")
-                    .body(Mono.just(currency), Currency.class)
-                    .retrieve()
-                    .bodyToMono(Currency.class);
-            result.subscribe((t) -> {
-                if (t != null) {
-                    if (lblStatus.getText().equals("EDIT")) {
-                        Global.listCurrency.set(selectRow, t);
-                    } else {
-                        Global.listCurrency.add(t);
-                    }
-                    clear();
-                    JOptionPane.showMessageDialog(this, "Saved");
-                }
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+            inventoryRepo.saveCurrency(currency);
 
         }
     }
@@ -116,7 +98,7 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
         txtCurrCode.setText(currency.getCurCode());
         txtCurrName.setText(currency.getCurrencyName());
         txtCurrSymbol.setText(currency.getCurrencySymbol());
-        chkActive.setSelected(currency.getActive());
+        chkActive.setSelected(currency.isActive());
         lblStatus.setText("EDIT");
     }
 
@@ -148,15 +130,6 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
             status = false;
             JOptionPane.showMessageDialog(this, "Invalid currency name.");
         }
-        if (status) {
-            if (editStatus.equals("NEW")) {
-                cur.setCreatedBy(Global.loginUser.getAppUserCode());
-                cur.setCreatedDt(Util1.getTodayDate());
-            } else {
-                cur.setUpdatedBy(Global.loginUser.getAppUserCode());
-            }
-        }
-
         return status;
     }
 

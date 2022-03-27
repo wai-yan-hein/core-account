@@ -5,8 +5,8 @@
  */
 package com.inventory.editor;
 
-import com.inventory.common.Global;
-import com.inventory.common.TableCellRender;
+import com.common.Global;
+import com.common.TableCellRender;
 import com.inventory.model.StockUnit;
 import com.inventory.ui.setup.dialog.common.StockUnitTableModel;
 import java.awt.Color;
@@ -202,8 +202,6 @@ public class UnitAutoCompleter implements KeyListener {
                 }
 
                 popup.show(textComp, x, y);
-                log.info("Show Popup...");
-
             } else {
                 popup.setVisible(false);
             }
@@ -249,7 +247,6 @@ public class UnitAutoCompleter implements KeyListener {
 
     protected void selectNextPossibleValue() {
         int si = table.getSelectedRow();
-
         if (si < table.getRowCount() - 1) {
             try {
                 table.setRowSelectionInterval(si + 1, si + 1);
@@ -317,36 +314,36 @@ public class UnitAutoCompleter implements KeyListener {
     @Override
     public void keyReleased(KeyEvent e) {
         String filter = textComp.getText();
-
         if (filter.length() == 0) {
             sorter.setRowFilter(null);
         } else {
-            //String value = Util1.getPropValue("system.iac.filter");
-
-            if ("N".equals("Y")) {
-                sorter.setRowFilter(RowFilter.regexFilter(filter));
-            } else {
-                sorter.setRowFilter(startsWithFilter);
-            }
+            sorter.setRowFilter(startsWithFilter);
             try {
-                if (e.getKeyCode() != KeyEvent.VK_DOWN && e.getKeyCode() != KeyEvent.VK_UP) {
-                    if (table.getSelectedRow() >= 0) {
+                if (!containKey(e)) {
+                    if (table.getRowCount() >= 0) {
                         table.setRowSelectionInterval(0, 0);
                     }
                 }
             } catch (Exception ex) {
             }
+
         }
     }
     private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
         @Override
         public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
-            String tmp1 = entry.getStringValue(0).toUpperCase();
-            String tmp2 = entry.getStringValue(1).toUpperCase();
-            String tmp3 = entry.getStringValue(3).toUpperCase();
-            String tmp4 = entry.getStringValue(4).toUpperCase();
-            String text = textComp.getText().toUpperCase();
-            return tmp1.startsWith(text) || tmp2.startsWith(text) || tmp3.startsWith(text) || tmp4.startsWith(text);
+            String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
+            String tmp2 = entry.getStringValue(1).toUpperCase().replace(" ", "");
+            String tmp3 = entry.getStringValue(3).toUpperCase().replace(" ", "");
+            String tmp4 = entry.getStringValue(4).toUpperCase().replace(" ", "");
+            String tmp5 = entry.getStringValue(4).toUpperCase().replace(" ", "");
+            String text = textComp.getText().toUpperCase().replace(" ", "");
+            return tmp1.startsWith(text) || tmp2.startsWith(text)
+                    || tmp3.startsWith(text) || tmp4.startsWith(text) || tmp5.startsWith(text);
         }
     };
+
+    private boolean containKey(KeyEvent e) {
+        return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;
+    }
 }

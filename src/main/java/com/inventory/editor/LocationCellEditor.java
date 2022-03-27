@@ -5,13 +5,14 @@
  */
 package com.inventory.editor;
 
-import com.inventory.common.Global;
+import com.common.Global;
 import com.inventory.model.Location;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
+import java.util.List;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JComponent;
 import javax.swing.JTable;
@@ -26,6 +27,7 @@ public class LocationCellEditor extends AbstractCellEditor implements TableCellE
 
     private JComponent component = null;
     private LocationAutoCompleter completer;
+    private List<Location> listLocation;
 
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
@@ -41,9 +43,9 @@ public class LocationCellEditor extends AbstractCellEditor implements TableCellE
         }
 
     };
-    //private List<Medicine> listCOA = new ArrayList();
 
-    public LocationCellEditor() {
+    public LocationCellEditor(List<Location> listLocation) {
+        this.listLocation = listLocation;
     }
 
     @Override
@@ -56,7 +58,7 @@ public class LocationCellEditor extends AbstractCellEditor implements TableCellE
         if (value != null) {
             jtf.setText(value.toString());
         }
-        completer = new LocationAutoCompleter(jtf, Global.listLocation, this, false, false);
+        completer = new LocationAutoCompleter(jtf, listLocation, this, false, false);
         return component;
     }
 

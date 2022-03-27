@@ -26,14 +26,14 @@ public class PatternTableModel extends AbstractTableModel {
     private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     private final String[] columnNames = {"System Code", "Pattern Code", "Pattern Name", "Active"};
     private List<Pattern> listPattern = new ArrayList<>();
-    private WebClient webClient;
+    private WebClient inventoryApi;
 
     public WebClient getWebClient() {
-        return webClient;
+        return inventoryApi;
     }
 
-    public void setWebClient(WebClient webClient) {
-        this.webClient = webClient;
+    public void setWebClient(WebClient inventoryApi) {
+        this.inventoryApi = inventoryApi;
     }
 
     @Override

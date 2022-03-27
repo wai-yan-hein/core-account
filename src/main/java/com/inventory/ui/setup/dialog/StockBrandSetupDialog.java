@@ -5,16 +5,18 @@
  */
 package com.inventory.ui.setup.dialog;
 
-import com.inventory.common.Global;
-import com.inventory.common.ReturnObject;
-import com.inventory.common.StartWithRowFilter;
-import com.inventory.common.TableCellRender;
-import com.inventory.common.Util1;
+import com.common.Global;
+import com.common.ReturnObject;
+import com.common.StartWithRowFilter;
+import com.common.TableCellRender;
+import com.common.Util1;
 import com.inventory.model.StockBrand;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.StockBrandTableModel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -28,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
@@ -45,10 +46,19 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
     @Autowired
     private StockBrandTableModel itemBrandTableModel;
     @Autowired
-    private WebClient webClient;
+    private InventoryRepo inventoryRepo;
+    private List<StockBrand> listStockBrand;
 
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
+
+    public List<StockBrand> getListStockBrand() {
+        return listStockBrand;
+    }
+
+    public void setListStockBrand(List<StockBrand> listStockBrand) {
+        this.listStockBrand = listStockBrand;
+    }
 
     /**
      * Creates new form ItemTypeSetupDialog
@@ -75,7 +85,7 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
     }
 
     private void searchItemBrand() {
-        itemBrandTableModel.setListItemBrand(Global.listStockBrand);
+        itemBrandTableModel.setListItemBrand(listStockBrand);
     }
 
     private void initTable() {
@@ -109,24 +119,13 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
 
     private void save() {
         if (isValidEntry()) {
-            Mono<StockBrand> result = webClient.post()
-                    .uri("/setup/save-brand")
-                    .body(Mono.just(brand), StockBrand.class)
-                    .retrieve()
-                    .bodyToMono(StockBrand.class);
-            result.subscribe((t) -> {
-                if (t != null) {
-                    if (lblStatus.getText().equals("EDIT")) {
-                        Global.listStockBrand.set(selectRow, t);
-                    } else {
-                        Global.listStockBrand.add(t);
-                    }
-                    clear();
-                    JOptionPane.showMessageDialog(this, "Saved");
-                }
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+            brand = inventoryRepo.saveBrand(brand);
+            if (lblStatus.getText().equals("EDIT")) {
+                listStockBrand.set(selectRow, brand);
+            } else {
+                listStockBrand.add(brand);
+            }
+            clear();
         }
     }
 
@@ -142,23 +141,6 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
         txtCode.requestFocus();
     }
 
-    private void delete() {
-        StockBrand b = itemBrandTableModel.getItemBrand(selectRow);
-        if (b != null) {
-            Global.listStockBrand.remove(selectRow);
-            String brandCode = b.getBrandCode();
-            Mono<ReturnObject> result = webClient.delete()
-                    .uri(builder -> builder.path("/setup/delete-brand").queryParam("code", brandCode).build())
-                    .retrieve().bodyToMono(ReturnObject.class);
-            result.subscribe((t) -> {
-                JOptionPane.showMessageDialog(this, t.getMessage());
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
-            clear();
-        }
-    }
-
     private boolean isValidEntry() {
         boolean status = true;
 
@@ -171,12 +153,12 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
             brand.setUserCode(txtCode.getText());
             brand.setBrandName(txtName.getText());
             if (lblStatus.getText().equals("NEW")) {
-                brand.setCreatedBy(Global.loginUser);
+                brand.setCreatedBy(Global.loginUser.getUserCode());
                 brand.setCreatedDate(Util1.getTodayDate());
                 brand.setCompCode(Global.compCode);
                 brand.setMacId(Global.macId);
             } else {
-                brand.setUpdatedBy(Global.loginUser);
+                brand.setUpdatedBy(Global.loginUser.getUserCode());
             }
         }
 

@@ -4,6 +4,7 @@
  */
 package com.inventory.model;
 
+import com.user.model.Currency;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
@@ -31,10 +32,10 @@ public class PurHis implements java.io.Serializable {
     private Float discount;
     private Float balance;
     @NonNull
-    private AppUser createdBy;
+    private String createdBy;
     @NonNull
     private Date createdDate;
-    private AppUser updatedBy;
+    private String updatedBy;
     private Date updatedDate;
     private String remark;
     private Integer session;
@@ -44,6 +45,7 @@ public class PurHis implements java.io.Serializable {
     private Float taxP;
     private Float taxAmt;
     private String intgUpdStatus;
+    private String reference;
     private Integer macId;
     @NonNull
     private String compCode;

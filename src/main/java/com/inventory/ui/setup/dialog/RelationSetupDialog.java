@@ -5,19 +5,24 @@
  */
 package com.inventory.ui.setup.dialog;
 
-import com.inventory.common.Global;
-import com.inventory.common.StartWithRowFilter;
-import com.inventory.common.TableCellRender;
-import com.inventory.model.UnitPattern;
+import com.common.Global;
+import com.common.StartWithRowFilter;
+import com.common.TableCellRender;
+import com.common.UnitFormatRender;
+import com.inventory.editor.StockUnitEditor;
+import com.inventory.model.UnitRelationDetail;
+import com.inventory.model.UnitRelation;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.inventory.ui.setup.dialog.common.RelationDetailTableModel;
 import com.inventory.ui.setup.dialog.common.RelationTableModel;
-import com.inventory.ui.setup.dialog.common.StockUnitEditor;
-import com.inventory.ui.setup.dialog.common.UnitPatternTableModel;
+import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import javax.swing.JButton;
+import java.util.List;
+import java.util.Objects;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
@@ -25,104 +30,145 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 public class RelationSetupDialog extends javax.swing.JDialog implements KeyListener {
 
     private static final Logger log = LoggerFactory.getLogger(RelationSetupDialog.class);
-    @Autowired
-    private RelationTableModel relationTableModel;
-    @Autowired
-    private UnitPatternTableModel patternTableModel;
+
+    private int selectRow = - 1;
+    private final RelationTableModel relationTableModel = new RelationTableModel();
+    private final RelationDetailTableModel relationDetailTableModel = new RelationDetailTableModel();
+    private InventoryRepo inventoryRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
-    private int selectRow = -1;
+    private List<UnitRelation> listUnitRelation;
+
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public List<UnitRelation> getListUnitRelation() {
+        return listUnitRelation;
+    }
+
+    public void setListUnitRelation(List<UnitRelation> listUnitRelation) {
+        this.listUnitRelation = listUnitRelation;
+    }
 
     /**
      * Creates new form ItemTypeSetupDialog
      */
     public RelationSetupDialog() {
-        super(Global.parentForm, true);
+        super(Global.parentForm, false);
         initComponents();
+        initKeyListener();
+        lblStatus.setForeground(Color.green);
     }
 
     public void initMain() {
+        swrf = new StartWithRowFilter(txtFilter);
         initTable();
-        searchRelation();
-        initCombo();
+        initTableRelD();
+        searchCategory();
     }
 
-    private void initCombo() {
+    private void initKeyListener() {
+        btnClear.addKeyListener(this);
+        btnSave.addKeyListener(this);
+        tblRel.addKeyListener(this);
     }
 
-    private void searchRelation() {
-        //relationTableModel.setListRelation();
+    private void searchCategory() {
+        relationTableModel.setListRelation(listUnitRelation);
     }
 
     private void initTable() {
-        initTablePattern();
-        tblRelation.setModel(relationTableModel);
-        relationTableModel.setParent(tblRelation);
-        tblRelation.getTableHeader().setFont(Global.lableFont);
-        tblRelation.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblRelation.getColumnModel().getColumn(0).setCellEditor(new StockUnitEditor());
-        tblRelation.getColumnModel().getColumn(1).setCellEditor(new StockUnitEditor());
-        tblRelation.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
-        tblRelation.setDefaultRenderer(Double.class, new TableCellRender());
-        tblRelation.setDefaultRenderer(Object.class, new TableCellRender());
-        tblRelation.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
+        tblRel.setModel(relationTableModel);
+        sorter = new TableRowSorter<>(tblRel.getModel());
+        tblRel.setRowSorter(sorter);
+        tblRel.getTableHeader().setFont(Global.lableFont);
+        tblRel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblRel.setDefaultRenderer(Object.class, new TableCellRender());
+        tblRel.setRowHeight(Global.tblRowHeight);
+        tblRel.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
             if (e.getValueIsAdjusting()) {
-                if (tblRelation.getSelectedRow() >= 0) {
+                if (tblRel.getSelectedRow() >= 0) {
+                    selectRow = tblRel.convertRowIndexToModel(tblRel.getSelectedRow());
+                    UnitRelation rel = relationTableModel.getRelation(selectRow);
+                    if (rel.getRelCode() != null) {
+                        relationDetailTableModel.setListRelation(inventoryRepo.getRelationDetail(rel.getRelCode()));
+                        relationDetailTableModel.setRelation(rel);
+                        lblName.setText(rel.getRelName());
+                        lblStatus.setText("EDIT");
+                        lblStatus.setForeground(Color.blue);
+                    }
+
                 }
             }
         });
-        tblRelation.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+    }
+
+    private void initTableRelD() {
+        relationDetailTableModel.setTable(tblRelD);
+        tblRelD.setModel(relationDetailTableModel);
+        tblRelD.getTableHeader().setFont(Global.lableFont);
+        tblRelD.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblRelD.setDefaultRenderer(Float.class, new UnitFormatRender());
+        tblRel.setRowHeight(Global.tblRowHeight);
+        tblRelD.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
+        tblRelD.getColumnModel().getColumn(1).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
+        relationDetailTableModel.addEmptyRow();
+        tblRelD.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
-        swrf = new StartWithRowFilter(txtFilter);
-        sorter = new TableRowSorter(tblRelation.getModel());
-        tblRelation.setRowSorter(sorter);
-
+        tblRelD.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblRelD.setCellSelectionEnabled(true);
     }
 
-    private void initTablePattern() {
-        tblPattern.setModel(patternTableModel);
-        tblPattern.getTableHeader().setFont(Global.tblHeaderFont);
-        tblPattern.setDefaultRenderer(Object.class, new TableCellRender());
-        tblPattern.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
-        patternTableModel.setListCategory(Global.listUnitPattern);
-        tblPattern.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
-            if (e.getValueIsAdjusting()) {
-                if (tblPattern.getSelectedRow() >= 0) {
-                    selectRow = tblPattern.convertRowIndexToModel(tblPattern.getSelectedRow());
-                    UnitPattern pattern = patternTableModel.getPattern(selectRow);
-                    relationTableModel.setPatternId(pattern.getPatternCode());
-                    searchUnitRelation(pattern.getPatternCode());
-                }
-            }
-        });
-
-    }
-
-    private void foucsRelationTable() {
-        int row = relationTableModel.getListRelation().size();
-        tblRelation.setColumnSelectionInterval(0, 0);
-        tblRelation.setRowSelectionInterval(row - 1, row - 1);
-    }
-
-    private void searchUnitRelation(String patternId) {
-        if (patternId != null) {
-            relationTableModel.setListRelation(Global.listUnitRelation);
-            relationTableModel.addNewRow();
-            foucsRelationTable();
+    private void save() {
+        UnitRelation rel = relationDetailTableModel.getRelation();
+        List<UnitRelationDetail> listD = relationDetailTableModel.getListRelation();
+        if (Objects.isNull(rel)) {
+            rel = new UnitRelation();
+            rel.setDetailList(listD);
         } else {
-            relationTableModel.clear();
+            rel.setDetailList(listD);
         }
+        rel = inventoryRepo.saveUnitRelation(rel);
+        if (lblStatus.getText().equals("NEW")) {
+            relationTableModel.addRelation(rel);
+        } else {
+            relationTableModel.setRelation(rel, selectRow);
+        }
+        clear();
+    }
+
+    private void clear() {
+        txtFilter.setText(null);
+        lblStatus.setText("NEW");
+        lblStatus.setForeground(Color.green);
+        lblName.setText("");
+        relationDetailTableModel.clear();
+        relationDetailTableModel.addEmptyRow();
+        focusRDTable();
+    }
+
+    private void focusRDTable() {
+        int row = tblRelD.getRowCount();
+        if (row > 0) {
+            tblRelD.setRowSelectionInterval(row - 1, row - 1);
+        } else {
+            tblRelD.setRowSelectionInterval(0, 0);
+        }
+        tblRelD.setColumnSelectionInterval(0, 0);
+        tblRelD.requestFocus();
     }
 
     /**
@@ -135,17 +181,21 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
     private void initComponents() {
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        tblRelation = new javax.swing.JTable();
+        tblRel = new javax.swing.JTable();
         txtFilter = new javax.swing.JTextField();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        tblPattern = new javax.swing.JTable();
+        lblStatus = new javax.swing.JLabel();
+        btnSave = new javax.swing.JButton();
+        btnClear = new javax.swing.JButton();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        tblRelD = new javax.swing.JTable();
+        lblName = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Relation Setup");
-        setModalityType(java.awt.Dialog.ModalityType.DOCUMENT_MODAL);
+        setModalityType(java.awt.Dialog.ModalityType.TOOLKIT_MODAL);
 
-        tblRelation.setFont(Global.textFont);
-        tblRelation.setModel(new javax.swing.table.DefaultTableModel(
+        tblRel.setFont(Global.textFont);
+        tblRel.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -156,30 +206,56 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        tblRelation.setName("tblRelation"); // NOI18N
-        tblRelation.setRowHeight(Global.tblRowHeight);
-        jScrollPane1.setViewportView(tblRelation);
+        tblRel.setName("tblRel"); // NOI18N
+        jScrollPane1.setViewportView(tblRel);
 
+        txtFilter.setName("txtFilter"); // NOI18N
         txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 txtFilterKeyReleased(evt);
             }
         });
 
-        tblPattern.setFont(Global.textFont);
-        tblPattern.setModel(new javax.swing.table.DefaultTableModel(
+        lblStatus.setFont(Global.menuFont);
+        lblStatus.setText("NEW");
+
+        btnSave.setBackground(Global.selectionColor);
+        btnSave.setFont(Global.lableFont);
+        btnSave.setForeground(new java.awt.Color(255, 255, 255));
+        btnSave.setText("Save");
+        btnSave.setName("btnSave"); // NOI18N
+        btnSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSaveActionPerformed(evt);
+            }
+        });
+
+        btnClear.setFont(Global.lableFont);
+        btnClear.setText("Clear");
+        btnClear.setName("btnClear"); // NOI18N
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
+
+        tblRelD.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {},
-                {},
-                {},
-                {}
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
             },
             new String [] {
-
+                "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        tblPattern.setRowHeight(Global.tblRowHeight);
-        jScrollPane2.setViewportView(tblPattern);
+        tblRelD.setShowHorizontalLines(true);
+        tblRelD.setShowVerticalLines(true);
+        jScrollPane3.setViewportView(tblRelD);
+
+        lblName.setFont(Global.menuFont);
+        lblName.setText("-");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -187,33 +263,66 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtFilter)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 468, Short.MAX_VALUE)
+                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 283, Short.MAX_VALUE))
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 468, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnSave))
+                    .addComponent(lblName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
+
+        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnClear, btnSave});
+
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(lblName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtFilter))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 337, Short.MAX_VALUE))
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblStatus)
+                    .addComponent(btnSave)
+                    .addComponent(btnClear))
                 .addContainerGap())
         );
+
+        getAccessibleContext().setAccessibleDescription("");
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
+        // TODO add your handling code here:
+        try {
+            save();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Save Category", JOptionPane.ERROR_MESSAGE);
+            log.error("Save Categor :" + e.getMessage());
+        }
+    }//GEN-LAST:event_btnSaveActionPerformed
+
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        // TODO add your handling code here:
+        clear();
+    }//GEN-LAST:event_btnClearActionPerformed
+
     private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
         // TODO add your handling code here:
-
-        if (txtFilter.getText().length() == 0) {
+        if (txtFilter.getText().isEmpty()) {
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(swrf);
@@ -225,10 +334,14 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
      */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnClear;
+    private javax.swing.JButton btnSave;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable tblPattern;
-    private javax.swing.JTable tblRelation;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JLabel lblName;
+    private javax.swing.JLabel lblStatus;
+    private javax.swing.JTable tblRel;
+    private javax.swing.JTable tblRelD;
     private javax.swing.JTextField txtFilter;
     // End of variables declaration//GEN-END:variables
 
@@ -243,60 +356,6 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
 
     @Override
     public void keyReleased(KeyEvent e) {
-        Object sourceObj = e.getSource();
-        String ctrlName = "-";
 
-        if (sourceObj instanceof JTable) {
-            ctrlName = ((JTable) sourceObj).getName();
-        } else if (sourceObj instanceof JTextField) {
-            ctrlName = ((JTextField) sourceObj).getName();
-        } else if (sourceObj instanceof JButton) {
-            ctrlName = ((JButton) sourceObj).getName();
-        }
-        switch (ctrlName) {
-
-            case "txtName":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
-                }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                }
-                tabToTable(e);
-
-                break;
-
-            case "btnSave":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
-                }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                }
-                tabToTable(e);
-
-                break;
-            case "btnDelete":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
-                }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                }
-                tabToTable(e);
-
-                break;
-            case "btnClear":
-                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
-                }
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
-                }
-                tabToTable(e);
-
-                break;
-        }
-    }
-
-    private void tabToTable(KeyEvent e) {
-        if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            tblRelation.requestFocus();
-            if (tblRelation.getRowCount() >= 0) {
-                tblRelation.setRowSelectionInterval(0, 0);
-            }
-        }
     }
 }

@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.common;
 
-import com.inventory.common.Util1;
+import com.common.Util1;
 import com.inventory.model.Trader;
 import java.util.ArrayList;
 import java.util.List;
@@ -97,6 +97,16 @@ public class TraderTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object value, int row, int column) {
 
+    }
+
+    public void setTrader(Trader t, int row) {
+        listTrader.set(row, t);
+        fireTableRowsUpdated(row, row);
+    }
+
+    public void addTrader(Trader t) {
+        listTrader.add(t);
+        fireTableRowsInserted(listTrader.size() - 1, listTrader.size() - 1);
     }
 
     @Override

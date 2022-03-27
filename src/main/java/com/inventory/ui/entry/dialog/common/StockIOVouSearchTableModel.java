@@ -5,24 +5,23 @@
  */
 package com.inventory.ui.entry.dialog.common;
 
-import com.inventory.common.Util1;
-import com.inventory.model.StockInOut;
+import com.common.Global;
+import com.common.Util1;
+import com.inventory.model.VStockIO;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /**
  *
- * @author Mg Kyaw Thura Aung
+ * @author wai yan
  */
-@Component
 @Slf4j
 public class StockIOVouSearchTableModel extends AbstractTableModel {
 
-    private List<StockInOut> listDetail = new ArrayList();
+    private List<VStockIO> listDetail = new ArrayList();
     private final String[] columnNames = {"Date", "Vou No", "Description", "Remark", "Voucher Type", "Created By"};
     private JTable parent;
 
@@ -62,16 +61,16 @@ public class StockIOVouSearchTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
         try {
-            StockInOut his = listDetail.get(row);
+            VStockIO his = listDetail.get(row);
 
             switch (column) {
                 case 0 -> {
                     //date
-                    return Util1.toDateStr(his.getVouDate(), "dd/MM/yyyy");
+                    return his.getVouDate();
                 }
                 case 1 -> {
                     //vou-no
-                    if (Util1.getBoolean(his.getDeleted())) {
+                    if (Util1.getBoolean(his.isDeleted())) {
                         return his.getVouNo() + "***";
                     } else {
                         return his.getVouNo();
@@ -86,11 +85,11 @@ public class StockIOVouSearchTableModel extends AbstractTableModel {
                     return his.getRemark();
                 }
                 case 4 -> {
-                    return his.getVouStatus().getDescription();
+                    return his.getVouTypeName();
                 }
                 case 5 -> {
                     //v-total
-                    return his.getCreatedBy().getUserShort();
+                    return Global.hmUser.get(his.getCreatedBy());
                 }
             }
         } catch (Exception ex) {
@@ -99,16 +98,16 @@ public class StockIOVouSearchTableModel extends AbstractTableModel {
         return null;
     }
 
-    public List<StockInOut> getListDetail() {
+    public List<VStockIO> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<StockInOut> listDetail) {
+    public void setListDetail(List<VStockIO> listDetail) {
         this.listDetail = listDetail;
         fireTableDataChanged();
     }
 
-    public StockInOut getSelectVou(int row) {
+    public VStockIO getSelectVou(int row) {
         return listDetail.get(row);
     }
 }

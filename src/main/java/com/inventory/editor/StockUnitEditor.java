@@ -5,7 +5,7 @@
  */
 package com.inventory.editor;
 
-import com.inventory.common.Global;
+import com.common.Global;
 import com.inventory.model.StockUnit;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -13,13 +13,12 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
+import java.util.List;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.TableCellEditor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -27,10 +26,9 @@ import org.slf4j.LoggerFactory;
  */
 public class StockUnitEditor extends AbstractCellEditor implements TableCellEditor {
 
-    private static final Logger log = LoggerFactory.getLogger(StockUnitEditor.class);
     private JComponent component = null;
     private UnitAutoCompleter completer;
-    private Object oldValue;
+    private List<StockUnit> listStockUnit;
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusLost(FocusEvent e) {
@@ -46,14 +44,15 @@ public class StockUnitEditor extends AbstractCellEditor implements TableCellEdit
 
     };
 
-    //private List<Medicine> listDepartment = new ArrayList();
-    public StockUnitEditor() {
+    public StockUnitEditor(List<StockUnit> listStockUnit) {
+        this.listStockUnit = listStockUnit;
     }
+
+    
 
     @Override
     public java.awt.Component getTableCellEditorComponent(JTable table, Object value,
             boolean isSelected, int rowIndex, int vColIndex) {
-        oldValue = value;
         JTextField jtf = new JTextField();
         jtf.setFont(Global.textFont);
         jtf.setHighlighter(null);
@@ -89,7 +88,7 @@ public class StockUnitEditor extends AbstractCellEditor implements TableCellEdit
             jtf.setText(value.toString());
             //jtf.selectAll();
         }
-        completer = new UnitAutoCompleter(jtf, Global.listStockUnit, this);
+        completer = new UnitAutoCompleter(jtf, listStockUnit, this);
 
         return component;
     }

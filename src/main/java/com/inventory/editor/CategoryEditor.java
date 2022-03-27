@@ -5,7 +5,7 @@
  */
 package com.inventory.editor;
 
-import com.inventory.common.Global;
+import com.common.Global;
 import com.inventory.model.Category;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -13,13 +13,12 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
+import java.util.List;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.TableCellEditor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -27,9 +26,9 @@ import org.slf4j.LoggerFactory;
  */
 public class CategoryEditor extends AbstractCellEditor implements TableCellEditor {
 
-    private static final Logger log = LoggerFactory.getLogger(CategoryEditor.class);
     private JComponent component = null;
     private CategoryAutoCompleter completer;
+    private List<Category> listCategory;
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusLost(FocusEvent e) {
@@ -42,10 +41,13 @@ public class CategoryEditor extends AbstractCellEditor implements TableCellEdito
         }
 
     };
-    //private List<Medicine> listCOA = new ArrayList();
 
-    public CategoryEditor() {
+    public List<Category> getListCategory() {
+        return listCategory;
+    }
 
+    public void setListCategory(List<Category> listCategory) {
+        this.listCategory = listCategory;
     }
 
     @Override
@@ -84,7 +86,7 @@ public class CategoryEditor extends AbstractCellEditor implements TableCellEdito
         if (value != null) {
             jtf.setText(value.toString());
         }
-        completer = new CategoryAutoCompleter(jtf, Global.listCategory, this, false,false);
+        completer = new CategoryAutoCompleter(jtf, listCategory, this, false, false);
         return component;
     }
 

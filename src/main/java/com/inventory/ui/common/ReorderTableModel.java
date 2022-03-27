@@ -7,8 +7,8 @@ package com.inventory.ui.common;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.inventory.common.ReturnObject;
-import com.inventory.common.Util1;
+import com.common.ReturnObject;
+import com.common.Util1;
 import com.inventory.model.ReorderLevel;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
@@ -34,7 +34,7 @@ public class ReorderTableModel extends AbstractTableModel {
     public static final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     private final String[] columnNames = {"Stock Code", "Stock Name", "Min Qty", "Min Unit", "Max Qty", "Max Unit", "Balance Qty", "Balance Unit"};
     private List<ReorderLevel> listReorder = new ArrayList<>();
-    private WebClient webClient;
+    private WebClient inventoryApi;
     private String patternCode;
     private JTable table;
 
@@ -46,7 +46,6 @@ public class ReorderTableModel extends AbstractTableModel {
         this.table = table;
     }
 
-
     public String getPatternCode() {
         return patternCode;
     }
@@ -56,11 +55,11 @@ public class ReorderTableModel extends AbstractTableModel {
     }
 
     public WebClient getWebClient() {
-        return webClient;
+        return inventoryApi;
     }
 
-    public void setWebClient(WebClient webClient) {
-        this.webClient = webClient;
+    public void setWebClient(WebClient inventoryApi) {
+        this.inventoryApi = inventoryApi;
     }
 
     @Override
@@ -155,7 +154,7 @@ public class ReorderTableModel extends AbstractTableModel {
     }
 
     private void save(ReorderLevel rl) {
-        Mono<ReturnObject> result = webClient.post()
+        Mono<ReturnObject> result = inventoryApi.post()
                 .uri("/setup/save-reorder")
                 .body(Mono.just(rl), ReorderLevel.class)
                 .retrieve()
@@ -180,7 +179,10 @@ public class ReorderTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return true;
+        return switch (columnIndex) {
+            case 0, 1, 6, 7 -> false;
+            default -> true;
+        };
     }
 
     public List<ReorderLevel> getListPattern() {

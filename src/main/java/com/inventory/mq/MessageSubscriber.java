@@ -4,8 +4,8 @@
  */
 package com.inventory.mq;
 
-import com.inventory.Tray;
-import com.inventory.common.Global;
+import com.Tray;
+import com.common.Global;
 import com.inventory.ui.entry.dialog.ReorderAlertDialog;
 import javax.jms.JMSException;
 import javax.jms.MapMessage;

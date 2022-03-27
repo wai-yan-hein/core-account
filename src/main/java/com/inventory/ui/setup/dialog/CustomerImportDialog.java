@@ -4,9 +4,9 @@
  */
 package com.inventory.ui.setup.dialog;
 
-import com.inventory.common.Global;
-import com.inventory.common.TableCellRender;
-import com.inventory.common.Util1;
+import com.common.Global;
+import com.common.TableCellRender;
+import com.common.Util1;
 import com.inventory.model.Trader;
 import com.inventory.ui.setup.dialog.common.TraderImportTableModel;
 import java.awt.FileDialog;
@@ -29,7 +29,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class CustomerImportDialog extends javax.swing.JDialog {
 
-    private WebClient webClient;
+    private WebClient inventoryApi;
     private final TraderImportTableModel tableModel = new TraderImportTableModel();
     private TaskExecutor taskExecutor;
 
@@ -42,11 +42,11 @@ public class CustomerImportDialog extends javax.swing.JDialog {
     }
 
     public WebClient getWebClient() {
-        return webClient;
+        return inventoryApi;
     }
 
-    public void setWebClient(WebClient webClient) {
-        this.webClient = webClient;
+    public void setWebClient(WebClient inventoryApi) {
+        this.inventoryApi = inventoryApi;
     }
 
     /**
@@ -85,7 +85,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         btnSave.setEnabled(false);
         progress.setVisible(true);
         for (Trader trader : traders) {
-            Mono<Trader> result = webClient.post()
+            Mono<Trader> result = inventoryApi.post()
                     .uri("/setup/save-trader")
                     .body(Mono.just(trader), Trader.class)
                     .retrieve()
@@ -129,9 +129,9 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                     t.setCompCode(Global.compCode);
                     t.setActive(Boolean.TRUE);
                     t.setCreatedDate(Util1.getTodayDate());
-                    t.setCreatedBy(Global.loginUser);
+                    t.setCreatedBy(Global.loginUser.getUserCode());
                     t.setMacId(Global.macId);
-                    t.setType("CUS");
+                    t.setType("SUP");
                     listTrader.add(t);
                 }
             }
@@ -211,9 +211,8 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 399, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jButton2)
-                        .addComponent(btnSave))
+                    .addComponent(jButton2)
+                    .addComponent(btnSave)
                     .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );

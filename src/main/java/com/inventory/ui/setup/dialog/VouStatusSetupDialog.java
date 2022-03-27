@@ -5,15 +5,18 @@
  */
 package com.inventory.ui.setup.dialog;
 
-import com.inventory.common.Global;
-import com.inventory.common.StartWithRowFilter;
-import com.inventory.common.TableCellRender;
-import com.inventory.common.Util1;
+import com.common.Global;
+import com.common.StartWithRowFilter;
+import com.common.TableCellRender;
+import com.common.Util1;
 import com.inventory.model.VouStatus;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.VouStatusTableModel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -26,8 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -43,10 +44,19 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
     @Autowired
     private VouStatusTableModel vouTableModel;
     @Autowired
-    private WebClient webClient;
+    private InventoryRepo inventoryRepo;
 
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
+    private List<VouStatus> listVou = new ArrayList<>();
+
+    public List<VouStatus> getListVou() {
+        return listVou;
+    }
+
+    public void setListVou(List<VouStatus> listVou) {
+        this.listVou = listVou;
+    }
 
     /**
      * Creates new form ItemTypeSetupDialog
@@ -74,7 +84,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
     }
 
     private void searchCategory() {
-        vouTableModel.setListVou(Global.listVouStatus);
+        vouTableModel.setListVou(listVou);
     }
 
     private void initTable() {
@@ -108,24 +118,13 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
 
     private void save() {
         if (isValidEntry()) {
-            Mono<VouStatus> result = webClient.post()
-                    .uri("/setup/save-voucher-status")
-                    .body(Mono.just(vou), VouStatus.class)
-                    .retrieve()
-                    .bodyToMono(VouStatus.class);
-            result.subscribe((t) -> {
-                if (t != null) {
-                    if (lblStatus.getText().equals("EDIT")) {
-                        Global.listVouStatus.set(selectRow, t);
-                    } else {
-                        Global.listVouStatus.add(t);
-                    }
-                    clear();
-                    JOptionPane.showMessageDialog(this, "Saved");
-                }
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+            vou = inventoryRepo.saveVouStatus(vou);
+            if (lblStatus.getText().equals("EDIT")) {
+                listVou.set(selectRow, vou);
+            } else {
+                listVou.add(vou);
+            }
+            clear();
         }
     }
 
@@ -152,11 +151,11 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
             vou.setDescription(txtName.getText());
             if (lblStatus.getText().equals("NEW")) {
                 vou.setCompCode(Global.compCode);
-                vou.setCreatedBy(Global.loginUser);
+                vou.setCreatedBy(Global.loginUser.getUserCode());
                 vou.setCreatedDate(Util1.getTodayDate());
                 vou.setMacId(Global.macId);
             } else {
-                vou.setUpdatedBy(Global.loginUser);
+                vou.setUpdatedBy(Global.loginUser.getUserCode());
             }
         }
         return status;

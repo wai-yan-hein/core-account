@@ -7,14 +7,15 @@ package com.inventory.ui.entry.dialog;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
-import com.inventory.common.Global;
-import com.inventory.common.TableCellRender;
+import com.common.Global;
+import com.common.TableCellRender;
 import com.inventory.model.ReorderLevel;
 import com.inventory.ui.common.ReorderAlertTableModel;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFrame;
@@ -69,7 +70,7 @@ public class ReorderAlertDialog extends javax.swing.JDialog {
             outputStream.close();
             java.lang.reflect.Type listType = new TypeToken<ArrayList<ReorderLevel>>() {
             }.getType();
-            JsonReader reader = new JsonReader(new FileReader(fileName));
+            JsonReader reader = new JsonReader(new FileReader(fileName,Charset.forName("UTF-8")));
             List<ReorderLevel> listReoder = gson.fromJson(reader, listType);
             tableModel.setListPattern(listReoder);
         } catch (IOException e) {
@@ -97,6 +98,7 @@ public class ReorderAlertDialog extends javax.swing.JDialog {
         jLabel1.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         jLabel1.setText("Reorder Level Alert");
 
+        tblOrder.setFont(Global.textFont);
         tblOrder.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},

@@ -4,7 +4,7 @@
  */
 package com.inventory.ui.common;
 
-import com.inventory.model.Currency;
+import com.user.model.Currency;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;

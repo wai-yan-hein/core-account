@@ -5,16 +5,17 @@
  */
 package com.inventory.ui.setup.dialog;
 
-import com.inventory.common.Global;
-import com.inventory.common.ReturnObject;
-import com.inventory.common.StartWithRowFilter;
-import com.inventory.common.TableCellRender;
-import com.inventory.common.Util1;
+import com.common.Global;
+import com.common.StartWithRowFilter;
+import com.common.TableCellRender;
+import com.common.Util1;
 import com.inventory.model.Category;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.CategoryTableModel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -27,8 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -44,10 +43,18 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
     @Autowired
     private CategoryTableModel categoryTableModel;
     @Autowired
-    private WebClient webClient;
-
+    private InventoryRepo inventoryRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
+    private List<Category> listCategory;
+
+    public List<Category> getListCategory() {
+        return listCategory;
+    }
+
+    public void setListCategory(List<Category> listCategory) {
+        this.listCategory = listCategory;
+    }
 
     /**
      * Creates new form ItemTypeSetupDialog
@@ -75,7 +82,7 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
     }
 
     private void searchCategory() {
-        categoryTableModel.setListCategory(Global.listCategory);
+        categoryTableModel.setListCategory(listCategory);
     }
 
     private void initTable() {
@@ -111,24 +118,13 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
 
     private void save() {
         if (isValidEntry()) {
-            Mono<Category> result = webClient.post()
-                    .uri("/setup/save-category")
-                    .body(Mono.just(category), Category.class)
-                    .retrieve()
-                    .bodyToMono(Category.class);
-            result.subscribe((t) -> {
-                if (t != null) {
-                    if (lblStatus.getText().equals("EDIT")) {
-                        Global.listCategory.set(selectRow, t);
-                    } else {
-                        Global.listCategory.add(t);
-                    }
-                    clear();
-                    JOptionPane.showMessageDialog(this, "Saved");
-                }
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+            category = inventoryRepo.saveCategory(category);
+            if (lblStatus.getText().equals("EDIT")) {
+                listCategory.set(selectRow, category);
+            } else {
+                listCategory.add(category);
+            }
+            clear();
         }
     }
 
@@ -144,23 +140,6 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
         txtUserCode.requestFocus();
     }
 
-    private void delete() {
-        Category cat = categoryTableModel.getCategory(selectRow);
-        if (cat != null) {
-            Global.listCategory.remove(selectRow);
-            String catCode = cat.getCatCode();
-            Mono<ReturnObject> result = webClient.delete()
-                    .uri(builder -> builder.path("/setup/delete-category").queryParam("code", catCode).build())
-                    .retrieve().bodyToMono(ReturnObject.class);
-            result.subscribe((t) -> {
-                JOptionPane.showMessageDialog(this, t.getMessage());
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
-            clear();
-        }
-    }
-
     private boolean isValidEntry() {
         boolean status = true;
         if (txtName.getText().isEmpty()) {
@@ -172,11 +151,11 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
             category.setCatName(txtName.getText());
             if (lblStatus.getText().equals("NEW")) {
                 category.setCompCode(Global.compCode);
-                category.setCreatedBy(Global.loginUser);
+                category.setCreatedBy(Global.loginUser.getUserCode());
                 category.setCreatedDate(Util1.getTodayDate());
                 category.setMacId(Global.macId);
             } else {
-                category.setUpdatedBy(Global.loginUser);
+                category.setUpdatedBy(Global.loginUser.getUserCode());
             }
         }
         return status;

@@ -5,25 +5,23 @@
  */
 package com.inventory.ui.entry.dialog.common;
 
-import com.inventory.common.Util1;
-import com.inventory.model.RetOutHis;
+import com.common.Global;
+import com.inventory.model.VReturnOut;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /**
  *
- * @author Mg Kyaw Thura Aung
+ * @author wai yan
  */
-@Component
 @Slf4j
 public class RetOutVouSearchTableModel extends AbstractTableModel {
 
-    private List<RetOutHis> listDetail = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Customer", "Created By", "V-Total"};
+    private List<VReturnOut> listDetail = new ArrayList();
+    private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Created By", "Paid Amt", "V-Total"};
     private JTable parent;
 
     public JTable getParent() {
@@ -56,22 +54,27 @@ public class RetOutVouSearchTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        return column == 4 ? Float.class : String.class;
+        switch (column) {
+            case 6,5 -> {
+                return Float.class;
+            }
+        }
+        return String.class;
     }
 
     @Override
     public Object getValueAt(int row, int column) {
         try {
-            RetOutHis his = listDetail.get(row);
+            VReturnOut his = listDetail.get(row);
 
             switch (column) {
                 case 0 -> {
                     //date
-                    return Util1.toDateStr(his.getVouDate(), "dd/MM/yyyy");
+                    return his.getVouDate();
                 }
                 case 1 -> {
                     //vou-no
-                    if (Util1.getBoolean(his.getDeleted())) {
+                    if (his.isDeleted()) {
                         return his.getVouNo() + "***";
                     } else {
                         return his.getVouNo();
@@ -79,13 +82,20 @@ public class RetOutVouSearchTableModel extends AbstractTableModel {
                 }
                 case 2 -> {
                     //customer
-                    return his.getTrader() == null ? null : his.getTrader().getTraderName();
+                    return his.getTraderName();
                 }
                 case 3 -> {
-                    //user
-                    return his.getCreatedBy().getUserShort();
+                    //remark
+                    return his.getRemark();
                 }
                 case 4 -> {
+                    return Global.hmUser.get(his.getCreatedBy());
+                }
+                case 5 -> {
+                    //v-total
+                    return his.getPaid();
+                }
+                case 6 -> {
                     //v-total
                     return his.getVouTotal();
                 }
@@ -96,16 +106,16 @@ public class RetOutVouSearchTableModel extends AbstractTableModel {
         return null;
     }
 
-    public List<RetOutHis> getListDetail() {
+    public List<VReturnOut> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<RetOutHis> listDetail) {
+    public void setListDetail(List<VReturnOut> listDetail) {
         this.listDetail = listDetail;
         fireTableDataChanged();
     }
 
-    public RetOutHis getSelectVou(int row) {
+    public VReturnOut getSelectVou(int row) {
         return listDetail.get(row);
     }
 }

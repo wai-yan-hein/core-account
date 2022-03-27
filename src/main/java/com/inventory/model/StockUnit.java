@@ -18,12 +18,19 @@ public class StockUnit implements java.io.Serializable {
     private String unitCode;
     private String unitName;
     private Date updatedDate;
-    private AppUser updatedBy;
+    private String updatedBy;
     private Date createdDate;
-    private AppUser createdBy;
+    private String createdBy;
     private Integer macId;
     private String userCode;
     private String compCode;
+
+    public StockUnit() {
+    }
+
+    public StockUnit(String unitCode) {
+        this.unitCode = unitCode;
+    }
 
     @Override
     public String toString() {

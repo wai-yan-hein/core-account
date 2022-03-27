@@ -5,16 +5,15 @@
 package com.inventory.ui.entry.dialog;
 
 import com.google.gson.reflect.TypeToken;
-import com.inventory.common.Global;
-import com.inventory.common.ReturnObject;
-import com.inventory.common.TableCellRender;
+import com.common.Global;
+import com.common.ReturnObject;
+import com.common.TableCellRender;
 import com.inventory.model.Pattern;
 import com.inventory.ui.common.PatternOptionTableModel;
 import static com.inventory.ui.setup.PatternSetup.gson;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -32,7 +31,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class PatternOptionDialog extends javax.swing.JDialog {
 
-    private WebClient webClient;
+    private WebClient inventoryApi;
     private Pattern pattern = new Pattern();
 
     public Pattern getPattern() {
@@ -46,11 +45,11 @@ public class PatternOptionDialog extends javax.swing.JDialog {
     private final PatternOptionTableModel tableModel = new PatternOptionTableModel();
 
     public WebClient getWebClient() {
-        return webClient;
+        return inventoryApi;
     }
 
-    public void setWebClient(WebClient webClient) {
-        this.webClient = webClient;
+    public void setWebClient(WebClient inventoryApi) {
+        this.inventoryApi = inventoryApi;
     }
 
     public JTextField getTxtQty() {
@@ -74,7 +73,7 @@ public class PatternOptionDialog extends javax.swing.JDialog {
     }
 
     private void initTable() {
-        tableModel.setWebClient(webClient);
+        tableModel.setWebClient(inventoryApi);
         tblPattern.setModel(tableModel);
         tblPattern.getTableHeader().setFont(Global.tblHeaderFont);
         tblPattern.setRowHeight(Global.tblRowHeight);
@@ -90,7 +89,7 @@ public class PatternOptionDialog extends javax.swing.JDialog {
     }
 
     public void searchPattern() {
-        Mono<ReturnObject> result = webClient
+        Mono<ReturnObject> result = inventoryApi
                 .get()
                 .uri(builder -> builder.path("/setup/get-pattern")
                 .queryParam("compCode", Global.compCode)

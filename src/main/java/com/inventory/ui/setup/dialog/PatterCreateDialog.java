@@ -4,10 +4,11 @@
  */
 package com.inventory.ui.setup.dialog;
 
-import com.inventory.common.Global;
-import com.inventory.common.Util1;
+import com.common.Global;
+import com.common.Util1;
 import com.inventory.editor.VouStatusAutoCompleter;
 import com.inventory.model.Pattern;
+import com.inventory.ui.common.InventoryRepo;
 import javax.swing.JFrame;
 
 /**
@@ -19,6 +20,15 @@ public class PatterCreateDialog extends javax.swing.JDialog {
     private Pattern pattern = new Pattern();
     private String status = "NEW";
     private VouStatusAutoCompleter vouStatusAutoCompleter;
+    private InventoryRepo inventoryRepo;
+
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
 
     public String getStatus() {
         return status;
@@ -56,7 +66,7 @@ public class PatterCreateDialog extends javax.swing.JDialog {
     }
 
     public void initCombo() {
-        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, Global.listVouStatus, null, false);
+        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, inventoryRepo.getVoucherStatus(), null, false);
         vouStatusAutoCompleter.setVoucher(null);
     }
 

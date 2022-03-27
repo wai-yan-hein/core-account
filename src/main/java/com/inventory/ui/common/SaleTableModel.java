@@ -5,16 +5,17 @@
  */
 package com.inventory.ui.common;
 
-import com.inventory.common.Global;
-import com.inventory.common.ProUtil;
-import com.inventory.common.SelectionObserver;
-import com.inventory.common.Util1;
+import com.common.Global;
+import com.common.ProUtil;
+import com.common.SelectionObserver;
+import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.ui.setup.dialog.PriceOptionDialog;
+import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JButton;
@@ -29,7 +30,7 @@ import org.springframework.stereotype.Component;
 
 /**
  *
- * @author Mg Kyaw Thura Aung
+ * @author wai yan
  */
 @Component
 public class SaleTableModel extends AbstractTableModel {
@@ -44,8 +45,19 @@ public class SaleTableModel extends AbstractTableModel {
     private LocationAutoCompleter locationAutoCompleter;
     @Autowired
     private StockBalanceTableModel sbTableModel;
+    @Autowired
+    private InventoryRepo inventoryRepo;
     private JLabel lblStockName;
     private JButton btnProgress;
+    private JDateChooser vouDate;
+
+    public JDateChooser getVouDate() {
+        return vouDate;
+    }
+
+    public void setVouDate(JDateChooser vouDate) {
+        this.vouDate = vouDate;
+    }
 
     public JLabel getLblStockName() {
         return lblStockName;
@@ -171,7 +183,7 @@ public class SaleTableModel extends AbstractTableModel {
                     return record.getAmount();
                 }
                 default -> {
-                    return new Object();
+                    return null;
                 }
             }
         } catch (Exception ex) {
@@ -222,20 +234,18 @@ public class SaleTableModel extends AbstractTableModel {
                         showMessageBox("Input value must be number.");
                         parent.setColumnSelectionInterval(column, column);
                     }
-                    if (record.getPrice() > 0) {
-                        parent.setRowSelectionInterval(row + 1, row + 1);
-                        parent.setColumnSelectionInterval(0, 0);
-                    } else {
-                        parent.setRowSelectionInterval(row, row);
-                        parent.setColumnSelectionInterval(6, 6);
-                    }
                     if (ProUtil.isPriceOption()) {
                         PriceOptionDialog dialog = new PriceOptionDialog();
+                        dialog.setInventoryRepo(inventoryRepo);
+                        dialog.initData();
                         dialog.setLocationRelativeTo(null);
                         dialog.setVisible(true);
-                        String priceType = dialog.getPriceType();
+                        String priceType = dialog.getOption().getPriceType();
                         Stock s = record.getStock();
                         switch (priceType) {
+                            case "N" -> {
+                                record.setPrice(s.getSalePriceN());
+                            }
                             case "A" -> {
                                 record.setPrice(s.getSalePriceA());
                             }
@@ -253,6 +263,14 @@ public class SaleTableModel extends AbstractTableModel {
                             }
                         }
                     }
+                    if (Util1.getFloat(record.getPrice()) > 0) {
+                        parent.setRowSelectionInterval(row + 1, row + 1);
+                        parent.setColumnSelectionInterval(0, 0);
+                    } else {
+                        parent.setRowSelectionInterval(row, row);
+                        parent.setColumnSelectionInterval(6, 6);
+                    }
+
                 }
                 case 4 -> {
                     //Std-Wt
@@ -301,6 +319,12 @@ public class SaleTableModel extends AbstractTableModel {
                     }
                 }
             }
+            if (column != 6) {
+                if (record.getStock() != null && record.getSaleUnit() != null) {
+                    record.setPrice(inventoryRepo.getSaleRecentPrice(record.getStock().getStockCode(),
+                            Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getSaleUnit().getUnitCode()));
+                }
+            }
             calculateAmount(record);
             fireTableRowsUpdated(row, row);
             selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
@@ -313,7 +337,7 @@ public class SaleTableModel extends AbstractTableModel {
 
     public void addNewRow() {
         if (listDetail != null) {
-            if (hasEmptyRow()) {
+            if (!hasEmptyRow()) {
                 SaleHisDetail pd = new SaleHisDetail();
                 pd.setLocation(locationAutoCompleter.getLocation());
                 listDetail.add(pd);
@@ -323,11 +347,11 @@ public class SaleTableModel extends AbstractTableModel {
     }
 
     private boolean hasEmptyRow() {
-        boolean status = true;
-        if (listDetail.size() > 1) {
+        boolean status = false;
+        if (listDetail.size() >= 1) {
             SaleHisDetail get = listDetail.get(listDetail.size() - 1);
             if (get.getStock() == null) {
-                status = false;
+                status = true;
             }
         }
         return status;
@@ -353,7 +377,7 @@ public class SaleTableModel extends AbstractTableModel {
             float saleQty = Util1.getFloat(sale.getQty());
             float stdSalePrice = Util1.getFloat(sale.getPrice());
             float amount = saleQty * stdSalePrice;
-            sale.setAmount(amount);
+            sale.setAmount(Util1.getFloat(Math.round(amount)));
         }
     }
 
@@ -373,6 +397,10 @@ public class SaleTableModel extends AbstractTableModel {
                     break;
                 } else if (sdh.getLocation() == null) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Location.");
+                    status = false;
+                    parent.requestFocus();
+                } else if (sdh.getSaleUnit() == null) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Sale Unit.");
                     status = false;
                     parent.requestFocus();
                 }
@@ -404,6 +432,7 @@ public class SaleTableModel extends AbstractTableModel {
         } else {
             parent.setRowSelectionInterval(0, 0);
         }
+        parent.requestFocus();
     }
 
     public void addSale(SaleHisDetail sd) {

@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 /**
  *
- * @author Mg Kyaw Thura Aung
+ * @author wai yan
  */
 public class SaleDetailKey implements Serializable {
 

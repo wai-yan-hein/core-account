@@ -5,16 +5,17 @@
  */
 package com.inventory.ui.setup.dialog;
 
-import com.inventory.common.Global;
-import com.inventory.common.ReturnObject;
-import com.inventory.common.StartWithRowFilter;
-import com.inventory.common.TableCellRender;
-import com.inventory.common.Util1;
+import com.common.Global;
+import com.common.StartWithRowFilter;
+import com.common.TableCellRender;
+import com.common.Util1;
 import com.inventory.model.StockType;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.StockTypeTableModel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -28,8 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -43,10 +42,19 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
     @Autowired
     private StockTypeTableModel stockTypeTableModel;
     @Autowired
-    private WebClient webClient;
+    private InventoryRepo inventoryRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
     private StockType stockType = new StockType();
+    private List<StockType> listStockType;
+
+    public List<StockType> getListStockType() {
+        return listStockType;
+    }
+
+    public void setListStockType(List<StockType> listStockType) {
+        this.listStockType = listStockType;
+    }
 
     /**
      * Creates new form ItemTypeSetupDialog
@@ -74,7 +82,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
     }
 
     private void searchItemType() {
-        stockTypeTableModel.setListType(Global.listStockType);
+        stockTypeTableModel.setListType(listStockType);
     }
 
     private void initTable() {
@@ -107,24 +115,13 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
 
     private void save() {
         if (isValidEntry()) {
-            Mono<StockType> result = webClient.post()
-                    .uri("/setup/save-type")
-                    .body(Mono.just(stockType), StockType.class)
-                    .retrieve()
-                    .bodyToMono(StockType.class);
-            result.subscribe((t) -> {
-                if (t != null) {
-                    if (lblStatus.getText().equals("EDIT")) {
-                        Global.listStockType.set(selectRow, t);
-                    } else {
-                        Global.listStockType.add(t);
-                    }
-                    clear();
-                    JOptionPane.showMessageDialog(this, "Saved");
-                }
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+            stockType = inventoryRepo.saveStockType(stockType);
+            if (lblStatus.getText().equals("EDIT")) {
+                listStockType.set(selectRow, stockType);
+            } else {
+                listStockType.add(stockType);
+            }
+            clear();
         }
     }
 
@@ -141,23 +138,6 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         txtUserCode.requestFocus();
     }
 
-    private void delete() {
-        StockType b = stockTypeTableModel.getItemType(selectRow);
-        if (b != null) {
-            Global.listStockType.remove(selectRow);
-            String saleManCode = b.getStockTypeCode();
-            Mono<ReturnObject> result = webClient.delete()
-                    .uri(builder -> builder.path("/setup/delete-type").queryParam("code", saleManCode).build())
-                    .retrieve().bodyToMono(ReturnObject.class);
-            result.subscribe((t) -> {
-                JOptionPane.showMessageDialog(this, t.getMessage());
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
-            clear();
-        }
-    }
-
     private boolean isValidEntry() {
         boolean status = true;
         if (Util1.isNull(txtName.getText())) {
@@ -170,11 +150,11 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
             stockType.setStockTypeName(txtName.getText());
             if (lblStatus.getText().equals("NEW")) {
                 stockType.setCompCode(Global.compCode);
-                stockType.setCreatedBy(Global.loginUser);
+                stockType.setCreatedBy(Global.loginUser.getUserCode());
                 stockType.setCreatedDate(Util1.getTodayDate());
                 stockType.setMacId(Global.macId);
             } else {
-                stockType.setUpdatedBy(Global.loginUser);
+                stockType.setUpdatedBy(Global.loginUser.getUserCode());
             }
         }
 

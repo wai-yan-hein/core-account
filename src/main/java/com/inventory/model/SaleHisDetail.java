@@ -10,7 +10,7 @@ import lombok.Data;
 
 /**
  *
- * @author Mg Kyaw Thura Aung
+ * @author wai yan
  */
 @Data
 public class SaleHisDetail implements java.io.Serializable {

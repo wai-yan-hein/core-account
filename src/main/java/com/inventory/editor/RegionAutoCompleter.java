@@ -5,9 +5,9 @@
  */
 package com.inventory.editor;
 
-import com.inventory.common.Global;
-import com.inventory.common.SelectionObserver;
-import com.inventory.common.TableCellRender;
+import com.common.Global;
+import com.common.SelectionObserver;
+import com.common.TableCellRender;
 import com.inventory.model.OptionModel;
 import com.inventory.model.Region;
 import com.inventory.ui.setup.dialog.OptionDialog;
@@ -59,6 +59,8 @@ public final class RegionAutoCompleter implements KeyListener {
     private SelectionObserver selectionObserver;
     private List<String> listOption = new ArrayList<>();
     private OptionDialog optionDialog;
+    private List<Region> listRegion;
+    private boolean custom;
 
     public List<String> getListOption() {
         return listOption;
@@ -69,7 +71,8 @@ public final class RegionAutoCompleter implements KeyListener {
     }
 
     private void initOption() {
-        Global.listRegion.forEach(t -> {
+        listOption.clear();
+        listRegion.forEach(t -> {
             listOption.add(t.getRegCode());
         });
     }
@@ -85,7 +88,9 @@ public final class RegionAutoCompleter implements KeyListener {
             AbstractCellEditor editor, boolean filter, boolean custom) {
         this.textComp = comp;
         this.editor = editor;
+        this.listRegion = list;
         this.textComp.addKeyListener(this);
+        this.custom = custom;
         initOption();
         if (filter) {
             Region reg = new Region("-", "All");
@@ -176,7 +181,7 @@ public final class RegionAutoCompleter implements KeyListener {
         table.setRequestFocusEnabled(false);
 
         if (list != null) {
-            if (list.size() > 0) {
+            if (!list.isEmpty()) {
                 table.setRowSelectionInterval(0, 0);
             }
         }
@@ -187,25 +192,29 @@ public final class RegionAutoCompleter implements KeyListener {
             region = regionTableModel.getRegion(table.convertRowIndexToModel(
                     table.getSelectedRow()));
             textComp.setText(region.getRegionName());
-            switch (region.getRegCode()) {
-                case "C" -> {
-                    optionDialog = new OptionDialog(Global.parentForm, "Region");
-                    List<OptionModel> listOP = new ArrayList<>();
-                    Global.listRegion.forEach(t -> {
-                        listOP.add(new OptionModel(t.getRegCode(), t.getRegionName()));
-                    });
-                    optionDialog.setOptionList(listOP);
-                    optionDialog.setLocationRelativeTo(null);
-                    optionDialog.setVisible(true);
-                    if (optionDialog.isSelect()) {
-                        listOption = optionDialog.getOptionList();
+            if (custom) {
+                switch (region.getRegCode()) {
+                    case "C" -> {
+                        optionDialog = new OptionDialog(Global.parentForm, "Region");
+                        List<OptionModel> listOP = new ArrayList<>();
+                        listRegion.forEach(t -> {
+                            listOP.add(new OptionModel(t.getRegCode(), t.getRegionName()));
+                        });
+                        optionDialog.setOptionList(listOP);
+                        optionDialog.setLocationRelativeTo(null);
+                        optionDialog.setVisible(true);
+                        if (optionDialog.isSelect()) {
+                            listOption = optionDialog.getOptionList();
+                        }
+                        //open
                     }
-                    //open
+                    case "-" ->
+                        initOption();
+                    default -> {
+                        listOption.clear();
+                        listOption.add(region.getRegCode());
+                    }
                 }
-                case "-" ->
-                    initOption();
-                default ->
-                    listOption.add(region.getRegCode());
             }
             if (editor == null) {
                 if (selectionObserver != null) {
@@ -376,28 +385,33 @@ public final class RegionAutoCompleter implements KeyListener {
         if (filter.length() == 0) {
             sorter.setRowFilter(null);
         } else {
-            if ("N".equals("Y")) {
-                sorter.setRowFilter(RowFilter.regexFilter(filter));
-            } else {
-                sorter.setRowFilter(startsWithFilter);
-            }
-            if (e.getKeyCode() != KeyEvent.VK_DOWN && e.getKeyCode() != KeyEvent.VK_UP) {
-                if (table.getSelectedRow() >= 0) {
-                    table.setRowSelectionInterval(0, 0);
+            sorter.setRowFilter(startsWithFilter);
+            try {
+                if (!containKey(e)) {
+                    if (table.getRowCount() >= 0) {
+                        table.setRowSelectionInterval(0, 0);
+                    }
                 }
+            } catch (Exception ex) {
             }
+
         }
     }
     private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
         @Override
         public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
-            String tmp1 = entry.getStringValue(0).toUpperCase();
-            String tmp2 = entry.getStringValue(1).toUpperCase();
-            String tmp3 = entry.getStringValue(3).toUpperCase();
-            String tmp4 = entry.getStringValue(4).toUpperCase();
-            String text = textComp.getText().toUpperCase();
-
-            return tmp1.startsWith(text) || tmp2.startsWith(text) || tmp3.startsWith(text) || tmp4.startsWith(text);
+            String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
+            String tmp2 = entry.getStringValue(1).toUpperCase().replace(" ", "");
+            String tmp3 = entry.getStringValue(3).toUpperCase().replace(" ", "");
+            String tmp4 = entry.getStringValue(4).toUpperCase().replace(" ", "");
+            String tmp5 = entry.getStringValue(4).toUpperCase().replace(" ", "");
+            String text = textComp.getText().toUpperCase().replace(" ", "");
+            return tmp1.startsWith(text) || tmp2.startsWith(text)
+                    || tmp3.startsWith(text) || tmp4.startsWith(text) || tmp5.startsWith(text);
         }
     };
+
+    private boolean containKey(KeyEvent e) {
+        return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;
+    }
 }

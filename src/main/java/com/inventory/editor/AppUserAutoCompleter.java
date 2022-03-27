@@ -5,10 +5,10 @@
  */
 package com.inventory.editor;
 
-import com.inventory.common.Global;
-import com.inventory.common.TableCellRender;
+import com.common.Global;
+import com.common.TableCellRender;
 import com.inventory.model.AppUser;
-import com.inventory.ui.common.UserTableModel;
+import com.user.common.UserTableModel;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Lenovo
  */
-public class AppUserAutoCompleter implements KeyListener {
+public final class AppUserAutoCompleter implements KeyListener {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(AppUserAutoCompleter.class);
     private final JTable table = new JTable();
@@ -62,7 +62,9 @@ public class AppUserAutoCompleter implements KeyListener {
         textComp.addKeyListener(this);
         if (filter) {
             list = new ArrayList<>(list);
-            list.add(0, new AppUser("-", "All"));
+            AppUser user = new AppUser("-", "All");
+            list.add(0,user);
+            setAppUser(user);
         }
         userTableModel = new UserTableModel(list);
         table.setModel(userTableModel);
@@ -84,7 +86,7 @@ public class AppUserAutoCompleter implements KeyListener {
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                if (evt.getClickCount() == 2) {
+                if (evt.getClickCount() == 1) {
                     mouseSelect();
                 }
             }
@@ -137,7 +139,7 @@ public class AppUserAutoCompleter implements KeyListener {
 
         table.setRequestFocusEnabled(false);
 
-        if (list.size() > 0) {
+        if (!list.isEmpty()) {
             table.setRowSelectionInterval(0, 0);
         }
     }

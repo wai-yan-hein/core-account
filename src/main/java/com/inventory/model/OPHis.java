@@ -18,11 +18,12 @@ public class OPHis {
 
     private String vouNo;
     private Date vouDate;
+    private String curCode;
     private String remark;
-    private AppUser createdBy;
+    private String createdBy;
     private Location location;
     private Date createdDate;
-    private AppUser updatedBy;
+    private String updatedBy;
     private Date updatedDate;
     private boolean deleted;
     private Integer macId;

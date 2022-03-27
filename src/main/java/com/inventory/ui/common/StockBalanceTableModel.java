@@ -4,9 +4,8 @@
  */
 package com.inventory.ui.common;
 
-import com.inventory.common.Global;
-import com.inventory.common.SettingKey;
-import com.inventory.common.Util1;
+import com.common.Global;
+import com.common.ProUtil;
 import com.inventory.model.VStockBalance;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +31,7 @@ public class StockBalanceTableModel extends AbstractTableModel {
     private List<VStockBalance> listStockBalance = new ArrayList();
     private final String[] columnNames = {"Locaiton", "Qty", "Unit"};
     @Autowired
-    private WebClient webClient;
+    private WebClient inventoryApi;
     private JProgressBar progress;
 
     public JProgressBar getProgress() {
@@ -131,11 +130,13 @@ public class StockBalanceTableModel extends AbstractTableModel {
     }
 
     public void calStockBalance(String stockCode) {
-        if (Util1.isProperValid(SettingKey.IS_CALCULATE_STOCK.name())) {
+        if (ProUtil.isCalStock()) {
             progress.setIndeterminate(true);
-            Mono<ResponseEntity<List<VStockBalance>>> result = webClient.get()
+            Mono<ResponseEntity<List<VStockBalance>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/report/get-stock-balance")
                     .queryParam("stockCode", stockCode)
+                    .queryParam("relation", ProUtil.isUnitRelation())
+                    .queryParam("macId", Global.macId)
                     .build())
                     .retrieve().toEntityList(VStockBalance.class);
             result.subscribe((t) -> {

@@ -5,7 +5,6 @@
  */
 package com.inventory.model;
 
-import java.util.Date;
 import lombok.Data;
 
 /**
@@ -15,24 +14,16 @@ import lombok.Data;
 @Data
 public class AppUser implements java.io.Serializable {
 
-    private String appUserCode;
-    private Boolean active;
+    private String userCode;
+    private String userName;
+    private String userShortName;
     private String email;
     private String password;
-    private String phone;
-    private String userName;
-    private String userShort;
-    private String createStatus;
-    private Date updatedDate;
-    private AppUser updatedBy;
-    private Date createdDate;
-    private AppUser createdBy;
-    private Integer macId;
-    private String userCode;
-    private String compCode;
+    private boolean active;
+    private AppRole role;
 
-    public AppUser(String appUserCode, String userName) {
-        this.appUserCode = appUserCode;
+    public AppUser(String userCode, String userName) {
+        this.userCode = userCode;
         this.userName = userName;
     }
 

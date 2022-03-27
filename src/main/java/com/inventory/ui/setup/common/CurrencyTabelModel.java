@@ -4,7 +4,7 @@
  */
 package com.inventory.ui.setup.common;
 
-import com.inventory.model.Currency;
+import com.user.model.Currency;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -60,18 +60,14 @@ public class CurrencyTabelModel extends AbstractTableModel {
         try {
             Currency currency = listCurrency.get(row);
 
-            switch (column) {
-                case 0: //Id
-                    return currency.getCurCode();
-                case 1: //Name
-                    return currency.getCurrencyName();
-                case 2:
-                    return currency.getCurrencySymbol();
-                case 3:
-                    return currency.getActive();
-                default:
-                    return null;
-            }
+            return switch (column) {
+                case 0 -> currency.getCurCode();
+                case 1 -> currency.getCurrencyName();
+                case 2 -> currency.getCurrencySymbol();
+                case 3 -> currency.isActive();
+                default -> null;
+            }; //Id
+            //Name
         } catch (Exception ex) {
             log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }

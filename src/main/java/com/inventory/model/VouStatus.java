@@ -18,9 +18,9 @@ public class VouStatus {
     private String code;
     private String description;
     private Date updatedDate;
-    private AppUser updatedBy;
+    private String updatedBy;
     private Date createdDate;
-    private AppUser createdBy;
+    private String createdBy;
     private Integer macId;
     private String userCode;
     private String compCode;

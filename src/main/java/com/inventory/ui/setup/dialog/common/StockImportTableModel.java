@@ -21,7 +21,7 @@ public class StockImportTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(StockImportTableModel.class);
     private List<Stock> listStock = new ArrayList();
-    private String[] columnNames = {"Code", "Stock-Code", "Stock Name", "Weight", "Stock Type", "Pattern"};
+    private String[] columnNames = {"Code", "Name", "Price"};
 
     @Override
     public String getColumnName(int column) {
@@ -35,10 +35,7 @@ public class StockImportTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        switch (column) {
-            default:
-                return String.class;
-        }
+        return column == 2 ? Float.class : String.class;
     }
 
     @Override
@@ -47,22 +44,17 @@ public class StockImportTableModel extends AbstractTableModel {
         try {
             Stock stock = listStock.get(row);
 
-            switch (column) {
-                case 0: //Id
-                    return stock.getMigCode();
-                case 1: //Name
-                    return stock.getBarcode();
-                case 2:
-                    return stock.getStockName();
-                case 3:
-                    return stock.getSaleWeight();
-                case 4:
-                    return stock.getStockType().getStockTypeCode();
-                case 5:
-                    return null;
-                default:
-                    return null;
-            }
+            return switch (column) {
+                case 0 ->
+                    stock.getUserCode();
+                case 1 ->
+                    stock.getStockName();
+                case 2 ->
+                    stock.getSalePriceN();
+                default ->
+                    null;
+            }; //Id
+            //Name
         } catch (Exception ex) {
             log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }

@@ -5,16 +5,17 @@
  */
 package com.inventory.ui.setup.dialog;
 
-import com.inventory.common.Global;
-import com.inventory.common.ReturnObject;
-import com.inventory.common.StartWithRowFilter;
-import com.inventory.common.TableCellRender;
-import com.inventory.common.Util1;
+import com.common.Global;
+import com.common.StartWithRowFilter;
+import com.common.TableCellRender;
+import com.common.Util1;
 import com.inventory.model.Region;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.RegionTableModel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -27,9 +28,6 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -42,14 +40,24 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
     private int selectRow = - 1;
     private Region region = new Region();
     private RegionTableModel regionTableModel = new RegionTableModel();
-    private WebClient webClient;
+    private InventoryRepo inventoryRepo;
+    private List<Region> listRegion;
 
-    public WebClient getWebClient() {
-        return webClient;
+    public List<Region> getListRegion() {
+        return listRegion;
     }
 
-    public void setWebClient(WebClient webClient) {
-        this.webClient = webClient;
+    public void setListRegion(List<Region> listRegion) {
+        this.listRegion = listRegion;
+    }
+
+
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
     }
 
     private TableRowSorter<TableModel> sorter;
@@ -83,7 +91,7 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
     }
 
     private void searchCategory() {
-        regionTableModel.setListRegion(Global.listRegion);
+        regionTableModel.setListRegion(listRegion);
     }
 
     private void initTable() {
@@ -116,24 +124,13 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
 
     private void save() {
         if (isValidEntry()) {
-            Mono<Region> result = webClient.post()
-                    .uri("/setup/save-region")
-                    .body(Mono.just(region), Region.class)
-                    .retrieve()
-                    .bodyToMono(Region.class);
-            result.subscribe((t) -> {
-                if (t != null) {
-                    if (lblStatus.getText().equals("EDIT")) {
-                        Global.listRegion.set(selectRow, t);
-                    } else {
-                        Global.listRegion.add(t);
-                    }
-                    clear();
-                    JOptionPane.showMessageDialog(this, "Saved");
-                }
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+            region = inventoryRepo.saveRegion(region);
+            if (lblStatus.getText().equals("EDIT")) {
+                listRegion.set(selectRow, region);
+            } else {
+                listRegion.add(region);
+            }
+            clear();
         }
     }
 
@@ -148,22 +145,7 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
         txtUserCode.requestFocus();
     }
 
-    private void delete() {
-        Region cat = regionTableModel.getRegion(selectRow);
-        if (cat != null) {
-            Global.listRegion.remove(selectRow);
-            String catCode = cat.getRegCode();
-            Mono<ReturnObject> result = webClient.delete()
-                    .uri(builder -> builder.path("/setup/delete-region").queryParam("code", catCode).build())
-                    .retrieve().bodyToMono(ReturnObject.class);
-            result.subscribe((t) -> {
-                JOptionPane.showMessageDialog(this, t.getMessage());
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
-            clear();
-        }
-    }
+  
 
     private boolean isValidEntry() {
         boolean status = true;
@@ -176,11 +158,11 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
             region.setRegionName(txtName.getText());
             if (lblStatus.getText().equals("NEW")) {
                 region.setCompCode(Global.compCode);
-                region.setCreatedBy(Global.loginUser);
+                region.setCreatedBy(Global.loginUser.getUserCode());
                 region.setCreatedDate(Util1.getTodayDate());
                 region.setMacId(Global.macId);
             } else {
-                region.setUpdatedBy(Global.loginUser);
+                region.setUpdatedBy(Global.loginUser.getUserCode());
             }
         }
         return status;
