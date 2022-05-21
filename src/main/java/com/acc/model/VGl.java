@@ -16,6 +16,7 @@ public class VGl {
 
     private String glCode;
     private Date glDate;
+    private String formatDate;
     private String description;
     private String sourceAcId;
     private String accCode;

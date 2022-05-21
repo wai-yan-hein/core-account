@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ReturnInTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Code", "Description", "Location",
-        "Qty", "Std-Wt", "Unit", "Cost Price", "Price", "Amount"};
+        "Qty", "Std-Wt", "Unit", "Price", "Amount"};
     private JTable parent;
     private List<RetInHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
@@ -114,7 +114,7 @@ public class ReturnInTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 4,8 -> {
+            case 4,7 -> {
                 return false;
             }
             default -> {
@@ -153,13 +153,10 @@ public class ReturnInTableModel extends AbstractTableModel {
                     return record.getUnit();
                 }
                 case 6 -> {
-                    return record.getCostPrice();
-                }
-                case 7 -> {
                     //price
                     return record.getPrice();
                 }
-                case 8 -> {
+                case 7 -> {
                     //amount
                     return record.getAmount();
                 }
@@ -170,6 +167,7 @@ public class ReturnInTableModel extends AbstractTableModel {
         } catch (Exception ex) {
             log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
+
         return null;
     }
 
@@ -241,12 +239,6 @@ public class ReturnInTableModel extends AbstractTableModel {
                     parent.setColumnSelectionInterval(6, 6);
                 }
                 case 6 -> {
-                    if (Util1.isPositive(Util1.getFloat(value))) {
-                        record.setCostPrice(Util1.getFloat(value));
-                    }
-                    parent.setColumnSelectionInterval(7, 7);
-                }
-                case 7 -> {
                     // Price
                     if (Util1.isNumber(value)) {
                         if (Util1.isPositive(Util1.getFloat(value))) {
@@ -262,24 +254,24 @@ public class ReturnInTableModel extends AbstractTableModel {
                         parent.setColumnSelectionInterval(column, column);
                     }
                 }
-                case 8 -> {
+                case 7 -> {
                     //Amount
                     if (value != null) {
                         record.setAmount(Util1.getFloat(value));
                     }
                 }
             }
-            if (column != 7) {
+            if (column != 6) {
                 if (record.getStock() != null && record.getUnit() != null) {
                     record.setPrice(inventoryRepo.getPurRecentPrice(record.getStock().getStockCode(),
                             Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnit().getUnitCode()));
+                    record.setCostPrice(0.0f);
                 }
             }
             calculateAmount(record);
             fireTableRowsUpdated(row, row);
             selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
             parent.requestFocusInWindow();
-            //   fireTableCellUpdated(row, 8);
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }

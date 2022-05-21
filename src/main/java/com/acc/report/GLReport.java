@@ -19,17 +19,21 @@ import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.inventory.editor.CurrencyAutoCompleter;
 import com.user.common.UserRepo;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
@@ -37,7 +41,12 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import net.coderazzi.filters.gui.AutoChoices;
 import net.coderazzi.filters.gui.TableFilterHeader;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.engine.fill.ReportFiller;
+import net.sf.jasperreports.view.JasperViewer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -151,15 +160,15 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                         selectRow = tblGL.convertRowIndexToModel(tblGL.getSelectedRow());
                         if (chkDetail.isSelected()) {
                             VTriBalance vtb = glListingTableModel.getTBAL(selectRow);
-                            String coaCode = vtb.getKey().getCoaCode();
+                            String coaCode = vtb.getCoaCode();
                             String coaName = vtb.getCoaName();
-                            String curCode = vtb.getKey().getCurCode();
+                            String curCode = vtb.getCurCode();
                             openTBDDialog(coaCode, curCode, coaName);
                         } else {
                             VTriBalance vtb = glListingTableModel.getTBAL(selectRow);
-                            String coaCode = vtb.getKey().getCoaCode();
+                            String coaCode = vtb.getCoaCode();
                             String coaName = vtb.getCoaName();
-                            String curCode = vtb.getKey().getCurCode();
+                            String curCode = vtb.getCurCode();
                             openTBDDialog(coaCode, curCode, coaName);
                         }
                     }
@@ -278,23 +287,31 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     private void printGLListing() {
         try {
             progress.setIndeterminate(true);
-            String depName = txtDep.getText();
-            String date = txtDate.getText();
-            String filePath = ProUtil.getReportPath() + File.separator + "TriBalance";
-            double ob = Util1.getDouble(txtOB.getValue());
             Map<String, Object> p = new HashMap();
-            p.put("p_company_name", Global.companyName);
-            p.put("p_comp_id", Global.compCode);
-            p.put("p_mac_id", Global.macId);
-            p.put("p_report_info", date);
-            p.put("p_dept_name", "Dept : " + depName);
-            p.put("p_out_balance", ob);
+            p.put("p_report_name", "Trial Balance");
+            p.put("p_date", String.format("Between %s and %s",
+                    Util1.toDateStr(stDate, "yyyy-MM-dd", "dd/MM/yyyy"),
+                    Util1.toDateStr(endDate, "yyyy-MM-dd", "dd/MM/yyyy")));
             p.put("p_print_date", Util1.getTodayDateTime());
+            p.put("p_comp_name", Global.companyName);
+            p.put("p_comp_address", Global.companyAddress);
+            p.put("p_comp_phone", Global.companyPhone);
+            p.put("p_currency", currencyAutoCompleter.getCurrency().getCurCode());
+            p.put("p_department", txtDep.getText());
+            ObjectMapper mapper = new ObjectMapper();
+            Gson gson = new Gson();
+            JsonNode node = mapper.readTree(gson.toJson(glListingTableModel.getListTBAL()));
+            JsonDataSource ds = new JsonDataSource(node, null) {
+            };
+            JasperPrint js = JasperFillManager.fillReport(Global.accountRP + "TriBalance.jasper", p, ds);
+            JasperViewer.viewReport(js, false);
             progress.setIndeterminate(false);
-        } catch (Exception ex) {
+        } catch (JsonProcessingException ex) {
             progress.setIndeterminate(false);
             JOptionPane.showMessageDialog(Global.parentForm, "Report", ex.getMessage(), JOptionPane.ERROR_MESSAGE);
             log.error("printGLListing : " + ex.getMessage());
+        } catch (JRException ex) {
+            java.util.logging.Logger.getLogger(GLReport.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
@@ -496,7 +513,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         jPanel3.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         chkClosing.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
-        chkClosing.setText("Closing");
+        chkClosing.setText("Net Change");
         chkClosing.setBorderPaintedFlat(true);
         chkClosing.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -514,7 +531,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         });
 
         chkDetail.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
-        chkDetail.setText("Detail");
+        chkDetail.setText("Currency Convert");
         chkDetail.setBorderPaintedFlat(true);
         chkDetail.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -528,11 +545,11 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(chkClosing, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(chkClosing)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(chkActive, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(chkActive)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(chkDetail, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(chkDetail)
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -540,8 +557,9 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(chkClosing, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(chkActive, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(chkClosing, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(chkActive, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(chkDetail, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -556,8 +574,8 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblCalTime, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                         .addComponent(txtFTotalDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)

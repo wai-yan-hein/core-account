@@ -132,26 +132,38 @@ public class AllCashTableModel extends AbstractTableModel {
             if (!listVGl.isEmpty()) {
                 VGl vgi = listVGl.get(row);
                 switch (column) {
-                    case 0: //Id
-                        if (vgi.getGlDate() != null) {
-                            return Util1.toDateStr(vgi.getGlDate(), "dd/MM/yyyy");
-                        }
-                    case 1: //Department
+                    case 0 -> {
+                        //Id
+                        return Util1.toDateStr(vgi.getGlDate(), "dd/MM/yyyy");
+                    }
+                    case 1 -> {
+                        //Department
                         return vgi.getDeptUsrCode();
-                    case 2://Desp
+                    }
+                    case 2 -> {
+                        //Desp
                         return vgi.getDescription();
-                    case 3://Ref
+                    }
+                    case 3 -> {
+                        //Ref
                         return vgi.getReference();
-                    case 4://Ref no
+                    }
+                    case 4 -> {
+                        //Ref no
                         return vgi.getRefNo();
-                    case 5://Person
+                    }
+                    case 5 -> {
+                        //Person
                         return vgi.getTraderName();
-                    case 6:
+                    }
+                    case 6 -> {
                         //Account
                         return vgi.getGlCode() != null ? Util1.isNull(vgi.getAccName(), "* Journal *") : vgi.getAccName();
-                    case 7:
+                    }
+                    case 7 -> {
                         return vgi.getCurCode();
-                    case 8:
+                    }
+                    case 8 -> {
                         if (vgi.getDrAmt() != null) {
                             if (vgi.getDrAmt() == 0) {
                                 return null;
@@ -161,7 +173,8 @@ public class AllCashTableModel extends AbstractTableModel {
                         } else {
                             return vgi.getDrAmt();
                         }
-                    case 9:
+                    }
+                    case 9 -> {
                         if (vgi.getCrAmt() != null) {
                             if (vgi.getCrAmt() == 0) {
                                 return null;
@@ -171,8 +184,10 @@ public class AllCashTableModel extends AbstractTableModel {
                         } else {
                             return vgi.getCrAmt();
                         }
-                    default:
-                        return null;
+                    }
+                    default -> {
+                            return null;
+                    }
                 }
             }
         } catch (Exception ex) {

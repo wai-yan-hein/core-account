@@ -227,8 +227,8 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="lblCalTime" min="-2" pref="59" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                  <Component id="jPanel3" max="32767" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="jPanel3" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="32767" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="1" attributes="0">
                           <Component id="txtFTotalDrAmt" min="-2" pref="200" max="-2" attributes="0"/>
@@ -348,11 +348,11 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="chkClosing" min="-2" pref="76" max="-2" attributes="0"/>
+                      <Component id="chkClosing" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="chkActive" min="-2" pref="76" max="-2" attributes="0"/>
+                      <Component id="chkActive" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="chkDetail" min="-2" pref="76" max="-2" attributes="0"/>
+                      <Component id="chkDetail" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -362,8 +362,10 @@
                   <Group type="102" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="chkClosing" alignment="0" min="-2" pref="22" max="-2" attributes="0"/>
-                          <Component id="chkActive" alignment="0" min="-2" pref="22" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="chkClosing" alignment="3" min="-2" pref="22" max="-2" attributes="0"/>
+                              <Component id="chkActive" alignment="3" min="-2" pref="22" max="-2" attributes="0"/>
+                          </Group>
                           <Component id="chkDetail" alignment="0" min="-2" pref="22" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="32767" attributes="0"/>
@@ -377,7 +379,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Arial" size="12" style="1"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Closing"/>
+                <Property name="text" type="java.lang.String" value="Net Change"/>
                 <Property name="borderPaintedFlat" type="boolean" value="true"/>
               </Properties>
               <Events>
@@ -401,7 +403,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Arial" size="12" style="1"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Detail"/>
+                <Property name="text" type="java.lang.String" value="Currency Convert"/>
                 <Property name="borderPaintedFlat" type="boolean" value="true"/>
               </Properties>
               <Events>

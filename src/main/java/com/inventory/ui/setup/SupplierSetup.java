@@ -359,7 +359,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         chkCD.setName("chkActive"); // NOI18N
 
         chkMulti.setFont(Global.lableFont);
-        chkMulti.setText("Cash Down");
+        chkMulti.setText("Multi Use");
         chkMulti.setName("chkActive"); // NOI18N
 
         javax.swing.GroupLayout panelEntryLayout = new javax.swing.GroupLayout(panelEntry);

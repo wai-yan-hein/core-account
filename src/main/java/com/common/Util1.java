@@ -4,15 +4,14 @@
  */
 package com.common;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.io.FileWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.Writer;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
@@ -21,6 +20,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -28,6 +29,8 @@ import javax.swing.JLabel;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
 import lombok.extern.slf4j.Slf4j;
+import net.lingala.zip4j.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
 
 /**
  * @author WSwe
@@ -653,11 +656,19 @@ public class Util1 {
         return Util1.getFloat(value) > 0;
     }
 
-    public static void writeJsonFile(Object data, String exportPath) throws IOException {
-        try (Writer writer = new FileWriter(exportPath)) {
-            Gson gson = new GsonBuilder().serializeNulls().create();
-            gson.toJson(data, writer);
+    public static void extractZipToJson(byte[] zipData, String exportPath) {
+        try {
+            File file = new File(exportPath.concat(".zip"));
+            try (FileOutputStream stream = new FileOutputStream(file)) {
+                stream.write(zipData);
+            }
+        } catch (IOException ex) {
+            log.error(ex.getMessage());
+        }
+        try {
+            new ZipFile(exportPath.concat(".zip")).extractAll("temp");
+        } catch (ZipException ex) {
+            log.error(ex.getMessage());
         }
     }
-
 }

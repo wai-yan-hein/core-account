@@ -8,6 +8,8 @@ package com.common;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.text.DateFormat;
+import java.util.Objects;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -63,6 +65,22 @@ public class ProUtil {
 
     public static String getCashGroup() {
         return Global.hmRoleProperty.get("cash.group");
+    }
+
+    public static String getIncomeGroup() {
+        String ig = Global.hmRoleProperty.get("income.group");
+        if (Objects.isNull(ig)) {
+            JOptionPane.showMessageDialog(Global.parentForm, "Invalid Income Group.");
+        }
+        return ig;
+    }
+
+    public static String getExpenseGroup() {
+        String eg = Global.hmRoleProperty.get("expense.group");
+        if (Objects.isNull(eg)) {
+            JOptionPane.showMessageDialog(Global.parentForm, "Invalid Expense Group.");
+        }
+        return eg;
     }
 
     public static String getReportPath() {

@@ -7,6 +7,7 @@ package com.inventory.ui;
 
 import com.common.Global;
 import com.common.TableCellRender;
+import com.common.Util1;
 import com.user.model.VRoleCompany;
 import com.inventory.ui.common.CompanyNameTableModel;
 import java.util.List;
@@ -53,8 +54,8 @@ public class CompanyDialog extends javax.swing.JDialog {
             Global.roleCode = company.getRoleCode();
             Global.compCode = company.getCompCode();
             Global.companyName = company.getCompName();
-            log.info("Role Id : " + Global.roleCode);
-            log.info("Company Id : " + Global.compCode);
+            Global.startDate = Util1.toDateStr(company.getStartDate(), "dd/MM/yyyy");
+            Global.endate = Util1.toDateStr(company.getEndDate(), "dd/MM/yyyy");
             this.dispose();
         }
     }

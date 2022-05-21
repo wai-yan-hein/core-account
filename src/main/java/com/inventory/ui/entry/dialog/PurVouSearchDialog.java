@@ -463,6 +463,7 @@ public class PurVouSearchDialog extends javax.swing.JDialog implements KeyListen
 
             }
         ));
+        tblVoucher.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
         tblVoucher.setRowHeight(Global.tblRowHeight);
         tblVoucher.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {

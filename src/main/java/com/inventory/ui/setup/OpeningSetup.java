@@ -352,7 +352,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         HashMap<String, Stock> hm = new HashMap<>();
         if (!listStock.isEmpty()) {
             for (Stock s : listStock) {
-                hm.put(s.getUserCode(), s);
+                hm.put(s.getStockCode(), s);
             }
         }
         String line;
@@ -366,33 +366,27 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                 {
                     OPHisDetail op = new OPHisDetail();
                     String[] data = line.split(splitBy);    // use comma as separator
-                    String userCode = null;
+                    String stockCode = null;
                     String unit = null;
                     String qty = null;
-                    String price = null;
-                    String amount = null;
                     lineCount++;
                     try {
-                        userCode = data[0];
+                        stockCode = data[0];
                         unit = data[1];
                         qty = data[2];
-                        price = data[3];
-                        amount = data[4];
 
                     } catch (IndexOutOfBoundsException e) {
                         //JOptionPane.showMessageDialog(Global.parentForm, "FORMAT ERROR IN LINE:" + lineCount + e.getMessage());
                     }
-                    Stock s = hm.get(userCode);
+                    Stock s = hm.get(stockCode);
                     if (s != null) {
                         op.setStock(s);
                         op.setQty(Util1.getFloat(qty));
-                        op.setPrice(Util1.getFloat(price));
-                        op.setAmount(Util1.getFloat(amount));
                         op.setStdWt(1.0f);
                         op.setStockUnit(new StockUnit(unit));
                         listOP.add(op);
                     } else {
-                        log.info(userCode + "\n");
+                        log.info(stockCode + "\n");
                     }
                 }
                 openingTableModel.setListDetail(listOP);

@@ -392,7 +392,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 companySetup.initMain();
                 return companySetup;
             }
-            case "GL Listing" -> {
+            case "G/L Listing" -> {
                 gLReport.setName(menuName);
                 gLReport.setObserver(this);
                 gLReport.setProgress(progress);

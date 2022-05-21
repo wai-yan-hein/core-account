@@ -14,7 +14,9 @@ import lombok.Data;
 @Data
 public class VTriBalance implements java.io.Serializable {
 
-    private VTriBalanceKey key;
+    private String coaCode;
+    private String curCode;
+    private String compCode;
     private Double drAmt;
     private Double crAmt;
     private String coaName;

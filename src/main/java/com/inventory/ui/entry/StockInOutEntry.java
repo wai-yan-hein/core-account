@@ -134,6 +134,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         tblStock.getColumnModel().getColumn(7).setPreferredWidth(50);
         tblStock.getColumnModel().getColumn(8).setPreferredWidth(50);
         tblStock.getColumnModel().getColumn(9).setPreferredWidth(50);
+        tblStock.getColumnModel().getColumn(10).setPreferredWidth(50);
         tblStock.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(listStock));
         tblStock.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(listStock));
         tblStock.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(listLocation));
@@ -509,10 +510,12 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
         txtOutQty.setEditable(false);
         txtOutQty.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
+        txtOutQty.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtOutQty.setFont(Global.amtFont);
 
         txtInQty.setEditable(false);
         txtInQty.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
+        txtInQty.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtInQty.setFont(Global.amtFont);
 
         jLabel1.setFont(Global.lableFont);
@@ -536,6 +539,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
         txtCost.setEditable(false);
         txtCost.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
+        txtCost.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtCost.setFont(Global.amtFont);
 
         jLabel8.setFont(Global.lableFont);

@@ -61,13 +61,13 @@ public class GLListingTableModel extends AbstractTableModel {
                     return apar.getCoaName();
                 }
                 case 2 -> {
-                    return apar.getKey().getCurCode();
+                    return apar.getCurCode();
                 }
                 case 3 -> {
-                    return Util1.getDouble(apar.getDrAmt()) == 0 ? null : apar.getDrAmt();
+                    return apar.getDrAmt();
                 }
                 case 4 -> {
-                    return Util1.getDouble(apar.getCrAmt()) == 0 ? null : apar.getCrAmt();
+                    return apar.getCrAmt();
                 }
                 case 5 -> {
                     return null;

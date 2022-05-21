@@ -129,8 +129,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         tblRet.getColumnModel().getColumn(4).setPreferredWidth(1);//Std wt
         tblRet.getColumnModel().getColumn(5).setPreferredWidth(1);//unit
         tblRet.getColumnModel().getColumn(6).setPreferredWidth(1);//price
-        tblRet.getColumnModel().getColumn(7).setPreferredWidth(1);//price
-        tblRet.getColumnModel().getColumn(8).setPreferredWidth(40);//amt
+        tblRet.getColumnModel().getColumn(7).setPreferredWidth(40);//amt
         tblRet.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(listStock));
         tblRet.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(listStock));
         tblRet.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(listLocation));
@@ -139,7 +138,6 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         tblRet.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
         tblRet.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
         tblRet.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
-        tblRet.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
         tblRet.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblRet.setDefaultRenderer(Float.class, new DecimalFormatRender());
         tblRet.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -215,6 +213,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.GREEN);
         progress.setIndeterminate(false);
+        txtRemark.setText(null);
         focusTable();
     }
 

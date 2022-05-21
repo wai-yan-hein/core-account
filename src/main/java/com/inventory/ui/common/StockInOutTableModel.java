@@ -30,7 +30,7 @@ public class StockInOutTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(StockInOutTableModel.class);
     private String[] columnNames = {"Stock Code", "Stock Name", "Location",
-        "In-Qty", "In-Weight", "In-Unit", "Out-Qty", "Out-Weight", "Out-Unit", "Cost Price"};
+        "In-Qty", "In-Weight", "In-Unit", "Out-Qty", "Out-Weight", "Out-Unit", "Cost Price", "Amount"};
     private JTable parent;
     private List<StockInOutDetail> listStock = new ArrayList();
     private List<String> deleteList = new ArrayList();
@@ -114,6 +114,8 @@ public class StockInOutTableModel extends AbstractTableModel {
                     io.getOutUnit();
                 case 9 ->
                     io.getCostPrice();
+                case 10 ->
+                    Util1.getFloat(io.getCostPrice()) * (Util1.getFloat(io.getInQty()) + Util1.getFloat(io.getOutQty()));
                 default ->
                     null;
             };
@@ -127,7 +129,7 @@ public class StockInOutTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 3,4,6,7,9 ->
+            case 3,4,6,7,9,10 ->
                 Float.class;
             default ->
                 String.class;
@@ -228,6 +230,7 @@ public class StockInOutTableModel extends AbstractTableModel {
                     }
                 }
             }
+            
             observer.selected("CAL-TOTAL", "CAL-TOTAL");
             fireTableRowsUpdated(row, row);
             parent.requestFocus();
@@ -235,7 +238,6 @@ public class StockInOutTableModel extends AbstractTableModel {
             log.error("setValueAt :" + e.getMessage());
         }
     }
-
     public List<String> getDeleteList() {
         return deleteList;
     }

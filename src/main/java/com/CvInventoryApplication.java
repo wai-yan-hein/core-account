@@ -30,9 +30,9 @@ public class CvInventoryApplication {
 
     public static void main(String[] args) throws IOException {
         try {
-            UIManager.setLookAndFeel(new FlatCyanLightIJTheme());
+        UIManager.setLookAndFeel(new FlatCyanLightIJTheme());
         } catch (UnsupportedLookAndFeelException ex) {
-            System.err.println("Failed to initialize LaF");
+        System.err.println("Failed to initialize LaF");
         }
         try {
             Global.sock = new ServerSocket(10004);//Pharmacy
@@ -41,7 +41,7 @@ public class CvInventoryApplication {
             System.exit(1);
         }
         System.setProperty("flatlaf.useWindowDecorations", "false");
-        System.setProperty("flatlaf.menuBarEmbedded","false");
+        System.setProperty("flatlaf.menuBarEmbedded", "false");
         System.setProperty("flatlaf.animation", "true");
         System.setProperty("flatlaf.uiScale.enabled", "true");
         UIManager.put("Button.arc", 10);
