@@ -351,6 +351,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         jLabel7.setText("Sys Code");
 
         txtSysCode.setFont(Global.textFont);
+        txtSysCode.setDisabledTextColor(new java.awt.Color(0, 0, 0));
         txtSysCode.setEnabled(false);
         txtSysCode.setName("txtCusCode"); // NOI18N
 

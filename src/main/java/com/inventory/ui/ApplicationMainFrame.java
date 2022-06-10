@@ -61,6 +61,7 @@ import com.inventory.ui.setup.PatternSetup;
 import com.user.setup.SystemProperty;
 import com.user.setup.AppUserSetup;
 import com.user.setup.CompanySetup;
+import com.user.setup.MachinePropertySetup;
 import java.time.Duration;
 import java.util.HashMap;
 import javax.swing.JSeparator;
@@ -104,7 +105,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private RoleSetting roleSetting;
     @Autowired
     private Reports report;
-
+    @Autowired
+    private MachinePropertySetup machineProperty;
     @Autowired
     private PatternSetup patternSetup;
     @Autowired
@@ -343,6 +345,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 systemProperty.initTable();
                 return systemProperty;
             }
+            case "Machine Property" -> {
+                machineProperty.setName(menuName);
+                machineProperty.setObserver(this);
+                machineProperty.setProgress(progress);
+                machineProperty.initTable();
+                return machineProperty;
+            }
             case "Pattern Setup" -> {
                 patternSetup.setName(menuName);
                 patternSetup.setObserver(this);
@@ -572,7 +581,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         Global.parentForm = this;
         lblCompName.setText(Global.companyName);
         lblUserName.setText(Global.loginUser.getUserName());
-        userRepo.initRoleProperty();
+        userRepo.setupProperty(Global.roleCode, Global.compCode, Global.macId);
     }
 
     private void logout() {

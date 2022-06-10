@@ -12,6 +12,8 @@ import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.PriceTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
@@ -28,6 +30,24 @@ public class PriceOptionDialog extends javax.swing.JDialog {
     private final PriceTableModel tableModel = new PriceTableModel();
     private PriceOption option;
     private InventoryRepo inventoryRepo;
+    private List<PriceOption> listPrice = new ArrayList<>();
+    private boolean needToChoice;
+
+    public boolean isNeedToChoice() {
+        return needToChoice;
+    }
+
+    public void setNeedToChoice(boolean needToChoice) {
+        this.needToChoice = needToChoice;
+    }
+
+    public List<PriceOption> getListPrice() {
+        return listPrice;
+    }
+
+    public void setListPrice(List<PriceOption> listPrice) {
+        this.listPrice = listPrice;
+    }
 
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
@@ -66,14 +86,18 @@ public class PriceOptionDialog extends javax.swing.JDialog {
         tblPrice.setRequestFocusEnabled(false);
         tblPrice.getColumnModel().getColumn(0).setPreferredWidth(10);
         tblPrice.getColumnModel().getColumn(1).setPreferredWidth(30);
+        tblPrice.getColumnModel().getColumn(1).setPreferredWidth(30);
         tblPrice.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "Enter-Action");
         tblPrice.getActionMap().put("Enter-Action", actionEnter);
         tblPrice.setDefaultRenderer(Object.class, new TableCellRender());
+        tblPrice.setDefaultRenderer(Float.class, new TableCellRender());
     }
 
     public void initData() {
-        tableModel.setListPrice(inventoryRepo.getPriceOption());
-        tblPrice.setRowSelectionInterval(0, 0);
+        tableModel.setListPrice(listPrice);
+        if (needToChoice) {
+            tblPrice.setRowSelectionInterval(0, 0);
+        }
     }
     private final Action actionEnter = new AbstractAction() {
         @Override
@@ -132,9 +156,7 @@ public class PriceOptionDialog extends javax.swing.JDialog {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

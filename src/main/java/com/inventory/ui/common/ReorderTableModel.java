@@ -7,7 +7,6 @@ package com.inventory.ui.common;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.common.ReturnObject;
 import com.common.Util1;
 import com.inventory.model.ReorderLevel;
 import com.inventory.model.Stock;
@@ -21,8 +20,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -32,9 +29,9 @@ import reactor.core.publisher.Mono;
 public class ReorderTableModel extends AbstractTableModel {
 
     public static final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
-    private final String[] columnNames = {"Stock Code", "Stock Name", "Min Qty", "Min Unit", "Max Qty", "Max Unit", "Balance Qty", "Balance Unit"};
+    private final String[] columnNames = {"Stock Code", "Stock Name", "Min Qty", "Min Unit", "Max Qty", "Max Unit", "Stock Balance", "Status"};
     private List<ReorderLevel> listReorder = new ArrayList<>();
-    private WebClient inventoryApi;
+    private InventoryRepo inventoryRepo;
     private String patternCode;
     private JTable table;
 
@@ -54,12 +51,12 @@ public class ReorderTableModel extends AbstractTableModel {
         this.patternCode = patternCode;
     }
 
-    public WebClient getWebClient() {
-        return inventoryApi;
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
     }
 
-    public void setWebClient(WebClient inventoryApi) {
-        this.inventoryApi = inventoryApi;
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
     }
 
     @Override
@@ -94,12 +91,19 @@ public class ReorderTableModel extends AbstractTableModel {
             case 5 ->
                 p.getMaxUnit();
             case 6 ->
-                p.getBalQty();
-            case 7 ->
                 p.getBalUnit();
+            case 7 ->
+                getStatus(p);
             default ->
                 null;
         };
+    }
+
+    private String getStatus(ReorderLevel r) {
+        float minQty = Util1.getFloat(r.getMinSmallQty());
+        float maxQty = Util1.getFloat(r.getMaxSmallQty());
+        float balQty = Util1.getFloat(r.getBalSmallQty());
+        return balQty < minQty ? "LOW" : balQty >maxQty ? "HIGH" : "NORMAL";
     }
 
     @Override
@@ -143,8 +147,15 @@ public class ReorderTableModel extends AbstractTableModel {
                         }
                     }
                 }
+                switch (column) {
+                    case 2,3 ->
+                        p.setMinSmallQty(p.getMinQty() * getSmallQty(p.getStock().getStockCode(), p.getMinUnit().getUnitCode()));
+                    case 4,5 ->
+                        p.setMaxSmallQty(p.getMaxQty() * getSmallQty(p.getStock().getStockCode(), p.getMinUnit().getUnitCode()));
+
+                }
                 addNewRow();
-                save(p);
+                inventoryRepo.saveReorder(p);
                 fireTableRowsUpdated(row, row);
                 table.requestFocus();
             }
@@ -153,24 +164,18 @@ public class ReorderTableModel extends AbstractTableModel {
         }
     }
 
-    private void save(ReorderLevel rl) {
-        Mono<ReturnObject> result = inventoryApi.post()
-                .uri("/setup/save-reorder")
-                .body(Mono.just(rl), ReorderLevel.class)
-                .retrieve()
-                .bodyToMono(ReturnObject.class);
-        ReturnObject ro = result.block();
-        if (!Objects.isNull(ro)) {
-            if (!Util1.isNull(ro.getErrorMessage())) {
-                JOptionPane.showMessageDialog(table, ro.getErrorMessage());
-            }
+    private float getSmallQty(String stockCode, String unit) {
+        float qty = 1.0f;
+        if (!Objects.isNull(stockCode) && !Objects.isNull(unit)) {
+            qty = inventoryRepo.getSmallQty(stockCode, unit);
         }
+        return qty;
     }
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
         return switch (columnIndex) {
-            case 2, 4, 6 ->
+            case 2, 4 ->
                 Float.class;
             default ->
                 String.class;
@@ -180,8 +185,10 @@ public class ReorderTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         return switch (columnIndex) {
-            case 0, 1, 6, 7 -> false;
-            default -> true;
+            case 0, 1, 6, 7 ->
+                false;
+            default ->
+                true;
         };
     }
 
@@ -194,11 +201,11 @@ public class ReorderTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
-    public ReorderLevel getPattern(int row) {
+    public ReorderLevel getReorder(int row) {
         return listReorder.get(row);
     }
 
-    public void setPattern(ReorderLevel report, int row) {
+    public void setReorder(ReorderLevel report, int row) {
         if (!listReorder.isEmpty()) {
             listReorder.set(row, report);
             fireTableRowsUpdated(row, row);

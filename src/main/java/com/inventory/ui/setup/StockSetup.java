@@ -25,6 +25,7 @@ import com.inventory.model.UnitRelation;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.common.StockTableModel;
 import com.inventory.ui.setup.dialog.CategorySetupDialog;
+import com.inventory.ui.setup.dialog.RelationSetupDialog;
 import com.inventory.ui.setup.dialog.StockBrandSetupDialog;
 import com.inventory.ui.setup.dialog.StockImportDialog;
 import com.inventory.ui.setup.dialog.StockTypeSetupDialog;
@@ -68,8 +69,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private StockBrandSetupDialog itemBrandDailog;
     @Autowired
     private StockUnitSetupDailog itemUnitSetupDailog;
-    @Autowired
-    private StockTableModel stockTableModel;
+    private final StockTableModel stockTableModel = new StockTableModel();
     @Autowired
     private WebClient inventoryApi;
     @Autowired
@@ -90,6 +90,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private List<StockBrand> listStockBrand = new ArrayList<>();
     private List<StockType> listStockType = new ArrayList<>();
     private List<UnitRelation> listRelation = new ArrayList<>();
+    private final Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
 
     public SelectionObserver getObserver() {
         return observer;
@@ -135,6 +136,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     }
 
     private void initTable() {
+        stockTableModel.setInventoryRepo(inventoryRepo);
         tblStock.setModel(stockTableModel);
         tblStock.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblStock.getColumnModel().getColumn(0).setPreferredWidth(10);
@@ -179,6 +181,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtSalePriceC.setText(Util1.getString(stock.getSalePriceC()));
         txtSalePriceD.setText(Util1.getString(stock.getSalePriceD()));
         txtSalePriceE.setText(Util1.getString(stock.getSalePriceE()));
+        chkCal.setSelected(stock.isCalculate());
         lblStatus.setText("EDIT");
     }
 
@@ -207,7 +210,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private boolean isValidEntry() {
         boolean status = true;
         if (txtStockName.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Stock name must not be blank.",
+            JOptionPane.showMessageDialog(this, "Stock Name must not be blank.",
                     "Stock name.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtStockName.requestFocus();
@@ -247,7 +250,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             stock.setSalePriceC(Util1.getFloat(txtSalePriceC.getText()));
             stock.setSalePriceD(Util1.getFloat(txtSalePriceD.getText()));
             stock.setSalePriceE(Util1.getFloat(txtSalePriceE.getText()));
-
+            stock.setCalculate(chkCal.isSelected());
             if (lblStatus.getText().equals("NEW")) {
                 stock.setMacId(Global.macId);
                 stock.setCompCode(Global.compCode);
@@ -267,7 +270,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             if (stock.getStockCode() != null) {
                 if (lblStatus.getText().equals("NEW")) {
                     stockTableModel.addStock(stock);
-                }else{
+                } else {
                     stockTableModel.setStock(selectRow, stock);
                 }
                 clear();
@@ -287,6 +290,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtUserCode.setText(null);
         txtStockName.setText(null);
         chkActive.setSelected(true);
+        chkCal.setSelected(true);
         txtPurPrice.setText(null);
         txtSalePriceE.setText(null);
         txtSalePrice.setText(null);
@@ -329,6 +333,17 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtSaleUnit.addKeyListener(this);
     }
 
+    private void relationSetup() {
+        RelationSetupDialog relationSetupDialog = new RelationSetupDialog();
+        relationSetupDialog.setIconImage(icon);
+        relationSetupDialog.setInventoryRepo(inventoryRepo);
+        relationSetupDialog.setListUnitRelation(listRelation);
+        relationSetupDialog.initMain();
+        relationSetupDialog.setSize(Global.width / 2, Global.height / 2);
+        relationSetupDialog.setLocationRelativeTo(null);
+        relationSetupDialog.setVisible(true);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -340,6 +355,10 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
         jScrollPane1 = new javax.swing.JScrollPane();
         tblStock = new javax.swing.JTable();
+        lblRecord = new javax.swing.JTextField();
+        jLabel19 = new javax.swing.JLabel();
+        txtFilter = new javax.swing.JTextField();
+        jScrollPane2 = new javax.swing.JScrollPane();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         txtUserCode = new javax.swing.JTextField();
@@ -388,10 +407,8 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtStockCode = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         txtRelation = new javax.swing.JTextField();
-        btnAddBrand1 = new javax.swing.JButton();
-        lblRecord = new javax.swing.JTextField();
-        jLabel19 = new javax.swing.JLabel();
-        txtFilter = new javax.swing.JTextField();
+        btnAddRelation = new javax.swing.JButton();
+        chkCal = new javax.swing.JCheckBox();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -414,6 +431,21 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         tblStock.setName("tblStock"); // NOI18N
         tblStock.setRowHeight(Global.tblRowHeight);
         jScrollPane1.setViewportView(tblStock);
+
+        lblRecord.setEditable(false);
+        lblRecord.setFont(Global.lableFont);
+        lblRecord.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+        lblRecord.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+
+        jLabel19.setFont(Global.lableFont);
+        jLabel19.setText("Record :");
+
+        txtFilter.setFont(Global.textFont);
+        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtFilterKeyReleased(evt);
+            }
+        });
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
@@ -859,18 +891,23 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             }
         });
 
-        btnAddBrand1.setBackground(Global.selectionColor);
-        btnAddBrand1.setFont(Global.lableFont);
-        btnAddBrand1.setForeground(new java.awt.Color(255, 255, 255));
-        btnAddBrand1.setText("...");
-        btnAddBrand1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnAddBrand1.setName("btnAddBrand"); // NOI18N
-        btnAddBrand1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        btnAddBrand1.addActionListener(new java.awt.event.ActionListener() {
+        btnAddRelation.setBackground(Global.selectionColor);
+        btnAddRelation.setFont(Global.lableFont);
+        btnAddRelation.setForeground(new java.awt.Color(255, 255, 255));
+        btnAddRelation.setText("...");
+        btnAddRelation.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnAddRelation.setName("btnAddBrand"); // NOI18N
+        btnAddRelation.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnAddRelation.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnAddBrand1ActionPerformed(evt);
+                btnAddRelationActionPerformed(evt);
             }
         });
+
+        chkCal.setFont(Global.lableFont);
+        chkCal.setSelected(true);
+        chkCal.setText("Calulate Stock");
+        chkCal.setName("chkActive"); // NOI18N
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -902,7 +939,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(txtRelation)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnAddBrand1, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addComponent(btnAddRelation, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -920,6 +957,8 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(chkCal)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(chkActive)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnAddItemType1)))
@@ -972,7 +1011,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtRelation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel8)))
-                    .addComponent(btnAddBrand1))
+                    .addComponent(btnAddRelation))
                 .addGap(18, 18, 18)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
@@ -981,24 +1020,12 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnAddItemType1)
                     .addComponent(chkActive)
-                    .addComponent(lblStatus))
+                    .addComponent(lblStatus)
+                    .addComponent(chkCal))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        lblRecord.setEditable(false);
-        lblRecord.setFont(Global.lableFont);
-        lblRecord.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-        lblRecord.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
-
-        jLabel19.setFont(Global.lableFont);
-        jLabel19.setText("Record :");
-
-        txtFilter.setFont(Global.textFont);
-        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtFilterKeyReleased(evt);
-            }
-        });
+        jScrollPane2.setViewportView(jPanel1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -1011,17 +1038,18 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                         .addComponent(jLabel19)
                         .addGap(18, 18, 18)
                         .addComponent(lblRecord))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 607, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 606, Short.MAX_VALUE)
                     .addComponent(txtFilter))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 700, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 589, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1029,15 +1057,13 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel19)))
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel19))))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAddItemTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddItemTypeActionPerformed
         // TODO add your handling code here:
-        Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
         itemTypeSetupDialog.setListStockType(listStockType);
         itemTypeSetupDialog.setIconImage(icon);
         itemTypeSetupDialog.initMain();
@@ -1053,7 +1079,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
     private void btnAddCategoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddCategoryActionPerformed
         // TODO add your handling code here:
-        Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
         categorySetupDailog.setListCategory(listCategory);
         categorySetupDailog.setIconImage(icon);
         categorySetupDailog.initMain();
@@ -1064,7 +1089,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
     private void btnAddBrandActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddBrandActionPerformed
         // TODO add your handling code here:
-        Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
         itemBrandDailog.setListStockBrand(listStockBrand);
         itemBrandDailog.setIconImage(icon);
         itemBrandDailog.initMain();
@@ -1075,7 +1099,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
     private void btnUnitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUnitActionPerformed
         // TODO add your handling code here:
-        Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
         itemUnitSetupDailog.setListStockUnit(listStockUnit);
         itemUnitSetupDailog.setIconImage(icon);
         itemUnitSetupDailog.initMain();
@@ -1132,6 +1155,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private void btnAddItemType1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddItemType1ActionPerformed
         // TODO add your handling code here:
         StockImportDialog dialog = new StockImportDialog(Global.parentForm);
+        dialog.setInventoryRepo(inventoryRepo);
         dialog.setWebClient(inventoryApi);
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
@@ -1205,19 +1229,21 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         // TODO add your handling code here:
     }//GEN-LAST:event_txtRelationFocusGained
 
-    private void btnAddBrand1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddBrand1ActionPerformed
+    private void btnAddRelationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddRelationActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_btnAddBrand1ActionPerformed
+        relationSetup();
+    }//GEN-LAST:event_btnAddRelationActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddBrand;
-    private javax.swing.JButton btnAddBrand1;
     private javax.swing.JButton btnAddCategory;
     private javax.swing.JButton btnAddItemType;
     private javax.swing.JButton btnAddItemType1;
+    private javax.swing.JButton btnAddRelation;
     private javax.swing.JButton btnUnit;
     private javax.swing.JCheckBox chkActive;
+    private javax.swing.JCheckBox chkCal;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -1242,6 +1268,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextField lblRecord;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JTable tblStock;

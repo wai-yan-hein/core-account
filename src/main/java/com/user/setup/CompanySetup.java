@@ -8,6 +8,7 @@ package com.user.setup;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
+import com.common.TableCellRender;
 import com.inventory.editor.CurrencyAutoCompleter;
 import com.user.common.CompanyTableModel;
 import com.user.common.UserRepo;
@@ -74,6 +75,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         tblCompany.setModel(tableModel);
         tblCompany.getTableHeader().setFont(Global.textFont);
         tblCompany.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblCompany.setDefaultRenderer(Object.class, new TableCellRender());
         tblCompany.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
             if (e.getValueIsAdjusting()) {
                 if (tblCompany.getSelectedRow() >= 0) {

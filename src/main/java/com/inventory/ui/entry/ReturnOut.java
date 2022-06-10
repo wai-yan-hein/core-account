@@ -38,6 +38,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -1029,7 +1030,9 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             case "RO-HISTORY" -> {
                 String vouNo = selectObj.toString();
                 RetOutHis s = inventoryRepo.findReturnOut(vouNo);
-                setVoucher(s);
+                if (!Objects.isNull(s)) {
+                    setVoucher(s);
+                }
             }
         }
     }

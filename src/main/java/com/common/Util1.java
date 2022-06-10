@@ -9,7 +9,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -19,18 +18,30 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.HashPrintServiceAttributeSet;
+import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.PrintServiceAttributeSet;
+import javax.print.attribute.standard.Copies;
+import javax.print.attribute.standard.PrinterName;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
 import lombok.extern.slf4j.Slf4j;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.export.JRPrintServiceExporter;
+import net.sf.jasperreports.engine.export.JRPrintServiceExporterParameter;
 
 /**
  * @author WSwe
@@ -43,16 +54,8 @@ public class Util1 {
      */
     public static final String DECIMAL_FORMAT = "###,##0.##;(###,##0.##)";
 
-    public static String getEngChar(int i) {
-        String[] engChar = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
-            "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
-            "U", "V", "W", "X", "Y", "Z"};
-
-        if ((i + 1) < 0 || (i + 1) > engChar.length) {
-            return null;
-        } else {
-            return engChar[i + 1];
-        }
+    public static void print(String pName) {
+      
     }
 
     public static boolean isNumber(Object obj) {
@@ -68,6 +71,7 @@ public class Util1 {
             }
         } catch (NumberFormatException ex) {
         }
+
         return status;
     }
 
@@ -259,7 +263,7 @@ public class Util1 {
     }
 
     public static Date getTodayDate() {
-        return Calendar.getInstance(TimeZone.getDefault()).getTime();
+        return Calendar.getInstance(TimeZone.getTimeZone("Asia/Yangon")).getTime();
     }
 
     public static String getTodayDateTime() {
@@ -656,10 +660,24 @@ public class Util1 {
         return Util1.getFloat(value) > 0;
     }
 
+    public static Date toDateTime(Date date) {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        SimpleDateFormat f2 = new SimpleDateFormat("dd/MM/yyyy");
+        LocalDateTime now = LocalDateTime.now();
+        String strDate = f2.format(date) + " " + now.getHour() + ":"
+                + now.getMinute() + ":" + now.getSecond();
+        try {
+            date = formatter.parse(strDate);
+        } catch (ParseException ex) {
+            log.error(String.format("toDateTime: %s", ex.getMessage()));
+        }
+        return date;
+    }
+
     public static void extractZipToJson(byte[] zipData, String exportPath) {
         try {
             File file = new File(exportPath.concat(".zip"));
-            try (FileOutputStream stream = new FileOutputStream(file)) {
+            try ( FileOutputStream stream = new FileOutputStream(file)) {
                 stream.write(zipData);
             }
         } catch (IOException ex) {

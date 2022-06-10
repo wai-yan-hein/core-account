@@ -5,7 +5,6 @@
 package com.user.common;
 
 import com.common.Global;
-import com.common.RoleProperty;
 import com.common.Util1;
 import com.inventory.model.AppRole;
 import com.inventory.model.AppUser;
@@ -14,7 +13,9 @@ import com.user.model.CompanyInfo;
 import com.user.model.Currency;
 import com.user.model.PrivilegeCompany;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,7 @@ import reactor.core.publisher.Mono;
  * @author Lenovo
  */
 @Component
+@Slf4j
 public class UserRepo {
 
     int min = 1;
@@ -99,20 +101,6 @@ public class UserRepo {
         return result.block(Duration.ofMinutes(min)).getBody();
     }
 
-    public void initRoleProperty() {
-        Mono<ResponseEntity<List<RoleProperty>>> result = userApi.get()
-                .uri(builder -> builder.path("/user/get-role-property")
-                .queryParam("roleCode", Global.roleCode)
-                .build())
-                .retrieve().toEntityList(RoleProperty.class);
-        List<RoleProperty> roleProperty = result.block().getBody();
-        if (!roleProperty.isEmpty()) {
-            for (RoleProperty p : roleProperty) {
-                Global.hmRoleProperty.put(p.getKey().getPropKey(), p.getPropValue());
-            }
-        }
-    }
-
     public CompanyInfo saveCompany(CompanyInfo app) {
         Mono<CompanyInfo> result = userApi.post()
                 .uri("/user/save-company")
@@ -172,4 +160,15 @@ public class UserRepo {
         return findCurrency(Util1.isNull(curCode, "-"));
     }
 
+    public void setupProperty(String roleCode, String compCode, Integer macId) {
+        Mono<HashMap> result = userApi.get()
+                .uri(builder -> builder.path("/user/get-property")
+                .queryParam("roleCode", roleCode)
+                .queryParam("compCode", compCode)
+                .queryParam("macId", macId)
+                .build())
+                .retrieve().bodyToMono(HashMap.class);
+        Global.hmRoleProperty = result.block();
+        log.info("setupProperty.");
+    }
 }

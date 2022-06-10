@@ -42,6 +42,7 @@ public class Trader implements java.io.Serializable {
     private String account;
     private boolean cashDown;
     private boolean multi;
+    private String priceType;
 
 
     public Trader(String code, String traderName) {

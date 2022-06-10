@@ -15,7 +15,6 @@ import com.inventory.ui.setup.dialog.common.LocationTableModel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;

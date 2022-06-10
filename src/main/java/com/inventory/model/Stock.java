@@ -45,10 +45,10 @@ public class Stock implements java.io.Serializable {
     private String userCode;
     private UnitRelation unitRelation;
     private Integer macId;
+    private boolean calculate;
 
     public Stock() {
     }
-    
 
     public Stock(String stockCode, String stockName) {
         this.stockCode = stockCode;

@@ -4,12 +4,12 @@
  */
 package com.inventory.ui.entry;
 
-import com.google.gson.reflect.TypeToken;
 import com.common.Global;
-import com.common.ReturnObject;
+import com.common.ReportFilter;
 import com.common.SelectionObserver;
 import com.inventory.editor.BrandAutoCompleter;
 import com.inventory.editor.CategoryAutoCompleter;
+import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.StockTypeAutoCompleter;
 import com.inventory.model.ReorderLevel;
@@ -17,7 +17,6 @@ import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.ReorderTableModel;
-import static com.inventory.ui.setup.PatternSetup.gson;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import java.awt.event.KeyEvent;
@@ -29,6 +28,7 @@ import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -48,6 +48,7 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
     private StockTypeAutoCompleter typeAutoCompleter;
     private CategoryAutoCompleter categoryAutoCompleter;
     private BrandAutoCompleter brandAutoCompleter;
+    private StockAutoCompleter stockAutoCompleter;
     private JProgressBar progress;
     private SelectionObserver observer;
     private List<StockUnit> listStockUnit = new ArrayList<>();
@@ -88,13 +89,14 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
         categoryAutoCompleter.setObserver(this);
         brandAutoCompleter = new BrandAutoCompleter(txtBrand, inventoryRepo.getStockBrand(), null, true, false);
         brandAutoCompleter.setObserver(this);
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo.getStock(true), null, true, false);
     }
 
     private void initTable() {
         listStock = inventoryRepo.getStock(true);
         listStockUnit = inventoryRepo.getStockUnit();
         reorderTableModel.setTable(tblOrder);
-        reorderTableModel.setWebClient(inventoryApi);
+        reorderTableModel.setInventoryRepo(inventoryRepo);
         tblOrder.setModel(reorderTableModel);
         tblOrder.getTableHeader().setFont(Global.tblHeaderFont);
         tblOrder.setRowHeight(Global.tblRowHeight);
@@ -122,20 +124,23 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
 
     private void getReorderLevel() {
         progress.setIndeterminate(true);
-        Mono<ReturnObject> result = inventoryApi
-                .get()
-                .uri(builder -> builder.path("/report/get-reorder-level")
-                .queryParam("compCode", Global.compCode)
-                .build())
-                .retrieve().bodyToMono(ReturnObject.class);
+        ReportFilter filter = new ReportFilter(Global.macId, Global.compCode);
+        filter.setBrandCode(brandAutoCompleter.getBrand().getBrandCode());
+        filter.setCatCode(categoryAutoCompleter.getCategory().getCatCode());
+        filter.setStockTypeCode(typeAutoCompleter.getStockType().getStockTypeCode());
+        filter.setStockCode(stockAutoCompleter.getStock().getStockCode());
+        Mono<ResponseEntity<List<ReorderLevel>>> result = inventoryApi
+                .post()
+                .uri("/report/get-reorder-level")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .toEntityList(ReorderLevel.class);
         result.subscribe((t) -> {
-            java.lang.reflect.Type listType = new TypeToken<ArrayList<ReorderLevel>>() {
-            }.getType();
-            List<ReorderLevel> listOP = gson.fromJson(gson.toJsonTree(t.getData()), listType);
-            reorderTableModel.setListPattern(listOP);
+            reorderTableModel.setListPattern(t.getBody());
             progress.setIndeterminate(false);
         }, (e) -> {
             JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+            progress.setIndeterminate(false);
         });
     }
 
@@ -161,7 +166,7 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
         jLabel3 = new javax.swing.JLabel();
         txtBrand = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        txtStockName = new javax.swing.JTextField();
+        txtStock = new javax.swing.JTextField();
         jSeparator1 = new javax.swing.JSeparator();
 
         tblOrder.setAutoCreateRowSorter(true);
@@ -198,7 +203,7 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
         jLabel4.setFont(Global.lableFont);
         jLabel4.setText("Stock Name");
 
-        txtStockName.setFont(Global.textFont);
+        txtStock.setFont(Global.textFont);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -224,7 +229,7 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtStockName)
+                        .addComponent(txtStock)
                         .addGap(2, 2, 2)))
                 .addContainerGap())
         );
@@ -240,7 +245,7 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(txtBrand)
                     .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtStockName))
+                    .addComponent(txtStock))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 4, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -261,6 +266,6 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
     private javax.swing.JTextField txtBrand;
     private javax.swing.JTextField txtCat;
     private javax.swing.JTextField txtGroup;
-    private javax.swing.JTextField txtStockName;
+    private javax.swing.JTextField txtStock;
     // End of variables declaration//GEN-END:variables
 }

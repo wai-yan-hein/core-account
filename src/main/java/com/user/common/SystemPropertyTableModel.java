@@ -5,7 +5,6 @@
 package com.user.common;
 
 import com.common.Global;
-import com.common.ReturnObject;
 import com.inventory.model.SysProperty;
 import java.util.ArrayList;
 import java.util.List;
@@ -106,13 +105,13 @@ public class SystemPropertyTableModel extends AbstractTableModel {
         if (isValidEntry(property)) {
             property.setCompCode(Global.compCode);
             addNewRow();
-            Mono<ReturnObject> result = inventoryApi.post()
-                    .uri("/setup/save-system-property")
+            Mono<SysProperty> result = inventoryApi.post()
+                    .uri("/user/save-system-property")
                     .body(Mono.just(property), SysProperty.class)
                     .retrieve()
-                    .bodyToMono(ReturnObject.class);
-            ReturnObject t = result.block();
-            if (t.getData() != null) {
+                    .bodyToMono(SysProperty.class);
+            property = result.block();
+            if (property != null) {
                 Global.hmRoleProperty.put(property.getPropKey(), property.getPropValue());
             }
         }
@@ -138,8 +137,20 @@ public class SystemPropertyTableModel extends AbstractTableModel {
     }
 
     public void addNewRow() {
-        listProperty.add(new SysProperty());
-        fireTableRowsInserted(listProperty.size() - 1, listProperty.size() - 1);
+        if (!hasEmptyRow()) {
+            listProperty.add(new SysProperty());
+            fireTableRowsInserted(listProperty.size() - 1, listProperty.size() - 1);
+        }
     }
 
+    private boolean hasEmptyRow() {
+        boolean status = false;
+        if (listProperty.size() >= 1) {
+            SysProperty get = listProperty.get(listProperty.size() - 1);
+            if (get.getPropKey() == null) {
+                status = true;
+            }
+        }
+        return status;
+    }
 }

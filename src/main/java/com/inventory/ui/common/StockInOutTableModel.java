@@ -6,6 +6,7 @@
 package com.inventory.ui.common;
 
 import com.common.Global;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.model.Location;
@@ -138,7 +139,12 @@ public class StockInOutTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return true;
+        return switch (column) {
+            case 4,7 ->
+                ProUtil.isWeightOption();
+            default ->
+                true;
+        };
     }
 
     @Override
@@ -230,7 +236,7 @@ public class StockInOutTableModel extends AbstractTableModel {
                     }
                 }
             }
-            
+
             observer.selected("CAL-TOTAL", "CAL-TOTAL");
             fireTableRowsUpdated(row, row);
             parent.requestFocus();
@@ -238,6 +244,7 @@ public class StockInOutTableModel extends AbstractTableModel {
             log.error("setValueAt :" + e.getMessage());
         }
     }
+
     public List<String> getDeleteList() {
         return deleteList;
     }

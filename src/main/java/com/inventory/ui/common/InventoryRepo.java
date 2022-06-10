@@ -6,14 +6,18 @@ package com.inventory.ui.common;
 
 import com.user.model.Currency;
 import com.common.Global;
+import com.common.ReturnObject;
 import com.common.Util1;
 import com.inventory.model.Category;
 import com.inventory.model.General;
 import com.inventory.model.Location;
+import com.inventory.model.OPHis;
 import com.inventory.model.Pattern;
 import com.inventory.model.PriceOption;
+import com.inventory.model.ProcessType;
 import com.inventory.model.PurHis;
 import com.inventory.model.Region;
+import com.inventory.model.ReorderLevel;
 import com.inventory.model.RetInHis;
 import com.inventory.model.RetOutHis;
 import com.inventory.model.SaleHis;
@@ -30,6 +34,8 @@ import com.inventory.model.UnitRelationDetail;
 import com.inventory.model.VouStatus;
 import java.time.Duration;
 import java.util.List;
+import java.util.Objects;
+import javax.swing.JOptionPane;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -326,6 +332,15 @@ public class InventoryRepo {
         return result.block(Duration.ofMinutes(min));
     }
 
+    public ProcessType saveProcessType(ProcessType vou) {
+        Mono<ProcessType> result = inventoryApi.post()
+                .uri("/setup/save-process-type")
+                .body(Mono.just(vou), ProcessType.class)
+                .retrieve()
+                .bodyToMono(ProcessType.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
     public Category saveCategory(Category category) {
         Mono<Category> result = inventoryApi.post()
                 .uri("/setup/save-category")
@@ -364,7 +379,8 @@ public class InventoryRepo {
                 .retrieve().bodyToMono(General.class);
         return Util1.getFloat(result.block().getAmount());
     }
-     public Float getSaleRecentPrice(String stockCode, String vouDate, String unit) {
+
+    public Float getSaleRecentPrice(String stockCode, String vouDate, String unit) {
         Mono<General> result = inventoryApi.get()
                 .uri(builder -> builder.path("/report/get-sale-recent-price")
                 .queryParam("stockCode", stockCode)
@@ -396,6 +412,15 @@ public class InventoryRepo {
         return result.block(Duration.ofMinutes(min)).getBody();
     }
 
+    public List<ProcessType> getProcessType() {
+        Mono<ResponseEntity<List<ProcessType>>> result = inventoryApi.get()
+                .uri(builder -> builder.path("/setup/get-process-type")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().toEntityList(ProcessType.class);
+        return result.block(Duration.ofMinutes(min)).getBody();
+    }
+
     public StockInOut findStockIO(String vouNo) {
         Mono<StockInOut> result = inventoryApi.get()
                 .uri(builder -> builder.path("/stockio/find-stockio")
@@ -411,6 +436,15 @@ public class InventoryRepo {
                 .queryParam("code", vouNo)
                 .build())
                 .retrieve().bodyToMono(SaleHis.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
+    public OPHis findOpening(String vouNo) {
+        Mono<OPHis> result = inventoryApi.get()
+                .uri(builder -> builder.path("/setup/find-opening")
+                .queryParam("code", vouNo)
+                .build())
+                .retrieve().bodyToMono(OPHis.class);
         return result.block(Duration.ofMinutes(min));
     }
 
@@ -438,6 +472,25 @@ public class InventoryRepo {
                 .queryParam("code", vouNo)
                 .build())
                 .retrieve().bodyToMono(RetOutHis.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
+    public float getSmallQty(String stockCode, String unit) {
+        Mono<Float> result = inventoryApi.get()
+                .uri(builder -> builder.path("/report/get-smallest_qty")
+                .queryParam("stockCode", stockCode)
+                .queryParam("unit", unit)
+                .build())
+                .retrieve().bodyToMono(Float.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
+    public ReorderLevel saveReorder(ReorderLevel rl) {
+        Mono<ReorderLevel> result = inventoryApi.post()
+                .uri("/setup/save-reorder")
+                .body(Mono.just(rl), ReorderLevel.class)
+                .retrieve()
+                .bodyToMono(ReorderLevel.class);
         return result.block(Duration.ofMinutes(min));
     }
 }

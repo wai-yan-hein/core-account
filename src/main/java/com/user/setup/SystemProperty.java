@@ -5,19 +5,13 @@
  */
 package com.user.setup;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import com.common.Global;
-import com.common.ReturnObject;
 import com.common.SelectionObserver;
 import com.inventory.model.SysProperty;
 import com.user.common.SystemPropertyTableModel;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.user.common.UserRepo;
 import java.awt.event.KeyEvent;
-import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -25,6 +19,7 @@ import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -37,11 +32,10 @@ import reactor.core.publisher.Mono;
 public class SystemProperty extends javax.swing.JPanel {
 
     @Autowired
-    private WebClient inventoryApi;
+    private WebClient userApi;
     @Autowired
     private UserRepo userRepo;
     private final SystemPropertyTableModel tableModel = new SystemPropertyTableModel();
-    private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     private SelectionObserver observer;
     private JProgressBar progress;
 
@@ -69,7 +63,7 @@ public class SystemProperty extends javax.swing.JPanel {
     }
 
     public void initTable() {
-        tableModel.setWebClient(inventoryApi);
+        tableModel.setWebClient(userApi);
         tblSystem.setModel(tableModel);
         tblSystem.getTableHeader().setFont(Global.tblHeaderFont);
         tblSystem.setRowHeight(Global.tblRowHeight);
@@ -83,17 +77,14 @@ public class SystemProperty extends javax.swing.JPanel {
     }
 
     public void searchSysProperty() {
-        Mono<ReturnObject> result = inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-system-property")
+        Mono<ResponseEntity<List<SysProperty>>> result = userApi.get()
+                .uri(builder -> builder.path("/user/get-system-property")
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
+                .toEntityList(SysProperty.class);
         result.subscribe((t) -> {
-            java.lang.reflect.Type listType = new TypeToken<ArrayList<SysProperty>>() {
-            }.getType();
-            List<SysProperty> listSys = gson.fromJson(gson.toJsonTree(t.getData()), listType);
-            tableModel.setListProperty(listSys);
+            tableModel.setListProperty(t.getBody());
             tableModel.addNewRow();
             tblSystem.requestFocus();
         }, (e) -> {
@@ -115,6 +106,7 @@ public class SystemProperty extends javax.swing.JPanel {
         txtFilter = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
 
+        tblSystem.setFont(Global.textFont);
         tblSystem.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -126,6 +118,8 @@ public class SystemProperty extends javax.swing.JPanel {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        tblSystem.setRowHeight(Global.tblRowHeight);
+        tblSystem.setShowGrid(true);
         jScrollPane1.setViewportView(tblSystem);
 
         txtFilter.addActionListener(new java.awt.event.ActionListener() {

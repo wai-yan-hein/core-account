@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -176,7 +177,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                     oPHis.setCreatedBy(Global.loginUser.getUserCode());
                 }
                 oPHis.setVouNo(voucherNo);
-                oPHis.setCurCode(currencyAAutoCompleter.getCurrency().getCurCode());
+                oPHis.setCurrency(currencyAAutoCompleter.getCurrency());
                 oPHis.setVouDate(txtOPDate.getDate());
                 oPHis.setRemark(txtRemark.getText());
                 oPHis.setStatus(lblStatus.getText());
@@ -235,6 +236,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
             vouSearchDialog.initMain();
             vouSearchDialog.setSize(Global.width - 200, Global.height - 200);
             vouSearchDialog.setLocationRelativeTo(null);
+            vouSearchDialog.setIconImage(new ImageIcon(getClass().getResource("/images/search.png")).getImage());
             vouSearchDialog.setVisible(true);
         } catch (Exception e) {
             log.error(String.format("historyOPhistoryOP: %s", Arrays.toString(e.getStackTrace())));
@@ -254,7 +256,6 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     private void setVoucher(OPHis op) {
         progress.setIndeterminate(true);
-        currencyAAutoCompleter.setCurrency(userRepo.findCurrency(op.getCurCode()));
         Mono<ResponseEntity<List<OPHisDetail>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-opening-detail")
                 .queryParam("vouNo", op.getVouNo())
@@ -265,6 +266,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
             txtVouNo.setText(oPHis.getVouNo());
             txtOPDate.setDate(oPHis.getVouDate());
             locationAutoCompleter.setLocation(oPHis.getLocation());
+            currencyAAutoCompleter.setCurrency(oPHis.getCurrency());
             txtRemark.setText(oPHis.getRemark());
             if (oPHis.isDeleted()) {
                 lblStatus.setText("DELETED");
@@ -352,7 +354,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         HashMap<String, Stock> hm = new HashMap<>();
         if (!listStock.isEmpty()) {
             for (Stock s : listStock) {
-                hm.put(s.getStockCode(), s);
+                hm.put(s.getUserCode(), s);
             }
         }
         String line;
@@ -360,20 +362,18 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         int lineCount = 0;
         List<OPHisDetail> listOP = new ArrayList<>();
         try {
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(
+            try ( BufferedReader br = new BufferedReader(new InputStreamReader(
                     new FileInputStream(path), "UTF8"))) {
                 while ((line = br.readLine()) != null) //returns a Boolean value
                 {
                     OPHisDetail op = new OPHisDetail();
                     String[] data = line.split(splitBy);    // use comma as separator
                     String stockCode = null;
-                    String unit = null;
                     String qty = null;
                     lineCount++;
                     try {
-                        stockCode = data[0];
-                        unit = data[1];
-                        qty = data[2];
+                        stockCode = data[1];
+                        qty = data[5];
 
                     } catch (IndexOutOfBoundsException e) {
                         //JOptionPane.showMessageDialog(Global.parentForm, "FORMAT ERROR IN LINE:" + lineCount + e.getMessage());
@@ -383,8 +383,10 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                         op.setStock(s);
                         op.setQty(Util1.getFloat(qty));
                         op.setStdWt(1.0f);
-                        op.setStockUnit(new StockUnit(unit));
-                        listOP.add(op);
+                        op.setStockUnit(new StockUnit("pcs"));
+                        if (op.getQty() != 0) {
+                            listOP.add(op);
+                        }
                     } else {
                         log.info(stockCode + "\n");
                     }
@@ -728,9 +730,9 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     @Override
     public void selected(Object source, Object selectObj) {
         if (source.toString().equals("OP-HISTORY")) {
-            if (selectObj instanceof OPHis op) {
-                setVoucher(op);
-            }
+            String vouNo = selectObj.toString();
+            OPHis op = inventoryRepo.findOpening(vouNo);
+            setVoucher(op);
         }
         if (source.toString().equals("CAL-TOTAL")) {
             calculatAmount();

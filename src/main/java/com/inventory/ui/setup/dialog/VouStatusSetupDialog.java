@@ -27,23 +27,18 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyListener {
 
     private static final Logger log = LoggerFactory.getLogger(VouStatusSetupDialog.class);
 
     private int selectRow = - 1;
     private VouStatus vou = new VouStatus();
-    @Autowired
-    private VouStatusTableModel vouTableModel;
-    @Autowired
+    private final VouStatusTableModel vouTableModel = new VouStatusTableModel();
     private InventoryRepo inventoryRepo;
 
     private TableRowSorter<TableModel> sorter;
@@ -56,6 +51,14 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
 
     public void setListVou(List<VouStatus> listVou) {
         this.listVou = listVou;
+    }
+
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
     }
 
     /**

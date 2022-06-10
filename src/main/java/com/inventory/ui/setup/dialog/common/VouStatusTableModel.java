@@ -9,13 +9,11 @@ import com.inventory.model.VouStatus;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 public class VouStatusTableModel extends AbstractTableModel {
 
     private final String[] columnNames = {"Code", "Description"};

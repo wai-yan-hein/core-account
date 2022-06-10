@@ -72,18 +72,18 @@ public class StockTypeTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
-    public StockType getItemType(int row) {
+    public StockType getStockType(int row) {
         return listType.get(row);
     }
 
-    public void setItemType(StockType itemType, int row) {
+    public void setStockType(StockType itemType, int row) {
         if (!listType.isEmpty()) {
             listType.set(row, itemType);
             fireTableRowsUpdated(row, row);
         }
     }
 
-    public void addItemType(StockType item) {
+    public void addStockType(StockType item) {
         if (!listType.isEmpty()) {
             listType.add(item);
             fireTableRowsInserted(listType.size() - 1, listType.size() - 1);

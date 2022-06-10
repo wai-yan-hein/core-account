@@ -9,6 +9,7 @@ import com.common.Global;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.CurrencySetupDialog;
 import com.inventory.ui.setup.dialog.LocationSetupDialog;
+import com.inventory.ui.setup.dialog.ProcessTypeSetupDialog;
 import com.inventory.ui.setup.dialog.RegionSetup;
 import com.inventory.ui.setup.dialog.RelationSetupDialog;
 import com.inventory.ui.setup.dialog.SaleManSetupDialog;
@@ -31,11 +32,11 @@ public class OtherSetup extends javax.swing.JPanel {
     private RegionSetup regionSetup;
     private LocationSetupDialog locationSetup;
     private RelationSetupDialog relationSetupDialog;
+    private ProcessTypeSetupDialog processTypeDialog;
     @Autowired
     private CurrencySetupDialog currencySetup;
     @Autowired
     private SaleManSetupDialog smDialog;
-    @Autowired
     private VouStatusSetupDialog vsDialog;
 
     /**
@@ -84,6 +85,7 @@ public class OtherSetup extends javax.swing.JPanel {
     }
 
     private void vouStatusSetup() {
+        vsDialog = new VouStatusSetupDialog();
         vsDialog.setIconImage(icon);
         vsDialog.setListVou(inventoryRepo.getVoucherStatus());
         vsDialog.initMain();
@@ -103,6 +105,17 @@ public class OtherSetup extends javax.swing.JPanel {
         relationSetupDialog.setVisible(true);
     }
 
+    private void processType() {
+        processTypeDialog = new ProcessTypeSetupDialog();
+        processTypeDialog.setInventoryRepo(inventoryRepo);
+        processTypeDialog.setListType(inventoryRepo.getProcessType());
+        processTypeDialog.setIconImage(icon);
+        processTypeDialog.initMain();
+        processTypeDialog.setSize(Global.width / 2, Global.height / 2);
+        processTypeDialog.setLocationRelativeTo(null);
+        processTypeDialog.setVisible(true);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -118,6 +131,7 @@ public class OtherSetup extends javax.swing.JPanel {
         jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
         jButton6 = new javax.swing.JButton();
+        btnProcess = new javax.swing.JButton();
 
         btnRegion.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
         btnRegion.setText("Region");
@@ -167,13 +181,23 @@ public class OtherSetup extends javax.swing.JPanel {
             }
         });
 
+        btnProcess.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        btnProcess.setText("Process Type");
+        btnProcess.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnProcessActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnRegion)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(btnProcess, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnRegion, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnLocation)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -200,7 +224,9 @@ public class OtherSetup extends javax.swing.JPanel {
                     .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(221, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnProcess, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(142, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -234,9 +260,15 @@ public class OtherSetup extends javax.swing.JPanel {
         relationSetup();
     }//GEN-LAST:event_jButton6ActionPerformed
 
+    private void btnProcessActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProcessActionPerformed
+        // TODO add your handling code here:
+        processType();
+    }//GEN-LAST:event_btnProcessActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnLocation;
+    private javax.swing.JButton btnProcess;
     private javax.swing.JButton btnRegion;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;

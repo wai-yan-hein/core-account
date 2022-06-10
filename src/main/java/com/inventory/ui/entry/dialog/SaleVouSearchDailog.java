@@ -13,6 +13,7 @@ import com.common.TableCellRender;
 import com.user.common.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
+import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.SaleManAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
@@ -58,6 +59,8 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
     private UserRepo userRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
+    private boolean status = false;
+    private LocationAutoCompleter locationAutoCompleter;
 
     public WebClient getInventoryApi() {
         return inventoryApi;
@@ -100,12 +103,13 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
     }
 
     public void initMain() {
-        initCombo();
-        initTableVoucher();
-        setTodayDate();
-        if (saleVouTableModel.getListSaleHis().isEmpty()) {
-            search();
+        if (!status) {
+            initCombo();
+            initTableVoucher();
+            setTodayDate();
+            status = true;
         }
+        search();
     }
 
     private void initCombo() {
@@ -113,6 +117,7 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
         appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo.getStock(true), null, true, false);
         saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, inventoryRepo.getSaleMan(), null, true, false);
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, true, false);
     }
 
     private void initTableVoucher() {
@@ -135,10 +140,8 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
     }
 
     private void setTodayDate() {
-        if (txtFromDate.getDate() == null) {
-            txtFromDate.setDate(Util1.getTodayDate());
-            txtToDate.setDate(Util1.getTodayDate());
-        }
+        txtFromDate.setDate(Util1.getTodayDate());
+        txtToDate.setDate(Util1.getTodayDate());
     }
 
     private void search() {
@@ -152,6 +155,7 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
         filter.setRemark(Util1.isNull(txtRemark.getText(), "-"));
         filter.setStockCode(stockAutoCompleter.getStock().getStockCode());
         filter.setSaleManCode(saleManAutoCompleter.getSaleMan().getSaleManCode());
+        filter.setLocCode(locationAutoCompleter.getLocation().getLocationCode());
         filter.setReference(txtRef.getText());
         //
         Mono<ResponseEntity<List<VSale>>> result = inventoryApi
@@ -160,7 +164,7 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .toEntityList(VSale.class);
-        List<VSale> listOP = result.block(Duration.ofMinutes(1)).getBody();
+        List<VSale> listOP = result.block(Duration.ofMinutes(5)).getBody();
         saleVouTableModel.setListSaleHis(listOP);
         calAmount();
     }
@@ -250,6 +254,8 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
         txtSaleMan = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
         txtRef = new javax.swing.JTextField();
+        txtLocation = new javax.swing.JTextField();
+        jLabel10 = new javax.swing.JLabel();
         lblTtlRecord = new javax.swing.JLabel();
         lblTtlAmount = new javax.swing.JLabel();
         btnSelect = new javax.swing.JButton();
@@ -267,7 +273,7 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Sale Voucher Search");
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel2.setFont(Global.lableFont);
         jLabel2.setText("Customer");
@@ -370,6 +376,17 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
             }
         });
 
+        txtLocation.setFont(Global.textFont);
+        txtLocation.setName("txtCus"); // NOI18N
+        txtLocation.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtLocationFocusGained(evt);
+            }
+        });
+
+        jLabel10.setFont(Global.lableFont);
+        jLabel10.setText("Location");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -390,7 +407,8 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
                             .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -407,7 +425,8 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
                             .addComponent(txtRemark)
                             .addComponent(txtStock)
                             .addComponent(txtSaleMan)
-                            .addComponent(txtRef))))
+                            .addComponent(txtRef)
+                            .addComponent(txtLocation))))
                 .addContainerGap())
         );
 
@@ -453,6 +472,10 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
                             .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel10)
+                            .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel8)
                             .addComponent(txtUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(jSeparator2))
@@ -460,7 +483,7 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton1))
-                .addContainerGap(222, Short.MAX_VALUE))
+                .addContainerGap(196, Short.MAX_VALUE))
         );
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel11, jLabel3, txtFromDate, txtToDate});
@@ -663,6 +686,10 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
         }
     }//GEN-LAST:event_tblVoucherMouseClicked
 
+    private void txtLocationFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtLocationFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtLocationFocusGained
+
     /**
      * @param args the command line arguments
      */
@@ -672,6 +699,7 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
     private javax.swing.JButton btnSelect;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -693,6 +721,7 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
     private javax.swing.JTextField txtCus;
     private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
+    private javax.swing.JTextField txtLocation;
     private javax.swing.JFormattedTextField txtPaid;
     private javax.swing.JTextField txtRef;
     private javax.swing.JTextField txtRemark;

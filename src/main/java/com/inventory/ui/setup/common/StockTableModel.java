@@ -6,23 +6,34 @@
 package com.inventory.ui.setup.common;
 
 import com.inventory.model.Stock;
+import com.inventory.ui.common.InventoryRepo;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 public class StockTableModel extends AbstractTableModel {
 
     static Logger log = LoggerFactory.getLogger(StockTableModel.class.getName());
     private List<Stock> listStock = new ArrayList();
     private String[] columnNames = {"Code", "Description", "Active", "Barcode"};
+    private InventoryRepo inventoryRepo;
+
+    public StockTableModel() {
+    }
+
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
 
     public StockTableModel(List<Stock> listStock) {
         this.listStock = listStock;
@@ -35,7 +46,7 @@ public class StockTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return false;
+        return column == 2;
     }
 
     @Override
@@ -46,6 +57,7 @@ public class StockTableModel extends AbstractTableModel {
             return String.class;
         }
     }
+
     @Override
     public Object getValueAt(int row, int column) {
         if (listStock == null) {
@@ -60,11 +72,16 @@ public class StockTableModel extends AbstractTableModel {
             Stock med = listStock.get(row);
 
             return switch (column) {
-                case 0 -> med.getUserCode();
-                case 1 -> med.getStockName();
-                case 2 -> med.isActive();
-                case 3 -> med.getBarcode();
-                default -> null;
+                case 0 ->
+                    med.getUserCode();
+                case 1 ->
+                    med.getStockName();
+                case 2 ->
+                    med.isActive();
+                case 3 ->
+                    med.getBarcode();
+                default ->
+                    null;
             }; //Code
             //Name
             //Active
@@ -77,7 +94,17 @@ public class StockTableModel extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object value, int row, int column) {
-
+        Stock s = listStock.get(row);
+        switch (column) {
+            case 2 -> {
+                if (value instanceof Boolean active) {
+                    s.setActive(active);
+                    inventoryRepo.saveStock(s);
+                }
+            }
+            default -> {
+            }
+        }
     }
 
     @Override

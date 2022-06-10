@@ -10,7 +10,7 @@ import com.google.gson.stream.JsonReader;
 import com.common.Global;
 import com.common.TableCellRender;
 import com.inventory.model.ReorderLevel;
-import com.inventory.ui.common.ReorderAlertTableModel;
+import com.inventory.ui.common.ReorderTableModel;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -29,8 +29,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ReorderAlertDialog extends javax.swing.JDialog {
 
-    private final ReorderAlertTableModel tableModel = new ReorderAlertTableModel();
-    private Gson gson = new Gson();
+    private final ReorderTableModel tableModel = new ReorderTableModel();
+    private final Gson gson = new Gson();
 
     /**
      * Creates new form ReorderAlertDialog
@@ -65,12 +65,12 @@ public class ReorderAlertDialog extends javax.swing.JDialog {
     public void setReorderList(byte[] file) {
         String fileName = String.format("temp%s%s", File.separator, "reorder.json");
         try {
-            FileOutputStream outputStream = new FileOutputStream(fileName);
-            outputStream.write(file);
-            outputStream.close();
+            try ( FileOutputStream outputStream = new FileOutputStream(fileName)) {
+                outputStream.write(file);
+            }
             java.lang.reflect.Type listType = new TypeToken<ArrayList<ReorderLevel>>() {
             }.getType();
-            JsonReader reader = new JsonReader(new FileReader(fileName,Charset.forName("UTF-8")));
+            JsonReader reader = new JsonReader(new FileReader(fileName, Charset.forName("UTF-8")));
             List<ReorderLevel> listReoder = gson.fromJson(reader, listType);
             tableModel.setListPattern(listReoder);
         } catch (IOException e) {

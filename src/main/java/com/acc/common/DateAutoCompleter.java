@@ -211,7 +211,7 @@ public class DateAutoCompleter implements KeyListener, SelectionObserver {
         } else {
             generateDate(date, row);
         }
-        selectionObserver.selected("Selected", "Date");
+        selectionObserver.selected("Selected-Date", "Date");
     }
 
     private void generateDate(DateModel date, int row) {

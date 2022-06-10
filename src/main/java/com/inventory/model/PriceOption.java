@@ -16,4 +16,5 @@ public class PriceOption {
     private String priceType;
     private String description;
     private String compCode;
+    private Float price;
 }

@@ -60,7 +60,7 @@ public class RoleCompanyTableModel extends AbstractTableModel {
             PrivilegeCompany p = listProperty.get(row);
             switch (column) {
                 case 0 -> {
-                    return p.getPcKey() == null ? null : p.getPcKey().getCompCode();
+                    return p.getPcKey() == null ? null : p.getPcKey().getCompanyInfo().getCompName();
                 }
                 case 1 -> {
                     return p.isAllow();

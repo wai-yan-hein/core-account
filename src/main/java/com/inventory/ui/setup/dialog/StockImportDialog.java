@@ -8,6 +8,8 @@ import com.common.Global;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.Stock;
+import com.inventory.model.StockType;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.StockImportTableModel;
 import java.awt.FileDialog;
 import java.io.BufferedReader;
@@ -15,12 +17,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import javax.swing.JFrame;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -32,6 +34,15 @@ public class StockImportDialog extends javax.swing.JDialog {
     private WebClient inventoryApi;
     private final StockImportTableModel tableModel = new StockImportTableModel();
     private TaskExecutor taskExecutor;
+    private InventoryRepo inventoryRepo;
+
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
 
     public TaskExecutor getTaskExecutor() {
         return taskExecutor;
@@ -58,7 +69,6 @@ public class StockImportDialog extends javax.swing.JDialog {
         super(parent, true);
         initComponents();
         initTable();
-        progress.setVisible(false);
     }
 
     private void initTable() {
@@ -84,25 +94,28 @@ public class StockImportDialog extends javax.swing.JDialog {
     private void save() {
         List<Stock> traders = tableModel.getListStock();
         btnSave.setEnabled(false);
-        progress.setVisible(true);
+        lblLog.setText("Importing.");
         for (Stock stock : traders) {
-            Mono<Stock> result = inventoryApi.post()
-                    .uri("/setup/save-stock")
-                    .body(Mono.just(stock), Stock.class)
-                    .retrieve()
-                    .bodyToMono(Stock.class);
-            result.block();
+            inventoryRepo.saveStock(stock);
         }
+        lblLog.setText("Success.");
         dispose();
     }
 
     private void readFile(String path) {
+        HashMap<String, StockType> hm = new HashMap<>();
+        List<StockType> listST = inventoryRepo.getStockType();
+        if (!listST.isEmpty()) {
+            for (StockType st : listST) {
+                hm.put(st.getUserCode(), st);
+            }
+        }
         String line;
         String splitBy = ",";
         int lineCount = 0;
         List<Stock> listStock = new ArrayList<>();
         try {
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(
+            try ( BufferedReader br = new BufferedReader(new InputStreamReader(
                     new FileInputStream(path), "UTF8"))) {
                 while ((line = br.readLine()) != null) //returns a Boolean value
                 {
@@ -110,24 +123,30 @@ public class StockImportDialog extends javax.swing.JDialog {
                     String[] data = line.split(splitBy);    // use comma as separator
                     String userCode = null;
                     String stockName = null;
-                    String price = null;
+                    String priceA = null;
+                    String priceB = null;
+                    String typeCode = null;
                     lineCount++;
                     try {
                         userCode = data[0];
                         stockName = data[1];
-                        price = data[2] == null ? null : data[2];
-
+                        priceA = data[2];
+                        priceB = data[3];
+                        typeCode = data[4];
                     } catch (IndexOutOfBoundsException e) {
                         //JOptionPane.showMessageDialog(Global.parentForm, "FORMAT ERROR IN LINE:" + lineCount + e.getMessage());
                     }
                     t.setUserCode(userCode);
                     t.setStockName(stockName);
-                    t.setSalePriceN(Util1.getFloat(price));
+                    t.setSalePriceN(Util1.getFloat(priceA));
+                    t.setSalePriceA(Util1.getFloat(priceB));
+                    t.setStockType(hm.get(typeCode));
                     t.setCompCode(Global.compCode);
-                    t.setActive(Boolean.TRUE);
+                    t.setActive(true);
                     t.setCreatedDate(Util1.getTodayDate());
                     t.setCreatedBy(Global.loginUser.getUserCode());
                     t.setMacId(Global.macId);
+                    t.setCalculate(true);
                     listStock.add(t);
                 }
             }
@@ -151,7 +170,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         tblTrader = new javax.swing.JTable();
         btnSave = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
-        progress = new javax.swing.JProgressBar();
+        lblLog = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -182,8 +201,6 @@ public class StockImportDialog extends javax.swing.JDialog {
             }
         });
 
-        progress.setIndeterminate(true);
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -197,7 +214,7 @@ public class StockImportDialog extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(lblLog, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -207,11 +224,9 @@ public class StockImportDialog extends javax.swing.JDialog {
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 399, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jButton2)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(btnSave)))
-                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jButton2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnSave, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblLog, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -236,7 +251,7 @@ public class StockImportDialog extends javax.swing.JDialog {
     private javax.swing.JButton btnSave;
     private javax.swing.JButton jButton2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JProgressBar progress;
+    private javax.swing.JLabel lblLog;
     private javax.swing.JTable tblTrader;
     // End of variables declaration//GEN-END:variables
 }

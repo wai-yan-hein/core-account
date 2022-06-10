@@ -13,6 +13,7 @@ import com.common.TableCellRender;
 import com.user.common.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
+import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.AppUser;
@@ -55,6 +56,7 @@ public class RetInVouSearchDialog extends javax.swing.JDialog implements KeyList
     private SelectionObserver observer;
     private StartWithRowFilter tblFilter;
     private TableRowSorter<TableModel> sorter;
+    private LocationAutoCompleter locationAutoCompleter;
 
     public WebClient getInventoryApi() {
         return inventoryApi;
@@ -107,6 +109,7 @@ public class RetInVouSearchDialog extends javax.swing.JDialog implements KeyList
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo.getCustomer(), null, true, 1, true);
         appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo.getStock(true), null, true, false);
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, true, false);
     }
 
     private void initTableVoucher() {
@@ -154,6 +157,7 @@ public class RetInVouSearchDialog extends javax.swing.JDialog implements KeyList
         filter.setUserCode(appUserAutoCompleter.getAppUser().getUserCode());
         filter.setVouNo(txtVouNo.getText());
         filter.setRemark(txtRemark.getText());
+        filter.setLocCode(locationAutoCompleter.getLocation().getLocationCode());
         filter.setStockCode(stockAutoCompleter.getStock().getStockCode());
         //
         Mono<ResponseEntity<List<VReturnIn>>> result = inventoryApi
@@ -236,6 +240,8 @@ public class RetInVouSearchDialog extends javax.swing.JDialog implements KeyList
         jLabel6 = new javax.swing.JLabel();
         txtStock = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
+        jLabel7 = new javax.swing.JLabel();
+        txtLocation = new javax.swing.JTextField();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
         lblTtlRecord = new javax.swing.JLabel();
@@ -253,7 +259,7 @@ public class RetInVouSearchDialog extends javax.swing.JDialog implements KeyList
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Return In Voucher Search");
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel2.setFont(Global.lableFont);
         jLabel2.setText("Customer");
@@ -332,6 +338,17 @@ public class RetInVouSearchDialog extends javax.swing.JDialog implements KeyList
             }
         });
 
+        jLabel7.setFont(Global.lableFont);
+        jLabel7.setText("Locaiton");
+
+        txtLocation.setFont(Global.textFont);
+        txtLocation.setName("txtCus"); // NOI18N
+        txtLocation.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtLocationFocusGained(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -350,7 +367,8 @@ public class RetInVouSearchDialog extends javax.swing.JDialog implements KeyList
                             .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -365,7 +383,8 @@ public class RetInVouSearchDialog extends javax.swing.JDialog implements KeyList
                             .addComponent(txtCus)
                             .addComponent(txtUser)
                             .addComponent(txtRemark)
-                            .addComponent(txtStock))))
+                            .addComponent(txtStock)
+                            .addComponent(txtLocation))))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -397,6 +416,10 @@ public class RetInVouSearchDialog extends javax.swing.JDialog implements KeyList
                             .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel7)
+                            .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel8)
                             .addComponent(txtUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(jSeparator2))
@@ -404,7 +427,7 @@ public class RetInVouSearchDialog extends javax.swing.JDialog implements KeyList
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton1))
-                .addContainerGap(121, Short.MAX_VALUE))
+                .addContainerGap(95, Short.MAX_VALUE))
         );
 
         tblVoucher.setFont(Global.textFont);
@@ -597,6 +620,10 @@ public class RetInVouSearchDialog extends javax.swing.JDialog implements KeyList
         }
     }//GEN-LAST:event_txtFilterKeyReleased
 
+    private void txtLocationFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtLocationFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtLocationFocusGained
+
     /**
      * @param args the command line arguments
      */
@@ -612,6 +639,7 @@ public class RetInVouSearchDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane2;
@@ -625,6 +653,7 @@ public class RetInVouSearchDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JTextField txtCus;
     private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
+    private javax.swing.JTextField txtLocation;
     private javax.swing.JFormattedTextField txtPaid;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtStock;

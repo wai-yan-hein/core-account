@@ -12,8 +12,8 @@ import com.common.TableCellRender;
 import com.user.common.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
-import com.inventory.model.AppUser;
-import com.inventory.model.OPHis;
+import com.inventory.editor.StockAutoCompleter;
+import com.inventory.model.VOpening;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.OPVouSearchTableModel;
 import java.awt.event.KeyEvent;
@@ -43,6 +43,7 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
     private UserRepo userRepo;
     private AppUserAutoCompleter appUserAutoCompleter;
     private SelectionObserver observer;
+    private StockAutoCompleter stockAutoCompleter;
 
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
@@ -93,7 +94,8 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
 
     private void initCombo() {
         appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
-        appUserAutoCompleter.setAppUser(new AppUser("-", "All"));
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo.getStock(true), null, true, false);
+
     }
 
     private void initTableVoucher() {
@@ -117,21 +119,22 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
     }
 
     private void search() {
-        log.info("Search Opening In History.");
         progess.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode);
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
         filter.setUserCode(appUserAutoCompleter.getAppUser().getUserCode());
         filter.setVouNo(txtVouNo.getText());
+        filter.setRemark(txtRemark.getText());
+        filter.setStockCode(stockAutoCompleter.getStock().getStockCode());
         //
-        Mono<ResponseEntity<List<OPHis>>> result = inventoryApi
+        Mono<ResponseEntity<List<VOpening>>> result = inventoryApi
                 .post()
                 .uri("/setup/get-opening")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
-                .toEntityList(OPHis.class);
-        List<OPHis> listOP = result.block(Duration.ofMinutes(1)).getBody();
+                .toEntityList(VOpening.class);
+        List<VOpening> listOP = result.block(Duration.ofMinutes(1)).getBody();
         tableModel.setListDetail(listOP);
         progess.setIndeterminate(false);
     }
@@ -139,8 +142,8 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
     private void select() {
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
-            OPHis his = tableModel.getSelectVou(row);
-            observer.selected("OP-HISTORY", his);
+            VOpening his = tableModel.getSelectVou(row);
+            observer.selected("OP-HISTORY", his.getVouNo());
             setVisible(false);
         } else {
             JOptionPane.showMessageDialog(this, "Please select the voucher.",
@@ -176,6 +179,10 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
         txtVouNo = new javax.swing.JTextField();
         txtUser = new javax.swing.JTextField();
         jSeparator2 = new javax.swing.JSeparator();
+        jLabel5 = new javax.swing.JLabel();
+        txtStock = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        txtRemark = new javax.swing.JTextField();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
         lblTtlRecord = new javax.swing.JLabel();
@@ -227,6 +234,28 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
 
         jSeparator2.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
+        jLabel5.setFont(Global.lableFont);
+        jLabel5.setText("Stock");
+
+        txtStock.setFont(Global.textFont);
+        txtStock.setName("txtVouNo"); // NOI18N
+        txtStock.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtStockFocusGained(evt);
+            }
+        });
+
+        jLabel6.setFont(Global.lableFont);
+        jLabel6.setText("Remark");
+
+        txtRemark.setFont(Global.textFont);
+        txtRemark.setName("txtVouNo"); // NOI18N
+        txtRemark.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtRemarkFocusGained(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -236,7 +265,9 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 63, Short.MAX_VALUE)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, 63, Short.MAX_VALUE)
+                    .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, 63, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -248,7 +279,9 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
                         .addGap(18, 18, 18)
                         .addComponent(txtToDate, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(txtVouNo)
-                    .addComponent(txtUser))
+                    .addComponent(txtUser)
+                    .addComponent(txtStock)
+                    .addComponent(txtRemark))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -268,10 +301,18 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
                             .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel6)
+                            .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel5)
+                            .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel8)
                             .addComponent(txtUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(jSeparator2))
-                .addContainerGap(220, Short.MAX_VALUE))
+                .addContainerGap(164, Short.MAX_VALUE))
         );
 
         tblVoucher.setFont(Global.textFont);
@@ -409,6 +450,14 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
         search();
     }//GEN-LAST:event_btnSearchActionPerformed
 
+    private void txtStockFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtStockFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtStockFocusGained
+
+    private void txtRemarkFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtRemarkFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtRemarkFocusGained
+
     /**
      * @param args the command line arguments
      */
@@ -419,6 +468,8 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane2;
@@ -429,6 +480,8 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
     private javax.swing.JProgressBar progess;
     private javax.swing.JTable tblVoucher;
     private com.toedter.calendar.JDateChooser txtFromDate;
+    private javax.swing.JTextField txtRemark;
+    private javax.swing.JTextField txtStock;
     private com.toedter.calendar.JDateChooser txtToDate;
     private javax.swing.JFormattedTextField txtTotalAmt;
     private javax.swing.JFormattedTextField txtTotalRecord;

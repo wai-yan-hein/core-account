@@ -143,6 +143,7 @@ public class RolePropertySetup extends javax.swing.JPanel {
         tblSystem = new javax.swing.JTable();
         txtFilter = new javax.swing.JTextField();
 
+        tblSystem.setFont(Global.textFont);
         tblSystem.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -154,6 +155,8 @@ public class RolePropertySetup extends javax.swing.JPanel {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        tblSystem.setRowHeight(Global.tblRowHeight);
+        tblSystem.setShowGrid(true);
         tblSystem.setShowHorizontalLines(true);
         tblSystem.setShowVerticalLines(true);
         jScrollPane1.setViewportView(tblSystem);

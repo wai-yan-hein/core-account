@@ -188,7 +188,7 @@ public final class StockTypeAutoCompleter implements KeyListener {
 
     public void mouseSelect() {
         if (table.getSelectedRow() != -1) {
-            type = stockTypeTableModel.getItemType(table.convertRowIndexToModel(
+            type = stockTypeTableModel.getStockType(table.convertRowIndexToModel(
                     table.getSelectedRow()));
             textComp.setText(type.getStockTypeName());
             if (custom) {

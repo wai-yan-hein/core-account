@@ -13,6 +13,7 @@ import com.common.TableCellRender;
 import com.user.common.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
+import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.VouStatusAutoCompleter;
 import com.inventory.model.AppUser;
@@ -55,6 +56,7 @@ public class StockIOSearchDialog extends javax.swing.JDialog implements KeyListe
     private SelectionObserver observer;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
+    private LocationAutoCompleter locationAutoCompleter;
 
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
@@ -115,6 +117,7 @@ public class StockIOSearchDialog extends javax.swing.JDialog implements KeyListe
         appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, inventoryRepo.getVoucherStatus(), null, true);
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo.getStock(true), null, true, false);
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, true, false);
     }
 
     private void initTableVoucher() {
@@ -142,7 +145,6 @@ public class StockIOSearchDialog extends javax.swing.JDialog implements KeyListe
     }
 
     private void search() {
-        log.info("Search Stock IO History.");
         progess.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode);
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
@@ -153,6 +155,7 @@ public class StockIOSearchDialog extends javax.swing.JDialog implements KeyListe
         filter.setDescription(Util1.isNull(txtDesp.getText(), "-"));
         filter.setVouStatus(vouStatusAutoCompleter.getVouStatus().getCode());
         filter.setStockCode(stockAutoCompleter.getStock().getStockCode());
+        filter.setLocCode(locationAutoCompleter.getLocation().getLocationCode());
         //
         Mono<ResponseEntity<List<VStockIO>>> result = inventoryApi
                 .post()
@@ -241,6 +244,8 @@ public class StockIOSearchDialog extends javax.swing.JDialog implements KeyListe
         jLabel9 = new javax.swing.JLabel();
         txtStock = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
+        jLabel10 = new javax.swing.JLabel();
+        txtLocation = new javax.swing.JTextField();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
         lblTtlRecord = new javax.swing.JLabel();
@@ -349,6 +354,17 @@ public class StockIOSearchDialog extends javax.swing.JDialog implements KeyListe
             }
         });
 
+        jLabel10.setFont(Global.lableFont);
+        jLabel10.setText("Location");
+
+        txtLocation.setFont(Global.textFont);
+        txtLocation.setName("txtVouNo"); // NOI18N
+        txtLocation.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtLocationFocusGained(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -368,7 +384,8 @@ public class StockIOSearchDialog extends javax.swing.JDialog implements KeyListe
                             .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE)
                             .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -387,7 +404,8 @@ public class StockIOSearchDialog extends javax.swing.JDialog implements KeyListe
                             .addComponent(txtVouType)
                             .addComponent(txtUser, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtStock)
-                            .addComponent(txtRemark))))
+                            .addComponent(txtRemark)
+                            .addComponent(txtLocation))))
                 .addContainerGap())
         );
 
@@ -429,6 +447,10 @@ public class StockIOSearchDialog extends javax.swing.JDialog implements KeyListe
                             .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel10)
+                            .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel8)
                             .addComponent(txtUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(jSeparator2))
@@ -436,7 +458,7 @@ public class StockIOSearchDialog extends javax.swing.JDialog implements KeyListe
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton1))
-                .addContainerGap(197, Short.MAX_VALUE))
+                .addContainerGap(169, Short.MAX_VALUE))
         );
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel11, jLabel3, txtFromDate, txtToDate});
@@ -625,6 +647,10 @@ public class StockIOSearchDialog extends javax.swing.JDialog implements KeyListe
         }
     }//GEN-LAST:event_txtFilterKeyReleased
 
+    private void txtLocationFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtLocationFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtLocationFocusGained
+
     /**
      * @param args the command line arguments
      */
@@ -634,6 +660,7 @@ public class StockIOSearchDialog extends javax.swing.JDialog implements KeyListe
     private javax.swing.JButton btnSelect;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -654,6 +681,7 @@ public class StockIOSearchDialog extends javax.swing.JDialog implements KeyListe
     private javax.swing.JTextField txtDesp;
     private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
+    private javax.swing.JTextField txtLocation;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtStock;
     private com.toedter.calendar.JDateChooser txtToDate;

@@ -159,4 +159,15 @@ public class AccountRepo {
                 .bodyToMono(ChartOfAccount.class);
         return result.block(Duration.ofMinutes(min));
     }
+
+    public double getTraderBalance(String date, String traderCode, String compCode) {
+        Mono<ResponseEntity<Double>> result = accountApi.get()
+                .uri(builder -> builder.path("/account/report/get-trader-balance")
+                .queryParam("date", date)
+                .queryParam("traderCode", traderCode)
+                .queryParam("compCode", compCode)
+                .build())
+                .retrieve().toEntity(Double.class);
+        return result.block(Duration.ofMinutes(min)).getBody();
+    }
 }

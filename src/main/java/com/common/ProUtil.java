@@ -19,6 +19,18 @@ public class ProUtil {
 
     public static final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
 
+    public static String getFontPath() {
+        return Global.hmRoleProperty.get("font.path");
+    }
+
+    public static boolean isSalePaid() {
+        return Util1.getBoolean(Global.hmRoleProperty.get("default.sale.paid"));
+    }
+
+    public static boolean isSaleEdit() {
+        return Util1.getBoolean(Global.hmRoleProperty.get("sale.voucher.edit"));
+    }
+
     public static boolean isCalStock() {
         return Util1.getBoolean(Global.hmRoleProperty.get("calculate.stock"));
     }
@@ -35,8 +47,24 @@ public class ProUtil {
         return Util1.getBoolean(Global.hmRoleProperty.get("sale.price.option"));
     }
 
+    public static boolean isSalePriceChange() {
+        return Util1.getBoolean(Global.hmRoleProperty.get("sale.price.change"));
+    }
+
+    public static boolean isWeightOption() {
+        return Util1.getBoolean(Global.hmRoleProperty.get("stock.use.weight"));
+    }
+
+    public static boolean isSaleLastPrice() {
+        return Util1.getBoolean(Global.hmRoleProperty.get("sale.last.price"));
+    }
+
     public static boolean isMultiCur() {
         return Util1.getBoolean(Global.hmRoleProperty.get("system.multi.currency.flag"));
+    }
+
+    public static boolean isPrint() {
+        return Util1.getBoolean(Global.hmRoleProperty.get("printer.print"));
     }
 
     public static String getPLProcess() {
@@ -84,7 +112,7 @@ public class ProUtil {
     }
 
     public static String getReportPath() {
-        return "report";
+        return "report/";
     }
 
 }

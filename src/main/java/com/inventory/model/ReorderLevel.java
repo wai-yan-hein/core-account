@@ -19,9 +19,12 @@ public class ReorderLevel {
     private Float maxQty;
     private StockUnit maxUnit;
     private Float balQty;
-    private StockUnit balUnit;
+    private String balUnit;
     private String compCode;
     private Float orderQty;
     private StockUnit orderUnit;
+    private float minSmallQty;
+    private float maxSmallQty;
+    private float balSmallQty;
 
 }

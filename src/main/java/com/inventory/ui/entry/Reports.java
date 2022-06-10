@@ -40,6 +40,9 @@ import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
+import javax.swing.RowFilter;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JRException;
@@ -60,7 +63,7 @@ import reactor.core.publisher.Mono;
  */
 @Component
 @Slf4j
-public class Reports extends javax.swing.JPanel implements PanelControl,SelectionObserver {
+public class Reports extends javax.swing.JPanel implements PanelControl, SelectionObserver {
 
     @Autowired
     private ReportTableModel tableModel;
@@ -90,6 +93,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl,Selectio
     private SelectionObserver observer;
     private JProgressBar progress;
     private final List<Trader> listTrader = new ArrayList<>();
+    private TableRowSorter<TableModel> sorter;
 
     public SelectionObserver getObserver() {
         return observer;
@@ -130,6 +134,8 @@ public class Reports extends javax.swing.JPanel implements PanelControl,Selectio
         tblReport.getTableHeader().setFont(Global.tblHeaderFont);
         tblReport.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblReport.setDefaultRenderer(Object.class, new TableCellRender());
+        sorter = new TableRowSorter(tblReport.getModel());
+        tblReport.setRowSorter(sorter);
         getReport();
     }
 
@@ -189,9 +195,11 @@ public class Reports extends javax.swing.JPanel implements PanelControl,Selectio
             filter.setStockCode(stockAutoCompleter.getStock().getStockCode());
             filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
             filter.setVouTypeCode(vouStatusAutoCompleter.getVouStatus().getCode());
+            filter.setLocCode(locationAutoCompleter.getLocation().getLocationCode());
             log.info("Report Date : " + stDate + " - " + enDate);
-            int selectRow = tblReport.convertRowIndexToModel(tblReport.getSelectedRow());
-            if (selectRow >= 0) {
+            int row = tblReport.getSelectedRow();
+            if (row >= 0) {
+                int selectRow = tblReport.convertRowIndexToModel(row);
                 VRoleMenu report = tableModel.getReport(selectRow);
                 String reportName = report.getMenuName();
                 String reportUrl = report.getMenuUrl();
@@ -276,6 +284,14 @@ public class Reports extends javax.swing.JPanel implements PanelControl,Selectio
         });
 
     }
+    private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
+        @Override
+        public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
+            String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
+            String text = txtFilter.getText().toUpperCase().replace(" ", "");
+            return tmp1.startsWith(text);
+        }
+    };
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -338,10 +354,10 @@ public class Reports extends javax.swing.JPanel implements PanelControl,Selectio
 
             }
         ));
-        tblReport.setRowHeight(Global.tblRowHeight);
+        tblReport.setRowHeight(26);
         jScrollPane1.setViewportView(tblReport);
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         txtFromDate.setDateFormatString("dd/MM/yyyy");
         txtFromDate.setFont(Global.lableFont);
@@ -500,7 +516,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl,Selectio
                         .addGap(18, 18, 18)
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtToDate, javax.swing.GroupLayout.DEFAULT_SIZE, 151, Short.MAX_VALUE))
+                        .addComponent(txtToDate, javax.swing.GroupLayout.DEFAULT_SIZE, 152, Short.MAX_VALUE))
                     .addComponent(txtTrader)
                     .addComponent(txtLocation)
                     .addComponent(txtStockType)
@@ -522,7 +538,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl,Selectio
                         .addComponent(txtFromDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(txtToDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(txtTrader)
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -567,7 +583,14 @@ public class Reports extends javax.swing.JPanel implements PanelControl,Selectio
         lblRecord.setFont(Global.lableFont);
         lblRecord.setText("0");
 
-        jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        txtFilter.setFont(Global.textFont);
+        txtFilter.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtFilterKeyReleased(evt);
+            }
+        });
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel14.setFont(Global.lableFont);
         jLabel14.setText("Date");
@@ -629,7 +652,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl,Selectio
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 483, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 484, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel12)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -650,12 +673,12 @@ public class Reports extends javax.swing.JPanel implements PanelControl,Selectio
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 428, Short.MAX_VALUE))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 7, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel12)
@@ -776,6 +799,16 @@ public class Reports extends javax.swing.JPanel implements PanelControl,Selectio
         // TODO add your handling code here:
     }//GEN-LAST:event_txtDateKeyReleased
 
+    private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
+        // TODO add your handling code here:
+        String filter = txtFilter.getText();
+        if (filter.length() == 0) {
+            sorter.setRowFilter(null);
+        } else {
+            sorter.setRowFilter(startsWithFilter);
+        }
+    }//GEN-LAST:event_txtFilterKeyReleased
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
@@ -850,7 +883,10 @@ public class Reports extends javax.swing.JPanel implements PanelControl,Selectio
 
     @Override
     public void selected(Object source, Object selectObj) {
-        //throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        if (source.equals("Selected-Date")) {
+            txtFromDate.setDate(Util1.toDate(dateAutoCompleter.getStDate(), "dd/MM/yyyy"));
+            txtToDate.setDate(Util1.toDate(dateAutoCompleter.getEndDate(), "dd/MM/yyyy"));
+        }
     }
 
 }

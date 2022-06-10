@@ -32,7 +32,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="btnSave" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="progress" max="32767" attributes="0"/>
+                      <Component id="lblLog" max="32767" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -46,9 +46,9 @@
               <Component id="jScrollPane1" pref="399" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                  <Component id="jButton2" alignment="0" min="-2" max="-2" attributes="0"/>
-                  <Component id="btnSave" min="-2" max="-2" attributes="0"/>
-                  <Component id="progress" max="32767" attributes="0"/>
+                  <Component id="jButton2" alignment="1" max="32767" attributes="0"/>
+                  <Component id="btnSave" alignment="1" max="32767" attributes="0"/>
+                  <Component id="lblLog" alignment="1" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -93,10 +93,7 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton2ActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JProgressBar" name="progress">
-      <Properties>
-        <Property name="indeterminate" type="boolean" value="true"/>
-      </Properties>
+    <Component class="javax.swing.JLabel" name="lblLog">
     </Component>
   </SubComponents>
 </Form>

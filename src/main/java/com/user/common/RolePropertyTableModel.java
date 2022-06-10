@@ -5,7 +5,6 @@
 package com.user.common;
 
 import com.common.Global;
-import com.common.ReturnObject;
 import com.common.RoleProperty;
 import com.common.RolePropertyKey;
 import java.time.Duration;
@@ -125,13 +124,14 @@ public class RolePropertyTableModel extends AbstractTableModel {
         if (isValidEntry(property)) {
             Global.hmRoleProperty.put(property.getKey().getPropKey(), property.getPropValue());
             property.setCompCode(Global.compCode);
-            addNewRow();
             Mono<RoleProperty> result = userApi.post()
                     .uri("/user/save-role-property")
                     .body(Mono.just(property), RoleProperty.class)
                     .retrieve()
                     .bodyToMono(RoleProperty.class);
             result.block(Duration.ofMinutes(1));
+            addNewRow();
+
         }
     }
 
@@ -159,8 +159,10 @@ public class RolePropertyTableModel extends AbstractTableModel {
     }
 
     public void addNewRow() {
-        listProperty.add(new RoleProperty());
-        fireTableRowsInserted(listProperty.size() - 1, listProperty.size() - 1);
+        if (!hasEmptyRow()) {
+            listProperty.add(new RoleProperty());
+            fireTableRowsInserted(listProperty.size() - 1, listProperty.size() - 1);
+        }
     }
 
     public void delete(int row) {
@@ -173,4 +175,14 @@ public class RolePropertyTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
+    private boolean hasEmptyRow() {
+        boolean status = false;
+        if (listProperty.size() >= 1) {
+            RoleProperty get = listProperty.get(listProperty.size() - 1);
+            if (get.getKey() == null) {
+                status = true;
+            }
+        }
+        return status;
+    }
 }

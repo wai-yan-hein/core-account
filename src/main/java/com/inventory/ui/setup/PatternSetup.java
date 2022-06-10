@@ -274,6 +274,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl {
         jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
         tblPD.setAutoCreateRowSorter(true);
+        tblPD.setFont(Global.textFont);
         tblPD.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},

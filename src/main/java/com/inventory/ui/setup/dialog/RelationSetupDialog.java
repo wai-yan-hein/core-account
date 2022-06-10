@@ -141,13 +141,15 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
         } else {
             rel.setDetailList(listD);
         }
-        rel = inventoryRepo.saveUnitRelation(rel);
-        if (lblStatus.getText().equals("NEW")) {
-            relationTableModel.addRelation(rel);
-        } else {
-            relationTableModel.setRelation(rel, selectRow);
+        if (!listD.isEmpty()) {
+            rel = inventoryRepo.saveUnitRelation(rel);
+            if (lblStatus.getText().equals("NEW")) {
+                relationTableModel.addRelation(rel);
+            } else {
+                relationTableModel.setRelation(rel, selectRow);
+            }
+            clear();
         }
-        clear();
     }
 
     private void clear() {
@@ -239,6 +241,7 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
             }
         });
 
+        tblRelD.setFont(Global.textFont);
         tblRelD.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -250,6 +253,8 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        tblRelD.setRowHeight(Global.tblRowHeight);
+        tblRelD.setShowGrid(true);
         tblRelD.setShowHorizontalLines(true);
         tblRelD.setShowVerticalLines(true);
         jScrollPane3.setViewportView(tblRelD);

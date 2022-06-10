@@ -152,6 +152,9 @@
       <SubComponents>
         <Component class="javax.swing.JTable" name="tblRelD">
           <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
             <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
               <Table columnCount="4" rowCount="4">
                 <Column editable="true" title="Title 1" type="java.lang.Object"/>
@@ -160,6 +163,10 @@
                 <Column editable="true" title="Title 4" type="java.lang.Object"/>
               </Table>
             </Property>
+            <Property name="rowHeight" type="int" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.tblRowHeight" type="code"/>
+            </Property>
+            <Property name="showGrid" type="boolean" value="true"/>
             <Property name="showHorizontalLines" type="boolean" value="true"/>
             <Property name="showVerticalLines" type="boolean" value="true"/>
           </Properties>

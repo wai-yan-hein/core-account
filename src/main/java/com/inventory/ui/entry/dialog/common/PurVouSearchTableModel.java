@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PurVouSearchTableModel extends AbstractTableModel {
 
     private List<VPurchase> listDetail = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Created By", "Paid Amt", "V-Total",};
+    private final String[] columnNames = {"Date", "Vou No", "Supplier", "Remark", "Created By", "Paid Amt", "V-Total",};
     private JTable parent;
 
     public JTable getParent() {

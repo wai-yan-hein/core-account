@@ -29,7 +29,7 @@ public class StockBalanceTableModel extends AbstractTableModel {
 
     static Logger log = LoggerFactory.getLogger(StockBalanceTableModel.class.getName());
     private List<VStockBalance> listStockBalance = new ArrayList();
-    private final String[] columnNames = {"Locaiton", "Qty", "Unit"};
+    private final String[] columnNames = {"Locaiton", "Qty",};
     @Autowired
     private WebClient inventoryApi;
     private JProgressBar progress;
@@ -54,13 +54,7 @@ public class StockBalanceTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        return switch (column) {
-            case 1 ->
-                Float.class;
-            default ->
-                String.class;
-        }; //code
-        //description
+       return String.class;
     }
 
     @Override
@@ -78,10 +72,6 @@ public class StockBalanceTableModel extends AbstractTableModel {
                         }
                     }
                     case 1 -> {
-                        //qty
-                        return stock.getTotalQty();
-                    }
-                    case 2 -> {
                         //Unit
                         if (stock.getUnitName() == null) {
                             return "No Unit";
@@ -135,7 +125,7 @@ public class StockBalanceTableModel extends AbstractTableModel {
             Mono<ResponseEntity<List<VStockBalance>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/report/get-stock-balance")
                     .queryParam("stockCode", stockCode)
-                    .queryParam("relation", ProUtil.isUnitRelation())
+                    .queryParam("compCode", Global.compCode)
                     .queryParam("macId", Global.macId)
                     .build())
                     .retrieve().toEntityList(VStockBalance.class);

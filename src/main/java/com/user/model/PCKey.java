@@ -12,6 +12,7 @@ import lombok.Data;
  */
 @Data
 public class PCKey {
+
     private String roleCode;
-    private String compCode;
+    private CompanyInfo companyInfo;
 }

@@ -6,6 +6,7 @@
 package com.inventory.ui.common;
 
 import com.common.Global;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
@@ -113,14 +114,12 @@ public class ReturnInTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        switch (column) {
-            case 4,7 -> {
-                return false;
-            }
-            default -> {
-                return true;
-            }
-        }
+        return switch (column) {
+            case 4,7 ->
+                ProUtil.isWeightOption();
+            default ->
+                true;
+        };
     }
 
     @Override

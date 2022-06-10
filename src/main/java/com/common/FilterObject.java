@@ -26,6 +26,7 @@ public class FilterObject {
     private String stockCode;
     private String saleManCode;
     private String reference;
+    private String locCode;
     @NonNull
     private String compCode;
 
