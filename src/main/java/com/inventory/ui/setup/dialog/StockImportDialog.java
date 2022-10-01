@@ -7,6 +7,7 @@ package com.inventory.ui.setup.dialog;
 import com.common.Global;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.inventory.model.CFont;
 import com.inventory.model.Stock;
 import com.inventory.model.StockType;
 import com.inventory.ui.common.InventoryRepo;
@@ -35,6 +36,7 @@ public class StockImportDialog extends javax.swing.JDialog {
     private final StockImportTableModel tableModel = new StockImportTableModel();
     private TaskExecutor taskExecutor;
     private InventoryRepo inventoryRepo;
+    private final HashMap<Integer, Integer> hmZG = new HashMap<>();
 
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
@@ -77,6 +79,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         tblTrader.setDefaultRenderer(Object.class, new TableCellRender());
         tblTrader.setDefaultRenderer(Float.class, new TableCellRender());
         tblTrader.setFont(Global.textFont);
+
     }
 
     private void chooseFile() {
@@ -103,6 +106,12 @@ public class StockImportDialog extends javax.swing.JDialog {
     }
 
     private void readFile(String path) {
+        List<CFont> listFont = inventoryRepo.getFont();
+        if (listFont != null) {
+            listFont.forEach(f -> {
+                hmZG.put(f.getIntCode(), f.getFontKey().getZwKeyCode());
+            });
+        }
         HashMap<String, StockType> hm = new HashMap<>();
         List<StockType> listST = inventoryRepo.getStockType();
         if (!listST.isEmpty()) {
@@ -137,7 +146,7 @@ public class StockImportDialog extends javax.swing.JDialog {
                         //JOptionPane.showMessageDialog(Global.parentForm, "FORMAT ERROR IN LINE:" + lineCount + e.getMessage());
                     }
                     t.setUserCode(userCode);
-                    t.setStockName(stockName);
+                    t.setStockName(getZawgyiText(stockName));
                     t.setSalePriceN(Util1.getFloat(priceA));
                     t.setSalePriceA(Util1.getFloat(priceB));
                     t.setStockType(hm.get(typeCode));
@@ -157,6 +166,38 @@ public class StockImportDialog extends javax.swing.JDialog {
         }
     }
 
+    private String getZawgyiText(String text) {
+        String tmpStr = "";
+
+        if (text != null) {
+            for (int i = 0; i < text.length(); i++) {
+                String tmpS = Character.toString(text.charAt(i));
+                int tmpChar = (int) text.charAt(i);
+
+                if (hmZG.containsKey(tmpChar)) {
+                    char tmpc = (char) hmZG.get(tmpChar).intValue();
+                    if (tmpStr.isEmpty()) {
+                        tmpStr = Character.toString(tmpc);
+                    } else {
+                        tmpStr = tmpStr + Character.toString(tmpc);
+                    }
+                } else if (tmpS.equals("ƒ")) {
+                    if (tmpStr.isEmpty()) {
+                        tmpStr = "ႏ";
+                    } else {
+                        tmpStr = tmpStr + "ႏ";
+                    }
+                } else if (tmpStr.isEmpty()) {
+                    tmpStr = tmpS;
+                } else {
+                    tmpStr = tmpStr + tmpS;
+                }
+            }
+        }
+
+        return tmpStr;
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -174,6 +215,7 @@ public class StockImportDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
+        tblTrader.setFont(Global.textFont);
         tblTrader.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},

@@ -8,6 +8,9 @@ import com.common.Global;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.Trader;
+import com.inventory.model.CFont;
+import com.inventory.model.TraderKey;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.TraderImportTableModel;
 import java.awt.FileDialog;
 import java.io.BufferedReader;
@@ -15,12 +18,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import javax.swing.JFrame;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -29,9 +31,10 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class CustomerImportDialog extends javax.swing.JDialog {
 
-    private WebClient inventoryApi;
+    private InventoryRepo inventoryRepo;
     private final TraderImportTableModel tableModel = new TraderImportTableModel();
     private TaskExecutor taskExecutor;
+    private final HashMap<Integer, Integer> hmZG = new HashMap<>();
 
     public TaskExecutor getTaskExecutor() {
         return taskExecutor;
@@ -41,12 +44,12 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         this.taskExecutor = taskExecutor;
     }
 
-    public WebClient getWebClient() {
-        return inventoryApi;
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
     }
 
-    public void setWebClient(WebClient inventoryApi) {
-        this.inventoryApi = inventoryApi;
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
     }
 
     /**
@@ -85,23 +88,57 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         btnSave.setEnabled(false);
         progress.setVisible(true);
         for (Trader trader : traders) {
-            Mono<Trader> result = inventoryApi.post()
-                    .uri("/setup/save-trader")
-                    .body(Mono.just(trader), Trader.class)
-                    .retrieve()
-                    .bodyToMono(Trader.class);
-            result.block();
+            inventoryRepo.saveTrader(trader);
         }
         dispose();
     }
 
+    private String getZawgyiText(String text) {
+        String tmpStr = "";
+
+        if (text != null) {
+            for (int i = 0; i < text.length(); i++) {
+                String tmpS = Character.toString(text.charAt(i));
+                int tmpChar = (int) text.charAt(i);
+
+                if (hmZG.containsKey(tmpChar)) {
+                    log.info(tmpChar + "");
+                    char tmpc = (char) hmZG.get(tmpChar).intValue();
+                    if (tmpStr.isEmpty()) {
+                        tmpStr = Character.toString(tmpc);
+                    } else {
+                        tmpStr = tmpStr + Character.toString(tmpc);
+                    }
+                } else if (tmpS.equals("ƒ")) {
+                    if (tmpStr.isEmpty()) {
+                        tmpStr = "ႏ";
+                    } else {
+                        tmpStr = tmpStr + "ႏ";
+                    }
+                } else if (tmpStr.isEmpty()) {
+                    tmpStr = tmpS;
+                } else {
+                    tmpStr = tmpStr + tmpS;
+                }
+            }
+        }
+
+        return tmpStr;
+    }
+
     private void readFile(String path) {
+        List<CFont> listFont = inventoryRepo.getFont();
+        if (listFont != null) {
+            listFont.forEach(f -> {
+                hmZG.put(f.getIntCode(), f.getFontKey().getZwKeyCode());
+            });
+        }
         String line;
         String splitBy = ",";
         int lineCount = 0;
         List<Trader> listTrader = new ArrayList<>();
         try {
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(
+            try ( BufferedReader br = new BufferedReader(new InputStreamReader(
                     new FileInputStream(path), "UTF8"))) {
                 while ((line = br.readLine()) != null) //returns a Boolean value
                 {
@@ -113,25 +150,26 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                     String phone;
                     lineCount++;
                     try {
-                        userCode = data[0];
-                        traderName = data[1];
-                        address = data[2] == null ? null : data[2];
-                        phone = data[3] == null ? null : data[3];
+                        userCode = getZawgyiText(data[0]);
+                        traderName = getZawgyiText(data[1]);
+                        address = getZawgyiText(data[2]);
+                        phone = getZawgyiText(data[3]);
 
                     } catch (IndexOutOfBoundsException e) {
                         phone = null;
-                        //JOptionPane.showMessageDialog(Global.parentForm, "FORMAT ERROR IN LINE:" + lineCount + e.getMessage());
                     }
                     t.setUserCode(userCode);
                     t.setTraderName(traderName);
                     t.setAddress(address);
                     t.setPhone(phone);
-                    t.setCompCode(Global.compCode);
+                    TraderKey key = new TraderKey();
+                    key.setCompCode(Global.compCode);
+                    t.setKey(key);
                     t.setActive(Boolean.TRUE);
                     t.setCreatedDate(Util1.getTodayDate());
                     t.setCreatedBy(Global.loginUser.getUserCode());
                     t.setMacId(Global.macId);
-                    t.setType("SUP");
+                    t.setType(chkCus.isSelected() ? "CUS" : "SUP");
                     listTrader.add(t);
                 }
             }
@@ -156,9 +194,13 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         btnSave = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         progress = new javax.swing.JProgressBar();
+        chkIntegra = new javax.swing.JCheckBox();
+        chkCus = new javax.swing.JCheckBox();
+        chkSup = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
+        tblTrader.setFont(Global.textFont);
         tblTrader.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -188,6 +230,12 @@ public class CustomerImportDialog extends javax.swing.JDialog {
 
         progress.setIndeterminate(true);
 
+        chkIntegra.setText("Integra Font");
+
+        chkCus.setText("CUS");
+
+        chkSup.setText("SUP");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -197,6 +245,12 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 668, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
+                        .addComponent(chkIntegra, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(chkCus, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(chkSup, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(12, 12, 12)
                         .addComponent(jButton2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnSave)
@@ -211,7 +265,11 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 399, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jButton2)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jButton2)
+                        .addComponent(chkIntegra)
+                        .addComponent(chkCus)
+                        .addComponent(chkSup))
                     .addComponent(btnSave)
                     .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
@@ -236,6 +294,9 @@ public class CustomerImportDialog extends javax.swing.JDialog {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSave;
+    private javax.swing.JCheckBox chkCus;
+    private javax.swing.JCheckBox chkIntegra;
+    private javax.swing.JCheckBox chkSup;
     private javax.swing.JButton jButton2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JProgressBar progress;

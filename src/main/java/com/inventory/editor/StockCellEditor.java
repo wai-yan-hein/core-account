@@ -7,13 +7,13 @@ package com.inventory.editor;
 
 import com.common.Global;
 import com.inventory.model.Stock;
+import com.inventory.ui.common.InventoryRepo;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
-import java.util.List;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JComponent;
 import javax.swing.JTable;
@@ -28,27 +28,14 @@ public class StockCellEditor extends AbstractCellEditor implements TableCellEdit
 
     private JComponent component = null;
     private StockAutoCompleter completer;
-    private List<Stock> listStock;
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusLost(FocusEvent e) {
-        }
+    private InventoryRepo inventoryRepo;
+   
 
-        @Override
-        public void focusGained(FocusEvent e) {
-            JTextField jtf = (JTextField) e.getSource();
-            int length = jtf.getText().length();
-            if (length > 0) {
-                String lastString = jtf.getText().substring(length - 1);
-                jtf.setText("");
-                jtf.setText(lastString);
-            }
-        }
+    public StockCellEditor(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
 
-    };
-
-    public StockCellEditor(List<Stock> listStock) {
-        this.listStock = listStock;
+    public StockCellEditor() {
     }
 
     @Override
@@ -82,12 +69,12 @@ public class StockCellEditor extends AbstractCellEditor implements TableCellEdit
         };
 
         jtf.addKeyListener(keyListener);
-        jtf.addFocusListener(fa);
         component = jtf;
         if (value != null) {
             jtf.setText(value.toString());
+            jtf.selectAll();
         }
-        completer = new StockAutoCompleter(jtf, listStock, this, false, false);
+        completer = new StockAutoCompleter(jtf,inventoryRepo, this, false);
         return component;
     }
 

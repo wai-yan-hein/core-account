@@ -94,7 +94,7 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
 
     private void initCombo() {
         appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo.getStock(true), null, true, false);
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
 
     }
 
@@ -126,7 +126,7 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
         filter.setUserCode(appUserAutoCompleter.getAppUser().getUserCode());
         filter.setVouNo(txtVouNo.getText());
         filter.setRemark(txtRemark.getText());
-        filter.setStockCode(stockAutoCompleter.getStock().getStockCode());
+        filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         //
         Mono<ResponseEntity<List<VOpening>>> result = inventoryApi
                 .post()

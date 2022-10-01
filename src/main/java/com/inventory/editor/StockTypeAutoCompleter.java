@@ -210,9 +210,7 @@ public final class StockTypeAutoCompleter implements KeyListener {
                     case "-" ->
                         initOption();
                     default -> {
-                        if (observer != null) {
-                            observer.selected("ST", type.getStockTypeCode());
-                        }
+
                         listOption.clear();
                         listOption.add(type.getStockTypeCode());
                     }
@@ -222,6 +220,9 @@ public final class StockTypeAutoCompleter implements KeyListener {
             popup.setVisible(false);
             if (editor != null) {
                 editor.stopCellEditing();
+            }
+            if (observer != null) {
+                observer.selected("ST", type.getStockTypeCode());
             }
         }
     }

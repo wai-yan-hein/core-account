@@ -24,8 +24,7 @@ public class StockCompleterTableModel extends AbstractTableModel {
     private List<Stock> listStock = new ArrayList();
     private String[] columnNames = {"Code", "Name", "Group", "Category", "Brand"};
 
-    public StockCompleterTableModel(List<Stock> listStock) {
-        this.listStock = listStock;
+    public StockCompleterTableModel() {
     }
 
     @Override

@@ -54,6 +54,15 @@ public class SaleTableModel extends AbstractTableModel {
     private JLabel lblStockName;
     private JButton btnProgress;
     private JDateChooser vouDate;
+    private boolean change = false;
+
+    public boolean isChange() {
+        return change;
+    }
+
+    public void setChange(boolean change) {
+        this.change = change;
+    }
 
     public TraderAutoCompleter getTraderAutoCompleter() {
         return traderAutoCompleter;
@@ -179,8 +188,17 @@ public class SaleTableModel extends AbstractTableModel {
                     return sd.getStock() == null ? null : sd.getStock().getUserCode();
                 }
                 case 1 -> {
+                    String stockName = null;
+                    if (sd.getStock() != null) {
+                        stockName = sd.getStock().getStockName();
+                        if (ProUtil.isStockNameWithCategory()) {
+                            if (sd.getStock().getCategory() != null) {
+                                stockName = String.format("%s (%s)", stockName, sd.getStock().getCategory().getCatName());
+                            }
+                        }
+                    }
                     //Name
-                    return sd.getStock() == null ? null : sd.getStock().getStockName();
+                    return stockName;
                 }
                 case 2 -> {
                     //loc
@@ -220,110 +238,117 @@ public class SaleTableModel extends AbstractTableModel {
     public void setValueAt(Object value, int row, int column) {
         try {
             SaleHisDetail sd = listDetail.get(row);
-            switch (column) {
-                case 0 -> {
-                    //Code
-                    if (value != null) {
-                        if (value instanceof Stock stock) {
-                            sbTableModel.calStockBalance(stock.getStockCode());
-                            sd.setStock(stock);
-                            sd.setQty(1.0f);
-                            sd.setSaleWt(Util1.gerFloatOne(stock.getSaleWeight()));
-                            sd.setSaleUnit(stock.getSaleUnit());
-                            sd.setLocation(locationAutoCompleter.getLocation());
-                            sd.setPrice(getTraderPrice(sd.getStock()));
-                            if (ProUtil.isPriceOption()) {
-                                sd.setPrice(getPopupPrice(row, true));
+            if (value != null) {
+                switch (column) {
+                    case 0 -> {
+                        //Code
+                        if (value != null) {
+                            if (value instanceof Stock stock) {
+                                sbTableModel.calStockBalance(stock.getKey().getStockCode());
+                                sd.setStock(stock);
+                                sd.setQty(1.0f);
+                                sd.setSaleWt(Util1.gerFloatOne(stock.getSaleWeight()));
+                                sd.setSaleUnit(stock.getSaleUnit());
+                                sd.setLocation(locationAutoCompleter.getLocation());
+                                sd.setPrice(getTraderPrice(sd.getStock()));
+                                if (ProUtil.isPricePopup()) {
+                                    sd.setPrice(getPopupPrice(row, true));
+                                }
+                                sd.setPrice(sd.getPrice() == 0 ? sd.getStock().getSalePriceN() : sd.getPrice());
+                                parent.setColumnSelectionInterval(3, 3);
+                                addNewRow();
                             }
-                            sd.setPrice(sd.getPrice() == 0 ? sd.getStock().getSalePriceN() : sd.getPrice());
-                            parent.setColumnSelectionInterval(3, 3);
-                            addNewRow();
                         }
                     }
-                }
-                case 2 -> {
-                    //Loc
-                    if (value instanceof Location location) {
-                        sd.setLocation(location);
-                    } else {
-                        sd.setLocation(null);
+                    case 2 -> {
+                        //Loc
+                        if (value instanceof Location location) {
+                            sd.setLocation(location);
+                        } else {
+                            sd.setLocation(null);
+                        }
                     }
-                }
-                case 3 -> {
-                    //Qty
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            sd.setQty(Util1.getFloat(value));
+                    case 3 -> {
+                        //Qty
+                        if (Util1.isNumber(value)) {
+                            if (Util1.isPositive(Util1.getFloat(value))) {
+                                sd.setQty(Util1.getFloat(value));
+                                if (sd.getSaleUnit() == null) {
+                                    parent.setColumnSelectionInterval(6, 6);
+                                } else {
+                                    parent.setColumnSelectionInterval(5, 5);
+                                }
+                            } else {
+                                showMessageBox("Input value must be positive");
+                                parent.setColumnSelectionInterval(column, column);
+                            }
+                        } else {
+                            showMessageBox("Input value must be number.");
+                            parent.setColumnSelectionInterval(column, column);
+                        }
+
+                    }
+                    case 4 -> {
+                        //Std-Wt
+                        if (Util1.isNumber(value)) {
+                            if (Util1.isPositive(Util1.getFloat(value))) {
+                                sd.setSaleWt(Util1.getFloat(value));
+                            } else {
+                                showMessageBox("Input value must be positive");
+                                parent.setColumnSelectionInterval(column, column);
+                            }
                         } else {
                             showMessageBox("Input value must be positive");
                             parent.setColumnSelectionInterval(column, column);
                         }
-                    } else {
-                        showMessageBox("Input value must be number.");
-                        parent.setColumnSelectionInterval(column, column);
                     }
 
-                }
-                case 4 -> {
-                    //Std-Wt
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            sd.setSaleWt(Util1.getFloat(value));
+                    case 5 -> {
+                        //Unit
+                        if (value != null) {
+                            if (value instanceof StockUnit stockUnit) {
+                                sd.setSaleUnit(stockUnit);
+                            }
+                        }
+                        parent.setColumnSelectionInterval(6, 6);
+                    }
+                    case 6 -> {
+                        //Sale Price
+                        if (Util1.isNumber(value)) {
+                            if (Util1.isPositive(Util1.getFloat(value))) {
+                                sd.setPrice(Util1.getFloat(value));
+                                parent.setColumnSelectionInterval(0, 0);
+                                parent.setRowSelectionInterval(row + 1, row + 1);
+                            } else {
+                                showMessageBox("Input value must be positive");
+                                parent.setColumnSelectionInterval(column, column);
+                            }
                         } else {
-                            showMessageBox("Input value must be positive");
+                            showMessageBox("Input value must be number.");
                             parent.setColumnSelectionInterval(column, column);
                         }
-                    } else {
-                        showMessageBox("Input value must be positive");
-                        parent.setColumnSelectionInterval(column, column);
                     }
-                }
-
-                case 5 -> {
-                    //Unit
-                    if (value != null) {
-                        if (value instanceof StockUnit stockUnit) {
-                            sd.setSaleUnit(stockUnit);
+                    case 7 -> {
+                        //Amount
+                        if (value != null) {
+                            sd.setAmount(Util1.getFloat(value));
                         }
                     }
-                    parent.setColumnSelectionInterval(6, 6);
                 }
-                case 6 -> {
-                    //Sale Price
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            sd.setPrice(Util1.getFloat(value));
-                            parent.setColumnSelectionInterval(0, 0);
-                            parent.setRowSelectionInterval(row + 1, row + 1);
-                        } else {
-                            showMessageBox("Input value must be positive");
-                            parent.setColumnSelectionInterval(column, column);
+                if (column != 6) {
+                    if (ProUtil.isSaleLastPrice()) {
+                        if (sd.getStock() != null && sd.getSaleUnit() != null) {
+                            sd.setPrice(inventoryRepo.getSaleRecentPrice(sd.getStock().getKey().getStockCode(),
+                                    Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), sd.getSaleUnit().getUnitCode()));
                         }
-                    } else {
-                        showMessageBox("Input value must be number.");
-                        parent.setColumnSelectionInterval(column, column);
                     }
                 }
-                case 7 -> {
-                    //Amount
-                    if (value != null) {
-                        sd.setAmount(Util1.getFloat(value));
-                    }
-                }
+                change = true;
+                calculateAmount(sd);
+                fireTableRowsUpdated(row, row);
+                selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
+                parent.requestFocusInWindow();
             }
-            if (column != 6) {
-                if (ProUtil.isSaleLastPrice()) {
-                    if (sd.getStock() != null && sd.getSaleUnit() != null) {
-                        sd.setPrice(inventoryRepo.getSaleRecentPrice(sd.getStock().getStockCode(),
-                                Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), sd.getSaleUnit().getUnitCode()));
-                    }
-                }
-            }
-            calculateAmount(sd);
-            fireTableRowsUpdated(row, row);
-            selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
-            parent.requestFocusInWindow();
-            //   fireTableCellUpdated(row, 8);
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }

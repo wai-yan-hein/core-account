@@ -136,7 +136,16 @@ public class ReturnOutTableModel extends AbstractTableModel {
                 }
                 case 1 -> {
                     //Name
-                    return record.getStock() == null ? null : record.getStock().getStockName();
+                    String stockName = null;
+                    if (record.getStock() != null) {
+                        stockName = record.getStock().getStockName();
+                        if (ProUtil.isStockNameWithCategory()) {
+                            if (record.getStock().getCategory() != null) {
+                                stockName = String.format("%s (%s)", stockName, record.getStock().getCategory().getCatName());
+                            }
+                        }
+                    }
+                    return stockName;
                 }
                 case 2 -> {
                     //loc
@@ -264,7 +273,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
             }
             if (column != 6) {
                 if (record.getStock() != null && record.getUnit() != null) {
-                    record.setPrice(inventoryRepo.getPurRecentPrice(record.getStock().getStockCode(),
+                    record.setPrice(inventoryRepo.getPurRecentPrice(record.getStock().getKey().getStockCode(),
                             Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnit().getUnitCode()));
                 }
             }

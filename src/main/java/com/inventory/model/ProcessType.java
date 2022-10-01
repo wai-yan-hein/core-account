@@ -16,6 +16,6 @@ public class ProcessType {
     private ProcessTypeKey key;
     private String userCode;
     private String proName;
-    private Integer uniqueId;
     private boolean calculate;
+    private boolean active;
 }

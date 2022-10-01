@@ -62,7 +62,7 @@ public class CodeTableModel extends AbstractTableModel {
 
             switch (column) {
                 case 0: //Code
-                    return stock.getStockCode();
+                    return stock.getKey().getStockCode();
                 case 1: //Desp
                     return stock.getStockName();
                 default:
@@ -89,14 +89,14 @@ public class CodeTableModel extends AbstractTableModel {
             Stock record = listStock.get(row);
 
             switch (column) {
-                case 0: //Code
+                case 0 -> {
+                    //Code
                     if (value != null) {
                         Stock stock = (Stock) value;
-                        record.setStockCode(stock.getStockCode());
-                        record.setStockName(stock.getStockName());
+                        record = stock;
                         addEmptyRow();
                     }
-                    break;
+                }
             }
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
@@ -119,7 +119,7 @@ public class CodeTableModel extends AbstractTableModel {
             status = true;
         } else {
             Stock stock = listStock.get(listStock.size() - 1);
-            if (stock.getStockCode() == null) {
+            if (stock.getKey().getStockCode() == null) {
                 status = false;
             }
         }
@@ -149,12 +149,12 @@ public class CodeTableModel extends AbstractTableModel {
 
         if (listStock != null) {
             for (Stock stock : listStock) {
-                if (stock.getStockCode() != null) {
+                if (stock.getKey().getStockCode() != null) {
 
                     if (strTmp == null) {
-                        strTmp = "'" + stock.getStockCode() + "'";
+                        strTmp = "'" + stock.getKey().getStockCode() + "'";
                     } else {
-                        strTmp = strTmp + ",'" + stock.getStockCode() + "'";
+                        strTmp = strTmp + ",'" + stock.getKey().getStockCode() + "'";
                     }
 
                 }

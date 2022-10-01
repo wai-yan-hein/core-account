@@ -6,6 +6,7 @@
 package com.inventory.ui.common;
 
 import com.common.Global;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
@@ -112,7 +113,16 @@ public class OpeningTableModel extends AbstractTableModel {
                 }
                 case 1 -> {
                     //Name
-                    return record.getStock() == null ? null : record.getStock().getStockName();
+                    String stockName = null;
+                    if (record.getStock() != null) {
+                        stockName = record.getStock().getStockName();
+                        if (ProUtil.isStockNameWithCategory()) {
+                            if (record.getStock().getCategory() != null) {
+                                stockName = String.format("%s (%s)", stockName, record.getStock().getCategory().getCatName());
+                            }
+                        }
+                    }
+                    return stockName;
                 }
                 case 2 -> {
                     //qty

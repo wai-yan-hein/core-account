@@ -15,7 +15,7 @@ import lombok.Data;
 @Data
 public class Stock implements java.io.Serializable {
 
-    private String stockCode;
+    private StockKey key;
     private boolean active;
     private StockBrand brand;
     private String stockName;
@@ -51,7 +51,8 @@ public class Stock implements java.io.Serializable {
     }
 
     public Stock(String stockCode, String stockName) {
-        this.stockCode = stockCode;
+        this.key = new StockKey();
+        this.key.setStockCode(stockCode);
         this.stockName = stockName;
     }
 

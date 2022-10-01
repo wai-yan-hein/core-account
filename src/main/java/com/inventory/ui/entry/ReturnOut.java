@@ -22,7 +22,6 @@ import com.inventory.model.Order;
 import com.inventory.model.RetInHis;
 import com.inventory.model.RetOutHis;
 import com.inventory.model.RetOutHisDetail;
-import com.inventory.model.Stock;
 import com.inventory.model.Trader;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.ReturnOutTableModel;
@@ -36,8 +35,12 @@ import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
@@ -47,7 +50,13 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.data.JsonDataSource;
+import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -76,7 +85,6 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     private LocationAutoCompleter locationAutoCompleter;
     private SelectionObserver observer;
     private JProgressBar progress;
-    private List<Stock> listStock = new ArrayList<>();
     private List<Location> listLocation = new ArrayList<>();
 
     private RetOutHis ri = new RetOutHis();
@@ -132,8 +140,8 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         tblRet.getColumnModel().getColumn(5).setPreferredWidth(1);//unit
         tblRet.getColumnModel().getColumn(6).setPreferredWidth(1);//price
         tblRet.getColumnModel().getColumn(7).setPreferredWidth(40);//amt
-        tblRet.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(listStock));
-        tblRet.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(listStock));
+        tblRet.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblRet.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         tblRet.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(listLocation));
         tblRet.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//qty
         tblRet.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
@@ -149,12 +157,11 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     }
 
     private void initCombo() {
-        listStock = inventoryRepo.getStock(true);
         listLocation = inventoryRepo.getLocation();
-        traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo.getSupplier(), null, false, 0, true);
+        traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "SUP");
         currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, inventoryRepo.getCurrency(), null, false);
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, false, false);
-        locationAutoCompleter.setSelectionObserver(this);
+        locationAutoCompleter.setObserver(this);
     }
 
     private void initKeyListener() {
@@ -228,6 +235,9 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                         .bodyToMono(RetInHis.class);
                 RetInHis t = result.block();
                 if (t != null) {
+                    if (print) {
+                        printVoucher(ri.getVouNo());
+                    }
                     clear();
                 }
             }
@@ -235,6 +245,42 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             log.error("saveRetIn :" + ex.getMessage());
             JOptionPane.showMessageDialog(this, "Could not saved.");
         }
+    }
+
+    private void printVoucher(String vouNo) {
+        Mono<byte[]> result = inventoryApi.get()
+                .uri(builder -> builder.path("/report/get-return-out-report")
+                .queryParam("vouNo", vouNo)
+                .queryParam("macId", Global.macId)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToMono(ByteArrayResource.class)
+                .map(ByteArrayResource::getByteArray);
+        result.subscribe((t) -> {
+            try {
+                if (t != null) {
+                    String reportName = "ReturnOutVoucher";
+                    String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
+                    Map<String, Object> param = new HashMap<>();
+                    param.put("p_print_date", Util1.getTodayDateTime());
+                    param.put("p_comp_name", Global.companyName);
+                    param.put("p_comp_address", Global.companyAddress);
+                    param.put("p_comp_phone", Global.companyPhone);
+                    param.put("p_logo_path", logoPath);
+                    String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
+                    ByteArrayInputStream jsonDataStream = new ByteArrayInputStream(t);
+                    JsonDataSource ds = new JsonDataSource(jsonDataStream);
+                    JasperPrint js = JasperFillManager.fillReport(reportPath, param, ds);
+                    JasperViewer.viewReport(js, false);
+                }
+            } catch (JRException ex) {
+                log.error("printVoucher : " + ex.getMessage());
+                JOptionPane.showMessageDialog(this, ex.getMessage());
+            }
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        });
     }
 
     private boolean isValidEntry() {
@@ -363,6 +409,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             Mono<ResponseEntity<List<RetOutHisDetail>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/retout/get-retout-detail")
                     .queryParam("vouNo", vouNo)
+                    .queryParam("compCode", Global.compCode)
                     .build())
                     .retrieve().toEntityList(RetOutHisDetail.class);
             result.subscribe((t) -> {
@@ -423,10 +470,6 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             });
         }
         roTableModel.setListDetail(listRetInDetail);
-    }
-
-    private void printSaveVoucher() {
-
     }
 
     private void focusTable() {
@@ -501,7 +544,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             }
         });
 
-        panelSale.setBorder(javax.swing.BorderFactory.createEtchedBorder(null, java.awt.Color.lightGray));
+        panelSale.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel17.setFont(Global.lableFont);
         jLabel17.setText("Vou No");
@@ -645,18 +688,18 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 151, Short.MAX_VALUE)
+                .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 315, Short.MAX_VALUE)
                 .addGap(62, 62, 62))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 225, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jPanel3.setBorder(javax.swing.BorderFactory.createEtchedBorder(null, java.awt.Color.lightGray));
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel13.setFont(Global.lableFont);
         jLabel13.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -679,12 +722,14 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         txtVouTotal.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtVouTotal.setFont(Global.amtFont);
 
+        jLabel7.setFont(Global.lableFont);
         jLabel7.setText("%");
 
         jLabel8.setFont(Global.lableFont);
         jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         jLabel8.setText("Vou Balance :");
 
+        jLabel15.setFont(Global.lableFont);
         jLabel15.setText("%");
 
         txtVouDiscP.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
@@ -794,7 +839,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                             .addComponent(txtVouTotal)
                             .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtVouDiscP, javax.swing.GroupLayout.DEFAULT_SIZE, 145, Short.MAX_VALUE)
+                                    .addComponent(txtVouDiscP)
                                     .addComponent(txtVouTaxP))
                                 .addGap(18, 18, 18)
                                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -802,7 +847,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                                     .addComponent(jLabel15))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtVouDiscount, javax.swing.GroupLayout.DEFAULT_SIZE, 145, Short.MAX_VALUE)
+                                    .addComponent(txtVouDiscount)
                                     .addComponent(txtTax)))
                             .addComponent(txtGrandTotal)
                             .addComponent(txtVouPaid, javax.swing.GroupLayout.Alignment.TRAILING)
@@ -894,12 +939,12 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                 .addGap(4, 4, 4)
                 .addComponent(panelSale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 289, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 291, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(11, 11, 11))
         );
     }// </editor-fold>//GEN-END:initComponents
 

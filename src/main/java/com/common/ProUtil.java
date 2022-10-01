@@ -31,6 +31,10 @@ public class ProUtil {
         return Util1.getBoolean(Global.hmRoleProperty.get("sale.voucher.edit"));
     }
 
+    public static boolean isPurchaseEdit() {
+        return Util1.getBoolean(Global.hmRoleProperty.get("purchase.voucher.edit"));
+    }
+
     public static boolean isCalStock() {
         return Util1.getBoolean(Global.hmRoleProperty.get("calculate.stock"));
     }
@@ -47,12 +51,20 @@ public class ProUtil {
         return Util1.getBoolean(Global.hmRoleProperty.get("sale.price.option"));
     }
 
+    public static boolean isPricePopup() {
+        return Util1.getBoolean(Global.hmRoleProperty.get("sale.price.popup"));
+    }
+
     public static boolean isSalePriceChange() {
         return Util1.getBoolean(Global.hmRoleProperty.get("sale.price.change"));
     }
 
     public static boolean isWeightOption() {
         return Util1.getBoolean(Global.hmRoleProperty.get("stock.use.weight"));
+    }
+
+    public static boolean isStockNameWithCategory() {
+        return Util1.getBoolean(Global.hmRoleProperty.get("stock.name.with.category"));
     }
 
     public static boolean isSaleLastPrice() {

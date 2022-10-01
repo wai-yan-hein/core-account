@@ -11,11 +11,15 @@ import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.editor.RegionAutoCompleter;
+import com.inventory.editor.TraderGroupAutoCompleter;
 import com.inventory.model.Region;
 import com.inventory.model.Trader;
+import com.inventory.model.TraderGroup;
+import com.inventory.model.TraderKey;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.SupplierTabelModel;
 import com.inventory.ui.setup.dialog.RegionSetup;
+import com.inventory.ui.setup.dialog.TraderGroupDialog;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
@@ -51,10 +55,12 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     @Autowired
     private InventoryRepo inventoryRepo;
     private RegionAutoCompleter regionAutoCompleter;
+    private TraderGroupAutoCompleter traderGroupAutoCompleter;
     private SelectionObserver observer;
     private JProgressBar progress;
     private List<Region> listRegion = new ArrayList<>();
     private TableRowSorter<TableModel> sorter;
+    private List<TraderGroup> listTraderGroup = new ArrayList<>();
 
     public SelectionObserver getObserver() {
         return observer;
@@ -90,6 +96,9 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         listRegion = inventoryRepo.getRegion();
         regionAutoCompleter = new RegionAutoCompleter(txtRegion, listRegion, null, false, false);
         regionAutoCompleter.setRegion(null);
+        listTraderGroup = inventoryRepo.getTraderGroup();
+        traderGroupAutoCompleter = new TraderGroupAutoCompleter(txtGroup, listTraderGroup, null, false);
+        traderGroupAutoCompleter.setGroup(null);
     }
 
     private void initTable() {
@@ -123,7 +132,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private void setCustomer(Trader sup) {
         supplier = sup;
-        txtSysCode.setText(supplier.getCode());
+        txtSysCode.setText(supplier.getKey().getCode());
         txtCusCode.setText(supplier.getUserCode());
         txtCusName.setText(supplier.getTraderName());
         txtCusEmail.setText(supplier.getEmail());
@@ -135,16 +144,13 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         chkMulti.setSelected(supplier.isMulti());
         txtCusName.requestFocus();
         lblStatus.setText("EDIT");
+        traderGroupAutoCompleter.setGroup(supplier.getGroup());
     }
 
     private boolean isValidEntry() {
         boolean status;
         if (txtCusName.getText().isEmpty()) {
             JOptionPane.showMessageDialog(Global.parentForm, "Customer Name can't be empty");
-            status = false;
-        } else if (regionAutoCompleter.getRegion() == null) {
-            JOptionPane.showMessageDialog(Global.parentForm, "Invalid Region.");
-            txtRegion.requestFocus();
             status = false;
         } else {
             supplier.setUserCode(txtCusCode.getText());
@@ -153,16 +159,19 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
             supplier.setEmail(txtCusEmail.getText());
             supplier.setAddress(txtCusAddress.getText());
             supplier.setActive(chkActive.isSelected());
-            supplier.setCompCode(Global.compCode);
             supplier.setUpdatedDate(Util1.getTodayDate());
             supplier.setRegion(regionAutoCompleter.getRegion());
             supplier.setType("SUP");
             supplier.setCashDown(chkCD.isSelected());
             supplier.setMulti(chkMulti.isSelected());
+            supplier.setGroup(traderGroupAutoCompleter.getGroup());
             if (lblStatus.getText().equals("NEW")) {
                 supplier.setMacId(Global.macId);
                 supplier.setCreatedBy(Global.loginUser.getUserCode());
                 supplier.setCreatedDate(Util1.getTodayDate());
+                TraderKey key = new TraderKey();
+                key.setCompCode(Global.compCode);
+                supplier.setKey(key);
             } else {
                 supplier.setUpdatedBy(Global.loginUser.getUserCode());
             }
@@ -174,7 +183,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     private void saveCustomer() {
         if (isValidEntry()) {
             supplier = inventoryRepo.saveTrader(supplier);
-            if (supplier.getCode() != null) {
+            if (supplier.getKey().getCode() != null) {
                 if (lblStatus.getText().equals("EDIT")) {
                     supplierTabelModel.setCustomer(selectRow, supplier);
                 } else {
@@ -201,6 +210,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         supplier = new Trader();
         supplierTabelModel.refresh();
         lblRecord.setText(String.valueOf(supplierTabelModel.getListCustomer().size()));
+        traderGroupAutoCompleter.setGroup(null);
     }
 
     private void initKeyListener() {
@@ -258,6 +268,9 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtSysCode = new javax.swing.JTextField();
         chkCD = new javax.swing.JCheckBox();
         chkMulti = new javax.swing.JCheckBox();
+        jLabel10 = new javax.swing.JLabel();
+        txtGroup = new javax.swing.JTextField();
+        btnGroup = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblCustomer = new javax.swing.JTable();
         jLabel6 = new javax.swing.JLabel();
@@ -270,7 +283,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
             }
         });
 
-        panelEntry.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED));
+        panelEntry.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         panelEntry.addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
                 panelEntryComponentShown(evt);
@@ -363,6 +376,22 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         chkMulti.setText("Multi Use");
         chkMulti.setName("chkActive"); // NOI18N
 
+        jLabel10.setFont(Global.lableFont);
+        jLabel10.setText("Group");
+
+        txtGroup.setFont(Global.textFont);
+        txtGroup.setName("txtRemark"); // NOI18N
+
+        btnGroup.setBackground(Global.selectionColor);
+        btnGroup.setFont(Global.lableFont);
+        btnGroup.setForeground(new java.awt.Color(255, 255, 255));
+        btnGroup.setText("...");
+        btnGroup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGroupActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelEntryLayout = new javax.swing.GroupLayout(panelEntry);
         panelEntry.setLayout(panelEntryLayout);
         panelEntryLayout.setHorizontalGroup(
@@ -378,7 +407,8 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                     .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(chkActive, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -391,13 +421,17 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                             .addComponent(txtCusName, javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtCusCode)
                             .addGroup(panelEntryLayout.createSequentialGroup()
+                                .addComponent(txtRegion, javax.swing.GroupLayout.DEFAULT_SIZE, 246, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButton2))
+                            .addComponent(txtSysCode)
+                            .addGroup(panelEntryLayout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
                                 .addComponent(jButton1))
                             .addGroup(panelEntryLayout.createSequentialGroup()
-                                .addComponent(txtRegion, javax.swing.GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE)
+                                .addComponent(txtGroup)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(txtSysCode))
+                                .addComponent(btnGroup)))
                         .addContainerGap())
                     .addComponent(chkCD, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkMulti, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
@@ -438,6 +472,11 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel8)
                     .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel10)
+                    .addComponent(txtGroup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnGroup))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(chkMulti)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -448,7 +487,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblStatus)
                     .addComponent(jButton1))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(100, Short.MAX_VALUE))
         );
 
         panelEntryLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {txtCusAddress, txtCusCode, txtCusEmail, txtCusName, txtCusPhone, txtRemark});
@@ -497,7 +536,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 449, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 459, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -570,14 +609,27 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtFilter.selectAll();
     }//GEN-LAST:event_txtFilterFocusGained
 
+    private void btnGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGroupActionPerformed
+        // TODO add your handling code here:
+        TraderGroupDialog dialog = new TraderGroupDialog();
+        dialog.setListGroup(listTraderGroup);
+        dialog.setInventoryRepo(inventoryRepo);
+        dialog.initMain();
+        dialog.setSize(Global.width / 2, Global.height / 2);
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
+    }//GEN-LAST:event_btnGroupActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnGroup;
     private javax.swing.JCheckBox chkActive;
     private javax.swing.JCheckBox chkCD;
     private javax.swing.JCheckBox chkMulti;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -597,6 +649,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     private javax.swing.JTextField txtCusName;
     private javax.swing.JTextField txtCusPhone;
     private javax.swing.JTextField txtFilter;
+    private javax.swing.JTextField txtGroup;
     private javax.swing.JTextField txtRegion;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtSysCode;
@@ -789,6 +842,17 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     @Override
     public void delete() {
+        if (selectRow >= 0) {
+            Trader t = supplierTabelModel.getCustomer(selectRow);
+            List<String> str = inventoryRepo.deleteTrader(t.getKey());
+            if (str.isEmpty()) {
+                supplierTabelModel.deleteCustomer(selectRow);
+                clear();
+                JOptionPane.showMessageDialog(this, "Deleted.");
+            } else {
+                JOptionPane.showMessageDialog(this, str);
+            }
+        }
     }
 
     @Override

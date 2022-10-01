@@ -112,9 +112,9 @@ public class PurVouSearchDialog extends javax.swing.JDialog implements KeyListen
     }
 
     private void initCombo() {
-        traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo.getSupplier(), null, true, 1, false);
+        traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "SUP");
         appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo.getStock(true), null, true, false);
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, true, false);
     }
 
@@ -158,13 +158,13 @@ public class PurVouSearchDialog extends javax.swing.JDialog implements KeyListen
     private void search() {
         progess.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode);
-        filter.setCusCode(traderAutoCompleter.getTrader().getCode());
+        filter.setCusCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
         filter.setUserCode(appUserAutoCompleter.getAppUser().getUserCode());
         filter.setVouNo(txtVouNo.getText());
         filter.setRemark(txtRemark.getText());
-        filter.setStockCode(stockAutoCompleter.getStock().getStockCode());
+        filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         filter.setLocCode(locationAutoCompleter.getLocation().getLocationCode());
         filter.setReference(txtRef.getText());
         //

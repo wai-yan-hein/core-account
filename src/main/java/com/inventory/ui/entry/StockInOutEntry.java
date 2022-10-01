@@ -6,7 +6,6 @@
 package com.inventory.ui.entry;
 
 import com.common.DecimalFormatRender;
-import com.google.gson.reflect.TypeToken;
 import java.awt.event.KeyEvent;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
@@ -16,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.common.Global;
 import com.common.PanelControl;
-import com.common.ReturnObject;
 import com.common.SelectionObserver;
 import com.user.common.UserRepo;
 import com.common.Util1;
@@ -24,17 +22,12 @@ import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.VouStatusAutoCompleter;
 import com.inventory.model.Location;
-import com.inventory.model.Pattern;
-import com.inventory.model.PatternDetail;
-import com.inventory.model.Stock;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
 import com.inventory.model.StockUnit;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.StockInOutTableModel;
-import com.inventory.ui.entry.dialog.PatternOptionDialog;
 import com.inventory.ui.entry.dialog.StockIOSearchDialog;
-import static com.inventory.ui.setup.PatternSetup.gson;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import java.awt.Color;
@@ -69,7 +62,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     private SelectionObserver observer;
     private JProgressBar progress;
     private List<StockUnit> listStockUnit = new ArrayList<>();
-    private List<Stock> listStock = new ArrayList<>();
     private List<Location> listLocation = new ArrayList<>();
 
     public SelectionObserver getObserver() {
@@ -114,7 +106,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     }
 
     private void initTable() {
-        listStock = inventoryRepo.getStock(true);
         listLocation = inventoryRepo.getLocation();
         listStockUnit = inventoryRepo.getStockUnit();
         outTableModel.setVouDate(txtDate);
@@ -133,18 +124,14 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         tblStock.getColumnModel().getColumn(6).setPreferredWidth(50);
         tblStock.getColumnModel().getColumn(7).setPreferredWidth(50);
         tblStock.getColumnModel().getColumn(8).setPreferredWidth(50);
-        tblStock.getColumnModel().getColumn(9).setPreferredWidth(50);
-        tblStock.getColumnModel().getColumn(10).setPreferredWidth(50);
-        tblStock.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(listStock));
-        tblStock.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(listStock));
+        tblStock.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblStock.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         tblStock.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(listLocation));
         tblStock.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
-        tblStock.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
-        tblStock.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(listStockUnit));
-        tblStock.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
+        tblStock.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(listStockUnit));
+        tblStock.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
+        tblStock.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(listStockUnit));
         tblStock.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
-        tblStock.getColumnModel().getColumn(8).setCellEditor(new StockUnitEditor(listStockUnit));
-        tblStock.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
         tblStock.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblStock.setDefaultRenderer(Float.class, new DecimalFormatRender());
         tblStock.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -228,7 +215,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         float ttlOutQty = 0.0f;
         float ttlPrice = 0.0f;
         List<StockInOutDetail> listIO = outTableModel.getListStock();
-        if (!listStock.isEmpty()) {
+        if (!listIO.isEmpty()) {
             for (StockInOutDetail s : listIO) {
                 ttlInQty += Util1.getFloat(s.getInQty());
                 ttlOutQty += Util1.getFloat(s.getOutQty());
@@ -297,7 +284,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             outTableModel.setListStock(t.getBody());
             outTableModel.addNewRow();
             txtVou.setText(io.getVouNo());
-            txtDate.setDate(io.getVouDate());
+            txtDate.setDate(Util1.toDateFormat(io.getVouDate(), "dd/MM/yyyy"));
             txtRemark.setText(io.getRemark());
             txtDesp.setText(io.getDescription());
             vouStatusAutoCompleter.setVoucher(io.getVouStatus());
@@ -311,6 +298,10 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 disableForm(true);
             }
             calTotalAmt();
+            int row = tblStock.getRowCount();
+            tblStock.setColumnSelectionInterval(0, 0);
+            tblStock.setRowSelectionInterval(row - 1, row - 1);
+            tblStock.requestFocus();
             progress.setIndeterminate(false);
         }, (e) -> {
             progress.setIndeterminate(false);
@@ -326,49 +317,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         tblStock.setEnabled(status);
         txtVouType.setEnabled(status);
 
-    }
-
-    private void searchPD(String patternCode, float qty) {
-        progress.setIndeterminate(true);
-        Mono<ReturnObject> result = inventoryApi
-                .get()
-                .uri(builder -> builder.path("/setup/get-pattern-detail")
-                .queryParam("patternCode", patternCode)
-                .build())
-                .retrieve().bodyToMono(ReturnObject.class);
-        result.subscribe((t) -> {
-            java.lang.reflect.Type listType = new TypeToken<ArrayList<PatternDetail>>() {
-            }.getType();
-            List<PatternDetail> listOP = gson.fromJson(gson.toJsonTree(t.getList()), listType);
-            addStockInout(listOP, qty);
-            calTotalAmt();
-            progress.setIndeterminate(false);
-        }, (e) -> {
-            progress.setIndeterminate(false);
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
-    }
-
-    private void addStockInout(List<PatternDetail> listPD, float qty) {
-        List<StockInOutDetail> listIO = new ArrayList<>();
-        if (!listPD.isEmpty()) {
-            for (PatternDetail pd : listPD) {
-                StockInOutDetail iod = new StockInOutDetail();
-                iod.setStock(pd.getStock());
-                iod.setLocation(pd.getLocation());
-                iod.setInQty(Util1.getFloat(pd.getInQty()) * qty);
-                iod.setInWt(1.0f);
-                iod.setInUnit(pd.getInUnit());
-                iod.setOutQty(Util1.getFloat(pd.getOutQty()) * qty);
-                iod.setOutWt(1.0f);
-                iod.setOutUnit(pd.getOutUnit());
-                iod.setCostPrice(pd.getCostPrice());
-                listIO.add(iod);
-            }
-            outTableModel.setListStock(listIO);
-        } else {
-            JOptionPane.showMessageDialog(this, "Pattern is empty.");
-        }
     }
 
     /**
@@ -398,7 +346,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         lblStatus = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
         txtCost = new javax.swing.JFormattedTextField();
         jLabel8 = new javax.swing.JLabel();
 
@@ -527,16 +474,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         lblStatus.setFont(new java.awt.Font("Arial", 0, 24)); // NOI18N
         lblStatus.setText("NEW");
 
-        jButton1.setBackground(Global.selectionColor);
-        jButton1.setFont(Global.lableFont);
-        jButton1.setForeground(new java.awt.Color(255, 255, 255));
-        jButton1.setText("Pattern");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-
         txtCost.setEditable(false);
         txtCost.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
         txtCost.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
@@ -555,9 +492,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addComponent(jButton1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jLabel2)
                         .addGap(18, 18, 18)
@@ -578,7 +513,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -588,9 +523,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                         .addComponent(jLabel1)
                         .addComponent(txtCost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel8))
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton1)))
+                    .addComponent(lblStatus))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -608,25 +541,8 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         }
     }//GEN-LAST:event_tblStockKeyReleased
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-        PatternOptionDialog dialog = new PatternOptionDialog(Global.parentForm);
-        dialog.setWebClient(inventoryApi);
-        dialog.searchPattern();
-        dialog.setLocationRelativeTo(null);
-        dialog.setVisible(true);
-        Pattern p = dialog.getPattern();
-        String patternCode = p.getPatternCode();
-        Float qty = Util1.getFloat(dialog.getTxtQty().getText());
-        if (!Util1.isNull(patternCode)) {
-            vouStatusAutoCompleter.setVoucher(p.getVouStatus());
-            searchPD(patternCode, qty == 0 ? 1 : qty);
-        }
-    }//GEN-LAST:event_jButton1ActionPerformed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

@@ -20,6 +20,8 @@ import com.user.common.UserRepo;
 import com.common.Util1;
 import com.common.setup.MenuSetup;
 import com.inventory.model.VRoleMenu;
+import com.inventory.ui.common.InventoryRepo;
+import com.inventory.ui.entry.Manufacture;
 import com.user.model.VRoleCompany;
 import com.inventory.ui.entry.OtherSetup;
 import com.inventory.ui.entry.Purchase;
@@ -56,12 +58,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import com.inventory.ui.entry.Reports;
+import com.inventory.ui.entry.Transfer;
 import com.inventory.ui.setup.OpeningSetup;
 import com.inventory.ui.setup.PatternSetup;
 import com.user.setup.SystemProperty;
 import com.user.setup.AppUserSetup;
 import com.user.setup.CompanySetup;
-import com.user.setup.MachinePropertySetup;
 import java.time.Duration;
 import java.util.HashMap;
 import javax.swing.JSeparator;
@@ -106,11 +108,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     @Autowired
     private Reports report;
     @Autowired
-    private MachinePropertySetup machineProperty;
-    @Autowired
     private PatternSetup patternSetup;
     @Autowired
     private ReorderLevelEntry reorderLevel;
+    @Autowired
+    private Transfer transfer;
+    @Autowired
+    private Manufacture manufacture;
 //account
     @Autowired
     private DepartmentSetup departmentSetup;
@@ -129,6 +133,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private WebClient accountApi;
 //user
     @Autowired
+    private InventoryRepo inventoryRepo;
     private SystemProperty systemProperty;
     @Autowired
     private AppUserSetup userSetup;
@@ -164,6 +169,11 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     private void initKeyFoucsManager() {
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher((KeyEvent ke) -> {
+            if (ke.isAltDown()) {
+                if (ke.getKeyCode() == KeyEvent.VK_F4) {
+                    System.exit(0);
+                }
+            }
             switch (ke.getID()) {
                 case KeyEvent.KEY_PRESSED -> {
                     if (control != null) {
@@ -184,6 +194,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                                 logout();
                             case KeyEvent.VK_F12 ->
                                 control.filter();
+
                         }
                     }
                 }
@@ -339,18 +350,26 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return report;
             }
             case "System Propery" -> {
+                systemProperty = new SystemProperty();
+                systemProperty.setUserRepo(userRepo);
+                systemProperty.setInventoryRepo(inventoryRepo);
                 systemProperty.setName(menuName);
                 systemProperty.setObserver(this);
                 systemProperty.setProgress(progress);
-                systemProperty.initTable();
+                systemProperty.setProperyType("System");
+                systemProperty.initMain();
                 return systemProperty;
             }
             case "Machine Property" -> {
-                machineProperty.setName(menuName);
-                machineProperty.setObserver(this);
-                machineProperty.setProgress(progress);
-                machineProperty.initTable();
-                return machineProperty;
+                systemProperty = new SystemProperty();
+                systemProperty.setUserRepo(userRepo);
+                systemProperty.setInventoryRepo(inventoryRepo);
+                systemProperty.setName(menuName);
+                systemProperty.setObserver(this);
+                systemProperty.setProgress(progress);
+                systemProperty.setProperyType("Machine");
+                systemProperty.initMain();
+                return systemProperty;
             }
             case "Pattern Setup" -> {
                 patternSetup.setName(menuName);
@@ -365,6 +384,20 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 reorderLevel.setProgress(progress);
                 reorderLevel.initMain();
                 return reorderLevel;
+            }
+            case "Transfer" -> {
+                transfer.setName(menuName);
+                transfer.setObserver(this);
+                transfer.setProgress(progress);
+                transfer.initMain();
+                return transfer;
+            }
+            case "Manufacture" -> {
+                manufacture.setName(menuName);
+                manufacture.setObserver(this);
+                manufacture.setProgress(progress);
+                manufacture.initMain();
+                return manufacture;
             }
             case "Menu" -> {
                 menuSetup.setName(menuName);
@@ -627,12 +660,15 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         btnNew2 = new javax.swing.JButton();
         jSeparator8 = new javax.swing.JToolBar.Separator();
         btnFilter = new javax.swing.JButton();
+        jSeparator11 = new javax.swing.JToolBar.Separator();
+        btnFilter2 = new javax.swing.JButton();
         jSeparator9 = new javax.swing.JToolBar.Separator();
         jSeparator4 = new javax.swing.JSeparator();
         progress = new javax.swing.JProgressBar();
         lblCompName = new javax.swing.JLabel();
         lblUserName = new javax.swing.JLabel();
         lblPanelName = new javax.swing.JLabel();
+        jSeparator10 = new javax.swing.JSeparator();
         menuBar = new javax.swing.JMenuBar();
 
         jMenu1.setText("jMenu1");
@@ -761,6 +797,20 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             }
         });
         jToolBar1.add(btnFilter);
+        jToolBar1.add(jSeparator11);
+
+        btnFilter2.setFont(Global.textFont);
+        btnFilter2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/cancel_20px.png"))); // NOI18N
+        btnFilter2.setText("Exit - Alt+F4");
+        btnFilter2.setToolTipText("Filter Bar");
+        btnFilter2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnFilter2.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnFilter2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnFilter2ActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(btnFilter2);
         jToolBar1.add(jSeparator9);
 
         lblCompName.setFont(Global.companyFont);
@@ -779,6 +829,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         lblPanelName.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         lblPanelName.setText("-");
 
+        jSeparator10.setOrientation(javax.swing.SwingConstants.VERTICAL);
+
         menuBar.setFont(Global.menuFont);
         menuBar.setMargin(new java.awt.Insets(5, 5, 5, 5));
         setJMenuBar(menuBar);
@@ -793,12 +845,14 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                     .addComponent(tabMain)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(lblPanelName, javax.swing.GroupLayout.DEFAULT_SIZE, 155, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, 154, Short.MAX_VALUE)
+                        .addComponent(lblPanelName, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblUserName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, 152, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jSeparator10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblUserName, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
             .addComponent(jSeparator4)
             .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -808,15 +862,17 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lblUserName)
-                    .addComponent(lblPanelName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(lblUserName)
+                        .addComponent(lblPanelName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jSeparator10, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
-                .addComponent(tabMain, javax.swing.GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)
+                .addComponent(tabMain, javax.swing.GroupLayout.DEFAULT_SIZE, 136, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -878,12 +934,18 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         }
     }//GEN-LAST:event_btnFilterActionPerformed
 
+    private void btnFilter2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFilter2ActionPerformed
+        // TODO add your handling code here:
+        System.exit(0);
+    }//GEN-LAST:event_btnFilter2ActionPerformed
+
     /**
      * @param args the command line arguments
      */
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnFilter;
+    private javax.swing.JButton btnFilter2;
     private javax.swing.JButton btnHistory;
     private javax.swing.JButton btnNew;
     private javax.swing.JButton btnNew1;
@@ -892,6 +954,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private javax.swing.JButton btnSave1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JToolBar.Separator jSeparator1;
+    private javax.swing.JSeparator jSeparator10;
+    private javax.swing.JToolBar.Separator jSeparator11;
     private javax.swing.JToolBar.Separator jSeparator2;
     private javax.swing.JToolBar.Separator jSeparator3;
     private javax.swing.JSeparator jSeparator4;

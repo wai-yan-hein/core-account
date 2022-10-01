@@ -92,7 +92,6 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private ReportFilter filter;
     private SelectionObserver observer;
     private JProgressBar progress;
-    private final List<Trader> listTrader = new ArrayList<>();
     private TableRowSorter<TableModel> sorter;
 
     public SelectionObserver getObserver() {
@@ -157,9 +156,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     }
 
     private void initCombo() {
-        listTrader.addAll(inventoryRepo.getCustomer());
-        listTrader.addAll(inventoryRepo.getSupplier());
-        traderAutoCompleter = new TraderAutoCompleter(txtTrader, listTrader, null, true, 1, false);
+        traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, true, "-");
         saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, inventoryRepo.getSaleMan(), null, true, false);
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, true, true);
         stockTypeAutoCompleter = new StockTypeAutoCompleter(txtStockType, inventoryRepo.getStockType(), null, true, false);
@@ -167,7 +164,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         brandAutoCompleter = new BrandAutoCompleter(txtBrand, inventoryRepo.getStockBrand(), null, true, false);
         regionAutoCompleter = new RegionAutoCompleter(txtRegion, inventoryRepo.getRegion(), null, true, false);
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, inventoryRepo.getCurrency(), null, false);
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo.getStock(true), null, true, false);
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         currencyAutoCompleter.setCurrency(userRepo.getDefaultCurrency());
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, inventoryRepo.getVoucherStatus(), null, true);
         dateAutoCompleter = new DateAutoCompleter(txtDate, false);
@@ -185,17 +182,18 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             filter.setFromDate(stDate);
             filter.setToDate(enDate);
             filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
-            filter.setTraderCode(traderAutoCompleter.getTrader().getCode());
+            filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
             filter.setSaleManCode(saleManAutoCompleter.getSaleMan().getSaleManCode());
             filter.setListLocation(locationAutoCompleter.getListOption());
             filter.setStockTypeCode(stockTypeAutoCompleter.getStockType().getStockTypeCode());
             filter.setBrandCode(brandAutoCompleter.getBrand().getBrandCode());
             filter.setRegCode(regionAutoCompleter.getRegion().getRegCode());
             filter.setCatCode(categoryAutoCompleter.getCategory().getCatCode());
-            filter.setStockCode(stockAutoCompleter.getStock().getStockCode());
+            filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
             filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
             filter.setVouTypeCode(vouStatusAutoCompleter.getVouStatus().getCode());
             filter.setLocCode(locationAutoCompleter.getLocation().getLocationCode());
+            filter.setRegCode(regionAutoCompleter.getRegion().getRegCode());
             log.info("Report Date : " + stDate + " - " + enDate);
             int row = tblReport.getSelectedRow();
             if (row >= 0) {
@@ -214,6 +212,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                 param.put("p_comp_phone", Global.companyPhone);
                 param.put("p_currency", currencyAutoCompleter.getCurrency().getCurCode());
                 param.put("p_stock_type", stockTypeAutoCompleter.getStockType().getStockTypeName());
+                param.put("p_location", txtLocation.getText());
                 printReport(reportUrl, reportUrl, param);
             } else {
                 isReport = false;
@@ -233,7 +232,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         insertFilter.setBrandCode(brandAutoCompleter.getBrand().getBrandCode());
         insertFilter.setRegCode(regionAutoCompleter.getRegion().getRegCode());
         insertFilter.setCatCode(categoryAutoCompleter.getCategory().getCatCode());
-        insertFilter.setStockCode(stockAutoCompleter.getStock().getStockCode());
+        insertFilter.setStockCode(stockAutoCompleter.getKey().getStockCode());
         insertFilter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
         Mono<ReturnObject> result = inventoryApi.post()
                 .uri("/report/save-filter")

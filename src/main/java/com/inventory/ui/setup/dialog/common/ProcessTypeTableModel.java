@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProcessTypeTableModel extends AbstractTableModel {
 
-    private final String[] columnNames = {"Code", "Description", "Unique"};
+    private final String[] columnNames = {"Code", "Description"};
     private List<ProcessType> listVou = new ArrayList<>();
 
     public ProcessTypeTableModel() {
@@ -57,11 +57,9 @@ public class ProcessTypeTableModel extends AbstractTableModel {
         ProcessType category = listVou.get(rowIndex);
         return switch (columnIndex) {
             case 0 ->
-                category.getUserCode();
+                category.getUserCode() == null ? category.getKey().getProCode() : category.getUserCode();
             case 1 ->
                 category.getProName();
-            case 2 ->
-                category.getUniqueId();
             default ->
                 null;
         };

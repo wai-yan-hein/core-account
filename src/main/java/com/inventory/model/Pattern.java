@@ -15,24 +15,12 @@ import lombok.Data;
 @Data
 public class Pattern {
 
-    private String patternCode;
-    private String patternName;
-    private VouStatus vouStatus;
-    private String userCode;
+    private Stock stock;
+    private Float qty;
+    private Float price;
+    private StockUnit unit;
+    private Location location;
+    private String stockCode;
+    private Integer uniqueId;
     private String compCode;
-    private Date createdDate;
-    private String createdBy;
-    private Date updatedDate;
-    private String updatedBy;
-    private boolean active;
-    private Integer macId;
-    private List<PatternDetail> detailList;
-    public Pattern() {
-    }
-
-    public Pattern(String patternName, boolean active) {
-        this.patternName = patternName;
-        this.active = active;
-    }
-
 }

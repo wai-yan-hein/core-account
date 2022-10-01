@@ -93,7 +93,7 @@ public class ReorderTableModel extends AbstractTableModel {
             case 6 ->
                 p.getBalUnit();
             case 7 ->
-                getStatus(p);
+                p.getStatus();
             default ->
                 null;
         };
@@ -103,7 +103,9 @@ public class ReorderTableModel extends AbstractTableModel {
         float minQty = Util1.getFloat(r.getMinSmallQty());
         float maxQty = Util1.getFloat(r.getMaxSmallQty());
         float balQty = Util1.getFloat(r.getBalSmallQty());
-        return balQty < minQty ? "LOW" : balQty >maxQty ? "HIGH" : "NORMAL";
+        String status = balQty < minQty ? "LOW" : balQty > maxQty ? "HIGH" : "NORMAL";
+        r.setStatus(status);
+        return status;
     }
 
     @Override
@@ -149,9 +151,9 @@ public class ReorderTableModel extends AbstractTableModel {
                 }
                 switch (column) {
                     case 2,3 ->
-                        p.setMinSmallQty(p.getMinQty() * getSmallQty(p.getStock().getStockCode(), p.getMinUnit().getUnitCode()));
+                        p.setMinSmallQty(p.getMinQty() * getSmallQty(p.getStock().getKey().getStockCode(), p.getMinUnit().getUnitCode()));
                     case 4,5 ->
-                        p.setMaxSmallQty(p.getMaxQty() * getSmallQty(p.getStock().getStockCode(), p.getMinUnit().getUnitCode()));
+                        p.setMaxSmallQty(p.getMaxQty() * getSmallQty(p.getStock().getKey().getStockCode(), p.getMinUnit().getUnitCode()));
 
                 }
                 addNewRow();
@@ -198,6 +200,11 @@ public class ReorderTableModel extends AbstractTableModel {
 
     public void setListPattern(List<ReorderLevel> listReorder) {
         this.listReorder = listReorder;
+        if (!this.listReorder.isEmpty()) {
+            for (ReorderLevel od : this.listReorder) {
+                od.setStatus(getStatus(od));
+            }
+        }
         fireTableDataChanged();
     }
 

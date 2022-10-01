@@ -4,9 +4,13 @@
  */
 package com.common;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -20,28 +24,15 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.print.attribute.HashPrintRequestAttributeSet;
-import javax.print.attribute.HashPrintServiceAttributeSet;
-import javax.print.attribute.PrintRequestAttributeSet;
-import javax.print.attribute.PrintServiceAttributeSet;
-import javax.print.attribute.standard.Copies;
-import javax.print.attribute.standard.PrinterName;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
 import lombok.extern.slf4j.Slf4j;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExporterParameter;
-import net.sf.jasperreports.engine.export.JRPrintServiceExporter;
-import net.sf.jasperreports.engine.export.JRPrintServiceExporterParameter;
 
 /**
  * @author WSwe
@@ -53,9 +44,10 @@ public class Util1 {
      *
      */
     public static final String DECIMAL_FORMAT = "###,##0.##;(###,##0.##)";
+    private static final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
 
     public static void print(String pName) {
-      
+
     }
 
     public static boolean isNumber(Object obj) {
@@ -229,6 +221,16 @@ public class Util1 {
         }
 
         return date;
+    }
+
+    public static Date toDateFormat(Date date, String format) {
+        SimpleDateFormat f = new SimpleDateFormat(format);
+        try {
+            return f.parse(f.format(date));
+        } catch (ParseException ex) {
+            log.error("toDateFormat: " + ex.getMessage());
+        }
+        return null;
     }
 
     public static String getFileExtension(String content) {
@@ -688,5 +690,19 @@ public class Util1 {
         } catch (ZipException ex) {
             log.error(ex.getMessage());
         }
+    }
+
+    private static Resolution getResolution() {
+        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        int width = gd.getDisplayMode().getWidth();
+        int height = gd.getDisplayMode().getHeight();
+        return new Resolution(width, height);
+    }
+
+    public static Resolution getPopSize() {
+        Resolution r = getResolution();
+        r.setWidth(r.getWidth() / 3);
+        r.setHeight(r.getHeight() / 5);
+        return r;
     }
 }

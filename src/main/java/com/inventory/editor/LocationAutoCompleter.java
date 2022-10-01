@@ -59,10 +59,18 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
-    private SelectionObserver selectionObserver;
+    private SelectionObserver observer;
     private List<String> listOption = new ArrayList<>();
     private OptionDialog optionDialog;
     private List<Location> listLocation;
+
+    public SelectionObserver getObserver() {
+        return observer;
+    }
+
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
+    }
 
     public List<Location> getListLocation() {
         return listLocation;
@@ -78,10 +86,6 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
 
     public void setListOption(List<String> listOption) {
         this.listOption = listOption;
-    }
-
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
     }
 
     private void initOption() {
@@ -220,6 +224,7 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
                     optionDialog.setVisible(true);
                     if (optionDialog.isSelect()) {
                         listOption = optionDialog.getOptionList();
+                        this.textComp.setText(optionDialog.getListName());
                     }
                     //open
                 }
@@ -231,8 +236,8 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
                 }
             }
             if (editor == null) {
-                if (selectionObserver != null) {
-                    selectionObserver.selected("Location", location.getLocationName());
+                if (observer != null) {
+                    observer.selected("Location", location.getLocationName());
                 }
             }
         }

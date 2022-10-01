@@ -52,7 +52,7 @@ public class Global {
     public static String companyPhone;
     public static String reportPath = "report";
     public static String accountRP = "report/account/";
-    public static String fontName = "font/Zawgyi-One.ttf";
+    public static String fontName;
     public static Map<String, String> hmRoleProperty = new HashMap<>();
     public static Map<String, String> hmUser = new HashMap<>();
 }

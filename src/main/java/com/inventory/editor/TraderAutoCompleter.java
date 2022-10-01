@@ -8,10 +8,9 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.model.OptionModel;
 import com.inventory.model.Trader;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.TraderTableModel;
-import com.inventory.ui.setup.dialog.OptionDialog;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -29,7 +28,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.RowFilter;
 import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
@@ -53,11 +51,27 @@ public class TraderAutoCompleter implements KeyListener {
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
-    private SelectionObserver selectionObserver;
+    private SelectionObserver observer;
     private List<String> listOption = new ArrayList<>();
-    private OptionDialog optionDialog;
-    private List<Trader> listTrader;
-    private boolean custom;
+    private InventoryRepo inventoryRepo;
+    private boolean filter;
+    private String traderType;
+
+    public SelectionObserver getObserver() {
+        return observer;
+    }
+
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
+    }
+
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
 
     public List<String> getListOption() {
         return listOption;
@@ -67,51 +81,24 @@ public class TraderAutoCompleter implements KeyListener {
         this.listOption = listOption;
     }
 
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
-    }
-
     public TraderAutoCompleter() {
     }
 
-    public TraderAutoCompleter(JTextComponent comp, List<Trader> list,
-            AbstractCellEditor editor, boolean filter, int max, boolean custom) {
+    public TraderAutoCompleter(JTextComponent comp, InventoryRepo inventoryRepo,
+            AbstractCellEditor editor, boolean filter, String traderType) {
         this.textComp = comp;
         this.editor = editor;
-        this.listTrader = list;
-        this.custom = custom;
+        this.filter = filter;
+        this.traderType = traderType;
+        this.inventoryRepo = inventoryRepo;
         textComp.putClientProperty(AUTOCOMPLETER, this);
-        initOption();
         if (filter) {
             Trader t = new Trader("-", "All");
-            switch (max) {
-                case 1 -> {
-                    list = new ArrayList<>(list);
-                    list.add(0, t);
-                    setTrader(t);
-                }
-                case 2 -> {
-                    list = new ArrayList<>(list);
-                    list.add(0, t);
-                    list.add(1, new Trader("C", "All Customer"));
-                    list.add(2, new Trader("S", "All Supplier"));
-                    setTrader(t);
-                }
-                default -> {
-                    Trader t2 = new Trader(null, "Default Customer");
-                    list = new ArrayList<>(list);
-                    list.add(0, t2);
-                    setTrader(t2);
-                }
-            }
-        }
-        if (custom) {
-            list = new ArrayList<>(list);
-            list.add(1, new Trader("C", "Custom"));
+            setTrader(t);
         }
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
-        traderTableModel = new TraderTableModel(list);
+        traderTableModel = new TraderTableModel();
         table.setModel(traderTableModel);
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
@@ -184,19 +171,6 @@ public class TraderAutoCompleter implements KeyListener {
         });
 
         table.setRequestFocusEnabled(false);
-
-        if (list != null) {
-            if (!list.isEmpty()) {
-                table.setRowSelectionInterval(0, 0);
-            }
-        }
-    }
-
-    private void initOption() {
-        listOption.clear();
-        listTrader.forEach(t -> {
-            listOption.add(t.getCode());
-        });
     }
 
     public void mouseSelect() {
@@ -205,40 +179,13 @@ public class TraderAutoCompleter implements KeyListener {
                     table.getSelectedRow()));
             textComp.setText(trader.getTraderName());
             listOption = new ArrayList<>();
-            if (custom) {
-                switch (trader.getCode()) {
-                    case "C" -> {
-                        optionDialog = new OptionDialog(Global.parentForm, "Trader");
-                        List<OptionModel> listOP = new ArrayList<>();
-                        listTrader.forEach(t -> {
-                            listOP.add(new OptionModel(t.getCode(), t.getTraderName()));
-                        });
-                        optionDialog.setOptionList(listOP);
-                        optionDialog.setLocationRelativeTo(null);
-                        optionDialog.setVisible(true);
-                        if (optionDialog.isSelect()) {
-                            listOption = optionDialog.getOptionList();
-                        }
-                        //open
-                    }
-                    case "-" ->
-                        initOption();
-                    default -> {
-                        listOption.clear();
-                        listOption.add(trader.getCode());
-                    }
-                }
-                if (editor == null) {
-                    if (selectionObserver != null) {
-                        selectionObserver.selected("Select", trader);
-                    }
-                }
-            }
         }
-
         popup.setVisible(false);
         if (editor != null) {
             editor.stopCellEditing();
+        }
+        if (observer != null) {
+            observer.selected(trader.getType(), trader.getType());
         }
 
     }
@@ -393,37 +340,19 @@ public class TraderAutoCompleter implements KeyListener {
      */
     @Override
     public void keyReleased(KeyEvent e) {
-        String filter = textComp.getText();
-        if (filter.length() == 0) {
-            sorter.setRowFilter(null);
-        } else {
-            sorter.setRowFilter(startsWithFilter);
-            try {
-                if (!containKey(e)) {
-                    if (table.getRowCount() >= 0) {
-                        table.setRowSelectionInterval(0, 0);
-                    }
+        String str = textComp.getText();
+        if (!str.isEmpty()) {
+            if (KeyEvent.getKeyText(e.getKeyCode()).length() == 1 || e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+                List<Trader> list = inventoryRepo.getTraderList(str, traderType);
+                if (this.filter) {
+                    Trader s = new Trader("-", "All");
+                    list.add(0, s);
                 }
-            } catch (Exception ex) {
+                traderTableModel.setListTrader(list);
+                if (!list.isEmpty()) {
+                    table.setRowSelectionInterval(0, 0);
+                }
             }
-
         }
-    }
-    private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
-        @Override
-        public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
-            String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
-            String tmp2 = entry.getStringValue(1).toUpperCase().replace(" ", "");
-            String tmp3 = entry.getStringValue(3).toUpperCase().replace(" ", "");
-            String tmp4 = entry.getStringValue(4).toUpperCase().replace(" ", "");
-            String tmp5 = entry.getStringValue(4).toUpperCase().replace(" ", "");
-            String text = textComp.getText().toUpperCase().replace(" ", "");
-            return tmp1.startsWith(text) || tmp2.startsWith(text)
-                    || tmp3.startsWith(text) || tmp4.startsWith(text) || tmp5.startsWith(text);
-        }
-    };
-
-    private boolean containKey(KeyEvent e) {
-        return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;
     }
 }

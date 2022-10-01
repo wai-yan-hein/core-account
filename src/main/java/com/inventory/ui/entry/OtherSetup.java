@@ -87,6 +87,7 @@ public class OtherSetup extends javax.swing.JPanel {
     private void vouStatusSetup() {
         vsDialog = new VouStatusSetupDialog();
         vsDialog.setIconImage(icon);
+        vsDialog.setInventoryRepo(inventoryRepo);
         vsDialog.setListVou(inventoryRepo.getVoucherStatus());
         vsDialog.initMain();
         vsDialog.setSize(Global.width / 2, Global.height / 2);

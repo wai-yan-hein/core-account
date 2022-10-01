@@ -57,6 +57,7 @@ public class StockIOSearchDialog extends javax.swing.JDialog implements KeyListe
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
+    private boolean status = false;
 
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
@@ -105,18 +106,19 @@ public class StockIOSearchDialog extends javax.swing.JDialog implements KeyListe
     }
 
     public void initMain() {
-        initTableVoucher();
-        setTodayDate();
-        initCombo();
-        if (tableModel.getListDetail().isEmpty()) {
-            search();
+        if (!status) {
+            initTableVoucher();
+            setTodayDate();
+            initCombo();
+            status = true;
         }
+        search();
     }
 
     private void initCombo() {
         appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, inventoryRepo.getVoucherStatus(), null, true);
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo.getStock(true), null, true, false);
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, true, false);
     }
 
@@ -154,7 +156,7 @@ public class StockIOSearchDialog extends javax.swing.JDialog implements KeyListe
         filter.setRemark(Util1.isNull(txtRemark.getText(), "-"));
         filter.setDescription(Util1.isNull(txtDesp.getText(), "-"));
         filter.setVouStatus(vouStatusAutoCompleter.getVouStatus().getCode());
-        filter.setStockCode(stockAutoCompleter.getStock().getStockCode());
+        filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         filter.setLocCode(locationAutoCompleter.getLocation().getLocationCode());
         //
         Mono<ResponseEntity<List<VStockIO>>> result = inventoryApi

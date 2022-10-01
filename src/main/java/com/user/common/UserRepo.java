@@ -5,12 +5,16 @@
 package com.user.common;
 
 import com.common.Global;
+import com.common.RoleProperty;
 import com.common.Util1;
 import com.inventory.model.AppRole;
+import com.inventory.model.MachineInfo;
 import com.inventory.model.AppUser;
 import com.inventory.model.MachineInfo;
+import com.inventory.model.SysProperty;
 import com.user.model.CompanyInfo;
 import com.user.model.Currency;
+import com.user.model.MachineProperty;
 import com.user.model.PrivilegeCompany;
 import java.time.Duration;
 import java.util.HashMap;
@@ -63,6 +67,14 @@ public class UserRepo {
             }
         }
         return user;
+    }
+
+    public List<MachineInfo> getMacList() {
+        Mono<ResponseEntity<List<MachineInfo>>> result = userApi.get()
+                .uri(builder -> builder.path("/user/get-mac-list")
+                .build())
+                .retrieve().toEntityList(MachineInfo.class);
+        return result.block(Duration.ofMinutes(min)).getBody();
     }
 
     public List<AppRole> getAppRole() {
@@ -171,4 +183,77 @@ public class UserRepo {
         Global.hmRoleProperty = result.block();
         log.info("setupProperty.");
     }
+
+    public HashMap<String, String> getSystProperty() {
+        HashMap<String, String> hm = new HashMap<>();
+        Mono<ResponseEntity<List<SysProperty>>> result = userApi.get()
+                .uri(builder -> builder.path("/user/get-system-property")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().toEntityList(SysProperty.class);
+        List<SysProperty> prop = result.block().getBody();
+        prop.forEach((t) -> {
+            hm.put(t.getPropKey(), t.getPropValue());
+        });
+        return hm;
+    }
+
+    public HashMap<String, String> getRoleProperty(String roleCode) {
+        HashMap<String, String> hm = new HashMap<>();
+        Mono<ResponseEntity<List<RoleProperty>>> result = userApi.get()
+                .uri(builder -> builder.path("/user/get-role-property")
+                .queryParam("roleCode", roleCode)
+                .build())
+                .retrieve().toEntityList(RoleProperty.class);
+        List<RoleProperty> prop = result.block().getBody();
+        prop.forEach((t) -> {
+            hm.put(t.getKey().getPropKey(), t.getPropValue());
+        });
+        return hm;
+    }
+
+    public HashMap<String, String> getMachineProperty(Integer macId) {
+        HashMap<String, String> hm = new HashMap<>();
+        if (macId == null) {
+            return hm;
+        }
+        Mono<ResponseEntity<List<MachineProperty>>> result = userApi.get()
+                .uri(builder -> builder.path("/user/get-mac-property")
+                .queryParam("macId", macId)
+                .build())
+                .retrieve().toEntityList(MachineProperty.class);
+        List<MachineProperty> prop = result.block().getBody();
+        prop.forEach((t) -> {
+            hm.put(t.getKey().getPropKey(), t.getPropValue());
+        });
+        return hm;
+    }
+
+    public SysProperty saveSys(SysProperty prop) {
+        Mono<SysProperty> result = userApi.post()
+                .uri("/user/save-system-property")
+                .body(Mono.just(prop), SysProperty.class)
+                .retrieve()
+                .bodyToMono(SysProperty.class);
+        return result.block();
+    }
+
+    public RoleProperty saveRoleProperty(RoleProperty prop) {
+        Mono<RoleProperty> result = userApi.post()
+                .uri("/user/save-role-property")
+                .body(Mono.just(prop), RoleProperty.class)
+                .retrieve()
+                .bodyToMono(RoleProperty.class);
+        return result.block();
+    }
+
+    public MachineProperty saveMacProp(MachineProperty prop) {
+        Mono<MachineProperty> result = userApi.post()
+                .uri("/user/save-mac-property")
+                .body(Mono.just(prop), MachineProperty.class)
+                .retrieve()
+                .bodyToMono(MachineProperty.class);
+        return result.block();
+    }
+
 }

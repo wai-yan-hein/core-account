@@ -139,7 +139,17 @@ public class PurchaseTableModel extends AbstractTableModel {
                     }
                     case 1 -> {
                         //Name
-                        return record.getStock() == null ? null : record.getStock().getStockName();
+                        String stockName = null;
+                        if (record.getStock() != null) {
+                            stockName = record.getStock().getStockName();
+                            if (ProUtil.isStockNameWithCategory()) {
+                                if (record.getStock().getCategory() != null) {
+                                    stockName = String.format("%s (%s)", stockName, record.getStock().getCategory().getCatName());
+                                }
+                            }
+                        }
+                        //Name
+                        return stockName;
                     }
                     case 2 -> {
                         //loc
@@ -290,7 +300,7 @@ public class PurchaseTableModel extends AbstractTableModel {
             }
             if (column != 7) {
                 if (record.getStock() != null && record.getPurUnit() != null) {
-                    record.setPrice(inventoryRepo.getPurRecentPrice(record.getStock().getStockCode(),
+                    record.setPrice(inventoryRepo.getPurRecentPrice(record.getStock().getKey().getStockCode(),
                             Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getPurUnit().getUnitCode()));
                 }
             }

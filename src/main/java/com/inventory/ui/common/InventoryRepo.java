@@ -4,9 +4,9 @@
  */
 package com.inventory.ui.common;
 
+import com.inventory.model.CFont;
 import com.user.model.Currency;
 import com.common.Global;
-import com.common.ReturnObject;
 import com.common.Util1;
 import com.inventory.model.Category;
 import com.inventory.model.General;
@@ -25,17 +25,20 @@ import com.inventory.model.SaleMan;
 import com.inventory.model.Stock;
 import com.inventory.model.StockBrand;
 import com.inventory.model.StockInOut;
+import com.inventory.model.StockKey;
 import com.inventory.model.StockType;
 import com.inventory.model.StockUnit;
 import com.inventory.model.SysProperty;
 import com.inventory.model.Trader;
+import com.inventory.model.TraderGroup;
+import com.inventory.model.TraderKey;
+import com.inventory.model.TransferHis;
+import com.inventory.model.TransferHisKey;
 import com.inventory.model.UnitRelation;
 import com.inventory.model.UnitRelationDetail;
 import com.inventory.model.VouStatus;
 import java.time.Duration;
 import java.util.List;
-import java.util.Objects;
-import javax.swing.JOptionPane;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -56,12 +59,12 @@ public class InventoryRepo {
 
     public Trader getDefaultCustomer() {
         String traderCode = Global.hmRoleProperty.get("default.customer");
-        return findTrader(Util1.isNull(traderCode, "-"));
+        return findTrader(new TraderKey(Util1.isNull(traderCode, "-"), Global.compCode));
     }
 
     public Trader getDefaultSupplier() {
         String traderCode = Global.hmRoleProperty.get("default.supplier");
-        return findTrader(Util1.isNull(traderCode, "-"));
+        return findTrader(new TraderKey(Util1.isNull(traderCode, "-"), Global.compCode));
     }
 
     public Location getDefaultLocation() {
@@ -140,13 +143,13 @@ public class InventoryRepo {
         return result.block(Duration.ofMinutes(min)).getBody();
     }
 
-    public Trader findTrader(String traderCode) {
-        Mono<ResponseEntity<Trader>> result = inventoryApi.get()
-                .uri(builder -> builder.path("/setup/find-trader")
-                .queryParam("traderCode", traderCode)
-                .build())
-                .retrieve().toEntity(Trader.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+    public Trader findTrader(TraderKey key) {
+        Mono<Trader> result = inventoryApi.post()
+                .uri("/setup/find-trader")
+                .body(Mono.just(key), Trader.class)
+                .retrieve()
+                .bodyToMono(Trader.class);
+        return result.block(Duration.ofMinutes(min));
     }
 
     public List<Trader> getCustomer() {
@@ -162,6 +165,17 @@ public class InventoryRepo {
         Mono<ResponseEntity<List<Trader>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-supplier")
                 .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().toEntityList(Trader.class);
+        return result.block(Duration.ofMinutes(min)).getBody();
+    }
+
+    public List<Trader> getTraderList(String text, String type) {
+        Mono<ResponseEntity<List<Trader>>> result = inventoryApi.get()
+                .uri(builder -> builder.path("/setup/get-trader-list")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("text", text)
+                .queryParam("type", type)
                 .build())
                 .retrieve().toEntityList(Trader.class);
         return result.block(Duration.ofMinutes(min)).getBody();
@@ -204,6 +218,25 @@ public class InventoryRepo {
         return result.block(Duration.ofMinutes(min)).getBody();
     }
 
+    public List<Stock> getStock(String str) {
+        Mono<ResponseEntity<List<Stock>>> result = inventoryApi.get()
+                .uri(builder -> builder.path("/setup/get-stock-list")
+                .queryParam("text", str)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().toEntityList(Stock.class);
+        return result.block(Duration.ofMinutes(min)).getBody();
+    }
+
+    public List<String> deleteStock(StockKey key) {
+        Mono<ResponseEntity<List<String>>> result = inventoryApi.post()
+                .uri("/setup/delete-stock")
+                .body(Mono.just(key), StockKey.class)
+                .retrieve()
+                .toEntityList(String.class);
+        return result.block(Duration.ofMinutes(min)).getBody();
+    }
+
     public List<Currency> getCurrency() {
         Mono<ResponseEntity<List<Currency>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-currency").build())
@@ -226,20 +259,6 @@ public class InventoryRepo {
                 .build())
                 .retrieve().toEntityList(UnitRelation.class);
         return result.block(Duration.ofMinutes(min)).getBody();
-    }
-
-    public void initSysProperty() {
-        Mono<ResponseEntity<List<SysProperty>>> result = inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-system-property")
-                .queryParam("compCode", Global.compCode)
-                .build())
-                .retrieve().toEntityList(SysProperty.class);
-        List<SysProperty> sys = result.block(Duration.ofMinutes(min)).getBody();
-        if (!sys.isEmpty()) {
-            sys.forEach(p -> {
-                Global.hmRoleProperty.put(p.getPropKey(), p.getPropValue());
-            });
-        }
     }
 
     public Trader saveTrader(Trader t) {
@@ -421,12 +440,30 @@ public class InventoryRepo {
         return result.block(Duration.ofMinutes(min)).getBody();
     }
 
+    public List<CFont> getFont() {
+        Mono<ResponseEntity<List<CFont>>> result = inventoryApi.get()
+                .uri(builder -> builder.path("/setup/get-font")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().toEntityList(CFont.class);
+        return result.block(Duration.ofMinutes(min)).getBody();
+    }
+
     public StockInOut findStockIO(String vouNo) {
         Mono<StockInOut> result = inventoryApi.get()
                 .uri(builder -> builder.path("/stockio/find-stockio")
                 .queryParam("code", vouNo)
                 .build())
                 .retrieve().bodyToMono(StockInOut.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
+    public TransferHis findTransfer(TransferHisKey key) {
+        Mono<TransferHis> result = inventoryApi.post()
+                .uri("/transfer/find-transfer")
+                .body(Mono.just(key), TransferHisKey.class)
+                .retrieve()
+                .bodyToMono(TransferHis.class);
         return result.block(Duration.ofMinutes(min));
     }
 
@@ -493,4 +530,41 @@ public class InventoryRepo {
                 .bodyToMono(ReorderLevel.class);
         return result.block(Duration.ofMinutes(min));
     }
+
+    public List<String> deleteTrader(TraderKey key) {
+        Mono<ResponseEntity<List<String>>> result = inventoryApi.post()
+                .uri("/setup/delete-trader")
+                .body(Mono.just(key), TraderKey.class)
+                .retrieve()
+                .toEntityList(String.class);
+        return result.block(Duration.ofMinutes(min)).getBody();
+    }
+
+    public TraderGroup saveTraderGroup(TraderGroup rl) {
+        Mono<TraderGroup> result = inventoryApi.post()
+                .uri("/setup/save-trader-group")
+                .body(Mono.just(rl), TraderGroup.class)
+                .retrieve()
+                .bodyToMono(TraderGroup.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
+    public List<TraderGroup> getTraderGroup() {
+        Mono<ResponseEntity<List<TraderGroup>>> result = inventoryApi.get()
+                .uri(builder -> builder.path("/setup/get-trader-group")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().toEntityList(TraderGroup.class);
+        return result.block(Duration.ofMinutes(min)).getBody();
+    }
+
+    public List<Pattern> getPattern(String stockCode) {
+        Mono<ResponseEntity<List<Pattern>>> result = inventoryApi.get()
+                .uri(builder -> builder.path("/setup/get-pattern")
+                .queryParam("stockCode", stockCode)
+                .build())
+                .retrieve().toEntityList(Pattern.class);
+        return result.block(Duration.ofMinutes(min)).getBody();
+    }
+
 }

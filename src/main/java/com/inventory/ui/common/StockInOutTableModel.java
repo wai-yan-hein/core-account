@@ -10,6 +10,7 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.model.Location;
+import com.inventory.model.Pattern;
 import com.inventory.model.Stock;
 import com.inventory.model.StockInOutDetail;
 import com.inventory.model.StockUnit;
@@ -31,7 +32,7 @@ public class StockInOutTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(StockInOutTableModel.class);
     private String[] columnNames = {"Stock Code", "Stock Name", "Location",
-        "In-Qty", "In-Weight", "In-Unit", "Out-Qty", "Out-Weight", "Out-Unit", "Cost Price", "Amount"};
+        "In-Qty", "In-Unit", "Out-Qty", "Out-Unit", "Cost Price", "Amount"};
     private JTable parent;
     private List<StockInOutDetail> listStock = new ArrayList();
     private List<String> deleteList = new ArrayList();
@@ -94,32 +95,45 @@ public class StockInOutTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
         try {
             StockInOutDetail io = listStock.get(row);
-            return switch (column) {
-                case 0 ->
-                    io.getStock() == null ? null : io.getStock().getUserCode();
-                case 1 ->
-                    io.getStock() == null ? null : io.getStock().getStockName();
-                case 2 ->
-                    io.getLocation();
-                case 3 ->
-                    io.getInQty();
-                case 4 ->
-                    Util1.getFloat(io.getInWt()) == 1 ? null : io.getInWt();
-                case 5 ->
-                    io.getInUnit();
-                case 6 ->
-                    io.getOutQty();
-                case 7 ->
-                    Util1.getFloat(io.getOutWt()) == 1 ? null : io.getOutWt();
-                case 8 ->
-                    io.getOutUnit();
-                case 9 ->
-                    io.getCostPrice();
-                case 10 ->
-                    Util1.getFloat(io.getCostPrice()) * (Util1.getFloat(io.getInQty()) + Util1.getFloat(io.getOutQty()));
-                default ->
-                    null;
-            };
+            switch (column) {
+                case 0 -> {
+                    return io.getStock() == null ? null : io.getStock().getUserCode();
+                }
+                case 1 -> {
+                    String stockName = null;
+                    if (io.getStock() != null) {
+                        stockName = io.getStock().getStockName();
+                        if (ProUtil.isStockNameWithCategory()) {
+                            if (io.getStock().getCategory() != null) {
+                                stockName = String.format("%s (%s)", stockName, io.getStock().getCategory().getCatName());
+                            }
+                        }
+                    }
+                    return stockName;
+                }
+                case 2 -> {
+                    return io.getLocation();
+                }
+                case 3 -> {
+                    return io.getInQty();
+                }
+                case 4 -> {
+                    return io.getInUnit();
+                }
+                case 5 -> {
+                    return io.getOutQty();
+                }
+                case 6 -> {
+                    return io.getOutUnit();
+                }
+                case 7 -> {
+                    return io.getCostPrice();
+                }
+                case 8 -> {
+                    return Util1.getFloat(io.getCostPrice()) * (Util1.getFloat(io.getInQty()) + Util1.getFloat(io.getOutQty()));
+                }
+
+            }
         } catch (Exception e) {
             log.error("getValueAt: " + e.getMessage()
             );
@@ -130,7 +144,7 @@ public class StockInOutTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 3,4,6,7,9,10 ->
+            case 3,5,7,8 ->
                 Float.class;
             default ->
                 String.class;
@@ -139,12 +153,7 @@ public class StockInOutTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return switch (column) {
-            case 4,7 ->
-                ProUtil.isWeightOption();
-            default ->
-                true;
-        };
+        return column != 8;
     }
 
     @Override
@@ -156,10 +165,9 @@ public class StockInOutTableModel extends AbstractTableModel {
                     case 0,1 -> {
                         if (value instanceof Stock stock) {
                             io.setStock(stock);
-                            io.setInWt(stock.getPurWeight());
-                            io.setOutWt(stock.getPurWeight());
                             io.setCostPrice(0.0f);
                             io.setLocation(inventoryRepo.getDefaultLocation());
+                            genPattern(stock, io);
                             setColumnSelection(3);
                         }
                         addNewRow();
@@ -173,9 +181,7 @@ public class StockInOutTableModel extends AbstractTableModel {
                     case 3 -> {
                         if (Util1.isNumber(value)) {
                             io.setInQty(Util1.getFloat(value));
-                            io.setInWt(io.getStock().getPurWeight());
                             io.setOutQty(null);
-                            io.setOutWt(null);
                             io.setOutUnit(null);
                             io.setInUnit(io.getStock().getPurUnit());
                             parent.setRowSelectionInterval(row + 1, row + 1);
@@ -183,54 +189,43 @@ public class StockInOutTableModel extends AbstractTableModel {
                         }
 
                     }
+
                     case 4 -> {
-                        if (Util1.isNumber(value)) {
-                            io.setInWt(Util1.getFloat(value));
-                        }
-                    }
-                    case 5 -> {
                         if (value instanceof StockUnit stockUnit) {
                             io.setInUnit(stockUnit);
                         }
                         setColumnSelection(8);
                     }
-                    case 6 -> {
+                    case 5 -> {
                         if (Util1.isNumber(value)) {
                             io.setOutQty(Util1.getFloat(value));
-                            io.setOutWt(io.getStock().getPurWeight());
                             io.setInQty(null);
-                            io.setInWt(null);
                             io.setInUnit(null);
                             io.setOutUnit(io.getStock().getPurUnit());
                             parent.setRowSelectionInterval(row + 1, row + 1);
                             parent.setColumnSelectionInterval(0, 0);
                         }
                     }
-                    case 7 -> {
-                        if (Util1.isNumber(value)) {
-                            io.setOutWt(Util1.getFloat(value));
-                        }
-                    }
-                    case 8 -> {
+                    case 6 -> {
                         if (value instanceof StockUnit stockUnit) {
                             io.setOutUnit(stockUnit);
                         }
                     }
-                    case 9 -> {
+                    case 7 -> {
                         if (Util1.isNumber(value)) {
                             io.setCostPrice(Util1.getFloat(value));
                         }
                     }
                 }
             }
-            if (column != 9) {
+            if (column != 7) {
                 if (io.getStock() != null) {
                     if (io.getInUnit() != null || io.getOutUnit() != null) {
                         String unit = io.getInUnit() == null ? io.getOutUnit().getUnitCode() : io.getInUnit().getUnitCode();
-                        io.setCostPrice(inventoryRepo.getPurRecentPrice(io.getStock().getStockCode(),
+                        io.setCostPrice(inventoryRepo.getPurRecentPrice(io.getStock().getKey().getStockCode(),
                                 Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), unit));
                         if (io.getCostPrice() == 0) {
-                            io.setCostPrice(inventoryRepo.getStockIORecentPrice(io.getStock().getStockCode(),
+                            io.setCostPrice(inventoryRepo.getStockIORecentPrice(io.getStock().getKey().getStockCode(),
                                     Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), unit));
                         }
                     }
@@ -242,6 +237,28 @@ public class StockInOutTableModel extends AbstractTableModel {
             parent.requestFocus();
         } catch (HeadlessException e) {
             log.error("setValueAt :" + e.getMessage());
+        }
+    }
+
+    private void genPattern(Stock s, StockInOutDetail iod) {
+        String stockCode = s.getKey().getStockCode();
+        List<Pattern> patterns = inventoryRepo.getPattern(stockCode);
+        if (!patterns.isEmpty()) {
+            String input = JOptionPane.showInputDialog("Enter Qty.");
+            if (Util1.isPositive(input)) {
+                float qty = Util1.getFloat(input);
+                patterns.forEach((p) -> {
+                    StockInOutDetail io = new StockInOutDetail();
+                    io.setOutQty(qty * p.getQty());
+                    io.setCostPrice(Util1.getFloat(p.getPrice()));
+                    io.setOutUnit(p.getUnit());
+                    io.setStock(p.getStock());
+                    io.setLocation(p.getLocation());
+                    addStockIO(io);
+                });
+                iod.setInQty(qty);
+                iod.setInUnit(s.getPurUnit());
+            }
         }
     }
 
@@ -304,6 +321,12 @@ public class StockInOutTableModel extends AbstractTableModel {
         } else {
             return null;
         }
+    }
+
+    private void addStockIO(StockInOutDetail s) {
+        listStock.add(s);
+        fireTableRowsInserted(listStock.size() - 1, listStock.size() - 1);
+
     }
 
     public void addNewRow() {

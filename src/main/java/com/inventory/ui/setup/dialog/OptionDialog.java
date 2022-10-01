@@ -72,6 +72,20 @@ public class OptionDialog extends javax.swing.JDialog {
         return listOption;
     }
 
+    public String getListName() {
+        String str = "";
+        List<OptionModel> listOP = tableModel.getListOption();
+        for (OptionModel op : listOP) {
+            if (op.isSelected()) {
+                str += op.getName() + ",";
+            }
+        }
+        if (!str.isEmpty()) {
+            str = str.substring(0, str.length() - 1);
+        }
+        return str;
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -186,7 +200,7 @@ public class OptionDialog extends javax.swing.JDialog {
     /**
      * @param args the command line arguments
      */
- 
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel1;

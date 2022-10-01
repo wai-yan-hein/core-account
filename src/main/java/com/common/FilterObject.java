@@ -27,6 +27,9 @@ public class FilterObject {
     private String saleManCode;
     private String reference;
     private String locCode;
+    private String locCodeTo;
+    private String refNo;
+
     @NonNull
     private String compCode;
 

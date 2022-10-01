@@ -11,19 +11,15 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
-public class PatternDetail {
+public class ProcessDetail {
 
-    private String ptCode;
-    private String patternCode;
+    private String pdCode;
     private Stock stock;
     private Location location;
-    private Float inQty;
-    private Float inWt;
-    private StockUnit inUnit;
-    private Float outQty;
-    private Float outWt;
-    private StockUnit outUnit;
+    private Float qty;
+    private Float price;
+    private StockUnit unit;
+    private Float amount;
+    private String vouNo;
     private Integer uniqueId;
-    private Float costPrice;
-
 }

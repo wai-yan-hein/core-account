@@ -5,6 +5,7 @@
  */
 package com.common;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
 import lombok.Data;
 import lombok.NonNull;
@@ -13,6 +14,7 @@ import lombok.NonNull;
  *
  * @author Lenovo
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 public class ReportFilter {
 

@@ -6,11 +6,13 @@
 package com.inventory.editor;
 
 import com.common.Global;
+import com.common.Resolution;
+import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.model.OptionModel;
+import com.common.Util1;
 import com.inventory.model.Stock;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.StockCompleterTableModel;
-import com.inventory.ui.setup.dialog.OptionDialog;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -28,7 +30,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.RowFilter;
 import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -37,15 +38,15 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public final class StockAutoCompleter implements KeyListener {
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(StockAutoCompleter.class);
     private final JTable table = new JTable();
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
@@ -58,9 +59,17 @@ public final class StockAutoCompleter implements KeyListener {
     private int y = 0;
     boolean popupOpen = false;
     private List<String> listOption = new ArrayList<>();
-    private OptionDialog optionDialog;
-    private List<Stock> listStock;
-    private boolean custom;
+    private SelectionObserver observer;
+    private InventoryRepo inventoryRepo;
+    private boolean filter;
+
+    public SelectionObserver getObserver() {
+        return observer;
+    }
+
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
+    }
 
     public List<String> getListOption() {
         return listOption;
@@ -72,35 +81,25 @@ public final class StockAutoCompleter implements KeyListener {
 
     private void initOption() {
         listOption.clear();
-        listStock.forEach(t -> {
-            listOption.add(t.getStockCode());
-        });
     }
 
     //private CashFilter cashFilter = Global.allCash;
     public StockAutoCompleter() {
     }
 
-    public StockAutoCompleter(JTextComponent comp, List<Stock> list,
-            AbstractCellEditor editor, boolean filter, boolean custom) {
+    public StockAutoCompleter(JTextComponent comp, InventoryRepo inventoryRepo,
+            AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
-        this.listStock = list;
-        this.custom = custom;
+        this.inventoryRepo = inventoryRepo;
+        this.filter = filter;
+        if (this.filter) {
+            setStock(new Stock("-", "All"));
+        }
         initOption();
-        if (filter) {
-            Stock reg = new Stock("-", "All");
-            list = new ArrayList<>(list);
-            list.add(0, reg);
-            setStock(reg);
-        }
-        if (custom) {
-            list = new ArrayList<>(list);
-            list.add(1, new Stock("C", "Custom"));
-        }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
-        stockTableModel = new StockCompleterTableModel(list);
+        stockTableModel = new StockCompleterTableModel();
         table.setModel(stockTableModel);
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
@@ -126,8 +125,8 @@ public final class StockAutoCompleter implements KeyListener {
 
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
-
-        popup.setPopupSize(800, 350);
+        Resolution r = Util1.getPopSize();
+        popup.setPopupSize(r.getWidth(), r.getHeight());
         popup.add(scroll);
 
         if (textComp instanceof JTextField) {
@@ -176,10 +175,6 @@ public final class StockAutoCompleter implements KeyListener {
         });
 
         table.setRequestFocusEnabled(false);
-
-        if (!list.isEmpty()) {
-            table.setRowSelectionInterval(0, 0);
-        }
     }
 
     public void mouseSelect() {
@@ -187,31 +182,8 @@ public final class StockAutoCompleter implements KeyListener {
             stock = stockTableModel.getStock(table.convertRowIndexToModel(
                     table.getSelectedRow()));
             textComp.setText(stock.getStockName());
-            if (custom) {
-                switch (stock.getStockCode()) {
-                    case "C" -> {
-                        optionDialog = new OptionDialog(Global.parentForm, "Stock");
-                        List<OptionModel> listOP = new ArrayList<>();
-                        listStock.forEach(t -> {
-                            listOP.add(new OptionModel(t.getStockCode(), t.getStockName()));
-                        });
-                        optionDialog.setOptionList(listOP);
-                        optionDialog.setLocationRelativeTo(null);
-                        optionDialog.setVisible(true);
-                        if (optionDialog.isSelect()) {
-                            listOption = optionDialog.getOptionList();
-                        }
-                        //open
-                    }
-                    case "-" ->
-                        initOption();
-                    default -> {
-                        listOption.clear();
-                        listOption.add(stock.getStockCode());
-                    }
-                }
-            }
-            if (editor == null) {
+            if (observer != null) {
+                observer.selected("STOCK", "STOCK");
             }
         }
 
@@ -267,10 +239,8 @@ public final class StockAutoCompleter implements KeyListener {
 
                     textComp.registerKeyboardAction(acceptAction, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
                             JComponent.WHEN_FOCUSED);
-                    if (x == 0) {
-                        x = textComp.getWidth();
-                        y = textComp.getHeight();
-                    }
+                    x = textComp.getWidth();
+                    y = textComp.getHeight();
                     popup.show(textComp, x, y);
                     popupOpen = false;
 
@@ -389,31 +359,23 @@ public final class StockAutoCompleter implements KeyListener {
      */
     @Override
     public void keyReleased(KeyEvent e) {
-        String filter = textComp.getText();
-        if (filter.length() == 0) {
-            sorter.setRowFilter(null);
-        } else {
-            sorter.setRowFilter(startsWithFilter);
-            try {
-                if (!containKey(e)) {
-                    if (table.getRowCount() >= 0) {
-                        table.setRowSelectionInterval(0, 0);
-                    }
+        String str = textComp.getText();
+        if (!str.isEmpty()) {
+            if (!containKey(e)) {
+                List<Stock> list = inventoryRepo.getStock(str);
+                if (this.filter) {
+                    Stock s = new Stock("-", "All");
+                    list.add(0, s);
                 }
-            } catch (Exception ex) {
+                stockTableModel.setListStock(list);
+                if (!list.isEmpty()) {
+                    table.setRowSelectionInterval(0, 0);
+                }
             }
 
         }
+
     }
-    private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
-        @Override
-        public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
-            String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
-            String tmp2 = entry.getStringValue(1).toUpperCase().replace(" ", "");
-            String text = textComp.getText().toUpperCase().replace(" ", "");
-            return tmp1.startsWith(text) || tmp2.startsWith(text);
-        }
-    };
 
     private boolean containKey(KeyEvent e) {
         return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;

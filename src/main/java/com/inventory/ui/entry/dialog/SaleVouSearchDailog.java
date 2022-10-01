@@ -24,12 +24,15 @@ import com.inventory.model.Trader;
 import com.inventory.model.VSale;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.SaleVouSearchTableModel;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.Duration;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -47,7 +50,20 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
 
     /**
      * Creates new form SaleVouSearchDialog
+     *
      */
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusLost(FocusEvent e) {
+        }
+
+        @Override
+        public void focusGained(FocusEvent e) {
+            JTextField jtf = (JTextField) e.getSource();
+            jtf.selectAll();
+        }
+
+    };
     private final SaleVouSearchTableModel saleVouTableModel = new SaleVouSearchTableModel();
     private WebClient inventoryApi;
     private InventoryRepo inventoryRepo;
@@ -98,6 +114,7 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
         super(frame, true);
         initComponents();
         initKeyListener();
+        initFocous();
         txtTotalAmt.setFormatterFactory(Util1.getDecimalFormat());
         txtPaid.setFormatterFactory(Util1.getDecimalFormat());
     }
@@ -112,10 +129,14 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
         search();
     }
 
+    private void initFocous() {
+        txtStock.addFocusListener(fa);
+    }
+
     private void initCombo() {
-        traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo.getCustomer(), null, true, 1, false);
+        traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "CUS");
         appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
-        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo.getStock(true), null, true, false);
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, inventoryRepo.getSaleMan(), null, true, false);
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, true, false);
     }
@@ -147,13 +168,13 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
     private void search() {
         log.info("Search Sale History.");
         FilterObject filter = new FilterObject(Global.compCode);
-        filter.setCusCode(traderAutoCompleter.getTrader().getCode());
+        filter.setCusCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
         filter.setUserCode(appUserAutoCompleter.getAppUser().getUserCode());
         filter.setVouNo(txtVouNo.getText());
         filter.setRemark(Util1.isNull(txtRemark.getText(), "-"));
-        filter.setStockCode(stockAutoCompleter.getStock().getStockCode());
+        filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         filter.setSaleManCode(saleManAutoCompleter.getSaleMan().getSaleManCode());
         filter.setLocCode(locationAutoCompleter.getLocation().getLocationCode());
         filter.setReference(txtRef.getText());
@@ -521,7 +542,7 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
         txtTotalAmt.setFont(Global.amtFont);
 
         lblTtlAmount1.setFont(Global.lableFont);
-        lblTtlAmount1.setText("Total Paid");
+        lblTtlAmount1.setText("Total Paid :");
 
         txtPaid.setEditable(false);
         txtPaid.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
@@ -668,6 +689,7 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
 
     private void txtRefFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtRefFocusGained
         // TODO add your handling code here:
+
     }//GEN-LAST:event_txtRefFocusGained
 
     private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased

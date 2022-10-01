@@ -211,9 +211,7 @@ public final class BrandAutoCompleter implements KeyListener {
                     case "-" ->
                         initOption();
                     default -> {
-                        if (observer != null) {
-                            observer.selected("ST", brand.getBrandCode());
-                        }
+
                         listOption.clear();
                         listOption.add(brand.getBrandCode());
                     }
@@ -224,6 +222,9 @@ public final class BrandAutoCompleter implements KeyListener {
         popup.setVisible(false);
         if (editor != null) {
             editor.stopCellEditing();
+        }
+        if (observer != null) {
+            observer.selected("SB", brand.getBrandCode());
         }
     }
 

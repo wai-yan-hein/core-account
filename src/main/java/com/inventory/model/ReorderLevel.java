@@ -26,5 +26,5 @@ public class ReorderLevel {
     private float minSmallQty;
     private float maxSmallQty;
     private float balSmallQty;
-
+    private String status;
 }

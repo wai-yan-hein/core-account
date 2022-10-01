@@ -33,10 +33,6 @@ public class TraderTableModel extends AbstractTableModel {
         this.table = table;
     }
 
-    public TraderTableModel(List<Trader> listTrader) {
-        this.listTrader = listTrader;
-    }
-
     public TraderTableModel() {
     }
 
@@ -78,7 +74,7 @@ public class TraderTableModel extends AbstractTableModel {
             Trader trader = listTrader.get(row);
             return switch (column) {
                 case 0 ->
-                    Util1.isNull(trader.getUserCode(), trader.getCode());
+                    Util1.isNull(trader.getUserCode(), trader.getKey().getCode());
                 case 1 ->
                     trader.getTraderName();
                 case 2 ->

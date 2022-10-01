@@ -219,6 +219,7 @@ public class DateAutoCompleter implements KeyListener, SelectionObserver {
         LocalDate localDate = LocalDate.now();
         if (text.equals("Today") || text.equals("-")) {
             setTodayDate();
+            stDate = endDate = Util1.toDateStr(Util1.getTodayDate(), "dd/MM/yyyy");
         } else if (text.equals("Yesterday")) {
             LocalDate minusDays = localDate.minusDays(1);
             Date yesterday = java.sql.Date.valueOf(minusDays);

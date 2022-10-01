@@ -16,8 +16,7 @@ import lombok.Data;
 @Data
 public class Trader implements java.io.Serializable {
 
-    private String code;
-    private String compCode;
+    private TraderKey key;
     private String traderName;
     private String address;
     private Region region;
@@ -43,10 +42,11 @@ public class Trader implements java.io.Serializable {
     private boolean cashDown;
     private boolean multi;
     private String priceType;
-
+    private TraderGroup group;
 
     public Trader(String code, String traderName) {
-        this.code = code;
+        this.key = new TraderKey();
+        this.key.setCode(code);
         this.traderName = traderName;
     }
 
