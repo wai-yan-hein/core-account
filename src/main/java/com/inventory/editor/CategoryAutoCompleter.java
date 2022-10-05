@@ -72,7 +72,7 @@ public final class CategoryAutoCompleter implements KeyListener {
     private void initOption() {
         listOption.clear();
         listCategory.forEach(t -> {
-            listOption.add(t.getCatCode());
+            listOption.add(t.getKey().getCatCode());
         });
     }
 
@@ -193,12 +193,12 @@ public final class CategoryAutoCompleter implements KeyListener {
                     table.getSelectedRow()));
             textComp.setText(type.getCatName());
             if (custom) {
-                switch (type.getCatCode()) {
+                switch (type.getKey().getCatCode()) {
                     case "C" -> {
                         optionDialog = new OptionDialog(Global.parentForm, "Stock Category");
                         List<OptionModel> listOP = new ArrayList<>();
                         listCategory.forEach(t -> {
-                            listOP.add(new OptionModel(t.getCatCode(), t.getCatName()));
+                            listOP.add(new OptionModel(t.getKey().getCatCode(), t.getCatName()));
                         });
                         optionDialog.setOptionList(listOP);
                         optionDialog.setLocationRelativeTo(null);
@@ -212,10 +212,10 @@ public final class CategoryAutoCompleter implements KeyListener {
                         initOption();
                     default -> {
                         if (observer != null) {
-                            observer.selected("SC", type.getCatCode());
+                            observer.selected("SC", type.getKey().getCatCode());
                         }
                         listOption.clear();
-                        listOption.add(type.getCatCode());
+                        listOption.add(type.getKey().getCatCode());
                     }
                 }
             }

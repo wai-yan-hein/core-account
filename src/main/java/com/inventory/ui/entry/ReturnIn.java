@@ -132,20 +132,21 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         tblRet.setCellSelectionEnabled(true);
         tblRet.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
         tblRet.getColumnModel().getColumn(1).setPreferredWidth(450);//Name
-        tblRet.getColumnModel().getColumn(2).setPreferredWidth(60);//Location
-        tblRet.getColumnModel().getColumn(3).setPreferredWidth(60);//qty
-        tblRet.getColumnModel().getColumn(4).setPreferredWidth(1);//Std wt
-        tblRet.getColumnModel().getColumn(5).setPreferredWidth(1);//unit
-        tblRet.getColumnModel().getColumn(6).setPreferredWidth(1);//price
-        tblRet.getColumnModel().getColumn(7).setPreferredWidth(40);//amt
+        tblRet.getColumnModel().getColumn(2).setPreferredWidth(60);//rel
+        tblRet.getColumnModel().getColumn(3).setPreferredWidth(60);//Location
+        tblRet.getColumnModel().getColumn(4).setPreferredWidth(60);//qty
+        tblRet.getColumnModel().getColumn(5).setPreferredWidth(1);//avg wt
+        tblRet.getColumnModel().getColumn(6).setPreferredWidth(1);//unit
+        tblRet.getColumnModel().getColumn(7).setPreferredWidth(1);//price
+        tblRet.getColumnModel().getColumn(8).setPreferredWidth(40);//amt
         tblRet.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblRet.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblRet.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(listLocation));
-        tblRet.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//qty
-        tblRet.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
-        tblRet.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
-        tblRet.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
+        tblRet.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(listLocation));
+        tblRet.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
+        tblRet.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
+        tblRet.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
         tblRet.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
+        tblRet.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
         tblRet.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblRet.setDefaultRenderer(Float.class, new DecimalFormatRender());
         tblRet.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -545,7 +546,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             }
         });
 
-        panelSale.setBorder(javax.swing.BorderFactory.createEtchedBorder(null, java.awt.Color.lightGray));
+        panelSale.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel17.setFont(Global.lableFont);
         jLabel17.setText("Vou No");
@@ -632,7 +633,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                             .addComponent(jLabel4))
                         .addGap(18, 18, 18)
                         .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtVouDate, javax.swing.GroupLayout.DEFAULT_SIZE, 448, Short.MAX_VALUE)
+                            .addComponent(txtVouDate, javax.swing.GroupLayout.DEFAULT_SIZE, 449, Short.MAX_VALUE)
                             .addComponent(txtVouNo)))
                     .addGroup(panelSaleLayout.createSequentialGroup()
                         .addComponent(jLabel2)
@@ -652,7 +653,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                         .addComponent(txtCurrency))
                     .addGroup(panelSaleLayout.createSequentialGroup()
                         .addGap(18, 18, 18)
-                        .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE)))
+                        .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 407, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -944,7 +945,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                 .addGap(6, 6, 6)
                 .addComponent(panelSale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 341, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 343, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)

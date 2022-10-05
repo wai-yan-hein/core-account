@@ -59,7 +59,7 @@ public class SaleManTableModel extends AbstractTableModel {
             SaleMan saleMan = listSaleMan.get(row);
             switch (column) {
                 case 0 -> {
-                    return Util1.isNull(saleMan.getUserCode(), saleMan.getSaleManCode());
+                    return Util1.isNull(saleMan.getUserCode(), saleMan.getKey().getSaleManCode());
                 }
                 case 1 -> {
                     return saleMan.getSaleManName();
@@ -158,7 +158,7 @@ public class SaleManTableModel extends AbstractTableModel {
             status = true;
         } else {
             SaleMan sm = listSaleMan.get(listSaleMan.size() - 1);
-            if (sm.getSaleManCode() == null) {
+            if (sm.getKey().getSaleManCode() == null) {
                 status = false;
             }
         }
@@ -183,7 +183,7 @@ public class SaleManTableModel extends AbstractTableModel {
     public void delete(int row) {
         if (!listSaleMan.isEmpty()) {
             SaleMan t = listSaleMan.get(row);
-            if (t.getSaleManCode() != null) {
+            if (t.getKey().getSaleManCode() != null) {
                 listSaleMan.remove(row);
                 if (table.getCellEditor() != null) {
                     table.getCellEditor().stopCellEditing();

@@ -166,7 +166,6 @@
             <Property name="rowHeight" type="int" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.tblRowHeight" type="code"/>
             </Property>
-            <Property name="showGrid" type="boolean" value="true"/>
             <Property name="showHorizontalLines" type="boolean" value="true"/>
             <Property name="showVerticalLines" type="boolean" value="true"/>
           </Properties>

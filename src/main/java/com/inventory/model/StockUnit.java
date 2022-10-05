@@ -15,7 +15,7 @@ import lombok.Data;
 @Data
 public class StockUnit implements java.io.Serializable {
 
-    private String unitCode;
+    private StockUnitKey key;
     private String unitName;
     private Date updatedDate;
     private String updatedBy;
@@ -23,18 +23,12 @@ public class StockUnit implements java.io.Serializable {
     private String createdBy;
     private Integer macId;
     private String userCode;
-    private String compCode;
 
     public StockUnit() {
     }
 
-    public StockUnit(String unitCode) {
-        this.unitCode = unitCode;
+    public StockUnit(StockUnitKey key) {
+        this.key = key;
     }
 
-    @Override
-    public String toString() {
-        return unitCode;
-    }
-
-}
+   }

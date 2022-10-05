@@ -21,7 +21,6 @@ import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.model.Location;
-import com.inventory.model.Stock;
 import com.inventory.model.TransferHis;
 import com.inventory.model.TransferHisDetail;
 import com.inventory.model.StockUnit;
@@ -109,14 +108,13 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         tranTableModel.setObserver(this);
         tblTransfer.setModel(tranTableModel);
         tblTransfer.getTableHeader().setFont(Global.tblHeaderFont);
-        tblTransfer.getColumnModel().getColumn(0).setPreferredWidth(100);
+        tblTransfer.getColumnModel().getColumn(0).setPreferredWidth(10);
         tblTransfer.getColumnModel().getColumn(1).setPreferredWidth(250);
         tblTransfer.getColumnModel().getColumn(2).setPreferredWidth(100);
-        tblTransfer.getColumnModel().getColumn(3).setPreferredWidth(50);
-        tblTransfer.getColumnModel().getColumn(4).setPreferredWidth(50);
+        tblTransfer.getColumnModel().getColumn(3).setPreferredWidth(100);
+        tblTransfer.getColumnModel().getColumn(4).setPreferredWidth(10);
         tblTransfer.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblTransfer.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblTransfer.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
         tblTransfer.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
         tblTransfer.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(listStockUnit));
         tblTransfer.setDefaultRenderer(Object.class, new DecimalFormatRender());
@@ -206,17 +204,23 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
 
     private boolean isValidEntry() {
         boolean status = true;
-        if (fromLocaitonCompleter.getLocation() == null) {
+        Location fromLoc = fromLocaitonCompleter.getLocation();
+        Location toLoc = toLocaitonCompleter.getLocation();
+        if (fromLoc == null) {
             JOptionPane.showMessageDialog(this, "Select From Location.");
             status = false;
             txtFrom.requestFocus();
-        } else if (toLocaitonCompleter.getLocation() == null) {
+        } else if (toLoc == null) {
             JOptionPane.showMessageDialog(this, "Select To Location.");
             status = false;
             txtTo.requestFocus();
         } else if (lblStatus.getText().equals("DELETED")) {
             clear();
             status = false;
+        } else if (fromLoc.getLocationCode().equals(toLoc.getLocationCode())) {
+            status = false;
+            JOptionPane.showMessageDialog(this, "Can't transfer the same location.");
+            txtTo.requestFocus();
         } else {
             TransferHisKey key = new TransferHisKey();
             key.setCompCode(Global.compCode);
@@ -347,7 +351,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel4.setFont(Global.lableFont);
-        jLabel4.setText("RefNo");
+        jLabel4.setText("Ref No");
 
         txtRefNo.setFont(Global.textFont);
 
@@ -391,7 +395,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                 .addGap(18, 18, 18)
                 .addComponent(jLabel3)
                 .addGap(18, 18, 18)
-                .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 118, Short.MAX_VALUE)
+                .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 115, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel7)
                 .addGap(18, 18, 18)

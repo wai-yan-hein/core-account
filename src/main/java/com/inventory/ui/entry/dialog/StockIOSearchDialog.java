@@ -155,7 +155,7 @@ public class StockIOSearchDialog extends javax.swing.JDialog implements KeyListe
         filter.setVouNo(txtVouNo.getText());
         filter.setRemark(Util1.isNull(txtRemark.getText(), "-"));
         filter.setDescription(Util1.isNull(txtDesp.getText(), "-"));
-        filter.setVouStatus(vouStatusAutoCompleter.getVouStatus().getCode());
+        filter.setVouStatus(vouStatusAutoCompleter.getVouStatus().getKey().getCode());
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         filter.setLocCode(locationAutoCompleter.getLocation().getLocationCode());
         //

@@ -23,6 +23,8 @@ public class ReportFilter {
     private Integer macId;
     @NonNull
     private String compCode;
+    @NonNull
+    private Integer deptId;
     private String vouNo;
     private String curCode;
     private String opDate;
@@ -45,9 +47,11 @@ public class ReportFilter {
     private String traderCode;
     private String saleManCode;
     private String vouTypeCode;
-    public ReportFilter(Integer macId, String compCode) {
+
+    public ReportFilter(Integer macId, String compCode, Integer deptId) {
         this.macId = macId;
         this.compCode = compCode;
+        this.deptId = deptId;
     }
 
 }

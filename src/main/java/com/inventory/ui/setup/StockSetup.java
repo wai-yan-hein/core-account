@@ -229,10 +229,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             status = false;
             txtRelation.requestFocus();
         } else {
-            StockKey key = new StockKey();
-            key.setStockCode(txtStockCode.getText());
-            key.setCompCode(Global.compCode);
-            stock.setKey(key);
             stock.setUserCode(txtUserCode.getText().trim());
             stock.setStockType(typeAutoCompleter.getStockType());
             stock.setStockName(txtStockName.getText().trim());
@@ -252,6 +248,11 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             stock.setSalePriceE(Util1.getFloat(txtSalePriceE.getText()));
             stock.setCalculate(chkCal.isSelected());
             if (lblStatus.getText().equals("NEW")) {
+                StockKey key = new StockKey();
+                key.setStockCode(null);
+                key.setCompCode(Global.compCode);
+                key.setDeptId(Global.deptId);
+                stock.setKey(key);
                 stock.setMacId(Global.macId);
                 stock.setCompCode(Global.compCode);
                 stock.setCreatedDate(Util1.getTodayDate());

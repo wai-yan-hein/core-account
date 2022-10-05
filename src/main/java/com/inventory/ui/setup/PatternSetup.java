@@ -153,10 +153,10 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
 
     private void searchStock() {
         stockTableModel.setListStock(inventoryRepo.getStock(true));
-        ReportFilter filter = new ReportFilter(Global.macId, Global.compCode);
-        filter.setBrandCode(brandAutoCompleter.getBrand().getBrandCode());
-        filter.setCatCode(categoryAutoCompleter.getCategory().getCatCode());
-        filter.setStockTypeCode(typeAutoCompleter.getStockType().getStockTypeCode());
+        ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
+        filter.setBrandCode(brandAutoCompleter.getBrand().getKey().getBrandCode());
+        filter.setCatCode(categoryAutoCompleter.getCategory().getKey().getCatCode());
+        filter.setStockTypeCode(typeAutoCompleter.getStockType().getKey().getStockTypeCode());
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         Mono<ResponseEntity<List<Stock>>> result = inventoryApi
                 .post()

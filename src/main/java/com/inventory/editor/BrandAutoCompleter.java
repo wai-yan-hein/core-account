@@ -80,7 +80,7 @@ public final class BrandAutoCompleter implements KeyListener {
     private void initOption() {
         listOption.clear();
         listStockBrand.forEach(t -> {
-            listOption.add(t.getBrandCode());
+            listOption.add(t.getKey().getBrandCode());
         });
     }
 
@@ -193,12 +193,12 @@ public final class BrandAutoCompleter implements KeyListener {
                     table.getSelectedRow()));
             textComp.setText(brand.getBrandName());
             if (custom) {
-                switch (brand.getBrandCode()) {
+                switch (brand.getKey().getBrandCode()) {
                     case "C" -> {
                         optionDialog = new OptionDialog(Global.parentForm, "Stock Brand");
                         List<OptionModel> listOP = new ArrayList<>();
                         listStockBrand.forEach(t -> {
-                            listOP.add(new OptionModel(t.getBrandCode(), t.getBrandName()));
+                            listOP.add(new OptionModel(t.getKey().getBrandCode(), t.getBrandName()));
                         });
                         optionDialog.setOptionList(listOP);
                         optionDialog.setLocationRelativeTo(null);
@@ -213,7 +213,7 @@ public final class BrandAutoCompleter implements KeyListener {
                     default -> {
 
                         listOption.clear();
-                        listOption.add(brand.getBrandCode());
+                        listOption.add(brand.getKey().getBrandCode());
                     }
                 }
             }
@@ -224,7 +224,7 @@ public final class BrandAutoCompleter implements KeyListener {
             editor.stopCellEditing();
         }
         if (observer != null) {
-            observer.selected("SB", brand.getBrandCode());
+            observer.selected("SB", brand.getKey().getBrandCode());
         }
     }
 

@@ -78,7 +78,7 @@ public class SaleManAutoCompleter implements KeyListener, SelectionObserver {
     private void initOption() {
         listOption.clear();
         listSaleMan.forEach(t -> {
-            listOption.add(t.getSaleManCode());
+            listOption.add(t.getKey().getSaleManCode());
         });
     }
 
@@ -202,12 +202,12 @@ public class SaleManAutoCompleter implements KeyListener, SelectionObserver {
             textComp.setText(saleMan.getSaleManName());
             listOption = new ArrayList<>();
             if (custom) {
-                switch (saleMan.getSaleManCode()) {
+                switch (saleMan.getKey().getSaleManCode()) {
                     case "C" -> {
                         optionDialog = new OptionDialog(Global.parentForm, "Sale Man");
                         List<OptionModel> listOP = new ArrayList<>();
                         listSaleMan.forEach(t -> {
-                            listOP.add(new OptionModel(t.getSaleManCode(), t.getSaleManName()));
+                            listOP.add(new OptionModel(t.getKey().getSaleManCode(), t.getSaleManName()));
                         });
                         optionDialog.setOptionList(listOP);
                         optionDialog.setLocationRelativeTo(null);
@@ -221,7 +221,7 @@ public class SaleManAutoCompleter implements KeyListener, SelectionObserver {
                         initOption();
                     default -> {
                         listOption.clear();
-                        listOption.add(saleMan.getSaleManCode());
+                        listOption.add(saleMan.getKey().getSaleManCode());
                     }
                 }
             }

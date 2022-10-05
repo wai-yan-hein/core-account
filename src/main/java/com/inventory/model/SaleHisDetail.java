@@ -24,5 +24,4 @@ public class SaleHisDetail implements java.io.Serializable {
     private Float amount;
     private Location location;
     private Integer uniqueId;
-    private Float saleWt;
 }

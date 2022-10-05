@@ -187,6 +187,8 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                 customer.setCreatedDate(Util1.getTodayDate());
                 TraderKey key = new TraderKey();
                 key.setCompCode(Global.compCode);
+                key.setCode(null);
+                key.setDeptId(Global.deptId);
                 customer.setKey(key);
             } else {
                 customer.setUpdatedBy(Global.loginUser.getUserCode());

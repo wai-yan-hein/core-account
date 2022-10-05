@@ -103,7 +103,7 @@ public class PatternTableModel extends AbstractTableModel {
             case 3 ->
                 p.getQty();
             case 4 ->
-                p.getUnit() == null ? null : p.getUnit().getUnitCode();
+                p.getUnit() == null ? null : p.getUnit().getKey().getUnitCode();
             case 5 ->
                 p.getPrice();
             default ->

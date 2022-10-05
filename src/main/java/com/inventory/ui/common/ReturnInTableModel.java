@@ -29,8 +29,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ReturnInTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Description", "Location",
-        "Qty", "Std-Wt", "Unit", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Description", "Relation", "Location",
+        "Qty", "Avg Qty", "Unit", "Price", "Amount"};
     private JTable parent;
     private List<RetInHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
@@ -105,20 +105,20 @@ public class ReturnInTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 0,1,2,5 ->
-                String.class;
-            default ->
+            case 4,5,7,8 ->
                 Float.class;
+            default ->
+                String.class;
         };
     }
 
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case 4,7 ->
+            case 5 ->
                 ProUtil.isWeightOption();
             default ->
-                true;
+                column != 2;
         };
     }
 
@@ -145,26 +145,34 @@ public class ReturnInTableModel extends AbstractTableModel {
                     return stockName;
                 }
                 case 2 -> {
+                    if (record.getStock() != null) {
+                        if (record.getStock().getUnitRelation() != null) {
+                            return record.getStock().getUnitRelation().getRelName();
+                        }
+                    }
+                    return null;
+                }
+                case 3 -> {
                     //loc
                     return record.getLocation();
                 }
-                case 3 -> {
+                case 4 -> {
                     //qty
                     return record.getQty();
                 }
-                case 4 -> {
-                    //Std-Wt
-                    return record.getWt();
-                }
                 case 5 -> {
+                    //Std-Wt
+                    return record.getAvgQty();
+                }
+                case 6 -> {
                     //unit
                     return record.getUnit();
                 }
-                case 6 -> {
+                case 7 -> {
                     //price
                     return record.getPrice();
                 }
-                case 7 -> {
+                case 8 -> {
                     //amount
                     return record.getAmount();
                 }
@@ -182,104 +190,104 @@ public class ReturnInTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object value, int row, int column) {
         try {
-            RetInHisDetail record = listDetail.get(row);
-            switch (column) {
-                case 0 -> {
-                    //Code
-                    if (value != null) {
+            if (value != null) {
+                RetInHisDetail record = listDetail.get(row);
+                switch (column) {
+                    case 0,1 -> {
+                        //Code
                         if (value instanceof Stock stock) {
                             record.setStock(stock);
                             record.setQty(1.0f);
-                            record.setWt(Util1.gerFloatOne(stock.getSaleWeight()));
+                            record.setAvgQty(1.0f);
                             record.setUnit(stock.getSaleUnit());
                             record.setPrice(stock.getPurPrice());
                             record.setLocation(locationAutoCompleter.getLocation());
                             addNewRow();
                         }
+                        parent.setColumnSelectionInterval(4, 4);
                     }
-                    parent.setColumnSelectionInterval(3, 3);
-                }
-                case 2 -> {
-                    //Loc
-                    if (value instanceof Location location) {
-                        record.setLocation(location);
-                    } else {
-                        record.setLocation(null);
+                    case 3 -> {
+                        //Loc
+                        if (value instanceof Location location) {
+                            record.setLocation(location);
+                        } else {
+                            record.setLocation(null);
+                        }
                     }
-                }
-                case 3 -> {
-                    //Qty
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            record.setQty(Util1.getFloat(value));
+                    case 4 -> {
+                        //Qty
+                        if (Util1.isNumber(value)) {
+                            if (Util1.isPositive(Util1.getFloat(value))) {
+                                record.setQty(Util1.getFloat(value));
+                                record.setAvgQty(record.getQty());
+                                parent.setColumnSelectionInterval(6, 6);
+                            } else {
+                                showMessageBox("Input value must be positive");
+                                parent.setColumnSelectionInterval(column, column);
+                            }
+                        } else {
+                            showMessageBox("Input value must be number.");
+                            parent.setColumnSelectionInterval(column, column);
+                        }
+                        parent.setRowSelectionInterval(row, row);
+                    }
+                    case 5 -> {
+                        //avg-qty
+                        if (Util1.isNumber(value)) {
+                            if (Util1.isPositive(Util1.getFloat(value))) {
+                                record.setAvgQty(Util1.getFloat(value));
+                            } else {
+                                showMessageBox("Input value must be positive");
+                                parent.setColumnSelectionInterval(column, column);
+                            }
                         } else {
                             showMessageBox("Input value must be positive");
                             parent.setColumnSelectionInterval(column, column);
                         }
-                    } else {
-                        showMessageBox("Input value must be number.");
-                        parent.setColumnSelectionInterval(column, column);
                     }
-                    parent.setRowSelectionInterval(row, row);
-                    parent.setColumnSelectionInterval(5, 5);
-                }
-                case 4 -> {
-                    //Std-Wt
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            record.setWt(Util1.getFloat(value));
-                        } else {
-                            showMessageBox("Input value must be positive");
-                            parent.setColumnSelectionInterval(column, column);
-                        }
-                    } else {
-                        showMessageBox("Input value must be positive");
-                        parent.setColumnSelectionInterval(column, column);
-                    }
-                }
-                case 5 -> {
-                    //Unit
-                    if (value != null) {
+                    case 6 -> {
+                        //Unit
                         if (value instanceof StockUnit stockUnit) {
                             record.setUnit(stockUnit);
                         }
+                        parent.setColumnSelectionInterval(6, 6);
                     }
-                    parent.setColumnSelectionInterval(6, 6);
-                }
-                case 6 -> {
-                    // Price
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            record.setPrice(Util1.getFloat(value));
-                            parent.setColumnSelectionInterval(0, 0);
-                            parent.setRowSelectionInterval(row + 1, row + 1);
+                    case 7 -> {
+                        // Price
+                        if (Util1.isNumber(value)) {
+                            if (Util1.isPositive(Util1.getFloat(value))) {
+                                record.setPrice(Util1.getFloat(value));
+                                parent.setColumnSelectionInterval(0, 0);
+                                parent.setRowSelectionInterval(row + 1, row + 1);
+                            } else {
+                                showMessageBox("Input value must be positive");
+                                parent.setColumnSelectionInterval(column, column);
+                            }
                         } else {
-                            showMessageBox("Input value must be positive");
+                            showMessageBox("Input value must be number.");
                             parent.setColumnSelectionInterval(column, column);
                         }
-                    } else {
-                        showMessageBox("Input value must be number.");
-                        parent.setColumnSelectionInterval(column, column);
                     }
-                }
-                case 7 -> {
-                    //Amount
-                    if (value != null) {
+                    case 8 -> {
+                        //Amount
                         record.setAmount(Util1.getFloat(value));
+
                     }
                 }
-            }
-            if (column != 6) {
-                if (record.getStock() != null && record.getUnit() != null) {
-                    record.setPrice(inventoryRepo.getPurRecentPrice(record.getStock().getKey().getStockCode(),
-                            Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnit().getUnitCode()));
-                    record.setCostPrice(0.0f);
+                if (column != 7) {
+                    if (Util1.getFloat(record.getPrice()) == 0) {
+                        if (record.getStock() != null && record.getUnit() != null) {
+                            record.setPrice(inventoryRepo.getSaleRecentPrice(record.getStock().getKey().getStockCode(),
+                                    Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnit().getKey().getUnitCode()));
+                            record.setCostPrice(0.0f);
+                        }
+                    }
                 }
+                calculateAmount(record);
+                fireTableRowsUpdated(row, row);
+                selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
+                parent.requestFocusInWindow();
             }
-            calculateAmount(record);
-            fireTableRowsUpdated(row, row);
-            selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
-            parent.requestFocusInWindow();
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
@@ -318,10 +326,13 @@ public class ReturnInTableModel extends AbstractTableModel {
 
     private void calculateAmount(RetInHisDetail ri) {
         float price = Util1.getFloat(ri.getPrice());
+        float avgQty = Util1.getFloat(ri.getAvgQty());
         float qty = Util1.getFloat(ri.getQty());
+        price = (avgQty / qty) * price;
         if (ri.getStock() != null) {
             float amount = qty * price;
-            ri.setAmount(amount);
+            ri.setPrice(price);
+            ri.setAmount(Util1.getFloat(Math.round(amount)));
         }
     }
 

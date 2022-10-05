@@ -21,14 +21,15 @@ import com.inventory.model.ReorderLevel;
 import com.inventory.model.RetInHis;
 import com.inventory.model.RetOutHis;
 import com.inventory.model.SaleHis;
+import com.inventory.model.SaleHisKey;
 import com.inventory.model.SaleMan;
+import com.inventory.model.SaleManKey;
 import com.inventory.model.Stock;
 import com.inventory.model.StockBrand;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockKey;
 import com.inventory.model.StockType;
 import com.inventory.model.StockUnit;
-import com.inventory.model.SysProperty;
 import com.inventory.model.Trader;
 import com.inventory.model.TraderGroup;
 import com.inventory.model.TraderKey;
@@ -59,12 +60,20 @@ public class InventoryRepo {
 
     public Trader getDefaultCustomer() {
         String traderCode = Global.hmRoleProperty.get("default.customer");
-        return findTrader(new TraderKey(Util1.isNull(traderCode, "-"), Global.compCode));
+        TraderKey key = new TraderKey();
+        key.setCode(Util1.isNull(traderCode, "-"));
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        return findTrader(Util1);
     }
 
     public Trader getDefaultSupplier() {
         String traderCode = Global.hmRoleProperty.get("default.supplier");
-        return findTrader(new TraderKey(Util1.isNull(traderCode, "-"), Global.compCode));
+        TraderKey key = new TraderKey();
+        key.setCode(Util1.isNull(traderCode, "-"));
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        return findTrader(key);
     }
 
     public Location getDefaultLocation() {
@@ -74,7 +83,11 @@ public class InventoryRepo {
 
     public SaleMan getDefaultSaleMan() {
         String code = Global.hmRoleProperty.get("default.saleman");
-        return findSaleMan(Util1.isNull(code, "-"));
+        SaleManKey key = new SaleManKey();
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        key.setSaleManCode(Util1.isNull(code, "-"));
+        return findSaleMan(key);
     }
 
     public List<PriceOption> getPriceOption() {
@@ -93,6 +106,7 @@ public class InventoryRepo {
         Mono<ResponseEntity<List<Category>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-category")
                 .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().toEntityList(Category.class);
         return result.block(Duration.ofMinutes(min)).getBody();
@@ -102,24 +116,26 @@ public class InventoryRepo {
         Mono<ResponseEntity<List<SaleMan>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-saleman")
                 .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().toEntityList(SaleMan.class);
         return result.block(Duration.ofMinutes(min)).getBody();
     }
 
-    public SaleMan findSaleMan(String smCode) {
-        Mono<ResponseEntity<SaleMan>> result = inventoryApi.get()
-                .uri(builder -> builder.path("/setup/find-saleman")
-                .queryParam("smCode", smCode)
-                .build())
-                .retrieve().toEntity(SaleMan.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+    public SaleMan findSaleMan(SaleManKey key) {
+        Mono<SaleMan> result = inventoryApi.post()
+                .uri("/setup/find-saleman")
+                .body(Mono.just(key), SaleManKey.class)
+                .retrieve()
+                .bodyToMono(SaleMan.class);
+        return result.block(Duration.ofMinutes(min));
     }
 
     public List<StockBrand> getStockBrand() {
         Mono<ResponseEntity<List<StockBrand>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-brand")
                 .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().toEntityList(StockBrand.class);
         return result.block(Duration.ofMinutes(min)).getBody();
@@ -129,6 +145,7 @@ public class InventoryRepo {
         Mono<ResponseEntity<List<StockType>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-type")
                 .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().toEntityList(StockType.class);
         return result.block(Duration.ofMinutes(min)).getBody();
@@ -138,12 +155,17 @@ public class InventoryRepo {
         Mono<ResponseEntity<List<StockUnit>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-unit")
                 .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().toEntityList(StockUnit.class);
         return result.block(Duration.ofMinutes(min)).getBody();
     }
 
-    public Trader findTrader(TraderKey key) {
+    public Trader findTrader(String code) {
+        TraderKey key = new TraderKey();
+        key.setCode(code);
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
         Mono<Trader> result = inventoryApi.post()
                 .uri("/setup/find-trader")
                 .body(Mono.just(key), Trader.class)
@@ -156,6 +178,7 @@ public class InventoryRepo {
         Mono<ResponseEntity<List<Trader>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-customer")
                 .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().toEntityList(Trader.class);
         return result.block(Duration.ofMinutes(min)).getBody();
@@ -165,6 +188,7 @@ public class InventoryRepo {
         Mono<ResponseEntity<List<Trader>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-supplier")
                 .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().toEntityList(Trader.class);
         return result.block(Duration.ofMinutes(min)).getBody();
@@ -185,6 +209,7 @@ public class InventoryRepo {
         Mono<ResponseEntity<List<Region>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-region")
                 .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().toEntityList(Region.class);
         return result.block(Duration.ofMinutes(min)).getBody();
@@ -203,6 +228,7 @@ public class InventoryRepo {
         Mono<ResponseEntity<List<Location>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-location")
                 .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().toEntityList(Location.class);
         return result.block(Duration.ofMinutes(min)).getBody();
@@ -213,6 +239,7 @@ public class InventoryRepo {
                 .uri(builder -> builder.path("/setup/get-stock")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("active", active)
+                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().toEntityList(Stock.class);
         return result.block(Duration.ofMinutes(min)).getBody();
@@ -223,6 +250,7 @@ public class InventoryRepo {
                 .uri(builder -> builder.path("/setup/get-stock-list")
                 .queryParam("text", str)
                 .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().toEntityList(Stock.class);
         return result.block(Duration.ofMinutes(min)).getBody();
@@ -248,6 +276,7 @@ public class InventoryRepo {
         Mono<ResponseEntity<List<VouStatus>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-voucher-status")
                 .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().toEntityList(VouStatus.class);
         return result.block(Duration.ofMinutes(min)).getBody();
@@ -256,6 +285,8 @@ public class InventoryRepo {
     public List<UnitRelation> getUnitRelation() {
         Mono<ResponseEntity<List<UnitRelation>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-unit-relation")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().toEntityList(UnitRelation.class);
         return result.block(Duration.ofMinutes(min)).getBody();
@@ -467,12 +498,12 @@ public class InventoryRepo {
         return result.block(Duration.ofMinutes(min));
     }
 
-    public SaleHis findSale(String vouNo) {
-        Mono<SaleHis> result = inventoryApi.get()
-                .uri(builder -> builder.path("/sale/find-sale")
-                .queryParam("code", vouNo)
-                .build())
-                .retrieve().bodyToMono(SaleHis.class);
+    public SaleHis findSale(SaleHisKey key) {
+        Mono<SaleHis> result = inventoryApi.post()
+                .uri("/sale/find-sale")
+                .body(Mono.just(key), SaleHisKey.class)
+                .retrieve()
+                .bodyToMono(SaleHis.class);
         return result.block(Duration.ofMinutes(min));
     }
 
@@ -553,6 +584,7 @@ public class InventoryRepo {
         Mono<ResponseEntity<List<TraderGroup>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-trader-group")
                 .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().toEntityList(TraderGroup.class);
         return result.block(Duration.ofMinutes(min)).getBody();

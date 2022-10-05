@@ -16,14 +16,9 @@ import lombok.Data;
 @Data
 public class UnitRelation implements Serializable {
 
-    private String relCode;
+    private RelationKey key;
     private String relName;
     private List<UnitRelationDetail> detailList;
-
-    public UnitRelation(String relCode, String relName) {
-        this.relCode = relCode;
-        this.relName = relName;
-    }
 
     public UnitRelation() {
     }

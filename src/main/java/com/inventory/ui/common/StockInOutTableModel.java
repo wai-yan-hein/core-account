@@ -221,7 +221,7 @@ public class StockInOutTableModel extends AbstractTableModel {
             if (column != 7) {
                 if (io.getStock() != null) {
                     if (io.getInUnit() != null || io.getOutUnit() != null) {
-                        String unit = io.getInUnit() == null ? io.getOutUnit().getUnitCode() : io.getInUnit().getUnitCode();
+                        String unit = io.getInUnit() == null ? io.getOutUnit().getKey().getUnitCode() : io.getInUnit().getKey().getUnitCode();
                         io.setCostPrice(inventoryRepo.getPurRecentPrice(io.getStock().getKey().getStockCode(),
                                 Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), unit));
                         if (io.getCostPrice() == 0) {

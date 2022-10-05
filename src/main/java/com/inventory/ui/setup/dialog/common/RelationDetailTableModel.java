@@ -85,7 +85,7 @@ public class RelationDetailTableModel extends AbstractTableModel {
                     }
                     case 1 -> {
                         if (aValue instanceof StockUnit unit) {
-                            rd.setUnit(unit.getUnitCode());
+                            rd.setUnit(unit.getKey().getUnitCode());
                         }
                     }
                 }

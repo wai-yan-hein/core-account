@@ -10,6 +10,7 @@ import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.StockUnit;
+import com.inventory.model.StockUnitKey;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.StockUnitTableModel;
 import java.awt.Color;
@@ -108,7 +109,7 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
     private void setItemUnit(StockUnit unit) {
         stockUnit = unit;
         txtUnitShort.setEditable(false);
-        txtUnitShort.setText(stockUnit.getUnitCode());
+        txtUnitShort.setText(stockUnit.getKey().getUnitCode());
         txtUnitDesp.setText(stockUnit.getUnitName());
         lblStatus.setText("EDIT");
         lblStatus.setForeground(Color.blue);
@@ -155,17 +156,20 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
             JOptionPane.showMessageDialog(this, "Invalid Unit Description.");
             txtUnitDesp.requestFocus();
         } else {
-            stockUnit.setUnitCode(txtUnitShort.getText());
-            stockUnit.setUnitName(txtUnitDesp.getText());
             if (lblStatus.getText().equals("NEW")) {
                 stockUnit.setCreatedBy(Global.loginUser.getUserCode());
                 stockUnit.setCreatedDate(Util1.getTodayDate());
                 stockUnit.setMacId(Global.macId);
-                stockUnit.setCompCode(Global.compCode);
                 stockUnit.setUserCode(Global.loginUser.getUserCode());
             } else {
                 stockUnit.setUpdatedBy(Global.loginUser.getUserCode());
             }
+            StockUnitKey key = new StockUnitKey();
+            key.setCompCode(Global.compCode);
+            key.setDeptId(Global.deptId);
+            key.setUnitCode(txtUnitShort.getText());
+            stockUnit.setKey(key);
+            stockUnit.setUnitName(txtUnitDesp.getText());
         }
         return status;
     }
@@ -216,7 +220,7 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
             }
         });
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel2.setFont(Global.lableFont);
         jLabel2.setText("Unit Short");
@@ -287,7 +291,7 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(txtUnitShort, javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 78, Short.MAX_VALUE)
+                        .addGap(0, 79, Short.MAX_VALUE)
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnClear))
@@ -311,7 +315,7 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(btnClear)
                         .addComponent(btnSave)))
-                .addContainerGap(271, Short.MAX_VALUE))
+                .addContainerGap(273, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -321,8 +325,8 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 301, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 301, Short.MAX_VALUE))
+                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())

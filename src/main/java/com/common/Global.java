@@ -5,6 +5,7 @@
  */
 package com.common;
 
+import com.acc.model.Department;
 import com.inventory.model.AppUser;
 import java.awt.Color;
 import java.awt.Font;
@@ -39,6 +40,7 @@ public class Global {
     public static String loginDate;
     public static Integer macId;
     public static String machineName;
+    public static Integer deptId = 1;
     public static boolean mqConStatus = false;
     public static int x;
     public static int y;

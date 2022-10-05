@@ -20,7 +20,7 @@ import com.inventory.model.Location;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisDetail;
 import com.inventory.model.Stock;
-import com.inventory.model.StockUnit;
+import com.inventory.model.StockUnitKey;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.OpeningTableModel;
 import com.inventory.ui.entry.dialog.OPSearchDialog;
@@ -382,7 +382,10 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                         op.setStock(s);
                         op.setQty(Util1.getFloat(qty));
                         op.setStdWt(1.0f);
-                        op.setStockUnit(new StockUnit("pcs"));
+                        StockUnitKey key = new StockUnitKey();
+                        key.setUnitCode("pcs");
+                        key.setCompCode(Global.compCode);
+                        key.setDeptId(Global.deptId);
                         if (op.getQty() != 0) {
                             listOP.add(op);
                         }

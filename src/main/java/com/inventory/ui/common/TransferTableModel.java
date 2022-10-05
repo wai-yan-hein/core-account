@@ -6,7 +6,6 @@
 package com.inventory.ui.common;
 
 import com.common.Global;
-import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.model.Stock;
@@ -29,7 +28,7 @@ import org.slf4j.LoggerFactory;
 public class TransferTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(TransferTableModel.class);
-    private String[] columnNames = {"Stock Code", "Stock Name", "Qty", "Weight", "Amount"};
+    private String[] columnNames = {"Stock Code", "Stock Name", "Relation", "Qty", "Unit"};
     private JTable parent;
     private List<TransferHisDetail> listTransfer = new ArrayList();
     private List<String> deleteList = new ArrayList();
@@ -92,20 +91,30 @@ public class TransferTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
         try {
             TransferHisDetail io = listTransfer.get(row);
-            return switch (column) {
-                case 0 ->
-                    io.getStock() == null ? null : io.getStock().getUserCode();
-                case 1 ->
-                    io.getStock() == null ? null : io.getStock().getStockName();
-                case 2 ->
-                    io.getQty();
-                case 3 ->
-                    Util1.getFloat(io.getWt()) == 1 ? null : Util1.getFloat(io.getWt());
-                case 4 ->
-                    io.getUnit() == null ? null : io.getUnit().getUnitCode();
-                default ->
-                    null;
-            };
+            switch (column) {
+                case 0 -> {
+                    return io.getStock() == null ? null : io.getStock().getUserCode();
+                }
+                case 1 -> {
+                    return io.getStock() == null ? null : io.getStock().getStockName();
+                }
+                case 2 -> {
+                    if (io.getStock() != null) {
+                        if (io.getStock().getUnitRelation() != null) {
+                            return io.getStock().getUnitRelation().getRelName();
+                        }
+                    }
+                    return null;
+                }
+
+                case 3 -> {
+                    return io.getQty();
+                }
+                case 4 -> {
+                    return io.getUnit() == null ? null : io.getUnit().getKey().getUnitCode();
+                }
+
+            }
         } catch (Exception e) {
             log.error("getValueAt: " + e.getMessage()
             );
@@ -116,7 +125,7 @@ public class TransferTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 2,3 ->
+            case 3 ->
                 Float.class;
             default ->
                 String.class;
@@ -125,12 +134,7 @@ public class TransferTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return switch (column) {
-            case 3 ->
-                ProUtil.isWeightOption();
-            default ->
-                true;
-        };
+        return column != 2;
     }
 
     @Override
@@ -142,22 +146,16 @@ public class TransferTableModel extends AbstractTableModel {
                     case 0,1 -> {
                         if (value instanceof Stock stock) {
                             io.setStock(stock);
-                            io.setWt(1.0f);
                             io.setUnit(stock.getPurUnit());
-                            setColumnSelection(2);
+                            setColumnSelection(3);
                         }
                         addNewRow();
                     }
-                    case 2 -> {
+                    case 3 -> {
                         if (Util1.isNumber(value)) {
                             io.setQty(Util1.getFloat(value));
                             parent.setRowSelectionInterval(row + 1, row + 1);
                             parent.setColumnSelectionInterval(0, 0);
-                        }
-                    }
-                    case 3 -> {
-                        if (Util1.isNumber(value)) {
-                            io.setWt(Util1.getFloat(value));
                         }
                     }
                     case 4 -> {
@@ -236,7 +234,6 @@ public class TransferTableModel extends AbstractTableModel {
         if (listTransfer != null) {
             if (!hasEmptyRow()) {
                 TransferHisDetail pd = new TransferHisDetail();
-                pd.setWt(1.0f);
                 listTransfer.add(pd);
                 fireTableRowsInserted(listTransfer.size() - 1, listTransfer.size() - 1);
             }

@@ -15,13 +15,16 @@ public class TraderKey {
 
     private String code;
     private String compCode;
-
-    public TraderKey(String code, String compCode) {
-        this.code = code;
-        this.compCode = compCode;
-    }
+    private Integer deptId;
 
     public TraderKey() {
     }
+
+    public TraderKey(String code, String compCode, Integer deptId) {
+        this.code = code;
+        this.compCode = compCode;
+        this.deptId = deptId;
+    }
+    
 
 }

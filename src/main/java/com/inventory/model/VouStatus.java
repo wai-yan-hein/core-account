@@ -15,7 +15,7 @@ import lombok.Data;
 @Data
 public class VouStatus {
 
-    private String code;
+    private VouStatusKey key;
     private String description;
     private Date updatedDate;
     private String updatedBy;
@@ -23,14 +23,14 @@ public class VouStatus {
     private String createdBy;
     private Integer macId;
     private String userCode;
-    private String compCode;
-
-    public VouStatus(String code, String description) {
-        this.code = code;
-        this.description = description;
-    }
 
     public VouStatus() {
+    }
+
+    public VouStatus(String code, String description) {
+        this.key = new VouStatusKey();
+        this.key.setCode(code);
+        this.description = description;
     }
 
 }

@@ -30,7 +30,7 @@
           <Group type="102" attributes="0">
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jScrollPane1" pref="320" max="32767" attributes="0"/>
+                  <Component id="jScrollPane1" pref="321" max="32767" attributes="0"/>
                   <Component id="txtFilter" max="32767" attributes="0"/>
               </Group>
               <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -87,8 +87,8 @@
     <Container class="javax.swing.JPanel" name="jPanel1">
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-          <Border info="org.netbeans.modules.form.compat2.border.EtchedBorderInfo">
-            <EtchetBorder/>
+          <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
+            <TitledBorder/>
           </Border>
         </Property>
       </Properties>
@@ -120,7 +120,7 @@
                                   <Component id="chkActive" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                               </Group>
-                              <Component id="txtPhone" pref="244" max="32767" attributes="0"/>
+                              <Component id="txtPhone" pref="245" max="32767" attributes="0"/>
                               <Component id="txtName" alignment="1" max="32767" attributes="0"/>
                               <Component id="txtId" alignment="1" max="32767" attributes="0"/>
                               <Component id="txtAddress" max="32767" attributes="0"/>
@@ -164,7 +164,7 @@
                       <Component id="btnClear" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="btnSave" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace pref="139" max="32767" attributes="0"/>
+                  <EmptySpace pref="176" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>

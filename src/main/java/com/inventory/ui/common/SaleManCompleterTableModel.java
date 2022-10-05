@@ -52,14 +52,14 @@ public class SaleManCompleterTableModel extends AbstractTableModel {
         }
         try {
             SaleMan saleMan = listSaleMan.get(row);
-            switch (column) {
-                case 0:
-                    return saleMan.getSaleManCode();
-                case 1:
-                    return saleMan.getSaleManName();
-                default:
-                    return null;
-            }
+            return switch (column) {
+                case 0 ->
+                    saleMan.getKey().getSaleManCode();
+                case 1 ->
+                    saleMan.getSaleManName();
+                default ->
+                    null;
+            };
         } catch (Exception ex) {
             log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }

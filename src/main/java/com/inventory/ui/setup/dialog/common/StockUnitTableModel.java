@@ -46,14 +46,11 @@ public class StockUnitTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         StockUnit itemUnit = listUnit.get(rowIndex);
-        switch (columnIndex) {
-            case 0:
-                return itemUnit.getUnitCode();
-            case 1:
-                return itemUnit.getUnitName();
-            default:
-                return null;
-        }
+        return switch (columnIndex) {
+            case 0 -> itemUnit.getKey().getUnitCode();
+            case 1 -> itemUnit.getUnitName();
+            default -> null;
+        };
     }
 
     @Override

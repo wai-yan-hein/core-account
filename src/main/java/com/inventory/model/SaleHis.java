@@ -19,14 +19,14 @@ import lombok.NonNull;
 public class SaleHis implements java.io.Serializable {
 
     @NonNull
-    private String vouNo;
-    private Trader trader;
-    private SaleMan saleMan;
+    private SaleHisKey key;
+    private String traderCode;
+    private String saleManCode;
     @NonNull
     private Date vouDate;
     private Date creditTerm;
     @NonNull
-    private Currency currency;
+    private String curCode;
     private Float vouTotal;
     private Float grandTotal;
     private Float discount;
@@ -49,16 +49,15 @@ public class SaleHis implements java.io.Serializable {
     private String reference;
     private Region region;
     @NonNull
-    private Location location;
+    private String locCode;
     @NonNull
     private Integer macId;
-    @NonNull
-    private String compCode;
     @NonNull
     private String status = "STATUS";
     private List<SaleHisDetail> listSH;
     private List<String> listDel;
     private boolean backup;
+
     public SaleHis() {
     }
 }

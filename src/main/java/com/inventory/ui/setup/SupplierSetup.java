@@ -171,7 +171,8 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                 supplier.setCreatedDate(Util1.getTodayDate());
                 TraderKey key = new TraderKey();
                 key.setCompCode(Global.compCode);
-                supplier.setKey(key);
+                key.setCode(null);
+                key.setDeptId(Global.deptId);
             } else {
                 supplier.setUpdatedBy(Global.loginUser.getUserCode());
             }

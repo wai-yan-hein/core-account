@@ -82,7 +82,7 @@ public class ProcessDetailTableModel extends AbstractTableModel {
                     if (p.getUnit() == null) {
                         return null;
                     }
-                    return p.getUnit().getUnitCode();
+                    return p.getUnit().getKey().getUnitCode();
                 }
                 case 5 -> {
                     return p.getPrice();

@@ -14,13 +14,12 @@ import lombok.Data;
  */
 @Data
 public class PurHisDetail implements Serializable {
+
     private PurDetailKey pdKey;
     private Stock stock;
+    private Float avgQty;
     private Float qty;
-    private Float stdWeight;
     private StockUnit purUnit;
-    private Float avgWeight;
-    private Float avgPrice;
     private Float price;
     private Float amount;
     private Location location;

@@ -15,7 +15,7 @@ import lombok.Data;
 @Data
 public class StockType implements java.io.Serializable {
 
-    private String stockTypeCode;
+    private StockTypeKey key;
     private String stockTypeName;
     private String accountId;
     private Date updatedDate;
@@ -24,13 +24,13 @@ public class StockType implements java.io.Serializable {
     private String createdBy;
     private Integer macId;
     private String userCode;
-    private String compCode;
 
     public StockType() {
     }
 
     public StockType(String stockTypeCode, String stockTypeName) {
-        this.stockTypeCode = stockTypeCode;
+        this.key = new StockTypeKey();
+        this.key.setStockTypeCode(stockTypeCode);
         this.stockTypeName = stockTypeName;
     }
 

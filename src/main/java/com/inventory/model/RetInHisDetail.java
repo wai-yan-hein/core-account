@@ -16,12 +16,12 @@ public class RetInHisDetail implements java.io.Serializable {
     private RetInKey riKey;
     private Stock stock;
     private Float qty;
+    private Float avgQty;
     private StockUnit unit;
     private Float costPrice;
     private Float price;
     private Float amount;
     private Location location;
     private Integer uniqueId;
-    private Float wt;
 
 }

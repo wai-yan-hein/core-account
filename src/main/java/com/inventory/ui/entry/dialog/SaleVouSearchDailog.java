@@ -175,7 +175,7 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
         filter.setVouNo(txtVouNo.getText());
         filter.setRemark(Util1.isNull(txtRemark.getText(), "-"));
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
-        filter.setSaleManCode(saleManAutoCompleter.getSaleMan().getSaleManCode());
+        filter.setSaleManCode(saleManAutoCompleter.getSaleMan().getKey().getSaleManCode());
         filter.setLocCode(locationAutoCompleter.getLocation().getLocationCode());
         filter.setReference(txtRef.getText());
         //

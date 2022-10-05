@@ -11,6 +11,7 @@ import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.StockBrand;
+import com.inventory.model.StockBrandKey;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.StockBrandTableModel;
 import java.awt.Color;
@@ -153,9 +154,13 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
             brand.setUserCode(txtCode.getText());
             brand.setBrandName(txtName.getText());
             if (lblStatus.getText().equals("NEW")) {
+                StockBrandKey key = new StockBrandKey();
+                key.setBrandCode(null);
+                key.setCompCode(Global.compCode);
+                key.setDeptId(Global.deptId);
+                brand.setKey(key);
                 brand.setCreatedBy(Global.loginUser.getUserCode());
                 brand.setCreatedDate(Util1.getTodayDate());
-                brand.setCompCode(Global.compCode);
                 brand.setMacId(Global.macId);
             } else {
                 brand.setUpdatedBy(Global.loginUser.getUserCode());
@@ -164,18 +169,6 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
 
         return status;
     }
-    private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
-        @Override
-        public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
-            if (Util1.isNumber(txtFilter.getText())) {
-                return entry.getStringValue(0).toUpperCase().startsWith(
-                        txtFilter.getText().toUpperCase());
-            } else {
-                return entry.getStringValue(1).toUpperCase().startsWith(
-                        txtFilter.getText().toUpperCase());
-            }
-        }
-    };
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -224,7 +217,7 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
             }
         });
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel2.setFont(Global.lableFont);
         jLabel2.setText("Name");
@@ -298,7 +291,7 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtName, javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(0, 78, Short.MAX_VALUE)
+                                .addGap(0, 79, Short.MAX_VALUE)
                                 .addComponent(btnSave)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnClear))
@@ -324,7 +317,7 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(btnClear)
                         .addComponent(btnSave)))
-                .addContainerGap(255, Short.MAX_VALUE))
+                .addContainerGap(257, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -334,8 +327,8 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE))
+                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())

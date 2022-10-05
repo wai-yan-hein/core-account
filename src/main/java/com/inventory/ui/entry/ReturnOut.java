@@ -135,16 +135,15 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         tblRet.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
         tblRet.getColumnModel().getColumn(1).setPreferredWidth(450);//Name
         tblRet.getColumnModel().getColumn(2).setPreferredWidth(60);//Location
-        tblRet.getColumnModel().getColumn(3).setPreferredWidth(60);//qty
-        tblRet.getColumnModel().getColumn(4).setPreferredWidth(1);//Std wt
+        tblRet.getColumnModel().getColumn(3).setPreferredWidth(60);//Location
+        tblRet.getColumnModel().getColumn(4).setPreferredWidth(60);//qty
         tblRet.getColumnModel().getColumn(5).setPreferredWidth(1);//unit
         tblRet.getColumnModel().getColumn(6).setPreferredWidth(1);//price
         tblRet.getColumnModel().getColumn(7).setPreferredWidth(40);//amt
         tblRet.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblRet.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblRet.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(listLocation));
-        tblRet.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//qty
-        tblRet.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
+        tblRet.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(listLocation));
+        tblRet.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
         tblRet.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
         tblRet.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
         tblRet.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());

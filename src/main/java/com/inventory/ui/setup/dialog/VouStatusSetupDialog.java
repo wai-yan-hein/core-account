@@ -9,7 +9,9 @@ import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.inventory.model.Department;
 import com.inventory.model.VouStatus;
+import com.inventory.model.VouStatusKey;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.VouStatusTableModel;
 import java.awt.Color;
@@ -110,7 +112,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
 
     private void setCategory(VouStatus cat) {
         vou = cat;
-        vou.setCode(vou.getCode());
+        vou.setKey(cat.getKey());
         txtName.setText(vou.getDescription());
         txtUserCode.setText(vou.getUserCode());
         txtName.requestFocus();
@@ -150,16 +152,20 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
             JOptionPane.showMessageDialog(this, "Invalid Name");
             txtName.requestFocus();
         } else {
-            vou.setUserCode(txtUserCode.getText());
-            vou.setDescription(txtName.getText());
             if (lblStatus.getText().equals("NEW")) {
-                vou.setCompCode(Global.compCode);
+                VouStatusKey key = new VouStatusKey();
+                key.setCode(null);
+                key.setCompCode(Global.compCode);
+                key.setDepartment(new Department(Global.deptId));
+                vou.setKey(key);
                 vou.setCreatedBy(Global.loginUser.getUserCode());
                 vou.setCreatedDate(Util1.getTodayDate());
                 vou.setMacId(Global.macId);
             } else {
                 vou.setUpdatedBy(Global.loginUser.getUserCode());
             }
+            vou.setUserCode(txtUserCode.getText());
+            vou.setDescription(txtName.getText());
         }
         return status;
     }
@@ -212,7 +218,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
             }
         });
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel2.setFont(Global.lableFont);
         jLabel2.setText("Description");
@@ -254,7 +260,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
         lblStatus.setText("NEW");
 
         jLabel3.setFont(Global.lableFont);
-        jLabel3.setText("Code");
+        jLabel3.setText("User Code");
 
         txtUserCode.setFont(Global.textFont);
         txtUserCode.setName("txtUserCode"); // NOI18N
@@ -286,7 +292,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
                             .addComponent(txtName, javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtUserCode, javax.swing.GroupLayout.Alignment.LEADING)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 129, Short.MAX_VALUE)
+                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -314,7 +320,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
                     .addComponent(btnClear)
                     .addComponent(btnSave)
                     .addComponent(lblStatus))
-                .addContainerGap(245, Short.MAX_VALUE))
+                .addContainerGap(247, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -324,8 +330,8 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE))
+                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())

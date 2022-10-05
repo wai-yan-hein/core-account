@@ -151,9 +151,9 @@ public class ReorderTableModel extends AbstractTableModel {
                 }
                 switch (column) {
                     case 2,3 ->
-                        p.setMinSmallQty(p.getMinQty() * getSmallQty(p.getStock().getKey().getStockCode(), p.getMinUnit().getUnitCode()));
+                        p.setMinSmallQty(p.getMinQty() * getSmallQty(p.getStock().getKey().getStockCode(), p.getMinUnit().getKey().getUnitCode()));
                     case 4,5 ->
-                        p.setMaxSmallQty(p.getMaxQty() * getSmallQty(p.getStock().getKey().getStockCode(), p.getMinUnit().getUnitCode()));
+                        p.setMaxSmallQty(p.getMaxQty() * getSmallQty(p.getStock().getKey().getStockCode(), p.getMinUnit().getKey().getUnitCode()));
 
                 }
                 addNewRow();

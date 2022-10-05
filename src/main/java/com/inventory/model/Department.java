@@ -8,12 +8,22 @@ import lombok.Data;
 
 /**
  *
- * @author Lenovo
+ * @author DELL
  */
 @Data
-public class StockKey {
+public class Department {
 
-    private String stockCode;
-    private String compCode;
     private Integer deptId;
+    private String userCode;
+    private String deptName;
+    private String queueName;
+
+    public Department(Integer deptId) {
+        this.deptId = deptId;
+    }
+
+    public Department() {
+    }
+    
+
 }

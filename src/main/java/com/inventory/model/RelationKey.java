@@ -15,8 +15,8 @@ import lombok.Data;
 @Data
 public class RelationKey implements Serializable {
 
-    private String fromUnit;
-    private String toUnit;
-    private String patternId;
+    private String relCode;
+    private String compCode;
+    private Integer deptId;
 
 }

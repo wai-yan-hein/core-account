@@ -16,7 +16,7 @@ import lombok.Data;
 @Data
 public class SaleMan implements Serializable {
 
-    private String saleManCode;
+    private SaleManKey key;
     private String saleManName;
     private Boolean active;
     private String phone;
@@ -24,7 +24,6 @@ public class SaleMan implements Serializable {
     private Gender genderId;
     private String address;
     private Integer macId;
-    private String compCode;
     private String userCode;
     private Date createdDate;
     private String createdBy;
@@ -34,7 +33,8 @@ public class SaleMan implements Serializable {
     }
 
     public SaleMan(String saleManCode, String saleManName) {
-        this.saleManCode = saleManCode;
+        this.key = new SaleManKey();
+        this.key.setSaleManCode(saleManCode);
         this.saleManName = saleManName;
     }
 

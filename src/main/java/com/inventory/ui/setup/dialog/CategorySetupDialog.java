@@ -10,6 +10,7 @@ import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.Category;
+import com.inventory.model.CategoryKey;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.CategoryTableModel;
 import java.awt.Color;
@@ -107,7 +108,6 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
 
     private void setCategory(Category cat) {
         category = cat;
-        category.setCatCode(category.getCatCode());
         txtName.setText(category.getCatName());
         txtUserCode.setText(category.getUserCode());
         txtName.requestFocus();
@@ -147,16 +147,21 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
             JOptionPane.showMessageDialog(this, "Invalid Name");
             txtName.requestFocus();
         } else {
-            category.setUserCode(txtUserCode.getText());
-            category.setCatName(txtName.getText());
+
             if (lblStatus.getText().equals("NEW")) {
-                category.setCompCode(Global.compCode);
+                CategoryKey key = new CategoryKey();
+                key.setCatCode(null);
+                key.setCompCode(Global.compCode);
+                key.setDeptId(Global.deptId);
+                category.setKey(key);
                 category.setCreatedBy(Global.loginUser.getUserCode());
                 category.setCreatedDate(Util1.getTodayDate());
                 category.setMacId(Global.macId);
             } else {
                 category.setUpdatedBy(Global.loginUser.getUserCode());
             }
+            category.setUserCode(txtUserCode.getText());
+            category.setCatName(txtName.getText());
         }
         return status;
     }
@@ -209,7 +214,7 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
             }
         });
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel2.setFont(Global.lableFont);
         jLabel2.setText("Name");
@@ -283,7 +288,7 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
                             .addComponent(txtName, javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtUserCode, javax.swing.GroupLayout.Alignment.LEADING)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 129, Short.MAX_VALUE)
+                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -311,7 +316,7 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
                     .addComponent(btnClear)
                     .addComponent(btnSave)
                     .addComponent(lblStatus))
-                .addContainerGap(245, Short.MAX_VALUE))
+                .addContainerGap(247, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -321,8 +326,8 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE))
+                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())

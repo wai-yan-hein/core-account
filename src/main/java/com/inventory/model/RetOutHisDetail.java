@@ -22,6 +22,5 @@ public class RetOutHisDetail implements java.io.Serializable {
     private Float amount;
     private Location location;
     private Integer uniqueId;
-    private Float wt;
 
 }

@@ -10,6 +10,7 @@ import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.UnitFormatRender;
 import com.inventory.editor.StockUnitEditor;
+import com.inventory.model.RelationKey;
 import com.inventory.model.UnitRelationDetail;
 import com.inventory.model.UnitRelation;
 import com.inventory.ui.common.InventoryRepo;
@@ -103,8 +104,9 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
                 if (tblRel.getSelectedRow() >= 0) {
                     selectRow = tblRel.convertRowIndexToModel(tblRel.getSelectedRow());
                     UnitRelation rel = relationTableModel.getRelation(selectRow);
-                    if (rel.getRelCode() != null) {
-                        relationDetailTableModel.setListRelation(inventoryRepo.getRelationDetail(rel.getRelCode()));
+                    String relCode = rel.getKey().getRelCode();
+                    if (relCode != null) {
+                        relationDetailTableModel.setListRelation(inventoryRepo.getRelationDetail(relCode));
                         relationDetailTableModel.setRelation(rel);
                         lblName.setText(rel.getRelName());
                         lblStatus.setText("EDIT");
@@ -137,6 +139,11 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
         List<UnitRelationDetail> listD = relationDetailTableModel.getListRelation();
         if (Objects.isNull(rel)) {
             rel = new UnitRelation();
+            RelationKey key = new RelationKey();
+            key.setCompCode(Global.compCode);
+            key.setDeptId(Global.deptId);
+            key.setRelCode(null);
+            rel.setKey(key);
             rel.setDetailList(listD);
         } else {
             rel.setDetailList(listD);

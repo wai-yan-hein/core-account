@@ -28,6 +28,8 @@ import com.inventory.model.OrderDetail;
 import com.inventory.model.Region;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
+import com.inventory.model.SaleHisKey;
+import com.inventory.model.SaleMan;
 import com.inventory.model.Trader;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.SaleTableModel;
@@ -158,18 +160,18 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         tblSale.setCellSelectionEnabled(true);
         tblSale.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
         tblSale.getColumnModel().getColumn(1).setPreferredWidth(450);//Name
-        tblSale.getColumnModel().getColumn(2).setPreferredWidth(60);//Location
-        tblSale.getColumnModel().getColumn(3).setPreferredWidth(60);//qty
-        tblSale.getColumnModel().getColumn(4).setPreferredWidth(1);//Std wt
+        tblSale.getColumnModel().getColumn(2).setPreferredWidth(60);//Rel
+        tblSale.getColumnModel().getColumn(3).setPreferredWidth(60);//Location
+        tblSale.getColumnModel().getColumn(4).setPreferredWidth(60);//qty
         tblSale.getColumnModel().getColumn(5).setPreferredWidth(1);//unit
         tblSale.getColumnModel().getColumn(6).setPreferredWidth(1);//price
         tblSale.getColumnModel().getColumn(7).setPreferredWidth(40);//amt
         tblSale.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblSale.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(listLocation));
-        tblSale.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//qty
-        tblSale.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//
+        tblSale.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(listLocation));
+        tblSale.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
         tblSale.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
+        tblSale.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//
         if (ProUtil.isSalePriceChange()) {
             if (ProUtil.isPriceOption()) {
                 SalePriceCellEditor editor = new SalePriceCellEditor(inventoryRepo.getPriceOption());
@@ -313,7 +315,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 if (t != null) {
                     if (print) {
                         String reportName = getReportName();
-                        printVoucher(t.getVouNo(), reportName, chkVou.isSelected());
+                        printVoucher(t.getKey().getVouNo(), reportName, chkVou.isSelected());
                     } else {
                         clear();
                     }
@@ -351,9 +353,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             status = false;
             txtLocation.requestFocus();
         } else {
-            saleHis.setVouNo(txtVouNo.getText());
             saleHis.setCreditTerm(txtDueDate.getDate());
-            saleHis.setSaleMan(saleManCompleter.getSaleMan());
+            saleHis.setSaleManCode(saleManCompleter.getSaleMan().getKey().getSaleManCode());
             saleHis.setRemark(txtRemark.getText());
             saleHis.setReference(txtReference.getText());
             saleHis.setDiscP(Util1.getFloat(txtVouDiscP.getValue()));
@@ -362,22 +363,26 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             saleHis.setTaxAmt(Util1.getFloat(txtTax.getValue()));
             saleHis.setPaid(Util1.getFloat(txtVouPaid.getValue()));
             saleHis.setBalance(Util1.getFloat(txtVouBalance.getValue()));
-            saleHis.setCurrency(currAutoCompleter.getCurrency());
+            saleHis.setCurCode(currAutoCompleter.getCurrency().getCurCode());
             saleHis.setDeleted(Util1.getNullTo(saleHis.getDeleted()));
             saleHis.setOrderCode(orderCode);
             saleHis.setRegion(region);
-            saleHis.setLocation(locationAutoCompleter.getLocation());
-            saleHis.setTrader(traderAutoCompleter.getTrader());
+            saleHis.setLocCode(locationAutoCompleter.getLocation().getLocationCode());
+            saleHis.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
             saleHis.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
             saleHis.setGrandTotal(Util1.getFloat(txtGrandTotal.getValue()));
             saleHis.setStatus(lblStatus.getText());
             saleHis.setVouDate(txtSaleDate.getDate());
             saleHis.setMacId(Global.macId);
             if (lblStatus.getText().equals("NEW")) {
+                SaleHisKey key = new SaleHisKey();
+                key.setCompCode(Global.compCode);
+                key.setDeptId(Global.deptId);
+                key.setVouNo(null);
+                saleHis.setKey(key);
                 saleHis.setCreatedDate(Util1.getTodayDate());
                 saleHis.setCreatedBy(Global.loginUser.getUserCode());
                 saleHis.setSession(Global.sessionId);
-                saleHis.setCompCode(Global.compCode);
             } else {
                 saleHis.setUpdatedBy(Global.loginUser.getUserCode());
             }
@@ -473,7 +478,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     public void setSaleVoucher(SaleHis sh) {
         if (sh != null) {
             progress.setIndeterminate(true);
-            String vouNo = sh.getVouNo();
+            String vouNo = sh.getKey().getVouNo();
             Mono<ResponseEntity<List<SaleHisDetail>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/sale/get-sale-detail")
                     .queryParam("vouNo", vouNo)
@@ -496,7 +501,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     disableForm(true);
                 }
                 saleHis = sh;
-                txtVouNo.setText(saleHis.getVouNo());
+                txtVouNo.setText(saleHis.getKey().getVouNo());
                 saleManCompleter.setSaleMan(saleHis.getSaleMan());
                 txtDueDate.setDate(saleHis.getCreditTerm());
                 currAutoCompleter.setCurrency(saleHis.getCurrency());
@@ -511,8 +516,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 txtVouPaid.setValue(Util1.getFloat(saleHis.getPaid()));
                 txtVouBalance.setValue(Util1.getFloat(saleHis.getBalance()));
                 txtGrandTotal.setValue(Util1.getFloat(saleHis.getGrandTotal()));
-                locationAutoCompleter.setLocation(saleHis.getLocation());
-                traderAutoCompleter.setTrader(saleHis.getTrader());
+                locationAutoCompleter.setLocation(inventoryRepo.findLocation(saleHis.getLocCode()));
+                traderAutoCompleter.setTrader(inventoryRepo.findTrader(saleHis.getTraderCode()));
                 chkPaid.setSelected(saleHis.getPaid() > 0);
                 focusTable();
                 progress.setIndeterminate(false);
@@ -633,7 +638,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 sd.setQty(od.getQty());
                 sd.setPrice(od.getPrice());
                 sd.setAmount(od.getAmount());
-                sd.setSaleWt(od.getStock().getSaleWeight());
                 sd.setSaleUnit(od.getStock().getSaleUnit());
                 return sd;
             }).forEachOrdered(sd -> {
@@ -1475,7 +1479,11 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
             case "SALE-HISTORY" -> {
                 String vouNo = selectObj.toString();
-                SaleHis sh = inventoryRepo.findSale(vouNo);
+                SaleHisKey key = new SaleHisKey();
+                key.setCompCode(Global.compCode);
+                key.setDeptId(Global.deptId);
+                key.setVouNo(vouNo);
+                SaleHis sh = inventoryRepo.findSale(key);
                 setSaleVoucher(sh);
             }
             case "Select" -> {

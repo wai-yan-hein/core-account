@@ -41,7 +41,7 @@ public class RelationTableModel extends AbstractTableModel {
         UnitRelation rel = listRelation.get(rowIndex);
         return switch (columnIndex) {
             case 0 ->
-                rel.getRelCode();
+                rel.getKey().getRelCode();
             case 1 ->
                 rel.getRelName();
             default ->
@@ -90,7 +90,6 @@ public class RelationTableModel extends AbstractTableModel {
             fireTableRowsInserted(listRelation.size() - 1, listRelation.size() - 1);
         }
     }
-
 
     public void clear() {
         if (listRelation != null) {

@@ -8,15 +8,12 @@ import lombok.Data;
 
 /**
  *
- * @author Lenovo
+ * @author DELL
  */
 @Data
-public class TransferHisDetail {
+public class SaleManKey {
 
-    private String tdCode;
-    private String vouNo;
-    private Stock stock;
-    private Float qty;
-    private StockUnit unit;
-    private Integer uniqueId;
+    private String saleManCode;
+    private String compCode;
+    private Integer deptId;
 }

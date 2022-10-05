@@ -29,8 +29,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ReturnOutTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Description", "Location",
-        "Qty", "Std-Wt", "Unit", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Description", "Relation", "Location",
+        "Qty", "Unit", "Price", "Amount"};
     private JTable parent;
     private List<RetOutHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
@@ -108,18 +108,18 @@ public class ReturnOutTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 0,1,2,5 ->
-                String.class;
-            default ->
+            case 4,6,7 ->
                 Float.class;
+            default ->
+                String.class;
         };
     }
 
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case 4,7 ->
-                ProUtil.isWeightOption();
+            case 2,7 ->
+                false;
             default ->
                 true;
         };
@@ -148,17 +148,22 @@ public class ReturnOutTableModel extends AbstractTableModel {
                     return stockName;
                 }
                 case 2 -> {
+                    if (record.getStock() != null) {
+                        if (record.getStock().getUnitRelation() != null) {
+                            return record.getStock().getUnitRelation().getRelName();
+                        }
+                    }
+                    return null;
+                }
+                case 3 -> {
                     //loc
                     return record.getLocation();
                 }
-                case 3 -> {
+                case 4 -> {
                     //qty
                     return record.getQty();
                 }
-                case 4 -> {
-                    //Std-Wt
-                    return record.getWt();
-                }
+
                 case 5 -> {
                     //unit
                     return record.getUnit();
@@ -186,22 +191,21 @@ public class ReturnOutTableModel extends AbstractTableModel {
         try {
             RetOutHisDetail record = listDetail.get(row);
             switch (column) {
-                case 0 -> {
+                case 0,1 -> {
                     //Code
                     if (value != null) {
                         if (value instanceof Stock stock) {
                             record.setStock(stock);
                             record.setQty(1.0f);
-                            record.setWt(Util1.gerFloatOne(stock.getSaleWeight()));
                             record.setUnit(stock.getSaleUnit());
                             record.setPrice(stock.getPurPrice());
                             record.setLocation(locationAutoCompleter.getLocation());
+                            parent.setColumnSelectionInterval(4, 4);
                             addNewRow();
                         }
                     }
-                    parent.setColumnSelectionInterval(3, 3);
                 }
-                case 2 -> {
+                case 3 -> {
                     //Loc
                     if (value instanceof Location location) {
                         record.setLocation(location);
@@ -209,7 +213,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
                         record.setLocation(null);
                     }
                 }
-                case 3 -> {
+                case 4 -> {
                     //Qty
                     if (Util1.isNumber(value)) {
                         if (Util1.isPositive(Util1.getFloat(value))) {
@@ -223,22 +227,8 @@ public class ReturnOutTableModel extends AbstractTableModel {
                         parent.setColumnSelectionInterval(column, column);
                     }
                     parent.setRowSelectionInterval(row, row);
-                    parent.setColumnSelectionInterval(5, 5);
                 }
-                case 4 -> {
-                    //Std-Wt
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            record.setWt(Util1.getFloat(value));
-                        } else {
-                            showMessageBox("Input value must be positive");
-                            parent.setColumnSelectionInterval(column, column);
-                        }
-                    } else {
-                        showMessageBox("Input value must be positive");
-                        parent.setColumnSelectionInterval(column, column);
-                    }
-                }
+
                 case 5 -> {
                     //Unit
                     if (value != null) {
@@ -264,17 +254,14 @@ public class ReturnOutTableModel extends AbstractTableModel {
                         parent.setColumnSelectionInterval(column, column);
                     }
                 }
-                case 7 -> {
-                    //Amount
-                    if (value != null) {
-                        record.setAmount(Util1.getFloat(value));
-                    }
-                }
+
             }
             if (column != 6) {
-                if (record.getStock() != null && record.getUnit() != null) {
-                    record.setPrice(inventoryRepo.getPurRecentPrice(record.getStock().getKey().getStockCode(),
-                            Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnit().getUnitCode()));
+                if (Util1.getFloat(record.getPrice()) == 0) {
+                    if (record.getStock() != null && record.getUnit() != null) {
+                        record.setPrice(inventoryRepo.getPurRecentPrice(record.getStock().getKey().getStockCode(),
+                                Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnit().getKey().getUnitCode()));
+                    }
                 }
             }
             calculateAmount(record);

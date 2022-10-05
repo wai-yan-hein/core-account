@@ -19,10 +19,8 @@ public class StockInOutDetail implements Serializable {
     private Stock stock;
     private Location location;
     private Float inQty;
-    private Float inWt;
     private StockUnit inUnit;
     private Float outQty;
-    private Float outWt;
     private StockUnit outUnit;
     private String description;
     private String remark;

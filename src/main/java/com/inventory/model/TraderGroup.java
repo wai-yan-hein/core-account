@@ -13,13 +13,13 @@ import lombok.Data;
 @Data
 public class TraderGroup {
 
-    private String groupCode;
-    private String compCode;
+    private TraderGroupKey key;
     private String userCode;
     private String groupName;
 
     public TraderGroup(String groupCode, String groupName) {
-        this.groupCode = groupCode;
+        this.key = new TraderGroupKey();
+        key.setGroupCode(groupCode);
         this.groupName = groupName;
     }
 

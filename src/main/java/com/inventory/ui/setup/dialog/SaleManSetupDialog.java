@@ -23,6 +23,7 @@ import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.SaleMan;
+import com.inventory.model.SaleManKey;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.SaleManTableModel;
 import java.awt.Color;
@@ -135,8 +136,12 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
             saleMan.setPhone(txtPhone.getText());
             saleMan.setAddress(txtAddress.getText());
             if (lblStatus.getText().equals("NEW")) {
+                SaleManKey key = new SaleManKey();
+                key.setCompCode(Global.compCode);
+                key.setDeptId(Global.deptId);
+                key.setSaleManCode(null);
+                saleMan.setKey(key);
                 saleMan.setMacId(Global.macId);
-                saleMan.setCompCode(Global.compCode);
                 saleMan.setCreatedDate(Util1.getTodayDate());
                 saleMan.setCreatedBy(Global.loginUser.getUserCode());
             } else {
@@ -227,7 +232,7 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
         ));
         jScrollPane1.setViewportView(tblSaleMan);
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel1.setFont(Global.lableFont);
         jLabel1.setText("Code");
@@ -302,7 +307,7 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(chkActive)
                                 .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(txtPhone, javax.swing.GroupLayout.DEFAULT_SIZE, 244, Short.MAX_VALUE)
+                            .addComponent(txtPhone, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE)
                             .addComponent(txtName, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtId, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtAddress))))
@@ -339,7 +344,7 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
                     .addComponent(lblStatus)
                     .addComponent(btnClear)
                     .addComponent(btnSave))
-                .addContainerGap(139, Short.MAX_VALUE))
+                .addContainerGap(176, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -349,7 +354,7 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 320, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE)
                     .addComponent(txtFilter))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)

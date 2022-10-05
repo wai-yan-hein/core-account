@@ -29,8 +29,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PurchaseTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Description", "Location",
-        "Qty", "Std-Wt", "Avg-Wt", "Unit", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Description", "Relation", "Location",
+        "Qty", "Avg Qty", "Unit", "Price", "Amount"};
     private JTable parent;
     private List<PurHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
@@ -108,19 +108,19 @@ public class PurchaseTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 0,1,2,6 ->
-                String.class;
-            default ->
+            case 4,5,7,8 ->
                 Float.class;
+            default ->
+                String.class;
         };
     }
 
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case 4,5 ->
+            case 5 ->
                 ProUtil.isWeightOption();
-            case 8 ->
+            case 2,8 ->
                 false;
             default ->
                 true;
@@ -152,24 +152,26 @@ public class PurchaseTableModel extends AbstractTableModel {
                         return stockName;
                     }
                     case 2 -> {
+                        if (record.getStock() != null) {
+                            return record.getStock().getUnitRelation().getRelName();
+                        }
+                        return null;
+                    }
+                    case 3 -> {
                         //loc
                         return record.getLocation();
                     }
-                    case 3 -> {
+                    case 4 -> {
                         //qty
                         return record.getQty();
-                    }
-                    case 4 -> {
-                        //Std-Wt
-                        return record.getStdWeight();
-                    }
-                    case 5 -> {
-                        //avg-Wt
-                        return record.getAvgWeight();
                     }
                     case 6 -> {
                         //unit
                         return record.getPurUnit();
+                    }
+                    case 5 -> {
+                        //avg-qty
+                        return record.getAvgQty();
                     }
                     case 7 -> {
                         //price
@@ -195,23 +197,22 @@ public class PurchaseTableModel extends AbstractTableModel {
         try {
             PurHisDetail record = listDetail.get(row);
             switch (column) {
-                case 0 -> {
+                case 0,1 -> {
                     //Code
                     if (value != null) {
                         if (value instanceof Stock stock) {
                             record.setStock(stock);
                             record.setQty(1.0f);
-                            record.setStdWeight(Util1.gerFloatOne(stock.getPurWeight()));
-                            record.setAvgWeight(Util1.gerFloatOne(stock.getPurWeight()));
+                            record.setAvgQty(1.0f);
                             StockUnit purUnit = stock.getPurUnit();
                             record.setPurUnit(purUnit);
                             record.setLocation(locationAutoCompleter.getLocation());
                             addNewRow();
                         }
                     }
-                    parent.setColumnSelectionInterval(3, 3);
+                    parent.setColumnSelectionInterval(4, 4);
                 }
-                case 2 -> {
+                case 3 -> {
                     //Loc
                     if (value instanceof Location location) {
                         record.setLocation(location);
@@ -219,11 +220,21 @@ public class PurchaseTableModel extends AbstractTableModel {
                         record.setLocation(null);
                     }
                 }
-                case 3 -> {
+                case 4 -> {
                     //Qty
                     if (Util1.isNumber(value)) {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             record.setQty(Util1.getFloat(value));
+                            if (Util1.getFloat(record.getAvgQty()) == 0) {
+                                record.setAvgQty(record.getQty());
+                            }
+                            if (record.getPurUnit() != null) {
+                                if (ProUtil.isWeightOption()) {
+                                    parent.setColumnSelectionInterval(5, 5);
+                                } else {
+                                    parent.setColumnSelectionInterval(7, 7);
+                                }
+                            }
                         } else {
                             showMessageBox("Input value must be positive");
                             parent.setColumnSelectionInterval(column, column);
@@ -233,37 +244,23 @@ public class PurchaseTableModel extends AbstractTableModel {
                         parent.setColumnSelectionInterval(column, column);
                     }
                     parent.setRowSelectionInterval(row, row);
-                    parent.setColumnSelectionInterval(5, 5);
                 }
-                case 4 -> {
-                    //Std-Wt
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            record.setStdWeight(Util1.getFloat(value));
-                        } else {
-                            showMessageBox("Input value must be positive");
-                            parent.setColumnSelectionInterval(column, column);
-                        }
-                    } else {
-                        showMessageBox("Input value must be positive");
-                        parent.setColumnSelectionInterval(column, column);
-                    }
-                }
+
                 case 5 -> {
-                    //avg-Wt
+                    //avg-Qty
                     if (Util1.isNumber(value)) {
                         if (Util1.isPositive(Util1.getFloat(value))) {
-                            record.setAvgWeight(Util1.getFloat(value));
+                            record.setAvgQty(Util1.getFloat(value));
                         } else {
                             showMessageBox("Input value must be positive");
                             parent.setColumnSelectionInterval(column, column);
                         }
                     } else {
-                        showMessageBox("Input value must be positive");
+                        showMessageBox("Input value must be number.");
                         parent.setColumnSelectionInterval(column, column);
                     }
                     parent.setRowSelectionInterval(row, row);
-                    parent.setColumnSelectionInterval(7, 7);
+                    parent.setColumnSelectionInterval(6, 6);
                 }
 
                 case 6 -> {
@@ -273,7 +270,7 @@ public class PurchaseTableModel extends AbstractTableModel {
                             record.setPurUnit(stockUnit);
                         }
                     }
-                    parent.setColumnSelectionInterval(6, 6);
+                    parent.setColumnSelectionInterval(7, 7);
                 }
                 case 7 -> {
                     //Pur Price
@@ -299,9 +296,11 @@ public class PurchaseTableModel extends AbstractTableModel {
                 }
             }
             if (column != 7) {
-                if (record.getStock() != null && record.getPurUnit() != null) {
-                    record.setPrice(inventoryRepo.getPurRecentPrice(record.getStock().getKey().getStockCode(),
-                            Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getPurUnit().getUnitCode()));
+                if (Util1.getFloat(record.getPrice()) == 0) {
+                    if (record.getStock() != null && record.getPurUnit() != null) {
+                        record.setPrice(inventoryRepo.getPurRecentPrice(record.getStock().getKey().getStockCode(),
+                                Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getPurUnit().getKey().getUnitCode()));
+                    }
                 }
             }
             calculateAmount(record);
@@ -347,10 +346,9 @@ public class PurchaseTableModel extends AbstractTableModel {
 
     private void calculateAmount(PurHisDetail pur) {
         float price = Util1.getFloat(pur.getPrice());
-        float avgWt = Util1.getFloat(pur.getAvgWeight());
-        float stdWt = Util1.getFloat(pur.getStdWeight());
+        float avgQty = Util1.getFloat(pur.getAvgQty());
         float qty = Util1.getFloat(pur.getQty());
-        price = (avgWt / stdWt) * price;
+        price = (avgQty / qty) * price;
         if (pur.getStock() != null) {
             float amount = qty * price;
             pur.setPrice(price);

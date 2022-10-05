@@ -8,7 +8,6 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.model.OptionModel;
 import com.inventory.model.UnitRelation;
 import com.inventory.ui.setup.dialog.OptionDialog;
 import com.inventory.ui.setup.dialog.common.RelationTableModel;
@@ -69,13 +68,6 @@ public final class UnitRelationAutoCompleter implements KeyListener {
         this.observer = observer;
     }
 
-    private void initOption() {
-        listOption.clear();
-        listRelation.forEach(t -> {
-            listOption.add(t.getRelCode());
-        });
-    }
-
     public List<String> getListOption() {
         return listOption;
     }
@@ -93,17 +85,6 @@ public final class UnitRelationAutoCompleter implements KeyListener {
         this.editor = editor;
         this.listRelation = list;
         this.custom = custom;
-        initOption();
-        if (filter) {
-            UnitRelation c = new UnitRelation("-", "All");
-            list = new ArrayList<>(list);
-            list.add(0, c);
-            setRelation(c);
-        }
-        if (custom) {
-            list = new ArrayList<>(list);
-            list.add(1, new UnitRelation("C", "Custom"));
-        }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
@@ -193,33 +174,6 @@ public final class UnitRelationAutoCompleter implements KeyListener {
             relation = relationTableModel.getRelation(table.convertRowIndexToModel(
                     table.getSelectedRow()));
             textComp.setText(relation.getRelName());
-            if (custom) {
-                switch (relation.getRelCode()) {
-                    case "C" -> {
-                        optionDialog = new OptionDialog(Global.parentForm, "Stock UnitRelation");
-                        List<OptionModel> listOP = new ArrayList<>();
-                        listRelation.forEach(t -> {
-                            listOP.add(new OptionModel(t.getRelCode(), t.getRelName()));
-                        });
-                        optionDialog.setOptionList(listOP);
-                        optionDialog.setLocationRelativeTo(null);
-                        optionDialog.setVisible(true);
-                        if (optionDialog.isSelect()) {
-                            listOption = optionDialog.getOptionList();
-                        }
-                        //open
-                    }
-                    case "-" ->
-                        initOption();
-                    default -> {
-                        if (observer != null) {
-                            observer.selected("SC", relation.getRelCode());
-                        }
-                        listOption.clear();
-                        listOption.add(relation.getRelCode());
-                    }
-                }
-            }
         }
 
         popup.setVisible(false);

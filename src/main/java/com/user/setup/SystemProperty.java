@@ -237,10 +237,15 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         printerAutoCompleter.setText(hmProperty.get("printer.name"));
         cusCompleter = new TraderAutoCompleter(txtCustomer, inventoryRepo, null, false, "CUS");
         cusCompleter.setObserver(this);
-        cusCompleter.setTrader(inventoryRepo.findTrader(new TraderKey(hmProperty.get("default.customer"), Global.compCode)));
+        TraderKey key = new TraderKey();
+        key.setCode(hmProperty.get("default.customer"));
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        cusCompleter.setTrader(inventoryRepo.findTrader(key));
         supCompleter = new TraderAutoCompleter(txtSupplier, inventoryRepo, null, false, "SUP");
         supCompleter.setObserver(this);
-        supCompleter.setTrader(inventoryRepo.findTrader(new TraderKey(hmProperty.get("default.supplier"), Global.compCode)));
+        key.setCode(hmProperty.get("default.supplier"));
+        supCompleter.setTrader(inventoryRepo.findTrader(key));
         locCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, false, false);
         locCompleter.setObserver(this);
         locCompleter.setLocation(inventoryRepo.findLocation(hmProperty.get("default.location")));

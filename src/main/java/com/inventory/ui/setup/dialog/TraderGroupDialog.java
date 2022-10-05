@@ -9,6 +9,7 @@ import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.inventory.model.TraderGroup;
+import com.inventory.model.TraderGroupKey;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.common.TraderGroupTableModel;
 import java.awt.Color;
@@ -151,7 +152,11 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
             group.setUserCode(txtUserCode.getText());
             group.setGroupName(txtName.getText());
             if (lblStatus.getText().equals("NEW")) {
-                group.setCompCode(Global.compCode);
+                TraderGroupKey key = new TraderGroupKey();
+                key.setCompCode(Global.compCode);
+                key.setDeptId(Global.deptId);
+                key.setGroupCode(null);
+                group.setKey(key);
             }
         }
         return status;

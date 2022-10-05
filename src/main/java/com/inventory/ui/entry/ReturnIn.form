@@ -40,7 +40,7 @@
               <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
               <Component id="panelSale" min="-2" max="-2" attributes="0"/>
               <EmptySpace min="-2" max="-2" attributes="0"/>
-              <Component id="jScrollPane1" pref="341" max="32767" attributes="0"/>
+              <Component id="jScrollPane1" pref="343" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                   <Component id="jPanel3" max="32767" attributes="0"/>
@@ -55,10 +55,8 @@
     <Container class="javax.swing.JPanel" name="panelSale">
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-          <Border info="org.netbeans.modules.form.compat2.border.EtchedBorderInfo">
-            <EtchetBorder>
-              <Color PropertyName="shadow" blue="c0" green="c0" id="lightGray" palette="1" red="c0" type="palette"/>
-            </EtchetBorder>
+          <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
+            <TitledBorder/>
           </Border>
         </Property>
       </Properties>
@@ -76,7 +74,7 @@
                           </Group>
                           <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="1" attributes="0">
-                              <Component id="txtVouDate" pref="448" max="32767" attributes="0"/>
+                              <Component id="txtVouDate" pref="449" max="32767" attributes="0"/>
                               <Component id="txtVouNo" max="32767" attributes="0"/>
                           </Group>
                       </Group>
@@ -103,7 +101,7 @@
                       </Group>
                       <Group type="102" attributes="0">
                           <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
-                          <Component id="txtRemark" pref="406" max="32767" attributes="0"/>
+                          <Component id="txtRemark" pref="407" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace min="-2" max="-2" attributes="0"/>

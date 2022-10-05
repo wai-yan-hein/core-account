@@ -80,7 +80,7 @@ public final class StockTypeAutoCompleter implements KeyListener {
     private void initOption() {
         listOption.clear();
         listStockType.forEach(t -> {
-            listOption.add(t.getStockTypeCode());
+            listOption.add(t.getKey().getStockTypeCode());
         });
     }
 
@@ -192,12 +192,12 @@ public final class StockTypeAutoCompleter implements KeyListener {
                     table.getSelectedRow()));
             textComp.setText(type.getStockTypeName());
             if (custom) {
-                switch (type.getStockTypeCode()) {
+                switch (type.getKey().getStockTypeCode()) {
                     case "C" -> {
                         optionDialog = new OptionDialog(Global.parentForm, "Stock Type");
                         List<OptionModel> listOP = new ArrayList<>();
                         listStockType.forEach(t -> {
-                            listOP.add(new OptionModel(t.getStockTypeCode(), t.getStockTypeName()));
+                            listOP.add(new OptionModel(t.getKey().getStockTypeCode(), t.getStockTypeName()));
                         });
                         optionDialog.setOptionList(listOP);
                         optionDialog.setLocationRelativeTo(null);
@@ -212,7 +212,7 @@ public final class StockTypeAutoCompleter implements KeyListener {
                     default -> {
 
                         listOption.clear();
-                        listOption.add(type.getStockTypeCode());
+                        listOption.add(type.getKey().getStockTypeCode());
                     }
                 }
 
@@ -222,7 +222,7 @@ public final class StockTypeAutoCompleter implements KeyListener {
                 editor.stopCellEditing();
             }
             if (observer != null) {
-                observer.selected("ST", type.getStockTypeCode());
+                observer.selected("ST", type.getKey().getStockTypeCode());
             }
         }
     }
