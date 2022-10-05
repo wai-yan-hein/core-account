@@ -115,19 +115,19 @@ public class StockInOutTableModel extends AbstractTableModel {
                     return io.getLocName();
                 }
                 case 3 -> {
-                    return io.getInQty();
+                    return Util1.getFloat(io.getInQty()) == 0 ? null : Util1.getFloat(io.getInQty());
                 }
                 case 4 -> {
                     return io.getInUnitCode();
                 }
                 case 5 -> {
-                    return io.getOutQty();
+                    return Util1.getFloat(io.getOutQty()) == 0 ? null : Util1.getFloat(io.getOutQty());
                 }
                 case 6 -> {
                     return io.getOutUnitCode();
                 }
                 case 7 -> {
-                    return io.getCostPrice();
+                    return Util1.getFloat(io.getCostPrice()) == 0 ? null : Util1.getFloat(io.getCostPrice());
                 }
                 case 8 -> {
                     return Util1.getFloat(io.getCostPrice()) * (Util1.getFloat(io.getInQty()) + Util1.getFloat(io.getOutQty()));
@@ -165,9 +165,12 @@ public class StockInOutTableModel extends AbstractTableModel {
                     case 0,1 -> {
                         if (value instanceof Stock s) {
                             io.setStockCode(s.getKey().getStockCode());
+                            io.setStockName(s.getStockName());
                             io.setUserCode(s.getUserCode());
-                            io.setRelation(s.getUnitRelation().getRelName());
+                            io.setRelation(s.getRelName());
                             io.setCostPrice(0.0f);
+                            io.setInUnitCode(s.getPurUnitCode());
+                            io.setOutUnitCode(s.getPurUnitCode());
                             Location l = inventoryRepo.getDefaultLocation();
                             if (l != null) {
                                 io.setLocCode(l.getKey().getLocCode());
@@ -236,7 +239,6 @@ public class StockInOutTableModel extends AbstractTableModel {
                     }
                 }
             }
-
             observer.selected("CAL-TOTAL", "CAL-TOTAL");
             fireTableRowsUpdated(row, row);
             parent.requestFocus();
@@ -262,7 +264,7 @@ public class StockInOutTableModel extends AbstractTableModel {
                     addStockIO(io);
                 });
                 iod.setInQty(qty);
-                iod.setInUnitCode(s.getPurUnit().getKey().getUnitCode());
+                iod.setInUnitCode(s.getPurUnitCode());
             }
         }
     }
@@ -283,6 +285,7 @@ public class StockInOutTableModel extends AbstractTableModel {
     public boolean isValidEntry() {
         boolean status = true;
         for (StockInOutDetail od : listStock) {
+            od.setCostPrice(Util1.getFloat(od.getCostPrice()));
             if (od.getStockCode() != null) {
                 if (od.getLocCode() == null) {
                     status = false;

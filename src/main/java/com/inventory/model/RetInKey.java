@@ -5,7 +5,6 @@
  */
 package com.inventory.model;
 
-import java.io.Serializable;
 import lombok.Data;
 
 /**
@@ -13,16 +12,19 @@ import lombok.Data;
  * @author lenovo
  */
 @Data
-public class RetInKey implements Serializable {
+public class RetInKey {
 
     private String rdCode;
     private String vouNo;
+    private Integer depId;
 
     public RetInKey() {
     }
 
-    public RetInKey(String rdCode, String vouNo) {
+    public RetInKey(String rdCode, String vouNo, Integer depId) {
         this.rdCode = rdCode;
         this.vouNo = vouNo;
+        this.depId = depId;
     }
+
 }

@@ -16,12 +16,19 @@ import lombok.Data;
 public class SaleHisDetail implements java.io.Serializable {
 
     private SaleDetailKey sdKey;
-    private Stock stock;
+    private String stockCode;
+    private String userCode;
+    private String stockName;
+    private String groupName;
+    private String brandName;
+    private String catName;
+    private String relName;
     private Date expDate;
     private Float qty;
-    private StockUnit saleUnit;
+    private String unitCode;
     private Float price;
     private Float amount;
-    private Location location;
+    private String locCode;
+    private String locName;
     private Integer uniqueId;
 }

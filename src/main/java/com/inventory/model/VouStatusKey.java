@@ -15,5 +15,5 @@ public class VouStatusKey {
 
     private String code;
     private String compCode;
-    private Department department;
+    private Integer deptId;
 }

@@ -73,7 +73,7 @@ public final class RegionAutoCompleter implements KeyListener {
     private void initOption() {
         listOption.clear();
         listRegion.forEach(t -> {
-            listOption.add(t.getRegCode());
+            listOption.add(t.getKey().getRegCode());
         });
     }
 
@@ -193,12 +193,12 @@ public final class RegionAutoCompleter implements KeyListener {
                     table.getSelectedRow()));
             textComp.setText(region.getRegionName());
             if (custom) {
-                switch (region.getRegCode()) {
+                switch (region.getKey().getRegCode()) {
                     case "C" -> {
                         optionDialog = new OptionDialog(Global.parentForm, "Region");
                         List<OptionModel> listOP = new ArrayList<>();
                         listRegion.forEach(t -> {
-                            listOP.add(new OptionModel(t.getRegCode(), t.getRegionName()));
+                            listOP.add(new OptionModel(t.getKey().getRegCode(), t.getRegionName()));
                         });
                         optionDialog.setOptionList(listOP);
                         optionDialog.setLocationRelativeTo(null);
@@ -212,13 +212,13 @@ public final class RegionAutoCompleter implements KeyListener {
                         initOption();
                     default -> {
                         listOption.clear();
-                        listOption.add(region.getRegCode());
+                        listOption.add(region.getKey().getRegCode());
                     }
                 }
             }
             if (editor == null) {
                 if (selectionObserver != null) {
-                    selectionObserver.selected("RegionList", region.getRegCode());
+                    selectionObserver.selected("RegionList", region.getKey().getRegCode());
                 }
             }
         }

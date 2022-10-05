@@ -137,14 +137,14 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtCusName.setText(supplier.getTraderName());
         txtCusEmail.setText(supplier.getEmail());
         txtCusPhone.setText(supplier.getPhone());
-        regionAutoCompleter.setRegion(supplier.getRegion());
+        regionAutoCompleter.setRegion(inventoryRepo.findRegion(supplier.getRegCode()));
         txtCusAddress.setText(supplier.getAddress());
         chkActive.setSelected(supplier.isActive());
         chkCD.setSelected(supplier.isCashDown());
         chkMulti.setSelected(supplier.isMulti());
         txtCusName.requestFocus();
         lblStatus.setText("EDIT");
-        traderGroupAutoCompleter.setGroup(supplier.getGroup());
+        traderGroupAutoCompleter.setGroup(inventoryRepo.findTraderGroup(supplier.getGroupCode()));
     }
 
     private boolean isValidEntry() {
@@ -159,13 +159,18 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
             supplier.setEmail(txtCusEmail.getText());
             supplier.setAddress(txtCusAddress.getText());
             supplier.setActive(chkActive.isSelected());
-            supplier.setUpdatedDate(Util1.getTodayDate());
-            supplier.setRegion(regionAutoCompleter.getRegion());
+            Region r = regionAutoCompleter.getRegion();
+            if (r != null) {
+                supplier.setRegCode(r.getKey().getRegCode());
+            }
             supplier.setType("SUP");
             supplier.setCashDown(chkCD.isSelected());
             supplier.setMulti(chkMulti.isSelected());
-            supplier.setGroup(traderGroupAutoCompleter.getGroup());
-            if (lblStatus.getText().equals("NEW")) {
+            TraderGroup t = traderGroupAutoCompleter.getGroup();
+            if (t != null) {
+                supplier.setGroupCode(t.getKey().getGroupCode());
+
+            }            if (lblStatus.getText().equals("NEW")) {
                 supplier.setMacId(Global.macId);
                 supplier.setCreatedBy(Global.loginUser.getUserCode());
                 supplier.setCreatedDate(Util1.getTodayDate());

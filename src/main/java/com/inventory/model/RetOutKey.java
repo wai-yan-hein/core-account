@@ -17,12 +17,16 @@ public class RetOutKey implements Serializable {
 
     private String rdCode;
     private String vouNo;
+    private Integer deptId;
 
     public RetOutKey() {
     }
 
-    public RetOutKey(String rdCode, String vouNo) {
+    public RetOutKey(String rdCode, String vouNo, Integer deptId) {
         this.rdCode = rdCode;
         this.vouNo = vouNo;
+        this.deptId = deptId;
     }
+
+   
 }

@@ -10,6 +10,7 @@ import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.Region;
+import com.inventory.model.RegionKey;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.RegionTableModel;
 import java.awt.Color;
@@ -50,7 +51,6 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
     public void setListRegion(List<Region> listRegion) {
         this.listRegion = listRegion;
     }
-
 
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
@@ -145,8 +145,6 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
         txtUserCode.requestFocus();
     }
 
-  
-
     private boolean isValidEntry() {
         boolean status = true;
         if (txtName.getText().isEmpty()) {
@@ -157,7 +155,10 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
             region.setUserCode(txtUserCode.getText());
             region.setRegionName(txtName.getText());
             if (lblStatus.getText().equals("NEW")) {
-                region.setCompCode(Global.compCode);
+                RegionKey key = new RegionKey();
+                key.setCompCode(Global.compCode);
+                key.setDeptId(Global.deptId);
+                key.setRegCode(null);
                 region.setCreatedBy(Global.loginUser.getUserCode());
                 region.setCreatedDate(Util1.getTodayDate());
                 region.setMacId(Global.macId);

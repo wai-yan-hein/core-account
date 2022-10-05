@@ -149,7 +149,7 @@ public class StockImportDialog extends javax.swing.JDialog {
                     t.setStockName(getZawgyiText(stockName));
                     t.setSalePriceN(Util1.getFloat(priceA));
                     t.setSalePriceA(Util1.getFloat(priceB));
-                    t.setStockType(hm.get(typeCode));
+                    t.setTypeCode(typeCode);
                     t.setCompCode(Global.compCode);
                     t.setActive(true);
                     t.setCreatedDate(Util1.getTodayDate());

@@ -135,31 +135,27 @@ public class PurchaseTableModel extends AbstractTableModel {
                 switch (column) {
                     case 0 -> {
                         //code
-                        return record.getStock() == null ? null : record.getStock().getUserCode();
+                        return record.getUserCode() == null ? record.getStockCode() : record.getUserCode();
                     }
                     case 1 -> {
                         //Name
                         String stockName = null;
-                        if (record.getStock() != null) {
-                            stockName = record.getStock().getStockName();
+                        if (record.getStockCode() != null) {
+                            stockName = record.getStockName();
                             if (ProUtil.isStockNameWithCategory()) {
-                                if (record.getStock().getCategory() != null) {
-                                    stockName = String.format("%s (%s)", stockName, record.getStock().getCategory().getCatName());
+                                if (record.getCatName() != null) {
+                                    stockName = String.format("%s (%s)", stockName, record.getCatName());
                                 }
                             }
                         }
-                        //Name
                         return stockName;
                     }
                     case 2 -> {
-                        if (record.getStock() != null) {
-                            return record.getStock().getUnitRelation().getRelName();
-                        }
-                        return null;
+                        return record.getRelName();
                     }
                     case 3 -> {
                         //loc
-                        return record.getLocation();
+                        return record.getLocName();
                     }
                     case 4 -> {
                         //qty
@@ -167,7 +163,7 @@ public class PurchaseTableModel extends AbstractTableModel {
                     }
                     case 6 -> {
                         //unit
-                        return record.getPurUnit();
+                        return record.getUnitCode();
                     }
                     case 5 -> {
                         //avg-qty
@@ -200,13 +196,14 @@ public class PurchaseTableModel extends AbstractTableModel {
                 case 0,1 -> {
                     //Code
                     if (value != null) {
-                        if (value instanceof Stock stock) {
-                            record.setStock(stock);
+                        if (value instanceof Stock s) {
+                            record.setStockCode(s.getKey().getStockCode());
+                            record.setStockName(s.getStockName());
+                            record.setUserCode(s.getUserCode());
+                            record.setRelName(s.getRelName());
                             record.setQty(1.0f);
                             record.setAvgQty(1.0f);
-                            StockUnit purUnit = stock.getPurUnit();
-                            record.setPurUnit(purUnit);
-                            record.setLocation(locationAutoCompleter.getLocation());
+                            record.setUnitCode(s.getPurUnitCode());
                             addNewRow();
                         }
                     }
@@ -214,10 +211,9 @@ public class PurchaseTableModel extends AbstractTableModel {
                 }
                 case 3 -> {
                     //Loc
-                    if (value instanceof Location location) {
-                        record.setLocation(location);
-                    } else {
-                        record.setLocation(null);
+                    if (value instanceof Location l) {
+                        record.setLocCode(l.getKey().getLocCode());
+                        record.setLocName(l.getLocName());
                     }
                 }
                 case 4 -> {
@@ -225,10 +221,8 @@ public class PurchaseTableModel extends AbstractTableModel {
                     if (Util1.isNumber(value)) {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             record.setQty(Util1.getFloat(value));
-                            if (Util1.getFloat(record.getAvgQty()) == 0) {
-                                record.setAvgQty(record.getQty());
-                            }
-                            if (record.getPurUnit() != null) {
+                            record.setAvgQty(record.getQty());
+                            if (record.getUnitCode() != null) {
                                 if (ProUtil.isWeightOption()) {
                                     parent.setColumnSelectionInterval(5, 5);
                                 } else {
@@ -266,8 +260,8 @@ public class PurchaseTableModel extends AbstractTableModel {
                 case 6 -> {
                     //Unit
                     if (value != null) {
-                        if (value instanceof StockUnit stockUnit) {
-                            record.setPurUnit(stockUnit);
+                        if (value instanceof StockUnit u) {
+                            record.setUnitCode(u.getKey().getUnitCode());
                         }
                     }
                     parent.setColumnSelectionInterval(7, 7);
@@ -297,13 +291,18 @@ public class PurchaseTableModel extends AbstractTableModel {
             }
             if (column != 7) {
                 if (Util1.getFloat(record.getPrice()) == 0) {
-                    if (record.getStock() != null && record.getPurUnit() != null) {
-                        record.setPrice(inventoryRepo.getPurRecentPrice(record.getStock().getKey().getStockCode(),
-                                Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getPurUnit().getKey().getUnitCode()));
+                    if (record.getStockCode() != null && record.getUnitCode() != null) {
+                        record.setPrice(inventoryRepo.getPurRecentPrice(record.getStockCode(),
+                                Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnitCode()));
                     }
                 }
             }
             calculateAmount(record);
+            Location l = locationAutoCompleter.getLocation();
+            if (l != null) {
+                record.setLocCode(l.getKey().getLocCode());
+                record.setLocName(l.getLocName());
+            }
             fireTableRowsUpdated(row, row);
             selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
             parent.requestFocusInWindow();
@@ -317,7 +316,6 @@ public class PurchaseTableModel extends AbstractTableModel {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
                 PurHisDetail pd = new PurHisDetail();
-                pd.setLocation(locationAutoCompleter.getLocation());
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }
@@ -328,7 +326,7 @@ public class PurchaseTableModel extends AbstractTableModel {
         boolean status = false;
         if (listDetail.size() >= 1) {
             PurHisDetail get = listDetail.get(listDetail.size() - 1);
-            if (get.getStock() == null) {
+            if (get.getStockCode() == null) {
                 status = true;
             }
         }
@@ -347,10 +345,8 @@ public class PurchaseTableModel extends AbstractTableModel {
     private void calculateAmount(PurHisDetail pur) {
         float price = Util1.getFloat(pur.getPrice());
         float avgQty = Util1.getFloat(pur.getAvgQty());
-        float qty = Util1.getFloat(pur.getQty());
-        price = (avgQty / qty) * price;
-        if (pur.getStock() != null) {
-            float amount = qty * price;
+        if (pur.getStockCode() != null) {
+            float amount = avgQty * price;
             pur.setPrice(price);
             pur.setAmount(Util1.getFloat(Math.round(amount)));
         }
@@ -363,18 +359,18 @@ public class PurchaseTableModel extends AbstractTableModel {
     public boolean isValidEntry() {
         boolean status = true;
         for (PurHisDetail sdh : listDetail) {
-            if (sdh.getStock() != null) {
+            if (sdh.getStockCode() != null) {
                 if (Util1.getFloat(sdh.getAmount()) <= 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
                             "Invalid.", JOptionPane.ERROR_MESSAGE);
                     status = false;
                     parent.requestFocus();
                     break;
-                } else if (sdh.getLocation() == null) {
+                } else if (sdh.getLocCode() == null) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Location.");
                     status = false;
                     parent.requestFocus();
-                } else if (sdh.getPurUnit() == null) {
+                } else if (sdh.getUnitCode() == null) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Purchase Unit.");
                     status = false;
                     parent.requestFocus();

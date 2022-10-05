@@ -16,12 +16,19 @@ import lombok.Data;
 public class PurHisDetail implements Serializable {
 
     private PurDetailKey pdKey;
-    private Stock stock;
+    private String stockCode;
+    private String userCode;
+    private String stockName;
+    private String groupName;
+    private String brandName;
+    private String catName;
+    private String relName;
     private Float avgQty;
     private Float qty;
-    private StockUnit purUnit;
+    private String unitCode;
     private Float price;
     private Float amount;
-    private Location location;
+    private String locCode;
+    private String locName;
     private Integer uniqueId;
 }

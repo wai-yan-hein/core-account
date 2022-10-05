@@ -89,7 +89,7 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
         initCombo();
         initTableVoucher();
         setTodayDate();
-        //search();
+        search();
     }
 
     private void initCombo() {

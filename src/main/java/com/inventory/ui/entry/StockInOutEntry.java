@@ -22,6 +22,7 @@ import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.VouStatusAutoCompleter;
 import com.inventory.model.Location;
+import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
 import com.inventory.model.StockUnit;
@@ -252,15 +253,18 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             status = false;
             JOptionPane.showMessageDialog(this, "No records.");
         } else {
-            io.setVouNo(txtVou.getText());
             io.setDescription(txtDesp.getText());
             io.setRemark(txtRemark.getText());
             io.setVouDate(txtDate.getDate());
-            io.setVouStatus(vouStatusAutoCompleter.getVouStatus());
+            io.setVouStatusCode(vouStatusAutoCompleter.getVouStatus().getKey().getCode());
             if (lblStatus.getText().equals("NEW")) {
+                StockIOKey key = new StockIOKey();
+                key.setCompCode(Global.compCode);
+                key.setDeptId(Global.deptId);
+                key.setVouNo(null);
+                io.setKey(key);
                 io.setCreatedBy(Global.loginUser.getUserCode());
                 io.setCreatedDate(Util1.getTodayDate());
-                io.setCompCode(Global.compCode);
                 io.setMacId(Global.macId);
                 io.setDeleted(Boolean.FALSE);
             } else {
@@ -271,43 +275,45 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     }
 
     private void setVoucher(StockInOut s) {
-        log.info("setVoucher");
-        progress.setIndeterminate(true);
-        io = s;
-        String vouNo = io.getVouNo();
-        Mono<ResponseEntity<List<StockInOutDetail>>> result = inventoryApi.get()
-                .uri(builder -> builder.path("/stockio/get-stockio-detail")
-                .queryParam("vouNo", vouNo)
-                .build())
-                .retrieve().toEntityList(StockInOutDetail.class);
-        result.subscribe((t) -> {
-            outTableModel.setListStock(t.getBody());
-            outTableModel.addNewRow();
-            txtVou.setText(io.getVouNo());
-            txtDate.setDate(Util1.toDateFormat(io.getVouDate(), "dd/MM/yyyy"));
-            txtRemark.setText(io.getRemark());
-            txtDesp.setText(io.getDescription());
-            vouStatusAutoCompleter.setVoucher(io.getVouStatus());
-            if (Util1.getBoolean(io.getDeleted())) {
-                lblStatus.setText("DELETED");
-                lblStatus.setForeground(Color.red);
-                disableForm(false);
-            } else {
-                lblStatus.setText("EDIT");
-                lblStatus.setForeground(Color.blue);
-                disableForm(true);
-            }
-            calTotalAmt();
-            int row = tblStock.getRowCount();
-            tblStock.setColumnSelectionInterval(0, 0);
-            tblStock.setRowSelectionInterval(row - 1, row - 1);
-            tblStock.requestFocus();
-            progress.setIndeterminate(false);
-        }, (e) -> {
-            progress.setIndeterminate(false);
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
-
+        if (s != null) {
+            progress.setIndeterminate(true);
+            io = s;
+            vouStatusAutoCompleter.setVoucher(inventoryRepo.findVouStatus(io.getVouStatusCode()));
+            String vouNo = io.getKey().getVouNo();
+            Mono<ResponseEntity<List<StockInOutDetail>>> result = inventoryApi.get()
+                    .uri(builder -> builder.path("/stockio/get-stockio-detail")
+                    .queryParam("vouNo", vouNo)
+                    .queryParam("compCode", Global.compCode)
+                    .queryParam("deptId", Global.deptId)
+                    .build())
+                    .retrieve().toEntityList(StockInOutDetail.class);
+            result.subscribe((t) -> {
+                outTableModel.setListStock(t.getBody());
+                outTableModel.addNewRow();
+                txtVou.setText(vouNo);
+                txtDate.setDate(Util1.toDateFormat(io.getVouDate(), "dd/MM/yyyy"));
+                txtRemark.setText(io.getRemark());
+                txtDesp.setText(io.getDescription());
+                if (Util1.getBoolean(io.getDeleted())) {
+                    lblStatus.setText("DELETED");
+                    lblStatus.setForeground(Color.red);
+                    disableForm(false);
+                } else {
+                    lblStatus.setText("EDIT");
+                    lblStatus.setForeground(Color.blue);
+                    disableForm(true);
+                }
+                calTotalAmt();
+                int row = tblStock.getRowCount();
+                tblStock.setColumnSelectionInterval(0, 0);
+                tblStock.setRowSelectionInterval(row - 1, row - 1);
+                tblStock.requestFocus();
+                progress.setIndeterminate(false);
+            }, (e) -> {
+                progress.setIndeterminate(false);
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            });
+        }
     }
 
     private void disableForm(boolean status) {

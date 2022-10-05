@@ -16,10 +16,10 @@ import lombok.Data;
 @Data
 public class RetInHis implements java.io.Serializable {
 
-    private String vouNo;
-    private Trader trader;
+    private RetInHisKey key;
+    private String traderCode;
     private Date vouDate;
-    private Location location;
+    private String locCode;
     private Boolean deleted;
     private Float vouTotal;
     private Float paid;
@@ -31,11 +31,10 @@ public class RetInHis implements java.io.Serializable {
     private Date updatedDate;
     private String remark;
     private Integer session;
-    private Currency currency;
+    private String curCode;
     private Float discP;
     private String intgUpdStatus;
     private Integer macId;
-    private String compCode;
     private String status = "STATUS";
     private List<RetInHisDetail> listRD;
     private List<String> listDel;

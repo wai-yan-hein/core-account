@@ -14,14 +14,20 @@ import lombok.Data;
 public class RetInHisDetail implements java.io.Serializable {
 
     private RetInKey riKey;
-    private Stock stock;
+    private String stockCode;
+    private String userCode;
+    private String stockName;
+    private String groupName;
+    private String brandName;
+    private String catName;
+    private String relName;
     private Float qty;
     private Float avgQty;
-    private StockUnit unit;
-    private Float costPrice;
+    private String unitCode;
     private Float price;
     private Float amount;
-    private Location location;
+    private String locCode;
+    private String locName;
     private Integer uniqueId;
 
 }

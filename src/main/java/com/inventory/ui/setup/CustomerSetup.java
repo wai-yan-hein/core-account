@@ -146,7 +146,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtCusName.setText(customer.getTraderName());
         txtCusEmail.setText(customer.getEmail());
         txtCusPhone.setText(customer.getPhone());
-        regionAutoCompleter.setRegion(customer.getRegion());
+        regionAutoCompleter.setRegion(inventoryRepo.findRegion(customer.getRegCode()));
         txtCusAddress.setText(customer.getAddress());
         chkActive.setSelected(customer.isActive());
         txtCreditLimit.setText(Util1.getString(cus.getCreditLimit()));
@@ -155,7 +155,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtPrice.setText(customer.getPriceType());
         txtCusName.requestFocus();
         lblStatus.setText("EDIT");
-        traderGroupAutoCompleter.setGroup(customer.getGroup());
+        traderGroupAutoCompleter.setGroup(inventoryRepo.findTraderGroup(customer.getGroupCode()));
     }
 
     private boolean isValidEntry() {
@@ -175,12 +175,19 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
             customer.setUpdatedDate(Util1.getTodayDate());
             customer.setCreditLimit(Util1.getInteger(txtCreditLimit.getText()));
             customer.setCreditDays(Util1.getInteger(txtCreditTerm.getText()));
-            customer.setRegion(regionAutoCompleter.getRegion());
+            Region r = regionAutoCompleter.getRegion();
+            if (r != null) {
+                customer.setRegCode(r.getKey().getRegCode());
+            }
             customer.setType("CUS");
             customer.setCashDown(false);
             customer.setMulti(chkMulti.isSelected());
             customer.setPriceType(Util1.isNull(txtPrice.getText(), "N"));
-            customer.setGroup(traderGroupAutoCompleter.getGroup());
+            TraderGroup t = traderGroupAutoCompleter.getGroup();
+            if (t != null) {
+                customer.setGroupCode(t.getKey().getGroupCode());
+
+            }
             if (lblStatus.getText().equals("NEW")) {
                 customer.setMacId(Global.macId);
                 customer.setCreatedBy(Global.loginUser.getUserCode());

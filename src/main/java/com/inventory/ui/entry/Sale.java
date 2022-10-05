@@ -490,6 +490,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             Mono<ResponseEntity<List<SaleHisDetail>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/sale/get-sale-detail")
                     .queryParam("vouNo", vouNo)
+                    .queryParam("compCode", Global.compCode)
+                    .queryParam("deptId", Global.deptId)
                     .build())
                     .retrieve().toEntityList(SaleHisDetail.class);
             result.subscribe((t) -> {
@@ -552,9 +554,11 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     private void setAllLocation() {
         List<SaleHisDetail> listSaleDetail = saleTableModel.getListDetail();
+        Location loc = locationAutoCompleter.getLocation();
         if (listSaleDetail != null) {
             listSaleDetail.forEach(sd -> {
-                sd.setLocation(locationAutoCompleter.getLocation());
+                sd.setLocCode(loc.getKey().getLocCode());
+                sd.setLocName(loc.getLocName());
             });
         }
         saleTableModel.setListDetail(listSaleDetail);
@@ -630,24 +634,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         traderAutoCompleter.setTrader(order.getTrader());
         txtRemark.setText(order.getDesp());
         orderCode = order.getOrderCode();
-        region = order.getTrader().getRegion();
         lblStatus.setText("NEW");
-        List<OrderDetail> listOD = new ArrayList<>();
-        if (!listOD.isEmpty()) {
-            saleTableModel.clear();
-            listOD.stream().map(od -> {
-                SaleHisDetail sd = new SaleHisDetail();
-                sd.setStock(od.getStock());
-                sd.setQty(od.getQty());
-                sd.setPrice(od.getPrice());
-                sd.setAmount(od.getAmount());
-                sd.setSaleUnit(od.getStock().getSaleUnit());
-                return sd;
-            }).forEachOrdered(sd -> {
-                saleTableModel.addSale(sd);
-            });
-            calculateTotalAmount(false);
-        }
+
     }
 
     private void focusTable() {
@@ -1482,11 +1470,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
             case "SALE-HISTORY" -> {
                 String vouNo = selectObj.toString();
-                SaleHisKey key = new SaleHisKey();
-                key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
-                key.setVouNo(vouNo);
-                SaleHis sh = inventoryRepo.findSale(key);
+                SaleHis sh = inventoryRepo.findSale(vouNo);
                 setSaleVoucher(sh);
             }
             case "Select" -> {

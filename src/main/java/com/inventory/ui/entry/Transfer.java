@@ -546,10 +546,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         if (source.toString().equals("TR-HISTORY")) {
             if (selectObj != null) {
                 String vouNo = selectObj.toString();
-                TransferHisKey key = new TransferHisKey();
-                key.setVouNo(vouNo);
-                key.setCompCode(Global.compCode);
-                setVoucher(inventoryRepo.findTransfer(key));
+                setVoucher(inventoryRepo.findTransfer(vouNo));
 
             }
         }

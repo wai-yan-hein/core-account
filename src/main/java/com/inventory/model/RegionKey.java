@@ -8,13 +8,12 @@ import lombok.Data;
 
 /**
  *
- * @author Lenovo
+ * @author DELL
  */
 @Data
-public class TransferHisKey {
+public class RegionKey {
 
-    private String vouNo;
+    private String regCode;
     private String compCode;
     private Integer deptId;
-
 }

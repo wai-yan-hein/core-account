@@ -17,16 +17,15 @@ import lombok.Data;
 @Data
 public class StockInOut implements Serializable {
 
-    private String vouNo;
+    private StockIOKey key;
     private String remark;
     private String description;
     private Date updatedDate;
     private String createdBy;
     private String updatedBy;
     private Date createdDate;
-    private String compCode;
     private Integer macId;
-    private VouStatus vouStatus;
+    private String vouStatusCode;
     private Date vouDate;
     private Boolean deleted;
     private String status = "STATUS";

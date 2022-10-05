@@ -15,8 +15,14 @@ public class TransferHisDetail {
 
     private String tdCode;
     private String vouNo;
-    private Stock stock;
+    private String stockCode;
+    private String userCode;
+    private String stockName;
+    private String groupName;
+    private String brandName;
+    private String catName;
+    private String relName;
     private Float qty;
-    private StockUnit unit;
+    private String unitCode;
     private Integer uniqueId;
 }

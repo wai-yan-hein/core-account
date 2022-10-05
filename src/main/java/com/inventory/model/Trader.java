@@ -19,7 +19,7 @@ public class Trader implements java.io.Serializable {
     private TraderKey key;
     private String traderName;
     private String address;
-    private Region region;
+    private String regCode;
     private String phone;
     private String email;
     private boolean active;
@@ -42,7 +42,7 @@ public class Trader implements java.io.Serializable {
     private boolean cashDown;
     private boolean multi;
     private String priceType;
-    private TraderGroup group;
+    private String groupCode;
 
     public Trader(String code, String traderName) {
         this.key = new TraderKey();

@@ -135,8 +135,8 @@ public class PatternTableModel extends AbstractTableModel {
                         if (value instanceof Stock s) {
                             p.setStockCode(s.getKey().getStockCode());
                             p.setUserCode(s.getUserCode());
-                            p.setRelation(s.getUnitRelation().getRelName());
-                            p.setUnitCode(s.getPurUnit().getKey().getUnitCode());
+                            p.setRelation(s.getRelName());
+                            p.setUnitCode(s.getPurUnitCode());
                             table.setColumnSelectionInterval(2, 2);
                         }
                     }

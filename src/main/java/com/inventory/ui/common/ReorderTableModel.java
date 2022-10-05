@@ -79,17 +79,17 @@ public class ReorderTableModel extends AbstractTableModel {
         ReorderLevel p = listReorder.get(rowIndex);
         return switch (columnIndex) {
             case 0 ->
-                p.getStock() == null ? null : p.getStock().getUserCode();
+                p.getUserCode() == null ? p.getStockCode() : p.getUserCode();
             case 1 ->
-                p.getStock() == null ? null : p.getStock().getStockName();
+                p.getStockName();
             case 2 ->
                 p.getMinQty();
             case 3 ->
-                p.getMinUnit();
+                p.getMinUnitCode();
             case 4 ->
                 p.getMaxQty();
             case 5 ->
-                p.getMaxUnit();
+                p.getMaxUnitCode();
             case 6 ->
                 p.getBalUnit();
             case 7 ->
@@ -116,7 +116,10 @@ public class ReorderTableModel extends AbstractTableModel {
                 switch (column) {
                     case 0,1 -> {
                         if (value instanceof Stock s) {
-                            p.setStock(s);
+                            p.setStockCode(s.getKey().getStockCode());
+                            p.setStockName(s.getStockName());
+                            p.setUserCode(s.getUserCode());
+                            p.setRelName(s.getRelName());
                             table.setColumnSelectionInterval(2, 2);
                         }
                     }
@@ -130,7 +133,7 @@ public class ReorderTableModel extends AbstractTableModel {
                     }
                     case 3 -> {
                         if (value instanceof StockUnit unit) {
-                            p.setMinUnit(unit);
+                            p.setMinUnitCode(unit.getKey().getUnitCode());
                             table.setColumnSelectionInterval(4, 4);
                         }
                     }
@@ -144,16 +147,16 @@ public class ReorderTableModel extends AbstractTableModel {
                     }
                     case 5 -> {
                         if (value instanceof StockUnit unit) {
-                            p.setMaxUnit(unit);
+                            p.setMaxUnitCode(unit.getKey().getUnitCode());
                             table.setColumnSelectionInterval(4, 4);
                         }
                     }
                 }
                 switch (column) {
                     case 2,3 ->
-                        p.setMinSmallQty(p.getMinQty() * getSmallQty(p.getStock().getKey().getStockCode(), p.getMinUnit().getKey().getUnitCode()));
+                        p.setMinSmallQty(p.getMinQty() * getSmallQty(p.getStockCode(), p.getMinUnitCode()));
                     case 4,5 ->
-                        p.setMaxSmallQty(p.getMaxQty() * getSmallQty(p.getStock().getKey().getStockCode(), p.getMinUnit().getKey().getUnitCode()));
+                        p.setMaxSmallQty(p.getMaxQty() * getSmallQty(p.getStockCode(), p.getMinUnitCode()));
 
                 }
                 addNewRow();
@@ -240,7 +243,7 @@ public class ReorderTableModel extends AbstractTableModel {
 
     private boolean hasEmptyRow() {
         ReorderLevel p = listReorder.get(listReorder.size() - 1);
-        return p.getStock() == null;
+        return p.getStockCode()== null;
     }
 
     public void addRow() {

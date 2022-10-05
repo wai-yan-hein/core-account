@@ -410,6 +410,8 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             Mono<ResponseEntity<List<PurHisDetail>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/pur/get-pur-detail")
                     .queryParam("vouNo", vouNo)
+                    .queryParam("compCode", Global.compCode)
+                    .queryParam("deptId", Global.deptId)
                     .build())
                     .retrieve().toEntityList(PurHisDetail.class);
             result.subscribe((t) -> {
@@ -473,9 +475,12 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
 
     private void setAllLocation() {
         List<PurHisDetail> listPurDetail = purTableModel.getListDetail();
+        Location l = locationAutoCompleter.getLocation();
         if (listPurDetail != null) {
             listPurDetail.forEach(sd -> {
-                sd.setLocation(locationAutoCompleter.getLocation());
+                sd.setLocCode(l.getKey().getLocCode());
+                sd.setLocName(l.getLocName());
+
             });
         }
         purTableModel.setListDetail(listPurDetail);

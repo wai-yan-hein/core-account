@@ -167,12 +167,12 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtUserCode.setText(stock.getUserCode());
         txtStockName.setText(stock.getStockName());
         chkActive.setSelected(stock.isActive());
-        brandAutoCompleter.setBrand(stock.getBrand());
-        categoryAutoCompleter.setCategory(stock.getCategory());
-        saleUnitCompleter.setStockUnit(stock.getSaleUnit());
-        typeAutoCompleter.setStockType(stock.getStockType());
-        purUnitCompleter.setStockUnit(stock.getPurUnit());
-        relationAutoCompleter.setRelation(stock.getUnitRelation());
+        brandAutoCompleter.setBrand(inventoryRepo.findBrand(stock.getBrandCode()));
+        categoryAutoCompleter.setCategory(inventoryRepo.findCategory(stock.getCatCode()));
+        saleUnitCompleter.setStockUnit(inventoryRepo.findUnit(stock.getSaleUnitCode()));
+        typeAutoCompleter.setStockType(inventoryRepo.findGroup(stock.getTypeCode()));
+        purUnitCompleter.setStockUnit(inventoryRepo.findUnit(stock.getPurUnitCode()));
+        relationAutoCompleter.setRelation(inventoryRepo.findRelation(stock.getRelCode()));
         txtPurPrice.setText(Util1.getString(stock.getPurPrice()));
         txtSalePrice.setText(Util1.getString(stock.getSalePriceN()));
         txtSalePriceA.setText(Util1.getString(stock.getSalePriceA()));
@@ -230,16 +230,22 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             txtRelation.requestFocus();
         } else {
             stock.setUserCode(txtUserCode.getText().trim());
-            stock.setStockType(typeAutoCompleter.getStockType());
+            stock.setTypeCode(typeAutoCompleter.getStockType().getKey().getStockTypeCode());
             stock.setStockName(txtStockName.getText().trim());
-            stock.setCategory(categoryAutoCompleter.getCategory());
-            stock.setBrand(brandAutoCompleter.getBrand());
+            Category c = categoryAutoCompleter.getCategory();
+            if (c != null) {
+                stock.setCatCode(c.getKey().getCatCode());
+            }
+            StockBrand b = brandAutoCompleter.getBrand();
+            if (b != null) {
+                stock.setBrandCode(b.getKey().getBrandCode());
+            }
             stock.setActive(chkActive.isSelected());
             stock.setBarcode(txtBarCode.getText().trim());
             stock.setPurPrice(Util1.getFloat(txtPurPrice.getText()));
-            stock.setPurUnit(purUnitCompleter.getStockUnit());
-            stock.setSaleUnit(saleUnitCompleter.getStockUnit());
-            stock.setUnitRelation(relationAutoCompleter.getRelation());
+            stock.setPurUnitCode(purUnitCompleter.getStockUnit().getKey().getUnitCode());
+            stock.setSaleUnitCode(saleUnitCompleter.getStockUnit().getKey().getUnitCode());
+            stock.setRelCode(relationAutoCompleter.getRelation().getKey().getRelCode());
             stock.setSalePriceN(Util1.getFloat(txtSalePrice.getText()));
             stock.setSalePriceA(Util1.getFloat(txtSalePriceA.getText()));
             stock.setSalePriceB(Util1.getFloat(txtSalePriceB.getText()));

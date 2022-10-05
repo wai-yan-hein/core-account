@@ -130,7 +130,7 @@ public class OpeningTableModel extends AbstractTableModel {
                     return stockName;
                 }
                 case 2 -> {
-                    return record.getRelation();
+                    return record.getRelName();
                 }
 
                 case 3 -> {
@@ -171,9 +171,9 @@ public class OpeningTableModel extends AbstractTableModel {
                             record.setStockCode(s.getKey().getStockCode());
                             record.setStockName(s.getStockName());
                             record.setUserCode(s.getUserCode());
-                            record.setRelation(s.getUnitRelation().getRelName());
+                            record.setRelName(s.getRelName());
                             record.setQty(1.0f);
-                            record.setUnitCode(s.getPurUnit().getKey().getUnitCode());
+                            record.setUnitCode(s.getPurUnitCode());
                             addNewRow();
                         }
                     }

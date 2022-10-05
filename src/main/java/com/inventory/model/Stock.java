@@ -17,19 +17,19 @@ public class Stock implements java.io.Serializable {
 
     private StockKey key;
     private boolean active;
-    private StockBrand brand;
+    private String brandCode;
     private String stockName;
-    private Category category;
-    private StockType stockType;
+    private String catCode;
+    private String typeCode;
     private String createdBy;
     private String updatedBy;
     private String barcode;
     private String shortName;
     private Float purWeight;
     private Float purPrice;
-    private StockUnit purUnit;
+    private String purUnitCode;
     private Float saleWeight;
-    private StockUnit saleUnit;
+    private String saleUnitCode;
     private Date expireDate;
     private String remark;
     private Float salePriceN;
@@ -43,9 +43,13 @@ public class Stock implements java.io.Serializable {
     private String migCode;
     private String compCode;
     private String userCode;
-    private UnitRelation unitRelation;
+    private String relCode;
     private Integer macId;
     private boolean calculate;
+    private String relName;
+    private String groupName;
+    private String catName;
+    private String brandName;
 
     public Stock() {
     }

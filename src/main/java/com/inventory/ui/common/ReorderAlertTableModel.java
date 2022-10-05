@@ -74,13 +74,13 @@ public class ReorderAlertTableModel extends AbstractTableModel {
         ReorderLevel p = listReorder.get(rowIndex);
         return switch (columnIndex) {
             case 0 ->
-                p.getStock() == null ? null : p.getStock().getUserCode();
+                p.getUserCode() == null ? p.getStockCode() : p.getUserCode();
             case 1 ->
-                p.getStock() == null ? null : p.getStock().getStockName();
+                p.getStockName();
             case 2 ->
                 p.getMinQty();
             case 3 ->
-                p.getMinUnit();
+                p.getMinUnitCode();
             case 4 ->
                 p.getBalQty();
             case 5 ->
@@ -88,7 +88,7 @@ public class ReorderAlertTableModel extends AbstractTableModel {
             case 6 ->
                 p.getOrderQty();
             case 7 ->
-                p.getOrderUnit();
+                p.getOrderUnitCode();
             default ->
                 null;
         };
@@ -154,7 +154,7 @@ public class ReorderAlertTableModel extends AbstractTableModel {
 
     private boolean hasEmptyRow() {
         ReorderLevel p = listReorder.get(listReorder.size() - 1);
-        return p.getStock() == null;
+        return p.getStockCode() == null;
     }
 
     public void addRow() {

@@ -8,13 +8,12 @@ import lombok.Data;
 
 /**
  *
- * @author Lenovo
+ * @author DELL
  */
 @Data
-public class TransferHisKey {
+public class StockIOKey {
 
     private String vouNo;
     private String compCode;
     private Integer deptId;
-
 }

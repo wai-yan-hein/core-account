@@ -21,6 +21,7 @@ import com.inventory.model.Location;
 import com.inventory.model.Order;
 import com.inventory.model.RetInHis;
 import com.inventory.model.RetInHisDetail;
+import com.inventory.model.RetInHisKey;
 import com.inventory.model.Trader;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.ReturnInTableModel;
@@ -254,7 +255,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                 RetInHis r = result.block();
                 if (r != null) {
                     if (print) {
-                        printSaveVoucher(ri.getVouNo());
+                        printSaveVoucher(ri.getKey().getVouNo());
                     }
                     clear();
                 }
@@ -291,25 +292,28 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             status = false;
             txtLocation.requestFocus();
         } else {
-            ri.setVouNo(txtVouNo.getText());
             ri.setRemark(txtRemark.getText());
             ri.setDiscP(Util1.getFloat(txtVouDiscP.getValue()));
             ri.setDiscount(Util1.getFloat(txtVouDiscount.getValue()));
             ri.setPaid(Util1.getFloat(txtVouPaid.getValue()));
             ri.setBalance(Util1.getFloat(txtVouBalance.getValue()));
-            ri.setCurrency(currAutoCompleter.getCurrency());
+            ri.setCurCode(currAutoCompleter.getCurrency().getCurCode());
             ri.setDeleted(Util1.getNullTo(ri.getDeleted()));
-            ri.setLocation(locationAutoCompleter.getLocation());
+            ri.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             ri.setVouDate(txtVouDate.getDate());
-            ri.setTrader(traderAutoCompleter.getTrader());
+            ri.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
             ri.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
             ri.setStatus(lblStatus.getText());
             if (lblStatus.getText().equals("NEW")) {
+                RetInHisKey key = new RetInHisKey();
+                key.setCompCode(Global.compCode);
+                key.setDeptId(Global.deptId);
+                key.setVouNo(null);
+                ri.setKey(key);
                 ri.setCreatedDate(Util1.getTodayDate());
                 ri.setCreatedBy(Global.loginUser.getUserCode());
                 ri.setSession(Global.sessionId);
                 ri.setMacId(Global.macId);
-                ri.setCompCode(Global.compCode);
             } else {
                 ri.setUpdatedBy(Global.loginUser.getUserCode());
             }
@@ -372,10 +376,15 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         if (ri != null) {
             progress.setIndeterminate(true);
             ri = retin;
-            String vouNo = ri.getVouNo();
+            locationAutoCompleter.setLocation(inventoryRepo.findLocation(ri.getLocCode()));
+            traderAutoCompleter.setTrader(inventoryRepo.findTrader(ri.getTraderCode()));
+            currAutoCompleter.setCurrency(inventoryRepo.findCurrency(ri.getCurCode()));
+            String vouNo = ri.getKey().getVouNo();
             Mono<ResponseEntity<List<RetInHisDetail>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/retin/get-retin-detail")
                     .queryParam("vouNo", vouNo)
+                    .queryParam("compCode", Global.compCode)
+                    .queryParam("deptId", Global.deptId)
                     .build())
                     .retrieve().toEntityList(RetInHisDetail.class);
             result.subscribe((t) -> {
@@ -390,8 +399,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                     lblStatus.setForeground(Color.blue);
                     disableForm(true);
                 }
-                txtVouNo.setText(ri.getVouNo());
-                currAutoCompleter.setCurrency(ri.getCurrency());
+                txtVouNo.setText(ri.getKey().getVouNo());
                 txtRemark.setText(ri.getRemark());
                 txtVouDate.setDate(ri.getVouDate());
                 txtVouTotal.setValue(Util1.getFloat(ri.getVouTotal()));
@@ -400,8 +408,6 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                 txtVouPaid.setValue(Util1.getFloat(ri.getPaid()));
                 txtVouBalance.setValue(Util1.getFloat(ri.getBalance()));
                 txtGrandTotal.setValue(Util1.getFloat(txtGrandTotal.getValue()));
-                locationAutoCompleter.setLocation(ri.getLocation());
-                traderAutoCompleter.setTrader(ri.getTrader());
                 chkPaid.setSelected(Util1.getFloat(ri.getPaid()) > 0);
                 focusTable();
                 progress.setIndeterminate(false);
@@ -430,9 +436,11 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
 
     private void setAllLocation() {
         List<RetInHisDetail> listRetInDetail = retInTableModel.getListDetail();
+        Location loc = locationAutoCompleter.getLocation();
         if (listRetInDetail != null) {
             listRetInDetail.forEach(sd -> {
-                sd.setLocation(locationAutoCompleter.getLocation());
+                sd.setLocCode(loc.getKey().getLocCode());
+                sd.setLocName(loc.getLocName());
             });
         }
         retInTableModel.setListDetail(listRetInDetail);

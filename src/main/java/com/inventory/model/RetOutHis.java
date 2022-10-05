@@ -4,7 +4,6 @@
  */
 package com.inventory.model;
 
-import com.user.model.Currency;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
@@ -16,10 +15,10 @@ import lombok.Data;
 @Data
 public class RetOutHis implements java.io.Serializable {
 
-    private String vouNo;
-    private Trader trader;
+    private RetOutHisKey key;
+    private String traderCode;
     private Date vouDate;
-    private Location location;
+    private String locCode;
     private Boolean deleted;
     private Float vouTotal;
     private Float paid;
@@ -31,11 +30,10 @@ public class RetOutHis implements java.io.Serializable {
     private Date updatedDate;
     private String remark;
     private Integer session;
-    private Currency currency;
+    private String curCode;
     private Float discP;
     private String intgUpdStatus;
     private Integer macId;
-    private String compCode;
     private String status = "STATUS";
     private List<RetOutHisDetail> listRD;
     private List<String> listDel;

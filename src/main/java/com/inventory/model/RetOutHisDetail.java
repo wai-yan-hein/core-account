@@ -12,15 +12,23 @@ import lombok.Data;
  * @author lenovo
  */
 @Data
-public class RetOutHisDetail implements java.io.Serializable {
+public class RetOutHisDetail {
 
     private RetOutKey roKey;
-    private Stock stock;
+    private String stockCode;
+    private String userCode;
+    private String stockName;
+    private String groupName;
+    private String brandName;
+    private String catName;
+    private String relName;
     private Float qty;
-    private StockUnit unit;
+    private String unitCode;
     private Float price;
     private Float amount;
-    private Location location;
+    private String locCode;
+    private String locName;
     private Integer uniqueId;
+    private String compCode;
 
 }

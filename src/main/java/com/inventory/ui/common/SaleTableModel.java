@@ -173,43 +173,33 @@ public class SaleTableModel extends AbstractTableModel {
             switch (column) {
                 case 0 -> {
                     //code
-                    return sd.getStock() == null ? null : sd.getStock().getUserCode();
+                    return sd.getUserCode() == null ? sd.getStockCode() : sd.getUserCode();
                 }
                 case 1 -> {
                     String stockName = null;
-                    if (sd.getStock() != null) {
-                        stockName = sd.getStock().getStockName();
+                    if (sd.getStockCode() != null) {
+                        stockName = sd.getStockName();
                         if (ProUtil.isStockNameWithCategory()) {
-                            if (sd.getStock().getCategory() != null) {
-                                stockName = String.format("%s (%s)", stockName, sd.getStock().getCategory().getCatName());
+                            if (sd.getCatName() != null) {
+                                stockName = String.format("%s (%s)", stockName, sd.getCatName());
                             }
                         }
                     }
-                    //Name
                     return stockName;
                 }
                 case 2 -> {
-                    if (sd.getStock() != null) {
-                        if (sd.getStock().getUnitRelation() != null) {
-                            return sd.getStock().getUnitRelation().getRelName();
-                        }
-                    }
-                    return null;
+                    return sd.getRelName();
                 }
                 case 3 -> {
                     //loc
-                    return sd.getLocation();
+                    return sd.getLocName();
                 }
                 case 4 -> {
                     //qty
                     return sd.getQty();
                 }
                 case 5 -> {
-                    if (sd.getSaleUnit() != null) {
-                        return sd.getSaleUnit().getKey().getUnitCode();
-                    }
-                    //unit
-                    return null;
+                    return sd.getUnitCode();
                 }
                 case 6 -> {
                     //price
@@ -237,27 +227,29 @@ public class SaleTableModel extends AbstractTableModel {
                 switch (column) {
                     case 0,1 -> {
                         //Code
-                        if (value instanceof Stock stock) {
-                            sbTableModel.calStockBalance(stock.getKey().getStockCode());
-                            sd.setStock(stock);
+                        if (value instanceof Stock s) {
+                            sbTableModel.calStockBalance(s.getKey().getStockCode());
+                            sd.setStockCode(s.getKey().getStockCode());
+                            sd.setStockName(s.getStockName());
+                            sd.setUserCode(s.getUserCode());
+                            sd.setRelName(s.getRelName());
                             sd.setQty(1.0f);
-                            sd.setSaleUnit(stock.getSaleUnit());
-                            sd.setLocation(locationAutoCompleter.getLocation());
-                            sd.setPrice(getTraderPrice(sd.getStock()));
+                            sd.setUnitCode(s.getSaleUnitCode());
+                            sd.setPrice(getTraderPrice(s));
                             if (ProUtil.isPricePopup()) {
-                                sd.setPrice(getPopupPrice(row, true));
+                                sd.setPrice(getPopupPrice(s, true));
                             }
-                            sd.setPrice(sd.getPrice() == 0 ? sd.getStock().getSalePriceN() : sd.getPrice());
+                            sd.setPrice(sd.getPrice() == 0 ? s.getSalePriceN() : sd.getPrice());
                             parent.setColumnSelectionInterval(4, 4);
                             addNewRow();
                         }
                     }
                     case 3 -> {
                         //Loc
-                        if (value instanceof Location location) {
-                            sd.setLocation(location);
-                        } else {
-                            sd.setLocation(null);
+                        if (value instanceof Location l) {
+                            sd.setLocCode(l.getKey().getLocCode());
+                            sd.setLocName(l.getLocName());
+
                         }
                     }
                     case 4 -> {
@@ -265,7 +257,7 @@ public class SaleTableModel extends AbstractTableModel {
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 sd.setQty(Util1.getFloat(value));
-                                if (sd.getSaleUnit() == null) {
+                                if (sd.getUnitCode() == null) {
                                     parent.setColumnSelectionInterval(5, 5);
                                 } else {
                                     parent.setColumnSelectionInterval(6, 6);
@@ -282,7 +274,7 @@ public class SaleTableModel extends AbstractTableModel {
                     case 5 -> {
                         //Unit
                         if (value instanceof StockUnit stockUnit) {
-                            sd.setSaleUnit(stockUnit);
+                            sd.setUnitCode(stockUnit.getKey().getUnitCode());
                         }
 
                     }
@@ -313,15 +305,20 @@ public class SaleTableModel extends AbstractTableModel {
                 if (column != 6) {
                     if (Util1.getFloat(sd.getPrice()) == 0) {
                         if (ProUtil.isSaleLastPrice()) {
-                            if (sd.getStock() != null && sd.getSaleUnit() != null) {
-                                sd.setPrice(inventoryRepo.getSaleRecentPrice(sd.getStock().getKey().getStockCode(),
-                                        Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), sd.getSaleUnit().getKey().getUnitCode()));
+                            if (sd.getStockCode() != null && sd.getUnitCode() != null) {
+                                sd.setPrice(inventoryRepo.getSaleRecentPrice(sd.getStockCode(),
+                                        Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), sd.getUnitCode()));
                             }
                         }
                     }
                 }
                 change = true;
                 calculateAmount(sd);
+                Location l = locationAutoCompleter.getLocation();
+                if (l != null) {
+                    sd.setLocCode(l.getKey().getLocCode());
+                    sd.setLocName(l.getLocName());
+                }
                 fireTableRowsUpdated(row, row);
                 selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
                 parent.requestFocusInWindow();
@@ -335,7 +332,6 @@ public class SaleTableModel extends AbstractTableModel {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
                 SaleHisDetail pd = new SaleHisDetail();
-                pd.setLocation(locationAutoCompleter.getLocation());
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }
@@ -346,7 +342,7 @@ public class SaleTableModel extends AbstractTableModel {
         boolean status = false;
         if (listDetail.size() >= 1) {
             SaleHisDetail get = listDetail.get(listDetail.size() - 1);
-            if (get.getStock() == null) {
+            if (get.getStockCode() == null) {
                 status = true;
             }
         }
@@ -369,7 +365,7 @@ public class SaleTableModel extends AbstractTableModel {
     }
 
     private void calculateAmount(SaleHisDetail sale) {
-        if (sale.getStock() != null) {
+        if (sale.getStockCode() != null) {
             float saleQty = Util1.getFloat(sale.getQty());
             float stdSalePrice = Util1.getFloat(sale.getPrice());
             float amount = saleQty * stdSalePrice;
@@ -384,18 +380,18 @@ public class SaleTableModel extends AbstractTableModel {
     public boolean isValidEntry() {
         boolean status = true;
         for (SaleHisDetail sdh : listDetail) {
-            if (sdh.getStock() != null) {
+            if (sdh.getStockCode() != null) {
                 if (Util1.getFloat(sdh.getAmount()) <= 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
                             "Invalid.", JOptionPane.ERROR_MESSAGE);
                     status = false;
                     parent.requestFocus();
                     break;
-                } else if (sdh.getLocation() == null) {
+                } else if (sdh.getLocCode() == null) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Location.");
                     status = false;
                     parent.requestFocus();
-                } else if (sdh.getSaleUnit() == null) {
+                } else if (sdh.getUnitCode() == null) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Sale Unit.");
                     status = false;
                     parent.requestFocus();
@@ -431,8 +427,7 @@ public class SaleTableModel extends AbstractTableModel {
         return price;
     }
 
-    public List<PriceOption> getPriceOption(int row) {
-        Stock s = listDetail.get(row).getStock();
+    public List<PriceOption> getPriceOption(Stock s) {
         List<PriceOption> listPrice = inventoryRepo.getPriceOption();
         if (!listPrice.isEmpty()) {
             for (PriceOption op : listPrice) {
@@ -458,8 +453,8 @@ public class SaleTableModel extends AbstractTableModel {
         return listPrice;
     }
 
-    private float getPopupPrice(int row, boolean needToChoice) {
-        List<PriceOption> listPrice = getPriceOption(row);
+    private float getPopupPrice(Stock s, boolean needToChoice) {
+        List<PriceOption> listPrice = getPriceOption(s);
         PriceOptionDialog dialog = new PriceOptionDialog();
         dialog.setListPrice(listPrice);
         dialog.setNeedToChoice(needToChoice);

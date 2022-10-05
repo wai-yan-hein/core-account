@@ -185,13 +185,12 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             filter.setListLocation(locationAutoCompleter.getListOption());
             filter.setStockTypeCode(stockTypeAutoCompleter.getStockType().getKey().getStockTypeCode());
             filter.setBrandCode(brandAutoCompleter.getBrand().getKey().getBrandCode());
-            filter.setRegCode(regionAutoCompleter.getRegion().getRegCode());
+            filter.setRegCode(regionAutoCompleter.getRegion().getKey().getRegCode());
             filter.setCatCode(categoryAutoCompleter.getCategory().getKey().getCatCode());
             filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
             filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
             filter.setVouTypeCode(vouStatusAutoCompleter.getVouStatus().getKey().getCode());
             filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
-            filter.setRegCode(regionAutoCompleter.getRegion().getRegCode());
             log.info("Report Date : " + stDate + " - " + enDate);
             int row = tblReport.getSelectedRow();
             if (row >= 0) {

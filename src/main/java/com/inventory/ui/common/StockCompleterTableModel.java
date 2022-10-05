@@ -53,11 +53,11 @@ public class StockCompleterTableModel extends AbstractTableModel {
                 case 1 ->
                     med.getStockName();
                 case 2 ->
-                    med.getStockType() == null ? null : med.getStockType().getStockTypeName();
+                    med.getGroupName();
                 case 3 ->
-                    med.getCategory() == null ? null : med.getCategory().getCatName();
+                    med.getCatName();
                 case 4 ->
-                    med.getBrand() == null ? null : med.getBrand().getBrandName();
+                    med.getBrandName();
                 default ->
                     null;
             }; //Code

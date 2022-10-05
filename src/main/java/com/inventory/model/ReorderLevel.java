@@ -13,16 +13,22 @@ import lombok.Data;
 @Data
 public class ReorderLevel {
 
-    private Stock stock;
+    private String stockCode;
+    private String userCode;
+    private String stockName;
+    private String groupName;
+    private String brandName;
+    private String catName;
+    private String relName;
     private Float minQty;
-    private StockUnit minUnit;
+    private String minUnitCode;
     private Float maxQty;
-    private StockUnit maxUnit;
+    private String maxUnitCode;
     private Float balQty;
     private String balUnit;
     private String compCode;
     private Float orderQty;
-    private StockUnit orderUnit;
+    private String orderUnitCode;
     private float minSmallQty;
     private float maxSmallQty;
     private float balSmallQty;

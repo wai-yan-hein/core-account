@@ -21,7 +21,7 @@ public class OPHisDetail {
     private String groupName;
     private String brandName;
     private String catName;
-    private String relation;
+    private String relName;
     private Float qty;
     private Float price;
     private Float amount;

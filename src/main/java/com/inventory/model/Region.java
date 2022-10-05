@@ -15,11 +15,10 @@ import lombok.Data;
 @Data
 public class Region implements java.io.Serializable {
 
-    private String regCode;
+    private RegionKey key;
     private String regionName;
     private String regionType;
     private String parentRegion;
-    private String compCode;
     private Date updatedDate;
     private String updatedBy;
     private Date createdDate;
@@ -28,7 +27,8 @@ public class Region implements java.io.Serializable {
     private String userCode;
 
     public Region(String regCode, String regionName) {
-        this.regCode = regCode;
+        this.key = new RegionKey();
+        this.key.setRegCode(regCode);
         this.regionName = regionName;
     }
 

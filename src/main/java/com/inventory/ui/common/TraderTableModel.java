@@ -78,7 +78,7 @@ public class TraderTableModel extends AbstractTableModel {
                 case 1 ->
                     trader.getTraderName();
                 case 2 ->
-                    trader.getRegion() == null ? null : trader.getRegion().getRegionName();
+                    null;
                 default ->
                     null;
             }; //Code

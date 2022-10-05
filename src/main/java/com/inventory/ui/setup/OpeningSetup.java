@@ -134,9 +134,9 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         tblOpening.getColumnModel().getColumn(1).setPreferredWidth(200);//name
         tblOpening.getColumnModel().getColumn(2).setPreferredWidth(100);//rel
         tblOpening.getColumnModel().getColumn(3).setPreferredWidth(50);//qty
-        tblOpening.getColumnModel().getColumn(5).setPreferredWidth(50);//unit
-        tblOpening.getColumnModel().getColumn(6).setPreferredWidth(100);//price
-        tblOpening.getColumnModel().getColumn(7).setPreferredWidth(100);//amount
+        tblOpening.getColumnModel().getColumn(4).setPreferredWidth(50);//unit
+        tblOpening.getColumnModel().getColumn(5).setPreferredWidth(100);//price
+        tblOpening.getColumnModel().getColumn(6).setPreferredWidth(100);//amount
         tblOpening.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblOpening.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         tblOpening.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());

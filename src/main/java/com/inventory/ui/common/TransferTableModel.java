@@ -6,6 +6,7 @@
 package com.inventory.ui.common;
 
 import com.common.Global;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.model.Stock;
@@ -93,25 +94,30 @@ public class TransferTableModel extends AbstractTableModel {
             TransferHisDetail io = listTransfer.get(row);
             switch (column) {
                 case 0 -> {
-                    return io.getStock() == null ? null : io.getStock().getUserCode();
+                    return io.getUserCode() == null ? io.getStockCode() : io.getUserCode();
                 }
                 case 1 -> {
-                    return io.getStock() == null ? null : io.getStock().getStockName();
-                }
-                case 2 -> {
-                    if (io.getStock() != null) {
-                        if (io.getStock().getUnitRelation() != null) {
-                            return io.getStock().getUnitRelation().getRelName();
+                    String stockName = null;
+                    if (io.getStockCode() != null) {
+                        stockName = io.getStockName();
+                        if (ProUtil.isStockNameWithCategory()) {
+                            if (io.getCatName() != null) {
+                                stockName = String.format("%s (%s)", stockName, io.getCatName());
+                            }
                         }
                     }
-                    return null;
+                    return stockName;
+                }
+                case 2 -> {
+
+                    return io.getRelName();
                 }
 
                 case 3 -> {
                     return io.getQty();
                 }
                 case 4 -> {
-                    return io.getUnit() == null ? null : io.getUnit().getKey().getUnitCode();
+                    return io.getUnitCode();
                 }
 
             }
@@ -144,9 +150,11 @@ public class TransferTableModel extends AbstractTableModel {
             if (value != null) {
                 switch (column) {
                     case 0,1 -> {
-                        if (value instanceof Stock stock) {
-                            io.setStock(stock);
-                            io.setUnit(stock.getPurUnit());
+                        if (value instanceof Stock s) {
+                            io.setStockCode(s.getKey().getStockCode());
+                            io.setUserCode(s.getUserCode());
+                            io.setRelName(s.getRelName());
+                            io.setUnitCode(s.getPurUnitCode());
                             setColumnSelection(3);
                         }
                         addNewRow();
@@ -160,7 +168,7 @@ public class TransferTableModel extends AbstractTableModel {
                     }
                     case 4 -> {
                         if (value instanceof StockUnit stockUnit) {
-                            io.setUnit(stockUnit);
+                            io.setUnitCode(stockUnit.getKey().getUnitCode());
                         }
                     }
 
@@ -189,8 +197,8 @@ public class TransferTableModel extends AbstractTableModel {
     public boolean isValidEntry() {
         boolean status = true;
         for (TransferHisDetail od : listTransfer) {
-            if (od.getStock() != null) {
-                if (od.getUnit() == null) {
+            if (od.getStockCode() != null) {
+                if (od.getUnitCode() == null) {
                     status = false;
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Unit.");
                     parent.requestFocus();
@@ -244,7 +252,7 @@ public class TransferTableModel extends AbstractTableModel {
         boolean status = false;
         if (listTransfer.size() >= 1) {
             TransferHisDetail get = listTransfer.get(listTransfer.size() - 1);
-            if (get.getStock() == null) {
+            if (get.getUnitCode() == null) {
                 status = true;
             }
         }

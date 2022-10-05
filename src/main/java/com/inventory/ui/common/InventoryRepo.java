@@ -9,6 +9,7 @@ import com.user.model.Currency;
 import com.common.Global;
 import com.common.Util1;
 import com.inventory.model.Category;
+import com.inventory.model.CategoryKey;
 import com.inventory.model.General;
 import com.inventory.model.Location;
 import com.inventory.model.LocationKey;
@@ -18,28 +19,42 @@ import com.inventory.model.Pattern;
 import com.inventory.model.PriceOption;
 import com.inventory.model.ProcessType;
 import com.inventory.model.PurHis;
+import com.inventory.model.PurHisKey;
 import com.inventory.model.Region;
+import com.inventory.model.RegionKey;
+import com.inventory.model.RelationKey;
 import com.inventory.model.ReorderLevel;
 import com.inventory.model.RetInHis;
+import com.inventory.model.RetInHisKey;
 import com.inventory.model.RetOutHis;
+import com.inventory.model.RetOutHisKey;
+import com.inventory.model.RetOutKey;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisKey;
 import com.inventory.model.SaleMan;
 import com.inventory.model.SaleManKey;
 import com.inventory.model.Stock;
 import com.inventory.model.StockBrand;
+import com.inventory.model.StockBrandKey;
+import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
+import com.inventory.model.StockInOutKey;
 import com.inventory.model.StockKey;
 import com.inventory.model.StockType;
+import com.inventory.model.StockTypeKey;
 import com.inventory.model.StockUnit;
+import com.inventory.model.StockUnitKey;
 import com.inventory.model.Trader;
 import com.inventory.model.TraderGroup;
+import com.inventory.model.TraderGroupKey;
 import com.inventory.model.TraderKey;
 import com.inventory.model.TransferHis;
 import com.inventory.model.TransferHisKey;
 import com.inventory.model.UnitRelation;
 import com.inventory.model.UnitRelationDetail;
 import com.inventory.model.VouStatus;
+import com.inventory.model.VouStatusKey;
+import com.inventory.model.Voucher;
 import java.time.Duration;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -162,9 +177,35 @@ public class InventoryRepo {
         key.setDeptId(Global.deptId);
         Mono<Trader> result = inventoryApi.post()
                 .uri("/setup/find-trader")
-                .body(Mono.just(key), Trader.class)
+                .body(Mono.just(key), TraderKey.class)
                 .retrieve()
                 .bodyToMono(Trader.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
+    public TraderGroup findTraderGroup(String code) {
+        TraderGroupKey key = new TraderGroupKey();
+        key.setGroupCode(Util1.isNull(code, "-"));
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        Mono<TraderGroup> result = inventoryApi.post()
+                .uri("/setup/find-trader-group")
+                .body(Mono.just(key), TraderGroupKey.class)
+                .retrieve()
+                .bodyToMono(TraderGroup.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
+    public Region findRegion(String code) {
+        RegionKey key = new RegionKey();
+        key.setRegCode(Util1.isNull(code, "-"));
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        Mono<Region> result = inventoryApi.post()
+                .uri("/setup/find-region")
+                .body(Mono.just(key), RegionKey.class)
+                .retrieve()
+                .bodyToMono(Region.class);
         return result.block(Duration.ofMinutes(min));
     }
 
@@ -219,6 +260,84 @@ public class InventoryRepo {
                 .body(Mono.just(key), LocationKey.class)
                 .retrieve()
                 .bodyToMono(Location.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
+    public StockBrand findBrand(String brandCode) {
+        StockBrandKey key = new StockBrandKey();
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        key.setBrandCode(brandCode);
+        Mono<StockBrand> result = inventoryApi.post()
+                .uri("/setup/find-brand")
+                .body(Mono.just(key), StockBrandKey.class)
+                .retrieve()
+                .bodyToMono(StockBrand.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
+    public VouStatus findVouStatus(String code) {
+        VouStatusKey key = new VouStatusKey();
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        key.setCode(code);
+        Mono<VouStatus> result = inventoryApi.post()
+                .uri("/setup/find-voucher-status")
+                .body(Mono.just(key), VouStatusKey.class)
+                .retrieve()
+                .bodyToMono(VouStatus.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
+    public StockUnit findUnit(String unitCode) {
+        StockUnitKey key = new StockUnitKey();
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        key.setUnitCode(unitCode);
+        Mono<StockUnit> result = inventoryApi.post()
+                .uri("/setup/find-unit")
+                .body(Mono.just(key), StockUnitKey.class)
+                .retrieve()
+                .bodyToMono(StockUnit.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
+    public UnitRelation findRelation(String relCode) {
+        RelationKey key = new RelationKey();
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        key.setRelCode(relCode);
+        Mono<UnitRelation> result = inventoryApi.post()
+                .uri("/setup/find-unit-relation")
+                .body(Mono.just(key), RelationKey.class)
+                .retrieve()
+                .bodyToMono(UnitRelation.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
+    public Category findCategory(String catCode) {
+        CategoryKey key = new CategoryKey();
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        key.setCatCode(catCode);
+        Mono<Category> result = inventoryApi.post()
+                .uri("/setup/find-brand")
+                .body(Mono.just(key), CategoryKey.class)
+                .retrieve()
+                .bodyToMono(Category.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
+    public StockType findGroup(String typeCode) {
+        StockTypeKey key = new StockTypeKey();
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        key.setStockTypeCode(typeCode);
+        Mono<StockType> result = inventoryApi.post()
+                .uri("/setup/find-type")
+                .body(Mono.just(key), StockTypeKey.class)
+                .retrieve()
+                .bodyToMono(StockType.class);
         return result.block(Duration.ofMinutes(min));
     }
 
@@ -488,15 +607,23 @@ public class InventoryRepo {
     }
 
     public StockInOut findStockIO(String vouNo) {
-        Mono<StockInOut> result = inventoryApi.get()
-                .uri(builder -> builder.path("/stockio/find-stockio")
-                .queryParam("code", vouNo)
-                .build())
-                .retrieve().bodyToMono(StockInOut.class);
+        StockIOKey key = new StockIOKey();
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        key.setVouNo(vouNo);
+        Mono<StockInOut> result = inventoryApi.post()
+                .uri("/stockio/find-stockio")
+                .body(Mono.just(key), StockIOKey.class)
+                .retrieve()
+                .bodyToMono(StockInOut.class);
         return result.block(Duration.ofMinutes(min));
     }
 
-    public TransferHis findTransfer(TransferHisKey key) {
+    public TransferHis findTransfer(String vouNo) {
+        TransferHisKey key = new TransferHisKey();
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        key.setVouNo(vouNo);
         Mono<TransferHis> result = inventoryApi.post()
                 .uri("/transfer/find-transfer")
                 .body(Mono.just(key), TransferHisKey.class)
@@ -505,7 +632,11 @@ public class InventoryRepo {
         return result.block(Duration.ofMinutes(min));
     }
 
-    public SaleHis findSale(SaleHisKey key) {
+    public SaleHis findSale(String vouNo) {
+        SaleHisKey key = new SaleHisKey();
+        key.setVouNo(vouNo);
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
         Mono<SaleHis> result = inventoryApi.post()
                 .uri("/sale/find-sale")
                 .body(Mono.just(key), SaleHisKey.class)
@@ -528,29 +659,41 @@ public class InventoryRepo {
     }
 
     public PurHis findPurchase(String vouNo) {
-        Mono<PurHis> result = inventoryApi.get()
-                .uri(builder -> builder.path("/pur/find-pur")
-                .queryParam("code", vouNo)
-                .build())
-                .retrieve().bodyToMono(PurHis.class);
+        PurHisKey key = new PurHisKey();
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        key.setVouNo(vouNo);
+        Mono<PurHis> result = inventoryApi.post()
+                .uri("/pur/find-pur")
+                .body(Mono.just(key), PurHisKey.class)
+                .retrieve()
+                .bodyToMono(PurHis.class);
         return result.block(Duration.ofMinutes(min));
     }
 
     public RetInHis findReturnIn(String vouNo) {
-        Mono<RetInHis> result = inventoryApi.get()
-                .uri(builder -> builder.path("/retin/find-retin")
-                .queryParam("code", vouNo)
-                .build())
-                .retrieve().bodyToMono(RetInHis.class);
+        RetInHisKey key = new RetInHisKey();
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        key.setVouNo(vouNo);
+        Mono<RetInHis> result = inventoryApi.post()
+                .uri("/retin/find-retin")
+                .body(Mono.just(key), RetInHisKey.class)
+                .retrieve()
+                .bodyToMono(RetInHis.class);
         return result.block(Duration.ofMinutes(min));
     }
 
     public RetOutHis findReturnOut(String vouNo) {
-        Mono<RetOutHis> result = inventoryApi.get()
-                .uri(builder -> builder.path("/retout/find-retout")
-                .queryParam("code", vouNo)
-                .build())
-                .retrieve().bodyToMono(RetOutHis.class);
+        RetOutHisKey key = new RetOutHisKey();
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        key.setVouNo(vouNo);
+        Mono<RetOutHis> result = inventoryApi.post()
+                .uri("/retout/find-retout")
+                .body(Mono.just(key), RetOutHisKey.class)
+                .retrieve()
+                .bodyToMono(RetOutHis.class);
         return result.block(Duration.ofMinutes(min));
     }
 
