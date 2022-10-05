@@ -91,7 +91,7 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
     private void initOption() {
         listOption.clear();
         listLocation.forEach(t -> {
-            listOption.add(t.getLocationCode());
+            listOption.add(t.getKey().getLocCode());
         });
     }
 
@@ -201,7 +201,7 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
     public final void setLocation(Location location) {
         this.location = location;
         if (this.location != null) {
-            this.textComp.setText(location.getLocationName());
+            this.textComp.setText(location.getLocName());
         } else {
             this.textComp.setText(null);
         }
@@ -211,13 +211,13 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
         if (table.getSelectedRow() != -1) {
             location = locationTableModel.getLocation(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            textComp.setText(location.getLocationName());
-            switch (location.getLocationCode()) {
+            textComp.setText(location.getLocName());
+            switch (location.getKey().getLocCode()) {
                 case "C" -> {
                     optionDialog = new OptionDialog(Global.parentForm, "Location");
                     List<OptionModel> listOP = new ArrayList<>();
                     listLocation.forEach(t -> {
-                        listOP.add(new OptionModel(t.getLocationCode(), t.getLocationName()));
+                        listOP.add(new OptionModel(t.getKey().getLocCode(), t.getLocName()));
                     });
                     optionDialog.setOptionList(listOP);
                     optionDialog.setLocationRelativeTo(null);
@@ -232,12 +232,12 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
                     initOption();
                 default -> {
                     listOption.clear();
-                    listOption.add(location.getLocationCode());
+                    listOption.add(location.getKey().getLocCode());
                 }
             }
             if (editor == null) {
                 if (observer != null) {
-                    observer.selected("Location", location.getLocationName());
+                    observer.selected("Location", location.getLocName());
                 }
             }
         }

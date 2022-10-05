@@ -176,7 +176,7 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
         filter.setRemark(Util1.isNull(txtRemark.getText(), "-"));
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         filter.setSaleManCode(saleManAutoCompleter.getSaleMan().getKey().getSaleManCode());
-        filter.setLocCode(locationAutoCompleter.getLocation().getLocationCode());
+        filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
         filter.setReference(txtRef.getText());
         //
         Mono<ResponseEntity<List<VSale>>> result = inventoryApi

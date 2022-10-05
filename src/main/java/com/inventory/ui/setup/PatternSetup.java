@@ -222,7 +222,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
                 Pattern p = patternTableModel.getPattern(row);
                 Mono<ReturnObject> result = inventoryApi.get()
                         .uri(builder -> builder.path("/setup/delete-pattern")
-                        .queryParam("stockCode", p.getStock().getKey().getStockCode())
+                        .queryParam("stockCode", p.getStockCode())
                         .build())
                         .retrieve().bodyToMono(ReturnObject.class);
                 ReturnObject ro = result.block();

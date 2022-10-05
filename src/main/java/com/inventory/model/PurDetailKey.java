@@ -17,13 +17,17 @@ public class PurDetailKey implements Serializable {
 
     private String vouNo;
     private String pdCode;
+    private Integer deptId;
 
     public PurDetailKey() {
     }
 
-    public PurDetailKey(String vouNo, String pdCode) {
+    public PurDetailKey(String vouNo, String pdCode, Integer deptId) {
         this.vouNo = vouNo;
         this.pdCode = pdCode;
+        this.deptId = deptId;
     }
+
+   
 
 }

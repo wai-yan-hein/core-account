@@ -10,6 +10,7 @@ import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.Location;
+import com.inventory.model.LocationKey;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.LocationTableModel;
 import java.awt.Color;
@@ -101,7 +102,7 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
 
     private void setCategory(Location loc) {
         location = loc;
-        txtName.setText(location.getLocationName());
+        txtName.setText(location.getLocName());
         txtUserCode.setText(location.getUserCode());
         txtName.requestFocus();
         lblStatus.setText("EDIT");
@@ -112,7 +113,7 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
         if (isValidEntry()) {
             location = inventoryRepo.saveLocaiton(location);
             if (lblStatus.getText().equals("EDIT")) {
-                locationTableModel.setLocation(location,selectRow);
+                locationTableModel.setLocation(location, selectRow);
             } else {
                 locationTableModel.addLocation(location);
             }
@@ -139,9 +140,13 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
             txtName.requestFocus();
         } else {
             location.setUserCode(txtUserCode.getText());
-            location.setLocationName(txtName.getText());
+            location.setLocName(txtName.getText());
             if (lblStatus.getText().equals("NEW")) {
-                location.setCompCode(Global.compCode);
+                LocationKey key = new LocationKey();
+                key.setCompCode(Global.compCode);
+                key.setDeptId(Global.deptId);
+                key.setLocCode(null);
+                location.setKey(key);
                 location.setCreatedBy(Global.loginUser.getUserCode());
                 location.setCreatedDate(Util1.getTodayDate());
                 location.setMacId(Global.macId);
@@ -211,7 +216,7 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
             }
         });
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel2.setFont(Global.lableFont);
         jLabel2.setText("Name");
@@ -282,7 +287,7 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(txtName, javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 72, Short.MAX_VALUE)
+                        .addGap(0, 73, Short.MAX_VALUE)
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnClear))
@@ -306,7 +311,7 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(btnClear)
                         .addComponent(btnSave)))
-                .addContainerGap(261, Short.MAX_VALUE))
+                .addContainerGap(263, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -316,8 +321,8 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE))
+                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())

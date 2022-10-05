@@ -4,8 +4,6 @@
  */
 package com.inventory.model;
 
-import java.util.Date;
-import java.util.List;
 import lombok.Data;
 
 /**
@@ -15,12 +13,20 @@ import lombok.Data;
 @Data
 public class Pattern {
 
-    private Stock stock;
+    private String stockCode;
+    private String userCode;
+    private String stockName;
+    private String groupName;
+    private String brandName;
+    private String catName;
+    private String relation;
     private Float qty;
     private Float price;
-    private StockUnit unit;
-    private Location location;
-    private String stockCode;
+    private String unitCode;
+    private String locCode;
+    private String locName;
+    private String mapStockCode;
     private Integer uniqueId;
     private String compCode;
+    private Integer deptId;
 }

@@ -18,13 +18,13 @@ import lombok.NonNull;
 public class PurHis implements java.io.Serializable {
 
     @NonNull
-    private String vouNo;
-    private Trader trader;
+    private PurHisKey key;
+    private String traderCode;
     @NonNull
     private Date vouDate;
     private Date dueDate;
     @NonNull
-    private Location location;
+    private String locCode;
     private Boolean deleted;
     @NonNull
     private Float vouTotal;
@@ -40,15 +40,13 @@ public class PurHis implements java.io.Serializable {
     private String remark;
     private Integer session;
     @NonNull
-    private Currency currency;
+    private String curCode;
     private Float discP;
     private Float taxP;
     private Float taxAmt;
     private String intgUpdStatus;
     private String reference;
     private Integer macId;
-    @NonNull
-    private String compCode;
     @NonNull
     private String status = "STATUS";
     private List<PurHisDetail> listPD;

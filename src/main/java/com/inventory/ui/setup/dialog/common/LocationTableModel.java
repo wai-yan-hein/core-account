@@ -48,7 +48,7 @@ public class LocationTableModel extends AbstractTableModel {
             case 0 ->
                 location.getUserCode();
             case 1 ->
-                location.getLocationName();
+                location.getLocName();
             default ->
                 null;
         };

@@ -354,7 +354,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             txtLocation.requestFocus();
         } else {
             saleHis.setCreditTerm(txtDueDate.getDate());
-            saleHis.setSaleManCode(saleManCompleter.getSaleMan().getKey().getSaleManCode());
+            SaleMan sm = saleManCompleter.getSaleMan();
+            if (sm != null) {
+                saleHis.setSaleManCode(sm.getKey().getSaleManCode());
+            }
             saleHis.setRemark(txtRemark.getText());
             saleHis.setReference(txtReference.getText());
             saleHis.setDiscP(Util1.getFloat(txtVouDiscP.getValue()));
@@ -367,7 +370,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             saleHis.setDeleted(Util1.getNullTo(saleHis.getDeleted()));
             saleHis.setOrderCode(orderCode);
             saleHis.setRegion(region);
-            saleHis.setLocCode(locationAutoCompleter.getLocation().getLocationCode());
+            saleHis.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             saleHis.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
             saleHis.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
             saleHis.setGrandTotal(Util1.getFloat(txtGrandTotal.getValue()));
@@ -477,7 +480,12 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     public void setSaleVoucher(SaleHis sh) {
         if (sh != null) {
+            saleHis = sh;
             progress.setIndeterminate(true);
+            locationAutoCompleter.setLocation(inventoryRepo.findLocation(saleHis.getLocCode()));
+            traderAutoCompleter.setTrader(inventoryRepo.findTrader(saleHis.getTraderCode()));
+            currAutoCompleter.setCurrency(inventoryRepo.findCurrency(saleHis.getCurCode()));
+            saleManCompleter.setSaleMan(inventoryRepo.findSaleMan(saleHis.getSaleManCode()));
             String vouNo = sh.getKey().getVouNo();
             Mono<ResponseEntity<List<SaleHisDetail>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/sale/get-sale-detail")
@@ -500,11 +508,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     lblStatus.setForeground(Color.blue);
                     disableForm(true);
                 }
-                saleHis = sh;
                 txtVouNo.setText(saleHis.getKey().getVouNo());
-                saleManCompleter.setSaleMan(saleHis.getSaleMan());
                 txtDueDate.setDate(saleHis.getCreditTerm());
-                currAutoCompleter.setCurrency(saleHis.getCurrency());
                 txtRemark.setText(saleHis.getRemark());
                 txtReference.setText(saleHis.getReference());
                 txtSaleDate.setDate(saleHis.getVouDate());
@@ -516,8 +521,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 txtVouPaid.setValue(Util1.getFloat(saleHis.getPaid()));
                 txtVouBalance.setValue(Util1.getFloat(saleHis.getBalance()));
                 txtGrandTotal.setValue(Util1.getFloat(saleHis.getGrandTotal()));
-                locationAutoCompleter.setLocation(inventoryRepo.findLocation(saleHis.getLocCode()));
-                traderAutoCompleter.setTrader(inventoryRepo.findTrader(saleHis.getTraderCode()));
                 chkPaid.setSelected(saleHis.getPaid() > 0);
                 focusTable();
                 progress.setIndeterminate(false);

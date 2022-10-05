@@ -16,12 +16,20 @@ import lombok.Data;
 public class StockInOutDetail implements Serializable {
 
     private StockInOutKey ioKey;
-    private Stock stock;
-    private Location location;
+    private String stockCode;
+    private String userCode;
+    private String stockName;
+    private String groupName;
+    private String brandName;
+    private String catName;
+    private String relation;
+    private String purUnitCode;
+    private String locCode;
+    private String locName;
     private Float inQty;
-    private StockUnit inUnit;
+    private String inUnitCode;
     private Float outQty;
-    private StockUnit outUnit;
+    private String outUnitCode;
     private String description;
     private String remark;
     private Integer uniqueId;

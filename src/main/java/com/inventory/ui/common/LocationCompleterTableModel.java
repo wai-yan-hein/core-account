@@ -46,12 +46,12 @@ public class LocationCompleterTableModel extends AbstractTableModel {
         try {
             Location location = listLocation.get(row);
 
-            switch (column) {
-                case 0: //Name
-                    return location.getLocationName();
-                default:
-                    return null;
-            }
+            return switch (column) {
+                case 0 ->
+                    location.getLocName();
+                default ->
+                    null;
+            }; //Name
         } catch (Exception ex) {
             log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }

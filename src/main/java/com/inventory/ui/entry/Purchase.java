@@ -20,6 +20,7 @@ import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.PurHis;
 import com.inventory.model.PurHisDetail;
+import com.inventory.model.PurHisKey;
 import com.inventory.model.Trader;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.PurchaseTableModel;
@@ -247,7 +248,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 if (t != null) {
                     clear();
                     if (print) {
-                        printVoucher(t.getVouNo());
+                        printVoucher(t.getKey().getVouNo());
                     }
                 }
             }
@@ -284,7 +285,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             status = false;
             txtCus.requestFocus();
         } else {
-            ph.setVouNo(txtVouNo.getText());
             ph.setRemark(txtRemark.getText());
             ph.setDiscP(Util1.getFloat(txtVouDiscP.getValue()));
             ph.setDiscount(Util1.getFloat(txtVouDiscount.getValue()));
@@ -292,20 +292,24 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             ph.setTaxAmt(Util1.getFloat(txtTax.getValue()));
             ph.setPaid(Util1.getFloat(txtVouPaid.getValue()));
             ph.setBalance(Util1.getFloat(txtVouBalance.getValue()));
-            ph.setCurrency(currAutoCompleter.getCurrency());
+            ph.setCurCode(currAutoCompleter.getCurrency().getCurCode());
             ph.setDeleted(Util1.getNullTo(ph.getDeleted()));
-            ph.setLocation(locationAutoCompleter.getLocation());
+            ph.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             ph.setVouDate(txtPurDate.getDate());
-            ph.setTrader(traderAutoCompleter.getTrader());
+            ph.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
             ph.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
             ph.setStatus(lblStatus.getText());
             ph.setReference(txtReference.getText());
             if (lblStatus.getText().equals("NEW")) {
+                PurHisKey key = new PurHisKey();
+                key.setCompCode(Global.compCode);
+                key.setDeptId(Global.deptId);
+                key.setVouNo(null);
+                ph.setKey(key);
                 ph.setCreatedDate(Util1.getTodayDate());
                 ph.setCreatedBy(Global.loginUser.getUserCode());
                 ph.setSession(Global.sessionId);
                 ph.setMacId(Global.macId);
-                ph.setCompCode(Global.compCode);
             } else {
                 ph.setUpdatedBy(Global.loginUser.getUserCode());
             }
@@ -399,7 +403,10 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         if (ph != null) {
             progress.setIndeterminate(true);
             ph = pur;
-            String vouNo = ph.getVouNo();
+            currAutoCompleter.setCurrency(inventoryRepo.findCurrency(ph.getCurCode()));
+            locationAutoCompleter.setLocation(inventoryRepo.findLocation(ph.getLocCode()));
+            traderAutoCompleter.setTrader(inventoryRepo.findTrader(ph.getTraderCode()));
+            String vouNo = ph.getKey().getVouNo();
             Mono<ResponseEntity<List<PurHisDetail>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/pur/get-pur-detail")
                     .queryParam("vouNo", vouNo)
@@ -422,9 +429,8 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                     lblStatus.setForeground(Color.blue);
                     disableForm(true);
                 }
-                txtVouNo.setText(ph.getVouNo());
+                txtVouNo.setText(ph.getKey().getVouNo());
                 txtDueDate.setDate(ph.getDueDate());
-                currAutoCompleter.setCurrency(ph.getCurrency());
                 txtRemark.setText(ph.getRemark());
                 txtPurDate.setDate(ph.getVouDate());
                 txtVouTotal.setValue(Util1.getFloat(ph.getVouTotal()));
@@ -435,8 +441,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 txtVouPaid.setValue(Util1.getFloat(ph.getPaid()));
                 txtVouBalance.setValue(Util1.getFloat(ph.getBalance()));
                 txtGrandTotal.setValue(Util1.getFloat(txtGrandTotal.getValue()));
-                locationAutoCompleter.setLocation(ph.getLocation());
-                traderAutoCompleter.setTrader(ph.getTrader());
                 chkPaid.setSelected(Util1.getFloat(ph.getPaid()) > 0);
                 txtReference.setText(ph.getReference());
                 focusTable();

@@ -5,7 +5,6 @@
  */
 package com.inventory.model;
 
-import com.user.model.Currency;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
@@ -17,18 +16,17 @@ import lombok.Data;
 @Data
 public class OPHis {
 
-    private String vouNo;
+    private OPHisKey key;
     private Date vouDate;
-    private Currency currency;
+    private String curCode;
     private String remark;
     private String createdBy;
-    private Location location;
+    private String locCode;
     private Date createdDate;
     private String updatedBy;
     private Date updatedDate;
     private boolean deleted;
     private Integer macId;
-    private String compCode;
     private float opAmt;
     private List<OPHisDetail> detailList;
     private List<String> listDel;

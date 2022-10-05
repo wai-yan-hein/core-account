@@ -15,13 +15,18 @@ import lombok.Data;
 public class OPHisDetail {
 
     private String opCode;
-    private Stock stock;
+    private String stockCode;
+    private String userCode;
+    private String stockName;
+    private String groupName;
+    private String brandName;
+    private String catName;
+    private String relation;
     private Float qty;
-    private Float stdWt;
     private Float price;
     private Float amount;
-    private Location location;
-    private StockUnit stockUnit;
+    private String locCode;
+    private String unitCode;
     private String vouNo;
     private Integer uniqueId;
 }

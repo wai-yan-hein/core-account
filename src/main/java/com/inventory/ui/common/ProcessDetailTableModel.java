@@ -73,7 +73,7 @@ public class ProcessDetailTableModel extends AbstractTableModel {
                     if (p.getLocation() == null) {
                         return null;
                     }
-                    return p.getLocation().getLocationName();
+                    return p.getLocation().getLocName();
                 }
                 case 3 -> {
                     return p.getQty();

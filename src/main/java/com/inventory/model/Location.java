@@ -15,8 +15,8 @@ import lombok.Data;
 @Data
 public class Location implements java.io.Serializable {
 
-    private String locationCode;
-    private String locationName;
+    private LocationKey key;
+    private String locName;
     private String parentCode;
     private boolean calcStock;
     private Date updatedDate;
@@ -25,19 +25,14 @@ public class Location implements java.io.Serializable {
     private String createdBy;
     private Integer macId;
     private String userCode;
-    private String compCode;
 
-    public Location(String locationCode, String locationName) {
-        this.locationCode = locationCode;
-        this.locationName = locationName;
+    public Location(String locCode, String locName) {
+        this.key = new LocationKey();
+        this.key.setLocCode(locCode);
+        this.locName = locName;
     }
 
     public Location() {
-    }
-
-    @Override
-    public String toString() {
-        return locationName;
     }
 
 }

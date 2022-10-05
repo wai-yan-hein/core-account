@@ -217,7 +217,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         } else if (lblStatus.getText().equals("DELETED")) {
             clear();
             status = false;
-        } else if (fromLoc.getLocationCode().equals(toLoc.getLocationCode())) {
+        } else if (fromLoc.getKey().getLocCode().equals(toLoc.getKey().getLocCode())) {
             status = false;
             JOptionPane.showMessageDialog(this, "Can't transfer the same location.");
             txtTo.requestFocus();

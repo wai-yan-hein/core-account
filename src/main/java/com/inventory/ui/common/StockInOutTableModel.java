@@ -97,34 +97,34 @@ public class StockInOutTableModel extends AbstractTableModel {
             StockInOutDetail io = listStock.get(row);
             switch (column) {
                 case 0 -> {
-                    return io.getStock() == null ? null : io.getStock().getUserCode();
+                    return io.getUserCode() == null ? io.getStockCode() : io.getUserCode();
                 }
                 case 1 -> {
                     String stockName = null;
-                    if (io.getStock() != null) {
-                        stockName = io.getStock().getStockName();
+                    if (io.getStockCode() != null) {
+                        stockName = io.getStockName();
                         if (ProUtil.isStockNameWithCategory()) {
-                            if (io.getStock().getCategory() != null) {
-                                stockName = String.format("%s (%s)", stockName, io.getStock().getCategory().getCatName());
+                            if (io.getCatName() != null) {
+                                stockName = String.format("%s (%s)", stockName, io.getCatName());
                             }
                         }
                     }
                     return stockName;
                 }
                 case 2 -> {
-                    return io.getLocation();
+                    return io.getLocName();
                 }
                 case 3 -> {
                     return io.getInQty();
                 }
                 case 4 -> {
-                    return io.getInUnit();
+                    return io.getInUnitCode();
                 }
                 case 5 -> {
                     return io.getOutQty();
                 }
                 case 6 -> {
-                    return io.getOutUnit();
+                    return io.getOutUnitCode();
                 }
                 case 7 -> {
                     return io.getCostPrice();
@@ -163,18 +163,25 @@ public class StockInOutTableModel extends AbstractTableModel {
             if (value != null) {
                 switch (column) {
                     case 0,1 -> {
-                        if (value instanceof Stock stock) {
-                            io.setStock(stock);
+                        if (value instanceof Stock s) {
+                            io.setStockCode(s.getKey().getStockCode());
+                            io.setUserCode(s.getUserCode());
+                            io.setRelation(s.getUnitRelation().getRelName());
                             io.setCostPrice(0.0f);
-                            io.setLocation(inventoryRepo.getDefaultLocation());
-                            genPattern(stock, io);
+                            Location l = inventoryRepo.getDefaultLocation();
+                            if (l != null) {
+                                io.setLocCode(l.getKey().getLocCode());
+                                io.setLocName(l.getLocName());
+                            }
+                            genPattern(s, io);
                             setColumnSelection(3);
                         }
                         addNewRow();
                     }
                     case 2 -> {
-                        if (value instanceof Location location) {
-                            io.setLocation(location);
+                        if (value instanceof Location l) {
+                            io.setLocCode(l.getKey().getLocCode());
+                            io.setLocName(l.getLocName());
                         }
                         setColumnSelection(5);
                     }
@@ -182,8 +189,7 @@ public class StockInOutTableModel extends AbstractTableModel {
                         if (Util1.isNumber(value)) {
                             io.setInQty(Util1.getFloat(value));
                             io.setOutQty(null);
-                            io.setOutUnit(null);
-                            io.setInUnit(io.getStock().getPurUnit());
+                            io.setOutUnitCode(null);
                             parent.setRowSelectionInterval(row + 1, row + 1);
                             parent.setColumnSelectionInterval(0, 0);
                         }
@@ -191,8 +197,8 @@ public class StockInOutTableModel extends AbstractTableModel {
                     }
 
                     case 4 -> {
-                        if (value instanceof StockUnit stockUnit) {
-                            io.setInUnit(stockUnit);
+                        if (value instanceof StockUnit unit) {
+                            io.setInUnitCode(unit.getKey().getUnitCode());
                         }
                         setColumnSelection(8);
                     }
@@ -200,15 +206,14 @@ public class StockInOutTableModel extends AbstractTableModel {
                         if (Util1.isNumber(value)) {
                             io.setOutQty(Util1.getFloat(value));
                             io.setInQty(null);
-                            io.setInUnit(null);
-                            io.setOutUnit(io.getStock().getPurUnit());
+                            io.setOutQty(null);
                             parent.setRowSelectionInterval(row + 1, row + 1);
                             parent.setColumnSelectionInterval(0, 0);
                         }
                     }
                     case 6 -> {
-                        if (value instanceof StockUnit stockUnit) {
-                            io.setOutUnit(stockUnit);
+                        if (value instanceof StockUnit unit) {
+                            io.setOutUnitCode(unit.getKey().getUnitCode());
                         }
                     }
                     case 7 -> {
@@ -219,13 +224,13 @@ public class StockInOutTableModel extends AbstractTableModel {
                 }
             }
             if (column != 7) {
-                if (io.getStock() != null) {
-                    if (io.getInUnit() != null || io.getOutUnit() != null) {
-                        String unit = io.getInUnit() == null ? io.getOutUnit().getKey().getUnitCode() : io.getInUnit().getKey().getUnitCode();
-                        io.setCostPrice(inventoryRepo.getPurRecentPrice(io.getStock().getKey().getStockCode(),
+                if (io.getStockCode() != null) {
+                    if (io.getInUnitCode() != null || io.getOutUnitCode() != null) {
+                        String unit = Util1.isNull(io.getInUnitCode(), io.getOutUnitCode());
+                        io.setCostPrice(inventoryRepo.getPurRecentPrice(io.getStockCode(),
                                 Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), unit));
                         if (io.getCostPrice() == 0) {
-                            io.setCostPrice(inventoryRepo.getStockIORecentPrice(io.getStock().getKey().getStockCode(),
+                            io.setCostPrice(inventoryRepo.getStockIORecentPrice(io.getStockCode(),
                                     Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), unit));
                         }
                     }
@@ -251,13 +256,13 @@ public class StockInOutTableModel extends AbstractTableModel {
                     StockInOutDetail io = new StockInOutDetail();
                     io.setOutQty(qty * p.getQty());
                     io.setCostPrice(Util1.getFloat(p.getPrice()));
-                    io.setOutUnit(p.getUnit());
-                    io.setStock(p.getStock());
-                    io.setLocation(p.getLocation());
+                    io.setOutUnitCode(p.getUnitCode());
+                    io.setStockCode(p.getStockCode());
+                    io.setLocCode(p.getLocCode());
                     addStockIO(io);
                 });
                 iod.setInQty(qty);
-                iod.setInUnit(s.getPurUnit());
+                iod.setInUnitCode(s.getPurUnit().getKey().getUnitCode());
             }
         }
     }
@@ -278,12 +283,12 @@ public class StockInOutTableModel extends AbstractTableModel {
     public boolean isValidEntry() {
         boolean status = true;
         for (StockInOutDetail od : listStock) {
-            if (od.getStock() != null) {
-                if (od.getLocation() == null) {
+            if (od.getStockCode() != null) {
+                if (od.getLocCode() == null) {
                     status = false;
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Location.");
                     parent.requestFocus();
-                } else if (od.getInUnit() == null && od.getOutUnit() == null) {
+                } else if (od.getInUnitCode() == null && od.getOutUnitCode() == null) {
                     status = false;
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Unit.");
                     parent.requestFocus();
@@ -343,7 +348,7 @@ public class StockInOutTableModel extends AbstractTableModel {
         boolean status = false;
         if (listStock.size() >= 1) {
             StockInOutDetail get = listStock.get(listStock.size() - 1);
-            if (get.getStock() == null) {
+            if (get.getStockCode() == null) {
                 status = true;
             }
         }

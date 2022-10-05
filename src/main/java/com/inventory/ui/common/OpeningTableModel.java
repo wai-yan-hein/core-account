@@ -29,8 +29,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class OpeningTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Stock Code", "Stock Name",
-        "Qty", "Std-Wt", "Unit", "Price", "Amount"};
+    private String[] columnNames = {"Stock Code", "Stock Name", "Relation",
+        "Qty", "Unit", "Price", "Amount"};
     private JTable parent;
     private List<OPHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
@@ -90,16 +90,21 @@ public class OpeningTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 0,1,4 ->
-                String.class;
-            default ->
+            case 3,5,6 ->
                 Float.class;
+            default ->
+                String.class;
         };
     }
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return column != 8;
+        switch (column) {
+            case 2,6 -> {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -109,32 +114,32 @@ public class OpeningTableModel extends AbstractTableModel {
             switch (column) {
                 case 0 -> {
                     //code
-                    return record.getStock() == null ? null : record.getStock().getUserCode();
+                    return record.getUserCode() == null ? record.getStockCode() : record.getUserCode();
                 }
                 case 1 -> {
                     //Name
                     String stockName = null;
-                    if (record.getStock() != null) {
-                        stockName = record.getStock().getStockName();
+                    if (record.getStockCode() != null) {
+                        stockName = record.getStockName();
                         if (ProUtil.isStockNameWithCategory()) {
-                            if (record.getStock().getCategory() != null) {
-                                stockName = String.format("%s (%s)", stockName, record.getStock().getCategory().getCatName());
+                            if (record.getCatName() != null) {
+                                stockName = String.format("%s (%s)", stockName, record.getCatName());
                             }
                         }
                     }
                     return stockName;
                 }
                 case 2 -> {
+                    return record.getRelation();
+                }
+
+                case 3 -> {
                     //qty
                     return record.getQty();
                 }
-                case 3 -> {
-                    //Std-Wt
-                    return record.getStdWt();
-                }
                 case 4 -> {
                     //unit
-                    return record.getStockUnit();
+                    return record.getUnitCode();
                 }
                 case 5 -> {
                     //price
@@ -162,17 +167,19 @@ public class OpeningTableModel extends AbstractTableModel {
                 case 0,1 -> {
                     //Code
                     if (value != null) {
-                        if (value instanceof Stock stock) {
-                            record.setStock(stock);
+                        if (value instanceof Stock s) {
+                            record.setStockCode(s.getKey().getStockCode());
+                            record.setStockName(s.getStockName());
+                            record.setUserCode(s.getUserCode());
+                            record.setRelation(s.getUnitRelation().getRelName());
                             record.setQty(1.0f);
-                            record.setStdWt(Util1.gerFloatOne(stock.getPurWeight()));
-                            record.setStockUnit(stock.getPurUnit());
+                            record.setUnitCode(s.getPurUnit().getKey().getUnitCode());
                             addNewRow();
                         }
                     }
-                    parent.setColumnSelectionInterval(2, 2);
+                    parent.setColumnSelectionInterval(3, 3);
                 }
-                case 2 -> {
+                case 3 -> {
                     //
                     if (Util1.isNumber(value)) {
                         if (Util1.isPositive(Util1.getFloat(value))) {
@@ -188,27 +195,11 @@ public class OpeningTableModel extends AbstractTableModel {
                     parent.setRowSelectionInterval(row, row);
                     parent.setColumnSelectionInterval(4, 4);
                 }
-                case 3 -> {
-                    //Std-Wt
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            record.setStdWt(Util1.getFloat(value));
-                            parent.setColumnSelectionInterval(4, 4);
-                        } else {
-                            showMessageBox("Input value must be positive");
-                            parent.setColumnSelectionInterval(column, column);
-                        }
-                    } else {
-                        showMessageBox("Input value must be positive");
-                        parent.setColumnSelectionInterval(column, column);
-                    }
-                }
-
                 case 4 -> {
                     //Unit
                     if (value != null) {
-                        if (value instanceof StockUnit stockUnit) {
-                            record.setStockUnit(stockUnit);
+                        if (value instanceof StockUnit unit) {
+                            record.setUnitCode(unit.getKey().getUnitCode());
                         }
                     }
                     parent.setColumnSelectionInterval(5, 5);
@@ -260,8 +251,8 @@ public class OpeningTableModel extends AbstractTableModel {
             op.setAmount(Util1.getFloat(op.getAmount()));
             op.setPrice(Util1.getFloat(op.getPrice()));
             op.setQty(Util1.getFloat(op.getQty()));
-            if (op.getStock() != null) {
-                if (op.getStockUnit() == null) {
+            if (op.getStockCode() != null) {
+                if (op.getUnitCode() == null) {
                     status = false;
                     JOptionPane.showMessageDialog(parent, "Invalid Unit.");
                 }
@@ -284,7 +275,7 @@ public class OpeningTableModel extends AbstractTableModel {
         boolean status = true;
         if (listDetail.size() > 1) {
             OPHisDetail get = listDetail.get(listDetail.size() - 1);
-            if (get.getStock() == null) {
+            if (get.getStockCode() == null) {
                 status = false;
             }
         }
@@ -301,7 +292,7 @@ public class OpeningTableModel extends AbstractTableModel {
     }
 
     private void calculatePrice(OPHisDetail pd) {
-        if (pd.getStock() != null) {
+        if (pd.getStockCode() != null) {
             float qty = Util1.getFloat(pd.getQty());
             float purAmt = Util1.getFloat(pd.getAmount());
             float price = purAmt / qty;
@@ -312,7 +303,7 @@ public class OpeningTableModel extends AbstractTableModel {
     private void calculateAmount(OPHisDetail pur) {
         float price = Util1.getFloat(pur.getPrice());
         float qty = Util1.getFloat(pur.getQty());
-        if (pur.getStock() != null) {
+        if (pur.getStockCode() != null) {
             float amount = qty * price;
             pur.setPrice(price);
             pur.setAmount(amount);

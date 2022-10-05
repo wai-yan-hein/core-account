@@ -11,7 +11,9 @@ import com.common.Util1;
 import com.inventory.model.Category;
 import com.inventory.model.General;
 import com.inventory.model.Location;
+import com.inventory.model.LocationKey;
 import com.inventory.model.OPHis;
+import com.inventory.model.OPHisKey;
 import com.inventory.model.Pattern;
 import com.inventory.model.PriceOption;
 import com.inventory.model.ProcessType;
@@ -60,34 +62,22 @@ public class InventoryRepo {
 
     public Trader getDefaultCustomer() {
         String traderCode = Global.hmRoleProperty.get("default.customer");
-        TraderKey key = new TraderKey();
-        key.setCode(Util1.isNull(traderCode, "-"));
-        key.setCompCode(Global.compCode);
-        key.setDeptId(Global.deptId);
-        return findTrader(Util1);
+        return findTrader(traderCode);
     }
 
     public Trader getDefaultSupplier() {
         String traderCode = Global.hmRoleProperty.get("default.supplier");
-        TraderKey key = new TraderKey();
-        key.setCode(Util1.isNull(traderCode, "-"));
-        key.setCompCode(Global.compCode);
-        key.setDeptId(Global.deptId);
-        return findTrader(key);
+        return findTrader(traderCode);
     }
 
     public Location getDefaultLocation() {
         String locCode = Global.hmRoleProperty.get("default.location");
-        return findLocation(Util1.isNull(locCode, "-"));
+        return findLocation(locCode);
     }
 
     public SaleMan getDefaultSaleMan() {
         String code = Global.hmRoleProperty.get("default.saleman");
-        SaleManKey key = new SaleManKey();
-        key.setCompCode(Global.compCode);
-        key.setDeptId(Global.deptId);
-        key.setSaleManCode(Util1.isNull(code, "-"));
-        return findSaleMan(key);
+        return findSaleMan(code);
     }
 
     public List<PriceOption> getPriceOption() {
@@ -122,7 +112,11 @@ public class InventoryRepo {
         return result.block(Duration.ofMinutes(min)).getBody();
     }
 
-    public SaleMan findSaleMan(SaleManKey key) {
+    public SaleMan findSaleMan(String code) {
+        SaleManKey key = new SaleManKey();
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        key.setSaleManCode(code);
         Mono<SaleMan> result = inventoryApi.post()
                 .uri("/setup/find-saleman")
                 .body(Mono.just(key), SaleManKey.class)
@@ -163,7 +157,7 @@ public class InventoryRepo {
 
     public Trader findTrader(String code) {
         TraderKey key = new TraderKey();
-        key.setCode(code);
+        key.setCode(Util1.isNull(code, "-"));
         key.setCompCode(Global.compCode);
         key.setDeptId(Global.deptId);
         Mono<Trader> result = inventoryApi.post()
@@ -216,11 +210,24 @@ public class InventoryRepo {
     }
 
     public Location findLocation(String locCode) {
-        Mono<ResponseEntity<Location>> result = inventoryApi.get()
-                .uri(builder -> builder.path("/setup/find-location")
-                .queryParam("locCode", locCode)
+        LocationKey key = new LocationKey();
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        key.setLocCode(locCode);
+        Mono<Location> result = inventoryApi.post()
+                .uri("/setup/find-location")
+                .body(Mono.just(key), LocationKey.class)
+                .retrieve()
+                .bodyToMono(Location.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
+    public Currency findCurrency(String curCode) {
+        Mono<ResponseEntity<Currency>> result = inventoryApi.get()
+                .uri(builder -> builder.path("/setup/find-currency")
+                .queryParam("curCode", curCode)
                 .build())
-                .retrieve().toEntity(Location.class);
+                .retrieve().toEntity(Currency.class);
         return result.block(Duration.ofMinutes(min)).getBody();
     }
 
@@ -508,11 +515,15 @@ public class InventoryRepo {
     }
 
     public OPHis findOpening(String vouNo) {
-        Mono<OPHis> result = inventoryApi.get()
-                .uri(builder -> builder.path("/setup/find-opening")
-                .queryParam("code", vouNo)
-                .build())
-                .retrieve().bodyToMono(OPHis.class);
+        OPHisKey key = new OPHisKey();
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        key.setVouNo(vouNo);
+        Mono<OPHis> result = inventoryApi.post()
+                .uri("/setup/find-opening")
+                .body(Mono.just(key), OPHisKey.class)
+                .retrieve()
+                .bodyToMono(OPHis.class);
         return result.block(Duration.ofMinutes(min));
     }
 

@@ -165,7 +165,7 @@ public class PurVouSearchDialog extends javax.swing.JDialog implements KeyListen
         filter.setVouNo(txtVouNo.getText());
         filter.setRemark(txtRemark.getText());
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
-        filter.setLocCode(locationAutoCompleter.getLocation().getLocationCode());
+        filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
         filter.setReference(txtRef.getText());
         //
         Mono<ResponseEntity<List<VPurchase>>> result = inventoryApi

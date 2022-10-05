@@ -157,7 +157,7 @@ public class StockIOSearchDialog extends javax.swing.JDialog implements KeyListe
         filter.setDescription(Util1.isNull(txtDesp.getText(), "-"));
         filter.setVouStatus(vouStatusAutoCompleter.getVouStatus().getKey().getCode());
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
-        filter.setLocCode(locationAutoCompleter.getLocation().getLocationCode());
+        filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
         //
         Mono<ResponseEntity<List<VStockIO>>> result = inventoryApi
                 .post()

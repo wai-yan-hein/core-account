@@ -157,7 +157,7 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
         filter.setUserCode(appUserAutoCompleter.getAppUser().getUserCode());
         filter.setVouNo(txtVouNo.getText());
         filter.setRemark(txtRemark.getText());
-        filter.setLocCode(locationAutoCompleter.getLocation().getLocationCode());
+        filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         //
         Mono<ResponseEntity<List<VReturnOut>>> result = inventoryApi

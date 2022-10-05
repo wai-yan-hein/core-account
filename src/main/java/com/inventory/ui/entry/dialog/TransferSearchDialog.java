@@ -158,8 +158,8 @@ public class TransferSearchDialog extends javax.swing.JDialog implements KeyList
         filter.setRemark(Util1.isNull(txtRemark.getText(), "-"));
         filter.setRefNo(Util1.isNull(txtRefNo.getText(), "-"));
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
-        filter.setLocCode(fromLocationCompleter.getLocation().getLocationCode());
-        filter.setLocCodeTo(toLocationCompleter.getLocation().getLocationCode());
+        filter.setLocCode(fromLocationCompleter.getLocation().getKey().getLocCode());
+        filter.setLocCodeTo(toLocationCompleter.getLocation().getKey().getLocCode());
         //
         Mono<ResponseEntity<List<VTransfer>>> result = inventoryApi
                 .post()

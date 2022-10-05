@@ -237,15 +237,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         printerAutoCompleter.setText(hmProperty.get("printer.name"));
         cusCompleter = new TraderAutoCompleter(txtCustomer, inventoryRepo, null, false, "CUS");
         cusCompleter.setObserver(this);
-        TraderKey key = new TraderKey();
-        key.setCode(hmProperty.get("default.customer"));
-        key.setCompCode(Global.compCode);
-        key.setDeptId(Global.deptId);
-        cusCompleter.setTrader(inventoryRepo.findTrader(key));
+        cusCompleter.setTrader(inventoryRepo.findTrader(hmProperty.get("default.customer")));
         supCompleter = new TraderAutoCompleter(txtSupplier, inventoryRepo, null, false, "SUP");
         supCompleter.setObserver(this);
-        key.setCode(hmProperty.get("default.supplier"));
-        supCompleter.setTrader(inventoryRepo.findTrader(key));
+        supCompleter.setTrader(inventoryRepo.findTrader(hmProperty.get("default.supplier")));
         locCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, false, false);
         locCompleter.setObserver(this);
         locCompleter.setLocation(inventoryRepo.findLocation(hmProperty.get("default.location")));
@@ -754,7 +749,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             String key = "default.location";
             Location loc = locCompleter.getLocation();
             if (loc != null) {
-                String value = loc.getLocationCode();
+                String value = loc.getKey().getLocCode();
                 save(key, value);
             }
         } else if (source.equals("Mac")) {

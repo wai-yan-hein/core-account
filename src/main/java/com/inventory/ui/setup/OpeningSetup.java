@@ -19,6 +19,7 @@ import com.inventory.editor.StockCellEditor;
 import com.inventory.model.Location;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisDetail;
+import com.inventory.model.OPHisKey;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnitKey;
 import com.inventory.ui.common.InventoryRepo;
@@ -130,15 +131,14 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         tblOpening.setCellSelectionEnabled(true);
         tblOpening.setRowHeight(Global.tblRowHeight);
         tblOpening.getColumnModel().getColumn(0).setPreferredWidth(50);//code
-        tblOpening.getColumnModel().getColumn(1).setPreferredWidth(100);//name
-        tblOpening.getColumnModel().getColumn(2).setPreferredWidth(50);//qty
-        tblOpening.getColumnModel().getColumn(3).setPreferredWidth(50);//std wt
-        tblOpening.getColumnModel().getColumn(4).setPreferredWidth(50);//unit
-        tblOpening.getColumnModel().getColumn(5).setPreferredWidth(100);//price
-        tblOpening.getColumnModel().getColumn(6).setPreferredWidth(100);//amount
+        tblOpening.getColumnModel().getColumn(1).setPreferredWidth(200);//name
+        tblOpening.getColumnModel().getColumn(2).setPreferredWidth(100);//rel
+        tblOpening.getColumnModel().getColumn(3).setPreferredWidth(50);//qty
+        tblOpening.getColumnModel().getColumn(5).setPreferredWidth(50);//unit
+        tblOpening.getColumnModel().getColumn(6).setPreferredWidth(100);//price
+        tblOpening.getColumnModel().getColumn(7).setPreferredWidth(100);//amount
         tblOpening.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblOpening.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblOpening.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
         tblOpening.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
         tblOpening.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
         tblOpening.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
@@ -166,23 +166,25 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     private void saveOpening() {
         try {
             progress.setIndeterminate(true);
-            String voucherNo = txtVouNo.getText();
             if (isValidEntry() && openingTableModel.isValidEntry()) {
                 progress.setIndeterminate(true);
                 if (lblStatus.getText().equals("NEW")) {
+                    OPHisKey key = new OPHisKey();
+                    key.setCompCode(Global.compCode);
+                    key.setDeptId(Global.deptId);
+                    key.setVouNo(null);
+                    oPHis.setKey(key);
                     oPHis.setCreatedBy(Global.loginUser.getUserCode());
                     oPHis.setCreatedDate(Util1.getTodayDate());
                 } else {
                     oPHis.setCreatedBy(Global.loginUser.getUserCode());
                 }
-                oPHis.setVouNo(voucherNo);
-                oPHis.setCurrency(currencyAAutoCompleter.getCurrency());
+                oPHis.setCurCode(currencyAAutoCompleter.getCurrency().getCurCode());
                 oPHis.setVouDate(txtOPDate.getDate());
                 oPHis.setRemark(txtRemark.getText());
                 oPHis.setStatus(lblStatus.getText());
-                oPHis.setCompCode(Global.compCode);
                 oPHis.setMacId(Global.macId);
-                oPHis.setLocation(locationAutoCompleter.getLocation());
+                oPHis.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
                 oPHis.setDetailList(openingTableModel.getListDetail());
                 oPHis.setListDel(openingTableModel.getDelList());
                 Mono<ReturnObject> result = inventoryApi.post()
@@ -254,37 +256,41 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     }
 
     private void setVoucher(OPHis op) {
-        progress.setIndeterminate(true);
-        Mono<ResponseEntity<List<OPHisDetail>>> result = inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-opening-detail")
-                .queryParam("vouNo", op.getVouNo())
-                .build())
-                .retrieve().toEntityList(OPHisDetail.class);
-        result.subscribe((t) -> {
+        if (op != null) {
             oPHis = op;
-            txtVouNo.setText(oPHis.getVouNo());
-            txtOPDate.setDate(oPHis.getVouDate());
-            locationAutoCompleter.setLocation(oPHis.getLocation());
-            currencyAAutoCompleter.setCurrency(oPHis.getCurrency());
-            txtRemark.setText(oPHis.getRemark());
-            if (oPHis.isDeleted()) {
-                lblStatus.setText("DELETED");
-                lblStatus.setForeground(Color.RED);
-                disableForm(false);
-            } else {
-                lblStatus.setText("EDIT");
-                lblStatus.setForeground(Color.blue);
-                disableForm(true);
-            }
-            openingTableModel.setListDetail(t.getBody());
-            openingTableModel.addNewRow();
-            calculatAmount();
-            focusOnTable();
-            progress.setIndeterminate(false);
-        }, (e) -> {
-            progress.setIndeterminate(false);
-            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-        });
+            locationAutoCompleter.setLocation(inventoryRepo.findLocation(oPHis.getLocCode()));
+            currencyAAutoCompleter.setCurrency(inventoryRepo.findCurrency(oPHis.getCurCode()));
+            progress.setIndeterminate(true);
+            Mono<ResponseEntity<List<OPHisDetail>>> result = inventoryApi.get()
+                    .uri(builder -> builder.path("/setup/get-opening-detail")
+                    .queryParam("vouNo", op.getKey().getVouNo())
+                    .queryParam("compCode", op.getKey().getCompCode())
+                    .queryParam("deptId", op.getKey().getDeptId())
+                    .build())
+                    .retrieve().toEntityList(OPHisDetail.class);
+            result.subscribe((t) -> {
+                txtVouNo.setText(oPHis.getKey().getVouNo());
+                txtOPDate.setDate(oPHis.getVouDate());
+                txtRemark.setText(oPHis.getRemark());
+                if (oPHis.isDeleted()) {
+                    lblStatus.setText("DELETED");
+                    lblStatus.setForeground(Color.RED);
+                    disableForm(false);
+                } else {
+                    lblStatus.setText("EDIT");
+                    lblStatus.setForeground(Color.blue);
+                    disableForm(true);
+                }
+                openingTableModel.setListDetail(t.getBody());
+                openingTableModel.addNewRow();
+                calculatAmount();
+                focusOnTable();
+                progress.setIndeterminate(false);
+            }, (e) -> {
+                progress.setIndeterminate(false);
+                JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+            });
+        }
     }
 
     private void disableForm(boolean status) {
@@ -379,9 +385,8 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                     }
                     Stock s = hm.get(stockCode);
                     if (s != null) {
-                        op.setStock(s);
+                        op.setStockCode(s.getKey().getStockCode());
                         op.setQty(Util1.getFloat(qty));
-                        op.setStdWt(1.0f);
                         StockUnitKey key = new StockUnitKey();
                         key.setUnitCode("pcs");
                         key.setCompCode(Global.compCode);
