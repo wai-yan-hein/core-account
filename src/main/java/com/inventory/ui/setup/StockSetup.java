@@ -260,7 +260,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 key.setDeptId(Global.deptId);
                 stock.setKey(key);
                 stock.setMacId(Global.macId);
-                stock.setCompCode(Global.compCode);
                 stock.setCreatedDate(Util1.getTodayDate());
                 stock.setCreatedBy(Global.loginUser.getUserCode());
             } else {

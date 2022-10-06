@@ -9,6 +9,7 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.CFont;
 import com.inventory.model.Stock;
+import com.inventory.model.StockKey;
 import com.inventory.model.StockType;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.StockImportTableModel;
@@ -132,31 +133,31 @@ public class StockImportDialog extends javax.swing.JDialog {
                     String[] data = line.split(splitBy);    // use comma as separator
                     String userCode = null;
                     String stockName = null;
-                    String priceA = null;
-                    String priceB = null;
                     String typeCode = null;
                     lineCount++;
                     try {
                         userCode = data[0];
                         stockName = data[1];
-                        priceA = data[2];
-                        priceB = data[3];
-                        typeCode = data[4];
+                        typeCode = data[2];
                     } catch (IndexOutOfBoundsException e) {
                         //JOptionPane.showMessageDialog(Global.parentForm, "FORMAT ERROR IN LINE:" + lineCount + e.getMessage());
                     }
-                    t.setUserCode(userCode);
-                    t.setStockName(getZawgyiText(stockName));
-                    t.setSalePriceN(Util1.getFloat(priceA));
-                    t.setSalePriceA(Util1.getFloat(priceB));
-                    t.setTypeCode(typeCode);
-                    t.setCompCode(Global.compCode);
-                    t.setActive(true);
-                    t.setCreatedDate(Util1.getTodayDate());
-                    t.setCreatedBy(Global.loginUser.getUserCode());
-                    t.setMacId(Global.macId);
-                    t.setCalculate(true);
-                    listStock.add(t);
+                    if (!Util1.isNull(typeCode, "0").equals("0")) {
+                        StockKey key = new StockKey();
+                        key.setCompCode(Global.compCode);
+                        key.setDeptId(Global.deptId);
+                        key.setStockCode(null);
+                        t.setKey(key);
+                        t.setUserCode(userCode);
+                        t.setStockName(getZawgyiText(stockName));
+                        t.setTypeCode(getGroupCode(typeCode));
+                        t.setActive(true);
+                        t.setCreatedDate(Util1.getTodayDate());
+                        t.setCreatedBy(Global.loginUser.getUserCode());
+                        t.setMacId(Global.macId);
+                        t.setCalculate(true);
+                        listStock.add(t);
+                    }
                 }
             }
             tableModel.setListStock(listStock);
@@ -196,6 +197,21 @@ public class StockImportDialog extends javax.swing.JDialog {
         }
 
         return tmpStr;
+    }
+
+    private String getGroupCode(String str) {
+        return switch (str) {
+            case "11" ->
+                "30-001";
+
+            case "96" ->
+                "30-002";
+            case "97" ->
+                "30-003";
+
+            default ->
+                null;
+        };
     }
 
     /**

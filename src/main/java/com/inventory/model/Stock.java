@@ -41,7 +41,6 @@ public class Stock implements java.io.Serializable {
     private Date updatedDate;
     private Date createdDate;
     private String migCode;
-    private String compCode;
     private String userCode;
     private String relCode;
     private Integer macId;
