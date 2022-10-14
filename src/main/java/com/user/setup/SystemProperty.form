@@ -80,7 +80,7 @@
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="txtCustomer" max="32767" attributes="0"/>
                               <Component id="txtSupplier" max="32767" attributes="0"/>
-                              <Component id="txtLocation" pref="91" max="32767" attributes="0"/>
+                              <Component id="txtLocation" pref="76" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -186,6 +186,7 @@
                           </Group>
                       </Group>
                       <Component id="chkWeight" max="32767" attributes="0"/>
+                      <Component id="chkDisableSale" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -201,6 +202,8 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="chkWeight" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
+                  <Component id="chkDisableSale" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
                   <Component id="jSeparator2" min="-2" pref="10" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
@@ -212,7 +215,7 @@
                       <Component id="jLabel8" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="txtLogoName" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace pref="151" max="32767" attributes="0"/>
+                  <EmptySpace pref="165" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -257,6 +260,11 @@
         <Component class="javax.swing.JCheckBox" name="chkWeight">
           <Properties>
             <Property name="text" type="java.lang.String" value="Weight"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="chkDisableSale">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Disable Calcuate Stock in Sale"/>
           </Properties>
         </Component>
       </SubComponents>
@@ -467,7 +475,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <Component id="jLabel9" min="-2" pref="78" max="-2" attributes="0"/>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                          <Component id="txtPurReport" pref="98" max="32767" attributes="0"/>
+                          <Component id="txtPurReport" pref="83" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>

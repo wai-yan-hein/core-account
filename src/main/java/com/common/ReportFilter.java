@@ -47,6 +47,7 @@ public class ReportFilter {
     private String traderCode;
     private String saleManCode;
     private String vouTypeCode;
+    private boolean calSale;
 
     public ReportFilter(Integer macId, String compCode, Integer deptId) {
         this.macId = macId;

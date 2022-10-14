@@ -8,8 +8,6 @@ package com.inventory.editor;
 import com.common.Global;
 import com.inventory.model.Stock;
 import com.inventory.ui.common.InventoryRepo;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -27,7 +25,7 @@ import javax.swing.table.TableCellEditor;
 public class StockCellEditor extends AbstractCellEditor implements TableCellEditor {
 
     private JComponent component = null;
-    private StockAutoCompleter completer;
+    private StockAutoCompleter1 completer;
     private InventoryRepo inventoryRepo;
 
     public StockCellEditor(InventoryRepo inventoryRepo) {
@@ -73,7 +71,7 @@ public class StockCellEditor extends AbstractCellEditor implements TableCellEdit
             jtf.setText(value.toString());
             jtf.selectAll();
         }
-        completer = new StockAutoCompleter(jtf, inventoryRepo, this, false);
+        completer = new StockAutoCompleter1(jtf, inventoryRepo, this, false);
         return component;
     }
 

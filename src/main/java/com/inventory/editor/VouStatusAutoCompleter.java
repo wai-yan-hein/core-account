@@ -210,8 +210,6 @@ public class VouStatusAutoCompleter implements KeyListener, SelectionObserver {
                 }
 
                 popup.show(textComp, x, y);
-                log.info("Show Popup...");
-
             } else {
                 popup.setVisible(false);
             }

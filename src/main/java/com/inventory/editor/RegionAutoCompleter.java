@@ -254,8 +254,7 @@ public final class RegionAutoCompleter implements KeyListener {
                 }
 
                 popup.show(textComp, x, y);
-                log.info("Show Popup...");
-                popupOpen = false;
+               popupOpen = false;
 
             } else {
                 popup.setVisible(false);

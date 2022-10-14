@@ -6,6 +6,7 @@ package com.inventory.ui.common;
 
 import com.common.Global;
 import com.common.ProUtil;
+import com.common.Util1;
 import com.inventory.model.VStockBalance;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +55,7 @@ public class StockBalanceTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-       return String.class;
+        return String.class;
     }
 
     @Override
@@ -125,6 +126,7 @@ public class StockBalanceTableModel extends AbstractTableModel {
             Mono<ResponseEntity<List<VStockBalance>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/report/get-stock-balance")
                     .queryParam("stockCode", stockCode)
+                    .queryParam("calSale", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.sale.stock")))
                     .queryParam("compCode", Global.compCode)
                     .queryParam("macId", Global.macId)
                     .build())

@@ -246,7 +246,6 @@ public final class TraderAAutoCompleter implements KeyListener {
                     }
 
                     popup.show(textComp, x, y);
-                    log.info("Show Popup...");
                     popupOpen = false;
 
                 } else {

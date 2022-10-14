@@ -686,7 +686,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
         jToolBar1.setFocusable(false);
 
-        btnSave1.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        btnSave1.setFont(Global.lableFont);
         btnSave1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/save.png"))); // NOI18N
         btnSave1.setText("Save - F5");
         btnSave1.setFocusable(false);
@@ -700,7 +700,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.add(btnSave1);
         jToolBar1.add(jSeparator1);
 
-        btnPrint.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        btnPrint.setFont(Global.lableFont);
         btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/print.png"))); // NOI18N
         btnPrint.setText("Print - F6");
         btnPrint.setFocusable(false);
@@ -714,7 +714,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.add(btnPrint);
         jToolBar1.add(jSeparator6);
 
-        btnNew1.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        btnNew1.setFont(Global.lableFont);
         btnNew1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh_20px.png"))); // NOI18N
         btnNew1.setText("Refresh - F7");
         btnNew1.setFocusable(false);
@@ -728,7 +728,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.add(btnNew1);
         jToolBar1.add(jSeparator5);
 
-        btnDelete.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        btnDelete.setFont(Global.lableFont);
         btnDelete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/trash_20px.png"))); // NOI18N
         btnDelete.setText("Delete - F8");
         btnDelete.setFocusable(false);
@@ -742,7 +742,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.add(btnDelete);
         jToolBar1.add(jSeparator2);
 
-        btnHistory.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        btnHistory.setFont(Global.lableFont);
         btnHistory.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/time_machine_20px.png"))); // NOI18N
         btnHistory.setText("History - F9");
         btnHistory.setFocusable(false);
@@ -756,7 +756,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.add(btnHistory);
         jToolBar1.add(jSeparator7);
 
-        btnNew.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        btnNew.setFont(Global.lableFont);
         btnNew.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/add_file_20px.png"))); // NOI18N
         btnNew.setText("New - F10");
         btnNew.setFocusable(false);
@@ -770,7 +770,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.add(btnNew);
         jToolBar1.add(jSeparator3);
 
-        btnNew2.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        btnNew2.setFont(Global.lableFont);
         btnNew2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/logout_rounded_down_20px.png"))); // NOI18N
         btnNew2.setText("Logout - F11");
         btnNew2.setFocusable(false);
@@ -784,7 +784,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.add(btnNew2);
         jToolBar1.add(jSeparator8);
 
-        btnFilter.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        btnFilter.setFont(Global.lableFont);
         btnFilter.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/slider_20px.png"))); // NOI18N
         btnFilter.setText("Filter-F12");
         btnFilter.setToolTipText("Filter Bar");
@@ -799,7 +799,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.add(btnFilter);
         jToolBar1.add(jSeparator11);
 
-        btnFilter2.setFont(Global.textFont);
+        btnFilter2.setFont(Global.lableFont);
         btnFilter2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/cancel_20px.png"))); // NOI18N
         btnFilter2.setText("Exit - Alt+F4");
         btnFilter2.setToolTipText("Filter Bar");
@@ -846,9 +846,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblPanelName, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE)
+                        .addComponent(lblPanelName, javax.swing.GroupLayout.DEFAULT_SIZE, 43, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, 152, Short.MAX_VALUE)
+                        .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, 164, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jSeparator10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
