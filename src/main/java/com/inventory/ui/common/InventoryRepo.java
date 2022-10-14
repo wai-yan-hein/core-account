@@ -748,6 +748,8 @@ public class InventoryRepo {
         Mono<ResponseEntity<List<Pattern>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-pattern")
                 .queryParam("stockCode", stockCode)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().toEntityList(Pattern.class);
         return result.block(Duration.ofMinutes(min)).getBody();

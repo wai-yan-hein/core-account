@@ -134,6 +134,7 @@ public class PatternTableModel extends AbstractTableModel {
                     case 0,1 -> {
                         if (value instanceof Stock s) {
                             p.setStockCode(s.getKey().getStockCode());
+                            p.setStockName(s.getStockName());
                             p.setUserCode(s.getUserCode());
                             p.setRelation(s.getRelName());
                             p.setUnitCode(s.getPurUnitCode());
@@ -177,7 +178,7 @@ public class PatternTableModel extends AbstractTableModel {
                         }
                     }
                 }
-                p.setStockCode(stockCode);
+                p.setMapStockCode(stockCode);
                 p.setUniqueId(row + 1);
                 save(p);
                 addNewRow();

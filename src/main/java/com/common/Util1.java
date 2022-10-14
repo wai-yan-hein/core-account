@@ -483,7 +483,7 @@ public class Util1 {
                     if (str.contains(",")) {
                         str = str.replaceAll(",", "");
                     }
-                    value = Float.valueOf(str);
+                    value = Float.parseFloat(str);
                 }
             }
         } catch (NumberFormatException e) {
@@ -509,7 +509,7 @@ public class Util1 {
     }
 
     public static Integer getInteger(Object obj) {
-        return Util1.isNull(obj) ? 0 : Integer.parseInt(obj.toString());
+        return Util1.isNull(obj) ? 0 : Integer.valueOf(obj.toString());
     }
 
     public static String getString(String str) {

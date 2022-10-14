@@ -148,12 +148,14 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                     String traderName = null;
                     String address = null;
                     String phone;
+                    String account = null;
                     lineCount++;
                     try {
                         userCode = getZawgyiText(data[0]);
                         traderName = getZawgyiText(data[1]);
                         address = getZawgyiText(data[2]);
                         phone = getZawgyiText(data[3]);
+                        account = data[4];
 
                     } catch (IndexOutOfBoundsException e) {
                         phone = null;
@@ -164,12 +166,13 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                     t.setPhone(phone);
                     TraderKey key = new TraderKey();
                     key.setCompCode(Global.compCode);
+                    key.setDeptId(Global.deptId);
                     t.setKey(key);
                     t.setActive(Boolean.TRUE);
                     t.setCreatedDate(Util1.getTodayDate());
                     t.setCreatedBy(Global.loginUser.getUserCode());
                     t.setMacId(Global.macId);
-                    t.setType(chkCus.isSelected() ? "CUS" : "SUP");
+                    t.setType(getTraderType(account));
                     listTrader.add(t);
                 }
             }
@@ -178,6 +181,15 @@ public class CustomerImportDialog extends javax.swing.JDialog {
             log.error("Read CSV File :" + e.getMessage());
 
         }
+    }
+
+    private String getTraderType(String code) {
+        return switch (code) {
+            case "16" ->
+                "SUP";
+            default ->
+                "CUS";
+        };
     }
 
     /**

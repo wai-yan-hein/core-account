@@ -151,6 +151,7 @@ public class TransferTableModel extends AbstractTableModel {
                 switch (column) {
                     case 0,1 -> {
                         if (value instanceof Stock s) {
+                            io.setStockName(s.getStockName());
                             io.setStockCode(s.getKey().getStockCode());
                             io.setUserCode(s.getUserCode());
                             io.setRelName(s.getRelName());
@@ -268,8 +269,8 @@ public class TransferTableModel extends AbstractTableModel {
 
     public void delete(int row) {
         TransferHisDetail sdh = listTransfer.get(row);
-        if (sdh.getTdCode() != null) {
-            deleteList.add(sdh.getTdCode());
+        if (sdh.getKey().getTdCode() != null) {
+            deleteList.add(sdh.getKey().getTdCode());
         }
         listTransfer.remove(row);
         addNewRow();

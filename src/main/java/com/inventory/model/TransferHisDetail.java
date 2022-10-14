@@ -13,8 +13,7 @@ import lombok.Data;
 @Data
 public class TransferHisDetail {
 
-    private String tdCode;
-    private String vouNo;
+    private THDetailKey key;
     private String stockCode;
     private String userCode;
     private String stockName;

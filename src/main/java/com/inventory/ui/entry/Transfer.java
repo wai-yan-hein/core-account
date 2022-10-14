@@ -222,17 +222,18 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             JOptionPane.showMessageDialog(this, "Can't transfer the same location.");
             txtTo.requestFocus();
         } else {
-            TransferHisKey key = new TransferHisKey();
-            key.setCompCode(Global.compCode);
-            key.setVouNo(txtVou.getText());
-            io.setKey(key);
             io.setRefNo(txtRefNo.getText());
             io.setRemark(txtRemark.getText());
             io.setVouDate(txtDate.getDate());
-            io.setLocationFrom(fromLocaitonCompleter.getLocation());
-            io.setLocationTo(toLocaitonCompleter.getLocation());
+            io.setLocCodeFrom(fromLocaitonCompleter.getLocation().getKey().getLocCode());
+            io.setLocCodeTo(toLocaitonCompleter.getLocation().getKey().getLocCode());
             io.setStatus(lblStatus.getText());
             if (lblStatus.getText().equals("NEW")) {
+                TransferHisKey key = new TransferHisKey();
+                key.setDeptId(Global.deptId);
+                key.setCompCode(Global.compCode);
+                key.setVouNo(txtVou.getText());
+                io.setKey(key);
                 io.setCreatedBy(Global.loginUser.getUserCode());
                 io.setCreatedDate(Util1.getTodayDate());
                 io.setMacId(Global.macId);
@@ -247,10 +248,14 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private void setVoucher(TransferHis s) {
         progress.setIndeterminate(true);
         io = s;
+        fromLocaitonCompleter.setLocation(inventoryRepo.findLocation(io.getLocCodeFrom()));
+        toLocaitonCompleter.setLocation(inventoryRepo.findLocation(io.getLocCodeTo()));
         String vouNo = io.getKey().getVouNo();
         Mono<ResponseEntity<List<TransferHisDetail>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/transfer/get-transfer-detail")
                 .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().toEntityList(TransferHisDetail.class);
         result.subscribe((t) -> {
@@ -260,8 +265,6 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             txtDate.setDate(Util1.toDateFormat(io.getVouDate(), "dd/MM/yyyy"));
             txtRemark.setText(io.getRemark());
             txtRefNo.setText(io.getRefNo());
-            fromLocaitonCompleter.setLocation(io.getLocationFrom());
-            toLocaitonCompleter.setLocation(io.getLocationTo());
             if (Util1.getBoolean(io.isDeleted())) {
                 lblStatus.setText("DELETED");
                 lblStatus.setForeground(Color.red);

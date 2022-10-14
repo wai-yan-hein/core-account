@@ -23,8 +23,8 @@ public class TransferHis {
     private String refNo;
     private String remark;
     private String updatedBy;
-    private Location locationFrom;
-    private Location locationTo;
+    private String locCodeFrom;
+    private String locCodeTo;
     private Integer macId;
     private List<TransferHisDetail> listTD;
     private List<String> delList;

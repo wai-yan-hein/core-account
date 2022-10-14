@@ -29,7 +29,6 @@ public class StockCellEditor extends AbstractCellEditor implements TableCellEdit
     private JComponent component = null;
     private StockAutoCompleter completer;
     private InventoryRepo inventoryRepo;
-   
 
     public StockCellEditor(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
@@ -48,8 +47,8 @@ public class StockCellEditor extends AbstractCellEditor implements TableCellEdit
             public void keyPressed(KeyEvent keyEvent) {
                 int keyCode = keyEvent.getKeyCode();
 
-                if ((keyEvent.isControlDown() && (keyCode == KeyEvent.VK_F8))
-                        || (keyEvent.isShiftDown() && (keyCode == KeyEvent.VK_F8))
+                if ((keyEvent.isControlDown() && (keyCode == KeyEvent.VK_DELETE))
+                        || (keyEvent.isShiftDown() && (keyCode == KeyEvent.VK_DELETE))
                         || (keyCode == KeyEvent.VK_F5)
                         || (keyCode == KeyEvent.VK_F7)
                         || (keyCode == KeyEvent.VK_F9)
@@ -74,7 +73,7 @@ public class StockCellEditor extends AbstractCellEditor implements TableCellEdit
             jtf.setText(value.toString());
             jtf.selectAll();
         }
-        completer = new StockAutoCompleter(jtf,inventoryRepo, this, false);
+        completer = new StockAutoCompleter(jtf, inventoryRepo, this, false);
         return component;
     }
 

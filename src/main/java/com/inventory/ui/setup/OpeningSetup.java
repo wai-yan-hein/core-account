@@ -357,6 +357,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     private void readFile(String path) {
         HashMap<String, Stock> hm = new HashMap<>();
+        listStock = inventoryRepo.getStock(true);
         if (!listStock.isEmpty()) {
             for (Stock s : listStock) {
                 hm.put(s.getUserCode(), s);
@@ -375,22 +376,24 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                     String[] data = line.split(splitBy);    // use comma as separator
                     String stockCode = null;
                     String qty = null;
+                    String price = null;
                     lineCount++;
                     try {
-                        stockCode = data[1];
-                        qty = data[5];
+                        stockCode = data[0];
+                        qty = data[1].replace("\"", "");
+                        price = data[2].replace("\"", "");
 
                     } catch (IndexOutOfBoundsException e) {
                         //JOptionPane.showMessageDialog(Global.parentForm, "FORMAT ERROR IN LINE:" + lineCount + e.getMessage());
                     }
-                    Stock s = hm.get(stockCode);
+                    String[] str = stockCode.split("-");
+                    Stock s = hm.get(str[0]);
                     if (s != null) {
                         op.setStockCode(s.getKey().getStockCode());
                         op.setQty(Util1.getFloat(qty));
-                        StockUnitKey key = new StockUnitKey();
-                        key.setUnitCode("pcs");
-                        key.setCompCode(Global.compCode);
-                        key.setDeptId(Global.deptId);
+                        op.setPrice(Util1.getFloat(price));
+                        op.setAmount(op.getQty() * op.getPrice());
+                        op.setUnitCode("pcs");
                         if (op.getQty() != 0) {
                             listOP.add(op);
                         }

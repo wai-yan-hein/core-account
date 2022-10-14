@@ -37,7 +37,8 @@ public class StockImportDialog extends javax.swing.JDialog {
     private final StockImportTableModel tableModel = new StockImportTableModel();
     private TaskExecutor taskExecutor;
     private InventoryRepo inventoryRepo;
-    private final HashMap<Integer, Integer> hmZG = new HashMap<>();
+    private final HashMap<Integer, Integer> hmIn = new HashMap<>();
+    private final HashMap<Integer, Integer> hmWin = new HashMap<>();
 
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
@@ -110,7 +111,9 @@ public class StockImportDialog extends javax.swing.JDialog {
         List<CFont> listFont = inventoryRepo.getFont();
         if (listFont != null) {
             listFont.forEach(f -> {
-                hmZG.put(f.getIntCode(), f.getFontKey().getZwKeyCode());
+                //hmZG.put(f.getFontKey().getWinKeyCode(), f.getFontKey().getZwKeyCode());
+                hmIn.put(f.getIntCode(), f.getFontKey().getZwKeyCode());
+                hmWin.put(f.getFontKey().getWinKeyCode(), f.getFontKey().getZwKeyCode());
             });
         }
         HashMap<String, StockType> hm = new HashMap<>();
@@ -149,7 +152,7 @@ public class StockImportDialog extends javax.swing.JDialog {
                         key.setStockCode(null);
                         t.setKey(key);
                         t.setUserCode(userCode);
-                        t.setStockName(getZawgyiText(stockName));
+                        t.setStockName(stockName);
                         t.setTypeCode(getGroupCode(typeCode));
                         t.setActive(true);
                         t.setCreatedDate(Util1.getTodayDate());
@@ -174,15 +177,21 @@ public class StockImportDialog extends javax.swing.JDialog {
             for (int i = 0; i < text.length(); i++) {
                 String tmpS = Character.toString(text.charAt(i));
                 int tmpChar = (int) text.charAt(i);
-
-                if (hmZG.containsKey(tmpChar)) {
-                    char tmpc = (char) hmZG.get(tmpChar).intValue();
+                if (hmIn.containsKey(tmpChar)) {
+                    char tmpc = (char) hmIn.get(tmpChar).intValue();
                     if (tmpStr.isEmpty()) {
                         tmpStr = Character.toString(tmpc);
                     } else {
                         tmpStr = tmpStr + Character.toString(tmpc);
                     }
-                } else if (tmpS.equals("ƒ")) {
+                } /*else if (hmWin.containsKey(tmpChar)) {
+                char tmpc = (char) hmWin.get(tmpChar).intValue();
+                if (tmpStr.isEmpty()) {
+                tmpStr = Character.toString(tmpc);
+                } else {
+                tmpStr = tmpStr + Character.toString(tmpc);
+                }
+                }*/ else if (tmpS.equals("ƒ")) {
                     if (tmpStr.isEmpty()) {
                         tmpStr = "ႏ";
                     } else {
@@ -190,8 +199,6 @@ public class StockImportDialog extends javax.swing.JDialog {
                     }
                 } else if (tmpStr.isEmpty()) {
                     tmpStr = tmpS;
-                } else {
-                    tmpStr = tmpStr + tmpS;
                 }
             }
         }

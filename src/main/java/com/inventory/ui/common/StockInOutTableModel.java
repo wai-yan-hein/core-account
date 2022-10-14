@@ -209,7 +209,6 @@ public class StockInOutTableModel extends AbstractTableModel {
                         if (Util1.isNumber(value)) {
                             io.setOutQty(Util1.getFloat(value));
                             io.setInQty(null);
-                            io.setOutQty(null);
                             parent.setRowSelectionInterval(row + 1, row + 1);
                             parent.setColumnSelectionInterval(0, 0);
                         }
@@ -256,11 +255,14 @@ public class StockInOutTableModel extends AbstractTableModel {
                 float qty = Util1.getFloat(input);
                 patterns.forEach((p) -> {
                     StockInOutDetail io = new StockInOutDetail();
+                    io.setUserCode(p.getUserCode());
                     io.setOutQty(qty * p.getQty());
                     io.setCostPrice(Util1.getFloat(p.getPrice()));
                     io.setOutUnitCode(p.getUnitCode());
                     io.setStockCode(p.getStockCode());
                     io.setLocCode(p.getLocCode());
+                    io.setLocName(p.getLocName());
+                    io.setStockName(p.getStockName());
                     addStockIO(io);
                 });
                 iod.setInQty(qty);
