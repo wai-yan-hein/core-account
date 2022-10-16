@@ -10,6 +10,7 @@ import com.common.Util1;
 import com.inventory.model.AppRole;
 import com.inventory.model.MachineInfo;
 import com.inventory.model.AppUser;
+import com.user.model.Department;
 import com.inventory.model.MachineInfo;
 import com.inventory.model.SysProperty;
 import com.user.model.CompanyInfo;
@@ -254,6 +255,14 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(MachineProperty.class);
         return result.block();
+    }
+
+    public List<Department> getDeparment() {
+        Mono<ResponseEntity<List<Department>>> result = userApi.get()
+                .uri(builder -> builder.path("/user/get-department")
+                .build())
+                .retrieve().toEntityList(Department.class);
+        return result.block(Duration.ofMinutes(min)).getBody();
     }
 
 }

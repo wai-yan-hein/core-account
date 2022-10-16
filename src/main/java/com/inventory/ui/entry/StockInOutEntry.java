@@ -102,7 +102,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     }
 
     private void initCombo() {
-        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, inventoryRepo.getVoucherStatus(), null, false);
+        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, inventoryRepo, null, false);
         vouStatusAutoCompleter.setVoucher(null);
     }
 
@@ -147,8 +147,8 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             int yes_no = JOptionPane.showConfirmDialog(this,
                     "Are you sure to delete?", "Stock In/Out Voucher delete", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
             if (yes_no == 0) {
-                io.setDeleted(true);
-                saveVoucher();
+                inventoryRepo.delete(io.getKey());
+                clear();
             }
         }
     }

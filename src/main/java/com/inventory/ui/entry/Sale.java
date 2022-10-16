@@ -24,7 +24,6 @@ import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.Order;
-import com.inventory.model.OrderDetail;
 import com.inventory.model.Region;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
@@ -398,8 +397,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             int yes_no = JOptionPane.showConfirmDialog(this,
                     "Are you sure to delete?", "Save Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
             if (yes_no == 0) {
-                saleHis.setDeleted(true);
-                saveSale(false);
+                inventoryRepo.delete(saleHis.getKey());
+                clear();
             }
         } else {
             JOptionPane.showMessageDialog(this, "Voucher can't delete.");

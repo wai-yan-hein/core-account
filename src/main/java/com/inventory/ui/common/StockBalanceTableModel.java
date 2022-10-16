@@ -128,6 +128,7 @@ public class StockBalanceTableModel extends AbstractTableModel {
                     .queryParam("stockCode", stockCode)
                     .queryParam("calSale", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.sale.stock")))
                     .queryParam("compCode", Global.compCode)
+                    .queryParam("deptId", Global.deptId)
                     .queryParam("macId", Global.macId)
                     .build())
                     .retrieve().toEntityList(VStockBalance.class);

@@ -9,10 +9,13 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.inventory.model.VouStatus;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.VouStatusTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
@@ -38,7 +41,6 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -46,18 +48,35 @@ import org.slf4j.LoggerFactory;
  */
 public class VouStatusAutoCompleter implements KeyListener, SelectionObserver {
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(VouStatusAutoCompleter.class);
     private final JTable table = new JTable();
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER";
-    private VouStatusTableModel vouStatusTableModel;
+    private VouStatusTableModel vouStatusTableModel = new VouStatusTableModel();
     private VouStatus vouStatus;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
     private SelectionObserver selectionObserver;
+    private boolean filter = false;
+    private InventoryRepo inventoryRepo;
+    private FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            List<VouStatus> list = inventoryRepo.getVoucherStatus();
+            if (filter) {
+                VouStatus loc = new VouStatus("-", "All");
+                list.add(0, loc);
+                setVoucher(loc);
+            }
+            vouStatusTableModel.setListVou(list);
+            if (!list.isEmpty()) {
+                table.setRowSelectionInterval(0, 0);
+            }
+        }
+
+    };
 
     public void setSelectionObserver(SelectionObserver selectionObserver) {
         this.selectionObserver = selectionObserver;
@@ -66,21 +85,25 @@ public class VouStatusAutoCompleter implements KeyListener, SelectionObserver {
     public VouStatusAutoCompleter() {
     }
 
-    public VouStatusAutoCompleter(JTextComponent comp, List<VouStatus> list,
+    public VouStatusAutoCompleter(JTextComponent comp, InventoryRepo inventoryRepo,
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
+        this.filter = filter;
+        this.inventoryRepo = inventoryRepo;
+
+        List<VouStatus> list = new ArrayList<>();
         if (filter) {
             VouStatus loc = new VouStatus("-", "All");
-            list = new ArrayList<>(list);
             list.add(0, loc);
             setVoucher(loc);
+            vouStatusTableModel.setListVou(list);
         }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
+        textComp.addFocusListener(fa);
         textComp.getDocument().addDocumentListener(documentListener);
-        vouStatusTableModel = new VouStatusTableModel(list);
         table.setModel(vouStatusTableModel);
         table.setSize(50, 50);
         table.setFont(Global.textFont); // NOI18N
@@ -150,10 +173,6 @@ public class VouStatusAutoCompleter implements KeyListener, SelectionObserver {
         });
 
         table.setRequestFocusEnabled(false);
-
-        if (!list.isEmpty()) {
-            table.setRowSelectionInterval(0, 0);
-        }
     }
 
     public VouStatus getVouStatus() {

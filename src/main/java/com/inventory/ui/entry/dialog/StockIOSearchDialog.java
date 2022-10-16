@@ -117,7 +117,7 @@ public class StockIOSearchDialog extends javax.swing.JDialog implements KeyListe
 
     private void initCombo() {
         appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
-        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, inventoryRepo.getVoucherStatus(), null, true);
+        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, inventoryRepo, null, true);
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, true, false);
     }

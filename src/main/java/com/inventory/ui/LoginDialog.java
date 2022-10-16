@@ -54,14 +54,18 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
         @Override
         public void focusGained(java.awt.event.FocusEvent evt) {
             Object sourceObj = evt.getSource();
-            if (sourceObj instanceof JComboBox jcb) {
-                log.info("Control Name : " + jcb.getName());
-            } else if (sourceObj instanceof JFormattedTextField jftf) {
-                jftf.selectAll();
-                log.info("Control Name : " + jftf.getName());
-            } else if (sourceObj instanceof JTextField jtf) {
-                jtf.selectAll();
-                log.info("Control Name : " + jtf.getName());
+            switch (sourceObj) {
+                case JComboBox jcb -> log.info("Control Name : " + jcb.getName());
+                case JFormattedTextField jftf -> {
+                    jftf.selectAll();
+                    log.info("Control Name : " + jftf.getName());
+                }
+                case JTextField jtf -> {
+                    jtf.selectAll();
+                    log.info("Control Name : " + jtf.getName());
+                }
+                case default -> {
+                }
             }
         }
 
@@ -181,55 +185,43 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
         Object sourceObj = e.getSource();
         String ctrlName = "-";
 
-        if (sourceObj instanceof JComboBox) {
-            ctrlName = ((JComboBox) sourceObj).getName();
-        } else if (sourceObj instanceof JFormattedTextField) {
-            ctrlName = ((JFormattedTextField) sourceObj).getName();
-        } else if (sourceObj instanceof JTextField) {
-            ctrlName = ((JTextField) sourceObj).getName();
+        switch (sourceObj) {
+            case JComboBox jComboBox -> ctrlName = jComboBox.getName();
+            case JFormattedTextField jFormattedTextField -> ctrlName = jFormattedTextField.getName();
+            case JTextField jTextField -> ctrlName = jTextField.getName();
+            case default -> {
+            }
         }
 
         switch (ctrlName) {
-            case "txtLoginName":
+            case "txtLoginName" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
                     txtPassword.requestFocus();
                 } else if (e.getKeyCode() == KeyEvent.VK_UP) {
                 }
-                break;
-            case "txtPassword":
+            }
+            case "txtPassword" -> {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_ENTER: //Login
+                    case KeyEvent.VK_ENTER -> //Login
                         login();
-                        break;
-                    case KeyEvent.VK_DOWN:
-                        btnLogin.requestFocus();
-                        break;
-                    case KeyEvent.VK_UP:
-                        txtLoginName.requestFocus();
-                        break;
+                    case KeyEvent.VK_DOWN -> btnLogin.requestFocus();
+                    case KeyEvent.VK_UP -> txtLoginName.requestFocus();
                 }
-                break;
-            case "butLogin":
+            }
+            case "butLogin" -> {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_ENTER:
-                        login();
-                        break;
-                    case KeyEvent.VK_DOWN:
-                        break;
+                    case KeyEvent.VK_ENTER -> login();
+                    case KeyEvent.VK_DOWN -> {
                 }
-                break;
-            case "butClear":
+                }
+            }
+            case "butClear" -> {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_ENTER:
-                        clear();
-                        break;
-                    case KeyEvent.VK_DOWN:
-                        txtLoginName.requestFocus();
-                        break;
-                    case KeyEvent.VK_UP:
-                        btnLogin.requestFocus();
-                        break;
+                    case KeyEvent.VK_ENTER -> clear();
+                    case KeyEvent.VK_DOWN -> txtLoginName.requestFocus();
+                    case KeyEvent.VK_UP -> btnLogin.requestFocus();
                 }
+            }
         }
     }
     //======End KeyListener implementation ======

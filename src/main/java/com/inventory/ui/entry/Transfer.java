@@ -131,8 +131,8 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             int yes_no = JOptionPane.showConfirmDialog(this,
                     "Are you sure to delete?", "Stock In/Out Voucher delete", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
             if (yes_no == 0) {
-                io.setDeleted(true);
-                saveVoucher();
+                inventoryRepo.delete(io.getKey());
+                clear();
             }
         }
     }

@@ -5,7 +5,6 @@
  */
 package com.common;
 
-import com.google.gson.JsonElement;
 import java.util.List;
 import lombok.Data;
 

@@ -19,6 +19,7 @@ import com.common.SelectionObserver;
 import com.user.common.UserRepo;
 import com.common.Util1;
 import com.common.setup.MenuSetup;
+import com.user.model.Department;
 import com.inventory.model.VRoleMenu;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.Manufacture;
@@ -61,6 +62,7 @@ import com.inventory.ui.entry.Reports;
 import com.inventory.ui.entry.Transfer;
 import com.inventory.ui.setup.OpeningSetup;
 import com.inventory.ui.setup.PatternSetup;
+import com.user.dialog.DepartmentDialog;
 import com.user.setup.SystemProperty;
 import com.user.setup.AppUserSetup;
 import com.user.setup.CompanySetup;
@@ -476,7 +478,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         return null;
     }
 
-    public void companyUserRoleAssign() {
+    private void companyUserRoleAssign() {
         Mono<ResponseEntity<List<VRoleCompany>>> result = userApi.get()
                 .uri(builder -> builder.path("/user/get-privilege-role-company")
                 .queryParam("roleCode", Global.loginUser.getRole().getRoleCode())
@@ -504,8 +506,29 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             Global.startDate = Util1.toDateStr(vuca.getStartDate(), "dd/MM/yyyy");
             Global.endate = Util1.toDateStr(vuca.getEndDate(), "dd/MM/yyyy");
         }
+    }
+
+    public void initMain() {
+        companyUserRoleAssign();
+        departmentAssign();
         initMenu();
         initializeData();
+    }
+
+    private void departmentAssign() {
+        Department dep;
+        List<Department> listDep = userRepo.getDeparment();
+        if (listDep.size() > 1) {
+            DepartmentDialog dialog = new DepartmentDialog(listDep);
+            dialog.initMain();
+            dialog.setLocationRelativeTo(null);
+            dialog.setVisible(true);
+            dep = dialog.getDeparment();
+        } else {
+            dep = listDep.get(0);
+        }
+        lblDep.setText(dep.getDeptName());
+        Global.deptId = dep.getDeptId();
     }
 
     public void initMenu() {
@@ -665,10 +688,12 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jSeparator9 = new javax.swing.JToolBar.Separator();
         jSeparator4 = new javax.swing.JSeparator();
         progress = new javax.swing.JProgressBar();
-        lblCompName = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
         lblUserName = new javax.swing.JLabel();
+        lblDep = new javax.swing.JLabel();
+        jPanel2 = new javax.swing.JPanel();
+        lblCompName = new javax.swing.JLabel();
         lblPanelName = new javax.swing.JLabel();
-        jSeparator10 = new javax.swing.JSeparator();
         menuBar = new javax.swing.JMenuBar();
 
         jMenu1.setText("jMenu1");
@@ -687,7 +712,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.setFocusable(false);
 
         btnSave1.setFont(Global.lableFont);
-        btnSave1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/save.png"))); // NOI18N
+        btnSave1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/save_18px.png"))); // NOI18N
         btnSave1.setText("Save - F5");
         btnSave1.setFocusable(false);
         btnSave1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -701,7 +726,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.add(jSeparator1);
 
         btnPrint.setFont(Global.lableFont);
-        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/print.png"))); // NOI18N
+        btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/print_18px.png"))); // NOI18N
         btnPrint.setText("Print - F6");
         btnPrint.setFocusable(false);
         btnPrint.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -715,7 +740,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.add(jSeparator6);
 
         btnNew1.setFont(Global.lableFont);
-        btnNew1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh_20px.png"))); // NOI18N
+        btnNew1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh_18px.png"))); // NOI18N
         btnNew1.setText("Refresh - F7");
         btnNew1.setFocusable(false);
         btnNew1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -729,7 +754,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.add(jSeparator5);
 
         btnDelete.setFont(Global.lableFont);
-        btnDelete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/trash_20px.png"))); // NOI18N
+        btnDelete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/trash_18px.png"))); // NOI18N
         btnDelete.setText("Delete - F8");
         btnDelete.setFocusable(false);
         btnDelete.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -743,7 +768,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.add(jSeparator2);
 
         btnHistory.setFont(Global.lableFont);
-        btnHistory.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/time_machine_20px.png"))); // NOI18N
+        btnHistory.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/time_machine_18px.png"))); // NOI18N
         btnHistory.setText("History - F9");
         btnHistory.setFocusable(false);
         btnHistory.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -757,7 +782,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.add(jSeparator7);
 
         btnNew.setFont(Global.lableFont);
-        btnNew.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/add_file_20px.png"))); // NOI18N
+        btnNew.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/new_copy_18px.png"))); // NOI18N
         btnNew.setText("New - F10");
         btnNew.setFocusable(false);
         btnNew.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -771,7 +796,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.add(jSeparator3);
 
         btnNew2.setFont(Global.lableFont);
-        btnNew2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/logout_rounded_down_20px.png"))); // NOI18N
+        btnNew2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/logout_rounded_down_18px.png"))); // NOI18N
         btnNew2.setText("Logout - F11");
         btnNew2.setFocusable(false);
         btnNew2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -785,7 +810,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.add(jSeparator8);
 
         btnFilter.setFont(Global.lableFont);
-        btnFilter.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/slider_20px.png"))); // NOI18N
+        btnFilter.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/slider_18px.png"))); // NOI18N
         btnFilter.setText("Filter-F12");
         btnFilter.setToolTipText("Filter Bar");
         btnFilter.setFocusable(false);
@@ -800,7 +825,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.add(jSeparator11);
 
         btnFilter2.setFont(Global.lableFont);
-        btnFilter2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/cancel_20px.png"))); // NOI18N
+        btnFilter2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/cancel_18px.png"))); // NOI18N
         btnFilter2.setText("Exit - Alt+F4");
         btnFilter2.setToolTipText("Filter Bar");
         btnFilter2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -813,23 +838,72 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.add(btnFilter2);
         jToolBar1.add(jSeparator9);
 
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        lblUserName.setFont(Global.lableFont);
+        lblUserName.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblUserName.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/male_user_16px.png"))); // NOI18N
+        lblUserName.setText("-");
+        lblUserName.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+
+        lblDep.setFont(Global.lableFont);
+        lblDep.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblDep.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/shop_16px.png"))); // NOI18N
+        lblDep.setText("-");
+        lblDep.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblUserName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblDep, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lblUserName)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblDep))
+        );
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
         lblCompName.setFont(Global.companyFont);
         lblCompName.setForeground(Global.selectionColor);
         lblCompName.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblCompName.setText("-");
-
-        lblUserName.setFont(Global.lableFont);
-        lblUserName.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        lblUserName.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/male_user.png"))); // NOI18N
-        lblUserName.setText("-");
-        lblUserName.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
 
         lblPanelName.setFont(Global.companyFont);
         lblPanelName.setForeground(Global.selectionColor);
         lblPanelName.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         lblPanelName.setText("-");
 
-        jSeparator10.setOrientation(javax.swing.SwingConstants.VERTICAL);
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblPanelName, javax.swing.GroupLayout.DEFAULT_SIZE, 49, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, 108, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblPanelName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
 
         menuBar.setFont(Global.menuFont);
         menuBar.setMargin(new java.awt.Insets(5, 5, 5, 5));
@@ -846,13 +920,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblPanelName, javax.swing.GroupLayout.DEFAULT_SIZE, 43, Short.MAX_VALUE)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, 164, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jSeparator10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblUserName, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
             .addComponent(jSeparator4)
             .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -861,18 +931,17 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(lblUserName)
-                        .addComponent(lblPanelName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jSeparator10, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, 0)
-                .addComponent(tabMain, javax.swing.GroupLayout.DEFAULT_SIZE, 136, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(tabMain, javax.swing.GroupLayout.DEFAULT_SIZE, 392, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -953,8 +1022,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnSave1;
     private javax.swing.JMenu jMenu1;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JToolBar.Separator jSeparator1;
-    private javax.swing.JSeparator jSeparator10;
     private javax.swing.JToolBar.Separator jSeparator11;
     private javax.swing.JToolBar.Separator jSeparator2;
     private javax.swing.JToolBar.Separator jSeparator3;
@@ -966,6 +1036,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private javax.swing.JToolBar.Separator jSeparator9;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JLabel lblCompName;
+    private javax.swing.JLabel lblDep;
     private javax.swing.JLabel lblPanelName;
     private javax.swing.JLabel lblUserName;
     private javax.swing.JMenuBar menuBar;

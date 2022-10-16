@@ -326,8 +326,8 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             int yes_no = JOptionPane.showConfirmDialog(Global.parentForm,
                     "Are you sure to delete?", "Return In Voucher delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
             if (yes_no == 0) {
-                ri.setDeleted(true);
-                saveRetIn(false);
+                inventoryRepo.delete(ri.getKey());
+                clear();
             }
         } else {
             JOptionPane.showMessageDialog(Global.parentForm, "Voucher can't delete.");

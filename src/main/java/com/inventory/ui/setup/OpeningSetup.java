@@ -21,7 +21,6 @@ import com.inventory.model.OPHis;
 import com.inventory.model.OPHisDetail;
 import com.inventory.model.OPHisKey;
 import com.inventory.model.Stock;
-import com.inventory.model.StockUnitKey;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.OpeningTableModel;
 import com.inventory.ui.entry.dialog.OPSearchDialog;
@@ -305,8 +304,8 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
             int yes_no = JOptionPane.showConfirmDialog(Global.parentForm,
                     "Are you sure to delete?", "Opening Voucher delete", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
             if (yes_no == 0) {
-                oPHis.setDeleted(true);
-                saveOpening();
+                inventoryRepo.delete(oPHis.getKey());
+                clear();
             }
         } else {
             JOptionPane.showMessageDialog(Global.parentForm, "Voucher can't delete.");

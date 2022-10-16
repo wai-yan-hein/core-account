@@ -83,7 +83,7 @@ public class CvInventoryApplication {
         tray = context.getBean(Tray.class);
         tray.startup();
         LoginDialog lg = context.getBean(LoginDialog.class);
-        URL imgUrl = CvInventoryApplication.class.getResource("/images/male_user.png");
+        URL imgUrl = CvInventoryApplication.class.getResource("/images/male_user_16px.png");
         lg.setIconImage(new ImageIcon(imgUrl).getImage());
         lg.checkMachineRegister();
         lg.setLocationRelativeTo(null);
@@ -95,7 +95,7 @@ public class CvInventoryApplication {
                     URL appUrl = CvInventoryApplication.class.getResource("/images/warehouse.png");
                     appMain.setIconImage(new ImageIcon(appUrl).getImage());
                     appMain.setExtendedState(JFrame.MAXIMIZED_BOTH);
-                    appMain.companyUserRoleAssign();
+                    appMain.initMain();
                     appMain.setVisible(true);
                 });
                 log.info("login sucess.");

@@ -7,6 +7,7 @@ package com.inventory.ui.common;
 import com.inventory.model.CFont;
 import com.user.model.Currency;
 import com.common.Global;
+import com.common.ReturnObject;
 import com.common.Util1;
 import com.inventory.model.Category;
 import com.inventory.model.CategoryKey;
@@ -28,7 +29,6 @@ import com.inventory.model.RetInHis;
 import com.inventory.model.RetInHisKey;
 import com.inventory.model.RetOutHis;
 import com.inventory.model.RetOutHisKey;
-import com.inventory.model.RetOutKey;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisKey;
 import com.inventory.model.SaleMan;
@@ -38,7 +38,6 @@ import com.inventory.model.StockBrand;
 import com.inventory.model.StockBrandKey;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
-import com.inventory.model.StockInOutKey;
 import com.inventory.model.StockKey;
 import com.inventory.model.StockType;
 import com.inventory.model.StockTypeKey;
@@ -54,7 +53,6 @@ import com.inventory.model.UnitRelation;
 import com.inventory.model.UnitRelationDetail;
 import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
-import com.inventory.model.Voucher;
 import java.time.Duration;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -233,6 +231,7 @@ public class InventoryRepo {
         Mono<ResponseEntity<List<Trader>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-trader-list")
                 .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
                 .queryParam("text", text)
                 .queryParam("type", type)
                 .build())
@@ -583,6 +582,8 @@ public class InventoryRepo {
         Mono<ResponseEntity<List<UnitRelationDetail>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-unit-relation-detail")
                 .queryParam("code", code)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().toEntityList(UnitRelationDetail.class);
         return result.block(Duration.ofMinutes(min)).getBody();
@@ -755,4 +756,66 @@ public class InventoryRepo {
         return result.block(Duration.ofMinutes(min)).getBody();
     }
 
+    public void delete(OPHisKey key) {
+        Mono<ReturnObject> result = inventoryApi.post()
+                .uri("/setup/delete-opening")
+                .body(Mono.just(key), OPHisKey.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+        result.block(Duration.ofMinutes(min));
+    }
+
+    public void delete(SaleHisKey key) {
+        Mono<ReturnObject> result = inventoryApi.post()
+                .uri("/sale/delete-sale")
+                .body(Mono.just(key), SaleHisKey.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+        result.block(Duration.ofMinutes(min));
+    }
+
+    public void delete(PurHisKey key) {
+        Mono<ReturnObject> result = inventoryApi.post()
+                .uri("/pur/delete-pur")
+                .body(Mono.just(key), PurHisKey.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+        result.block(Duration.ofMinutes(min));
+    }
+
+    public void delete(RetInHisKey key) {
+        Mono<ReturnObject> result = inventoryApi.post()
+                .uri("/retin/delete-retin")
+                .body(Mono.just(key), RetInHisKey.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+        result.block(Duration.ofMinutes(min));
+    }
+
+    public void delete(RetOutHisKey key) {
+        Mono<ReturnObject> result = inventoryApi.post()
+                .uri("/retout/delete-retout")
+                .body(Mono.just(key), RetOutHisKey.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+        result.block(Duration.ofMinutes(min));
+    }
+
+    public void delete(StockIOKey key) {
+        Mono<ReturnObject> result = inventoryApi.post()
+                .uri("/stockio/delete-stockio")
+                .body(Mono.just(key), StockIOKey.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+        result.block(Duration.ofMinutes(min));
+    }
+
+    public void delete(TransferHisKey key) {
+        Mono<ReturnObject> result = inventoryApi.post()
+                .uri("/transfer/delete-transfer")
+                .body(Mono.just(key), TransferHisKey.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+        result.block(Duration.ofMinutes(min));
+    }
 }

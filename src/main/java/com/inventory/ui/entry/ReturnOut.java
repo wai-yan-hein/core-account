@@ -343,8 +343,8 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             int yes_no = JOptionPane.showConfirmDialog(this,
                     "Are you sure to delete?", "Return Out Voucher delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
             if (yes_no == 0) {
-                ri.setDeleted(true);
-                saveRetIn(false);
+                inventoryRepo.delete(ri.getKey());
+                clear();
             }
         } else {
             JOptionPane.showMessageDialog(this, "Voucher can't delete.");

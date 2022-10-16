@@ -322,8 +322,8 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             int yes_no = JOptionPane.showConfirmDialog(this,
                     "Are you sure to delete?", "Purchase Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
             if (yes_no == 0) {
-                ph.setDeleted(true);
-                savePur(false);
+                inventoryRepo.delete(ph.getKey());
+                clear();
             }
         } else {
             JOptionPane.showMessageDialog(this, "Voucher can't delete.");

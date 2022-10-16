@@ -165,7 +165,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, inventoryRepo.getCurrency(), null, false);
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         currencyAutoCompleter.setCurrency(userRepo.getDefaultCurrency());
-        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, inventoryRepo.getVoucherStatus(), null, true);
+        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, inventoryRepo, null, true);
         dateAutoCompleter = new DateAutoCompleter(txtDate, false);
         dateAutoCompleter.setSelectionObserver(this);
     }

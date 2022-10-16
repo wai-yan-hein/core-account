@@ -176,6 +176,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkBalance.addActionListener(action);
         chkWeight.addActionListener(action);
         chkDisableSale.addActionListener(action);
+        chkPriceChange.addActionListener(action);
         //txt
         txtA4Report.addActionListener(action);
         txtA5Report.addActionListener(action);

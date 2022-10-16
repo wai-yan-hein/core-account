@@ -69,7 +69,11 @@ public class OPVouSearchTableModel extends AbstractTableModel {
                 }
                 case 1 -> {
                     //vou-no
-                    return his.getVouNo();
+                    if (his.isDeleted()) {
+                        return his.getVouNo() + "***";
+                    } else {
+                        return his.getVouNo();
+                    }
                 }
                 case 2 -> {
                     //location
