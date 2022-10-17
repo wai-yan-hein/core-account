@@ -140,9 +140,7 @@ public class CvInventoryApplication {
                 Global.shortCutFont = font.deriveFont(Font.BOLD, fontSize + 2);
                 Global.tblHeaderFont = font.deriveFont(Font.BOLD, fontSize + 1);
                 Global.tblRowHeight = fontSize + 15;
-                Global.fontName = "font/" + font.getName() + ".ttf";
-                log.info(Global.fontName);
-                //ge.registerFont(Global.textFont);
+                Global.fontName = "font" + File.separator + file.getName();
                 log.info("font apply.");
             }
 

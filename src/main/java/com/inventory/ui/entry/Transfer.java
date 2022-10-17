@@ -30,13 +30,18 @@ import com.inventory.ui.common.TransferTableModel;
 import com.inventory.ui.entry.dialog.TransferSearchDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
+import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Color;
 import java.awt.HeadlessException;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
+import javax.swing.JTextField;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -46,7 +51,7 @@ import reactor.core.publisher.Mono;
  * @author Lenovo
  */
 @Component
-public class Transfer extends javax.swing.JPanel implements PanelControl, SelectionObserver {
+public class Transfer extends javax.swing.JPanel implements PanelControl, SelectionObserver, KeyListener {
 
     private static final Logger log = LoggerFactory.getLogger(Transfer.class);
     private final TransferTableModel tranTableModel = new TransferTableModel();
@@ -85,6 +90,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
      */
     public Transfer() {
         initComponents();
+        initDateListner();
     }
 
     public void initMain() {
@@ -92,6 +98,24 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         initCombo();
         clear();
     }
+
+    private void initDateListner() {
+        txtDate.getDateEditor().getUiComponent().setName("txtDate");
+        txtDate.getDateEditor().getUiComponent().addKeyListener(this);
+        txtDate.getDateEditor().getUiComponent().addFocusListener(fa);
+        txtVou.addKeyListener(this);
+        txtRemark.addKeyListener(this);
+        txtRefNo.addKeyListener(this);
+        txtFrom.addKeyListener(this);
+        txtTo.addKeyListener(this);
+    }
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            ((JTextFieldDateEditor) e.getSource()).selectAll();
+        }
+
+    };
 
     private void initCombo() {
         List<Location> listLocaiton = inventoryRepo.getLocation();
@@ -198,7 +222,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             tblTransfer.setColumnSelectionInterval(0, 0);
             tblTransfer.requestFocus();
         } else {
-            txtFrom.requestFocus();
+            txtDate.requestFocusInWindow();
         }
     }
 
@@ -357,11 +381,13 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         jLabel4.setText("Ref No");
 
         txtRefNo.setFont(Global.textFont);
+        txtRefNo.setName("txtRefNo"); // NOI18N
 
         jLabel5.setFont(Global.lableFont);
         jLabel5.setText("Remark");
 
         txtRemark.setFont(Global.textFont);
+        txtRemark.setName("txtRemark"); // NOI18N
 
         jLabel6.setFont(Global.lableFont);
         jLabel6.setText("Vou No    ");
@@ -380,11 +406,13 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         jLabel7.setText("Location From");
 
         txtFrom.setFont(Global.textFont);
+        txtFrom.setName("txtFrom"); // NOI18N
 
         jLabel9.setFont(Global.lableFont);
         jLabel9.setText("Location To");
 
         txtTo.setFont(Global.textFont);
+        txtTo.setName("txtTo"); // NOI18N
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -559,5 +587,55 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     @Override
     public String panelName() {
         return this.getName();
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        Object sourceObj = e.getSource();
+        String ctrlName = "-";
+        if (sourceObj instanceof JTextField jTextField) {
+            ctrlName = jTextField.getName();
+        } else if (sourceObj instanceof JTextFieldDateEditor jTextFieldDateEditor) {
+            ctrlName = jTextFieldDateEditor.getName();
+        }
+        switch (ctrlName) {
+            case "txtDate" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    String date = ((JTextFieldDateEditor) sourceObj).getText();
+                    if (date.length() == 8 || date.length() == 6) {
+                        txtDate.setDate(Util1.formatDate(date));
+                    }
+                    txtFrom.requestFocus();
+                }
+            }
+            case "txtFrom" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    txtTo.requestFocus();
+                }
+            }
+            case "txtTo" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    txtRefNo.requestFocus();
+                }
+            }
+            case "txtRefNo" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    txtRemark.requestFocus();
+                }
+            }
+            case "txtRemark" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    tblTransfer.requestFocus();
+                }
+            }
+        }
     }
 }

@@ -185,7 +185,9 @@ public class TraderAutoCompleter implements KeyListener {
             editor.stopCellEditing();
         }
         if (observer != null) {
-            observer.selected(trader.getType(), trader.getType());
+            if (trader != null) {
+                observer.selected(trader.getType(), trader.getType());
+            }
         }
 
     }

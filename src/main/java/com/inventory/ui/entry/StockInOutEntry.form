@@ -173,6 +173,7 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.textFont" type="code"/>
             </Property>
+            <Property name="name" type="java.lang.String" value="txtDesp" noResource="true"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel5">
@@ -188,6 +189,7 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.textFont" type="code"/>
             </Property>
+            <Property name="name" type="java.lang.String" value="txtRemark" noResource="true"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel6">
@@ -238,6 +240,7 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.textFont" type="code"/>
             </Property>
+            <Property name="name" type="java.lang.String" value="txtVouType" noResource="true"/>
           </Properties>
         </Component>
       </SubComponents>

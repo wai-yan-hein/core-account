@@ -34,6 +34,8 @@ import com.user.common.UserRepo;
 import java.awt.Color;
 import java.awt.HeadlessException;
 import java.awt.Image;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
@@ -115,6 +117,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         initKeyListener();
         initTextBoxFormat();
         initTextBoxValue();
+        initDateListner();
     }
 
     public void initMain() {
@@ -122,6 +125,19 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         initRetInTable();
         assignDefaultValue();
     }
+
+    private void initDateListner() {
+        vouDate.getDateEditor().getUiComponent().setName("vouDate");
+        vouDate.getDateEditor().getUiComponent().addKeyListener(this);
+        vouDate.getDateEditor().getUiComponent().addFocusListener(fa);
+    }
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            ((JTextFieldDateEditor) e.getSource()).selectAll();
+        }
+
+    };
 
     private void initRetInTable() {
         tblRet.setModel(roTableModel);
@@ -1149,13 +1165,11 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             }
             case "vouDate" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (sourceObj != null) {
-                        String date = ((JTextFieldDateEditor) sourceObj).getText();
-                        if (date.length() == 8) {
-                            String toFormatDate = Util1.toFormatDate(date);
-                            vouDate.setDate(Util1.toDate(toFormatDate, "dd/MM/yyyy"));
-                        }
+                    String date = ((JTextFieldDateEditor) sourceObj).getText();
+                    if (date.length() == 8 || date.length() == 6) {
+                        vouDate.setDate(Util1.formatDate(date));
                     }
+                    txtCus.requestFocus();
                 }
                 tabToTable(e);
             }

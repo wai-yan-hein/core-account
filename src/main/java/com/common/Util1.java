@@ -4,8 +4,6 @@
  */
 package com.common;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -44,7 +42,6 @@ public class Util1 {
      *
      */
     public static final String DECIMAL_FORMAT = "###,##0.##;(###,##0.##)";
-    private static final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
 
     public static void print(String pName) {
 
@@ -58,7 +55,7 @@ public class Util1 {
                 if (str.contains(",")) {
                     str = str.replaceAll(",", "");
                 }
-                Float.parseFloat(str);
+                Float.valueOf(str);
                 status = true;
             }
         } catch (NumberFormatException ex) {
@@ -704,5 +701,33 @@ public class Util1 {
         r.setWidth(r.getWidth() / 3);
         r.setHeight((r.getHeight() / 5) + 52);
         return r;
+    }
+
+    public static Date formatDate(Object obj) {
+        if (obj != null) {
+            DateFormat f1 = new SimpleDateFormat("dd/MM/yyyy");
+            try {
+                return f1.parse(obj.toString());
+            } catch (ParseException ex) {
+            }
+            try {
+                f1 = new SimpleDateFormat("dd/MM/yy");
+                return f1.parse(obj.toString());
+            } catch (ParseException ex) {
+            }
+            int length = obj.toString().length();
+            return Util1.toDate(toFormatDate(obj.toString(), length), "dd/MM/yyyy");
+        }
+        return null;
+    }
+
+    public static String toFormatDate(String obj, int length) {
+        String[] arr = obj.split("(?<=\\G.{2})");
+        if (length == 8) {
+            String format = arr[0] + "/" + arr[1] + "/" + arr[2] + arr[3];
+            return format;
+        }
+        return arr[0] + "/" + arr[1] + "/20" + arr[2];
+
     }
 }

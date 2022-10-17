@@ -32,6 +32,8 @@ import com.user.common.UserRepo;
 import java.awt.Color;
 import java.awt.HeadlessException;
 import java.awt.Image;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
@@ -112,6 +114,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         initKeyListener();
         initTextBoxFormat();
         initTextBoxValue();
+        initDateListner();
     }
 
     public void initMain() {
@@ -119,6 +122,23 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         initPurTable();
         assignDefaultValue();
     }
+
+    private void initDateListner() {
+        txtPurDate.getDateEditor().getUiComponent().setName("txtPurDate");
+        txtPurDate.getDateEditor().getUiComponent().addKeyListener(this);
+        txtPurDate.getDateEditor().getUiComponent().addFocusListener(fa);
+        txtDueDate.getDateEditor().getUiComponent().setName("txtDueDate");
+        txtDueDate.getDateEditor().getUiComponent().addKeyListener(this);
+        txtDueDate.getDateEditor().getUiComponent().addFocusListener(fa);
+        
+    }
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            ((JTextFieldDateEditor) e.getSource()).selectAll();
+        }
+
+    };
 
     private void initPurTable() {
         tblPur.setModel(purTableModel);
@@ -535,7 +555,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             tblPur.setColumnSelectionInterval(0, 0);
             tblPur.requestFocus();
         } else {
-            txtCus.requestFocus();
+            txtPurDate.requestFocusInWindow();
         }
     }
 
@@ -1244,27 +1264,21 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             }
             case "txtPurDate" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (sourceObj != null) {
-                        String date = ((JTextFieldDateEditor) sourceObj).getText();
-                        if (date.length() == 8) {
-                            String toFormatDate = Util1.toFormatDate(date);
-                            txtPurDate.setDate(Util1.toDate(toFormatDate, "dd/MM/yyyy"));
-                        }
+                    String date = ((JTextFieldDateEditor) sourceObj).getText();
+                    if (date.length() == 8 || date.length() == 6) {
+                        txtPurDate.setDate(Util1.formatDate(date));
                     }
-                    txtDueDate.getDateEditor().getUiComponent().requestFocusInWindow();
+                    txtCus.requestFocus();
                 }
                 tabToTable(e);
             }
             case "txtDueDate" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (sourceObj != null) {
-                        String date = ((JTextFieldDateEditor) sourceObj).getText();
-                        if (date.length() == 8) {
-                            String toFormatDate = Util1.toFormatDate(date);
-                            txtDueDate.setDate(Util1.toDate(toFormatDate, "dd/MM/yyyy"));
-                        }
+                    String date = ((JTextFieldDateEditor) sourceObj).getText();
+                    if (date.length() == 8 || date.length() == 6) {
+                        txtDueDate.setDate(Util1.formatDate(date));
                     }
-                    txtCurrency.requestFocus();
+                    txtReference.requestFocus();
                 }
                 tabToTable(e);
             }

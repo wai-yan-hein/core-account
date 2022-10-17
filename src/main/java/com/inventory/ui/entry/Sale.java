@@ -40,6 +40,8 @@ import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.common.UserRepo;
 import java.awt.Color;
 import java.awt.HeadlessException;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
@@ -57,6 +59,7 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jasperreports.components.barcode4j.FourStateBarcodeComponent;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -130,7 +133,24 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         initKeyListener();
         initTextBoxFormat();
         initTextBoxValue();
+        initDateListner();
     }
+
+    private void initDateListner() {
+        txtSaleDate.getDateEditor().getUiComponent().setName("txtSaleDate");
+        txtSaleDate.getDateEditor().getUiComponent().addKeyListener(this);
+        txtSaleDate.getDateEditor().getUiComponent().addFocusListener(fa);
+        txtDueDate.getDateEditor().getUiComponent().setName("txtDueDate");
+        txtDueDate.getDateEditor().getUiComponent().addKeyListener(this);
+        txtDueDate.getDateEditor().getUiComponent().addFocusListener(fa);
+    }
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            ((JTextFieldDateEditor) e.getSource()).selectAll();
+        }
+
+    };
 
     private void initButtonGroup() {
         ButtonGroup g = new ButtonGroup();
@@ -788,6 +808,11 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
         txtSaleDate.setDateFormatString("dd/MM/yyyy");
         txtSaleDate.setFont(Global.textFont);
+        txtSaleDate.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtSaleDateFocusGained(evt);
+            }
+        });
 
         txtCurrency.setFont(Global.textFont);
         txtCurrency.setDisabledTextColor(new java.awt.Color(0, 0, 0));
@@ -1432,6 +1457,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         // TODO add your handling code here:
         log.info("change.");
     }//GEN-LAST:event_formPropertyChange
+
+    private void txtSaleDateFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSaleDateFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtSaleDateFocusGained
     private void tabToTable(KeyEvent e) {
         if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
             tblSale.requestFocus();
@@ -1538,12 +1567,9 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
             case "txtSaleDate" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (sourceObj != null) {
-                        String date = ((JTextFieldDateEditor) sourceObj).getText();
-                        if (date.length() == 8) {
-                            String toFormatDate = Util1.toFormatDate(date);
-                            txtSaleDate.setDate(Util1.toDate(toFormatDate, "dd/MM/yyyy"));
-                        }
+                    String date = ((JTextFieldDateEditor) sourceObj).getText();
+                    if (date.length() == 8 || date.length() == 6) {
+                        txtSaleDate.setDate(Util1.formatDate(date));
                     }
                     txtCus.requestFocus();
                 }
@@ -1551,14 +1577,11 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
             case "txtDueDate" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (sourceObj != null) {
-                        String date = ((JTextFieldDateEditor) sourceObj).getText();
-                        if (date.length() == 8) {
-                            String toFormatDate = Util1.toFormatDate(date);
-                            txtDueDate.setDate(Util1.toDate(toFormatDate, "dd/MM/yyyy"));
-                        }
+                    String date = ((JTextFieldDateEditor) sourceObj).getText();
+                    if (date.length() == 8 || date.length() == 6) {
+                        txtDueDate.setDate(Util1.formatDate(date));
                     }
-                    txtCurrency.requestFocus();
+                    txtReference.requestFocus();
                 }
                 tabToTable(e);
             }

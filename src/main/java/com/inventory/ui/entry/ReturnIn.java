@@ -33,6 +33,8 @@ import com.user.common.UserRepo;
 import java.awt.Color;
 import java.awt.HeadlessException;
 import java.awt.Image;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
@@ -112,6 +114,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         initKeyListener();
         initTextBoxFormat();
         initTextBoxValue();
+        initDateListner();
     }
 
     public void initMain() {
@@ -119,6 +122,20 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         initRetInTable();
         assignDefaultValue();
     }
+
+    private void initDateListner() {
+        txtVouDate.getDateEditor().getUiComponent().setName("txtVouDate");
+        txtVouDate.getDateEditor().getUiComponent().addKeyListener(this);
+        txtVouDate.getDateEditor().getUiComponent().addFocusListener(fa);
+
+    }
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            ((JTextFieldDateEditor) e.getSource()).selectAll();
+        }
+
+    };
 
     private void initRetInTable() {
 
@@ -1154,25 +1171,11 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             }
             case "txtVouDate" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (sourceObj != null) {
-                        String date = ((JTextFieldDateEditor) sourceObj).getText();
-                        if (date.length() == 8) {
-                            String toFormatDate = Util1.toFormatDate(date);
-                            txtVouDate.setDate(Util1.toDate(toFormatDate, "dd/MM/yyyy"));
-                        }
+                    String date = ((JTextFieldDateEditor) sourceObj).getText();
+                    if (date.length() == 8 || date.length() == 6) {
+                        txtVouDate.setDate(Util1.formatDate(date));
                     }
-                }
-                tabToTable(e);
-            }
-            case "txtDueDate" -> {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (sourceObj != null) {
-                        String date = ((JTextFieldDateEditor) sourceObj).getText();
-                        if (date.length() == 8) {
-                            String toFormatDate = Util1.toFormatDate(date);
-                        }
-                    }
-                    txtCurrency.requestFocus();
+                    txtCus.requestFocus();
                 }
                 tabToTable(e);
             }

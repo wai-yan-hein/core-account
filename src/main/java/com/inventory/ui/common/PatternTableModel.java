@@ -151,8 +151,9 @@ public class PatternTableModel extends AbstractTableModel {
                                 p.setLocCode(location.getKey().getLocCode());
                                 p.setLocName(location.getLocName());
                                 table.setColumnSelectionInterval(3, 3);
+                            } else {
+                                table.setColumnSelectionInterval(2, 2);
                             }
-                            table.setColumnSelectionInterval(2, 2);
                         }
                     }
                     case 2 -> {

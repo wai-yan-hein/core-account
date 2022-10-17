@@ -264,7 +264,6 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                         jc.setProperty("net.sf.jasperreports.default.pdf.font.name", Global.fontName);
                         jc.setProperty("net.sf.jasperreports.default.pdf.encoding", "Identity-H");
                         jc.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
-                        jc.setProperty("net.sf.jasperreports.default.font.name", Global.fontName);
                         InputStream input = new ByteArrayInputStream(t.getFile());
                         JsonDataSource ds = new JsonDataSource(input);
                         JasperPrint js = JasperFillManager.fillReport(filePath, param, ds);
@@ -801,8 +800,8 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
 
     private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
         // TODO add your handling code here:
-        String filter = txtFilter.getText();
-        if (filter.length() == 0) {
+        String f = txtFilter.getText();
+        if (f.length() == 0) {
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(startsWithFilter);
