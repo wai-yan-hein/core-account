@@ -1545,7 +1545,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                             txtSaleDate.setDate(Util1.toDate(toFormatDate, "dd/MM/yyyy"));
                         }
                     }
-                    txtDueDate.getDateEditor().getUiComponent().requestFocusInWindow();
+                    txtCus.requestFocus();
                 }
                 tabToTable(e);
             }

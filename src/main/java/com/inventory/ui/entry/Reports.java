@@ -63,7 +63,7 @@ import reactor.core.publisher.Mono;
 @Component
 @Slf4j
 public class Reports extends javax.swing.JPanel implements PanelControl, SelectionObserver {
-    
+
     @Autowired
     private ReportTableModel tableModel;
     @Autowired
@@ -92,19 +92,19 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private SelectionObserver observer;
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
-    
+
     public SelectionObserver getObserver() {
         return observer;
     }
-    
+
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-    
+
     public JProgressBar getProgress() {
         return progress;
     }
-    
+
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
@@ -115,18 +115,18 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     public Reports() {
         initComponents();
     }
-    
+
     public void initMain() {
         initTableReport();
         initCombo();
         initDate();
     }
-    
+
     private void initDate() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
     }
-    
+
     private void initTableReport() {
         tblReport.setModel(tableModel);
         tblReport.getTableHeader().setFont(Global.tblHeaderFont);
@@ -136,7 +136,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         tblReport.setRowSorter(sorter);
         getReport();
     }
-    
+
     private void getReport() {
         progress.setIndeterminate(true);
         Mono<ResponseEntity<List<VRoleMenu>>> result = userApi.get()
@@ -153,7 +153,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             JOptionPane.showConfirmDialog(Global.parentForm, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         });
     }
-    
+
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, true, "-");
         saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, inventoryRepo.getSaleMan(), null, true, false);
@@ -169,7 +169,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         dateAutoCompleter = new DateAutoCompleter(txtDate, false);
         dateAutoCompleter.setSelectionObserver(this);
     }
-    
+
     private void report() {
         if (!isReport) {
             progress.setIndeterminate(true);
@@ -260,9 +260,11 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     if (t.getFile().length > 0) {
                         log.info("font: " + Global.fontName);
                         JasperReportsContext jc = DefaultJasperReportsContext.getInstance();
+                        jc.setProperty("net.sf.jasperreports.default.font.name", Global.fontName);
                         jc.setProperty("net.sf.jasperreports.default.pdf.font.name", Global.fontName);
                         jc.setProperty("net.sf.jasperreports.default.pdf.encoding", "Identity-H");
                         jc.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
+                        jc.setProperty("net.sf.jasperreports.default.font.name", Global.fontName);
                         InputStream input = new ByteArrayInputStream(t.getFile());
                         JsonDataSource ds = new JsonDataSource(input);
                         JasperPrint js = JasperFillManager.fillReport(filePath, param, ds);
@@ -280,7 +282,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
             progress.setIndeterminate(false);
         });
-        
+
     }
     private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
         @Override
@@ -847,38 +849,38 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     @Override
     public void save() {
     }
-    
+
     @Override
     public void delete() {
     }
-    
+
     @Override
     public void newForm() {
     }
-    
+
     @Override
     public void history() {
     }
-    
+
     @Override
     public void print() {
         report();
     }
-    
+
     @Override
     public void refresh() {
         getReport();
     }
-    
+
     @Override
     public void filter() {
     }
-    
+
     @Override
     public String panelName() {
         return this.getName();
     }
-    
+
     @Override
     public void selected(Object source, Object selectObj) {
         if (source.equals("Selected-Date")) {
@@ -886,5 +888,5 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             txtToDate.setDate(Util1.toDate(dateAutoCompleter.getEndDate(), "dd/MM/yyyy"));
         }
     }
-    
+
 }

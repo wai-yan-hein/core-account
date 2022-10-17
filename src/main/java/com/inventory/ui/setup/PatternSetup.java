@@ -175,6 +175,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
 
     private void initTablePD() {
         List<StockUnit> lisetStockUnit = inventoryRepo.getStockUnit();
+        patternTableModel.setLocation(inventoryRepo.getDefaultLocation());
         patternTableModel.setTable(tblPD);
         patternTableModel.setPanel(this);
         patternTableModel.setWebClient(inventoryApi);

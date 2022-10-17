@@ -41,6 +41,15 @@ public class PatternTableModel extends AbstractTableModel {
     private String stockCode;
     private JPanel panel;
     private JTable table;
+    private Location location;
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     public JTable getTable() {
         return table;
@@ -138,6 +147,11 @@ public class PatternTableModel extends AbstractTableModel {
                             p.setUserCode(s.getUserCode());
                             p.setRelation(s.getRelName());
                             p.setUnitCode(s.getPurUnitCode());
+                            if (location != null) {
+                                p.setLocCode(location.getKey().getLocCode());
+                                p.setLocName(location.getLocName());
+                                table.setColumnSelectionInterval(3, 3);
+                            }
                             table.setColumnSelectionInterval(2, 2);
                         }
                     }
