@@ -17,8 +17,6 @@ import com.common.TableCellRender;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.List;
-import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
@@ -26,10 +24,7 @@ import javax.swing.ListSelectionModel;
 import net.coderazzi.filters.gui.AutoChoices;
 import net.coderazzi.filters.gui.TableFilterHeader;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -45,8 +40,6 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
     private TableFilterHeader filterHeader;
     @Autowired
     private AccountRepo accountRepo;
-    @Autowired
-    private WebClient accountApi;
     private JProgressBar progress;
     private SelectionObserver observer;
 
@@ -90,10 +83,8 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         tblCoaHead.setModel(coaHeadTableModel);
         tblCoaHead.getTableHeader().setFont(Global.tblHeaderFont);
         tblCoaHead.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblCoaHead.getColumnModel().getColumn(0).setPreferredWidth(20);// Code
-        tblCoaHead.getColumnModel().getColumn(1).setPreferredWidth(400);// Name
-        tblCoaHead.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
-        tblCoaHead.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
+        tblCoaHead.getColumnModel().getColumn(0).setPreferredWidth(10);// Code
+        tblCoaHead.getColumnModel().getColumn(1).setPreferredWidth(500);// Name
         tblCoaHead.setDefaultRenderer(Object.class, new TableCellRender());
         tblCoaHead.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
@@ -105,20 +96,8 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
     }
 
     private void searchHead() {
-        Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get().uri((builder) -> builder.path("/account/get-coa-child")
-                .queryParam("parentCode", "#")
-                .queryParam("compCode", Global.compCode)
-                .build())
-                .retrieve()
-                .toEntityList(ChartOfAccount.class);
-        result.subscribe((t) -> {
-            coaHeadTableModel.setlistCoaHead(t.getBody());
-            tblCoaHead.requestFocus();
-            progress.setIndeterminate(false);
-        }, (e) -> {
-            progress.setIndeterminate(false);
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
+        coaHeadTableModel.setlistCoaHead(accountRepo.getCOA("#"));
+        tblCoaHead.requestFocus();
     }
 
     private void tblCOAGroup() {
@@ -175,25 +154,13 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
     private void getCOAGroup(int row) {
         clear();
         ChartOfAccount c = coaHeadTableModel.getChartOfAccount(row);
-        if (c.getKey().getCoaCode() != null) {
-            progress.setIndeterminate(true);
-            Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get().uri((builder) -> builder.path("/account/get-coa-child")
-                    .queryParam("parentCode", c.getKey().getCoaCode())
-                    .queryParam("compCode", Global.compCode)
-                    .build())
-                    .retrieve()
-                    .toEntityList(ChartOfAccount.class);
-            result.subscribe((t) -> {
-                coaGroupTableModel.setCoaHeadCode(c.getKey().getCoaCode());
-                coaGroupTableModel.setListCOA(t.getBody());
-                coaGroupTableModel.addEmptyRow();
-                lblCoaGroup.setText(c.getCoaNameEng());
-                reqCoaGroup();
-                progress.setIndeterminate(false);
-            }, (e) -> {
-                progress.setIndeterminate(false);
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+        String coaCode = c.getKey().getCoaCode();
+        if (coaCode != null) {
+            coaGroupTableModel.setCoaHeadCode(c.getKey().getCoaCode());
+            coaGroupTableModel.setListCOA(accountRepo.getCOA(coaCode));
+            coaGroupTableModel.addEmptyRow();
+            lblCoaGroup.setText(c.getCoaNameEng());
+            reqCoaGroup();
         }
     }
 
@@ -213,25 +180,13 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
     private void getCOAGroupChild(int row) {
         cOAGroupChildTableModel.clear();
         ChartOfAccount c = coaGroupTableModel.getChartOfAccount(row);
-        if (c.getKey().getCoaCode() != null) {
-            progress.setIndeterminate(true);
-            Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get().uri((builder) -> builder.path("/account/get-coa-child")
-                    .queryParam("parentCode", c.getKey().getCoaCode())
-                    .queryParam("compCode", Global.compCode)
-                    .build())
-                    .retrieve()
-                    .toEntityList(ChartOfAccount.class);
-            result.subscribe((t) -> {
-                cOAGroupChildTableModel.setCoaGroupCode(c.getKey().getCoaCode());
-                cOAGroupChildTableModel.setListCOA(t.getBody());
-                cOAGroupChildTableModel.addEmptyRow();
-                lblCoaChild.setText(c.getCoaNameEng());
-                reqCOAGroupChild();
-                progress.setIndeterminate(false);
-            }, (e) -> {
-                progress.setIndeterminate(false);
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+        String coaCode = c.getKey().getCoaCode();
+        if (coaCode != null) {
+            cOAGroupChildTableModel.setCoaGroupCode(c.getKey().getCoaCode());
+            cOAGroupChildTableModel.setListCOA(accountRepo.getCOA(coaCode));
+            cOAGroupChildTableModel.addEmptyRow();
+            lblCoaChild.setText(c.getCoaNameEng());
+            reqCOAGroupChild();
         }
     }
 

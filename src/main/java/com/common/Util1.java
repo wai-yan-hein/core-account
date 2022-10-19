@@ -46,6 +46,9 @@ public class Util1 {
     public static void print(String pName) {
 
     }
+    public static boolean isNullOrEmpty(Object obj) {
+        return obj == null || obj.toString().isEmpty();
+    }
 
     public static boolean isNumber(Object obj) {
         boolean status = false;

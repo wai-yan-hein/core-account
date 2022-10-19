@@ -141,7 +141,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         tblStock.setModel(stockTableModel);
         tblStock.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblStock.getColumnModel().getColumn(0).setPreferredWidth(10);
-        tblStock.getColumnModel().getColumn(1).setPreferredWidth(100);
+        tblStock.getColumnModel().getColumn(1).setPreferredWidth(300);
         tblStock.getColumnModel().getColumn(2).setPreferredWidth(10);
         tblStock.getColumnModel().getColumn(3).setPreferredWidth(50);
         tblStock.getTableHeader().setFont(Global.tblHeaderFont);

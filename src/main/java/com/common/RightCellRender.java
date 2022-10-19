@@ -5,14 +5,10 @@
  */
 package com.common;
 
-import java.awt.Color;
 import java.awt.Component;
-import java.text.DecimalFormat;
-import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
 import javax.swing.table.DefaultTableCellRenderer;
 
 /**

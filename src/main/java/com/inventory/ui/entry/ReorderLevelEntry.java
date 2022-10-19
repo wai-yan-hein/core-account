@@ -104,20 +104,19 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
         tblOrder.setFont(Global.textFont);
         tblOrder.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblOrder.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblOrder.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
-        tblOrder.getColumnModel().getColumn(3).setCellEditor(new StockUnitEditor(listStockUnit));
-        tblOrder.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
-        tblOrder.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(listStockUnit));
-        tblOrder.getColumnModel().getColumn(0).setPreferredWidth(50);
-        tblOrder.getColumnModel().getColumn(1).setPreferredWidth(150);
+        tblOrder.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
+        tblOrder.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(listStockUnit));
+        tblOrder.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
+        tblOrder.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(listStockUnit));
+        tblOrder.getColumnModel().getColumn(0).setPreferredWidth(30);
+        tblOrder.getColumnModel().getColumn(1).setPreferredWidth(200);
         tblOrder.getColumnModel().getColumn(2).setPreferredWidth(100);
         tblOrder.getColumnModel().getColumn(3).setPreferredWidth(50);
         tblOrder.getColumnModel().getColumn(4).setPreferredWidth(50);
         tblOrder.getColumnModel().getColumn(5).setPreferredWidth(50);
         tblOrder.getColumnModel().getColumn(6).setPreferredWidth(50);
-        tblOrder.getColumnModel().getColumn(7).setPreferredWidth(50);
-        tblOrder.getColumnModel().getColumn(6).setCellRenderer(new RightCellRender());
         tblOrder.getColumnModel().getColumn(7).setCellRenderer(new RightCellRender());
+        tblOrder.getColumnModel().getColumn(8).setCellRenderer(new RightCellRender());
         tblOrder.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblOrder.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

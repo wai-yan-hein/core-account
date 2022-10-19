@@ -74,7 +74,7 @@ public class ReorderAlertTableModel extends AbstractTableModel {
         ReorderLevel p = listReorder.get(rowIndex);
         return switch (columnIndex) {
             case 0 ->
-                p.getUserCode() == null ? p.getStockCode() : p.getUserCode();
+                p.getUserCode() == null ? p.getKey().getStockCode() : p.getUserCode();
             case 1 ->
                 p.getStockName();
             case 2 ->
@@ -154,7 +154,7 @@ public class ReorderAlertTableModel extends AbstractTableModel {
 
     private boolean hasEmptyRow() {
         ReorderLevel p = listReorder.get(listReorder.size() - 1);
-        return p.getStockCode() == null;
+        return p.getKey().getStockCode() == null;
     }
 
     public void addRow() {

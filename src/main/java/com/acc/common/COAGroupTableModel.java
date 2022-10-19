@@ -5,6 +5,7 @@
  */
 package com.acc.common;
 
+import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.Util1;
@@ -77,7 +78,7 @@ public class COAGroupTableModel extends AbstractTableModel {
             ChartOfAccount coa = listCOA.get(row);
             return switch (column) {
                 case 0 ->
-                    coa.getKey().getCoaCode();
+                    coa.getKey() == null ? null : coa.getKey().getCoaCode();
                 case 1 ->
                     coa.getCoaCodeUsr();
                 case 2 ->
@@ -102,31 +103,31 @@ public class COAGroupTableModel extends AbstractTableModel {
         try {
             ChartOfAccount coa = listCOA.get(row);
             switch (column) {
-                case 0:
-                    break;
-                case 1://user code
+                case 0 -> {
+                }
+                case 1 -> {
+                    //user code
                     if (value != null) {
                         coa.setCoaCodeUsr(value.toString());
                         parent.setColumnSelectionInterval(2, 2);
                     }
-                    break;
+                }
 
-                case 2:
+                case 2 -> {
                     if (value != null) {
                         coa.setCoaNameEng(value.toString());
                     }
-                    break;
-                case 3:
+                }
+                case 3 -> {
                     if (value != null) {
                         Boolean active = (Boolean) value;
                         coa.setActive(active);
                     } else {
                         coa.setActive(Boolean.TRUE);
                     }
-
-                    break;
-                default:
-                    break;
+                }
+                default -> {
+                }
 
             }
             coa.setCoaLevel(2);
@@ -222,6 +223,7 @@ public class COAGroupTableModel extends AbstractTableModel {
             status = false;
         } else {
             if (Objects.isNull(coa.getKey().getCoaCode())) {
+                coa.setActive(true);
                 coa.setCreatedBy(Global.loginUser.getUserCode());
                 coa.setCreatedDate(Util1.getTodayDate());
                 coa.setMacId(Global.macId);
@@ -251,6 +253,9 @@ public class COAGroupTableModel extends AbstractTableModel {
         if (listCOA != null) {
             if (hasEmptyRow()) {
                 ChartOfAccount coa = new ChartOfAccount();
+                COAKey key = new COAKey();
+                key.setCompCode(Global.compCode);
+                coa.setKey(key);
                 listCOA.add(coa);
                 fireTableRowsInserted(listCOA.size() - 1, listCOA.size() - 1);
             }

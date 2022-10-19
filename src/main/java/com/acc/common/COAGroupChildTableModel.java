@@ -5,8 +5,10 @@
  */
 package com.acc.common;
 
+import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
+import com.common.ProUtil;
 import com.common.Util1;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +69,7 @@ public class COAGroupChildTableModel extends AbstractTableModel {
 
             return switch (column) {
                 case 0 ->
-                    coa.getKey().getCoaCode();
+                    coa.getKey() == null ? null : coa.getKey().getCoaCode();
                 case 1 ->
                     coa.getCoaCodeUsr();
                 case 2 ->
@@ -211,7 +213,8 @@ public class COAGroupChildTableModel extends AbstractTableModel {
         } else if (Util1.isNull(coa.getCoaLevel())) {
             status = false;
         } else {
-            if (Objects.isNull(coa.getKey().getCoaCode())) {
+            if (Util1.isNullOrEmpty(coa.getKey().getCoaCode())) {
+                coa.setActive(true);
                 coa.setCreatedBy(Global.loginUser.getUserCode());
                 coa.setCreatedDate(Util1.getTodayDate());
                 coa.setMacId(Global.macId);
@@ -241,6 +244,9 @@ public class COAGroupChildTableModel extends AbstractTableModel {
         if (listCOA != null) {
             if (hasEmptyRow()) {
                 ChartOfAccount coa = new ChartOfAccount();
+                COAKey key = new COAKey();
+                key.setCompCode(Global.compCode);
+                coa.setKey(key);
                 listCOA.add(coa);
                 fireTableRowsInserted(listCOA.size() - 1, listCOA.size() - 1);
             }

@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ReorderTableModel extends AbstractTableModel {
 
     public static final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
-    private final String[] columnNames = {"Stock Code", "Stock Name", "Min Qty", "Min Unit", "Max Qty", "Max Unit", "Stock Balance", "Status"};
+    private final String[] columnNames = {"Stock Code", "Stock Name", "Relation", "Min Qty", "Min Unit", "Max Qty", "Max Unit", "Stock Balance", "Status"};
     private List<ReorderLevel> listReorder = new ArrayList<>();
     private InventoryRepo inventoryRepo;
     private String patternCode;
@@ -79,20 +79,22 @@ public class ReorderTableModel extends AbstractTableModel {
         ReorderLevel p = listReorder.get(rowIndex);
         return switch (columnIndex) {
             case 0 ->
-                p.getUserCode() == null ? p.getStockCode() : p.getUserCode();
+                p.getUserCode() == null ? p.getKey().getStockCode() : p.getUserCode();
             case 1 ->
                 p.getStockName();
             case 2 ->
-                p.getMinQty();
+                p.getRelName();
             case 3 ->
-                p.getMinUnitCode();
+                p.getMinQty();
             case 4 ->
-                p.getMaxQty();
+                p.getMinUnitCode();
             case 5 ->
-                p.getMaxUnitCode();
+                p.getMaxQty();
             case 6 ->
-                p.getBalUnit();
+                p.getMaxUnitCode();
             case 7 ->
+                p.getBalUnit();
+            case 8 ->
                 p.getStatus();
             default ->
                 null;
@@ -116,14 +118,14 @@ public class ReorderTableModel extends AbstractTableModel {
                 switch (column) {
                     case 0,1 -> {
                         if (value instanceof Stock s) {
-                            p.setStockCode(s.getKey().getStockCode());
+                            p.getKey().setStockCode(s.getKey().getStockCode());
                             p.setStockName(s.getStockName());
                             p.setUserCode(s.getUserCode());
                             p.setRelName(s.getRelName());
                             table.setColumnSelectionInterval(2, 2);
                         }
                     }
-                    case 2 -> {
+                    case 3 -> {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             p.setMinQty(Util1.getFloat(value));
                             table.setColumnSelectionInterval(3, 3);
@@ -131,13 +133,13 @@ public class ReorderTableModel extends AbstractTableModel {
                             JOptionPane.showMessageDialog(table, "Invalid Amount.");
                         }
                     }
-                    case 3 -> {
+                    case 4 -> {
                         if (value instanceof StockUnit unit) {
                             p.setMinUnitCode(unit.getKey().getUnitCode());
                             table.setColumnSelectionInterval(4, 4);
                         }
                     }
-                    case 4 -> {
+                    case 5 -> {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             p.setMaxQty(Util1.getFloat(value));
                             table.setColumnSelectionInterval(5, 5);
@@ -145,7 +147,7 @@ public class ReorderTableModel extends AbstractTableModel {
                             JOptionPane.showMessageDialog(table, "Invalid Amount.");
                         }
                     }
-                    case 5 -> {
+                    case 6 -> {
                         if (value instanceof StockUnit unit) {
                             p.setMaxUnitCode(unit.getKey().getUnitCode());
                             table.setColumnSelectionInterval(4, 4);
@@ -153,10 +155,10 @@ public class ReorderTableModel extends AbstractTableModel {
                     }
                 }
                 switch (column) {
-                    case 2,3 ->
-                        p.setMinSmallQty(p.getMinQty() * getSmallQty(p.getStockCode(), p.getMinUnitCode()));
-                    case 4,5 ->
-                        p.setMaxSmallQty(p.getMaxQty() * getSmallQty(p.getStockCode(), p.getMinUnitCode()));
+                    case 3,4 ->
+                        p.setMinSmallQty(p.getMinQty() * getSmallQty(p.getKey().getStockCode(), p.getMinUnitCode()));
+                    case 5,6 ->
+                        p.setMaxSmallQty(p.getMaxQty() * getSmallQty(p.getKey().getStockCode(), p.getMinUnitCode()));
 
                 }
                 addNewRow();
@@ -180,7 +182,7 @@ public class ReorderTableModel extends AbstractTableModel {
     @Override
     public Class<?> getColumnClass(int columnIndex) {
         return switch (columnIndex) {
-            case 2, 4 ->
+            case 3, 5 ->
                 Float.class;
             default ->
                 String.class;
@@ -190,7 +192,7 @@ public class ReorderTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         return switch (columnIndex) {
-            case 0, 1, 6, 7 ->
+            case 0,2, 1, 6, 7 ->
                 false;
             default ->
                 true;
@@ -243,7 +245,7 @@ public class ReorderTableModel extends AbstractTableModel {
 
     private boolean hasEmptyRow() {
         ReorderLevel p = listReorder.get(listReorder.size() - 1);
-        return p.getStockCode()== null;
+        return p.getKey().getStockCode() == null;
     }
 
     public void addRow() {

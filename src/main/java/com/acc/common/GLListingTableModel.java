@@ -22,7 +22,7 @@ public class GLListingTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(GLListingTableModel.class);
     private List<VTriBalance> listTBal = new ArrayList();
-    private String[] columnNames = {"Code", "Description", "Currency", "Dr-Amt", "Cr-Amt", "Net Change"};
+    private String[] columnNames = {"Code", "Description", "Currency", "Dr-Amt", "Cr-Amt"};
 
     @Override
     public String getColumnName(int column) {
@@ -68,9 +68,6 @@ public class GLListingTableModel extends AbstractTableModel {
                 }
                 case 4 -> {
                     return apar.getCrAmt();
-                }
-                case 5 -> {
-                    return null;
                 }
             }
 

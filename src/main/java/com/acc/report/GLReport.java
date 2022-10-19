@@ -149,7 +149,6 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         tblGL.getColumnModel().getColumn(2).setPreferredWidth(1);
         tblGL.getColumnModel().getColumn(3).setPreferredWidth(50);
         tblGL.getColumnModel().getColumn(4).setPreferredWidth(50);
-        tblGL.getColumnModel().getColumn(5).setPreferredWidth(50);
         tblGL.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -370,7 +369,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             }
         });
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder(null, java.awt.Color.lightGray));
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel1.setFont(Global.lableFont);
         jLabel1.setText("Date");
@@ -483,7 +482,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         });
         jScrollPane1.setViewportView(tblGL);
 
-        jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder(null, java.awt.Color.lightGray));
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         txtFTotalDrAmt.setEditable(false);
         txtFTotalDrAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
@@ -510,7 +509,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         lblCalTime.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         lblCalTime.setText("0");
 
-        jPanel3.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         chkClosing.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
         chkClosing.setText("Net Change");
@@ -522,6 +521,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         });
 
         chkActive.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        chkActive.setSelected(true);
         chkActive.setText("Zero");
         chkActive.setBorderPaintedFlat(true);
         chkActive.addActionListener(new java.awt.event.ActionListener() {
@@ -600,7 +600,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                             .addComponent(txtFNetChange, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel6)
                             .addComponent(lblCalTime))
-                        .addGap(21, 21, 21)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtOB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel5))
@@ -627,7 +627,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 324, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 328, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
