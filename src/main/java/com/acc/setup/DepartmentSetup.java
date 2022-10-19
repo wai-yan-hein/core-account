@@ -5,10 +5,11 @@
  */
 package com.acc.setup;
 
+import com.acc.common.AccountRepo;
 import com.acc.model.Department;
+import com.acc.model.DepartmentKey;
 import com.common.Global;
 import com.common.PanelControl;
-import com.common.ReturnObject;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.google.gson.Gson;
@@ -36,10 +37,7 @@ import javax.swing.tree.DefaultTreeModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -78,7 +76,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
     @Autowired
     private TaskExecutor taskExecutor;
     @Autowired
-    private WebClient accountApi;
+    private AccountRepo accountRepo;
 
     JPopupMenu popupmenu;
     private final ActionListener menuListener = (java.awt.event.ActionEvent evt) -> {
@@ -118,38 +116,29 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
     }
 
     private void createTreeNode(DefaultMutableTreeNode treeRoot) {
-        Mono<ResponseEntity<List<Department>>> result = accountApi.get()
-                .uri(builder -> builder.path("/account/get-department-tree")
-                .queryParam("compCode", Global.compCode)
-                .build())
-                .retrieve().toEntityList(Department.class);
-        result.subscribe((t) -> {
-            List<Department> departments = t.getBody();
-            if (!departments.isEmpty()) {
-                departments.forEach((menu) -> {
-                    if (menu.getChild() != null) {
-                        if (!menu.getChild().isEmpty()) {
-                            DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
-                            treeRoot.add(parent);
-                            addChildMenu(parent, menu.getChild());
-                        } else {  //No Child
-                            DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
-
-                            treeRoot.add(parent);
-                        }
-                    } else {  //No Child
+        List<Department> departments = accountRepo.getDepartment();
+        if (!departments.isEmpty()) {
+            departments.forEach((menu) -> {
+                if (menu.getChild() != null) {
+                    if (!menu.getChild().isEmpty()) {
                         DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
                         treeRoot.add(parent);
-                    }
+                        addChildMenu(parent, menu.getChild());
+                    } else {  //No Child
+                        DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
 
-                });
-                treeModel.setRoot(treeRoot);
-                treeModel.reload(treeRoot);
-                progress.setIndeterminate(false);
-            }
-        }, (e) -> {
-            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-        });
+                        treeRoot.add(parent);
+                    }
+                } else {  //No Child
+                    DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
+                    treeRoot.add(parent);
+                }
+
+            });
+            treeModel.setRoot(treeRoot);
+            treeModel.reload(treeRoot);
+            progress.setIndeterminate(false);
+        }
 
     }
 
@@ -178,7 +167,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
     }
 
     private void setDepartment(Department dep) {
-        txtSystemCode.setText(dep.getDeptCode());
+        txtSystemCode.setText(dep.getKey().getDeptCode());
         txtUserCode.setText(dep.getUserCode());
         txtName.setText(dep.getDeptName());
         chkActive.setSelected(Util1.getBoolean(dep.isActive()));
@@ -189,8 +178,9 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
         txtSystemCode.setText(null);
         txtUserCode.setText(null);
         txtName.setText(null);
-        chkActive.setSelected(Boolean.FALSE);
+        chkActive.setSelected(true);
         labelStatus.setText("NEW");
+        txtUserCode.requestFocus();
     }
 
     private void initPopup() {
@@ -219,58 +209,44 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
 
     private void newDepartment() {
         Department dep = new Department();
+        DepartmentKey key = new DepartmentKey();
+        key.setCompCode(Global.compCode);
+        dep.setKey(key);
         dep.setDeptName("New Department");
         child = new DefaultMutableTreeNode(dep);
         selectedNode.add(child);
         treeModel.insertNodeInto(child, selectedNode, selectedNode.getChildCount() - 1);
         treeDept.setSelectionRow(selectedNode.getChildCount());
-
-        //treeModel.reload();
+        txtUserCode.requestFocus();
     }
 
     private void saveDepartment() {
-        Department department = new Department();
-        department.setDeptCode(txtSystemCode.getText());
-        department.setDeptName(txtName.getText());
-        department.setUserCode(txtUserCode.getText());
-        department.setActive(chkActive.isSelected());
-        department.setCompCode(Global.compCode);
-        department.setMacId(Global.macId);
-        if (isValidDepartment(department, Global.loginUser.getUserCode())) {
-            Mono<ReturnObject> result = accountApi.post()
-                    .uri("/account/save-department")
-                    .body(Mono.just(department), Department.class)
-                    .retrieve()
-                    .bodyToMono(ReturnObject.class);
-            ReturnObject block = result.block();
-            Department dep = gson.fromJson(gson.toJson(block.getData()), Department.class);
-            if (dep != null) {
-                JOptionPane.showMessageDialog(Global.parentForm, block.getMessage());
-                if (labelStatus.getText().equals("EDIT")) {
-                    selectedNode.setUserObject(dep);
-                    clear();
-                    setEnabledControl(false);
-                    treeModel.reload(selectedNode);
-                }
+        Department dep = new Department();
+        DepartmentKey key = new DepartmentKey();
+        key.setCompCode(Global.compCode);
+        key.setDeptCode(txtSystemCode.getText());
+        dep.setKey(key);
+        dep.setDeptName(txtName.getText());
+        dep.setUserCode(txtUserCode.getText());
+        dep.setActive(chkActive.isSelected());
+        dep.setMacId(Global.macId);
+        if (isValidDepartment(dep)) {
+            Department deparment = accountRepo.saveDepartment(dep);
+            if (deparment != null) {
+                selectedNode.setUserObject(deparment);
+                treeModel.reload(selectedNode);
+                setEnabledControl(false);
+                clear();
             }
         }
     }
 
-    private boolean isValidDepartment(Department dept,
-            String userCode) {
-        boolean status = true;
-
+    private boolean isValidDepartment(Department dept) {
         if (Util1.isNull(dept.getDeptName(), "-").equals("-")) {
-            status = false;
             JOptionPane.showMessageDialog(Global.parentForm, "Invalid department code.");
+            return false;
         } else {
-
-            if (dept.getDeptCode().isEmpty()) {
-                //dept.setDeptCode(getDeptCode(compCode));
-                dept.setCreatedBy(userCode);
-                dept.setCreatedDt(Util1.getTodayDate());
-            }
-            dept.setUpdatedBy(userCode);
+            dept.setUpdatedBy(Global.loginUser.getUserCode());
             dept.setUpdatedDt(Util1.getTodayDate());
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectedNode.getParent();
             Object userObject = node.getUserObject();
@@ -278,12 +254,10 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
                 dept.setParentDept("#");
             } else {
                 Department dep = (Department) userObject;
-                dept.setParentDept(dep.getDeptCode());
+                dept.setParentDept(dep.getKey().getDeptCode());
             }
-
         }
-
-        return status;
+        return true;
     }
 
     /**
@@ -316,7 +290,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
             }
         });
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED));
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel1.setFont(Global.lableFont        );
         jLabel1.setText("System Code");
@@ -345,11 +319,12 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
         });
 
         chkActive.setFont(Global.lableFont        );
+        chkActive.setSelected(true);
         chkActive.setText("Active");
         chkActive.setEnabled(false);
         chkActive.setName("chkActive"); // NOI18N
 
-        labelStatus.setFont(Global.lableFont        );
+        labelStatus.setFont(Global.menuFont        );
         labelStatus.setText("NEW");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -359,13 +334,13 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(labelStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(labelStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 242, Short.MAX_VALUE)
+                    .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 243, Short.MAX_VALUE)
                     .addComponent(txtUserCode)
                     .addComponent(txtSystemCode)
                     .addComponent(chkActive, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -389,8 +364,8 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(chkActive)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(labelStatus)
-                .addContainerGap(232, Short.MAX_VALUE))
+                .addComponent(labelStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         treeDept.setFont(Global.textFont);
@@ -405,7 +380,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 246, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -511,12 +486,12 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
             ctrlName = jButton.getName();
         }
         switch (ctrlName) {
-            case "txtSystemCode":
+            case "txtSystemCode" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
                     txtUserCode.requestFocus();
                 }
-                break;
-            case "txtUserCode":
+            }
+            case "txtUserCode" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
                     txtName.requestFocus();
                 }
@@ -524,8 +499,8 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
                     txtSystemCode.requestFocus();
                 }
                 tabToTree(e);
-                break;
-            case "txtName":
+            }
+            case "txtName" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
                     chkActive.requestFocus();
                 }
@@ -533,29 +508,27 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
                     txtUserCode.requestFocus();
                 }
                 tabToTree(e);
-                break;
-            case "chkActive":
-
+            }
+            case "chkActive" -> {
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
                     txtName.requestFocus();
                 }
                 tabToTree(e);
-                break;
-            case "btnSave":
-
+            }
+            case "btnSave" -> {
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
                     chkActive.requestFocus();
                 }
                 tabToTree(e);
-                break;
-            case "btnClear":
+            }
+            case "btnClear" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
                     txtUserCode.requestFocus();
                 }
 
                 tabToTree(e);
-                break;
-            case "treeDept":
+            }
+            case "treeDept" -> {
                 if (e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP) {
                     if (selectedNode != null) {
                         if (!selectedNode.getUserObject().toString().equals(parentRootName)) {
@@ -574,6 +547,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
                 if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
                     txtUserCode.requestFocus();
                 }
+            }
 
         }
     }

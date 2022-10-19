@@ -4,6 +4,7 @@
  */
 package com.acc.common;
 
+import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import com.user.model.Currency;
 import com.acc.model.Department;
@@ -14,6 +15,7 @@ import com.acc.model.VDescription;
 import com.acc.model.VRef;
 import com.acc.model.VTranSource;
 import com.common.Global;
+import com.common.ReturnObject;
 import com.common.Util1;
 import java.time.Duration;
 import java.util.List;
@@ -169,5 +171,45 @@ public class AccountRepo {
                 .build())
                 .retrieve().toEntity(Double.class);
         return result.block(Duration.ofMinutes(min)).getBody();
+    }
+
+    public List<ChartOfAccount> getCOA(String coaCode) {
+        COAKey key = new COAKey();
+        key.setCoaCode(coaCode);
+        key.setCompCode(Global.compCode);
+        Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.post()
+                .uri("/account/get-coa-child")
+                .body(Mono.just(key), COAKey.class)
+                .retrieve().toEntityList(ChartOfAccount.class);
+        return result.block(Duration.ofMinutes(min)).getBody();
+    }
+
+    public ChartOfAccount findCOA(String coaCode) {
+        COAKey key = new COAKey();
+        key.setCoaCode(coaCode);
+        key.setCompCode(Global.compCode);
+        Mono<ResponseEntity<ChartOfAccount>> result = accountApi.post()
+                .uri("/account/find-coa")
+                .body(Mono.just(key), COAKey.class)
+                .retrieve().toEntity(ChartOfAccount.class);
+        return result.block(Duration.ofMinutes(min)).getBody();
+    }
+
+    public Department saveDepartment(Department dep) {
+        Mono<Department> result = accountApi.post()
+                .uri("/account/save-department")
+                .body(Mono.just(dep), Department.class)
+                .retrieve()
+                .bodyToMono(Department.class);
+        return result.block();
+    }
+
+    public List<Department> getDepartmentTree() {
+        Mono<ResponseEntity<List<Department>>> result = accountApi.get()
+                .uri(builder -> builder.path("/account/get-department-tree")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().toEntityList(Department.class);
+        return result.block().getBody();
     }
 }

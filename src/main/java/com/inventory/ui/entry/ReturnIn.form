@@ -606,6 +606,9 @@
         <Component class="javax.swing.JSeparator" name="jSeparator2">
         </Component>
         <Component class="javax.swing.JCheckBox" name="chkPaid">
+          <Properties>
+            <Property name="selected" type="boolean" value="true"/>
+          </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkPaidActionPerformed"/>
           </Events>

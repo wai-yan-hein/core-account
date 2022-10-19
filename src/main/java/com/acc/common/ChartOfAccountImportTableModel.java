@@ -47,24 +47,18 @@ public class ChartOfAccountImportTableModel extends AbstractTableModel {
         try {
             ChartOfAccount coa = listCOA.get(row);
 
-            switch (column) {
-                case 0: //Id
-                    return coa.getMigCode();
-                case 1: //Name
-                    return coa.getCoaCodeUsr();
-                case 2: //Name
-                    return coa.getCoaNameEng();
-                case 3:
-                    return coa.getCoaParent();
-                case 4:
-                    return coa.getOption();
-                case 5:
-                    return coa.getCompCode();
-                case 6:
-                    return coa.isActive();
-                default:
-                    return null;
-            }
+            return switch (column) {
+                case 0 -> coa.getMigCode();
+                case 1 -> coa.getCoaCodeUsr();
+                case 2 -> coa.getCoaNameEng();
+                case 3 -> coa.getCoaParent();
+                case 4 -> coa.getOption();
+                case 5 -> coa.getKey().getCompCode();
+                case 6 -> coa.isActive();
+                default -> null;
+            }; //Id
+            //Name
+            //Name
         } catch (Exception ex) {
             log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }

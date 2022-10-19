@@ -12,7 +12,7 @@ import com.inventory.model.MachineInfo;
 import com.inventory.model.AppUser;
 import com.user.model.Department;
 import com.inventory.model.MachineInfo;
-import com.inventory.model.SysProperty;
+import com.user.model.SysProperty;
 import com.user.model.CompanyInfo;
 import com.user.model.Currency;
 import com.user.model.MachineProperty;
@@ -194,7 +194,7 @@ public class UserRepo {
                 .retrieve().toEntityList(SysProperty.class);
         List<SysProperty> prop = result.block().getBody();
         prop.forEach((t) -> {
-            hm.put(t.getPropKey(), t.getPropValue());
+            hm.put(t.getKey().getPropKey(), t.getPropValue());
         });
         return hm;
     }

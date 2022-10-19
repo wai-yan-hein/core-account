@@ -15,7 +15,7 @@ import lombok.Data;
 @Data
 public class ChartOfAccount {
 
-    private String coaCode;
+    private COAKey key;
     private String coaNameEng;
     private String coaNameMya;
     private boolean active;
@@ -26,7 +26,6 @@ public class ChartOfAccount {
     private String modifiedBy;
     private String coaParent;
     private String option;
-    private String compCode;
     private Integer coaLevel;
     private String coaCodeUsr;
     private String parentUsrCode;
@@ -36,14 +35,6 @@ public class ChartOfAccount {
     private boolean marked;
     private String curCode;
     private List<ChartOfAccount> child;
-
-    public ChartOfAccount(String coaCode, String coaNameEng) {
-        this.coaCode = coaCode;
-        this.coaNameEng = coaNameEng;
-    }
-
-    public ChartOfAccount() {
-    }
 
     @Override
     public String toString() {

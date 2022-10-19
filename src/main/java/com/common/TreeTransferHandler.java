@@ -168,7 +168,7 @@ public class TreeTransferHandler extends TransferHandler {
         if ((action & MOVE) == MOVE) {
             try {
                 ChartOfAccount coaParent = (ChartOfAccount) parent.getUserObject();
-                String parentCode = coaParent.getCoaCode();
+                String parentCode = coaParent.getKey().getCoaCode();
                 String parentName = coaParent.getCoaNameEng();
                 JTree tree = (JTree) source;
                 DefaultTreeModel model = (DefaultTreeModel) tree.getModel();

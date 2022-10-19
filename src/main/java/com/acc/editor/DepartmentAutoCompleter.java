@@ -91,7 +91,7 @@ public final class DepartmentAutoCompleter implements KeyListener {
     private void initOption() {
         listOption.clear();
         listDepartment.forEach(t -> {
-            listOption.add(t.getDeptCode());
+            listOption.add(t.getKey().getDeptCode());
         });
     }
 
@@ -205,12 +205,12 @@ public final class DepartmentAutoCompleter implements KeyListener {
                     table.getSelectedRow()));
             ((JTextField) textComp).setText(department.getDeptName());
             if (custom) {
-                switch (department.getDeptCode()) {
+                switch (department.getKey().getDeptCode()) {
                     case "C" -> {
                         optionDialog = new OptionDialog(Global.parentForm, "Stock Category");
                         List<OptionModel> listOP = new ArrayList<>();
                         listDepartment.forEach(t -> {
-                            listOP.add(new OptionModel(t.getDeptCode(), t.getDeptName()));
+                            listOP.add(new OptionModel(t.getKey().getDeptCode(), t.getDeptName()));
                         });
                         optionDialog.setOptionList(listOP);
                         optionDialog.setLocationRelativeTo(null);
@@ -224,12 +224,12 @@ public final class DepartmentAutoCompleter implements KeyListener {
                         initOption();
                     default -> {
                         listOption.clear();
-                        listOption.add(department.getDeptCode());
+                        listOption.add(department.getKey().getDeptCode());
                     }
                 }
             }
             if (observer != null) {
-                observer.selected("Selected", department.getDeptCode());
+                observer.selected("Selected", department.getKey().getDeptCode());
             }
             popup.setVisible(false);
             popupOpen = false;

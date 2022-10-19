@@ -70,7 +70,7 @@ public class DepartmentTableModel extends AbstractTableModel {
             Department dep = listDep.get(row);
             return switch (column) {
                 case 0 ->
-                    Util1.isNull(dep.getUserCode(), dep.getDeptCode());
+                    Util1.isNull(dep.getUserCode(), dep.getKey().getDeptCode());
                 case 1 ->
                     dep.getDeptName();
                 default ->
@@ -122,7 +122,7 @@ public class DepartmentTableModel extends AbstractTableModel {
             status = true;
         } else {
             Department dep = listDep.get(listDep.size() - 1);
-            if (dep.getDeptCode() == null) {
+            if (dep.getKey().getDeptCode() == null) {
                 status = false;
             }
         }
@@ -142,7 +142,7 @@ public class DepartmentTableModel extends AbstractTableModel {
     public void delete(int row) {
         if (!listDep.isEmpty()) {
             Department dep = listDep.get(row);
-            if (dep.getDeptCode() != null) {
+            if (dep.getKey().getDeptCode() != null) {
                 listDep.remove(row);
                 if (table.getCellEditor() != null) {
                     table.getCellEditor().stopCellEditing();

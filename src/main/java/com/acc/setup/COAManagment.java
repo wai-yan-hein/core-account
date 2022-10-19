@@ -10,6 +10,7 @@ import com.acc.common.COAViewTableModel;
 import com.acc.common.StandardCOATableModel;
 import com.acc.dialog.COAUnusedDailog;
 import com.acc.dialog.ChartOfAccountImportDialog;
+import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.PanelControl;
@@ -26,10 +27,6 @@ import com.inventory.editor.MenuAutoCompleter;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import java.awt.FileDialog;
 import java.awt.HeadlessException;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -37,7 +34,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.util.Enumeration;
@@ -191,6 +187,10 @@ public class COAManagment extends javax.swing.JPanel implements
 
     private void newCOA() {
         ChartOfAccount coa = new ChartOfAccount();
+        COAKey key = new COAKey();
+        key.setCompCode(Global.compCode);
+        key.setCoaCode(txtSysCode.getText());
+        coa.setKey(key);
         coa.setCoaNameEng("New Chart of Account");
         DefaultMutableTreeNode child = new DefaultMutableTreeNode(coa);
         if (selectedNode != null) {
@@ -213,7 +213,7 @@ public class COAManagment extends javax.swing.JPanel implements
                     option = "SYS";
                 } else {
                     ChartOfAccount pCoa = (ChartOfAccount) parentNode.getUserObject();
-                    parentCode = pCoa.getCoaCode();
+                    parentCode = pCoa.getKey().getCoaCode();
                     option = "USR";
                 }
                 if (isNew) {
@@ -221,10 +221,8 @@ public class COAManagment extends javax.swing.JPanel implements
                     chartOfAccount.setCreatedDate(Util1.getTodayDate());
                 }
                 int level = selectedNode.getLevel();
-                chartOfAccount.setCoaCode(txtSysCode.getText());
                 chartOfAccount.setCoaNameEng(txtName.getText());
                 chartOfAccount.setCoaCodeUsr(txtUsrCode.getText());
-                chartOfAccount.setCompCode(Global.compCode);
                 chartOfAccount.setCoaParent(parentCode);
                 chartOfAccount.setCoaLevel(level);
                 chartOfAccount.setModifiedBy(Global.loginUser.getUserCode());
@@ -256,7 +254,7 @@ public class COAManagment extends javax.swing.JPanel implements
             if (selectedNode != null) {
                 ChartOfAccount coa = (ChartOfAccount) selectedNode.getUserObject();
                 if (coa != null) {
-                    String code = coa.getCoaCode();
+                    String code = coa.getKey().getCoaCode();
                     int status = deleteCOA(code);
                     if (status == 10) {
                         JOptionPane.showMessageDialog(Global.parentForm, "Can't delete this account is already used.");
@@ -394,7 +392,7 @@ public class COAManagment extends javax.swing.JPanel implements
     private void setCOA(ChartOfAccount coa) {
         chartOfAccount = coa;
         setEnabledControl(true);
-        txtSysCode.setText(chartOfAccount.getCoaCode());
+        txtSysCode.setText(chartOfAccount.getKey().getCoaCode());
         txtName.setText(chartOfAccount.getCoaNameEng());
         txtUsrCode.setText(chartOfAccount.getCoaCodeUsr());
         chkActive.setSelected(Util1.getBoolean(chartOfAccount.isActive()));
@@ -403,7 +401,7 @@ public class COAManagment extends javax.swing.JPanel implements
         if (chartOfAccount.getCoaLevel() != null) {
             if (chartOfAccount.getCoaLevel() == 3) {
                 btnCreate.setEnabled(true);
-                Menu menu = hmMenu.get(chartOfAccount.getCoaCode());
+                Menu menu = hmMenu.get(chartOfAccount.getKey().getCoaCode());
                 completer.setMenu(menu);
             } else {
                 btnCreate.setEnabled(false);
@@ -450,7 +448,7 @@ public class COAManagment extends javax.swing.JPanel implements
             menu.setMenuName(coa.getCoaNameEng());
             menu.setMenuClass(completer.getMenu().getMenuClass());
             menu.setParentMenuCode(completer.getMenu().getMenuCode());
-            menu.setAccount(coa.getCoaCode());
+            menu.setAccount(coa.getKey().getCoaCode());
             menu.setMenuType("Menu");
             try {
                 saveMenu(menu);
@@ -464,11 +462,9 @@ public class COAManagment extends javax.swing.JPanel implements
     private Menu saveMenu(Menu menu) {
         Mono<ReturnObject> result = userApi.post()
                 .uri("/user/save-menu")
-                .body(Mono.just(menu), Menu.class
-                )
+                .body(Mono.just(menu), Menu.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class
-                );
+                .bodyToMono(ReturnObject.class);
         ReturnObject block = result.block();
         if (!Objects.isNull(block)) {
             menu = gson.fromJson(gson.toJson(block.getData()), Menu.class);
@@ -480,7 +476,7 @@ public class COAManagment extends javax.swing.JPanel implements
     private void importCOA() {
         ChartOfAccount coa = (ChartOfAccount) selectedNode.getUserObject();
         Integer cLevel = coa == null ? 0 : coa.getCoaLevel();
-        String cCode = cLevel == 2 ? coa.getCoaCode() : null;
+        String cCode = cLevel == 2 ? coa.getKey().getCoaCode() : null;
         if (cCode != null) {
             FileDialog dialog = new FileDialog(Global.parentForm, "Choose CSV File", FileDialog.LOAD);
             dialog.setDirectory("D:\\");
@@ -497,7 +493,7 @@ public class COAManagment extends javax.swing.JPanel implements
     private void readFile(String path, String parentCode) {
         String line;
         int lineCount = 0;
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(
+        try ( BufferedReader br = new BufferedReader(new InputStreamReader(
                 new FileInputStream(path), "UTF8"))) {
             while ((line = br.readLine()) != null) {
                 ChartOfAccount coa = new ChartOfAccount();
@@ -506,7 +502,6 @@ public class COAManagment extends javax.swing.JPanel implements
                 coa.setCoaLevel(3);
                 coa.setCoaParent(parentCode);
                 coa.setCoaNameEng(line);
-                coa.setCompCode(Global.compCode);
                 coa.setActive(Boolean.TRUE);
                 coa.setCreatedDate(Util1.getTodayDate());
                 coa.setCreatedBy(Global.loginUser.getUserCode());
@@ -627,7 +622,7 @@ public class COAManagment extends javax.swing.JPanel implements
             }
         });
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED));
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         jPanel1.setFont(Global.textFont);
 
         jLabel1.setFont(Global.lableFont);
@@ -794,7 +789,7 @@ public class COAManagment extends javax.swing.JPanel implements
                 .addComponent(panelMenu, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1)
-                .addContainerGap(32, Short.MAX_VALUE))
+                .addContainerGap(95, Short.MAX_VALUE))
         );
 
         treeCOA.setFont(Global.textFont);
@@ -811,7 +806,7 @@ public class COAManagment extends javax.swing.JPanel implements
             panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 325, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 344, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())

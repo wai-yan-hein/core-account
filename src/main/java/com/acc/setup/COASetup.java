@@ -175,16 +175,16 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
     private void getCOAGroup(int row) {
         clear();
         ChartOfAccount c = coaHeadTableModel.getChartOfAccount(row);
-        if (c.getCoaCode() != null) {
+        if (c.getKey().getCoaCode() != null) {
             progress.setIndeterminate(true);
             Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get().uri((builder) -> builder.path("/account/get-coa-child")
-                    .queryParam("parentCode", c.getCoaCode())
+                    .queryParam("parentCode", c.getKey().getCoaCode())
                     .queryParam("compCode", Global.compCode)
                     .build())
                     .retrieve()
                     .toEntityList(ChartOfAccount.class);
             result.subscribe((t) -> {
-                coaGroupTableModel.setCoaHeadCode(c.getCoaCode());
+                coaGroupTableModel.setCoaHeadCode(c.getKey().getCoaCode());
                 coaGroupTableModel.setListCOA(t.getBody());
                 coaGroupTableModel.addEmptyRow();
                 lblCoaGroup.setText(c.getCoaNameEng());
@@ -213,16 +213,16 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
     private void getCOAGroupChild(int row) {
         cOAGroupChildTableModel.clear();
         ChartOfAccount c = coaGroupTableModel.getChartOfAccount(row);
-        if (c.getCoaCode() != null) {
+        if (c.getKey().getCoaCode() != null) {
             progress.setIndeterminate(true);
             Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get().uri((builder) -> builder.path("/account/get-coa-child")
-                    .queryParam("parentCode", c.getCoaCode())
+                    .queryParam("parentCode", c.getKey().getCoaCode())
                     .queryParam("compCode", Global.compCode)
                     .build())
                     .retrieve()
                     .toEntityList(ChartOfAccount.class);
             result.subscribe((t) -> {
-                cOAGroupChildTableModel.setCoaGroupCode(c.getCoaCode());
+                cOAGroupChildTableModel.setCoaGroupCode(c.getKey().getCoaCode());
                 cOAGroupChildTableModel.setListCOA(t.getBody());
                 cOAGroupChildTableModel.addEmptyRow();
                 lblCoaChild.setText(c.getCoaNameEng());

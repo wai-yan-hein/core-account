@@ -193,9 +193,9 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), "dd/MM/yyyy");
             endDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getEndDate(), "dd/MM/yyyy");
             ChartOfAccount coa = cOAAutoCompleter.getCOA();
-            String coaLv1 = Util1.getInteger(coa.getCoaLevel()) == 1 ? coa.getCoaCode() : "-";
-            String coaLv2 = Util1.getInteger(coa.getCoaLevel()) == 2 ? coa.getCoaCode() : "-";
-            String coaLv3 = Util1.getInteger(coa.getCoaLevel()) == 3 ? coa.getCoaCode() : "-";
+            String coaLv1 = Util1.getInteger(coa.getCoaLevel()) == 1 ? coa.getKey().getCoaCode() : "-";
+            String coaLv2 = Util1.getInteger(coa.getCoaLevel()) == 2 ? coa.getKey().getCoaCode() : "-";
+            String coaLv3 = Util1.getInteger(coa.getCoaLevel()) == 3 ? coa.getKey().getCoaCode() : "-";
             ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
             filter.setCoaCode(coaLv3);
             filter.setCoaLv1(coaLv1);

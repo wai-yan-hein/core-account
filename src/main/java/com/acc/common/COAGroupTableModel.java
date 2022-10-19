@@ -77,7 +77,7 @@ public class COAGroupTableModel extends AbstractTableModel {
             ChartOfAccount coa = listCOA.get(row);
             return switch (column) {
                 case 0 ->
-                    coa.getCoaCode();
+                    coa.getKey().getCoaCode();
                 case 1 ->
                     coa.getCoaCodeUsr();
                 case 2 ->
@@ -143,7 +143,7 @@ public class COAGroupTableModel extends AbstractTableModel {
         if (isValidCOA(coa)) {
             try {
                 ChartOfAccount save = accountRepo.saveCOA(coa);
-                if (save.getCoaCode() != null) {
+                if (save.getKey().getCoaCode() != null) {
                     listCOA.set(row, save);
                     addEmptyRow();
                     parent.setRowSelectionInterval(row + 1, row + 1);
@@ -221,8 +221,7 @@ public class COAGroupTableModel extends AbstractTableModel {
         } else if (Util1.isNull(coa.getCoaLevel())) {
             status = false;
         } else {
-            if (Objects.isNull(coa.getCoaCode())) {
-                coa.setCompCode(Global.compCode);
+            if (Objects.isNull(coa.getKey().getCoaCode())) {
                 coa.setCreatedBy(Global.loginUser.getUserCode());
                 coa.setCreatedDate(Util1.getTodayDate());
                 coa.setMacId(Global.macId);
@@ -240,7 +239,7 @@ public class COAGroupTableModel extends AbstractTableModel {
             status = true;
         } else {
             ChartOfAccount coa = listCOA.get(listCOA.size() - 1);
-            if (coa.getCoaCode() == null) {
+            if (coa.getKey().getCoaCode() == null) {
                 status = false;
             }
         }

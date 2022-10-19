@@ -65,7 +65,7 @@ public class StandardCOATableModel extends AbstractTableModel {
 
             return switch (column) {
                 case 0 ->
-                    coa.getCoaCode();
+                    coa.getKey().getCoaCode();
                 case 1 ->
                     coa.getCoaCodeUsr();
                 case 2 ->

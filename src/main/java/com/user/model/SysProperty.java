@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.inventory.model;
+package com.user.model;
 
 import lombok.Data;
 
@@ -14,8 +14,7 @@ import lombok.Data;
 @Data
 public class SysProperty {
 
-    private String propKey;
+    private PropertyKey key;
     private String propValue;
     private String remark;
-    private String compCode;
 }

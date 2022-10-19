@@ -71,7 +71,7 @@ public final class COAAutoCompleter implements KeyListener {
         textComp.setFont(Global.textFont);
         if (filter) {
             list = new ArrayList<>(list);
-            ChartOfAccount c = new ChartOfAccount("-", "All");
+            ChartOfAccount c = new ChartOfAccount();
             list.add(0, c);
             setCoa(c);
         }
@@ -85,8 +85,7 @@ public final class COAAutoCompleter implements KeyListener {
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
         table.getColumnModel().getColumn(0).setPreferredWidth(10);//Code
-        table.getColumnModel().getColumn(1).setPreferredWidth(120);//Name
-        table.getColumnModel().getColumn(2).setPreferredWidth(120);//Name
+        table.getColumnModel().getColumn(1).setPreferredWidth(200);//Name
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -161,7 +160,7 @@ public final class COAAutoCompleter implements KeyListener {
             ((JTextField) textComp).setText(coa.getCoaNameEng());
             if (editor == null) {
                 if (selectionObserver != null) {
-                    selectionObserver.selected("Selected", coa.getCoaCode());
+                    selectionObserver.selected("Selected", coa.getKey().getCoaCode());
                 }
             }
         }

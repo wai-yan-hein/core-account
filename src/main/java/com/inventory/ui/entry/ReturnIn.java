@@ -833,6 +833,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             }
         });
 
+        chkPaid.setSelected(true);
         chkPaid.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkPaidActionPerformed(evt);

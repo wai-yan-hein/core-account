@@ -221,7 +221,7 @@ public class AllCashTableModel extends AbstractTableModel {
                 case 1 -> {
                     if (value instanceof Department dep) {
                         vgl.setDeptUsrCode(dep.getUserCode());
-                        vgl.setDeptCode(dep.getDeptCode());
+                        vgl.setDeptCode(dep.getKey().getDeptCode());
                     }
                     parent.setColumnSelectionInterval(2, 2);
                 }
@@ -447,7 +447,7 @@ public class AllCashTableModel extends AbstractTableModel {
                 }
             }
             if (department != null) {
-                vGl.setDeptCode(department.getDeptCode());
+                vGl.setDeptCode(department.getKey().getDeptCode());
                 vGl.setDeptUsrCode(department.getUserCode());
             }
             vGl.setGlDate(glDate == null ? Util1.getTodayDate() : Util1.toDate(glDate, "dd/MM/yyyy"));

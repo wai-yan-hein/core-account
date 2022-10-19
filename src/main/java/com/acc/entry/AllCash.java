@@ -533,9 +533,9 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         traderCode = traderAutoCompleter.getTrader().getCode();
         traderType = Util1.isNull(traderType, "-");
         ChartOfAccount coa = coaAutoCompleter.getCOA();
-        coaLv1 = Util1.getInteger(coa.getCoaLevel()) == 1 ? coa.getCoaCode() : "-";
-        coaLv2 = Util1.getInteger(coa.getCoaLevel()) == 2 ? coa.getCoaCode() : "-";
-        accCode = Util1.getInteger(coa.getCoaLevel()) == 3 ? coa.getCoaCode() : "-";
+        coaLv1 = Util1.getInteger(coa.getCoaLevel()) == 1 ? coa.getKey().getCoaCode() : "-";
+        coaLv2 = Util1.getInteger(coa.getCoaLevel()) == 2 ? coa.getKey().getCoaCode() : "-";
+        accCode = Util1.getInteger(coa.getCoaLevel()) == 3 ? coa.getKey().getCoaCode() : "-";
         clearTextBox();
     }
 

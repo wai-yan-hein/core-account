@@ -21,7 +21,7 @@ public class COATableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(COATableModel.class);
     private List<ChartOfAccount> listCOA = new ArrayList<>();
-    private final String[] columnNames = {"Code", "Name", "Group"};
+    private final String[] columnNames = {"Code", "Name"};
 
     public COATableModel(List<ChartOfAccount> listCOA) {
         this.listCOA = listCOA;
@@ -60,8 +60,6 @@ public class COATableModel extends AbstractTableModel {
                     coa.getCoaCodeUsr();
                 case 1 ->
                     coa.getCoaNameEng();
-                case 2 ->
-                    Util1.getString(coa.getCoaLevel());
                 default ->
                     null;
             }; //Code

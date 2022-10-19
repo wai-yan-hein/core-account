@@ -14,7 +14,7 @@ import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.MachineInfo;
-import com.inventory.model.SysProperty;
+import com.user.model.SysProperty;
 import com.inventory.model.Trader;
 import com.inventory.ui.common.InventoryRepo;
 import com.user.common.UserRepo;
@@ -22,6 +22,7 @@ import com.user.editor.MacAutoCompleter;
 import com.user.editor.TextAutoCompleter;
 import com.user.model.MachineProperty;
 import com.user.model.MachinePropertyKey;
+import com.user.model.PropertyKey;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -183,6 +184,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtVouReport.addActionListener(action);
         txtLogoName.addActionListener(action);
         txtPurReport.addActionListener(action);
+        txtDebtor.addActionListener(action);
+        txtCreditor.addActionListener(action);
+        txtCus.addActionListener(action);
+        txtSup.addActionListener(action);
     }
 
     private void initCheckBox() {
@@ -229,6 +234,14 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtLogoName.setText(hmProperty.get("logo.name"));
         txtPurReport.setName("report.purchase.voucher");
         txtPurReport.setText(hmProperty.get("report.purchase.voucher"));
+        txtCreditor.setName("creditor.account");
+        txtCreditor.setText(hmProperty.get("creditor.account"));
+        txtDebtor.setName("debtor.account");
+        txtDebtor.setText(hmProperty.get("debtor.account"));
+        txtCus.setName("customer.account");
+        txtCus.setText(hmProperty.get("customer.account"));
+        txtSup.setName("supplier.account");
+        txtSup.setText(hmProperty.get("supplier.account"));
     }
 
     private void initCombo() {
@@ -259,9 +272,11 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
     private void saveSysProp(String key, String value) {
         SysProperty p = new SysProperty();
-        p.setPropKey(key);
+        PropertyKey pKey = new PropertyKey();
+        pKey.setPropKey(key);
+        pKey.setCompCode(Global.compCode);
+        p.setKey(pKey);
         p.setPropValue(value);
-        p.setCompCode(Global.compCode);
         userRepo.saveSys(p);
         Global.hmRoleProperty.put(key, value);
         log.info("save.");
@@ -353,6 +368,16 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         panelMac = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
         txtMac = new javax.swing.JTextField();
+        jPanel5 = new javax.swing.JPanel();
+        jLabel11 = new javax.swing.JLabel();
+        txtDebtor = new javax.swing.JTextField();
+        jLabel12 = new javax.swing.JLabel();
+        txtCreditor = new javax.swing.JTextField();
+        jSeparator5 = new javax.swing.JSeparator();
+        txtCus = new javax.swing.JTextField();
+        jLabel13 = new javax.swing.JLabel();
+        txtSup = new javax.swing.JTextField();
+        jLabel14 = new javax.swing.JLabel();
 
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Default", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, Global.menuFont));
 
@@ -385,7 +410,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtCustomer)
                             .addComponent(txtSupplier)
-                            .addComponent(txtLocation, javax.swing.GroupLayout.DEFAULT_SIZE, 76, Short.MAX_VALUE))))
+                            .addComponent(txtLocation))))
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
@@ -600,7 +625,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtPurReport, javax.swing.GroupLayout.DEFAULT_SIZE, 83, Short.MAX_VALUE)))
+                        .addComponent(txtPurReport)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -644,6 +669,70 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addContainerGap(10, Short.MAX_VALUE))
         );
 
+        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Account", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, Global.menuFont));
+
+        jLabel11.setText("Debotor Acc Group");
+
+        txtDebtor.setFont(Global.textFont);
+
+        jLabel12.setText("Creditor Acc Group");
+
+        txtCreditor.setFont(Global.textFont);
+
+        txtCus.setFont(Global.textFont);
+
+        jLabel13.setText("Customer Acc");
+
+        txtSup.setFont(Global.textFont);
+
+        jLabel14.setText("Supplier Acc");
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSeparator5)
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtCreditor)
+                            .addComponent(txtDebtor)
+                            .addComponent(txtCus)
+                            .addComponent(txtSup))))
+                .addContainerGap())
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel11)
+                    .addComponent(txtDebtor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel12)
+                    .addComponent(txtCreditor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel13)
+                    .addComponent(txtCus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel14)
+                    .addComponent(txtSup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSeparator5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(220, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -659,7 +748,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -672,7 +763,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 364, Short.MAX_VALUE)
                     .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -700,6 +792,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JCheckBox chkWeight;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
+    private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -712,19 +808,25 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator4;
+    private javax.swing.JSeparator jSeparator5;
     private javax.swing.JPanel panelMac;
     private javax.swing.JTextField txtA4Report;
     private javax.swing.JTextField txtA5Report;
+    private javax.swing.JTextField txtCreditor;
+    private javax.swing.JTextField txtCus;
     private javax.swing.JTextField txtCustomer;
+    private javax.swing.JTextField txtDebtor;
     private javax.swing.JTextField txtLocation;
     private javax.swing.JTextField txtLogoName;
     private javax.swing.JTextField txtMac;
     private javax.swing.JTextField txtPrinter;
     private javax.swing.JTextField txtPurReport;
+    private javax.swing.JTextField txtSup;
     private javax.swing.JTextField txtSupplier;
     private javax.swing.JTextField txtVouReport;
     // End of variables declaration//GEN-END:variables

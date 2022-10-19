@@ -107,7 +107,6 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
                     coa.setCoaCodeUsr(userCode);
                     coa.setMigCode(code);
                     coa.setCoaNameEng(name);
-                    coa.setCompCode(Global.compCode);
                     coa.setActive(Boolean.TRUE);
                     coa.setCreatedDate(Util1.getTodayDate());
                     coa.setCreatedBy(Global.loginUser.getUserCode());

@@ -15,11 +15,10 @@ import lombok.Data;
 @Data
 public class Department {
 
-    private String deptCode;
+    private DepartmentKey key;
     private String deptName;
     private String parentDept;
     private boolean active;
-    private String compCode;
     private String createdBy;
     private Date createdDt;
     private String updatedBy;
@@ -29,13 +28,13 @@ public class Department {
     private List<Department> child;
 
     public Department(String deptCode, String deptName) {
-        this.deptCode = deptCode;
+        this.key = new DepartmentKey();
+        this.key.setDeptCode(deptCode);
         this.deptName = deptName;
     }
 
     public Department() {
     }
-
 
     @Override
     public String toString() {
