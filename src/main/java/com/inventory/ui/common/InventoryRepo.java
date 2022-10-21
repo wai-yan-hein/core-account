@@ -29,6 +29,7 @@ import com.inventory.model.RetInHis;
 import com.inventory.model.RetInHisKey;
 import com.inventory.model.RetOutHis;
 import com.inventory.model.RetOutHisKey;
+import com.inventory.model.RetOutKey;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisKey;
 import com.inventory.model.SaleMan;
@@ -534,6 +535,15 @@ public class InventoryRepo {
         return result.block(Duration.ofMinutes(min));
     }
 
+    public void delete(Pattern p) {
+        Mono<ReturnObject> result = inventoryApi.post()
+                .uri("/setup/delete-pattern")
+                .body(Mono.just(p), Pattern.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+        result.block(Duration.ofMinutes(min));
+    }
+
     public UnitRelation saveUnitRelation(UnitRelation rel) {
         Mono<UnitRelation> result = inventoryApi.post()
                 .uri("/setup/save-unit-relation")
@@ -774,9 +784,45 @@ public class InventoryRepo {
         result.block(Duration.ofMinutes(min));
     }
 
+    public void restore(SaleHisKey key) {
+        Mono<ReturnObject> result = inventoryApi.post()
+                .uri("/sale/restore-sale")
+                .body(Mono.just(key), SaleHisKey.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+        result.block(Duration.ofMinutes(min));
+    }
+
+    public void restore(RetInHisKey key) {
+        Mono<ReturnObject> result = inventoryApi.post()
+                .uri("/retin/restore-retin")
+                .body(Mono.just(key), RetInHisKey.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+        result.block(Duration.ofMinutes(min));
+    }
+
+    public void restore(RetOutHisKey key) {
+        Mono<ReturnObject> result = inventoryApi.post()
+                .uri("/retout/restore-retout")
+                .body(Mono.just(key), RetOutHisKey.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+        result.block(Duration.ofMinutes(min));
+    }
+
     public void delete(PurHisKey key) {
         Mono<ReturnObject> result = inventoryApi.post()
                 .uri("/pur/delete-pur")
+                .body(Mono.just(key), PurHisKey.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+        result.block(Duration.ofMinutes(min));
+    }
+
+    public void restore(PurHisKey key) {
+        Mono<ReturnObject> result = inventoryApi.post()
+                .uri("/pur/restore-pur")
                 .body(Mono.just(key), PurHisKey.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
@@ -810,9 +856,27 @@ public class InventoryRepo {
         result.block(Duration.ofMinutes(min));
     }
 
+    public void restore(StockIOKey key) {
+        Mono<ReturnObject> result = inventoryApi.post()
+                .uri("/stockio/restore-stockio")
+                .body(Mono.just(key), StockIOKey.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+        result.block(Duration.ofMinutes(min));
+    }
+
     public void delete(TransferHisKey key) {
         Mono<ReturnObject> result = inventoryApi.post()
                 .uri("/transfer/delete-transfer")
+                .body(Mono.just(key), TransferHisKey.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+        result.block(Duration.ofMinutes(min));
+    }
+
+    public void restore(TransferHisKey key) {
+        Mono<ReturnObject> result = inventoryApi.post()
+                .uri("/transfer/restore-transfer")
                 .body(Mono.just(key), TransferHisKey.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);

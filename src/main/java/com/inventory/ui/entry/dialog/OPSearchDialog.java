@@ -120,7 +120,7 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
 
     private void search() {
         progess.setIndeterminate(true);
-        FilterObject filter = new FilterObject(Global.compCode);
+        FilterObject filter = new FilterObject(Global.compCode,Global.deptId);
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
         filter.setUserCode(appUserAutoCompleter.getAppUser().getUserCode());

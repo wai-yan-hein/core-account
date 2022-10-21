@@ -133,6 +133,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         listStockUnit = inventoryRepo.getStockUnit();
         outTableModel.setVouDate(txtDate);
         outTableModel.setInventoryRepo(inventoryRepo);
+        outTableModel.setLblRec(lblRec);
         outTableModel.addNewRow();
         outTableModel.setParent(tblStock);
         outTableModel.setObserver(this);
@@ -165,13 +166,29 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     }
 
     private void deleteVoucher() {
-        if (lblStatus.getText().equals("EDIT")) {
-            int yes_no = JOptionPane.showConfirmDialog(this,
-                    "Are you sure to delete?", "Stock In/Out Voucher delete", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
-            if (yes_no == 0) {
-                inventoryRepo.delete(io.getKey());
-                clear();
+        String status = lblStatus.getText();
+        switch (status) {
+            case "EDIT" -> {
+                int yes_no = JOptionPane.showConfirmDialog(Global.parentForm,
+                        "Are you sure to delete?", "Stock In/Out Voucher delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+                if (yes_no == 0) {
+                    inventoryRepo.delete(io.getKey());
+                    clear();
+                }
             }
+            case "DELETED" -> {
+                int yes_no = JOptionPane.showConfirmDialog(this,
+                        "Are you sure to restore?", "Stock In/Out Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (yes_no == 0) {
+                    io.setDeleted(false);
+                    inventoryRepo.restore(io.getKey());
+                    lblStatus.setText("EDIT");
+                    lblStatus.setForeground(Color.blue);
+                    disableForm(true);
+                }
+            }
+            default ->
+                JOptionPane.showMessageDialog(Global.parentForm, "Voucher can't delete.");
         }
     }
 
@@ -376,6 +393,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         lblStatus = new javax.swing.JLabel();
         txtCost = new javax.swing.JFormattedTextField();
         jLabel8 = new javax.swing.JLabel();
+        lblRec = new javax.swing.JLabel();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -513,6 +531,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         jLabel8.setFont(Global.lableFont);
         jLabel8.setText("Total Cost");
 
+        lblRec.setFont(Global.lableFont);
+        lblRec.setText("Records");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -523,8 +544,10 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lblStatus)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel2)
                         .addGap(18, 18, 18)
                         .addComponent(txtInQty, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -553,7 +576,8 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                         .addComponent(jLabel2)
                         .addComponent(jLabel1)
                         .addComponent(txtCost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel8))
+                        .addComponent(jLabel8)
+                        .addComponent(lblRec))
                     .addComponent(lblStatus))
                 .addContainerGap())
         );
@@ -584,6 +608,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JTable tblStock;
     private javax.swing.JFormattedTextField txtCost;

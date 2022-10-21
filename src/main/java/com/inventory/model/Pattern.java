@@ -13,7 +13,7 @@ import lombok.Data;
 @Data
 public class Pattern {
 
-    private String stockCode;
+    private PatternKey key;
     private String userCode;
     private String stockName;
     private String groupName;
@@ -26,7 +26,5 @@ public class Pattern {
     private String locCode;
     private String locName;
     private String mapStockCode;
-    private Integer uniqueId;
-    private String compCode;
     private Integer deptId;
 }

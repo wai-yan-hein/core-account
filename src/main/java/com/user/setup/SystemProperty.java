@@ -178,6 +178,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkWeight.addActionListener(action);
         chkDisableSale.addActionListener(action);
         chkPriceChange.addActionListener(action);
+        chkDisablePur.addActionListener(action);
+        chkDisableRI.addActionListener(action);
+        chkDisableRO.addActionListener(action);
         //txt
         txtA4Report.addActionListener(action);
         txtA5Report.addActionListener(action);
@@ -221,6 +224,12 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkWeight.setSelected(Util1.getBoolean(hmProperty.get("stock.use.weight")));
         chkDisableSale.setName("disable.calcuate.sale.stock");
         chkDisableSale.setSelected(Util1.getBoolean(hmProperty.get("disable.calcuate.sale.stock")));
+        chkDisablePur.setName("disable.calcuate.purchase.stock");
+        chkDisablePur.setSelected(Util1.getBoolean(hmProperty.get("disable.calcuate.purchase.stock")));
+        chkDisableRI.setName("disable.calcuate.returin.stock");
+        chkDisableRI.setSelected(Util1.getBoolean(hmProperty.get("disable.calcuate.returin.stock")));
+        chkDisableRO.setName("disable.calcuate.returnout.stock");
+        chkDisableRO.setSelected(Util1.getBoolean(hmProperty.get("disable.calcuate.returnout.stock")));
     }
 
     private void initTextBox() {
@@ -342,6 +351,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtLogoName = new javax.swing.JTextField();
         chkWeight = new javax.swing.JCheckBox();
         chkDisableSale = new javax.swing.JCheckBox();
+        chkDisablePur = new javax.swing.JCheckBox();
+        chkDisableRI = new javax.swing.JCheckBox();
+        chkDisableRO = new javax.swing.JCheckBox();
         jPanel1 = new javax.swing.JPanel();
         chkSA4 = new javax.swing.JCheckBox();
         chkSA5 = new javax.swing.JCheckBox();
@@ -451,6 +463,12 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         chkDisableSale.setText("Disable Calcuate Stock in Sale");
 
+        chkDisablePur.setText("Disable Calcuate Stock in Purchase");
+
+        chkDisableRI.setText("Disable Calcuate Stock in Return In");
+
+        chkDisableRO.setText("Disable Calcuate Stock in Return Out");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -470,7 +488,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                             .addComponent(txtPrinter)
                             .addComponent(txtLogoName)))
                     .addComponent(chkWeight, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkDisableSale, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(chkDisableSale, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(chkDisablePur, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(chkDisableRI, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(chkDisableRO, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -485,6 +506,12 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkDisableSale)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkDisablePur)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkDisableRI)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkDisableRO)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -494,7 +521,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel8)
                     .addComponent(txtLogoName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(165, Short.MAX_VALUE))
+                .addContainerGap(87, Short.MAX_VALUE))
         );
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Sale", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, Global.menuFont));
@@ -777,6 +804,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkBalance;
     private javax.swing.JCheckBox chkCalStock;
+    private javax.swing.JCheckBox chkDisablePur;
+    private javax.swing.JCheckBox chkDisableRI;
+    private javax.swing.JCheckBox chkDisableRO;
     private javax.swing.JCheckBox chkDisableSale;
     private javax.swing.JCheckBox chkPriceChange;
     private javax.swing.JCheckBox chkPricePopup;

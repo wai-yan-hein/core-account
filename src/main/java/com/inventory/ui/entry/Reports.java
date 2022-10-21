@@ -193,6 +193,9 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             filter.setVouTypeCode(vouStatusAutoCompleter.getVouStatus().getKey().getCode());
             filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             filter.setCalSale(Util1.getBoolean(ProUtil.getProperty("disable.calcuate.sale.stock")));
+            filter.setCalPur(Util1.getBoolean(ProUtil.getProperty("disable.calcuate.purchase.stock")));
+            filter.setCalRI(Util1.getBoolean(ProUtil.getProperty("disable.calcuate.returnin.stock")));
+            filter.setCalRO(Util1.getBoolean(ProUtil.getProperty("disable.calcuate.retunout.stock")));
             log.info("Report Date : " + stDate + " - " + enDate);
             int row = tblReport.getSelectedRow();
             if (row >= 0) {

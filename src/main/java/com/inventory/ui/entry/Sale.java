@@ -59,7 +59,6 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jasperreports.components.barcode4j.FourStateBarcodeComponent;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -169,6 +168,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     private void initSaleTable() {
         tblSale.setModel(saleTableModel);
+        saleTableModel.setLblRecord(lblRec);
         saleTableModel.setParent(tblSale);
         saleTableModel.setLocationAutoCompleter(locationAutoCompleter);
         saleTableModel.setTraderAutoCompleter(traderAutoCompleter);
@@ -413,15 +413,30 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }
 
     private void deleteSale() {
-        if (lblStatus.getText().equals("EDIT")) {
-            int yes_no = JOptionPane.showConfirmDialog(this,
-                    "Are you sure to delete?", "Save Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
-            if (yes_no == 0) {
-                inventoryRepo.delete(saleHis.getKey());
-                clear();
+        String status = lblStatus.getText();
+        switch (status) {
+            case "EDIT" -> {
+                int yes_no = JOptionPane.showConfirmDialog(this,
+                        "Are you sure to delete?", "Save Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+                if (yes_no == 0) {
+                    inventoryRepo.delete(saleHis.getKey());
+                    clear();
+                }
             }
-        } else {
-            JOptionPane.showMessageDialog(this, "Voucher can't delete.");
+            case "DELETED" -> {
+                int yes_no = JOptionPane.showConfirmDialog(this,
+                        "Are you sure to restore?", "Purchase Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (yes_no == 0) {
+                    saleHis.setDeleted(false);
+                    inventoryRepo.restore(saleHis.getKey());
+                    lblStatus.setText("EDIT");
+                    lblStatus.setForeground(Color.blue);
+                    disableForm(true);
+
+                }
+            }
+            default ->
+                JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }
 
     }
@@ -710,6 +725,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         chkA5 = new javax.swing.JCheckBox();
         chkVou = new javax.swing.JCheckBox();
         chkA4 = new javax.swing.JCheckBox();
+        lblRec = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblSale = new javax.swing.JTable();
         jScrollPane3 = new javax.swing.JScrollPane();
@@ -988,6 +1004,9 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 .addComponent(chkA4))
         );
 
+        lblRec.setFont(Global.lableFont);
+        lblRec.setText("Records");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -997,15 +1016,21 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 199, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, 193, Short.MAX_VALUE))
                     .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(16, 16, 16)
+                        .addComponent(lblRec)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(lblStatus)
                 .addContainerGap())
@@ -1664,6 +1689,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelSale;
     private javax.swing.JPanel sbPanel;

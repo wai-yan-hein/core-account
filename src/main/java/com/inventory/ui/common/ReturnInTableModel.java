@@ -17,6 +17,7 @@ import com.inventory.model.StockUnit;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
@@ -38,6 +39,15 @@ public class ReturnInTableModel extends AbstractTableModel {
     private LocationAutoCompleter locationAutoCompleter;
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
+    private JLabel lblRec;
+
+    public JLabel getLblRec() {
+        return lblRec;
+    }
+
+    public void setLblRec(JLabel lblRec) {
+        this.lblRec = lblRec;
+    }
 
     public JDateChooser getVouDate() {
         return vouDate;
@@ -284,6 +294,7 @@ public class ReturnInTableModel extends AbstractTableModel {
                     record.setLocCode(l.getKey().getLocCode());
                     record.setLocName(l.getLocName());
                 }
+                setRecord(listDetail.size() - 1);
                 fireTableRowsUpdated(row, row);
                 selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
                 parent.requestFocusInWindow();
@@ -291,6 +302,10 @@ public class ReturnInTableModel extends AbstractTableModel {
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
+    }
+
+    private void setRecord(int size) {
+        lblRec.setText("Records : " + size);
     }
 
     public void addNewRow() {
@@ -320,6 +335,7 @@ public class ReturnInTableModel extends AbstractTableModel {
 
     public void setListDetail(List<RetInHisDetail> listDetail) {
         this.listDetail = listDetail;
+        setRecord(listDetail.size());
         fireTableDataChanged();
     }
 

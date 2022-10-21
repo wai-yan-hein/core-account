@@ -190,6 +190,9 @@
                       </Group>
                       <Component id="chkWeight" max="32767" attributes="0"/>
                       <Component id="chkDisableSale" max="32767" attributes="0"/>
+                      <Component id="chkDisablePur" max="32767" attributes="0"/>
+                      <Component id="chkDisableRI" max="32767" attributes="0"/>
+                      <Component id="chkDisableRO" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -207,6 +210,12 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="chkDisableSale" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
+                  <Component id="chkDisablePur" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="chkDisableRI" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="chkDisableRO" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
                   <Component id="jSeparator2" min="-2" pref="10" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
@@ -218,7 +227,7 @@
                       <Component id="jLabel8" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="txtLogoName" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace pref="165" max="32767" attributes="0"/>
+                  <EmptySpace pref="87" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -268,6 +277,21 @@
         <Component class="javax.swing.JCheckBox" name="chkDisableSale">
           <Properties>
             <Property name="text" type="java.lang.String" value="Disable Calcuate Stock in Sale"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="chkDisablePur">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Disable Calcuate Stock in Purchase"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="chkDisableRI">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Disable Calcuate Stock in Return In"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="chkDisableRO">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Disable Calcuate Stock in Return Out"/>
           </Properties>
         </Component>
       </SubComponents>

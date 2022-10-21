@@ -54,6 +54,15 @@ public class SaleTableModel extends AbstractTableModel {
     private JButton btnProgress;
     private JDateChooser vouDate;
     private boolean change = false;
+    private JLabel lblRecord;
+
+    public JLabel getLblRecord() {
+        return lblRecord;
+    }
+
+    public void setLblRecord(JLabel lblRecord) {
+        this.lblRecord = lblRecord;
+    }
 
     public boolean isChange() {
         return change;
@@ -320,6 +329,7 @@ public class SaleTableModel extends AbstractTableModel {
                     sd.setLocName(l.getLocName());
                 }
                 fireTableRowsUpdated(row, row);
+                setRecord(listDetail.size() - 1);
                 selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
                 parent.requestFocusInWindow();
             }
@@ -355,8 +365,13 @@ public class SaleTableModel extends AbstractTableModel {
 
     public void setListDetail(List<SaleHisDetail> listDetail) {
         this.listDetail = listDetail;
+        setRecord(listDetail.size());
         addNewRow();
         fireTableDataChanged();
+    }
+
+    private void setRecord(int size) {
+        lblRecord.setText("Records : " + size);
     }
 
     public void removeListDetail() {

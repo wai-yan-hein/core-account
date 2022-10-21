@@ -146,6 +146,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         retInTableModel.setSelectionObserver(this);
         retInTableModel.setInventoryRepo(inventoryRepo);
         retInTableModel.setVouDate(txtVouDate);
+        retInTableModel.setLblRec(lblRec);
         tblRet.getTableHeader().setFont(Global.tblHeaderFont);
         tblRet.setCellSelectionEnabled(true);
         tblRet.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
@@ -339,15 +340,26 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     private void deleteRetIn() {
-        if (lblStatus.getText().equals("EDIT")) {
-            int yes_no = JOptionPane.showConfirmDialog(Global.parentForm,
-                    "Are you sure to delete?", "Return In Voucher delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
-            if (yes_no == 0) {
-                inventoryRepo.delete(ri.getKey());
-                clear();
-            }
-        } else {
-            JOptionPane.showMessageDialog(Global.parentForm, "Voucher can't delete.");
+        String status = lblStatus.getText();
+        switch (status) {
+            case "EDIT" ->                 {
+                    int yes_no = JOptionPane.showConfirmDialog(Global.parentForm,
+                            "Are you sure to delete?", "Return In Voucher delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+                    if (yes_no == 0) {
+                        inventoryRepo.delete(ri.getKey());
+                        clear();
+                    }                      }
+            case "DELETED" ->                 {
+                    int yes_no = JOptionPane.showConfirmDialog(this,
+                            "Are you sure to restore?", "Return In Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                    if (yes_no == 0) {
+                        ri.setDeleted(false);
+                        inventoryRepo.restore(ri.getKey());
+                        lblStatus.setText("EDIT");
+                        lblStatus.setForeground(Color.blue);
+                        disableForm(true);
+                    }                      }
+            default -> JOptionPane.showMessageDialog(Global.parentForm, "Voucher can't delete.");
         }
 
     }
@@ -542,6 +554,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         txtLocation = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         lblStatus = new javax.swing.JLabel();
+        lblRec = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jLabel13 = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
@@ -713,19 +726,26 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         lblStatus.setFont(new java.awt.Font("Tahoma", 0, 30)); // NOI18N
         lblStatus.setText("NEW");
 
+        lblRec.setFont(Global.lableFont);
+        lblRec.setText("Records");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 603, Short.MAX_VALUE)
-                .addGap(134, 134, 134))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(lblRec)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
@@ -1234,6 +1254,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelSale;
     private javax.swing.JTable tblRet;

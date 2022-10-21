@@ -18,6 +18,7 @@ import com.toedter.calendar.JDateChooser;
 import java.awt.HeadlessException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
@@ -39,6 +40,15 @@ public class StockInOutTableModel extends AbstractTableModel {
     private SelectionObserver observer;
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
+    private JLabel lblRec;
+
+    public JLabel getLblRec() {
+        return lblRec;
+    }
+
+    public void setLblRec(JLabel lblRec) {
+        this.lblRec = lblRec;
+    }
 
     public JDateChooser getVouDate() {
         return vouDate;
@@ -239,11 +249,16 @@ public class StockInOutTableModel extends AbstractTableModel {
                 }
             }
             observer.selected("CAL-TOTAL", "CAL-TOTAL");
+            setRecord(listStock.size() - 1);
             fireTableRowsUpdated(row, row);
             parent.requestFocus();
         } catch (HeadlessException e) {
             log.error("setValueAt :" + e.getMessage());
         }
+    }
+
+    private void setRecord(int size) {
+        lblRec.setText("Records : " + size);
     }
 
     private void genPattern(Stock s, StockInOutDetail iod) {
@@ -259,7 +274,7 @@ public class StockInOutTableModel extends AbstractTableModel {
                     io.setOutQty(qty * p.getQty());
                     io.setCostPrice(Util1.getFloat(p.getPrice()));
                     io.setOutUnitCode(p.getUnitCode());
-                    io.setStockCode(p.getStockCode());
+                    io.setStockCode(p.getKey().getStockCode());
                     io.setLocCode(p.getLocCode());
                     io.setLocName(p.getLocName());
                     io.setStockName(p.getStockName());
@@ -267,6 +282,7 @@ public class StockInOutTableModel extends AbstractTableModel {
                 });
                 iod.setInQty(qty);
                 iod.setInUnitCode(s.getPurUnitCode());
+                setRecord(listStock.size());
             }
         }
     }
@@ -322,6 +338,7 @@ public class StockInOutTableModel extends AbstractTableModel {
 
     public void setListStock(List<StockInOutDetail> listStock) {
         this.listStock = listStock;
+        setRecord(listStock.size());
         fireTableDataChanged();
     }
 

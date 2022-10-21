@@ -29,12 +29,13 @@ public class FilterObject {
     private String locCode;
     private String locCodeTo;
     private String refNo;
-
-    @NonNull
+    private boolean deleted;
     private String compCode;
+    private Integer deptId;
 
-    public FilterObject(String compCode) {
+    public FilterObject(String compCode, Integer deptId) {
         this.compCode = compCode;
+        this.deptId = deptId;
     }
 
 }

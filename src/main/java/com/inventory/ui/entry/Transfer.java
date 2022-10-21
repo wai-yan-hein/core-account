@@ -126,6 +126,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private void initTable() {
         listStockUnit = inventoryRepo.getStockUnit();
         tranTableModel.setVouDate(txtDate);
+        tranTableModel.setLblRec(lblRec);
         tranTableModel.setInventoryRepo(inventoryRepo);
         tranTableModel.addNewRow();
         tranTableModel.setParent(tblTransfer);
@@ -151,13 +152,29 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     }
 
     private void deleteVoucher() {
-        if (lblStatus.getText().equals("EDIT")) {
-            int yes_no = JOptionPane.showConfirmDialog(this,
-                    "Are you sure to delete?", "Stock In/Out Voucher delete", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
-            if (yes_no == 0) {
-                inventoryRepo.delete(io.getKey());
-                clear();
+        String status = lblStatus.getText();
+        switch (status) {
+            case "EDIT" -> {
+                int yes_no = JOptionPane.showConfirmDialog(Global.parentForm,
+                        "Are you sure to delete?", "Transfer Voucher delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+                if (yes_no == 0) {
+                    inventoryRepo.delete(io.getKey());
+                    clear();
+                }
             }
+            case "DELETED" -> {
+                int yes_no = JOptionPane.showConfirmDialog(this,
+                        "Are you sure to restore?", "Transfer Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (yes_no == 0) {
+                    io.setDeleted(false);
+                    inventoryRepo.restore(io.getKey());
+                    lblStatus.setText("EDIT");
+                    lblStatus.setForeground(Color.blue);
+                    disableForm(true);
+                }
+            }
+            default ->
+                JOptionPane.showMessageDialog(Global.parentForm, "Voucher can't delete.");
         }
     }
 
@@ -345,6 +362,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         jLabel9 = new javax.swing.JLabel();
         txtTo = new javax.swing.JTextField();
         lblStatus = new javax.swing.JLabel();
+        lblRec = new javax.swing.JLabel();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -470,6 +488,9 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         lblStatus.setFont(new java.awt.Font("Arial", 0, 24)); // NOI18N
         lblStatus.setText("NEW");
 
+        lblRec.setFont(Global.lableFont);
+        lblRec.setText("Records");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -479,7 +500,10 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(lblStatus)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -490,7 +514,9 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblStatus)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblStatus)
+                    .addComponent(lblRec))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -518,6 +544,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JTable tblTransfer;
     private com.toedter.calendar.JDateChooser txtDate;

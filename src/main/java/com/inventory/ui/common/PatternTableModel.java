@@ -12,6 +12,7 @@ import com.google.gson.GsonBuilder;
 import com.common.Util1;
 import com.inventory.model.Location;
 import com.inventory.model.Pattern;
+import com.inventory.model.PatternKey;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import java.awt.HeadlessException;
@@ -19,6 +20,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
@@ -37,11 +39,20 @@ public class PatternTableModel extends AbstractTableModel {
     public static final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     private final String[] columnNames = {"Stock Code", "Stock Name", "Location", "Qty", "Unit", "Price"};
     private List<Pattern> listPattern = new ArrayList<>();
-    private WebClient inventoryApi;
+    private JLabel lblRecord;
+    private InventoryRepo inventoryRepo;
     private String stockCode;
     private JPanel panel;
     private JTable table;
     private Location location;
+
+    public JLabel getLblRecord() {
+        return lblRecord;
+    }
+
+    public void setLblRecord(JLabel lblRecord) {
+        this.lblRecord = lblRecord;
+    }
 
     public Location getLocation() {
         return location;
@@ -76,12 +87,12 @@ public class PatternTableModel extends AbstractTableModel {
         addNewRow();
     }
 
-    public WebClient getWebClient() {
-        return inventoryApi;
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
     }
 
-    public void setWebClient(WebClient inventoryApi) {
-        this.inventoryApi = inventoryApi;
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
     }
 
     @Override
@@ -104,11 +115,11 @@ public class PatternTableModel extends AbstractTableModel {
         Pattern p = listPattern.get(rowIndex);
         switch (columnIndex) {
             case 0 -> {
-                return p.getUserCode() == null ? p.getStockCode() : p.getUserCode();
+                return Util1.isNull(p.getUserCode(), p.getKey().getStockCode());
             }
             case 1 -> {
                 String stockName = null;
-                if (p.getStockCode() != null) {
+                if (p.getKey() != null) {
                     stockName = p.getStockName();
                     if (ProUtil.isStockNameWithCategory()) {
                         if (p.getCatName() != null) {
@@ -142,7 +153,7 @@ public class PatternTableModel extends AbstractTableModel {
                 switch (column) {
                     case 0,1 -> {
                         if (value instanceof Stock s) {
-                            p.setStockCode(s.getKey().getStockCode());
+                            p.getKey().setStockCode(s.getKey().getStockCode());
                             p.setStockName(s.getStockName());
                             p.setUserCode(s.getUserCode());
                             p.setRelation(s.getRelName());
@@ -194,7 +205,7 @@ public class PatternTableModel extends AbstractTableModel {
                     }
                 }
                 p.setMapStockCode(stockCode);
-                p.setUniqueId(row + 1);
+                p.getKey().setUniqueId(uniqueId(row));
                 save(p);
                 addNewRow();
                 fireTableRowsUpdated(row, row);
@@ -205,12 +216,16 @@ public class PatternTableModel extends AbstractTableModel {
         }
     }
 
+    private int uniqueId(int row) {
+        return row <= 0 ? 1 : listPattern.get(row - 1).getKey().getUniqueId() + 1;
+    }
+
     private boolean isValidEntry(Pattern pd) {
         boolean status = true;
-        if (Util1.isNull(pd.getStockCode())) {
+        if (Util1.isNull(pd.getKey().getStockCode())) {
             status = false;
             JOptionPane.showMessageDialog(panel, "Select Pattern");
-        } else if (Objects.isNull(pd.getStockCode())) {
+        } else if (Objects.isNull(pd.getKey().getStockCode())) {
             status = false;
         } else if (Objects.isNull(pd.getLocCode())) {
             status = false;
@@ -224,14 +239,9 @@ public class PatternTableModel extends AbstractTableModel {
 
     private void save(Pattern pd) {
         if (isValidEntry(pd)) {
-            pd.setCompCode(Global.compCode);
-            pd.setDeptId(Global.deptId);
-            Mono<Pattern> result = inventoryApi.post()
-                    .uri("/setup/save-pattern")
-                    .body(Mono.just(pd), Pattern.class)
-                    .retrieve()
-                    .bodyToMono(Pattern.class);
-            result.block();
+            inventoryRepo.savePattern(pd);
+            int size = listPattern.size() - 1;
+            lblRecord.setText("Records : " + size);
         }
     }
 
@@ -280,6 +290,10 @@ public class PatternTableModel extends AbstractTableModel {
     public void addNewRow() {
         if (!hasEmptyRow()) {
             Pattern p = new Pattern();
+            PatternKey key = new PatternKey();
+            key.setCompCode(Global.compCode);
+            key.setDeptId(Global.deptId);
+            p.setKey(key);
             listPattern.add(p);
             fireTableRowsInserted(listPattern.size() - 1, listPattern.size() - 1);
         }
@@ -290,7 +304,7 @@ public class PatternTableModel extends AbstractTableModel {
             return false;
         }
         Pattern p = listPattern.get(listPattern.size() - 1);
-        return p.getStockCode() == null;
+        return p.getKey().getStockCode() == null;
     }
 
     public void addRow() {

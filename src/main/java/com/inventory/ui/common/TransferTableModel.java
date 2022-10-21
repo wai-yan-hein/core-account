@@ -16,6 +16,7 @@ import com.toedter.calendar.JDateChooser;
 import java.awt.HeadlessException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
@@ -36,6 +37,15 @@ public class TransferTableModel extends AbstractTableModel {
     private SelectionObserver observer;
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
+    private JLabel lblRec;
+
+    public JLabel getLblRec() {
+        return lblRec;
+    }
+
+    public void setLblRec(JLabel lblRec) {
+        this.lblRec = lblRec;
+    }
 
     public JDateChooser getVouDate() {
         return vouDate;
@@ -175,11 +185,16 @@ public class TransferTableModel extends AbstractTableModel {
 
                 }
             }
+            setRecord(listTransfer.size() - 1);
             fireTableRowsUpdated(row, row);
             parent.requestFocus();
         } catch (HeadlessException e) {
             log.error("setValueAt :" + e.getMessage());
         }
+    }
+
+    private void setRecord(int size) {
+        lblRec.setText("Records : " + size);
     }
 
     public List<String> getDeleteList() {
@@ -228,6 +243,7 @@ public class TransferTableModel extends AbstractTableModel {
 
     public void setListTransfer(List<TransferHisDetail> listTransfer) {
         this.listTransfer = listTransfer;
+        setRecord(listTransfer.size());
         fireTableDataChanged();
     }
 

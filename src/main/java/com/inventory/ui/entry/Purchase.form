@@ -74,7 +74,7 @@
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="txtPurDate" pref="298" max="32767" attributes="0"/>
+                              <Component id="txtPurDate" pref="306" max="32767" attributes="0"/>
                               <Component id="txtVouNo" max="32767" attributes="0"/>
                           </Group>
                       </Group>
@@ -94,8 +94,8 @@
                   </Group>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="txtRemark" max="32767" attributes="0"/>
-                      <Component id="txtLocation" pref="282" max="32767" attributes="0"/>
+                      <Component id="txtRemark" pref="266" max="32767" attributes="0"/>
+                      <Component id="txtLocation" max="32767" attributes="0"/>
                       <Component id="txtCurrency" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -105,7 +105,7 @@
                   </Group>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="txtDueDate" pref="298" max="32767" attributes="0"/>
+                      <Component id="txtDueDate" pref="306" max="32767" attributes="0"/>
                       <Component id="txtReference" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -323,19 +323,23 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="0" attributes="0">
+              <Group type="102" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="lblStatus" max="32767" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="lblRec" max="32767" attributes="0"/>
+                      <Component id="lblStatus" max="32767" attributes="0"/>
+                  </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" attributes="0">
+              <Group type="102" alignment="0" attributes="0">
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="lblRec" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="lblStatus" max="32767" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -347,6 +351,14 @@
               <Font name="Tahoma" size="30" style="0"/>
             </Property>
             <Property name="text" type="java.lang.String" value="NEW"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="lblRec">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.lableFont" type="code"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Records"/>
           </Properties>
         </Component>
       </SubComponents>

@@ -9,7 +9,6 @@ import com.google.gson.GsonBuilder;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ReportFilter;
-import com.common.ReturnObject;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.inventory.editor.BrandAutoCompleter;
@@ -178,7 +177,8 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         patternTableModel.setLocation(inventoryRepo.getDefaultLocation());
         patternTableModel.setTable(tblPD);
         patternTableModel.setPanel(this);
-        patternTableModel.setWebClient(inventoryApi);
+        patternTableModel.setInventoryRepo(inventoryRepo);
+        patternTableModel.setLblRecord(lblRec);
         tblPD.setCellSelectionEnabled(true);
         tblPD.setModel(patternTableModel);
         tblPD.getTableHeader().setFont(Global.tblHeaderFont);
@@ -207,9 +207,12 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         if (row >= 0) {
             Stock s = stockTableModel.getStock(row);
             String stockCode = s.getKey().getStockCode();
-            patternTableModel.setListPattern(inventoryRepo.getPattern(stockCode));
-            patternTableModel.setStockCode(stockCode);
+            List<Pattern> list = inventoryRepo.getPattern(stockCode);
             lblStockName.setText(s.getStockName());
+            lblRec.setText("Records : " + list.size());
+            patternTableModel.setListPattern(list);
+            patternTableModel.setStockCode(stockCode);
+
             focusOnPD();
 
         }
@@ -221,16 +224,9 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
             int y = JOptionPane.showConfirmDialog(this, "Are you sure to delete?");
             if (y == JOptionPane.YES_OPTION) {
                 Pattern p = patternTableModel.getPattern(row);
-                Mono<ReturnObject> result = inventoryApi.get()
-                        .uri(builder -> builder.path("/setup/delete-pattern")
-                        .queryParam("stockCode", p.getStockCode())
-                        .build())
-                        .retrieve().bodyToMono(ReturnObject.class);
-                ReturnObject ro = result.block();
-                if (ro != null) {
-                    patternTableModel.remove(row);
-                    focusOnPD();
-                }
+                inventoryRepo.delete(p);
+                patternTableModel.remove(row);
+                focusOnPD();
             }
         }
     }
@@ -261,6 +257,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         jPanel2 = new javax.swing.JPanel();
         lblStockName = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        lblRec = new javax.swing.JLabel();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -379,13 +376,18 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
             }
         });
 
+        lblRec.setFont(Global.lableFont);
+        lblRec.setText("Records");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblStockName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lblStockName, javax.swing.GroupLayout.PREFERRED_SIZE, 273, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1)
                 .addContainerGap())
@@ -394,9 +396,13 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblStockName, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(lblStockName, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButton1))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -496,6 +502,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStockName;
     private javax.swing.JTable tblPD;
     private javax.swing.JTable tblStock;
