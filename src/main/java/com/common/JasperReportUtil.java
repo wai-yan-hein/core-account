@@ -25,19 +25,17 @@ public class JasperReportUtil {
 
     public static void print(JasperPrint jp) {
         try {
-            jp.setRightMargin(Util1.getInteger(ProUtil.getProperty("margin.right")));
-            jp.setLeftMargin(Util1.getInteger(ProUtil.getProperty("margin.left")));
             PrintRequestAttributeSet printRequestAttributeSet = new HashPrintRequestAttributeSet();
             printRequestAttributeSet.add(MediaSizeName.ISO_A4);
             PrintServiceAttributeSet printServiceAttributeSet = new HashPrintServiceAttributeSet();
             printServiceAttributeSet.add(new PrinterName(ProUtil.getProperty("printer.name"), null));
             JRPrintServiceExporter exporter = new JRPrintServiceExporter();
-            SimplePrintServiceExporterConfiguration configuration = new SimplePrintServiceExporterConfiguration();
-            configuration.setPrintRequestAttributeSet(printRequestAttributeSet);
-            configuration.setPrintServiceAttributeSet(printServiceAttributeSet);
-            configuration.setDisplayPageDialog(false);
-            configuration.setDisplayPrintDialog(true);
-            exporter.setConfiguration(configuration);
+            SimplePrintServiceExporterConfiguration config = new SimplePrintServiceExporterConfiguration();
+            config.setPrintRequestAttributeSet(printRequestAttributeSet);
+            config.setPrintServiceAttributeSet(printServiceAttributeSet);
+            config.setDisplayPageDialog(false);
+            config.setDisplayPrintDialog(true);
+            exporter.setConfiguration(config);
             exporter.setExporterInput(new SimpleExporterInput(jp));
             exporter.exportReport();
         } catch (JRException e) {
