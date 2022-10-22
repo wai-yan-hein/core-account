@@ -29,7 +29,6 @@ import com.inventory.model.RetInHis;
 import com.inventory.model.RetInHisKey;
 import com.inventory.model.RetOutHis;
 import com.inventory.model.RetOutHisKey;
-import com.inventory.model.RetOutKey;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisKey;
 import com.inventory.model.SaleMan;
@@ -56,6 +55,7 @@ import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
 import java.time.Duration;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -67,6 +67,7 @@ import reactor.core.publisher.Mono;
  * @author Lenovo
  */
 @Component
+@Slf4j
 public class InventoryRepo {
 
     int min = 1;
@@ -136,7 +137,9 @@ public class InventoryRepo {
                 .body(Mono.just(key), SaleManKey.class)
                 .retrieve()
                 .bodyToMono(SaleMan.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.doOnError((t) -> {
+            log.error(t.getMessage());
+        }).block();
     }
 
     public List<StockBrand> getStockBrand() {
@@ -179,7 +182,9 @@ public class InventoryRepo {
                 .body(Mono.just(key), TraderKey.class)
                 .retrieve()
                 .bodyToMono(Trader.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.doOnError((t) -> {
+            log.error(t.getMessage());
+        }).block();
     }
 
     public TraderGroup findTraderGroup(String code) {
@@ -260,7 +265,9 @@ public class InventoryRepo {
                 .body(Mono.just(key), LocationKey.class)
                 .retrieve()
                 .bodyToMono(Location.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.doOnError((t) -> {
+            log.error(t.getMessage());
+        }).block();
     }
 
     public StockBrand findBrand(String brandCode) {
