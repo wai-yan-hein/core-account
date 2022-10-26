@@ -167,6 +167,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtUserCode.setText(stock.getUserCode());
         txtStockName.setText(stock.getStockName());
         chkActive.setSelected(stock.isActive());
+        chkEx.setSelected(stock.isExplode());
         brandAutoCompleter.setBrand(inventoryRepo.findBrand(stock.getBrandCode()));
         categoryAutoCompleter.setCategory(inventoryRepo.findCategory(stock.getCatCode()));
         saleUnitCompleter.setStockUnit(inventoryRepo.findUnit(stock.getSaleUnitCode()));
@@ -253,6 +254,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             stock.setSalePriceD(Util1.getFloat(txtSalePriceD.getText()));
             stock.setSalePriceE(Util1.getFloat(txtSalePriceE.getText()));
             stock.setCalculate(chkCal.isSelected());
+            stock.setExplode(chkEx.isSelected());
             if (lblStatus.getText().equals("NEW")) {
                 StockKey key = new StockKey();
                 key.setStockCode(null);
@@ -409,6 +411,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtRelation = new javax.swing.JTextField();
         btnAddRelation = new javax.swing.JButton();
         chkCal = new javax.swing.JCheckBox();
+        chkEx = new javax.swing.JCheckBox();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -866,6 +869,11 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         chkCal.setText("Calulate Stock");
         chkCal.setName("chkActive"); // NOI18N
 
+        chkEx.setFont(Global.lableFont);
+        chkEx.setSelected(true);
+        chkEx.setText("Explode");
+        chkEx.setName("chkActive"); // NOI18N
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -914,6 +922,8 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(chkEx)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(chkCal)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(chkActive)
@@ -977,8 +987,10 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnAddItemType1)
                     .addComponent(chkActive)
-                    .addComponent(lblStatus)
-                    .addComponent(chkCal))
+                    .addComponent(chkCal)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(lblStatus, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                        .addComponent(chkEx, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1189,6 +1201,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private javax.swing.JButton btnUnit;
     private javax.swing.JCheckBox chkActive;
     private javax.swing.JCheckBox chkCal;
+    private javax.swing.JCheckBox chkEx;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

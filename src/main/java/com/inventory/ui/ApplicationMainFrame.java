@@ -18,7 +18,7 @@ import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.user.common.UserRepo;
 import com.common.Util1;
-import com.common.setup.MenuSetup;
+import com.user.setup.MenuSetup;
 import com.user.model.Department;
 import com.inventory.model.VRoleMenu;
 import com.inventory.ui.common.InventoryRepo;
@@ -652,6 +652,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             case "control" -> {
                 control = (PanelControl) selectObj;
                 lblPanelName.setText(control.panelName());
+            }
+            case "menu" -> {
+                initMenu();
             }
         }
     }

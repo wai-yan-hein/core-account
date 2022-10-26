@@ -25,6 +25,5 @@ public class Pattern {
     private String unitCode;
     private String locCode;
     private String locName;
-    private String mapStockCode;
     private Integer deptId;
 }

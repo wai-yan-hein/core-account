@@ -263,6 +263,7 @@ public class StockInOutTableModel extends AbstractTableModel {
 
     private void genPattern(Stock s, StockInOutDetail iod) {
         String stockCode = s.getKey().getStockCode();
+        boolean explode = s.isExplode();
         List<Pattern> patterns = inventoryRepo.getPattern(stockCode);
         if (!patterns.isEmpty()) {
             String input = JOptionPane.showInputDialog("Enter Qty.");
@@ -271,17 +272,29 @@ public class StockInOutTableModel extends AbstractTableModel {
                 patterns.forEach((p) -> {
                     StockInOutDetail io = new StockInOutDetail();
                     io.setUserCode(p.getUserCode());
-                    io.setOutQty(qty * p.getQty());
+                    if (explode) {
+                        io.setInQty(qty * p.getQty());
+                        io.setInUnitCode(p.getUnitCode());
+                    } else {
+                        io.setOutQty(qty * p.getQty());
+                        io.setOutUnitCode(p.getUnitCode());
+                    }
                     io.setCostPrice(Util1.getFloat(p.getPrice()));
-                    io.setOutUnitCode(p.getUnitCode());
                     io.setStockCode(p.getKey().getStockCode());
                     io.setLocCode(p.getLocCode());
                     io.setLocName(p.getLocName());
                     io.setStockName(p.getStockName());
                     addStockIO(io);
                 });
-                iod.setInQty(qty);
-                iod.setInUnitCode(s.getPurUnitCode());
+                if (explode) {
+                    iod.setOutQty(qty);
+                    iod.setOutUnitCode(s.getPurUnitCode());
+                    iod.setInUnitCode(null);
+                } else {
+                    iod.setInQty(qty);
+                    iod.setInUnitCode(s.getPurUnitCode());
+                    iod.setOutUnitCode(null);
+                }
                 setRecord(listStock.size());
             }
         }

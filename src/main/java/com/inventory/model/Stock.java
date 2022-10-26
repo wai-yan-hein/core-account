@@ -45,6 +45,7 @@ public class Stock implements java.io.Serializable {
     private String relCode;
     private Integer macId;
     private boolean calculate;
+    private boolean explode;
     private String relName;
     private String groupName;
     private String catName;

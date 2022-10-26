@@ -46,6 +46,7 @@ public class Util1 {
     public static void print(String pName) {
 
     }
+
     public static boolean isNullOrEmpty(Object obj) {
         return obj == null || obj.toString().isEmpty();
     }
@@ -733,4 +734,18 @@ public class Util1 {
         return arr[0] + "/" + arr[1] + "/20" + arr[2];
 
     }
+
+    public static List<Date> getDaysBetweenDates(Date startdate, Date endate) {
+        List<Date> dates = new ArrayList<>();
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(startdate);
+
+        while (!calendar.getTime().after(endate)) {
+            Date result = calendar.getTime();
+            dates.add(result);
+            calendar.add(Calendar.DATE, 1);
+        }
+        return dates;
+    }
+
 }

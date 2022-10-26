@@ -17,4 +17,6 @@ public class PatternKey {
     private String compCode;
     private Integer uniqueId;
     private Integer deptId;
+    private String mapStockCode;
+
 }

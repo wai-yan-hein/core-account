@@ -24,6 +24,7 @@ import com.acc.common.CashInOutTableModel;
 import com.acc.common.CashOpeningTableModel;
 import com.acc.common.CurExchangeRateTableModel;
 import com.acc.common.DateAutoCompleter;
+import com.acc.common.DateTableDecorator;
 import com.acc.common.OpeningCellRender;
 import com.acc.model.ChartOfAccount;
 import com.user.model.Currency;
@@ -65,6 +66,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -135,8 +137,9 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private List<VCOALv3> listCOA = new ArrayList<>();
     private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     private final String path = String.format("%s%s%s", "temp", File.separator, "Ledger" + Global.macId);
+    private DateTableDecorator decorator;
 
-    ;    public UserRepo getUserRepo() {
+    public UserRepo getUserRepo() {
         return userRepo;
     }
 
@@ -204,6 +207,28 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         initTableCB();
         initTableCashInOut();
         initTableCashOP();
+        initDateDecorator();
+        createDateFilter();
+    }
+
+    private void initDateDecorator() {
+        decorator = DateTableDecorator.decorate(panelDate);
+        decorator.setObserver(this);
+    }
+
+    private void createDateFilter() {
+        HashMap<Integer, String> hmDate = new HashMap<>();
+        HashMap<String, Integer> hmPage = new HashMap<>();
+        List<Date> date = Util1.getDaysBetweenDates(Util1.toDate(Global.startDate), Util1.getTodayDate());
+        for (int i = 0; i < date.size(); i++) {
+            String str = Util1.toDateStr(date.get(i), "yyyy-MM-dd");
+            int z = i + 1;
+            hmDate.put(z, str);
+            hmPage.put(str, z);
+        }
+        decorator.setHmData(hmDate);
+        decorator.setHmPage(hmPage);
+        decorator.refreshButton(enDate);
     }
 
     private void initFilter() {
@@ -600,6 +625,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         jLabel7 = new javax.swing.JLabel();
         txtOption = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
+        panelDate = new javax.swing.JPanel();
 
         jMenuItem1.setText("jMenuItem1");
 
@@ -658,6 +684,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         ));
         tblCurrency.setRowHeight(Global.tblRowHeight);
         jScrollPane4.setViewportView(tblCurrency);
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         txtDate.setFont(Global.textFont);
         txtDate.setName("txtDate"); // NOI18N
@@ -885,6 +913,19 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        panelDate.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        javax.swing.GroupLayout panelDateLayout = new javax.swing.GroupLayout(panelDate);
+        panelDate.setLayout(panelDateLayout);
+        panelDateLayout.setHorizontalGroup(
+            panelDateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        panelDateLayout.setVerticalGroup(
+            panelDateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 33, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -896,7 +937,9 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addComponent(panelDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -908,12 +951,15 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tblScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE)
+                .addComponent(tblScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 131, Short.MAX_VALUE)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(panelDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -1065,6 +1111,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JPanel panelDate;
     private javax.swing.JTable tblCIO;
     private javax.swing.JTable tblCash;
     private javax.swing.JTable tblCashOP;
