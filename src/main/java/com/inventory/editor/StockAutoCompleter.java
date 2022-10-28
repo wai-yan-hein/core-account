@@ -365,7 +365,7 @@ public final class StockAutoCompleter implements KeyListener {
                 List<Stock> list = inventoryRepo.getStock(str);
                 if (this.filter) {
                     Stock s = new Stock("-", "All");
-                    list.add(0, s);
+                    list.add(s);
                 }
                 stockTableModel.setListStock(list);
                 if (!list.isEmpty()) {

@@ -171,97 +171,89 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     }
 
     private void report() {
-        if (!isReport) {
-            progress.setIndeterminate(true);
-            isReport = true;
-            stDate = Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd");
-            enDate = Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd");
-            filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
-            filter.setOpDate(Util1.toDateStr(Global.startDate, "dd/MM/yyyy", "yyyy-MM-dd"));
-            filter.setFromDate(stDate);
-            filter.setToDate(enDate);
-            filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
-            filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
-            filter.setSaleManCode(saleManAutoCompleter.getSaleMan().getKey().getSaleManCode());
-            filter.setListLocation(locationAutoCompleter.getListOption());
-            filter.setStockTypeCode(stockTypeAutoCompleter.getStockType().getKey().getStockTypeCode());
-            filter.setBrandCode(brandAutoCompleter.getBrand().getKey().getBrandCode());
-            filter.setRegCode(regionAutoCompleter.getRegion().getKey().getRegCode());
-            filter.setCatCode(categoryAutoCompleter.getCategory().getKey().getCatCode());
-            filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
-            filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
-            filter.setVouTypeCode(vouStatusAutoCompleter.getVouStatus().getKey().getCode());
-            filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
-            filter.setCalSale(Util1.getBoolean(ProUtil.getProperty("disable.calcuate.sale.stock")));
-            filter.setCalPur(Util1.getBoolean(ProUtil.getProperty("disable.calcuate.purchase.stock")));
-            filter.setCalRI(Util1.getBoolean(ProUtil.getProperty("disable.calcuate.returnin.stock")));
-            filter.setCalRO(Util1.getBoolean(ProUtil.getProperty("disable.calcuate.retunout.stock")));
-            log.info("Report Date : " + stDate + " - " + enDate);
-            int row = tblReport.getSelectedRow();
-            if (row >= 0) {
-                int selectRow = tblReport.convertRowIndexToModel(row);
-                VRoleMenu report = tableModel.getReport(selectRow);
-                String reportName = report.getMenuName();
-                String reportUrl = report.getMenuUrl();
-                Map<String, Object> param = new HashMap<>();
-                param.put("p_report_name", reportName);
-                param.put("p_date", String.format("Between %s and %s",
-                        Util1.toDateStr(stDate, "yyyy-MM-dd", "dd/MM/yyyy"),
-                        Util1.toDateStr(enDate, "yyyy-MM-dd", "dd/MM/yyyy")));
-                param.put("p_print_date", Util1.getTodayDateTime());
-                param.put("p_comp_name", Global.companyName);
-                param.put("p_comp_address", Global.companyAddress);
-                param.put("p_comp_phone", Global.companyPhone);
-                param.put("p_currency", currencyAutoCompleter.getCurrency().getCurCode());
-                param.put("p_stock_type", stockTypeAutoCompleter.getStockType().getStockTypeName());
-                param.put("p_location", txtLocation.getText());
-                printReport(reportUrl, reportUrl, param);
-            } else {
+        int row = tblReport.getSelectedRow();
+        if (row >= 0) {
+            int selectRow = tblReport.convertRowIndexToModel(row);
+            VRoleMenu report = tableModel.getReport(selectRow);
+            String reportName = report.getMenuName();
+            String reportUrl = report.getMenuUrl();
+            if (isValidReport(reportUrl)) {
+                if (!isReport) {
+                    progress.setIndeterminate(true);
+                    isReport = true;
+                    stDate = Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd");
+                    enDate = Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd");
+                    filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
+                    filter.setOpDate(Util1.toDateStr(Global.startDate, "dd/MM/yyyy", "yyyy-MM-dd"));
+                    filter.setFromDate(stDate);
+                    filter.setToDate(enDate);
+                    filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
+                    filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
+                    filter.setSaleManCode(saleManAutoCompleter.getSaleMan().getKey().getSaleManCode());
+                    filter.setListLocation(locationAutoCompleter.getListOption());
+                    filter.setStockTypeCode(stockTypeAutoCompleter.getStockType().getKey().getStockTypeCode());
+                    filter.setBrandCode(brandAutoCompleter.getBrand().getKey().getBrandCode());
+                    filter.setRegCode(regionAutoCompleter.getRegion().getKey().getRegCode());
+                    filter.setCatCode(categoryAutoCompleter.getCategory().getKey().getCatCode());
+                    filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
+                    filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
+                    filter.setVouTypeCode(vouStatusAutoCompleter.getVouStatus().getKey().getCode());
+                    filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
+                    filter.setCalSale(Util1.getBoolean(ProUtil.getProperty("disable.calcuate.sale.stock")));
+                    filter.setCalPur(Util1.getBoolean(ProUtil.getProperty("disable.calcuate.purchase.stock")));
+                    filter.setCalRI(Util1.getBoolean(ProUtil.getProperty("disable.calcuate.returnin.stock")));
+                    filter.setCalRO(Util1.getBoolean(ProUtil.getProperty("disable.calcuate.retunout.stock")));
+                    log.info("Report Date : " + stDate + " - " + enDate);
+                    Map<String, Object> param = new HashMap<>();
+                    param.put("p_report_name", reportName);
+                    param.put("p_date", String.format("Between %s and %s",
+                            Util1.toDateStr(stDate, "yyyy-MM-dd", "dd/MM/yyyy"),
+                            Util1.toDateStr(enDate, "yyyy-MM-dd", "dd/MM/yyyy")));
+                    param.put("p_print_date", Util1.getTodayDateTime());
+                    param.put("p_comp_name", Global.companyName);
+                    param.put("p_comp_address", Global.companyAddress);
+                    param.put("p_comp_phone", Global.companyPhone);
+                    param.put("p_currency", currencyAutoCompleter.getCurrency().getCurCode());
+                    param.put("p_stock_type", stockTypeAutoCompleter.getStockType().getStockTypeName());
+                    param.put("p_location", txtLocation.getText());
+                    printReport(reportUrl, reportUrl, param);
+                }
                 isReport = false;
-                progress.setIndeterminate(false);
-                JOptionPane.showMessageDialog(Global.parentForm, "Choose Report.");
             }
+        } else {
             isReport = false;
+            progress.setIndeterminate(false);
+            JOptionPane.showMessageDialog(Global.parentForm, "Choose Report.");
         }
     }
 
-    /*private void prepareReport(String reportUrl, String reportName, Map<String, Object> param) {
-        ReportFilter insertFilter = new ReportFilter(Global.macId, Global.compCode);
-        insertFilter.setTraderCode(traderAutoCompleter.getTrader().getCode());
-        insertFilter.setSaleManCode(saleManAutoCompleter.getSaleMan().getSaleManCode());
-        insertFilter.setListLocation(locationAutoCompleter.getListOption());
-        insertFilter.setStockTypeCode(stockTypeAutoCompleter.getStockType().getStockTypeCode());
-        insertFilter.setBrandCode(brandAutoCompleter.getBrand().getBrandCode());
-        insertFilter.setRegCode(regionAutoCompleter.getRegion().getRegCode());
-        insertFilter.setCatCode(categoryAutoCompleter.getCategory().getCatCode());
-        insertFilter.setStockCode(stockAutoCompleter.getKey().getStockCode());
-        insertFilter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
-        Mono<ReturnObject> result = inventoryApi.post()
-                .uri("/report/save-filter")
-                .body(Mono.just(insertFilter), ReportFilter.class)
-                .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.subscribe((t) -> {
-            printReport(reportUrl, reportName, param);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Report", JOptionPane.ERROR_MESSAGE);
-        });
-    }*/
+    private boolean isValidReport(String url) {
+        if (url.equals("StockInOutDetail")) {
+            if (stockAutoCompleter.getStock().getKey().getStockCode().equals("-")) {
+                JOptionPane.showMessageDialog(this, "Please select stock code.", "Report Validation", JOptionPane.INFORMATION_MESSAGE);
+                txtStock.requestFocus();
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void printReport(String reportUrl, String reportName, Map<String, Object> param) {
         filter.setReportName(reportName);
         Mono<ReturnObject> result = inventoryApi
                 .post()
                 .uri("/report/get-report")
-                .body(Mono.just(filter), FilterObject.class)
+                .body(Mono.just(filter), FilterObject.class
+                )
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
+                .bodyToMono(ReturnObject.class
+                );
         result.subscribe((t) -> {
             try {
                 if (t != null) {
                     log.info(String.format("printReport %s", t.getMessage()));
                     String filePath = String.format("%s%s%s", Global.reportPath, File.separator, reportUrl.concat(".jasper"));
                     if (t.getFile().length > 0) {
-                        log.info("font: " + Global.fontName);
                         JasperReportsContext jc = DefaultJasperReportsContext.getInstance();
                         jc.setProperty("net.sf.jasperreports.default.font.name", Global.fontName);
                         jc.setProperty("net.sf.jasperreports.default.pdf.font.name", Global.fontName);

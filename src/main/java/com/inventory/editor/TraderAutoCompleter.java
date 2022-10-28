@@ -348,7 +348,7 @@ public class TraderAutoCompleter implements KeyListener {
                 List<Trader> list = inventoryRepo.getTraderList(str, traderType);
                 if (this.filter) {
                     Trader s = new Trader("-", "All");
-                    list.add(0, s);
+                    list.add(s);
                 }
                 traderTableModel.setListTrader(list);
                 if (!list.isEmpty()) {

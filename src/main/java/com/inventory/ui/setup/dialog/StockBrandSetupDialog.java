@@ -6,7 +6,6 @@
 package com.inventory.ui.setup.dialog;
 
 import com.common.Global;
-import com.common.ReturnObject;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
@@ -23,7 +22,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.RowFilter;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -31,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -79,6 +76,7 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
     }
 
     private void initKeyListener() {
+        txtCode.addKeyListener(this);
         txtName.addKeyListener(this);
         btnClear.addKeyListener(this);
         btnSave.addKeyListener(this);
@@ -262,7 +260,7 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
         jLabel3.setText("Code");
 
         txtCode.setFont(Global.textFont);
-        txtCode.setName("txtName"); // NOI18N
+        txtCode.setName("txtCode"); // NOI18N
         txtCode.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 txtCodeFocusGained(evt);
@@ -432,7 +430,7 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
         }
         switch (ctrlName) {
 
-            case "txtName":
+            case "txtName" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
                     btnSave.requestFocus();
                 }
@@ -440,17 +438,20 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
                     btnClear.requestFocus();
                 }
                 tabToTable(e);
+            }
+            case "txtCode" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    txtName.requestFocus();
+                }
+            }
 
-                break;
-
-            case "btnSave":
+            case "btnSave" -> {
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
                     txtName.requestFocus();
                 }
                 tabToTable(e);
-
-                break;
-            case "btnDelete":
+            }
+            case "btnDelete" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
                     btnClear.requestFocus();
                 }
@@ -458,15 +459,13 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
                     btnSave.requestFocus();
                 }
                 tabToTable(e);
-
-                break;
-            case "btnClear":
+            }
+            case "btnClear" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
                     txtName.requestFocus();
                 }
                 tabToTable(e);
-
-                break;
+            }
         }
     }
 

@@ -151,10 +151,11 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
         if (!listD.isEmpty()) {
             rel = inventoryRepo.saveUnitRelation(rel);
             if (lblStatus.getText().equals("NEW")) {
-                relationTableModel.addRelation(rel);
+                listUnitRelation.add(rel);
             } else {
-                relationTableModel.setRelation(rel, selectRow);
+                listUnitRelation.set(selectRow, rel);
             }
+            relationTableModel.setListRelation(listUnitRelation);
             clear();
         }
     }

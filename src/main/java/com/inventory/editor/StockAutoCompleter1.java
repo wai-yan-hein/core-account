@@ -10,13 +10,9 @@ import com.common.Resolution;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.inventory.model.Location;
-import com.inventory.model.OptionModel;
 import com.inventory.model.Stock;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.StockCompleterTableModel;
-import com.inventory.ui.setup.dialog.OptionDialog;
-import com.inventory.ui.setup.dialog.common.LocationTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -36,7 +32,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.RowFilter;
 import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -335,14 +330,13 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
 
     @Override
     public void keyReleased(KeyEvent e) {
-        log.info("search.");
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
                 List<Stock> list = inventoryRepo.getStock(str);
                 if (this.filter) {
                     Stock s = new Stock("-", "All");
-                    list.add(0, s);
+                    list.add(s);
                 }
                 tableModel.setListStock(list);
                 if (!list.isEmpty()) {
