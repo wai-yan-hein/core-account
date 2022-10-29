@@ -58,7 +58,7 @@ public class VouStatusAutoCompleter implements KeyListener, SelectionObserver {
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
-    private SelectionObserver selectionObserver;
+    private SelectionObserver observer;
     private boolean filter = false;
     private InventoryRepo inventoryRepo;
     private FocusAdapter fa = new FocusAdapter() {
@@ -78,8 +78,12 @@ public class VouStatusAutoCompleter implements KeyListener, SelectionObserver {
 
     };
 
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
+    public SelectionObserver getObserver() {
+        return observer;
+    }
+
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
     }
 
     public VouStatusAutoCompleter() {
@@ -194,8 +198,8 @@ public class VouStatusAutoCompleter implements KeyListener, SelectionObserver {
                     table.getSelectedRow()));
             textComp.setText(vouStatus.getDescription());
             if (editor == null) {
-                if (selectionObserver != null) {
-                    selectionObserver.selected("VouStatus", vouStatus.getDescription());
+                if (observer != null) {
+                    observer.selected("VouStatus", vouStatus.getDescription());
                 }
             }
         }

@@ -91,7 +91,7 @@ public final class SalePriceAutoCompleter implements KeyListener {
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
 
-        popup.setPopupSize(300, 400);
+        popup.setPopupSize(350, 300);
         popup.add(scroll);
 
         if (textComp instanceof JTextField) {

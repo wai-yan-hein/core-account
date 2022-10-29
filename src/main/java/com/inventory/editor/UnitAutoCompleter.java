@@ -6,6 +6,7 @@
 package com.inventory.editor;
 
 import com.common.Global;
+import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.inventory.model.StockUnit;
 import com.inventory.ui.setup.dialog.common.StockUnitTableModel;
@@ -42,7 +43,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Lenovo
  */
-public class UnitAutoCompleter implements KeyListener {
+public final class UnitAutoCompleter implements KeyListener {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(UnitAutoCompleter.class);
     private final JTable table = new JTable();
@@ -56,6 +57,15 @@ public class UnitAutoCompleter implements KeyListener {
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
+    private SelectionObserver observer;
+
+    public SelectionObserver getObserver() {
+        return observer;
+    }
+
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
+    }
 
     public UnitAutoCompleter() {
     }
@@ -68,6 +78,9 @@ public class UnitAutoCompleter implements KeyListener {
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
         textComp.getDocument().addDocumentListener(documentListener);
+        if (list.size() == 1) {
+            setStockUnit(list.get(0));
+        }
         unitTableModel = new StockUnitTableModel(list);
         table.setModel(unitTableModel);
         table.setSize(50, 50);
@@ -139,7 +152,7 @@ public class UnitAutoCompleter implements KeyListener {
 
         table.setRequestFocusEnabled(false);
 
-        if (list.size() > 0) {
+        if (!list.isEmpty()) {
             table.setRowSelectionInterval(0, 0);
         }
     }

@@ -18,6 +18,7 @@ import com.inventory.model.OPHis;
 import com.inventory.model.OPHisKey;
 import com.inventory.model.Pattern;
 import com.inventory.model.PriceOption;
+import com.inventory.model.ProcessHis;
 import com.inventory.model.ProcessType;
 import com.inventory.model.PurHis;
 import com.inventory.model.PurHisKey;
@@ -888,5 +889,14 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
         result.block(Duration.ofMinutes(min));
+    }
+
+    public ProcessHis saveProcess(ProcessHis his) {
+        Mono<ProcessHis> result = inventoryApi.post()
+                .uri("/setup/save-unit")
+                .body(Mono.just(his), ProcessHis.class)
+                .retrieve()
+                .bodyToMono(ProcessHis.class);
+        return result.block(Duration.ofMinutes(min));
     }
 }

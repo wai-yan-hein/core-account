@@ -100,7 +100,7 @@ public class SalePriceCellEditor extends AbstractCellEditor implements TableCell
         }
         int row = table.convertRowIndexToModel(table.getSelectedRow());
         if (row >= 0) {
-            //listOption = saleTableModel.getPriceOption(row);
+            listOption = saleTableModel.getPriceOption(row);
         }
         completer = new SalePriceAutoCompleter(jtf, listOption, this);
         return component;

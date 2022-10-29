@@ -245,8 +245,9 @@ public class SaleTableModel extends AbstractTableModel {
                             sd.setQty(1.0f);
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setPrice(getTraderPrice(s));
+                            sd.setStock(s);
                             if (ProUtil.isPricePopup()) {
-                                sd.setPrice(getPopupPrice(s, true));
+                                sd.setPrice(getPopupPrice(row, true));
                             }
                             sd.setPrice(sd.getPrice() == 0 ? s.getSalePriceN() : sd.getPrice());
                             parent.setColumnSelectionInterval(4, 4);
@@ -442,7 +443,8 @@ public class SaleTableModel extends AbstractTableModel {
         return price;
     }
 
-    public List<PriceOption> getPriceOption(Stock s) {
+    public List<PriceOption> getPriceOption(int row) {
+        Stock s = listDetail.get(row).getStock();
         List<PriceOption> listPrice = inventoryRepo.getPriceOption();
         if (!listPrice.isEmpty()) {
             for (PriceOption op : listPrice) {
@@ -468,8 +470,8 @@ public class SaleTableModel extends AbstractTableModel {
         return listPrice;
     }
 
-    private float getPopupPrice(Stock s, boolean needToChoice) {
-        List<PriceOption> listPrice = getPriceOption(s);
+    private float getPopupPrice(int row, boolean needToChoice) {
+        List<PriceOption> listPrice = getPriceOption(row);
         PriceOptionDialog dialog = new PriceOptionDialog();
         dialog.setListPrice(listPrice);
         dialog.setNeedToChoice(needToChoice);

@@ -572,7 +572,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                             //Need to add action listener
                             //====================================
                             menuBar.add(jmenu);
-                            menuBar.add(new JSeparator(JSeparator.VERTICAL));
                         }
                     } else {  //No Child
                         JMenu jmenu = new JMenu();
@@ -580,7 +579,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                         jmenu.setFont(Global.menuFont);
                         jmenu.setName(menu.getMenuClass() + ","
                                 + Util1.isNull(menu.getAccount(), "-") + ","
-                                + menu.getMenuName());                        //Need to add action listener
+                                + menu.getMenuName());
+                        //Need to add action listener
                         //====================================
                         menuBar.add(jmenu);
                     }

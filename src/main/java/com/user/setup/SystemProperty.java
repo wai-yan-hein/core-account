@@ -206,8 +206,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkPrint.setSelected(Util1.getBoolean(hmProperty.get("printer.print")));
         chkSWB.setName("stock.name.with.brand");
         chkSWB.setSelected(Util1.getBoolean(hmProperty.get("stock.name.with.brand")));
-        chkPricePopup.setName("sale.price.option");
-        chkPricePopup.setSelected(Util1.getBoolean(hmProperty.get("sale.price.option")));
+        chkPricePopup.setName("sale.price.popup");
+        chkPricePopup.setSelected(Util1.getBoolean(hmProperty.get("sale.price.popup")));
         chkCalStock.setName("calculate.stock");
         chkCalStock.setSelected(Util1.getBoolean(hmProperty.get("calculate.stock")));
         chkSalePaid.setName("default.sale.paid");
