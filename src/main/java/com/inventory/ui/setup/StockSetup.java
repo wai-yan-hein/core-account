@@ -224,6 +224,11 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                     "Stock Unit Pattern.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtPurUnit.requestFocus();
+        } else if (saleUnitCompleter.getStockUnit() == null) {
+            JOptionPane.showMessageDialog(this, "Sale Unit  cannot be blank.",
+                    "Sale Unit", JOptionPane.ERROR_MESSAGE);
+            status = false;
+            txtSaleUnit.requestFocus();
         } else if (relationAutoCompleter.getRelation() == null) {
             JOptionPane.showMessageDialog(this, "Relation Unit  cannot be blank.",
                     "Stock Relation.", JOptionPane.ERROR_MESSAGE);
@@ -337,6 +342,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         tblStock.addKeyListener(this);
         txtPurUnit.addKeyListener(this);
         txtSaleUnit.addKeyListener(this);
+        txtRelation.addKeyListener(this);
     }
 
     private void relationSetup() {
@@ -844,7 +850,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         jLabel8.setText("Unit Relation");
 
         txtRelation.setFont(Global.textFont);
-        txtRelation.setName("txtBarCode"); // NOI18N
+        txtRelation.setName("txtRelation"); // NOI18N
         txtRelation.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 txtRelationFocusGained(evt);
@@ -1281,178 +1287,74 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtStockName.requestFocus();
-                    case KeyEvent.VK_DOWN ->
-                        txtStockName.requestFocus();
-                    case KeyEvent.VK_UP -> {
-                    }
-                    case KeyEvent.VK_RIGHT ->
-                        txtType.requestFocus();
-                    case KeyEvent.VK_LEFT -> {
-                    }
+      
                 }
             }
             case "txtType" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtCat.requestFocus();
-                    case KeyEvent.VK_UP ->
-                        txtUserCode.requestFocus();
-                    case KeyEvent.VK_RIGHT ->
-                        btnAddItemType.requestFocus();
-                    case KeyEvent.VK_LEFT ->
-                        txtUserCode.requestFocus();
+
                 }
             }
             case "btnAddItemType" -> {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_ENTER:
+                    case KeyEvent.VK_ENTER ->
                         txtStockName.requestFocus();
-                        break;
-                    case KeyEvent.VK_UP:
-                        txtType.requestFocus();
-                        break;
-                    case KeyEvent.VK_RIGHT:
-                        txtStockName.requestFocus();
-                        break;
-                    case KeyEvent.VK_LEFT:
-                        txtType.requestFocus();
-                        break;
-                    case KeyEvent.VK_DOWN:
-                        txtStockName.requestFocus();
-                        break;
                 }
             }
             case "txtStockName" -> {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_ENTER:
+                    case KeyEvent.VK_ENTER ->
                         txtType.requestFocus();
-                        break;
-                    case KeyEvent.VK_DOWN:
-                        txtType.requestFocus();
-                        break;
-                    case KeyEvent.VK_UP:
-                        txtType.requestFocus();
-                        break;
-                    case KeyEvent.VK_LEFT:
-                        txtType.requestFocus();
-                        break;
-                    case KeyEvent.VK_RIGHT:
-                        txtCat.requestFocus();
-                        break;
 
                 }
             }
             case "txtCat" -> {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_ENTER:
+                    case KeyEvent.VK_ENTER ->
                         txtBrand.requestFocus();
-                        break;
-                    case KeyEvent.VK_UP:
-                        txtType.requestFocus();
-                        break;
-                    case KeyEvent.VK_RIGHT:
-                        btnAddCategory.requestFocus();
-                        break;
-                    case KeyEvent.VK_LEFT:
-                        txtStockName.requestFocus();
-                        break;
                 }
             }
             case "btnAddCategory" -> {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_ENTER:
+                    case KeyEvent.VK_ENTER ->
                         txtBrand.requestFocus();
-                        break;
-                    case KeyEvent.VK_UP:
-                        txtCat.requestFocus();
-                        break;
-                    case KeyEvent.VK_RIGHT:
-                        txtBrand.requestFocus();
-                        break;
-                    case KeyEvent.VK_LEFT:
-                        txtCat.requestFocus();
-                        break;
-                    case KeyEvent.VK_DOWN:
-                        txtBrand.requestFocus();
-                        break;
                 }
             }
             case "txtBrand" -> {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_ENTER:
+                    case KeyEvent.VK_ENTER ->
                         txtBarCode.requestFocus();
-                        break;
-                    case KeyEvent.VK_UP:
-                        txtCat.requestFocus();
-                        break;
-                    case KeyEvent.VK_RIGHT:
-                        btnAddBrand.requestFocus();
-                        break;
-                    case KeyEvent.VK_LEFT:
-                        txtCat.requestFocus();
-                        break;
                 }
             }
             case "btnAddBrand" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER -> {
                     }
-                    case KeyEvent.VK_UP ->
-                        txtBrand.requestFocus();
-                    case KeyEvent.VK_RIGHT -> {
-                    }
-                    case KeyEvent.VK_LEFT ->
-                        txtBrand.requestFocus();
-                    case KeyEvent.VK_DOWN -> {
-                    }
                 }
-                //txtRemark.requestFocus();
-                //txtRemark.requestFocus();
-                //txtRemark.requestFocus();
             }
             case "txtRemark" -> {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_ENTER:
+                    case KeyEvent.VK_ENTER ->
                         txtBarCode.requestFocus();
-                        break;
-                    case KeyEvent.VK_DOWN:
-                        txtBarCode.requestFocus();
-                        break;
-                    case KeyEvent.VK_UP:
-                        txtBrand.requestFocus();
-                        break;
-                    case KeyEvent.VK_RIGHT:
-                        txtBarCode.requestFocus();
-                        break;
-                    case KeyEvent.VK_LEFT:
-                        txtBrand.requestFocus();
-                        break;
-
                 }
             }
             case "txtBarCode" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
-                        txtPurUnit.requestFocus();
-                    case KeyEvent.VK_DOWN ->
-                        txtPurUnit.requestFocus();
-                    case KeyEvent.VK_UP ->
-                        txtBrand.requestFocus();
-                    case KeyEvent.VK_RIGHT ->
-                        txtPurUnit.requestFocus();
-                    case KeyEvent.VK_LEFT ->
-                        txtBrand.requestFocus();
-
+                        txtRelation.requestFocus();
                 }
             }
-
-            case "txtPurWt" -> {
+            case "txtRelation" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtPurUnit.requestFocus();
-                    case KeyEvent.VK_DOWN ->
-                        txtPurUnit.requestFocus();
-                    case KeyEvent.VK_UP ->
+                }
+            }
+            case "txtPurWt" -> {
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_ENTER ->
                         txtPurUnit.requestFocus();
                 }
             }
@@ -1460,12 +1362,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtPurPrice.requestFocus();
-                    case KeyEvent.VK_DOWN ->
-                        txtPurPrice.requestFocus();
-
-                    case KeyEvent.VK_RIGHT ->
-                        txtPurPrice.requestFocus();
-
                 }
             }
             case "txtPurPrice" -> {
@@ -1485,12 +1381,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtSaleUnit.requestFocus();
-                    case KeyEvent.VK_UP ->
-                        chkActive.requestFocus();
-                    case KeyEvent.VK_RIGHT ->
-                        txtSaleUnit.requestFocus();
-                    case KeyEvent.VK_LEFT ->
-                        chkActive.requestFocus();
                 }
             }
             case "txtPurUnit" -> {

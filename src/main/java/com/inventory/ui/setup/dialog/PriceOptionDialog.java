@@ -96,7 +96,9 @@ public class PriceOptionDialog extends javax.swing.JDialog {
     public void initData() {
         tableModel.setListPrice(listPrice);
         if (needToChoice) {
-            tblPrice.setRowSelectionInterval(0, 0);
+            if (!listPrice.isEmpty()) {
+                tblPrice.setRowSelectionInterval(0, 0);
+            }
         }
     }
     private final Action actionEnter = new AbstractAction() {

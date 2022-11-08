@@ -25,11 +25,13 @@ import com.inventory.ui.common.PatternTableModel;
 import com.inventory.ui.common.StockCompleterTableModel;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
+import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.text.DateFormat;
 import java.util.List;
+import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -101,6 +103,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         initCombo();
         initTableStock();
         initTablePD();
+        actionMapping();
 
     }
 
@@ -130,7 +133,21 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         }
         tblPD.requestFocusInWindow();
     }
+    private void actionMapping() {
+        String solve = "delete";
+        KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
+        tblPD.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
+        tblPD.getActionMap().put(solve, new DeleteAction());
 
+    }
+
+    private class DeleteAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            deleteTran();
+        }
+    }
     private void initTableStock() {
         tblStock.setModel(stockTableModel);
         tblStock.getTableHeader().setFont(Global.tblHeaderFont);

@@ -78,9 +78,9 @@ public final class UnitAutoCompleter implements KeyListener {
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
         textComp.getDocument().addDocumentListener(documentListener);
-        if (list.size() == 1) {
-            setStockUnit(list.get(0));
-        }
+        /*        if (list.size() == 1) {
+        setStockUnit(list.get(0));
+        }*/
         unitTableModel = new StockUnitTableModel(list);
         table.setModel(unitTableModel);
         table.setSize(50, 50);

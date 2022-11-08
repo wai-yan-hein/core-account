@@ -32,6 +32,7 @@ import com.user.common.UserRepo;
 import java.awt.Color;
 import java.awt.HeadlessException;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
@@ -43,6 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -115,6 +117,23 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         initTextBoxFormat();
         initTextBoxValue();
         initDateListner();
+        actionMapping();
+    }
+
+    private void actionMapping() {
+        String solve = "delete";
+        KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
+        tblPur.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
+        tblPur.getActionMap().put(solve, new DeleteAction());
+
+    }
+
+    private class DeleteAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            deleteTran();
+        }
     }
 
     public void initMain() {
@@ -1124,10 +1143,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
 
     private void tblPurKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblPurKeyReleased
         // TODO add your handling code here:
-        if (evt.getKeyCode() == KeyEvent.VK_DELETE) {
-            deleteTran();
-        }
-
     }//GEN-LAST:event_tblPurKeyReleased
 
     private void txtCurrencyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCurrencyActionPerformed

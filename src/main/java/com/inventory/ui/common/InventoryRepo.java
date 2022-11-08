@@ -19,6 +19,9 @@ import com.inventory.model.OPHisKey;
 import com.inventory.model.Pattern;
 import com.inventory.model.PriceOption;
 import com.inventory.model.ProcessHis;
+import com.inventory.model.ProcessHisDetail;
+import com.inventory.model.ProcessHisDetailKey;
+import com.inventory.model.ProcessHisKey;
 import com.inventory.model.ProcessType;
 import com.inventory.model.PurHis;
 import com.inventory.model.PurHisKey;
@@ -336,6 +339,19 @@ public class InventoryRepo {
         return result.block(Duration.ofMinutes(min));
     }
 
+    public Stock findStock(String stockCode) {
+        StockKey key = new StockKey();
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        key.setStockCode(stockCode);
+        Mono<Stock> result = inventoryApi.post()
+                .uri("/setup/find-stock")
+                .body(Mono.just(key), StockKey.class)
+                .retrieve()
+                .bodyToMono(Stock.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
     public StockType findGroup(String typeCode) {
         StockTypeKey key = new StockTypeKey();
         key.setCompCode(Global.compCode);
@@ -568,6 +584,33 @@ public class InventoryRepo {
                 .queryParam("vouDate", vouDate)
                 .queryParam("unit", unit)
                 .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
+                .build())
+                .retrieve().bodyToMono(General.class);
+        return Util1.getFloat(result.block().getAmount());
+    }
+
+    public Float getPurAvgPrice(String stockCode, String vouDate, String unit) {
+        Mono<General> result = inventoryApi.get()
+                .uri(builder -> builder.path("/report/get-purchase-avg-price")
+                .queryParam("stockCode", stockCode)
+                .queryParam("vouDate", vouDate)
+                .queryParam("unit", unit)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
+                .build())
+                .retrieve().bodyToMono(General.class);
+        return Util1.getFloat(result.block().getAmount());
+    }
+
+    public Float getProductionRecentPrice(String stockCode, String vouDate, String unit) {
+        Mono<General> result = inventoryApi.get()
+                .uri(builder -> builder.path("/report/get-production-recent-price")
+                .queryParam("stockCode", stockCode)
+                .queryParam("vouDate", vouDate)
+                .queryParam("unit", unit)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().bodyToMono(General.class);
         return Util1.getFloat(result.block().getAmount());
@@ -891,12 +934,59 @@ public class InventoryRepo {
         result.block(Duration.ofMinutes(min));
     }
 
+    public void delete(ProcessHisKey key) {
+        Mono<ReturnObject> result = inventoryApi.post()
+                .uri("/process/delete-process")
+                .body(Mono.just(key), StockIOKey.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+        result.block(Duration.ofMinutes(min));
+    }
+
+    public void delete(ProcessHisDetailKey key) {
+        Mono<ReturnObject> result = inventoryApi.post()
+                .uri("/process/delete-process-detail")
+                .body(Mono.just(key), ProcessHisDetailKey.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+        result.block(Duration.ofMinutes(min));
+    }
+
+    public void restore(ProcessHisKey key) {
+        Mono<ReturnObject> result = inventoryApi.post()
+                .uri("/process/restore-process")
+                .body(Mono.just(key), StockIOKey.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+        result.block(Duration.ofMinutes(min));
+    }
+
     public ProcessHis saveProcess(ProcessHis his) {
         Mono<ProcessHis> result = inventoryApi.post()
-                .uri("/setup/save-unit")
+                .uri("/process/save-process")
                 .body(Mono.just(his), ProcessHis.class)
                 .retrieve()
                 .bodyToMono(ProcessHis.class);
         return result.block(Duration.ofMinutes(min));
+    }
+
+    public ProcessHisDetail saveProcessDetail(ProcessHisDetail his) {
+        Mono<ProcessHisDetail> result = inventoryApi.post()
+                .uri("/process/save-process-detail")
+                .body(Mono.just(his), ProcessHisDetail.class)
+                .retrieve()
+                .bodyToMono(ProcessHisDetail.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
+    public List<ProcessHisDetail> getProcessDetail(String vouNo) {
+        Mono<ResponseEntity<List<ProcessHisDetail>>> result = inventoryApi.get()
+                .uri(builder -> builder.path("/process/get-process-detail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
+                .build())
+                .retrieve().toEntityList(ProcessHisDetail.class);
+        return result.block(Duration.ofMinutes(min)).getBody();
     }
 }

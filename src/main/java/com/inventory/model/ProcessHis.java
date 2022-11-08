@@ -27,9 +27,11 @@ public class ProcessHis {
     private Float avgQty;
     private String unit;
     private Float price;
+    private Float avgPrice;
     private boolean finished;
     private boolean deleted;
     private Integer macId;
-    private String cratedBy;
+    private String createdBy;
     private String updatedBy;
+    private String locName;
 }

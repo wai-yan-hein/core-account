@@ -33,7 +33,7 @@ public class WebFlexConfig {
                 .exchangeStrategies(ExchangeStrategies.builder()
                         .codecs(configurer -> configurer
                         .defaultCodecs()
-                        .maxInMemorySize(16 * 1024 * 1024))
+                        .maxInMemorySize(100 * 1024 * 1024))
                         .build())
                 .baseUrl(environment.getProperty("inventory.url"))
                 .build();
@@ -46,7 +46,7 @@ public class WebFlexConfig {
                 .exchangeStrategies(ExchangeStrategies.builder()
                         .codecs(configurer -> configurer
                         .defaultCodecs()
-                        .maxInMemorySize(16 * 1024 * 1024))
+                        .maxInMemorySize(100 * 1024 * 1024))
                         .build())
                 .baseUrl(environment.getProperty("account.url"))
                 .build();
@@ -59,7 +59,7 @@ public class WebFlexConfig {
                 .exchangeStrategies(ExchangeStrategies.builder()
                         .codecs(configurer -> configurer
                         .defaultCodecs()
-                        .maxInMemorySize(16 * 1024 * 1024))
+                        .maxInMemorySize(100 * 1024 * 1024))
                         .build())
                 .baseUrl(environment.getProperty("user.url"))
                 .build();

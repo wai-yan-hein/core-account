@@ -32,7 +32,8 @@ public class FilterObject {
     private boolean deleted;
     private String compCode;
     private Integer deptId;
-
+    private String processNo;
+    private boolean finished;
     public FilterObject(String compCode, Integer deptId) {
         this.compCode = compCode;
         this.deptId = deptId;

@@ -29,6 +29,7 @@ import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import java.awt.Color;
 import java.awt.FileDialog;
 import java.awt.HeadlessException;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -98,6 +100,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     public OpeningSetup() {
         initComponents();
         initTextBoxFormat();
+        actionMapping();
     }
 
     public void initMain() {
@@ -105,6 +108,21 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         initTable();
         txtOPDate.setDate(Util1.getTodayDate());
         txtCurrency.setEnabled(ProUtil.isMultiCur());
+    }
+
+    private void actionMapping() {
+        String solve = "delete";
+        KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
+        tblOpening.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
+        tblOpening.getActionMap().put(solve, new DeleteAction());
+    }
+
+    private class DeleteAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            deleteTran();
+        }
     }
 
     private void initTextBoxFormat() {
@@ -659,9 +677,6 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     private void tblOpeningKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblOpeningKeyReleased
         // TODO add your handling code here:
-        if (evt.getKeyCode() == KeyEvent.VK_DELETE) {
-            deleteTran();
-        }
     }//GEN-LAST:event_tblOpeningKeyReleased
 
     private void txtQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtQtyActionPerformed

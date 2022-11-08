@@ -34,6 +34,7 @@ import com.user.common.UserRepo;
 import java.awt.Color;
 import java.awt.HeadlessException;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
@@ -45,6 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -118,12 +120,29 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         initTextBoxFormat();
         initTextBoxValue();
         initDateListner();
+        actionMapping();
     }
 
     public void initMain() {
         initCombo();
         initRetInTable();
         assignDefaultValue();
+    }
+
+    private void actionMapping() {
+        String solve = "delete";
+        KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
+        tblRet.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
+        tblRet.getActionMap().put(solve, new DeleteAction());
+
+    }
+
+    private class DeleteAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            deleteTran();
+        }
     }
 
     private void initDateListner() {
@@ -1070,9 +1089,6 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
 
     private void tblRetKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblRetKeyReleased
         // TODO add your handling code here:
-        if (evt.getKeyCode() == KeyEvent.VK_DELETE) {
-            deleteTran();
-        }
     }//GEN-LAST:event_tblRetKeyReleased
 
     private void chkPaidActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkPaidActionPerformed

@@ -11,6 +11,7 @@ import com.common.TableCellRender;
 import com.common.UnitFormatRender;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.model.RelationKey;
+import com.inventory.model.StockUnit;
 import com.inventory.model.UnitRelationDetail;
 import com.inventory.model.UnitRelation;
 import com.inventory.ui.common.InventoryRepo;
@@ -126,7 +127,8 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
         tblRelD.setDefaultRenderer(Float.class, new UnitFormatRender());
         tblRel.setRowHeight(Global.tblRowHeight);
         tblRelD.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
-        tblRelD.getColumnModel().getColumn(1).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
+        List<StockUnit> list = inventoryRepo.getStockUnit();
+        tblRelD.getColumnModel().getColumn(1).setCellEditor(new StockUnitEditor(list));
         relationDetailTableModel.addEmptyRow();
         tblRelD.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");

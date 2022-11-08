@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.common;
 
+import com.common.Util1;
 import com.inventory.model.ProcessHis;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ import org.springframework.stereotype.Component;
 public class ProcessHisTableModel extends AbstractTableModel {
 
     private List<ProcessHis> listDetail = new ArrayList();
-    private final String[] columnNames = {"Date", "Stock Code", "Stock Name", "Process Type"};
+    private final String[] columnNames = {"Date", "Code", "Stock Name", "Location", "Process Type"};
 
     public ProcessHisTableModel() {
     }
@@ -48,12 +49,14 @@ public class ProcessHisTableModel extends AbstractTableModel {
 
             return switch (column) {
                 case 0 ->
-                    med.getVouDate();
+                    Util1.toDateStr(med.getVouDate(), "dd/MM/yyyy");
                 case 1 ->
-                    med.getStockUsrCode();
+                    med.getStockUsrCode() == null ? med.getKey().getStockCode() : med.getStockUsrCode();
                 case 2 ->
                     med.getStockName();
                 case 3 ->
+                    med.getLocName();
+                case 4 ->
                     med.getPtName();
                 default ->
                     null;

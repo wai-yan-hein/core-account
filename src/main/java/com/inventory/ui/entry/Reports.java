@@ -36,6 +36,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
@@ -49,6 +50,7 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.data.JsonDataSource;
+import net.sf.jasperreports.swing.JRViewer;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -199,10 +201,10 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
                     filter.setVouTypeCode(vouStatusAutoCompleter.getVouStatus().getKey().getCode());
                     filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
-                    filter.setCalSale(Util1.getBoolean(ProUtil.getProperty("disable.calcuate.sale.stock")));
-                    filter.setCalPur(Util1.getBoolean(ProUtil.getProperty("disable.calcuate.purchase.stock")));
-                    filter.setCalRI(Util1.getBoolean(ProUtil.getProperty("disable.calcuate.returnin.stock")));
-                    filter.setCalRO(Util1.getBoolean(ProUtil.getProperty("disable.calcuate.retunout.stock")));
+                    filter.setCalSale(Util1.getBoolean(ProUtil.getProperty("disable.calculate.sale.stock")));
+                    filter.setCalPur(Util1.getBoolean(ProUtil.getProperty("disable.calculate.purchase.stock")));
+                    filter.setCalRI(Util1.getBoolean(ProUtil.getProperty("disable.calculate.returin.stock")));
+                    filter.setCalRO(Util1.getBoolean(ProUtil.getProperty("disable.calculate.retunout.stock")));
                     log.info("Report Date : " + stDate + " - " + enDate);
                     Map<String, Object> param = new HashMap<>();
                     param.put("p_report_name", reportName);
@@ -259,10 +261,17 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                         jc.setProperty("net.sf.jasperreports.default.pdf.font.name", Global.fontName);
                         jc.setProperty("net.sf.jasperreports.default.pdf.encoding", "Identity-H");
                         jc.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
+                        jc.setProperty("net.sf.jasperreports.viewer.zoom", "1");
                         InputStream input = new ByteArrayInputStream(t.getFile());
                         JsonDataSource ds = new JsonDataSource(input);
                         JasperPrint js = JasperFillManager.fillReport(filePath, param, ds);
-                        JasperViewer.viewReport(js, false);
+                        JRViewer viwer = new JRViewer(js);
+                        JFrame frame = new JFrame("Core Value Report");
+                        frame.getContentPane().add(viwer);
+                        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                        frame.setVisible(true);
+
                     } else {
                         JOptionPane.showMessageDialog(this, "Report Does Not Exists.");
                     }
@@ -270,6 +279,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                 progress.setIndeterminate(false);
             } catch (JRException ex) {
                 log.error("printVoucher : " + ex.getMessage());
+                progress.setIndeterminate(false);
                 JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
             }
         }, (e) -> {

@@ -222,14 +222,14 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkBalance.setSelected(Util1.getBoolean(hmProperty.get("trader.balance")));
         chkWeight.setName("stock.use.weight");
         chkWeight.setSelected(Util1.getBoolean(hmProperty.get("stock.use.weight")));
-        chkDisableSale.setName("disable.calcuate.sale.stock");
-        chkDisableSale.setSelected(Util1.getBoolean(hmProperty.get("disable.calcuate.sale.stock")));
-        chkDisablePur.setName("disable.calcuate.purchase.stock");
-        chkDisablePur.setSelected(Util1.getBoolean(hmProperty.get("disable.calcuate.purchase.stock")));
-        chkDisableRI.setName("disable.calcuate.returin.stock");
-        chkDisableRI.setSelected(Util1.getBoolean(hmProperty.get("disable.calcuate.returin.stock")));
-        chkDisableRO.setName("disable.calcuate.returnout.stock");
-        chkDisableRO.setSelected(Util1.getBoolean(hmProperty.get("disable.calcuate.returnout.stock")));
+        chkDisableSale.setName("disable.calculate.sale.stock");
+        chkDisableSale.setSelected(Util1.getBoolean(hmProperty.get("disable.calculate.sale.stock")));
+        chkDisablePur.setName("disable.calculate.purchase.stock");
+        chkDisablePur.setSelected(Util1.getBoolean(hmProperty.get("disable.calculate.purchase.stock")));
+        chkDisableRI.setName("disable.calculate.returin.stock");
+        chkDisableRI.setSelected(Util1.getBoolean(hmProperty.get("disable.calculate.returin.stock")));
+        chkDisableRO.setName("disable.calculate.returnout.stock");
+        chkDisableRO.setSelected(Util1.getBoolean(hmProperty.get("disable.calculate.returnout.stock")));
     }
 
     private void initTextBox() {
@@ -461,13 +461,13 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         chkWeight.setText("Weight");
 
-        chkDisableSale.setText("Disable Calcuate Stock in Sale");
+        chkDisableSale.setText("Disable Calculate Stock in Sale");
 
-        chkDisablePur.setText("Disable Calcuate Stock in Purchase");
+        chkDisablePur.setText("Disable Calculate Stock in Purchase");
 
-        chkDisableRI.setText("Disable Calcuate Stock in Return In");
+        chkDisableRI.setText("Disable Calculate Stock in Return In");
 
-        chkDisableRO.setText("Disable Calcuate Stock in Return Out");
+        chkDisableRO.setText("Disable Calculate Stock in Return Out");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);

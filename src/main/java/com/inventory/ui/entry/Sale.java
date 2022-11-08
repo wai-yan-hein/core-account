@@ -40,6 +40,7 @@ import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.common.UserRepo;
 import java.awt.Color;
 import java.awt.HeadlessException;
+import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
@@ -50,6 +51,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
@@ -133,6 +135,23 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         initTextBoxFormat();
         initTextBoxValue();
         initDateListner();
+        actionMapping();
+    }
+
+    private void actionMapping() {
+        String solve = "delete";
+        KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
+        tblSale.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
+        tblSale.getActionMap().put(solve, new DeleteAction());
+
+    }
+
+    private class DeleteAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            deleteTran();
+        }
     }
 
     private void initDateListner() {
@@ -1394,9 +1413,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     private void tblSaleKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblSaleKeyReleased
         // TODO add your handling code here:
-        if (evt.getKeyCode() == KeyEvent.VK_DELETE) {
-            deleteTran();
-        }
+
     }//GEN-LAST:event_tblSaleKeyReleased
 
     private void txtSalemanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSalemanActionPerformed

@@ -324,6 +324,10 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         txtMenuType.setEditable(status);
     }
 
+    private void removeSpace() {
+        txtMenuUrl.setText(txtMenuUrl.getText().replaceAll(" ", ""));
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -382,6 +386,11 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         txtMenuUrl.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 txtMenuUrlFocusGained(evt);
+            }
+        });
+        txtMenuUrl.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtMenuUrlActionPerformed(evt);
             }
         });
 
@@ -552,6 +561,11 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
     private void txtMenuMMFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtMenuMMFocusGained
         // TODO add your handling code here:
     }//GEN-LAST:event_txtMenuMMFocusGained
+
+    private void txtMenuUrlActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtMenuUrlActionPerformed
+        // TODO add your handling code here:
+        removeSpace();
+    }//GEN-LAST:event_txtMenuUrlActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

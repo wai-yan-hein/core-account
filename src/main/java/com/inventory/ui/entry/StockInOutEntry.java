@@ -34,11 +34,13 @@ import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Color;
 import java.awt.HeadlessException;
+import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -93,12 +95,29 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         initComponents();
         initTextBoxFormat();
         initDateListner();
+        actionMapping();
     }
 
     public void initMain() {
         initTable();
         initCombo();
         clear();
+    }
+
+    private void actionMapping() {
+        String solve = "delete";
+        KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
+        tblStock.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
+        tblStock.getActionMap().put(solve, new DeleteAction());
+
+    }
+
+    private class DeleteAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            deleteTran();
+        }
     }
 
     private void initDateListner() {
@@ -591,9 +610,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     private void tblStockKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblStockKeyReleased
         // TODO add your handling code here:
-        if (evt.getKeyCode() == KeyEvent.VK_DELETE) {
-            deleteTran();
-        }
     }//GEN-LAST:event_tblStockKeyReleased
 
 

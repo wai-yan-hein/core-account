@@ -276,22 +276,22 @@
         </Component>
         <Component class="javax.swing.JCheckBox" name="chkDisableSale">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Disable Calcuate Stock in Sale"/>
+            <Property name="text" type="java.lang.String" value="Disable Calculate Stock in Sale"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JCheckBox" name="chkDisablePur">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Disable Calcuate Stock in Purchase"/>
+            <Property name="text" type="java.lang.String" value="Disable Calculate Stock in Purchase"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JCheckBox" name="chkDisableRI">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Disable Calcuate Stock in Return In"/>
+            <Property name="text" type="java.lang.String" value="Disable Calculate Stock in Return In"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JCheckBox" name="chkDisableRO">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Disable Calcuate Stock in Return Out"/>
+            <Property name="text" type="java.lang.String" value="Disable Calculate Stock in Return Out"/>
           </Properties>
         </Component>
       </SubComponents>
