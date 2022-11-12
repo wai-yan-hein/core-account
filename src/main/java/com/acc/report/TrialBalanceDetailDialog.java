@@ -9,7 +9,7 @@ import com.acc.common.CrAmtTableModel;
 import com.acc.common.DrAmtTableModel;
 import com.acc.model.ReportFilter;
 import com.acc.model.TmpOpening;
-import com.acc.model.VGl;
+import com.acc.model.Gl;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
@@ -157,14 +157,13 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         filter.setCurCode(curCode);
         filter.setDepartments(department);
         filter.setTraderCode(traderCode);
-        Mono<ResponseEntity<List<VGl>>> result = accountApi.post()
+        Mono<ResponseEntity<List<Gl>>> result = accountApi.post()
                 .uri("/account/search-gl")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .toEntityList(VGl.class);
+                .toEntityList(Gl.class);
         result.subscribe((t) -> {
-            List<VGl> listVGl = t.getBody();
-            swapData(listVGl, coaCode);
+            List<Gl> listVGl = t.getBody();
             calculateOpeningClosing(listVGl);
             progress.setIndeterminate(false);
         }, (e) -> {
@@ -173,27 +172,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         });
     }
 
-    private void swapData(List<VGl> listVGL, String targetId) {
-        listVGL.forEach(vgl -> {
-            String sourceAcId = Util1.isNull(vgl.getSourceAcId(), "-");
-            if (!sourceAcId.equals(targetId)) {
-                double tmpDrAmt = 0.0;
-                if (vgl.getDrAmt() != null) {
-                    tmpDrAmt = vgl.getDrAmt();
-                }
-                vgl.setDrAmt(Util1.getDouble(vgl.getCrAmt()));
-                vgl.setCrAmt(tmpDrAmt);
-                String tmpStr = vgl.getAccName();
-                vgl.setAccName(vgl.getSrcAccName());
-                vgl.setSrcAccName(tmpStr);
-            } else {
-                vgl.setCrAmt(Util1.getDouble(vgl.getCrAmt()));
-                vgl.setDrAmt((Util1.getDouble(vgl.getDrAmt())));
-            }
-        });
-    }
-
-    private void calculateOpeningClosing(List<VGl> listVGl) {
+    private void calculateOpeningClosing(List<Gl> listVGl) {
         String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
         String clDate = Util1.toDateStrMYSQL(stDate, "dd/MM/yyyy");
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
@@ -215,7 +194,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
                 double ttlDrAmt = 0.0;
                 double ttlCrAmt = 0.0;
                 if (!listVGl.isEmpty()) {
-                    for (VGl vgl : listVGl) {
+                    for (Gl vgl : listVGl) {
                         if (vgl.getDrAmt() > 0) {
                             ttlDrAmt += vgl.getDrAmt();
                             drAmtTableModel.addVGl(vgl);
@@ -732,28 +711,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
     @Override
     public void selected(Object source, Object selectObj) {
-
-        if (source.equals("SAVE-GL-DR")) {
-            int selectRow = tblDr.convertRowIndexToModel(tblDr.getSelectedRow());
-            VGl vgl = (VGl) selectObj;
-            if (!vgl.getSourceAcId().equals(coaCode)) {
-                vgl = swapDrCr(vgl);
-            }
-            drAmtTableModel.setVGl(selectRow, vgl);
-        }
-        if (source.equals("SAVE-GL-CR")) {
-            int selectRow = tblDr.convertRowIndexToModel(tblCr.getSelectedRow());
-            VGl vgl = (VGl) selectObj;
-            if (!vgl.getSourceAcId().equals(coaCode)) {
-                vgl = swapDrCr(vgl);
-            }
-            crAmtTableModel.setVGl(selectRow, vgl);
-        }
     }
 
-    private VGl swapDrCr(VGl vgl) {
-        vgl.setDrAmt(Util1.getDouble(vgl.getCrAmt()));
-        vgl.setCrAmt(Util1.getDouble(vgl.getDrAmt()));
-        return vgl;
-    }
 }

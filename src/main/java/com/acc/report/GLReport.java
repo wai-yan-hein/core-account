@@ -220,7 +220,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                 progress.setIndeterminate(false);
                 long end = new GregorianCalendar().getTimeInMillis();
                 long pt = end - start;
-                lblCalTime.setText(pt + " ms");
+                lblCalTime.setText(pt / 1000 + " s");
                 tblGL.requestFocus();
             }, (e) -> {
                 tblGL.requestFocus();
@@ -713,7 +713,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
 
     @Override
     public void selected(Object source, Object selectObj) {
-        if (source.toString().equals("Selected")) {
+        if (source != null) {
             searchGLListing();
         }
     }

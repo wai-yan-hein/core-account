@@ -8,14 +8,15 @@ import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import com.user.model.Currency;
 import com.acc.model.Department;
+import com.acc.model.DepartmentKey;
 import com.acc.model.Gl;
+import com.acc.model.GlKey;
 import com.acc.model.TraderA;
 import com.acc.model.VCOALv3;
 import com.acc.model.VDescription;
 import com.acc.model.VRef;
 import com.acc.model.VTranSource;
 import com.common.Global;
-import com.common.ReturnObject;
 import com.common.Util1;
 import java.time.Duration;
 import java.util.List;
@@ -44,12 +45,15 @@ public class AccountRepo {
     }
 
     public Department findDepartment(String deptCode) {
-        Mono<ResponseEntity<Department>> result = accountApi.get()
-                .uri(builder -> builder.path("/account/find-department")
-                .queryParam("deptCode", deptCode)
-                .build())
-                .retrieve().toEntity(Department.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        DepartmentKey key = new DepartmentKey();
+        key.setDeptCode(Util1.isNull(deptCode, "-"));
+        key.setCompCode(Global.compCode);
+        Mono<Department> result = accountApi.post()
+                .uri("/account/find-department")
+                .body(Mono.just(key), DepartmentKey.class)
+                .retrieve()
+                .bodyToMono(Department.class);
+        return result.block(Duration.ofMinutes(min));
     }
 
     public Currency findCurrency(String curCode) {
@@ -144,10 +148,10 @@ public class AccountRepo {
         return result.block(Duration.ofMinutes(min));
     }
 
-    public boolean deleteGl(Gl gl) {
+    public boolean deleteGl(GlKey gl) {
         Mono<Boolean> result = accountApi.post()
                 .uri("/account/delete-gl")
-                .body(Mono.just(gl), Gl.class)
+                .body(Mono.just(gl), GlKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class);
         return result.block(Duration.ofMinutes(min));

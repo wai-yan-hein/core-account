@@ -12,6 +12,7 @@ import java.text.DecimalFormat;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.table.DefaultTableCellRenderer;
 
 /**
@@ -20,7 +21,7 @@ import javax.swing.table.DefaultTableCellRenderer;
  */
 public class GLTableCellRender extends DefaultTableCellRenderer {
 
-    private final Color bgColor = new Color(245, 245, 245);
+    private final Color bgColor = new Color(213, 235, 226);
     private final Color zeroColor = new Color(204, 242, 196);
     private double drAmt = 0.0;
     private double crAmt = 0.0;
@@ -46,7 +47,7 @@ public class GLTableCellRender extends DefaultTableCellRenderer {
             c.setBackground(zeroColor);
         }
         if (isSelected) {
-            c.setBackground(new Color(38, 117, 191));
+            c.setBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
         }
         String s;
         if (value instanceof Double d) {

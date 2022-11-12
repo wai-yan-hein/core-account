@@ -4,7 +4,7 @@
  */
 package com.acc.common;
 
-import com.acc.model.VGl;
+import com.acc.model.Gl;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 public class CashOpeningTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(CashOpeningTableModel.class);
-    private List<VGl> listVGl = new ArrayList();
+    private List<Gl> listVGl = new ArrayList();
     private String[] columnNames = {"Currency", "Opening", "Closing"};
 
     @Override
@@ -45,7 +45,7 @@ public class CashOpeningTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
 
         try {
-            VGl apar = listVGl.get(row);
+            Gl apar = listVGl.get(row);
             return switch (column) {
                 case 0 ->
                     apar.getCurCode();
@@ -92,16 +92,16 @@ public class CashOpeningTableModel extends AbstractTableModel {
         this.columnNames = columnNames;
     }
 
-    public List<VGl> getListVGl() {
+    public List<Gl> getListVGl() {
         return listVGl;
     }
 
-    public void setListVGl(List<VGl> listVGl) {
+    public void setListVGl(List<Gl> listVGl) {
         this.listVGl = listVGl;
         fireTableDataChanged();
     }
 
-    public VGl getVGl(int row) {
+    public Gl getVGl(int row) {
         return listVGl.get(row);
     }
 
@@ -113,12 +113,12 @@ public class CashOpeningTableModel extends AbstractTableModel {
 
     }
 
-    public void addVGl(VGl apar) {
+    public void addVGl(Gl apar) {
         listVGl.add(apar);
         fireTableRowsInserted(listVGl.size() - 1, listVGl.size() - 1);
     }
 
-    public void setVGl(int row, VGl apar) {
+    public void setVGl(int row, Gl apar) {
         if (!listVGl.isEmpty()) {
             listVGl.set(row, apar);
             fireTableRowsUpdated(row, row);

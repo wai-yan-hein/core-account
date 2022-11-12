@@ -121,7 +121,7 @@ public class ProcessHisTableModel extends AbstractTableModel {
     }
 
     public void deleteObject(int row) {
-        if (listDetail != null) {
+        if (row >= 0) {
             if (!listDetail.isEmpty()) {
                 listDetail.remove(row);
                 fireTableDataChanged();

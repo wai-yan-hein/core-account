@@ -9,16 +9,14 @@ import com.inventory.model.VRoleMenu;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 public class ReportTableModel extends AbstractTableModel {
 
-    private final String[] columnNames = {"Inventory Report"};
+    private final List<String> columnNames = new ArrayList<>();
     private List<VRoleMenu> listReport = new ArrayList<>();
 
     @Override
@@ -28,23 +26,31 @@ public class ReportTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return columnNames.length;
+        return columnNames.size();
     }
 
     @Override
     public String getColumnName(int column) {
-        return columnNames[column];
+        return columnNames.get(column);
+    }
+
+    public ReportTableModel(String columName) {
+        this.columnNames.add(0, "No");
+        this.columnNames.add(1, columName);
+        fireTableStructureChanged();
     }
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         VRoleMenu report = listReport.get(rowIndex);
-        switch (columnIndex) {
-            case 0:
-                return report.getMenuName();
-            default:
-                return null;
-        }
+        return switch (columnIndex) {
+            case 0 ->
+                String.valueOf(rowIndex + 1);
+            case 1 ->
+                report.getMenuName();
+            default ->
+                null;
+        };
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.acc.common;
 
 
-import com.acc.model.VGl;
+import com.acc.model.Gl;
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.TableModel;
@@ -167,7 +167,7 @@ public class PaginatedTableDecorator<T> {
             endIndex = dataProvider.getTotalRowCount();
         }
         List<T> rows = dataProvider.getRows(startIndex, endIndex);
-        objectTableModel.setListVGl((List<VGl>) rows);
+        objectTableModel.setListVGl((List<Gl>) rows);
         objectTableModel.fireTableDataChanged();
     }
 }

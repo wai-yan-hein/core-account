@@ -783,10 +783,10 @@
             </Component>
             <Component class="javax.swing.JFormattedTextField" name="txtPrice">
               <Properties>
-                <Property name="editable" type="boolean" value="false"/>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
                   <Connection code="Global.amtFont" type="code"/>
                 </Property>
+                <Property name="name" type="java.lang.String" value="txtPrice" noResource="true"/>
               </Properties>
             </Component>
             <Component class="javax.swing.JButton" name="btnDelete">

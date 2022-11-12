@@ -9,6 +9,7 @@ import com.CvInventoryApplication;
 import com.acc.common.AccountRepo;
 import com.acc.entry.AllCash;
 import com.acc.report.AparReport;
+import com.acc.report.FinancialReport;
 import com.acc.report.GLReport;
 import com.acc.setup.COAManagment;
 import com.acc.setup.COASetup;
@@ -68,7 +69,6 @@ import com.user.setup.AppUserSetup;
 import com.user.setup.CompanySetup;
 import java.time.Duration;
 import java.util.HashMap;
-import javax.swing.JSeparator;
 import org.springframework.core.task.TaskExecutor;
 
 /**
@@ -133,6 +133,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private TaskExecutor taskExecutor;
     @Autowired
     private WebClient accountApi;
+    @Autowired
+    private FinancialReport financialReport;
 //user
     @Autowired
     private InventoryRepo inventoryRepo;
@@ -449,6 +451,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 aparReport.setProgress(progress);
                 aparReport.initMain();
                 return aparReport;
+            }
+            case "Financial Report" -> {
+                financialReport.setName(menuName);
+                financialReport.setObserver(this);
+                financialReport.setProgress(progress);
+                financialReport.initMain();
+                return financialReport;
             }
             case "Chart Of Account" -> {
                 cOASetup.setName(menuName);

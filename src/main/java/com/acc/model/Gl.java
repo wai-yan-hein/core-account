@@ -15,10 +15,10 @@ import lombok.Data;
 @Data
 public class Gl {
 
-    private String glCode;
+    private GlKey key;
     private Date glDate;
     private String description;
-    private String sourceAcId;
+    private String srcAccCode;
     private String accCode;
     private String curCode;
     private Double drAmt;
@@ -27,7 +27,6 @@ public class Gl {
     private String deptCode;
     private String vouNo;
     private String traderCode;
-    private String compCode;
     private Date createdDate;
     private Date modifyDate;
     private String modifyBy;
@@ -42,4 +41,18 @@ public class Gl {
     private Integer macId;
     private Integer exchangeId;
     private List<String> delList;
+    private String deptUsrCode;
+    private String traderName;
+    private String srcAccName;
+    private String accName;
+
+    public Gl(String curCode, Double drAmt, Double crAmt) {
+        this.curCode = curCode;
+        this.drAmt = drAmt;
+        this.crAmt = crAmt;
+    }
+
+    public Gl() {
+    }
+
 }
