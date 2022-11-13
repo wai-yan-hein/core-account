@@ -14,17 +14,16 @@ import com.inventory.ui.common.InventoryRepo;
 
 import com.acc.model.OpeningBalance;
 import com.acc.model.Department;
-
+import com.acc.model.ChartOfAccount;
 import com.user.model.Currency;
 
 import com.acc.common.OpeningBalanceTableModel;
 
 import com.acc.editor.DepartmentAutoCompleter;
-import com.acc.editor.COA3AutoCompleter;
+import com.acc.editor.COAAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.editor.CurrencyAutoCompleter;
 import com.inventory.editor.RegionAutoCompleter;
-
 
 import com.toedter.calendar.JTextFieldDateEditor;
 
@@ -69,7 +68,7 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel implements Select
 
     private DepartmentAutoCompleter departmenttAutoCompleter;
     private CurrencyAutoCompleter currencyAutoCompleter;
-    private COA3AutoCompleter coaAutoCompleter;
+    private COAAutoCompleter coaAutoCompleter;
     private RegionAutoCompleter regionAutoCompleter;
     private TraderAutoCompleter tradeAutoCompleter;
     private SelectionObserver observer;
@@ -127,7 +126,7 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel implements Select
 //        System.out.println(listDepart);
         departmenttAutoCompleter = new DepartmentAutoCompleter(txtDept, accountRepo.getDepartment(), null, true, false);
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, inventoryRepo.getCurrency(), null, false);
-      //  coaAutoCompleter = new COA3AutoCompleter(txtCOA, accountRepo.getCOA(), null, false);
+        coaAutoCompleter = new COAAutoCompleter(txtCOA, accountRepo.getCOAGroup(), null, false);
     }
 
     private void initDate() {
@@ -154,12 +153,10 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel implements Select
     };
 
     private void initTable() {
-         openingTableModel.setDeptAutoCompleter(departmenttAutoCompleter);
+        openingTableModel.setDeptAutoCompleter(departmenttAutoCompleter);
         openingTableModel.setTradeAutoCompleter(tradeAutoCompleter);
         tblOpening.setModel(openingTableModel);
         openingTableModel.setParent(tblOpening);
-        //openingTableModel.addOpeningBalance(opBalance);
-       
         openingTableModel.setObserver(this);
         openingTableModel.addNewRow();
         tblOpening.getTableHeader().setFont(Global.tblHeaderFont);
@@ -172,7 +169,9 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel implements Select
         tblOpening.getColumnModel().getColumn(5).setPreferredWidth(10);
         tblOpening.getColumnModel().getColumn(6).setPreferredWidth(20);
         tblOpening.getColumnModel().getColumn(7).setPreferredWidth(20);
-
+        tblOpening.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
+        tblOpening.getInputMap().put(KeyStroke.getKeyStroke("F8"), "F8-Action");
 //        tblOpening.getColumnModel().getColumn(0).setCellEditor(new COA3 CellEditor(accountRepo),false);
 //        tblOpening.getColumnModel().getColumn(1).setCellEditor();
 //        tblOpening.getColumnModel().getColumn(3).setCellEditor();
@@ -180,7 +179,7 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel implements Select
 //        tblOpening.getColumnModel().getColumn(5).setCellEditor();
 //        tblOpening.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//
 //        tblOpening.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());//
-       tblOpening.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblOpening.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
 
     /**

@@ -57,6 +57,7 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
         this.selectionObserver = selectionObserver;
     }
 
+    
     public void addNewRow() {
         if (listOpening != null) {
             if (!isEmptyRow()) {
@@ -68,6 +69,7 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
         }
     }
 
+    //check if the list is empty
     private boolean isEmptyRow() {
         boolean status = false;
         if (listOpening.size() >= 1) {
