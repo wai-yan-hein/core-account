@@ -89,8 +89,7 @@ public class COAViewTableModel extends AbstractTableModel {
 
     }
 
-    public VCOALv3
-            getChartOfAccount(int row) {
+    public VCOALv3 getChartOfAccount(int row) {
         return listCOA.get(row);
     }
 

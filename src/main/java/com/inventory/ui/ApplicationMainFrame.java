@@ -11,6 +11,7 @@ import com.acc.entry.AllCash;
 import com.acc.report.AparReport;
 import com.acc.report.GLReport;
 import com.acc.setup.COAManagment;
+import com.acc.setup.COAOpeningBalanceSetup;
 import com.acc.setup.COASetup;
 import com.acc.setup.DepartmentSetup;
 import com.common.Global;
@@ -133,6 +134,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private TaskExecutor taskExecutor;
     @Autowired
     private WebClient accountApi;
+    @Autowired
+    private COAOpeningBalanceSetup coaOpening;
 //user
     @Autowired
     private InventoryRepo inventoryRepo;
@@ -456,6 +459,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 cOASetup.setProgress(progress);
                 cOASetup.initMain();
                 return cOASetup;
+            }
+            case "Opening Balance" ->{
+                coaOpening.setName(menuName);
+                coaOpening.setObservaer(this);
+                //coaOpening.setProgress(progress);
+                coaOpening.initMain();
+                return coaOpening;
             }
             default -> {
                 switch (cName) {
