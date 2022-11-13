@@ -4,9 +4,9 @@
  */
 package com.acc.common;
 
+import com.acc.model.ChartOfAccount;
 import com.acc.model.Department;
 import com.acc.model.TraderA;
-import com.acc.model.VCOALv3;
 import com.acc.model.VDescription;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
@@ -277,9 +277,9 @@ public class AllCashTableModel extends AbstractTableModel {
                 }
                 case 6 -> {
                     if (value != null) {
-                        if (value instanceof VCOALv3 coa) {
-                            if (!coa.getCoaCode().equals(sourceAccId)) {
-                                gl.setAccCode(coa.getCoaCode());
+                        if (value instanceof ChartOfAccount coa) {
+                            if (!coa.getKey().getCoaCode().equals(sourceAccId)) {
+                                gl.setAccCode(coa.getKey().getCoaCode());
                                 gl.setAccName(coa.getCoaNameEng());
                                 gl.setTraderCode(null);
                                 gl.setTraderName(null);
@@ -322,8 +322,9 @@ public class AllCashTableModel extends AbstractTableModel {
     private void save(Gl gl, int row, int column) {
         if (isValidEntry(gl, row, column)) {
             try {
-                Gl glSave = accountRepo.saveGl(gl);
-                if (glSave != null) {
+                gl = accountRepo.saveGl(gl);
+                if (gl != null) {
+                    listVGl.set(row, gl);
                     addNewRow();
                     parent.setRowSelectionInterval(row + 1, row + 1);
                     parent.setColumnSelectionInterval(0, 0);
@@ -422,6 +423,8 @@ public class AllCashTableModel extends AbstractTableModel {
             GlKey key = new GlKey();
             key.setCompCode(Global.compCode);
             gl.setKey(key);
+            gl.setMacId(Global.macId);
+            gl.setTranSource("CB");
             if (ProUtil.getProperty(sourceAccId) != null) {
                 gl.setCurCode(ProUtil.getProperty(sourceAccId));
             } else {

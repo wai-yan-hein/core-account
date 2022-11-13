@@ -5,7 +5,7 @@
  */
 package com.acc.common;
 
-import com.acc.model.VCOALv3;
+import com.acc.model.ChartOfAccount;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -19,12 +19,8 @@ import org.slf4j.LoggerFactory;
 public class COA3TableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(COA3TableModel.class);
-    private List<VCOALv3> listCOA = new ArrayList<>();
+    private List<ChartOfAccount> listCOA = new ArrayList<>();
     private final String[] columnNames = {"User Code", "COA Name", "COA Group", "COA Head"};
-
-    public COA3TableModel(List<VCOALv3> listCOA) {
-        this.listCOA = listCOA;
-    }
 
     @Override
     public String getColumnName(int column) {
@@ -52,17 +48,17 @@ public class COA3TableModel extends AbstractTableModel {
         }
 
         try {
-            VCOALv3 coa = listCOA.get(row);
+            ChartOfAccount coa = listCOA.get(row);
 
             return switch (column) {
                 case 0 ->
-                    coa.getCoaCode();
+                    coa.getCoaCodeUsr() == null ? coa.getKey().getCoaCode() : coa.getCoaCodeUsr();
                 case 1 ->
                     coa.getCoaNameEng();
                 case 2 ->
-                    coa.getCoaNameEngParent2();
+                    coa.getGroupName();
                 case 3 ->
-                    coa.getCoaNameEngParent3();
+                    coa.getHeadName();
                 default ->
                     null;
             }; //Code
@@ -92,7 +88,16 @@ public class COA3TableModel extends AbstractTableModel {
         return columnNames.length;
     }
 
-    public VCOALv3 getCOA(int row) {
+    public List<ChartOfAccount> getListCOA() {
+        return listCOA;
+    }
+
+    public void setListCOA(List<ChartOfAccount> listCOA) {
+        this.listCOA = listCOA;
+        fireTableDataChanged();
+    }
+
+    public ChartOfAccount getCOA(int row) {
         if (listCOA == null) {
             return null;
         } else if (listCOA.isEmpty()) {

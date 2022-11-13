@@ -22,8 +22,16 @@ public class DespTableModel extends AbstractTableModel {
     private List<VDescription> listAutoText = new ArrayList<>();
     private final String[] columnNames = {"Description"};
 
-    public DespTableModel(List<VDescription> listAutoText) {
+    public DespTableModel() {
+    }
+
+    public List<VDescription> getListAutoText() {
+        return listAutoText;
+    }
+
+    public void setListAutoText(List<VDescription> listAutoText) {
         this.listAutoText = listAutoText;
+        fireTableDataChanged();
     }
 
     @Override

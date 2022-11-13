@@ -17,37 +17,45 @@ import org.slf4j.LoggerFactory;
  * @author Lenovo
  */
 public class RefTableModel extends AbstractTableModel {
-    
+
     private static final Logger log = LoggerFactory.getLogger(RefTableModel.class);
     private List<VRef> listAutoText = new ArrayList<>();
     private final String[] columnNames = {"Reference"};
-    
-    public RefTableModel(List<VRef> listAutoText) {
-        this.listAutoText = listAutoText;
+
+    public RefTableModel() {
     }
-    
+
+    public List<VRef> getListAutoText() {
+        return listAutoText;
+    }
+
+    public void setListAutoText(List<VRef> listAutoText) {
+        this.listAutoText = listAutoText;
+        fireTableDataChanged();
+    }
+
     @Override
     public String getColumnName(int column) {
         return columnNames[column];
     }
-    
+
     @Override
     public boolean isCellEditable(int row, int column) {
         return false;
     }
-    
+
     @Override
     public Class getColumnClass(int column) {
         return String.class;
     }
-    
+
     @Override
     public Object getValueAt(int row, int column) {
-        
+
         try {
             if (!listAutoText.isEmpty()) {
                 VRef auto = listAutoText.get(row);
-                
+
                 switch (column) {
                     case 0: //Code
                         return auto == null ? null : auto.getReference();
@@ -58,14 +66,14 @@ public class RefTableModel extends AbstractTableModel {
         } catch (Exception ex) {
             log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
-        
+
         return null;
     }
-    
+
     @Override
     public void setValueAt(Object value, int row, int column) {
     }
-    
+
     @Override
     public int getRowCount() {
         if (listAutoText == null) {
@@ -74,12 +82,12 @@ public class RefTableModel extends AbstractTableModel {
             return listAutoText.size();
         }
     }
-    
+
     @Override
     public int getColumnCount() {
         return columnNames.length;
     }
-    
+
     public VRef getRemark(int row) {
         if (listAutoText == null) {
             return null;
@@ -89,7 +97,7 @@ public class RefTableModel extends AbstractTableModel {
             return listAutoText.get(row);
         }
     }
-    
+
     public int getSize() {
         if (listAutoText == null) {
             return 0;

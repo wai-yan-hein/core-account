@@ -12,7 +12,6 @@ import com.acc.model.DepartmentKey;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
 import com.acc.model.TraderA;
-import com.acc.model.VCOALv3;
 import com.acc.model.VDescription;
 import com.acc.model.VRef;
 import com.acc.model.VTranSource;
@@ -95,12 +94,13 @@ public class AccountRepo {
         return result.block().getBody();
     }
 
-    public List<VCOALv3> getCOA() {
-        Mono<ResponseEntity<List<VCOALv3>>> result = accountApi.get()
+    public List<ChartOfAccount> getCOA(String str) {
+        Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get()
                 .uri(builder -> builder.path("/account/get-coa")
                 .queryParam("compCode", Global.compCode)
+                .queryParam("str", str)
                 .build())
-                .retrieve().toEntityList(VCOALv3.class);
+                .retrieve().toEntityList(ChartOfAccount.class);
         return result.block().getBody();
     }
 
@@ -112,19 +112,21 @@ public class AccountRepo {
         return result.block().getBody();
     }
 
-    public List<VRef> getReference() {
+    public List<VRef> getReference(String str) {
         Mono<ResponseEntity<List<VRef>>> result = accountApi.get()
                 .uri(builder -> builder.path("/account/get-reference")
                 .queryParam("compCode", Global.compCode)
+                .queryParam("str", str)
                 .build())
                 .retrieve().toEntityList(VRef.class);
         return result.block().getBody();
     }
 
-    public List<VDescription> getDescription() {
+    public List<VDescription> getDescription(String str) {
         Mono<ResponseEntity<List<VDescription>>> result = accountApi.get()
                 .uri(builder -> builder.path("/account/get-description")
                 .queryParam("compCode", Global.compCode)
+                .queryParam("str", str)
                 .build())
                 .retrieve().toEntityList(VDescription.class);
         return result.block().getBody();
@@ -177,7 +179,7 @@ public class AccountRepo {
         return result.block(Duration.ofMinutes(min)).getBody();
     }
 
-    public List<ChartOfAccount> getCOA(String coaCode) {
+    public List<ChartOfAccount> getCOAChild(String coaCode) {
         COAKey key = new COAKey();
         key.setCoaCode(coaCode);
         key.setCompCode(Global.compCode);

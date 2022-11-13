@@ -106,13 +106,13 @@ public class ReorderTableModel extends AbstractTableModel {
     private String getStatus(ReorderLevel r) {
         return switch (r.getPosition()) {
             case 1 ->
-                "Below Minimun";
+                "Below-Min";
             case 2 ->
-                "Over Miniumn";
+                "Over-Min";
             case 3 ->
-                "Below Maximun";
+                "Below-Max";
             case 4 ->
-                "Over Maxiumn";
+                "Over-Max";
             default ->
                 "Normal";
         };
@@ -136,6 +136,7 @@ public class ReorderTableModel extends AbstractTableModel {
                     case 3 -> {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             p.setMinQty(Util1.getFloat(value));
+                            p.setMinUnitCode(getPurUnit(p.getKey().getStockCode()));
                             table.setColumnSelectionInterval(3, 3);
                         } else {
                             JOptionPane.showMessageDialog(table, "Invalid Amount.");
@@ -150,6 +151,7 @@ public class ReorderTableModel extends AbstractTableModel {
                     case 5 -> {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             p.setMaxQty(Util1.getFloat(value));
+                            p.setMaxUnitCode(getPurUnit(p.getKey().getStockCode()));
                             table.setColumnSelectionInterval(5, 5);
                         } else {
                             JOptionPane.showMessageDialog(table, "Invalid Amount.");
@@ -169,6 +171,8 @@ public class ReorderTableModel extends AbstractTableModel {
                         p.setMaxSmallQty(p.getMaxQty() * getSmallQty(p.getKey().getStockCode(), p.getMinUnitCode()));
 
                 }
+                p.setPosition(getPosition(p));
+                p.setStatus(getStatus(p));
                 inventoryRepo.saveReorder(p);
                 fireTableRowsUpdated(row, row);
                 table.requestFocus();
@@ -178,12 +182,32 @@ public class ReorderTableModel extends AbstractTableModel {
         }
     }
 
+    private String getPurUnit(String stockCode) {
+        return inventoryRepo.findStock(stockCode).getPurUnitCode();
+    }
+
     private float getSmallQty(String stockCode, String unit) {
-        float qty = 1.0f;
+        float qty = 0.0f;
         if (!Objects.isNull(stockCode) && !Objects.isNull(unit)) {
             qty = inventoryRepo.getSmallQty(stockCode, unit);
         }
         return qty;
+    }
+
+    private int getPosition(ReorderLevel rl) {
+        float balQty = rl.getBalSmallQty();
+        float minQty = rl.getMinSmallQty();
+        float maxQty = rl.getMaxSmallQty();
+        if (balQty < minQty) {
+            return 1;
+        } else if (balQty > minQty) {
+            return 2;
+        } else if (balQty < maxQty) {
+            return 3;
+        } else if (balQty > maxQty) {
+            return 4;
+        }
+        return 5;
     }
 
     @Override

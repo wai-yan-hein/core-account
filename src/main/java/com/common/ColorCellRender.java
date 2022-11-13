@@ -25,11 +25,12 @@ public class ColorCellRender extends DefaultTableCellRenderer {
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         if (value instanceof String str) {
             switch (str) {
-                case "Below Minimun" -> {
+                case "Below-Min" ->
                     ((JLabel) c).setForeground(Color.red);
-                }
-                case "Over Minimun" ->
+                case "Over-Min" ->
                     ((JLabel) c).setForeground(Color.green);
+                case "Below-Max" ->
+                    ((JLabel) c).setForeground(Color.yellow);
                 default ->
                     ((JLabel) c).setForeground(Color.blue);
             }

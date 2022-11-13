@@ -5,6 +5,7 @@
  */
 package com.acc.editor;
 
+import com.acc.common.AccountRepo;
 import com.acc.model.VDescription;
 import com.common.Global;
 import java.awt.event.FocusAdapter;
@@ -13,7 +14,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
-import java.util.List;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JComponent;
 import javax.swing.JTable;
@@ -28,7 +28,7 @@ public class DespEditor extends AbstractCellEditor implements TableCellEditor {
 
     private JComponent component = null;
     private DespAutoCompleter completer;
-    private List<VDescription> listDesp;
+    private AccountRepo accountRepo;
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusLost(FocusEvent e) {
@@ -42,8 +42,8 @@ public class DespEditor extends AbstractCellEditor implements TableCellEditor {
 
     };
 
-    public DespEditor(List<VDescription> listDesp) {
-        this.listDesp = listDesp;
+    public DespEditor(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
     }
 
     @Override
@@ -83,7 +83,7 @@ public class DespEditor extends AbstractCellEditor implements TableCellEditor {
             jtf.setText(value.toString());
             jtf.selectAll();
         }
-        completer = new DespAutoCompleter(jtf, listDesp, this, false);
+        completer = new DespAutoCompleter(jtf, accountRepo, this, false);
         return component;
     }
 

@@ -5,7 +5,8 @@
  */
 package com.acc.editor;
 
-import com.acc.model.VCOALv3;
+import com.acc.common.AccountRepo;
+import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -13,7 +14,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
-import java.util.List;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JComponent;
 import javax.swing.JTable;
@@ -29,7 +29,7 @@ public class COA3CellEditor extends AbstractCellEditor implements TableCellEdito
     private JComponent component = null;
     private COA3AutoCompleter completer;
     private final boolean filter;
-    private List<VCOALv3> listCOA;
+    private AccountRepo accountRepo;
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusLost(FocusEvent e) {
@@ -49,8 +49,8 @@ public class COA3CellEditor extends AbstractCellEditor implements TableCellEdito
     };
     //private List<Medicine> listCOA = new ArrayList();
 
-    public COA3CellEditor(List<VCOALv3> listCOA, boolean filter) {
-        this.listCOA = listCOA;
+    public COA3CellEditor(AccountRepo accountRepo, boolean filter) {
+        this.accountRepo = accountRepo;
         this.filter = filter;
     }
 
@@ -90,14 +90,14 @@ public class COA3CellEditor extends AbstractCellEditor implements TableCellEdito
             jtf.setText(value.toString());
             jtf.selectAll();
         }
-        completer = new COA3AutoCompleter(jtf, listCOA, this, filter);
+        completer = new COA3AutoCompleter(jtf, accountRepo, this, filter);
         return component;
     }
 
     @Override
     public Object getCellEditorValue() {
         Object obj;
-        VCOALv3 coa = completer.getCOA();
+        ChartOfAccount coa = completer.getCOA();
 
         if (coa != null) {
             obj = coa;

@@ -34,7 +34,21 @@ public class ChartOfAccount {
     private Integer macId;
     private boolean marked;
     private String curCode;
+    private String groupCode;
+    private String groupUsrCode;
+    private String groupName;
+    private String headCode;
+    private String headUsrCode;
+    private String headName;
     private List<ChartOfAccount> child;
+
+    public ChartOfAccount(COAKey key, String coaNameEng) {
+        this.key = key;
+        this.coaNameEng = coaNameEng;
+    }
+
+    public ChartOfAccount() {
+    }
 
     @Override
     public String toString() {

@@ -5,6 +5,7 @@
  */
 package com.acc.editor;
 
+import com.acc.common.AccountRepo;
 import com.acc.common.RefTableModel;
 import com.acc.model.VRef;
 import com.common.Global;
@@ -16,19 +17,16 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
 import javax.swing.Action;
-import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.RowFilter;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
@@ -49,7 +47,7 @@ public final class RefAutoCompleter implements KeyListener {
     private JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private RefTableModel refModel;
+    private RefTableModel refModel = new RefTableModel();
     private VRef ref;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
@@ -57,6 +55,8 @@ public final class RefAutoCompleter implements KeyListener {
     private int y = 0;
     boolean popupOpen = false;
     private SelectionObserver selectionObserver;
+    private AccountRepo accountRepo;
+    private boolean filter;
 
     public SelectionObserver getSelectionObserver() {
         return selectionObserver;
@@ -70,19 +70,17 @@ public final class RefAutoCompleter implements KeyListener {
     public RefAutoCompleter() {
     }
 
-    public RefAutoCompleter(JTextComponent comp, List<VRef> list,
+    public RefAutoCompleter(JTextComponent comp, AccountRepo accountRepo,
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
-        if (filter) {
-            list = new ArrayList<>(list);
-            VRef vRef = new VRef("All");
-            list.add(0, vRef);
-            setAutoText(vRef);
+        this.accountRepo = accountRepo;
+        this.filter = filter;
+        if (this.filter) {
+            setAutoText(new VRef("All"));
         }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
-        refModel = new RefTableModel(list);
         table.setModel(refModel);
         table.setSize(25, 25);
         table.getTableHeader().setFont(Global.lableFont);
@@ -160,12 +158,6 @@ public final class RefAutoCompleter implements KeyListener {
         });
 
         table.setRequestFocusEnabled(false);
-
-        if (list != null) {
-            if (!list.isEmpty()) {
-                table.setRowSelectionInterval(0, 0);
-            }
-        }
     }
 
     public void mouseSelect() {
@@ -357,35 +349,20 @@ public final class RefAutoCompleter implements KeyListener {
      */
     @Override
     public void keyReleased(KeyEvent e) {
-        String filter = textComp.getText();
-        if (filter.length() == 0) {
-            sorter.setRowFilter(null);
-        } else {
-            sorter.setRowFilter(startsWithFilter);
-            try {
-                if (!containKey(e)) {
-                    if (table.getRowCount() >= 0) {
-                        table.setRowSelectionInterval(0, 0);
-                    }
+        String str = textComp.getText();
+        if (!str.isEmpty()) {
+            if (!containKey(e)) {
+                List<VRef> list = accountRepo.getReference(str);
+                if (this.filter) {
+                    VRef s = new VRef("All");
+                    list.add(s);
                 }
-            } catch (Exception ex) {
+                refModel.setListAutoText(list);
+
             }
 
         }
     }
-    private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
-        @Override
-        public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
-            String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
-            String tmp2 = entry.getStringValue(1).toUpperCase().replace(" ", "");
-            String tmp3 = entry.getStringValue(3).toUpperCase().replace(" ", "");
-            String tmp4 = entry.getStringValue(4).toUpperCase().replace(" ", "");
-            String tmp5 = entry.getStringValue(4).toUpperCase().replace(" ", "");
-            String text = textComp.getText().toUpperCase().replace(" ", "");
-            return tmp1.startsWith(text) || tmp2.startsWith(text)
-                    || tmp3.startsWith(text) || tmp4.startsWith(text) || tmp5.startsWith(text);
-        }
-    };
 
     private boolean containKey(KeyEvent e) {
         return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;

@@ -5,8 +5,10 @@
  */
 package com.acc.editor;
 
+import com.acc.common.AccountRepo;
 import com.acc.common.COA3TableModel;
-import com.acc.model.VCOALv3;
+import com.acc.model.COAKey;
+import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
@@ -16,7 +18,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
@@ -27,35 +28,33 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.RowFilter;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class COA3AutoCompleter implements KeyListener {
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(COA3AutoCompleter.class);
-    private JTable table = new JTable();
+    private final JTable table = new JTable();
     private JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private COA3TableModel cOATableModel;
-    private VCOALv3 coa;
+    private final COA3TableModel cOATableModel = new COA3TableModel();
+    private ChartOfAccount coa;
     public AbstractCellEditor editor;
-    private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
     boolean popupOpen = false;
     private SelectionObserver selectionObserver;
+    private AccountRepo accountRepo;
+    private boolean filter;
 
     public void setSelectionObserver(SelectionObserver selectionObserver) {
         this.selectionObserver = selectionObserver;
@@ -65,24 +64,19 @@ public class COA3AutoCompleter implements KeyListener {
     public COA3AutoCompleter() {
     }
 
-    public COA3AutoCompleter(JTextComponent comp, List<VCOALv3> list,
+    public COA3AutoCompleter(JTextComponent comp, AccountRepo accountRepo,
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
+        this.accountRepo = accountRepo;
+        this.filter = filter;
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
-        if (filter) {
-            list = new ArrayList<>(list);
-            list.add(0, new VCOALv3("-", "All"));
-        }
-        cOATableModel = new COA3TableModel(list);
         table.setModel(cOATableModel);
         table.getTableHeader().setFont(Global.lableFont);
         table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
         table.setDefaultRenderer(Object.class, new TableCellRender());
-        sorter = new TableRowSorter(table.getModel());
-        table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
         table.getColumnModel().getColumn(0).setPreferredWidth(70);//Code
         table.getColumnModel().getColumn(1).setPreferredWidth(150);//Name
@@ -146,12 +140,7 @@ public class COA3AutoCompleter implements KeyListener {
 
             }
         });
-
         table.setRequestFocusEnabled(false);
-
-        if (!list.isEmpty()) {
-            table.setRowSelectionInterval(0, 0);
-        }
     }
 
     public void mouseSelect() {
@@ -161,7 +150,7 @@ public class COA3AutoCompleter implements KeyListener {
             ((JTextField) textComp).setText(coa.getCoaNameEng());
             if (editor == null) {
                 if (selectionObserver != null) {
-                    selectionObserver.selected("COA_OBJ", coa.getCoaCode());
+                    selectionObserver.selected("COA_OBJ", coa.getKey().getCoaCode());
                 }
             }
         }
@@ -173,7 +162,7 @@ public class COA3AutoCompleter implements KeyListener {
         }
     }
 
-    private Action acceptAction = new AbstractAction() {
+    private final Action acceptAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             mouseSelect();
@@ -308,11 +297,11 @@ public class COA3AutoCompleter implements KeyListener {
         table.scrollRectToVisible(rect);
     }
 
-    public VCOALv3 getCOA() {
+    public ChartOfAccount getCOA() {
         return coa;
     }
 
-    public void setCoa(VCOALv3 coa) {
+    public void setCoa(ChartOfAccount coa) {
         this.coa = coa;
         if (this.coa != null) {
             textComp.setText(coa.getCoaNameEng());
@@ -343,31 +332,22 @@ public class COA3AutoCompleter implements KeyListener {
      */
     @Override
     public void keyReleased(KeyEvent e) {
-        String filter = textComp.getText();
-        if (filter.length() == 0) {
-            sorter.setRowFilter(null);
-        } else {
-            sorter.setRowFilter(startsWithFilter);
-            try {
-                if (!containKey(e)) {
-                    if (table.getRowCount() >= 0) {
-                        table.setRowSelectionInterval(0, 0);
-                    }
+        String str = textComp.getText();
+        if (!str.isEmpty()) {
+            if (!containKey(e)) {
+                List<ChartOfAccount> list = accountRepo.getCOA(str);
+                if (this.filter) {
+                    ChartOfAccount s = new ChartOfAccount(new COAKey("-", Global.compCode), "All");
+                    list.add(s);
                 }
-            } catch (Exception ex) {
+                cOATableModel.setListCOA(list);
+                if (!list.isEmpty()) {
+                    table.setRowSelectionInterval(0, 0);
+                }
             }
 
         }
     }
-    private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
-        @Override
-        public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
-            String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
-            String tmp2 = entry.getStringValue(1).toUpperCase().replace(" ", "");
-            String text = textComp.getText().toUpperCase().replace(" ", "");
-            return tmp1.startsWith(text) || tmp2.startsWith(text);
-        }
-    };
 
     private boolean containKey(KeyEvent e) {
         return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;
