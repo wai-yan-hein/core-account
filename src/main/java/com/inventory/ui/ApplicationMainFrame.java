@@ -136,6 +136,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private WebClient accountApi;
     @Autowired
     private FinancialReport financialReport;
+    @Autowired
     private COAOpeningBalanceSetup coaOpening;
 //user
     @Autowired
@@ -468,7 +469,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 cOASetup.initMain();
                 return cOASetup;
             }
-            case "Opening Balance" ->{
+            case "Opening Balance" -> {
                 coaOpening.setName(menuName);
                 coaOpening.setObservaer(this);
                 //coaOpening.setProgress(progress);
