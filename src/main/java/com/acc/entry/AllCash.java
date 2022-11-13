@@ -227,7 +227,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         traderAutoCompleter.setSelectionObserver(this);
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDepartment, listDepartment, null, true, true);
         departmentAutoCompleter.setObserver(this);
-        coaAutoCompleter = new COAAutoCompleter(txtAccount, accounRepo.getCOAGroup(), null, true);
+        coaAutoCompleter = new COAAutoCompleter(txtAccount, accounRepo.getChartOfAccount(), null, true);
         dateAutoCompleter = new DateAutoCompleter(txtDate, true);
         currencyAutoCompleter = new CurrencyAAutoCompleter(txtCurrency, accounRepo.getCurrency(), null, true);
         currencyAutoCompleter.setSelectionObserver(this);
@@ -1115,7 +1115,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     @Override
     public void selected(Object source, Object selectObj) {
-        if (source.toString().equals("Selected")) {
+        if (selectObj != null) {
             searchCash();
         }
     }

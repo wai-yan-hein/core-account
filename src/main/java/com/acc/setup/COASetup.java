@@ -96,7 +96,7 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
     }
 
     private void searchHead() {
-        coaHeadTableModel.setlistCoaHead(accountRepo.getCOA("#"));
+        coaHeadTableModel.setlistCoaHead(accountRepo.getCOAChild("#"));
         tblCoaHead.requestFocus();
     }
 
@@ -157,7 +157,7 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         String coaCode = c.getKey().getCoaCode();
         if (coaCode != null) {
             coaGroupTableModel.setCoaHeadCode(c.getKey().getCoaCode());
-            coaGroupTableModel.setListCOA(accountRepo.getCOA(coaCode));
+            coaGroupTableModel.setListCOA(accountRepo.getCOAChild(coaCode));
             coaGroupTableModel.addEmptyRow();
             lblCoaGroup.setText(c.getCoaNameEng());
             reqCoaGroup();
@@ -183,7 +183,7 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         String coaCode = c.getKey().getCoaCode();
         if (coaCode != null) {
             cOAGroupChildTableModel.setCoaGroupCode(c.getKey().getCoaCode());
-            cOAGroupChildTableModel.setListCOA(accountRepo.getCOA(coaCode));
+            cOAGroupChildTableModel.setListCOA(accountRepo.getCOAChild(coaCode));
             cOAGroupChildTableModel.addEmptyRow();
             lblCoaChild.setText(c.getCoaNameEng());
             reqCOAGroupChild();

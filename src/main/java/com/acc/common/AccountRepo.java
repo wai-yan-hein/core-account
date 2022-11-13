@@ -85,9 +85,9 @@ public class AccountRepo {
         return result.block().getBody();
     }
 
-    public List<ChartOfAccount> getCOAGroup() {
+    public List<ChartOfAccount> getChartOfAccount() {
         Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get()
-                .uri(builder -> builder.path("/account/get-coa-group")
+                .uri(builder -> builder.path("/account/get-coa")
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve().toEntityList(ChartOfAccount.class);
@@ -96,7 +96,7 @@ public class AccountRepo {
 
     public List<ChartOfAccount> getCOA(String str) {
         Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get()
-                .uri(builder -> builder.path("/account/get-coa")
+                .uri(builder -> builder.path("/account/get-coa-lv3")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("str", str)
                 .build())

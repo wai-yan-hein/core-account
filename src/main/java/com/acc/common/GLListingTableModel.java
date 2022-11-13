@@ -5,24 +5,21 @@
 package com.acc.common;
 
 import com.acc.model.VTriBalance;
-import com.common.Util1;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author winswe
  */
-@Component
 public class GLListingTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(GLListingTableModel.class);
     private List<VTriBalance> listTBal = new ArrayList();
-    private String[] columnNames = {"Code", "Description", "Currency", "Dr-Amt", "Cr-Amt"};
+    private String[] columnNames = {"Code", "Chart Of Account", "Currency", "Dr-Amt", "Cr-Amt"};
 
     @Override
     public String getColumnName(int column) {
