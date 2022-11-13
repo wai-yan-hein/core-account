@@ -76,8 +76,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     /**
      * Creates new form AparGlReport
      */
-    @Autowired
-    private GLListingTableModel glListingTableModel;
+    private final GLListingTableModel glListingTableModel= new GLListingTableModel();
 
     private final TrialBalanceDetailDialog trialBalanceDetailDialog = new TrialBalanceDetailDialog();
     private COAAutoCompleter cOAAutoCompleter;
@@ -173,7 +172,6 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                     }
                 }
             }
-
         });
         filterHeader = new TableFilterHeader(tblGL, AutoChoices.ENABLED);
         filterHeader.setPosition(TableFilterHeader.Position.TOP);
@@ -273,7 +271,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     private void initCombo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate, true);
         dateAutoCompleter.setSelectionObserver(this);
-        cOAAutoCompleter = new COAAutoCompleter(txtCOA, accountRepo.getCOAGroup(), null, true);
+        cOAAutoCompleter = new COAAutoCompleter(txtCOA, accountRepo.getChartOfAccount(), null, true);
         cOAAutoCompleter.setSelectionObserver(this);
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDep,
                 accountRepo.getDepartment(), null, true, true);

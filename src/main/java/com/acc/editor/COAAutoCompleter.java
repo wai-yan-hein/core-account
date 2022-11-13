@@ -6,6 +6,7 @@
 package com.acc.editor;
 
 import com.acc.common.COATableModel;
+import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.SelectionObserver;
@@ -16,7 +17,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
@@ -54,6 +54,7 @@ public final class COAAutoCompleter implements KeyListener {
     private int y = 0;
     boolean popupOpen = false;
     private SelectionObserver selectionObserver;
+    private boolean filter;
 
     public void setSelectionObserver(SelectionObserver selectionObserver) {
         this.selectionObserver = selectionObserver;
@@ -67,11 +68,11 @@ public final class COAAutoCompleter implements KeyListener {
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
+        this.filter = filter;
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
-        if (filter) {
-            list = new ArrayList<>(list);
-            ChartOfAccount c = new ChartOfAccount();
+        if (this.filter) {
+            ChartOfAccount c = new ChartOfAccount(new COAKey("-", Global.compCode), "All");
             list.add(0, c);
             setCoa(c);
         }
