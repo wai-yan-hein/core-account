@@ -32,4 +32,6 @@ public class ReorderLevel {
     private float maxSmallQty;
     private float balSmallQty;
     private String status;
+    private String locName;
+    private Integer position;
 }

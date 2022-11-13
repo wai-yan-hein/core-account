@@ -32,7 +32,7 @@ public class SaleHis implements java.io.Serializable {
     private Float discount;
     private Float discP;
     private Float taxAmt;
-    private Float taxP;
+    private Float taxPercent;
     private Boolean deleted;
     private Float paid;
     private Float balance;

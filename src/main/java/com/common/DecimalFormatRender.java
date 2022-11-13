@@ -22,8 +22,13 @@ public class DecimalFormatRender extends DefaultTableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        if (value instanceof Float) {
-            Float d = Util1.getFloat(value);
+        if (value instanceof Float f) {
+            String s = formatter.format(f);
+            c = getTableCellRendererComponent(table, s,
+                    isSelected, hasFocus, row, column);
+            ((JLabel) c).setHorizontalAlignment(SwingConstants.RIGHT);
+        }
+        if (value instanceof Double d) {
             String s = formatter.format(d);
             c = getTableCellRendererComponent(table, s,
                     isSelected, hasFocus, row, column);

@@ -9,13 +9,12 @@ import com.common.PanelControl;
 import com.common.KeyPropagate;
 import com.common.Global;
 import com.common.Util1;
-
 import com.acc.common.AccountRepo;
 import com.inventory.ui.common.InventoryRepo;
 
 import com.acc.model.OpeningBalance;
 import com.acc.model.Department;
-import com.acc.model.VCOALv3;
+
 import com.user.model.Currency;
 
 import com.acc.common.OpeningBalanceTableModel;
@@ -77,7 +76,6 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel implements Select
 
     private OpeningBalance opBalance;
     private List<OpeningBalance> listOpening = new ArrayList();
-    private List<VCOALv3> listCOA = new ArrayList();
     private List<Department> listDept = new ArrayList();
     private List<Currency> listCurrency = new ArrayList();
 

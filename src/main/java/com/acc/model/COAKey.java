@@ -15,4 +15,13 @@ public class COAKey {
 
     private String coaCode;
     private String compCode;
+
+    public COAKey(String coaCode, String compCode) {
+        this.coaCode = coaCode;
+        this.compCode = compCode;
+    }
+
+    public COAKey() {
+    }
+    
 }

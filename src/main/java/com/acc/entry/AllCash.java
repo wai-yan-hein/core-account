@@ -29,14 +29,10 @@ import com.acc.common.OpeningCellRender;
 import com.acc.model.ChartOfAccount;
 import com.user.model.Currency;
 import com.acc.model.Department;
-import com.acc.model.Gl;
 import com.acc.model.ReportFilter;
 import com.acc.model.TmpOpening;
 import com.acc.model.TraderA;
-import com.acc.model.VCOALv3;
-import com.acc.model.VDescription;
-import com.acc.model.VGl;
-import com.acc.model.VRef;
+import com.acc.model.Gl;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -52,10 +48,7 @@ import com.user.common.UserRepo;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -81,6 +74,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import lombok.extern.slf4j.Slf4j;
 import net.coderazzi.filters.gui.AutoChoices;
 import net.coderazzi.filters.gui.TableFilterHeader;
 import net.sf.jasperreports.engine.JRException;
@@ -88,8 +82,6 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -99,10 +91,10 @@ import reactor.core.publisher.Mono;
  *
  * @author Lenovo
  */
+@Slf4j
 public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         PanelControl {
 
-    private static final Logger log = LoggerFactory.getLogger(AllCash.class);
     private String stDate, enDate, desp, accCode, ref, traderCode, currency, traderType, tranSource, coaLv2, coaLv1;
     private TaskExecutor taskExecutor;
     private final AllCashTableModel allCashTableModel = new AllCashTableModel();
@@ -124,17 +116,14 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private final JPopupMenu popupmenu = new JPopupMenu();
     private final JLabel lblMessage = new JLabel();
     private TableFilterHeader filterHeader;
-    private final HashMap<String, VGl> hmOpening = new HashMap<>();
+    private final HashMap<String, Gl> hmOpening = new HashMap<>();
     private JProgressBar progress;
     private AccountRepo accounRepo;
     private UserRepo userRepo;
     private List<TraderA> listTrader = new ArrayList<>();
     private List<Department> listDepartment = new ArrayList<>();
     private List<Currency> listCurrency = new ArrayList<>();
-    private List<VRef> listRef = new ArrayList<>();
-    private List<VDescription> listDesp = new ArrayList<>();
     private List<String> department = new ArrayList<>();
-    private List<VCOALv3> listCOA = new ArrayList<>();
     private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     private final String path = String.format("%s%s%s", "temp", File.separator, "Ledger" + Global.macId);
     private DateTableDecorator decorator;
@@ -203,7 +192,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     public AllCash() {
         initComponents();
         initPopup();
-        initMouseLisener();
         initTableCB();
         initTableCashInOut();
         initTableCashOP();
@@ -219,7 +207,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private void createDateFilter() {
         HashMap<Integer, String> hmDate = new HashMap<>();
         HashMap<String, Integer> hmPage = new HashMap<>();
-        List<Date> date = Util1.getDaysBetweenDates(Util1.toDate(Global.startDate), Util1.getTodayDate());
+        List<Date> date = Util1.getDaysBetweenDates(Util1.toDate(Global.startDate, "dd/MM/yyyy"), Util1.getTodayDate());
         for (int i = 0; i < date.size(); i++) {
             String str = Util1.toDateStr(date.get(i), "yyyy-MM-dd");
             int z = i + 1;
@@ -228,16 +216,13 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         }
         decorator.setHmData(hmDate);
         decorator.setHmPage(hmPage);
-        decorator.refreshButton(enDate);
+        //decorator.refreshButton(enDate);
     }
 
     private void initFilter() {
         listDepartment = accounRepo.getDepartment();
         listTrader = accounRepo.getTrader();
         listCurrency = accounRepo.getCurrency();
-        listDesp = accounRepo.getDescription();
-        listRef = accounRepo.getReference();
-        listCOA = accounRepo.getCOA();
         traderAutoCompleter = new TraderAAutoCompleter(txtPerson, listTrader, null, true, 2);
         traderAutoCompleter.setSelectionObserver(this);
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDepartment, listDepartment, null, true, true);
@@ -248,9 +233,9 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         currencyAutoCompleter.setSelectionObserver(this);
         dateAutoCompleter.setSelectionObserver(this);
         coaAutoCompleter.setSelectionObserver(this);
-        despAutoCompleter = new DespAutoCompleter(txtDesp, listDesp, null, true);
+        despAutoCompleter = new DespAutoCompleter(txtDesp, accounRepo, null, true);
         despAutoCompleter.setSelectionObserver(this);
-        refAutoCompleter = new RefAutoCompleter(txtRefrence, listRef, null, true);
+        refAutoCompleter = new RefAutoCompleter(txtRefrence, accounRepo, null, true);
         refAutoCompleter.setSelectionObserver(this);
         tranSourceAutoCompleter = new TranSourceAutoCompleter(txtOption, accounRepo.getTranSource(), null, true);
         tranSourceAutoCompleter.setSelectionObserver(this);
@@ -264,11 +249,11 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         allCashTableModel.addNewRow();
         tblCash.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
         tblCash.getColumnModel().getColumn(1).setCellEditor(new DepartmentCellEditor(false, listDepartment));
-        tblCash.getColumnModel().getColumn(2).setCellEditor(new DespEditor(listDesp));
-        tblCash.getColumnModel().getColumn(3).setCellEditor(new RefCellEditor(listRef));
+        tblCash.getColumnModel().getColumn(2).setCellEditor(new DespEditor(accounRepo));
+        tblCash.getColumnModel().getColumn(3).setCellEditor(new RefCellEditor(accounRepo));
         tblCash.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
         tblCash.getColumnModel().getColumn(5).setCellEditor(new TraderCellEditor(listTrader, false, 2));
-        tblCash.getColumnModel().getColumn(6).setCellEditor(new COA3CellEditor(listCOA, false));
+        tblCash.getColumnModel().getColumn(6).setCellEditor(new COA3CellEditor(accounRepo, false));
         tblCash.getColumnModel().getColumn(7).setCellEditor(new CurrencyAEditor(listCurrency, false));
         tblCash.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
         tblCash.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
@@ -351,14 +336,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tblCash.getColumnModel().getColumn(7).setPreferredWidth(1);// Curr      
         tblCash.getColumnModel().getColumn(8).setPreferredWidth(90);// Dr-Amt   
         tblCash.getColumnModel().getColumn(9).setPreferredWidth(90);// Cr-Amt  
-        tblCash.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                if (e.isControlDown() && e.getKeyCode() == 222) {
-                    allCashTableModel.copyRow();
-                }
-            }
-        });
         tblCash.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblCash.getInputMap().put(KeyStroke.getKeyStroke("F8"), "F8-Action");
@@ -377,49 +354,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         popupmenu.add(lblMessage);
     }
 
-    private void initMouseLisener() {
-        tblCash.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 1) {
-                    String message = getMessage();
-                    if (message != null) {
-                        lblMessage.setText(message);
-                        popupmenu.show(tblCash, e.getX(), e.getY());
-                    }
-                }
-            }
-
-        });
-    }
-
     public boolean isCellEditable(int row, int column) {
         return tblCash.getModel().isCellEditable(row, column);
-    }
-
-    private String getMessage() {
-        String msg = null;
-        int selectRow = tblCash.convertRowIndexToModel(tblCash.getSelectedRow());
-        int column = tblCash.getSelectedColumn();
-        VGl vGl = allCashTableModel.getVGl(selectRow);
-        switch (column) {
-            case 0 -> //date
-                msg = Util1.toDateStr(vGl.getGlDate(), "dd/MM/yyyy");
-            case 1 -> //dep
-                msg = vGl.getDeptName();
-            case 2 -> //desp
-                msg = vGl.getDescription();
-            case 3 -> //ref
-                msg = vGl.getReference();
-            case 4 -> //person
-                msg = vGl.getTraderCode();
-            case 5 -> //account
-                msg = vGl.getAccCode();
-            case 6 -> //curr
-                msg = vGl.getCurName();
-        }
-
-        return msg;
     }
 
     private final Action actionItemDeleteExp = new AbstractAction() {
@@ -440,17 +376,12 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         int selectRow = tblCash.convertRowIndexToModel(tblCash.getSelectedRow());
         int yes_no;
         if (tblCash.getSelectedRow() >= 0) {
-            VGl vgl = allCashTableModel.getVGl(selectRow);
-            if (vgl.getGlCode() != null) {
+            Gl vgl = allCashTableModel.getVGl(selectRow);
+            if (vgl.getKey().getGlCode() != null) {
                 yes_no = JOptionPane.showConfirmDialog(Global.parentForm, "Are you sure to delete?",
                         "Delete", JOptionPane.YES_NO_OPTION);
                 if (yes_no == 0) {
-                    Gl gl = new Gl();
-                    gl.setGlCode(vgl.getGlCode());
-                    gl.setModifyBy(Global.loginUser.getUserCode());
-                    gl.setMacId(Global.macId);
-                    gl.setCompCode(Global.compCode);
-                    if (accounRepo.deleteGl(gl)) {
+                    if (accounRepo.deleteGl(vgl.getKey())) {
                         allCashTableModel.deleteVGl(selectRow);
                     }
                     calDebitCredit();
@@ -474,7 +405,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                     p.put("p_comp_address", Global.companyAddress);
                     p.put("p_comp_phone", Global.companyPhone);
                     p.put("p_currency", currencyAutoCompleter.getCurrency().getCurCode());
-                    VGl vGl = opTableModel.getVGl(0);
+                    Gl vGl = opTableModel.getVGl(0);
                     double opening = vGl.getDrAmt();
                     double closing = vGl.getCrAmt();
                     p.put("p_opening", opening);
@@ -526,7 +457,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             Util1.extractZipToJson(t.getFile(), path);
             try {
                 Reader reader = Files.newBufferedReader(Paths.get(path.concat(".json")));
-                List<VGl> listVGl = gson.fromJson(reader, new TypeToken<ArrayList<VGl>>() {
+                List<Gl> listVGl = gson.fromJson(reader, new TypeToken<ArrayList<Gl>>() {
                 }.getType());
                 allCashTableModel.setListVGl(listVGl);
                 allCashTableModel.addNewRow();
@@ -1130,27 +1061,27 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private void calDebitCredit() {
         opTableModel.clear();
         inOutTableModel.clear();
-        List<VGl> listVGl = allCashTableModel.getListVGl();
+        List<Gl> listVGl = allCashTableModel.getListVGl();
         //lblTotalCount.setText(listVGl.size() - 1 + "");
-        Map<String, List<VGl>> hmGroup = listVGl.stream().collect(Collectors.groupingBy(w -> w.getCurCode()));
+        Map<String, List<Gl>> hmGroup = listVGl.stream().collect(Collectors.groupingBy(w -> w.getCurCode()));
         hmGroup.forEach((t, u) -> {
             double drAmt = 0.0;
             double crAmt = 0.0;
-            for (VGl gl : u) {
+            for (Gl gl : u) {
                 drAmt += Util1.getDouble(gl.getDrAmt());
                 crAmt += Util1.getDouble(gl.getCrAmt());
             }
             double closing;
-            VGl vgl = hmOpening.get(t);
+            Gl vgl = hmOpening.get(t);
             if (vgl != null) {
                 closing = Util1.getDouble(vgl.getDrAmt()) + drAmt - crAmt;
                 vgl.setCrAmt(closing);
             } else {
                 closing = drAmt - crAmt;
-                vgl = new VGl(t, 0.0, closing);
+                vgl = new Gl(t, 0.0, closing);
             }
             opTableModel.addVGl(vgl);
-            inOutTableModel.addVGl(new VGl(t, drAmt, crAmt));
+            inOutTableModel.addVGl(new Gl(t, drAmt, crAmt));
         });
     }
 
@@ -1173,7 +1104,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             hmOpening.clear();
             if (!t.getBody().isEmpty()) {
                 t.getBody().forEach(op -> {
-                    hmOpening.put(op.getKey().getCurCode(), new VGl(op.getKey().getCurCode(), op.getOpening(), op.getClosing()));
+                    hmOpening.put(op.getKey().getCurCode(), new Gl(op.getKey().getCurCode(), op.getOpening(), op.getClosing()));
                 });
             }
             calDebitCredit();
@@ -1187,10 +1118,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         if (source.toString().equals("Selected")) {
             searchCash();
         }
-    }
-
-    private void searchValidation(String str) {
-        searchCash();
     }
 
     @Override

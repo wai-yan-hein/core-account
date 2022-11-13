@@ -297,10 +297,17 @@ public class ProcessHisDetailTableModel extends AbstractTableModel {
             ttlAmt += Util1.getFloat(pd.getPrice()) * Util1.getFloat(pd.getQty());
         }
         lblRec.setText("Records : " + String.valueOf(listDetail.size() - 1));
-        txtPrice.setValue(ttlAmt / qty);
-        txtAmt.setValue(ttlAmt);
-        txtPrice.setEditable(false);
-        txtAmt.setEditable(false);
+        if (ttlAmt > 0) {
+            txtPrice.setValue(ttlAmt / qty);
+            txtAmt.setValue(ttlAmt);
+            txtPrice.setEditable(false);
+            txtAmt.setEditable(false);
+        } else {
+            txtAmt.setValue(qty * Util1.getFloat(txtPrice.getValue()));
+            txtPrice.setEditable(true);
+            txtAmt.setEditable(false);
+        }
+
     }
 
     @Override

@@ -14,7 +14,7 @@ import com.acc.editor.TraderAAutoCompleter;
 import com.acc.model.ReportFilter;
 import com.acc.model.TraderA;
 import com.acc.model.VApar;
-import com.acc.model.VGl;
+import com.acc.model.Gl;
 import com.common.FilterObject;
 import com.common.Global;
 import com.common.PanelControl;
@@ -221,27 +221,6 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
 
         }
 
-    }
-
-    private void swapDrCrAmt(List<VGl> listVGL, String targetId) {
-        listVGL.forEach(vgl -> {
-            String sourceAcId = Util1.isNull(vgl.getSourceAcId(), "-");
-            if (!sourceAcId.equals(targetId)) {
-                double tmpDrAmt = 0.0;
-                if (vgl.getDrAmt() != null) {
-                    tmpDrAmt = vgl.getDrAmt();
-                }
-                vgl.setDrAmt(Util1.getDouble(vgl.getCrAmt()));
-                vgl.setCrAmt(tmpDrAmt);
-
-                String tmpStr = vgl.getAccName();
-                vgl.setAccName(vgl.getSrcAccName());
-                vgl.setSrcAccName(tmpStr);
-            } else {
-                vgl.setCrAmt(Util1.getDouble(vgl.getCrAmt()));
-                vgl.setDrAmt((Util1.getDouble(vgl.getDrAmt())));
-            }
-        });
     }
 
     private void calAPARTotalAmount() {

@@ -4,13 +4,18 @@
  */
 package com.inventory.ui.entry;
 
+import com.common.ColorCellRender;
 import com.common.Global;
 import com.common.PanelControl;
+import com.common.ProUtil;
 import com.common.ReportFilter;
 import com.common.RightCellRender;
 import com.common.SelectionObserver;
+import com.common.StartWithRowFilter;
+import com.common.Util1;
 import com.inventory.editor.BrandAutoCompleter;
 import com.inventory.editor.CategoryAutoCompleter;
+import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.StockTypeAutoCompleter;
@@ -20,14 +25,21 @@ import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.ReorderTableModel;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import javax.swing.RowFilter;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -41,6 +53,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionObserver, PanelControl {
 
+    private final ButtonGroup g = new ButtonGroup();
     @Autowired
     private WebClient inventoryApi;
     @Autowired
@@ -50,9 +63,12 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
     private CategoryAutoCompleter categoryAutoCompleter;
     private BrandAutoCompleter brandAutoCompleter;
     private StockAutoCompleter stockAutoCompleter;
+    private LocationAutoCompleter locationAutoCompleter;
     private JProgressBar progress;
     private SelectionObserver observer;
     private List<StockUnit> listStockUnit = new ArrayList<>();
+    private TableRowSorter<TableModel> sorter;
+    private StartWithRowFilter swrf;
 
     public JProgressBar getProgress() {
         return progress;
@@ -75,12 +91,45 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
      */
     public ReorderLevelEntry() {
         initComponents();
+        chkGroup();
     }
 
     public void initMain() {
         initCombo();
         initTable();
     }
+
+    private void chkGroup() {
+        g.add(chk1);
+        g.add(chk2);
+        g.add(chk3);
+        g.add(chk4);
+        g.add(chk5);
+        chk1.setActionCommand(chk1.getText());
+        chk2.setActionCommand(chk2.getText());
+        chk3.setActionCommand(chk3.getText());
+        chk4.setActionCommand(chk4.getText());
+        chk5.setActionCommand(chk5.getText());
+        chk1.addActionListener(a);
+        chk2.addActionListener(a);
+        chk3.addActionListener(a);
+        chk4.addActionListener(a);
+        chk5.addActionListener(a);
+
+    }
+
+    private void filterStatus() {
+        sorter.setRowFilter(startsWithFilter);
+
+    }
+    private ActionListener a = (ActionEvent e) -> {
+        if (e.getActionCommand().equals("All")) {
+            sorter.setRowFilter(null);
+        } else {
+            filterStatus();
+        }
+        calQty();
+    };
 
     private void initCombo() {
         typeAutoCompleter = new StockTypeAutoCompleter(txtGroup, inventoryRepo.getStockType(), null, true, false);
@@ -91,6 +140,8 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
         brandAutoCompleter.setObserver(this);
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         stockAutoCompleter.setObserver(this);
+        locationAutoCompleter = new LocationAutoCompleter(txtLoc, inventoryRepo.getLocation(), null, true, true);
+        locationAutoCompleter.setObserver(this);
     }
 
     private void initTable() {
@@ -98,6 +149,7 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
         reorderTableModel.setTable(tblOrder);
         reorderTableModel.setInventoryRepo(inventoryRepo);
         tblOrder.setModel(reorderTableModel);
+        tblOrder.setCellSelectionEnabled(true);
         tblOrder.getTableHeader().setFont(Global.tblHeaderFont);
         tblOrder.setRowHeight(Global.tblRowHeight);
         tblOrder.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -116,12 +168,23 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
         tblOrder.getColumnModel().getColumn(5).setPreferredWidth(50);
         tblOrder.getColumnModel().getColumn(6).setPreferredWidth(50);
         tblOrder.getColumnModel().getColumn(7).setCellRenderer(new RightCellRender());
-        tblOrder.getColumnModel().getColumn(8).setCellRenderer(new RightCellRender());
+        tblOrder.getColumnModel().getColumn(9).setCellRenderer(new ColorCellRender());
         tblOrder.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblOrder.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        sorter = new TableRowSorter<>(tblOrder.getModel());
+        tblOrder.setRowSorter(sorter);
         getReorderLevel();
     }
+    private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
+        @Override
+        public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
+            String tmp1 = entry.getStringValue(9).toUpperCase().replace(" ", "");
+            String text = g.getSelection().getActionCommand().toUpperCase();
+            return tmp1.startsWith(text);
+
+        }
+    };
 
     private void getReorderLevel() {
         progress.setIndeterminate(true);
@@ -130,6 +193,11 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
         filter.setCatCode(categoryAutoCompleter.getCategory().getKey().getCatCode());
         filter.setStockTypeCode(typeAutoCompleter.getStockType().getKey().getStockTypeCode());
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
+        filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
+        filter.setCalSale(Util1.getBoolean(ProUtil.getProperty("disable.calculate.sale.stock")));
+        filter.setCalPur(Util1.getBoolean(ProUtil.getProperty("disable.calculate.purchase.stock")));
+        filter.setCalRI(Util1.getBoolean(ProUtil.getProperty("disable.calculate.returin.stock")));
+        filter.setCalRO(Util1.getBoolean(ProUtil.getProperty("disable.calculate.retunout.stock")));
         Mono<ResponseEntity<List<ReorderLevel>>> result = inventoryApi
                 .post()
                 .uri("/report/get-reorder-level")
@@ -147,38 +215,35 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
     }
 
     private void calQty() {
-        int low = 0;
-        int normal = 0;
-        int high = 0;
-        List<ReorderLevel> orders = reorderTableModel.getListPattern();
-        if (!orders.isEmpty()) {
-            for (ReorderLevel od : orders) {
-                String status = od.getStatus();
-                if (status != null) {
-                    switch (status) {
-                        case "LOW" ->
-                            low += 1;
-                        case "NORMAL" ->
-                            low += 1;
-                        case "HIGH" ->
-                            high += 1;
-                    }
-                }
+        int lowMin = 0;
+        int overMin = 0;
+        int lowMax = 0;
+        int overMax = 0;
+        int row = tblOrder.getRowCount();
+        for (int i = 0; i < row; i++) {
+            String status = tblOrder.getValueAt(i, 9).toString();
+            switch (status) {
+                case "Below-Min" ->
+                    lowMin += 1;
+                case "Over-Min" ->
+                    overMin += 1;
+                case "Below-Max" ->
+                    lowMax += 1;
+                case "Over-Max" ->
+                    overMax += 1;
             }
         }
-        txtLow.setText(String.valueOf(low));
-        txtNormal.setText(String.valueOf(normal));
-        txtHigh.setText(String.valueOf(high));
+        txtBMin.setText(String.valueOf(lowMin));
+        txtOMin.setText(String.valueOf(overMin));
+        txtBMax.setText(String.valueOf(lowMax));
+        txtOMax.setText(String.valueOf(overMax));
+
     }
 
     @Override
     public void selected(Object source, Object selectObj) {
-        switch (source.toString()) {
-            case "STOCK","ST","SC","SB" ->
-                getReorderLevel();
-            default -> {
-                break;
-            }
+        if (source != null) {
+            getReorderLevel();
         }
     }
 
@@ -203,12 +268,22 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
         txtStock = new javax.swing.JTextField();
         jSeparator1 = new javax.swing.JSeparator();
         jLabel5 = new javax.swing.JLabel();
-        txtLow = new javax.swing.JTextField();
+        txtOMin = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
-        txtNormal = new javax.swing.JTextField();
+        txtBMax = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
-        txtHigh = new javax.swing.JTextField();
+        txtOMax = new javax.swing.JTextField();
         jSeparator2 = new javax.swing.JSeparator();
+        txtLoc = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
+        chk1 = new javax.swing.JCheckBox();
+        chk2 = new javax.swing.JCheckBox();
+        chk3 = new javax.swing.JCheckBox();
+        chk4 = new javax.swing.JCheckBox();
+        chk5 = new javax.swing.JCheckBox();
+        jSeparator3 = new javax.swing.JSeparator();
+        jLabel9 = new javax.swing.JLabel();
+        txtBMin = new javax.swing.JTextField();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -252,29 +327,60 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
 
         txtStock.setFont(Global.textFont);
 
-        jLabel5.setFont(Global.textFont);
-        jLabel5.setText("Low");
+        jLabel5.setFont(Global.lableFont);
+        jLabel5.setText("Over Min");
 
-        txtLow.setEditable(false);
-        txtLow.setFont(Global.textFont);
-        txtLow.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtLow.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+        txtOMin.setEditable(false);
+        txtOMin.setFont(Global.lableFont);
+        txtOMin.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtOMin.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        jLabel6.setFont(Global.textFont);
-        jLabel6.setText("Normal");
+        jLabel6.setFont(Global.lableFont);
+        jLabel6.setText("Below Max");
 
-        txtNormal.setEditable(false);
-        txtNormal.setFont(Global.textFont);
-        txtNormal.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtNormal.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+        txtBMax.setEditable(false);
+        txtBMax.setFont(Global.lableFont);
+        txtBMax.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtBMax.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        jLabel7.setFont(Global.textFont);
-        jLabel7.setText("High");
+        jLabel7.setFont(Global.lableFont);
+        jLabel7.setText("Over Max");
 
-        txtHigh.setEditable(false);
-        txtHigh.setFont(Global.textFont);
-        txtHigh.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtHigh.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+        txtOMax.setEditable(false);
+        txtOMax.setFont(Global.lableFont);
+        txtOMax.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtOMax.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        txtLoc.setFont(Global.textFont);
+
+        jLabel8.setFont(Global.lableFont);
+        jLabel8.setText("Location");
+
+        chk1.setFont(Global.lableFont);
+        chk1.setText("Below-Min");
+
+        chk2.setFont(Global.lableFont);
+        chk2.setText("Over-Min");
+
+        chk3.setFont(Global.lableFont);
+        chk3.setText("Below-Max");
+
+        chk4.setFont(Global.lableFont);
+        chk4.setText("Over-Max");
+
+        chk5.setFont(Global.lableFont);
+        chk5.setSelected(true);
+        chk5.setText("All");
+
+        jSeparator3.setOrientation(javax.swing.SwingConstants.VERTICAL);
+
+        jLabel9.setFont(Global.lableFont);
+        jLabel9.setText("Below Min");
+
+        txtBMin.setEditable(false);
+        txtBMin.setFont(Global.lableFont);
+        txtBMin.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtBMin.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -301,21 +407,40 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
                         .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(txtStock)
-                        .addGap(2, 2, 2))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel8)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtLoc)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(chk5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(chk1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(chk2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(chk3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(chk4))
                     .addComponent(jSeparator2)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jLabel9)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtBMin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtLow, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtOMin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtNormal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtBMax, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtHigh, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(txtOMax, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -330,7 +455,16 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(txtBrand)
                     .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtStock))
+                    .addComponent(txtStock)
+                    .addComponent(txtLoc)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(chk1)
+                        .addComponent(chk2)
+                        .addComponent(chk3)
+                        .addComponent(chk4)
+                        .addComponent(chk5))
+                    .addComponent(jSeparator3))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 4, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -340,11 +474,13 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
-                    .addComponent(txtLow, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtOMin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel6)
-                    .addComponent(txtNormal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtBMax, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel7)
-                    .addComponent(txtHigh, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtOMax, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel9)
+                    .addComponent(txtBMin, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -356,6 +492,11 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox chk1;
+    private javax.swing.JCheckBox chk2;
+    private javax.swing.JCheckBox chk3;
+    private javax.swing.JCheckBox chk4;
+    private javax.swing.JCheckBox chk5;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -363,16 +504,21 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JSeparator jSeparator3;
     private javax.swing.JTable tblOrder;
+    private javax.swing.JTextField txtBMax;
+    private javax.swing.JTextField txtBMin;
     private javax.swing.JTextField txtBrand;
     private javax.swing.JTextField txtCat;
     private javax.swing.JTextField txtGroup;
-    private javax.swing.JTextField txtHigh;
-    private javax.swing.JTextField txtLow;
-    private javax.swing.JTextField txtNormal;
+    private javax.swing.JTextField txtLoc;
+    private javax.swing.JTextField txtOMax;
+    private javax.swing.JTextField txtOMin;
     private javax.swing.JTextField txtStock;
     // End of variables declaration//GEN-END:variables
 

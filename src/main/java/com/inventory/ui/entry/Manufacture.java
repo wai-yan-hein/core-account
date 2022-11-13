@@ -277,6 +277,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         txtQty.addKeyListener(this);
         txtAvgQty.addKeyListener(this);
         txtUnit.addKeyListener(this);
+        txtPrice.addKeyListener(this);
     }
 
     private void setProcess(ProcessHis p) {
@@ -844,8 +845,8 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         txtQty.setFont(Global.textFont);
         txtQty.setName("txtQty"); // NOI18N
 
-        txtPrice.setEditable(false);
         txtPrice.setFont(Global.amtFont);
+        txtPrice.setName("txtPrice"); // NOI18N
 
         btnDelete.setFont(Global.lableFont);
         btnDelete.setText("Delete");
@@ -1328,6 +1329,12 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     processHisDetailTableModel.calPrice();
                     txtUnit.requestFocus();
+                }
+            }
+            case "txtPrice" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    processHisDetailTableModel.calPrice();
+                    txtPt.requestFocus();
                 }
             }
             case "txtUnit" -> {

@@ -416,10 +416,16 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
 
         //calculate taxAmt
         float taxp = Util1.getFloat(txtVouTaxP.getValue());
-        float afterDiscountAmt = totalAmount - Util1.getFloat(txtVouDiscount.getValue());
-        float totalTax = (afterDiscountAmt * taxp) / 100;
-
-        txtTax.setValue(Util1.getFloat(totalTax));
+        float taxAmt = Util1.getFloat(txtTax.getValue());
+        if (taxp > 0) {
+            float afterDiscountAmt = totalAmount - Util1.getFloat(txtVouDiscount.getValue());
+            float totalTax = (afterDiscountAmt * taxp) / 100;
+            txtTax.setValue(Util1.getFloat(totalTax));
+        } else if (taxAmt > 0) {
+            float afterDiscountAmt = totalAmount - Util1.getFloat(txtVouDiscount.getValue());
+            taxp = (taxAmt / afterDiscountAmt) * 100;
+            txtVouTaxP.setValue(Util1.getFloat(taxp));
+        }
         txtGrandTotal.setValue(totalAmount
                 + Util1.getFloat(txtTax.getValue())
                 - Util1.getFloat(txtVouDiscount.getValue()));
@@ -1325,8 +1331,16 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 }
                 tabToTable(e);
             }
-            case "txtVouTaxP","txtTax" -> {
+            case "txtVouTaxP" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    txtTax.setValue(0);
+                    calculateTotalAmount(false);
+                    tblPur.requestFocus();
+                }
+            }
+            case "txtTax" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    txtVouTaxP.setValue(0);
                     calculateTotalAmount(false);
                     tblPur.requestFocus();
                 }

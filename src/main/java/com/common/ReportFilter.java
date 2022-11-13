@@ -51,6 +51,7 @@ public class ReportFilter {
     private boolean calPur;
     private boolean calRI;
     private boolean calRO;
+    private String status;
 
     public ReportFilter(Integer macId, String compCode, Integer deptId) {
         this.macId = macId;

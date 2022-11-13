@@ -203,8 +203,12 @@ public class StockInOutTableModel extends AbstractTableModel {
                             io.setInQty(Util1.getFloat(value));
                             io.setOutQty(null);
                             io.setOutUnitCode(null);
-                            parent.setRowSelectionInterval(row + 1, row + 1);
-                            parent.setColumnSelectionInterval(0, 0);
+                            if (io.getInUnitCode() != null) {
+                                parent.setRowSelectionInterval(row + 1, row + 1);
+                                parent.setColumnSelectionInterval(0, 0);
+                            } else {
+                                parent.setColumnSelectionInterval(4, 4);
+                            }
                         }
 
                     }
@@ -212,20 +216,30 @@ public class StockInOutTableModel extends AbstractTableModel {
                     case 4 -> {
                         if (value instanceof StockUnit unit) {
                             io.setInUnitCode(unit.getKey().getUnitCode());
+                            io.setOutUnitCode(null);
+                            parent.setRowSelectionInterval(row + 1, row + 1);
+                            parent.setColumnSelectionInterval(0, 0);
                         }
-                        setColumnSelection(8);
                     }
                     case 5 -> {
                         if (Util1.isNumber(value)) {
                             io.setOutQty(Util1.getFloat(value));
                             io.setInQty(null);
-                            parent.setRowSelectionInterval(row + 1, row + 1);
-                            parent.setColumnSelectionInterval(0, 0);
+                            io.setInUnitCode(null);
+                            if (io.getOutUnitCode() != null) {
+                                parent.setRowSelectionInterval(row + 1, row + 1);
+                                parent.setColumnSelectionInterval(0, 0);
+                            } else {
+                                parent.setColumnSelectionInterval(6, 6);
+                            }
                         }
                     }
                     case 6 -> {
                         if (value instanceof StockUnit unit) {
                             io.setOutUnitCode(unit.getKey().getUnitCode());
+                            io.setInUnitCode(null);
+                            parent.setRowSelectionInterval(row + 1, row + 1);
+                            parent.setColumnSelectionInterval(0, 0);
                         }
                     }
                     case 7 -> {

@@ -4,7 +4,7 @@
  */
 package com.acc.common;
 
-import com.acc.model.VGl;
+import com.acc.model.Gl;
 import com.common.Util1;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DrAmtTableModel extends AbstractTableModel {
 
-    private List<VGl> listVGl = new ArrayList();
+    private List<Gl> listVGl = new ArrayList();
     private String[] columnNames = {"Date", "Dep :", "Description", "Ref", "No :", "Dr-Amt"};
 
     @Override
@@ -45,7 +45,7 @@ public class DrAmtTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
 
         try {
-            VGl apar = listVGl.get(row);
+            Gl apar = listVGl.get(row);
 
             return switch (column) {
                 case 0 ->
@@ -100,16 +100,16 @@ public class DrAmtTableModel extends AbstractTableModel {
         this.columnNames = columnNames;
     }
 
-    public List<VGl> getListVGl() {
+    public List<Gl> getListVGl() {
         return listVGl;
     }
 
-    public void setListVGl(List<VGl> listVGl) {
+    public void setListVGl(List<Gl> listVGl) {
         this.listVGl = listVGl;
         fireTableDataChanged();
     }
 
-    public VGl getVGl(int row) {
+    public Gl getVGl(int row) {
         return listVGl.get(row);
     }
 
@@ -121,12 +121,12 @@ public class DrAmtTableModel extends AbstractTableModel {
 
     }
 
-    public void addVGl(VGl apar) {
+    public void addVGl(Gl apar) {
         listVGl.add(apar);
         fireTableRowsInserted(listVGl.size() - 1, listVGl.size() - 1);
     }
 
-    public void setVGl(int row, VGl apar) {
+    public void setVGl(int row, Gl apar) {
         if (!listVGl.isEmpty()) {
             listVGl.set(row, apar);
             fireTableRowsUpdated(row, row);

@@ -40,22 +40,41 @@
                       <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                       <Component id="txtStock" max="32767" attributes="0"/>
-                      <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabel8" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtLoc" max="32767" attributes="0"/>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
+                      <Component id="jSeparator3" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="chk5" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="chk1" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="chk2" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="chk3" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="chk4" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Component id="jSeparator2" alignment="0" max="32767" attributes="0"/>
                   <Group type="102" alignment="1" attributes="0">
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                      <Component id="jLabel9" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Component id="txtBMin" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="txtLow" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtOMin" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="txtNormal" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtBMax" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jLabel7" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="txtHigh" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtOMax" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -75,8 +94,18 @@
                   <Component id="txtBrand" max="32767" attributes="0"/>
                   <Component id="jLabel4" max="32767" attributes="0"/>
                   <Component id="txtStock" max="32767" attributes="0"/>
+                  <Component id="txtLoc" max="32767" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jLabel8" alignment="3" max="32767" attributes="0"/>
+                      <Component id="chk1" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="chk2" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="chk3" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="chk4" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="chk5" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Component id="jSeparator3" max="32767" attributes="0"/>
               </Group>
-              <EmptySpace min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
               <Component id="jSeparator1" min="-2" pref="4" max="-2" attributes="0"/>
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Component id="jScrollPane1" pref="66" max="32767" attributes="0"/>
@@ -85,11 +114,13 @@
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="jLabel5" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtLow" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="txtOMin" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel6" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtNormal" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="txtBMax" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel7" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtHigh" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="txtOMax" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="jLabel9" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="txtBMin" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace min="-2" max="-2" attributes="0"/>
           </Group>
@@ -186,16 +217,16 @@
     <Component class="javax.swing.JLabel" name="jLabel5">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="Global.textFont" type="code"/>
+          <Connection code="Global.lableFont" type="code"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Low"/>
+        <Property name="text" type="java.lang.String" value="Over Min"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="txtLow">
+    <Component class="javax.swing.JTextField" name="txtOMin">
       <Properties>
         <Property name="editable" type="boolean" value="false"/>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="Global.textFont" type="code"/>
+          <Connection code="Global.lableFont" type="code"/>
         </Property>
         <Property name="horizontalAlignment" type="int" value="4"/>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
@@ -208,16 +239,16 @@
     <Component class="javax.swing.JLabel" name="jLabel6">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="Global.textFont" type="code"/>
+          <Connection code="Global.lableFont" type="code"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Normal"/>
+        <Property name="text" type="java.lang.String" value="Below Max"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="txtNormal">
+    <Component class="javax.swing.JTextField" name="txtBMax">
       <Properties>
         <Property name="editable" type="boolean" value="false"/>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="Global.textFont" type="code"/>
+          <Connection code="Global.lableFont" type="code"/>
         </Property>
         <Property name="horizontalAlignment" type="int" value="4"/>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
@@ -230,16 +261,16 @@
     <Component class="javax.swing.JLabel" name="jLabel7">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="Global.textFont" type="code"/>
+          <Connection code="Global.lableFont" type="code"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="High"/>
+        <Property name="text" type="java.lang.String" value="Over Max"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="txtHigh">
+    <Component class="javax.swing.JTextField" name="txtOMax">
       <Properties>
         <Property name="editable" type="boolean" value="false"/>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="Global.textFont" type="code"/>
+          <Connection code="Global.lableFont" type="code"/>
         </Property>
         <Property name="horizontalAlignment" type="int" value="4"/>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
@@ -250,6 +281,89 @@
       </Properties>
     </Component>
     <Component class="javax.swing.JSeparator" name="jSeparator2">
+    </Component>
+    <Component class="javax.swing.JTextField" name="txtLoc">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="Global.textFont" type="code"/>
+        </Property>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel8">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="Global.lableFont" type="code"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Location"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="chk1">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="Global.lableFont" type="code"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Below-Min"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="chk2">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="Global.lableFont" type="code"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Over-Min"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="chk3">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="Global.lableFont" type="code"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Below-Max"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="chk4">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="Global.lableFont" type="code"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Over-Max"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="chk5">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="Global.lableFont" type="code"/>
+        </Property>
+        <Property name="selected" type="boolean" value="true"/>
+        <Property name="text" type="java.lang.String" value="All"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JSeparator" name="jSeparator3">
+      <Properties>
+        <Property name="orientation" type="int" value="1"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="jLabel9">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="Global.lableFont" type="code"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Below Min"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="txtBMin">
+      <Properties>
+        <Property name="editable" type="boolean" value="false"/>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="Global.lableFont" type="code"/>
+        </Property>
+        <Property name="horizontalAlignment" type="int" value="4"/>
+        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+          <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
+            <TitledBorder/>
+          </Border>
+        </Property>
+      </Properties>
     </Component>
   </SubComponents>
 </Form>

@@ -176,6 +176,17 @@ public class InventoryRepo {
         return result.block(Duration.ofMinutes(min)).getBody();
     }
 
+    public List<StockUnit> getUnit(String relCode) {
+        Mono<ResponseEntity<List<StockUnit>>> result = inventoryApi.get()
+                .uri(builder -> builder.path("/setup/get-relation")
+                .queryParam("relCode", relCode)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
+                .build())
+                .retrieve().toEntityList(StockUnit.class);
+        return result.block(Duration.ofMinutes(min)).getBody();
+    }
+
     public Trader findTrader(String code) {
         TraderKey key = new TraderKey();
         key.setCode(Util1.isNull(code, "-"));

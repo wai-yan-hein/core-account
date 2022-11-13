@@ -7,6 +7,7 @@ package com.inventory.ui.entry;
 
 import com.acc.common.DateAutoCompleter;
 import com.common.FilterObject;
+import com.common.FontCellRender;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -51,7 +52,6 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.swing.JRViewer;
-import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -66,8 +66,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class Reports extends javax.swing.JPanel implements PanelControl, SelectionObserver {
 
-    @Autowired
-    private ReportTableModel tableModel;
+    private final ReportTableModel tableModel = new ReportTableModel("Inventory Report");
     @Autowired
     private WebClient userApi;
     @Autowired
@@ -134,6 +133,9 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         tblReport.getTableHeader().setFont(Global.tblHeaderFont);
         tblReport.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblReport.setDefaultRenderer(Object.class, new TableCellRender());
+        tblReport.getColumnModel().getColumn(0).setCellRenderer(new FontCellRender());
+        tblReport.getColumnModel().getColumn(0).setPreferredWidth(50);
+        tblReport.getColumnModel().getColumn(1).setPreferredWidth(900);
         sorter = new TableRowSorter(tblReport.getModel());
         tblReport.setRowSorter(sorter);
         getReport();
@@ -144,6 +146,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         Mono<ResponseEntity<List<VRoleMenu>>> result = userApi.get()
                 .uri(builder -> builder.path("/user/get-report")
                 .queryParam("roleCode", Global.roleCode)
+                .queryParam("menuClass", "Inventory")
                 .build())
                 .retrieve().toEntityList(VRoleMenu.class);
         result.subscribe((t) -> {
