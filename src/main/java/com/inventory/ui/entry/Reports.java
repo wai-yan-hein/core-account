@@ -7,6 +7,7 @@ package com.inventory.ui.entry;
 
 import com.acc.common.DateAutoCompleter;
 import com.common.FilterObject;
+import com.common.FontCellRender;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -132,7 +133,8 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         tblReport.getTableHeader().setFont(Global.tblHeaderFont);
         tblReport.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblReport.setDefaultRenderer(Object.class, new TableCellRender());
-        tblReport.getColumnModel().getColumn(0).setPreferredWidth(10);
+        tblReport.getColumnModel().getColumn(0).setCellRenderer(new FontCellRender());
+        tblReport.getColumnModel().getColumn(0).setPreferredWidth(50);
         tblReport.getColumnModel().getColumn(1).setPreferredWidth(900);
         sorter = new TableRowSorter(tblReport.getModel());
         tblReport.setRowSorter(sorter);

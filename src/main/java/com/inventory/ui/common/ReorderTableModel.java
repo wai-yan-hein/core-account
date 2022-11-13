@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ReorderTableModel extends AbstractTableModel {
 
     public static final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
-    private final String[] columnNames = {"Stock Code", "Stock Name", "Relation", "Min Qty", "Min Unit", "Max Qty", "Max Unit", "Stock Balance", "Status"};
+    private final String[] columnNames = {"Stock Code", "Stock Name", "Relation", "Min Qty", "Min Unit", "Max Qty", "Max Unit", "Stock Balance", "Location", "Status"};
     private List<ReorderLevel> listReorder = new ArrayList<>();
     private InventoryRepo inventoryRepo;
     private String patternCode;
@@ -95,6 +95,8 @@ public class ReorderTableModel extends AbstractTableModel {
             case 7 ->
                 p.getBalUnit();
             case 8 ->
+                p.getLocName();
+            case 9 ->
                 p.getStatus();
             default ->
                 null;
@@ -102,12 +104,18 @@ public class ReorderTableModel extends AbstractTableModel {
     }
 
     private String getStatus(ReorderLevel r) {
-        float minQty = Util1.getFloat(r.getMinSmallQty());
-        float maxQty = Util1.getFloat(r.getMaxSmallQty());
-        float balQty = Util1.getFloat(r.getBalSmallQty());
-        String status = balQty < minQty ? "LOW" : balQty > maxQty ? "HIGH" : "NORMAL";
-        r.setStatus(status);
-        return status;
+        return switch (r.getPosition()) {
+            case 1 ->
+                "Below Minimun";
+            case 2 ->
+                "Over Miniumn";
+            case 3 ->
+                "Below Maximun";
+            case 4 ->
+                "Over Maxiumn";
+            default ->
+                "Normal";
+        };
     }
 
     @Override
@@ -161,7 +169,6 @@ public class ReorderTableModel extends AbstractTableModel {
                         p.setMaxSmallQty(p.getMaxQty() * getSmallQty(p.getKey().getStockCode(), p.getMinUnitCode()));
 
                 }
-                addNewRow();
                 inventoryRepo.saveReorder(p);
                 fireTableRowsUpdated(row, row);
                 table.requestFocus();
@@ -192,10 +199,10 @@ public class ReorderTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         return switch (columnIndex) {
-            case 0,2, 1, 6, 7 ->
-                false;
-            default ->
+            case 3, 4, 5, 6 ->
                 true;
+            default ->
+                false;
         };
     }
 
@@ -233,24 +240,5 @@ public class ReorderTableModel extends AbstractTableModel {
 
     public void refresh() {
         fireTableDataChanged();
-    }
-
-    public void addNewRow() {
-        if (!hasEmptyRow()) {
-            ReorderLevel p = new ReorderLevel();
-            listReorder.add(p);
-            fireTableRowsInserted(listReorder.size() - 1, listReorder.size() - 1);
-        }
-    }
-
-    private boolean hasEmptyRow() {
-        ReorderLevel p = listReorder.get(listReorder.size() - 1);
-        return p.getKey().getStockCode() == null;
-    }
-
-    public void addRow() {
-        ReorderLevel p = new ReorderLevel();
-        listReorder.add(p);
-        fireTableRowsInserted(listReorder.size() - 1, listReorder.size() - 1);
     }
 }

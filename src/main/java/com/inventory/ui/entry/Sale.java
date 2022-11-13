@@ -400,7 +400,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             saleHis.setReference(txtReference.getText());
             saleHis.setDiscP(Util1.getFloat(txtVouDiscP.getValue()));
             saleHis.setDiscount(Util1.getFloat(txtVouDiscount.getValue()));
-            saleHis.setTaxP(Util1.getFloat(txtVouTaxP.getValue()));
+            saleHis.setTaxPercent(Util1.getFloat(txtVouTaxP.getValue()));
             saleHis.setTaxAmt(Util1.getFloat(txtTax.getValue()));
             saleHis.setPaid(Util1.getFloat(txtVouPaid.getValue()));
             saleHis.setBalance(Util1.getFloat(txtVouBalance.getValue()));
@@ -490,10 +490,15 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         }
         //calculate taxAmt
         float taxp = Util1.getFloat(txtVouTaxP.getValue());
+        float taxAmt = Util1.getFloat(txtTax.getValue());
         if (taxp > 0) {
             float afterDiscountAmt = totalAmount - Util1.getFloat(txtVouDiscount.getValue());
             float totalTax = (afterDiscountAmt * taxp) / 100;
             txtTax.setValue(Util1.getFloat(totalTax));
+        } else if (taxAmt > 0) {
+            float afterDiscountAmt = totalAmount - Util1.getFloat(txtVouDiscount.getValue());
+            taxp = (taxAmt / afterDiscountAmt) * 100;
+            txtVouTaxP.setValue(Util1.getFloat(taxp));
         }
         //
         txtGrandTotal.setValue(totalAmount
@@ -571,7 +576,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 txtVouTotal.setValue(Util1.getFloat(saleHis.getVouTotal()));
                 txtVouDiscP.setValue(Util1.getFloat(saleHis.getDiscP()));
                 txtVouDiscount.setValue(Util1.getFloat(saleHis.getDiscount()));
-                txtVouTaxP.setValue(Util1.getFloat(saleHis.getTaxP()));
+                txtVouTaxP.setValue(Util1.getFloat(saleHis.getTaxPercent()));
                 txtTax.setValue(Util1.getFloat(saleHis.getTaxAmt()));
                 txtVouPaid.setValue(Util1.getFloat(saleHis.getPaid()));
                 txtVouBalance.setValue(Util1.getFloat(saleHis.getBalance()));
@@ -1645,6 +1650,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
             case "txtTax" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    txtVouTaxP.setValue(0);
                     calculateTotalAmount(false);
                     tblSale.requestFocus();
                 }

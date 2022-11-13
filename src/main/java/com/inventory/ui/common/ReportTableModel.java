@@ -45,7 +45,7 @@ public class ReportTableModel extends AbstractTableModel {
         VRoleMenu report = listReport.get(rowIndex);
         return switch (columnIndex) {
             case 0 ->
-                String.valueOf(rowIndex + 1);
+                String.valueOf(rowIndex + 1 + ". ");
             case 1 ->
                 report.getMenuName();
             default ->
