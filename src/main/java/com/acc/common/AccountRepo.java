@@ -11,6 +11,7 @@ import com.acc.model.Department;
 import com.acc.model.DepartmentKey;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
+import com.acc.model.OpeningBalance;
 import com.acc.model.TraderA;
 import com.acc.model.VDescription;
 import com.acc.model.VRef;
@@ -218,4 +219,23 @@ public class AccountRepo {
                 .retrieve().toEntityList(Department.class);
         return result.block().getBody();
     }
+
+    public List<OpeningBalance> getCOAOpening() {
+        Mono<ResponseEntity<List<OpeningBalance>>> result = accountApi.get()
+                .uri(builder -> builder.path("/account/get-coa-opening")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().toEntityList(OpeningBalance.class);
+        return result.block().getBody();
+    }
+
+    public OpeningBalance saveCOAOpening(OpeningBalance opening) {
+        Mono<OpeningBalance> result = accountApi.post()
+                .uri("/account/save-department")
+                .body(Mono.just(opening), OpeningBalance.class)
+                .retrieve()
+                .bodyToMono(OpeningBalance.class);
+        return result.block();
+    }
+
 }

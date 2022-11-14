@@ -18,6 +18,7 @@ import com.acc.model.ChartOfAccount;
 import com.user.model.Currency;
 
 import com.acc.common.OpeningBalanceTableModel;
+import com.acc.editor.COA3CellEditor;
 
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.COAAutoCompleter;
@@ -81,7 +82,7 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel implements Select
     private TableFilterHeader filterHeader;
 
     /**
-     * Creates new form COAOpeningBalanceSetup
+     * Creates new form COAOpeningBalanceSetup 
      */
     //Constructor for opening balance
     public COAOpeningBalanceSetup() {
@@ -119,14 +120,15 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel implements Select
         txtDate.setDate(Util1.getTodayDate());
         initComboBox();
         initTable();
+        searchOpening();
     }
 
     private void initComboBox() {
 //        List<Department> listDepart=accountRepo.getDepartment();
 //        System.out.println(listDepart);
         departmenttAutoCompleter = new DepartmentAutoCompleter(txtDept, accountRepo.getDepartment(), null, true, false);
-        currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, inventoryRepo.getCurrency(), null, false);
-        coaAutoCompleter = new COAAutoCompleter(txtCOA, accountRepo.getCOAGroup(), null, false);
+        currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, inventoryRepo.getCurrency(), null, true);
+        coaAutoCompleter = new COAAutoCompleter(txtCOA, accountRepo.getChartOfAccount(), null, false);
     }
 
     private void initDate() {
@@ -161,6 +163,8 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel implements Select
         openingTableModel.addNewRow();
         tblOpening.getTableHeader().setFont(Global.tblHeaderFont);
         tblOpening.setCellSelectionEnabled(true);
+        tblOpening.setRowHeight(Global.tblRowHeight);
+        tblOpening.setShowGrid(true);
         tblOpening.getColumnModel().getColumn(0).setPreferredWidth(10);
         tblOpening.getColumnModel().getColumn(1).setPreferredWidth(250);
         tblOpening.getColumnModel().getColumn(2).setPreferredWidth(20);
@@ -172,7 +176,8 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel implements Select
         tblOpening.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblOpening.getInputMap().put(KeyStroke.getKeyStroke("F8"), "F8-Action");
-//        tblOpening.getColumnModel().getColumn(0).setCellEditor(new COA3 CellEditor(accountRepo),false);
+        tblOpening.getColumnModel().getColumn(0).setCellEditor(new COA3CellEditor(accountRepo, false));
+        tblOpening.getColumnModel().getColumn(1).setCellEditor(new COA3CellEditor(accountRepo, false));
 //        tblOpening.getColumnModel().getColumn(1).setCellEditor();
 //        tblOpening.getColumnModel().getColumn(3).setCellEditor();
 //        tblOpening.getColumnModel().getColumn(4).setCellEditor();
@@ -182,6 +187,11 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel implements Select
         tblOpening.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
 
+    private void searchOpening(){
+        openingTableModel.setListOpening(accountRepo.getCOAOpening());
+        openingTableModel.addNewRow();
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -193,59 +203,22 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel implements Select
 
         jScrollPane2 = new javax.swing.JScrollPane();
         jEditorPane1 = new javax.swing.JEditorPane();
-        jPanel1 = new javax.swing.JPanel();
-        txtDept = new javax.swing.JTextField();
-        txtCurrency = new javax.swing.JTextField();
-        txtCOA = new javax.swing.JTextField();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
-        jCheckBox2 = new javax.swing.JCheckBox();
-        jCheckBox3 = new javax.swing.JCheckBox();
-        jButton1 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblOpening = new javax.swing.JTable();
-        txtSaleDate = new com.toedter.calendar.JDateChooser();
+        jPanel2 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
+        txtDept = new javax.swing.JTextField();
+        txtCOA = new javax.swing.JTextField();
+        jCheckBox2 = new javax.swing.JCheckBox();
+        jLabel3 = new javax.swing.JLabel();
+        txtCurrency = new javax.swing.JTextField();
         txtDate = new com.toedter.calendar.JDateChooser();
+        jCheckBox3 = new javax.swing.JCheckBox();
+        jLabel2 = new javax.swing.JLabel();
 
         jScrollPane2.setViewportView(jEditorPane1);
-
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
-
-        txtDept.setFont(Global.textFont);
-
-        txtCurrency.setFont(Global.textFont);
-
-        txtCOA.setFont(Global.textFont);
-
-        jLabel1.setFont(Global.lableFont);
-        jLabel1.setText("Date");
-
-        jLabel2.setFont(Global.lableFont);
-        jLabel2.setText("Department");
-
-        jLabel3.setFont(Global.lableFont);
-        jLabel3.setText("Currency");
-
-        jLabel5.setFont(Global.lableFont);
-        jLabel5.setText("COA");
-
-        jCheckBox2.setText("Customer");
-        jCheckBox2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCheckBox2ActionPerformed(evt);
-            }
-        });
-
-        jCheckBox3.setText("Supplier");
-        jCheckBox3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCheckBox3ActionPerformed(evt);
-            }
-        });
-
-        jButton1.setText("Generate Zero");
 
         tblOpening.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -258,13 +231,32 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel implements Select
         tblOpening.setName("tblOpening"); // NOI18N
         jScrollPane1.setViewportView(tblOpening);
 
-        txtSaleDate.setDateFormatString("dd/MM/yyyy");
-        txtSaleDate.setFont(Global.textFont);
-        txtSaleDate.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                txtSaleDateFocusGained(evt);
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel1.setFont(Global.lableFont);
+        jLabel1.setText("Date");
+
+        jLabel5.setFont(Global.lableFont);
+        jLabel5.setText("COA");
+
+        jButton1.setText("Generate Zero");
+
+        txtDept.setFont(Global.textFont);
+
+        txtCOA.setFont(Global.textFont);
+
+        jCheckBox2.setFont(Global.lableFont);
+        jCheckBox2.setText("Customer");
+        jCheckBox2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox2ActionPerformed(evt);
             }
         });
+
+        jLabel3.setFont(Global.lableFont);
+        jLabel3.setText("Currency");
+
+        txtCurrency.setFont(Global.textFont);
 
         txtDate.setDateFormatString("dd/MM/yyyy");
         txtDate.setFont(Global.textFont);
@@ -274,50 +266,53 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel implements Select
             }
         });
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtDept, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtCOA, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jCheckBox2)
-                        .addGap(18, 18, 18)
-                        .addComponent(jCheckBox3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 135, Short.MAX_VALUE)
-                        .addComponent(jButton1))
-                    .addComponent(jScrollPane1))
-                .addGap(18, 18, 18))
-            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(jPanel1Layout.createSequentialGroup()
-                    .addGap(385, 385, 385)
-                    .addComponent(txtSaleDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGap(385, 385, 385)))
+        jCheckBox3.setFont(Global.lableFont);
+        jCheckBox3.setText("Supplier");
+        jCheckBox3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox3ActionPerformed(evt);
+            }
+        });
+
+        jLabel2.setFont(Global.lableFont);
+        jLabel2.setText("Department");
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtDept, javax.swing.GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtCurrency, javax.swing.GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtCOA, javax.swing.GroupLayout.DEFAULT_SIZE, 136, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(jCheckBox2)
+                .addGap(18, 18, 18)
+                .addComponent(jCheckBox3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton1)
+                .addContainerGap())
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(20, 20, 20)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(txtDept, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(txtCOA, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -328,15 +323,10 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel implements Select
                         .addComponent(jCheckBox3)
                         .addComponent(jCheckBox2)
                         .addComponent(jButton1)))
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(jPanel1Layout.createSequentialGroup()
-                    .addGap(177, 177, 177)
-                    .addComponent(txtSaleDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGap(177, 177, 177)))
         );
+
+        jPanel2Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {txtCOA, txtCurrency, txtDate, txtDept});
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -344,15 +334,19 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel implements Select
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(72, Short.MAX_VALUE))
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 390, Short.MAX_VALUE)
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -363,10 +357,6 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel implements Select
     private void jCheckBox3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox3ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jCheckBox3ActionPerformed
-
-    private void txtSaleDateFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSaleDateFocusGained
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtSaleDateFocusGained
 
     private void txtDateFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDateFocusGained
         // TODO add your handling code here:
@@ -382,7 +372,7 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel implements Select
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable tblOpening;
@@ -390,7 +380,6 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel implements Select
     private javax.swing.JTextField txtCurrency;
     private com.toedter.calendar.JDateChooser txtDate;
     private javax.swing.JTextField txtDept;
-    private com.toedter.calendar.JDateChooser txtSaleDate;
     // End of variables declaration//GEN-END:variables
 
     @Override
