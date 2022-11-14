@@ -5,7 +5,6 @@
 package com.acc.common;
 
 import com.acc.model.VApar;
-import com.common.Util1;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -57,7 +56,7 @@ public class APARTableModel extends AbstractTableModel {
                 case 1 ->
                     apar.getTraderName();
                 case 2 ->
-                    apar.getKey().getCurCode();
+                    apar.getCurCode();
                 case 3 ->
                     apar.getDrAmt();
                 case 4 ->

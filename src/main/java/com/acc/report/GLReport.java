@@ -78,7 +78,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
      */
     private final GLListingTableModel glListingTableModel= new GLListingTableModel();
 
-    private final TrialBalanceDetailDialog trialBalanceDetailDialog = new TrialBalanceDetailDialog();
+    private final TrialBalanceDetailDialog dialog = new TrialBalanceDetailDialog();
     private COAAutoCompleter cOAAutoCompleter;
     private SelectionObserver observer;
     private DepartmentAutoCompleter departmentAutoCompleter;
@@ -232,19 +232,18 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void openTBDDialog(String coaCode, String curCode, String coaName) {
-        trialBalanceDetailDialog.setTxtDate(txtDate);
-        trialBalanceDetailDialog.setTxtDep(txtDep);
-        trialBalanceDetailDialog.setCoaCode(coaCode);
-        trialBalanceDetailDialog.setStDate(stDate);
-        trialBalanceDetailDialog.setEndDate(endDate);
-        trialBalanceDetailDialog.setCurCode(curCode);
-        trialBalanceDetailDialog.setDesp(coaName);
-        trialBalanceDetailDialog.setTraderCode(null);
-        trialBalanceDetailDialog.setDepartment(departments);
-        trialBalanceDetailDialog.initMain();
-        trialBalanceDetailDialog.setSize(Global.width - 50, Global.height - 50);
-        trialBalanceDetailDialog.setLocationRelativeTo(null);
-        trialBalanceDetailDialog.setVisible(true);
+        dialog.setTxtDep(txtDep);
+        dialog.setCoaCode(coaCode);
+        dialog.setStDate(stDate);
+        dialog.setEndDate(endDate);
+        dialog.setCurCode(curCode);
+        dialog.setDesp(coaName);
+        dialog.setTraderCode(null);
+        dialog.setDepartment(departments);
+        dialog.initMain();
+        dialog.setSize(Global.width - 50, Global.height - 50);
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
     }
 
     private void calGLTotlaAmount() {

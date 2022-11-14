@@ -486,7 +486,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tranSource = tranSourceAutoCompleter.getAutoText().getTranSource().equals("All") ? "-"
                 : tranSourceAutoCompleter.getAutoText().getTranSource();
         department = departmentAutoCompleter.getListOption();
-        traderCode = traderAutoCompleter.getTrader().getCode();
+        traderCode = traderAutoCompleter.getTrader().getKey().getCode();
         traderType = Util1.isNull(traderType, "-");
         ChartOfAccount coa = coaAutoCompleter.getCOA();
         coaLv1 = Util1.getInteger(coa.getCoaLevel()) == 1 ? coa.getKey().getCoaCode() : "-";
@@ -1093,7 +1093,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         filter.setClosingDate(clDate);
         filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
         filter.setDepartments(departmentAutoCompleter.getListOption());
-        filter.setTraderCode(traderAutoCompleter.getTrader().getCode());
+        filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setCoaCode(sourceAccId);
         Mono<ResponseEntity<List<TmpOpening>>> result = accountApi.post()
                 .uri("/account/get-coa-opening")
