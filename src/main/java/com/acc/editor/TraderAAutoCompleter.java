@@ -7,10 +7,10 @@ package com.acc.editor;
 
 import com.acc.common.TraderATableModel;
 import com.acc.model.TraderA;
+import com.acc.model.TraderAKey;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.ui.common.TraderTableModel;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -74,16 +74,16 @@ public final class TraderAAutoCompleter implements KeyListener {
             switch (max) {
                 case 1 -> {
                     list = new ArrayList<>(list);
-                    TraderA t = new TraderA("-", "All");
+                    TraderA t = new TraderA(new TraderAKey("-", Global.compCode), "All");
                     list.add(0, t);
                     setTrader(t);
                 }
                 case 2 -> {
                     list = new ArrayList<>(list);
-                    TraderA t = new TraderA("-", "All");
+                    TraderA t = new TraderA(new TraderAKey("-", Global.compCode), "All");
                     list.add(0, t);
-                    list.add(1, new TraderA("C", "All Customer"));
-                    list.add(2, new TraderA("S", "All Supplier"));
+                    list.add(1, new TraderA(new TraderAKey("C", Global.compCode), "All Customer"));
+                    list.add(2, new TraderA(new TraderAKey("S", Global.compCode), "All Supplier"));
                     setTrader(t);
                 }
                 default -> {

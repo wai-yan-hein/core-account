@@ -95,6 +95,15 @@ public class AccountRepo {
         return result.block().getBody();
     }
 
+    public List<ChartOfAccount> getTraderAccount() {
+        Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get()
+                .uri(builder -> builder.path("/account/get-trader-coa")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().toEntityList(ChartOfAccount.class);
+        return result.block().getBody();
+    }
+
     public List<ChartOfAccount> getCOA(String str) {
         Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get()
                 .uri(builder -> builder.path("/account/get-coa-lv3")

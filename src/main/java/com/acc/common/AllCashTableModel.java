@@ -257,7 +257,7 @@ public class AllCashTableModel extends AbstractTableModel {
                             trader = trader1;
                         }
                         if (trader != null) {
-                            gl.setTraderCode(trader.getCode());
+                            gl.setTraderCode(trader.getKey().getCode());
                             gl.setTraderName(trader.getTraderName());
                             if (trader.getAccCode() != null) {
                                 gl.setAccCode(trader.getAccCode());

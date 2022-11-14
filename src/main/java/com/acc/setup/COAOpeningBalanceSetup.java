@@ -14,7 +14,6 @@ import com.inventory.ui.common.InventoryRepo;
 
 import com.acc.model.OpeningBalance;
 import com.acc.model.Department;
-import com.acc.model.ChartOfAccount;
 import com.user.model.Currency;
 
 import com.acc.common.OpeningBalanceTableModel;
@@ -128,6 +127,7 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel implements Select
 //        System.out.println(listDepart);
         departmenttAutoCompleter = new DepartmentAutoCompleter(txtDept, accountRepo.getDepartment(), null, true, false);
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, inventoryRepo.getCurrency(), null, true);
+        currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, inventoryRepo.getCurrency(), null, false);
         coaAutoCompleter = new COAAutoCompleter(txtCOA, accountRepo.getChartOfAccount(), null, false);
     }
 

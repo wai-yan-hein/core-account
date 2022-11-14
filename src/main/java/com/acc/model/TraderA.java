@@ -14,8 +14,7 @@ import lombok.Data;
 @Data
 public class TraderA {
 
-    private String code;
-    private String compCode;
+    private TraderAKey key;
     private String traderName;
     private String traderType;
     private String address;
@@ -36,8 +35,8 @@ public class TraderA {
     private Integer macId;
     private String userCode;
 
-    public TraderA(String code, String traderName) {
-        this.code = code;
+    public TraderA(TraderAKey key, String traderName) {
+        this.key = key;
         this.traderName = traderName;
     }
 
