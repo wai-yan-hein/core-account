@@ -5,12 +5,13 @@
  */
 package com.common;
 
-import com.acc.model.Department;
+import com.acc.model.DateModel;
 import com.inventory.model.AppUser;
 import java.awt.Color;
 import java.awt.Font;
 import java.net.ServerSocket;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.swing.JFrame;
 
@@ -46,6 +47,8 @@ public class Global {
     public static int y;
     public static int width;
     public static int height;
+    public static String dateFormat = "dd/MM/yyyy";
+    public static List<DateModel> listDate;
     public static JFrame parentForm;
     public static String startDate;
     public static String endate;

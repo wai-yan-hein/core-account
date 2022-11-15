@@ -159,10 +159,10 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
 
     private void openTBDDialog(String coaCode, String curCode, String traderCode, String traderName) {
         dialog.setAccountApi(accountApi);
-        dialog.setTxtDep(txtDep);
+        dialog.setAccountRepo(accountRepo);
         dialog.setCoaCode(coaCode);
-        dialog.setStDate(dateAutoCompleter.getStDate());
-        dialog.setEndDate(dateAutoCompleter.getEndDate());
+        dialog.setStDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), "dd/MM/yyyy"));
+        dialog.setEndDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), "dd/MM/yyyy"));
         dialog.setCurCode(curCode);
         dialog.setDesp(traderName);
         dialog.setTraderCode(traderCode);
@@ -245,7 +245,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void initCombo() {
-        dateAutoCompleter = new DateAutoCompleter(txtDate, true);
+        dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
         dateAutoCompleter.setSelectionObserver(this);
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDep,
                 accountRepo.getDepartment(), null, true, true);

@@ -95,7 +95,6 @@ import reactor.core.publisher.Mono;
 public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         PanelControl {
 
-    private String stDate, enDate, desp, accCode, ref, traderCode, currency, traderType, tranSource, coaLv2, coaLv1;
     private TaskExecutor taskExecutor;
     private final AllCashTableModel allCashTableModel = new AllCashTableModel();
     private WebClient accountApi;
@@ -228,7 +227,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDepartment, listDepartment, null, true, true);
         departmentAutoCompleter.setObserver(this);
         coaAutoCompleter = new COAAutoCompleter(txtAccount, accounRepo.getChartOfAccount(), null, true);
-        dateAutoCompleter = new DateAutoCompleter(txtDate, true);
+        dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
         currencyAutoCompleter = new CurrencyAAutoCompleter(txtCurrency, accounRepo.getCurrency(), null, true);
         currencyAutoCompleter.setSelectionObserver(this);
         dateAutoCompleter.setSelectionObserver(this);
@@ -265,20 +264,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             clearFilter();
         });
         progress.setVisible(true);
-    }
-
-    private void assignDefault() {
-        stDate = Util1.toDateStr(Util1.getTodayDate(), "dd/MM/yyyy");
-        enDate = stDate;
-        desp = "-";
-        accCode = "-";
-        currency = "-";
-        ref = "-";
-        tranSource = "-";
-        traderCode = "-";
-    }
-
-    private void clearTextBox() {
     }
 
     private void requestFoucsTable() {
@@ -391,15 +376,16 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     public void printVoucher() {
+        String currency = currencyAutoCompleter.getCurrency().getCurCode();
+        String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), Global.dateFormat);
+        String endDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getEndDate(), Global.dateFormat);
         if (!currency.equals("-") || !ProUtil.isMultiCur()) {
             progress.setIndeterminate(true);
             taskExecutor.execute(() -> {
                 try {
                     Map<String, Object> p = new HashMap();
                     p.put("p_report_name", this.getName());
-                    p.put("p_date", String.format("Between %s and %s",
-                            Util1.toDateStr(stDate, "yyyy-MM-dd", "dd/MM/yyyy"),
-                            Util1.toDateStr(enDate, "yyyy-MM-dd", "dd/MM/yyyy")));
+                    p.put("p_date", String.format("Between %s and %s", stDate, endDate));
                     p.put("p_print_date", Util1.getTodayDateTime());
                     p.put("p_comp_name", Global.companyName);
                     p.put("p_comp_address", Global.companyAddress);
@@ -433,21 +419,26 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     private void searchCash() {
         progress.setIndeterminate(true);
-        initializeParameter();
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
-        filter.setFromDate(stDate);
-        filter.setToDate(enDate);
-        filter.setDesp(desp);
+        filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), Global.dateFormat));
+        filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getEndDate(), Global.dateFormat));
+        filter.setDesp(despAutoCompleter.getAutoText().getDescription().equals("All") ? "-" : despAutoCompleter.getAutoText().getDescription());
         filter.setSrcAcc(sourceAccId);
-        filter.setAcc(accCode);
-        filter.setReference(ref);
-        filter.setCurCode(currency);
-        filter.setDepartments(department);
-        filter.setTranSource(tranSource);
-        filter.setTraderCode(traderCode);
-        filter.setTraderType(traderType);
+        filter.setReference(refAutoCompleter.getAutoText().getReference().equals("All") ? "-"
+                : refAutoCompleter.getAutoText().getReference());
+        filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
+        filter.setDepartments(departmentAutoCompleter.getListOption());
+        filter.setTranSource(tranSourceAutoCompleter.getAutoText().getTranSource().equals("All") ? "-"
+                : tranSourceAutoCompleter.getAutoText().getTranSource());
+        filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
+        ChartOfAccount coa = coaAutoCompleter.getCOA();
+        String coaLv1 = Util1.getInteger(coa.getCoaLevel()) == 1 ? coa.getKey().getCoaCode() : "-";
+        String coaLv2 = Util1.getInteger(coa.getCoaLevel()) == 2 ? coa.getKey().getCoaCode() : "-";
+        String accCode = Util1.getInteger(coa.getCoaLevel()) == 3 ? coa.getKey().getCoaCode() : "-";
         filter.setCoaLv1(coaLv1);
         filter.setCoaLv2(coaLv2);
+        filter.setAcc(accCode);
+
         Mono<ReturnObject> result = accountApi.post()
                 .uri("/account/search-gl")
                 .body(Mono.just(filter), ReportFilter.class)
@@ -475,28 +466,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         });
     }
 
-    private void initializeParameter() {
-        stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), "dd/MM/yyyy");
-        enDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getEndDate(), "dd/MM/yyyy");
-        log.info(String.format("%s,%s", stDate, enDate));
-        desp = despAutoCompleter.getAutoText().getDescription().equals("All") ? "-" : despAutoCompleter.getAutoText().getDescription();
-        currency = currencyAutoCompleter.getCurrency().getCurCode();
-        ref = refAutoCompleter.getAutoText().getReference().equals("All") ? "-"
-                : refAutoCompleter.getAutoText().getReference();
-        tranSource = tranSourceAutoCompleter.getAutoText().getTranSource().equals("All") ? "-"
-                : tranSourceAutoCompleter.getAutoText().getTranSource();
-        department = departmentAutoCompleter.getListOption();
-        traderCode = traderAutoCompleter.getTrader().getKey().getCode();
-        traderType = Util1.isNull(traderType, "-");
-        ChartOfAccount coa = coaAutoCompleter.getCOA();
-        coaLv1 = Util1.getInteger(coa.getCoaLevel()) == 1 ? coa.getKey().getCoaCode() : "-";
-        coaLv2 = Util1.getInteger(coa.getCoaLevel()) == 2 ? coa.getKey().getCoaCode() : "-";
-        accCode = Util1.getInteger(coa.getCoaLevel()) == 3 ? coa.getKey().getCoaCode() : "-";
-        clearTextBox();
-    }
-
     public void clearFilter() {
-        assignDefault();
         searchCash();
 
     }
@@ -1086,6 +1056,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void calOpeningClosing() {
+        String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getEndDate(), Global.dateFormat);
         String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
         String clDate = Util1.toDateStrMYSQL(stDate, "dd/MM/yyyy");
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);

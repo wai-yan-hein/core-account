@@ -86,6 +86,14 @@ public class DatePickerDialog extends javax.swing.JDialog implements KeyListener
         }
     }
 
+    public String getStartDate() {
+        return Util1.toDateStr(txtFromDate.getDate(), "dd/MM/yyyy");
+    }
+
+    public String getEndDate() {
+        return Util1.toDateStr(txtToDate.getDate(), "dd/MM/yyyy");
+    }
+
     private void sendDate() {
         if (txtFromDate.getDate() != null && txtToDate.getDate() != null) {
             String dateStr = Util1.toDateStr(txtFromDate.getDate(), "dd/MM/yyyy") + "to" + Util1.toDateStr(txtToDate.getDate(), "dd/MM/yyyy");

@@ -76,7 +76,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     /**
      * Creates new form AparGlReport
      */
-    private final GLListingTableModel glListingTableModel= new GLListingTableModel();
+    private final GLListingTableModel glListingTableModel = new GLListingTableModel();
 
     private final TrialBalanceDetailDialog dialog = new TrialBalanceDetailDialog();
     private COAAutoCompleter cOAAutoCompleter;
@@ -232,7 +232,6 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void openTBDDialog(String coaCode, String curCode, String coaName) {
-        dialog.setTxtDep(txtDep);
         dialog.setCoaCode(coaCode);
         dialog.setStDate(stDate);
         dialog.setEndDate(endDate);
@@ -268,7 +267,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void initCombo() {
-        dateAutoCompleter = new DateAutoCompleter(txtDate, true);
+        dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
         dateAutoCompleter.setSelectionObserver(this);
         cOAAutoCompleter = new COAAutoCompleter(txtCOA, accountRepo.getChartOfAccount(), null, true);
         cOAAutoCompleter.setSelectionObserver(this);
@@ -285,9 +284,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             progress.setIndeterminate(true);
             Map<String, Object> p = new HashMap();
             p.put("p_report_name", "Trial Balance");
-            p.put("p_date", String.format("Between %s and %s",
-                    Util1.toDateStr(stDate, "yyyy-MM-dd", "dd/MM/yyyy"),
-                    Util1.toDateStr(endDate, "yyyy-MM-dd", "dd/MM/yyyy")));
+            p.put("p_date", String.format("Between %s and %s", stDate, endDate));
             p.put("p_print_date", Util1.getTodayDateTime());
             p.put("p_comp_name", Global.companyName);
             p.put("p_comp_address", Global.companyAddress);
@@ -508,7 +505,8 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        chkClosing.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        chkClosing.setFont(Global.lableFont);
+        chkClosing.setSelected(true);
         chkClosing.setText("Net Change");
         chkClosing.setBorderPaintedFlat(true);
         chkClosing.addActionListener(new java.awt.event.ActionListener() {
@@ -517,7 +515,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             }
         });
 
-        chkActive.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        chkActive.setFont(Global.lableFont);
         chkActive.setSelected(true);
         chkActive.setText("Zero");
         chkActive.setBorderPaintedFlat(true);
@@ -527,7 +525,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             }
         });
 
-        chkDetail.setFont(new java.awt.Font("Arial", 1, 12)); // NOI18N
+        chkDetail.setFont(Global.lableFont);
         chkDetail.setText("Currency Convert");
         chkDetail.setBorderPaintedFlat(true);
         chkDetail.addActionListener(new java.awt.event.ActionListener() {

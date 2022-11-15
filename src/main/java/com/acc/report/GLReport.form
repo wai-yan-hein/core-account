@@ -372,9 +372,10 @@
           <SubComponents>
             <Component class="javax.swing.JCheckBox" name="chkClosing">
               <Properties>
-                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Arial" size="12" style="1"/>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="Global.lableFont" type="code"/>
                 </Property>
+                <Property name="selected" type="boolean" value="true"/>
                 <Property name="text" type="java.lang.String" value="Net Change"/>
                 <Property name="borderPaintedFlat" type="boolean" value="true"/>
               </Properties>
@@ -384,8 +385,8 @@
             </Component>
             <Component class="javax.swing.JCheckBox" name="chkActive">
               <Properties>
-                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Arial" size="12" style="1"/>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="Global.lableFont" type="code"/>
                 </Property>
                 <Property name="selected" type="boolean" value="true"/>
                 <Property name="text" type="java.lang.String" value="Zero"/>
@@ -397,8 +398,8 @@
             </Component>
             <Component class="javax.swing.JCheckBox" name="chkDetail">
               <Properties>
-                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Arial" size="12" style="1"/>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="Global.lableFont" type="code"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Currency Convert"/>
                 <Property name="borderPaintedFlat" type="boolean" value="true"/>
