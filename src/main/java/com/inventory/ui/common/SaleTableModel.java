@@ -324,11 +324,15 @@ public class SaleTableModel extends AbstractTableModel {
                 }
                 change = true;
                 calculateAmount(sd);
-                Location l = locationAutoCompleter.getLocation();
-                if (l != null) {
-                    sd.setLocCode(l.getKey().getLocCode());
-                    sd.setLocName(l.getLocName());
+                if (sd.getLocCode() == null) {
+                    Location l = locationAutoCompleter.getLocation();
+                    if (l != null) {
+                        sd.setLocCode(l.getKey().getLocCode());
+                        sd.setLocName(l.getLocName());
+
+                    }
                 }
+
                 fireTableRowsUpdated(row, row);
                 setRecord(listDetail.size() - 1);
                 selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
