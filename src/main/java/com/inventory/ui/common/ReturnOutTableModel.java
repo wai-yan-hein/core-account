@@ -272,10 +272,12 @@ public class ReturnOutTableModel extends AbstractTableModel {
                 }
             }
             calculateAmount(record);
-            Location l = locationAutoCompleter.getLocation();
-            if (l != null) {
-                record.setLocCode(l.getKey().getLocCode());
-                record.setLocName(l.getLocName());
+            if (record.getLocCode() == null) {
+                Location l = locationAutoCompleter.getLocation();
+                if (l != null) {
+                    record.setLocCode(l.getKey().getLocCode());
+                    record.setLocName(l.getLocName());
+                }
             }
             setRecord(listDetail.size() - 1);
             fireTableRowsUpdated(row, row);

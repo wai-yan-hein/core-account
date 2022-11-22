@@ -4,6 +4,7 @@
  */
 package com.inventory.ui.common;
 
+import com.common.FilterObject;
 import com.inventory.model.CFont;
 import com.user.model.Currency;
 import com.common.Global;
@@ -57,6 +58,9 @@ import com.inventory.model.UnitRelation;
 import com.inventory.model.UnitRelationDetail;
 import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
+import com.inventory.model.WeightLossDetail;
+import com.inventory.model.WeightLossHis;
+import com.inventory.model.WeightLossHisKey;
 import java.time.Duration;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -99,11 +103,13 @@ public class InventoryRepo {
         return findSaleMan(code);
     }
 
-    public List<PriceOption> getPriceOption() {
+    public List<PriceOption> getPriceOption(String option) {
         if (listPO == null) {
             Mono<ResponseEntity<List<PriceOption>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/setup/get-price-option")
                     .queryParam("compCode", Global.compCode)
+                    .queryParam("deptId", Global.deptId)
+                    .queryParam("option", option)
                     .build())
                     .retrieve().toEntityList(PriceOption.class);
             listPO = result.block(Duration.ofMinutes(min)).getBody();
@@ -376,6 +382,28 @@ public class InventoryRepo {
         return result.block(Duration.ofMinutes(min));
     }
 
+    public WeightLossHis findWeightLoss(String vouNo) {
+        WeightLossHisKey key = new WeightLossHisKey();
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        key.setVouNo(vouNo);
+        Mono<WeightLossHis> result = inventoryApi.post()
+                .uri("/weight/find-weight-loss")
+                .body(Mono.just(key), StockTypeKey.class)
+                .retrieve()
+                .bodyToMono(WeightLossHis.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
+    public ProcessHis findProcess(ProcessHisKey key) {
+        Mono<ProcessHis> result = inventoryApi.post()
+                .uri("/process/find-process")
+                .body(Mono.just(key), ProcessHisKey.class)
+                .retrieve()
+                .bodyToMono(ProcessHis.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
     public Currency findCurrency(String curCode) {
         Mono<ResponseEntity<Currency>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/find-currency")
@@ -570,6 +598,15 @@ public class InventoryRepo {
         return result.block(Duration.ofMinutes(min));
     }
 
+    public WeightLossHis saveWeightLoss(WeightLossHis loss) {
+        Mono<WeightLossHis> result = inventoryApi.post()
+                .uri("/weight/save-weight-loss")
+                .body(Mono.just(loss), WeightLossHis.class)
+                .retrieve()
+                .bodyToMono(WeightLossHis.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
     public void delete(Pattern p) {
         Mono<ReturnObject> result = inventoryApi.post()
                 .uri("/setup/delete-pattern")
@@ -591,6 +628,19 @@ public class InventoryRepo {
     public Float getPurRecentPrice(String stockCode, String vouDate, String unit) {
         Mono<General> result = inventoryApi.get()
                 .uri(builder -> builder.path("/report/get-purchase-recent-price")
+                .queryParam("stockCode", stockCode)
+                .queryParam("vouDate", vouDate)
+                .queryParam("unit", unit)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
+                .build())
+                .retrieve().bodyToMono(General.class);
+        return Util1.getFloat(result.block().getAmount());
+    }
+
+    public Float getWeightLossRecentPrice(String stockCode, String vouDate, String unit) {
+        Mono<General> result = inventoryApi.get()
+                .uri(builder -> builder.path("/report/get-weight-loss-recent-price")
                 .queryParam("stockCode", stockCode)
                 .queryParam("vouDate", vouDate)
                 .queryParam("unit", unit)
@@ -775,6 +825,8 @@ public class InventoryRepo {
                 .uri(builder -> builder.path("/report/get-smallest_qty")
                 .queryParam("stockCode", stockCode)
                 .queryParam("unit", unit)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().bodyToMono(Float.class);
         return result.block(Duration.ofMinutes(min));
@@ -972,6 +1024,24 @@ public class InventoryRepo {
         result.block(Duration.ofMinutes(min));
     }
 
+    public void delete(WeightLossHisKey key) {
+        Mono<ReturnObject> result = inventoryApi.post()
+                .uri("/weight/delete-weight-loss")
+                .body(Mono.just(key), WeightLossHisKey.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+        result.block(Duration.ofMinutes(min));
+    }
+
+    public void restore(WeightLossHisKey key) {
+        Mono<ReturnObject> result = inventoryApi.post()
+                .uri("/weight/restore-weight-loss")
+                .body(Mono.just(key), WeightLossHisKey.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+        result.block(Duration.ofMinutes(min));
+    }
+
     public ProcessHis saveProcess(ProcessHis his) {
         Mono<ProcessHis> result = inventoryApi.post()
                 .uri("/process/save-process")
@@ -999,5 +1069,17 @@ public class InventoryRepo {
                 .build())
                 .retrieve().toEntityList(ProcessHisDetail.class);
         return result.block(Duration.ofMinutes(min)).getBody();
+    }
+
+    public List<ProcessHis> getProcess(FilterObject f) {
+        Mono<ResponseEntity<List<ProcessHis>>> result = inventoryApi
+                .post()
+                .uri("/process/get-process")
+                .body(Mono.just(f), FilterObject.class
+                )
+                .retrieve()
+                .toEntityList(ProcessHis.class
+                );
+        return result.block(Duration.ofMinutes(1)).getBody();
     }
 }

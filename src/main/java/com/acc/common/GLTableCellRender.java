@@ -5,6 +5,7 @@
  */
 package com.acc.common;
 
+import com.common.Global;
 import com.common.Util1;
 import java.awt.Color;
 import java.awt.Component;
@@ -54,6 +55,7 @@ public class GLTableCellRender extends DefaultTableCellRenderer {
             s = formatter.format(d);
             c = getTableCellRendererComponent(table, s,
                     isSelected, hasFocus, row, column);
+            ((JLabel) c).setFont(Global.lableFont);
             ((JLabel) c).setHorizontalAlignment(SwingConstants.RIGHT);
         }
 

@@ -9,7 +9,7 @@ import com.common.Global;
 import com.common.TableCellRender;
 import com.inventory.model.PriceOption;
 import com.inventory.ui.common.InventoryRepo;
-import com.inventory.ui.common.PriceTableModel;
+import com.inventory.ui.common.SalePriceTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PriceOptionDialog extends javax.swing.JDialog {
 
-    private final PriceTableModel tableModel = new PriceTableModel();
+    private final SalePriceTableModel tableModel = new SalePriceTableModel();
     private PriceOption option;
     private InventoryRepo inventoryRepo;
     private List<PriceOption> listPrice = new ArrayList<>();

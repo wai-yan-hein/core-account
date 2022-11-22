@@ -10,13 +10,11 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author winswe
  */
-@Component
 public class SupplierTabelModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(SupplierTabelModel.class);

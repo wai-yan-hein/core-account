@@ -9,7 +9,7 @@ import com.common.Global;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.PriceOption;
-import com.inventory.ui.common.PriceTableModel;
+import com.inventory.ui.common.SalePriceTableModel;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -26,7 +26,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.RowFilter;
 import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -46,7 +45,7 @@ public final class SalePriceAutoCompleter implements KeyListener {
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private PriceTableModel priceTableModel;
+    private final SalePriceTableModel priceTableModel = new SalePriceTableModel();
     private PriceOption price;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
@@ -65,7 +64,6 @@ public final class SalePriceAutoCompleter implements KeyListener {
 
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
-        priceTableModel = new PriceTableModel();
         priceTableModel.setListPrice(list);
         table.setModel(priceTableModel);
         table.getTableHeader().setFont(Global.tblHeaderFont);

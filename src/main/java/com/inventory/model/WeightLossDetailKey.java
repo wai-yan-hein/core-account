@@ -8,14 +8,13 @@ import lombok.Data;
 
 /**
  *
- * @author Lenovo
+ * @author DELL
  */
 @Data
-public class PriceOption {
+public class WeightLossDetailKey {
 
-    private PriceOptionKey key;
-    private String description;
+    private String vouNo;
     private String compCode;
-    private Float price;
-    private String tranOption;
+    private Integer deptId;
+    private Integer uniqueId;
 }

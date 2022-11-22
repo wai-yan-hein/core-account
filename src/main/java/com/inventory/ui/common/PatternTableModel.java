@@ -7,16 +7,14 @@ package com.inventory.ui.common;
 
 import com.common.Global;
 import com.common.ProUtil;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.common.Util1;
 import com.inventory.model.Location;
 import com.inventory.model.Pattern;
 import com.inventory.model.PatternKey;
+import com.inventory.model.PriceOption;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import java.awt.HeadlessException;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -34,8 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PatternTableModel extends AbstractTableModel {
 
-    public static final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
-    private final String[] columnNames = {"Stock Code", "Stock Name", "Location", "Qty", "Unit", "Price"};
+    private final String[] columnNames = {"Stock Code", "Stock Name", "Location", "Qty", "Unit", "Price", "Price Method"};
     private List<Pattern> listPattern = new ArrayList<>();
     private JLabel lblRecord;
     private InventoryRepo inventoryRepo;
@@ -139,6 +136,9 @@ public class PatternTableModel extends AbstractTableModel {
             case 5 -> {
                 return p.getPrice();
             }
+            case 6 -> {
+                return p.getPriceTypeName();
+            }
         }
         return null;
     }
@@ -177,9 +177,6 @@ public class PatternTableModel extends AbstractTableModel {
                             p.setQty(Util1.getFloat(value));
                             if (p.getUnitCode() == null) {
                                 table.setColumnSelectionInterval(4, 4);
-                            } else {
-                                table.setColumnSelectionInterval(0, 0);
-                                table.setRowSelectionInterval(row + 1, row + 1);
                             }
                         } else {
                             JOptionPane.showMessageDialog(panel, String.format("Invalid %s", value));
@@ -201,11 +198,20 @@ public class PatternTableModel extends AbstractTableModel {
                             JOptionPane.showMessageDialog(panel, String.format("Invalid %s", value));
                         }
                     }
+                    case 6 -> {
+                        if (value instanceof PriceOption op) {
+                            p.setPriceTypeCode(op.getKey().getPriceType());
+                            p.setPriceTypeName(op.getDescription());
+                            table.setColumnSelectionInterval(0, 0);
+                            table.setRowSelectionInterval(row + 1, row + 1);
+                        }
+                    }
                 }
                 p.getKey().setMapStockCode(stockCode);
-                p.getKey().setUniqueId(uniqueId(row));
-                save(p);
-                addNewRow();
+                if (p.getKey().getUniqueId() == null) {
+                    p.getKey().setUniqueId(row + 1);
+                }
+                save(p, row);
                 fireTableRowsUpdated(row, row);
                 table.requestFocus();
             }
@@ -235,11 +241,13 @@ public class PatternTableModel extends AbstractTableModel {
         return status;
     }
 
-    private void save(Pattern pd) {
-        if (isValidEntry(pd)) {
-            inventoryRepo.savePattern(pd);
-            int size = listPattern.size() - 1;
-            lblRecord.setText("Records : " + size);
+    private void save(Pattern p, int row) {
+        if (isValidEntry(p)) {
+            inventoryRepo.savePattern(p);
+            addNewRow();
+            table.setRowSelectionInterval(row + 1, row + 1);
+            table.setColumnSelectionInterval(0, 0);
+
         }
     }
 
@@ -285,6 +293,13 @@ public class PatternTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
+    private Pattern aboveObject() {
+        if (!listPattern.isEmpty()) {
+            return listPattern.get(listPattern.size() - 1);
+        }
+        return null;
+    }
+
     public void addNewRow() {
         if (!hasEmptyRow()) {
             Pattern p = new Pattern();
@@ -292,6 +307,11 @@ public class PatternTableModel extends AbstractTableModel {
             key.setCompCode(Global.compCode);
             key.setDeptId(Global.deptId);
             p.setKey(key);
+            Pattern obj = aboveObject();
+            if (obj != null) {
+                p.setLocCode(obj.getLocCode());
+                p.setLocName(obj.getLocName());
+            }
             listPattern.add(p);
             fireTableRowsInserted(listPattern.size() - 1, listPattern.size() - 1);
         }

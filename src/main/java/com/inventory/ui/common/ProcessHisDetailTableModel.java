@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -248,8 +249,8 @@ public class ProcessHisDetailTableModel extends AbstractTableModel {
                         }
                     }
                 }
-                p.getKey().setUniqueId(uniqueId(row));
-                save(p, row);
+                calPrice();
+                addNewRow();
                 fireTableRowsUpdated(row, row);
                 table.requestFocusInWindow();
             }
@@ -259,32 +260,24 @@ public class ProcessHisDetailTableModel extends AbstractTableModel {
 
     }
 
-    private void save(ProcessHisDetail pd, int row) {
-        if (isValidEntry(pd)) {
-            inventoryRepo.saveProcessDetail(pd);
-            calPrice();
-            addNewRow();
-            table.setRowSelectionInterval(row + 1, row + 1);
-            table.setColumnSelectionInterval(0, 0);
-        }
-    }
-
-    private int uniqueId(int row) {
-        return row <= 0 ? 1 : listDetail.get(row - 1).getKey().getUniqueId() + 1;
-    }
-
     private boolean isValidEntry(ProcessHisDetail pd) {
         if (pd.getKey().getStockCode() == null) {
+            JOptionPane.showMessageDialog(table, "Invalid Stock.");
             return false;
         } else if (pd.getKey().getLocCode() == null) {
+            JOptionPane.showMessageDialog(table, "Invalid Location.");
             return false;
         } else if (pd.getUnit() == null) {
+            JOptionPane.showMessageDialog(table, "Invalid Unit.");
             return false;
         } else if (pd.getVouDate() == null) {
+            JOptionPane.showMessageDialog(table, "Invalid Date.");
             return false;
         } else if (Util1.getFloat(pd.getPrice()) == 0) {
+            JOptionPane.showMessageDialog(table, "Invalid Price.");
             return false;
         } else if (Util1.getFloat(pd.getQty()) == 0) {
+            JOptionPane.showMessageDialog(table, "Invalid Qty.");
             return false;
         }
         return true;
@@ -388,12 +381,56 @@ public class ProcessHisDetailTableModel extends AbstractTableModel {
             ProcessHisDetail a = aboveObject();
             if (a != null) {
                 pd.setVouDate(a.getVouDate());
-                pd.setKey(a.getKey());
+                pd.getKey().setLocCode(a.getKey().getLocCode());
                 pd.setLocName(a.getLocName());
             }
             listDetail.add(pd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
         }
+    }
+
+    public boolean validEntry() {
+        if (listDetail.size() <= 1) {
+            JOptionPane.showMessageDialog(table, "Invalid Value Added Stock.");
+            table.requestFocus();
+            return false;
+        }
+        for (int i = 0; i < listDetail.size(); i++) {
+            ProcessHisDetail pd = listDetail.get(i);
+            if (pd.getKey().getStockCode() != null) {
+                if (pd.getKey().getStockCode() == null) {
+                    JOptionPane.showMessageDialog(table, "Invalid Stock.");
+                    return false;
+                } else if (pd.getKey().getLocCode() == null) {
+                    foucsTable(i, 3);
+                    JOptionPane.showMessageDialog(table, "Invalid Location.");
+                    return false;
+                } else if (pd.getUnit() == null) {
+                    foucsTable(i, 5);
+                    JOptionPane.showMessageDialog(table, "Invalid Unit.");
+                    return false;
+                } else if (pd.getVouDate() == null) {
+                    foucsTable(i, 1);
+                    JOptionPane.showMessageDialog(table, "Invalid Date.");
+                    return false;
+                } else if (Util1.getFloat(pd.getPrice()) == 0) {
+                    foucsTable(i, 6);
+                    JOptionPane.showMessageDialog(table, "Invalid Price.");
+                    return false;
+                } else if (Util1.getFloat(pd.getQty()) == 0) {
+                    foucsTable(i, 4);
+                    JOptionPane.showMessageDialog(table, "Invalid Qty.");
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private void foucsTable(int row, int column) {
+        table.setRowSelectionInterval(row, row);
+        table.setColumnSelectionInterval(column, column);
+        table.requestFocus();
     }
 
     private boolean hasEmptyRow() {
