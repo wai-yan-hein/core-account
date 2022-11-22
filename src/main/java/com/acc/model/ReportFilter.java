@@ -24,7 +24,7 @@ public class ReportFilter {
     private String acc;
     private String curCode;
     private String reference;
-    private String dept;
+    private String deptCode;
     private String refNo;
     private String compCode;
     private String tranSource;

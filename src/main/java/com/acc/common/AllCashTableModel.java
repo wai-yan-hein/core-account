@@ -127,7 +127,7 @@ public class AllCashTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
 
-        try {
+        try {   
             if (!listVGl.isEmpty()) {
                 Gl vgi = listVGl.get(row);
                 switch (column) {

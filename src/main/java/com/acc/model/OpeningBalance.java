@@ -9,34 +9,32 @@ import lombok.Data;
 
 /**
  *
- * @author myohtut
+ * @author htut
  */
 @Data
 public class OpeningBalance {
 
-    private Integer opId;
+    private OpeningKey key;
     private Date opDate;
     private String sourceAccId;
-    private String sourceAccName;
-    private String currCode;
+    private String srcAccName;
+    private String curCode;
     private Double crAmt;
     private Double drAmt;
-    private String uerCode;
-    private String compCode;
+    private String userCode;
     private Date createdDate;
     private String deptCode;
     private String traderCode;
     private String traderName;
     private String tranSource;
-    private String depUserCode;
-    private String tradeUserCode;
+    private String deptUsrCode;
+    private String tradeUsrCode;
     private String traderType;
-    private String coaUserCode;
+    private String coaUsrCode;
     private String coaParent;
     private String regCode;
-    
-    
-    public OpeningBalance(){
-        
+
+    public OpeningBalance() {
+
     }
 }

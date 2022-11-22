@@ -472,7 +472,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             case "Opening Balance" -> {
                 coaOpening.setName(menuName);
                 coaOpening.setObservaer(this);
-                //coaOpening.setProgress(progress);
+                coaOpening.setProgress(progress);
                 coaOpening.initMain();
                 return coaOpening;
             }
