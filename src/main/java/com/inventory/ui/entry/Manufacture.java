@@ -4,12 +4,9 @@
  */
 package com.inventory.ui.entry;
 
-import com.common.DecimalFormatRender;
-import com.common.FilterObject;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
-import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
@@ -19,13 +16,15 @@ import com.inventory.editor.StockUnitEditor;
 import com.inventory.editor.UnitAutoCompleter;
 import com.inventory.editor.VouStatusAutoCompleter;
 import com.inventory.model.Location;
+import com.inventory.model.Pattern;
 import com.inventory.model.ProcessHis;
 import com.inventory.model.ProcessHisDetail;
+import com.inventory.model.ProcessHisDetailKey;
 import com.inventory.model.ProcessHisKey;
 import com.inventory.model.Stock;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.ProcessHisDetailTableModel;
-import com.inventory.ui.common.ProcessHisTableModel;
+import com.inventory.ui.entry.dialog.ManufactureHistoryDialog;
 import com.inventory.ui.setup.dialog.VouStatusSetupDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
@@ -34,7 +33,7 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.time.Duration;
+import java.util.Date;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
@@ -46,13 +45,9 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -65,21 +60,16 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
     private final Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
     @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
-    private WebClient inventoryApi;
     private JProgressBar progress;
     private SelectionObserver observer;
-    private final ProcessHisTableModel processHisTableModel = new ProcessHisTableModel();
     private final ProcessHisDetailTableModel processHisDetailTableModel = new ProcessHisDetailTableModel();
+    private final ManufactureHistoryDialog dialog = new ManufactureHistoryDialog();
     private StockAutoCompleter stockAutoCompleter;
     private LocationAutoCompleter locationAutoCompleter;
     private UnitAutoCompleter unitAutoCompleter;
-    private StockAutoCompleter stockAutoCompleter1;
-    private LocationAutoCompleter locationAutoCompleter1;
     private VouStatusAutoCompleter vouStatusAutoCompleter;
-    private VouStatusAutoCompleter vouStatusAutoCompleter1;
     private ProcessHis ph = new ProcessHis();
-    private int selectRow = -1;
+    private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
 
     /**
      * Creates new form Manufacture
@@ -117,15 +107,11 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
     private void initDate() {
         txtStartDate.setDate(Util1.getTodayDate());
         txtEndDate.setDate(Util1.getTodayDate());
-        txtFromDate.setDate(Util1.getTodayDate());
-        txtToDate.setDate(Util1.getTodayDate());
     }
 
     private void initFomatFactory() {
         txtQty.setFormatterFactory(Util1.getDecimalFormat());
-        txtAvgQty.setFormatterFactory(Util1.getDecimalFormat());
         txtPrice.setFormatterFactory(Util1.getDecimalFormat());
-        txtAvgPrice.setFormatterFactory(Util1.getDecimalFormat());
         txtAmt.setFormatterFactory(Util1.getDecimalFormat());
     }
 
@@ -138,47 +124,9 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         stockAutoCompleter.setObserver(this);
         unitAutoCompleter = new UnitAutoCompleter(txtUnit, inventoryRepo.getStockUnit(), null);
         unitAutoCompleter.setObserver(this);
-        locationAutoCompleter1 = new LocationAutoCompleter(txtLocation1, listLocation, null, true, false);
-        locationAutoCompleter1.setObserver(this);
-        stockAutoCompleter1 = new StockAutoCompleter(txtStock1, inventoryRepo, null, true);
-        stockAutoCompleter1.setObserver(this);
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtPt, inventoryRepo, null, false);
         vouStatusAutoCompleter.setObserver(this);
-        vouStatusAutoCompleter1 = new VouStatusAutoCompleter(txtPT1, inventoryRepo, null, true);
-        vouStatusAutoCompleter1.setObserver(this);
-    }
 
-    private void initTblProcess() {
-        tblProcess.setModel(processHisTableModel);
-        tblProcess.getTableHeader().setFont(Global.tblHeaderFont);
-        tblProcess.getColumnModel().getColumn(0).setPreferredWidth(30);//date
-        tblProcess.getColumnModel().getColumn(1).setPreferredWidth(20);//code
-        tblProcess.getColumnModel().getColumn(2).setPreferredWidth(200);//name
-        tblProcess.getColumnModel().getColumn(3).setPreferredWidth(40);//type
-        tblProcess.setDefaultRenderer(Object.class, new DecimalFormatRender());
-        tblProcess.setDefaultRenderer(Float.class, new DecimalFormatRender());
-        tblProcess.setFont(Global.textFont);
-        tblProcess.setRowHeight(Global.tblRowHeight);
-        tblProcess.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
-                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
-        tblProcess.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblProcess.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
-            if (e.getValueIsAdjusting()) {
-                if (tblProcess.getSelectedRow() >= 0) {
-                    selectRow = tblProcess.convertRowIndexToModel(tblProcess.getSelectedRow());
-                    ProcessHis his = processHisTableModel.getObject(selectRow);
-                    setProcess(his);
-                    List<ProcessHisDetail> listD = inventoryRepo.getProcessDetail(his.getKey().getVouNo());
-                    processHisDetailTableModel.setListDetail(listD);
-                    lblRecord.setText("Records : " + listD.size());
-                    txtPrice.setEditable(listD.isEmpty());
-                    processHisDetailTableModel.addNewRow();
-                    focusOnTable();
-                }
-            }
-        });
-        tblProcess.setDefaultRenderer(Object.class, new TableCellRender());
-        tblProcess.setDefaultRenderer(Float.class, new TableCellRender());
     }
 
     private void focusOnTable() {
@@ -259,9 +207,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         initFomatFactory();
         initDate();
         initCompleter();
-        initTblProcess();
         initTblProcessDetail();
-        searchProcess();
     }
 
     private void initKeyListener() {
@@ -275,7 +221,6 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         txtRemark.addKeyListener(this);
         txtProNo.addKeyListener(this);
         txtQty.addKeyListener(this);
-        txtAvgQty.addKeyListener(this);
         txtUnit.addKeyListener(this);
         txtPrice.addKeyListener(this);
     }
@@ -288,27 +233,26 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         txtRemark.setText(ph.getRemark());
         txtProNo.setText(ph.getProcessNo());
         txtQty.setValue(ph.getQty());
-        txtAvgQty.setValue(ph.getAvgQty());
         txtPrice.setValue(ph.getPrice());
         txtAmt.setValue(ph.getQty() * ph.getPrice());
-        txtAvgPrice.setValue(ph.getAvgPrice());
         chkFinish.setSelected(ph.isFinished());
         unitAutoCompleter.setStockUnit(inventoryRepo.findUnit(ph.getUnit()));
         vouStatusAutoCompleter.setVoucher(inventoryRepo.findVouStatus(p.getPtCode()));
         stockAutoCompleter.setStock(inventoryRepo.findStock(ph.getKey().getStockCode()));
         locationAutoCompleter.setLocation(inventoryRepo.findLocation(ph.getKey().getLocCode()));
-        btnDelete.setEnabled(true);
         if (p.isDeleted()) {
             enableProcess(false);
             lblStatus.setText("DELETED");
             lblStatus.setForeground(Color.red);
-            btnDelete.setText("Restore");
         } else {
             enableProcess(true);
             lblStatus.setText("EDIT");
             lblStatus.setForeground(Color.blue);
-            btnDelete.setText("Delete");
         }
+        processHisDetailTableModel.setListDetail(inventoryRepo.getProcessDetail(ph.getKey().getVouNo()));
+        processHisDetailTableModel.addNewRow();
+        lblRecord.setText("Records : " + String.valueOf(processHisDetailTableModel.getListDetail().size() - 1));
+        focusOnTable();
     }
 
     private void enableProcess(boolean status) {
@@ -317,13 +261,11 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         txtRemark.setEditable(status);
         txtProNo.setEditable(status);
         txtQty.setEditable(status);
-        txtAvgQty.setEditable(status);
         chkFinish.setEnabled(status);
         txtUnit.setEnabled(status);
         txtPt.setEnabled(status);
         txtStock.setEnabled(status);
         txtLocation.setEnabled(status);
-        btnSave.setEnabled(status);
     }
 
     private void vouStatusSetup() {
@@ -337,54 +279,20 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         vsDialog.setVisible(true);
     }
 
-    private void searchProcess() {
-        FilterObject f = new FilterObject(Global.compCode, Global.deptId);
-        f.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
-        f.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
-        f.setProcessNo(txtProNo1.getText());
-        f.setRemark(txtRemark1.getText());
-        f.setVouNo(txtVouNo1.getText());
-        f.setStockCode(stockAutoCompleter1.getStock().getKey().getStockCode());
-        f.setVouStatus(vouStatusAutoCompleter1.getVouStatus().getKey().getCode());
-        f.setLocCode(locationAutoCompleter1.getLocation().getKey().getLocCode());
-        f.setFinished(chkFinish1.isSelected());
-        f.setDeleted(chkDel.isSelected());
-        Mono<ResponseEntity<List<ProcessHis>>> result = inventoryApi
-                .post()
-                .uri("/process/get-process")
-                .body(Mono.just(f), FilterObject.class
-                )
-                .retrieve()
-                .toEntityList(ProcessHis.class
-                );
-        List<ProcessHis> listOP = result.block(Duration.ofMinutes(1)).getBody();
-        processHisTableModel.setListDetail(listOP);
-    }
-
     private void saveProcess() {
-        if (isValidProcess()) {
+        if (isValidProcess() && processHisDetailTableModel.validEntry()) {
+            ph.setListDetail(processHisDetailTableModel.getListDetail());
             if (chkFinish.isSelected()) {
                 int s = JOptionPane.showConfirmDialog(this,
                         String.format("Production end date is %s", Util1.toDateStr(ph.getEndDate(), "dd/MM/yyyy")),
                         "Warning", JOptionPane.WARNING_MESSAGE);
                 if (s == JOptionPane.YES_OPTION) {
                     ph = inventoryRepo.saveProcess(ph);
-                    fixFilter();
                     clear();
                 } else {
                     txtEndDate.requestFocusInWindow();
                 }
-            } else {
-                ph = inventoryRepo.saveProcess(ph);
-                fixFilter();
-                clear();
             }
-        }
-    }
-
-    private void fixFilter() {
-        if (chkFinish.isSelected() || chkFinish1.isSelected()) {
-            processHisTableModel.deleteObject(selectRow);
         }
     }
 
@@ -396,13 +304,8 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         txtStock.setText(null);
         txtRemark.setText(null);
         txtProNo.setText(null);
-        txtQty.setValue(null);
-        txtAvgQty.setValue(null);
+        txtQty.setValue(1);
         txtPrice.setValue(null);
-        txtAvgPrice.setValue(null);
-        btnDelete.setEnabled(false);
-        btnDelete.setText("Delete");
-        searchProcess();
         processHisDetailTableModel.clear();
         txtStartDate.requestFocusInWindow();
     }
@@ -424,6 +327,10 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             JOptionPane.showMessageDialog(this, "Choose Unit.");
             txtUnit.requestFocus();
             return false;
+        } else if (Util1.getFloat(txtQty.getValue()) <= 0) {
+            JOptionPane.showMessageDialog(this, "Invalid Qty.");
+            txtQty.requestFocus();
+            return false;
         } else {
             ProcessHisKey key = new ProcessHisKey();
             key.setVouNo(txtVouNo.getText());
@@ -437,9 +344,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             ph.setRemark(txtRemark.getText());
             ph.setProcessNo(txtProNo.getText());
             ph.setQty(Util1.getFloat(txtQty.getValue()));
-            ph.setAvgQty(Util1.getFloat(txtAvgQty.getValue()));
             ph.setPrice(Util1.getFloat(txtPrice.getValue()));
-            ph.setAvgPrice(Util1.getFloat(txtAvgPrice.getValue()));
             ph.setPtCode(vouStatusAutoCompleter.getVouStatus().getKey().getCode());
             ph.setUnit(unitAutoCompleter.getStockUnit().getKey().getUnitCode());
             ph.setFinished(chkFinish.isSelected());
@@ -454,22 +359,13 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         return true;
     }
 
-    private void calAvgPrice() {
-        float qty = Util1.getFloat(txtQty.getValue());
-        float avgQty = Util1.getFloat(txtAvgQty.getValue());
-        float price = Util1.getFloat(txtPrice.getValue());
-        float avgPrice = (qty / avgQty) * price;
-        txtAvgPrice.setValue(avgPrice);
-    }
-
     private void deleteProcess() {
-        String name = btnDelete.getText();
+        String name = lblStatus.getText();
         if (name.equals("Delete")) {
             int s = JOptionPane.showConfirmDialog(this, "Are you sure to delete?", "Process Delete.", JOptionPane.ERROR_MESSAGE);
             if (s == JOptionPane.YES_OPTION) {
                 ph.setDeleted(true);
                 inventoryRepo.delete(ph.getKey());
-                processHisTableModel.deleteObject(selectRow);
                 clear();
             }
         } else {
@@ -479,9 +375,92 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
                 inventoryRepo.restore(ph.getKey());
                 lblStatus.setText("EDIT");
                 lblStatus.setForeground(Color.blue);
-                btnDelete.setText("Delete");
                 enableProcess(true);
             }
+        }
+    }
+
+    private void historyDialog() {
+        dialog.setIconImage(searchIcon);
+        dialog.setObserver(this);
+        dialog.setInventoryRepo(inventoryRepo);
+        dialog.initMain();
+        dialog.setSize(Global.width - 100, Global.height - 100);
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
+    }
+
+    private void getPattern() {
+        Stock s = stockAutoCompleter.getStock();
+        if (s != null) {
+            String stockCode = s.getKey().getStockCode();
+            if (processHisDetailTableModel.getListDetail().size() >= 1) {
+                int status = JOptionPane.showConfirmDialog(this, "Are you sure to generate pattern.?");
+                if (status == JOptionPane.OK_OPTION) {
+                    processHisDetailTableModel.clear();
+                    generatePattern(stockCode);
+
+                }
+            } else {
+                generatePattern(stockCode);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select stock.");
+            txtStock.requestFocus();
+        }
+    }
+
+    private void generatePattern(String code) {
+        Date vouDate = txtStartDate.getDate();
+        List<Pattern> patterns = inventoryRepo.getPattern(code);
+        if (!patterns.isEmpty()) {
+            String input = JOptionPane.showInputDialog("Enter Qty.");
+            float qty = Util1.getFloat(input);
+            if (qty > 0) {
+                txtQty.setValue(qty);
+                for (Pattern p : patterns) {
+                    String stockCode = p.getKey().getStockCode();
+                    ProcessHisDetail his = new ProcessHisDetail();
+                    ProcessHisDetailKey key = new ProcessHisDetailKey();
+                    key.setCompCode(p.getKey().getCompCode());
+                    key.setDeptId(p.getKey().getDeptId());
+                    key.setLocCode(p.getLocCode());
+                    key.setStockCode(stockCode);
+                    his.setKey(key);
+                    his.setStockName(p.getStockName());
+                    his.setStockUsrCode(p.getUserCode());
+                    his.setLocName(p.getLocName());
+                    his.setQty(p.getQty() * qty);
+                    his.setUnit(p.getUnitCode());
+                    his.setVouDate(vouDate);
+                    String type = p.getPriceTypeCode();
+                    String date = Util1.toDateStr(vouDate, "yyyy-MM-dd");
+                    if (type != null) {
+                        switch (type) {
+                            case "PUR-R" -> {
+                                his.setPrice(inventoryRepo.getPurRecentPrice(stockCode, date, his.getUnit()));
+                            }
+                            case "PUR-A" -> {
+                                his.setPrice(inventoryRepo.getPurAvgPrice(stockCode, date, his.getUnit()));
+                            }
+                            case "PRO-R" -> {
+                                his.setPrice(inventoryRepo.getProductionRecentPrice(stockCode, date, his.getUnit()));
+                            }
+                            case "WL-R" -> {
+                                his.setPrice(inventoryRepo.getWeightLossRecentPrice(stockCode, date, his.getUnit()));
+                            }
+                        }
+                    }
+                    processHisDetailTableModel.addObject(his);
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid Qty");
+            }
+            processHisDetailTableModel.addNewRow();
+            processHisDetailTableModel.calPrice();
+            focusOnTable();
+        } else {
+            JOptionPane.showMessageDialog(this, "No pattern.");
         }
     }
 
@@ -494,31 +473,6 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel3 = new javax.swing.JPanel();
-        jPanel4 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        txtProNo1 = new javax.swing.JTextField();
-        jLabel2 = new javax.swing.JLabel();
-        txtRemark1 = new javax.swing.JTextField();
-        txtStock1 = new javax.swing.JTextField();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        chkFinish1 = new javax.swing.JCheckBox();
-        jLabel18 = new javax.swing.JLabel();
-        txtFromDate = new com.toedter.calendar.JDateChooser();
-        jLabel19 = new javax.swing.JLabel();
-        txtToDate = new com.toedter.calendar.JDateChooser();
-        jLabel20 = new javax.swing.JLabel();
-        txtVouNo1 = new javax.swing.JTextField();
-        jLabel21 = new javax.swing.JLabel();
-        txtPT1 = new javax.swing.JTextField();
-        jLabel22 = new javax.swing.JLabel();
-        txtLocation1 = new javax.swing.JTextField();
-        chkDel = new javax.swing.JCheckBox();
-        jButton4 = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        tblProcess = new javax.swing.JTable();
-        jPanel1 = new javax.swing.JPanel();
         panelProcess = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
         txtVouNo = new javax.swing.JTextField();
@@ -540,19 +494,12 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         jLabel13 = new javax.swing.JLabel();
         jLabel15 = new javax.swing.JLabel();
         chkFinish = new javax.swing.JCheckBox();
-        btnSave = new javax.swing.JButton();
         lblStatus = new javax.swing.JLabel();
         jLabel17 = new javax.swing.JLabel();
         txtProNo = new javax.swing.JTextField();
         jButton2 = new javax.swing.JButton();
         txtQty = new javax.swing.JFormattedTextField();
         txtPrice = new javax.swing.JFormattedTextField();
-        btnDelete = new javax.swing.JButton();
-        jPanel2 = new javax.swing.JPanel();
-        txtAvgQty = new javax.swing.JFormattedTextField();
-        jLabel16 = new javax.swing.JLabel();
-        jLabel23 = new javax.swing.JLabel();
-        txtAvgPrice = new javax.swing.JFormattedTextField();
         jLabel25 = new javax.swing.JLabel();
         txtAmt = new javax.swing.JFormattedTextField();
         jPanel5 = new javax.swing.JPanel();
@@ -569,187 +516,6 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
                 formComponentShown(evt);
             }
         });
-
-        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
-
-        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Search Production History", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, Global.menuFont, Global.selectionColor));
-
-        jLabel1.setFont(Global.lableFont);
-        jLabel1.setText("Process No");
-
-        txtProNo1.setFont(Global.textFont);
-
-        jLabel2.setFont(Global.lableFont);
-        jLabel2.setText("Remark");
-
-        txtRemark1.setFont(Global.textFont);
-
-        txtStock1.setFont(Global.textFont);
-
-        jLabel3.setFont(Global.lableFont);
-        jLabel3.setText("Stock");
-
-        jLabel4.setFont(Global.lableFont);
-        jLabel4.setText("Status");
-
-        chkFinish1.setText("Finished");
-
-        jLabel18.setFont(Global.lableFont);
-        jLabel18.setText("Start Date");
-
-        txtFromDate.setDateFormatString("dd/MM/yyyy");
-        txtFromDate.setFont(Global.textFont);
-
-        jLabel19.setFont(Global.lableFont);
-        jLabel19.setText("End Date");
-
-        txtToDate.setDateFormatString("dd/MM/yyyy");
-        txtToDate.setFont(Global.textFont);
-
-        jLabel20.setFont(Global.lableFont);
-        jLabel20.setText("Vou No");
-
-        txtVouNo1.setFont(Global.textFont);
-
-        jLabel21.setFont(Global.lableFont);
-        jLabel21.setText("Process Type");
-
-        txtPT1.setFont(Global.textFont);
-
-        jLabel22.setFont(Global.lableFont);
-        jLabel22.setText("Location");
-
-        txtLocation1.setFont(Global.textFont);
-
-        chkDel.setText("Deleted");
-
-        jButton4.setFont(Global.lableFont);
-        jButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/search.png"))); // NOI18N
-        jButton4.setText("Search");
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton4ActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(6, 6, 6)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jLabel22, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel20, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel18, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 62, Short.MAX_VALUE)
-                        .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jLabel21))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtProNo1)
-                    .addComponent(txtRemark1)
-                    .addComponent(txtStock1)
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addComponent(txtFromDate, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel19)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtToDate, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE))
-                    .addComponent(txtVouNo1)
-                    .addComponent(txtPT1)
-                    .addComponent(txtLocation1)
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addComponent(chkFinish1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(chkDel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton4)))
-                .addContainerGap())
-        );
-        jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtToDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtFromDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jLabel19, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel18, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(txtProNo1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(txtRemark1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel20)
-                    .addComponent(txtVouNo1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(txtStock1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel21)
-                    .addComponent(txtPT1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel22)
-                    .addComponent(txtLocation1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel4)
-                    .addComponent(jButton4)
-                    .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(chkDel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(chkFinish1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-        );
-
-        tblProcess.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
-        jScrollPane1.setViewportView(tblProcess);
-
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1))
-                .addContainerGap())
-        );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 458, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         panelProcess.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Prodcution Stock", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, Global.menuFont, Global.selectionColor));
         panelProcess.setFocusCycleRoot(true);
@@ -813,17 +579,11 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         jLabel15.setFont(Global.lableFont);
         jLabel15.setText("Status");
 
+        chkFinish.setFont(Global.lableFont);
         chkFinish.setText("Finished");
 
-        btnSave.setFont(Global.lableFont);
-        btnSave.setText("Save");
-        btnSave.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSaveActionPerformed(evt);
-            }
-        });
-
-        lblStatus.setFont(Global.lableFont);
+        lblStatus.setFont(new java.awt.Font("Arial", 0, 24)); // NOI18N
+        lblStatus.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblStatus.setText("NEW");
 
         jLabel17.setFont(Global.lableFont);
@@ -842,68 +602,13 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             }
         });
 
+        txtQty.setEditable(false);
         txtQty.setFont(Global.textFont);
         txtQty.setName("txtQty"); // NOI18N
 
+        txtPrice.setEditable(false);
         txtPrice.setFont(Global.amtFont);
         txtPrice.setName("txtPrice"); // NOI18N
-
-        btnDelete.setFont(Global.lableFont);
-        btnDelete.setText("Delete");
-        btnDelete.setEnabled(false);
-        btnDelete.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnDeleteActionPerformed(evt);
-            }
-        });
-
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Weight Loss", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, Global.lableFont, Global.selectionColor));
-
-        txtAvgQty.setFont(Global.textFont);
-        txtAvgQty.setName("txtAvgQty"); // NOI18N
-        txtAvgQty.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtAvgQtyActionPerformed(evt);
-            }
-        });
-
-        jLabel16.setFont(Global.lableFont);
-        jLabel16.setText("Qty");
-
-        jLabel23.setFont(Global.lableFont);
-        jLabel23.setText("Price");
-
-        txtAvgPrice.setEditable(false);
-        txtAvgPrice.setFont(Global.amtFont);
-
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(16, 16, 16)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtAvgPrice, javax.swing.GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE)
-                    .addComponent(txtAvgQty))
-                .addContainerGap())
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel16)
-                    .addComponent(txtAvgQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtAvgPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel23))
-                .addContainerGap())
-        );
 
         jLabel25.setFont(Global.lableFont);
         jLabel25.setText("Amount");
@@ -920,53 +625,55 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
                 .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelProcessLayout.createSequentialGroup()
                         .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 58, Short.MAX_VALUE)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 58, Short.MAX_VALUE)
                             .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(11, 11, 11)
-                        .addComponent(chkFinish, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblStatus)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnDelete)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnSave))
+                        .addComponent(chkFinish, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(panelProcessLayout.createSequentialGroup()
+                        .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(11, 11, 11)
+                        .addComponent(txtUnit))
                     .addGroup(panelProcessLayout.createSequentialGroup()
                         .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel25, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(11, 11, 11)
                         .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtUnit, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtQty, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtRemark, javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtVouNo, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtStartDate, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 319, Short.MAX_VALUE)
-                            .addComponent(txtStock, javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtPrice)
-                            .addComponent(txtAmt))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(txtAmt)))
+                    .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(jLabel12, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel13, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 58, Short.MAX_VALUE))
+                    .addGroup(panelProcessLayout.createSequentialGroup()
+                        .addGap(69, 69, 69)
                         .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtQty, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(txtStock))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(panelProcessLayout.createSequentialGroup()
+                        .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel17, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel10, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtRemark)
+                            .addComponent(txtLocation)
+                            .addComponent(txtEndDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtStartDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtProNo, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(panelProcessLayout.createSequentialGroup()
-                                .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel17, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addComponent(txtPt)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtEndDate, javax.swing.GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE)
-                                    .addComponent(txtLocation, javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(txtProNo, javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addGroup(panelProcessLayout.createSequentialGroup()
-                                        .addComponent(txtPt, javax.swing.GroupLayout.DEFAULT_SIZE, 280, Short.MAX_VALUE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(panelProcessLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(lblStatus)))
                 .addContainerGap())
         );
         panelProcessLayout.setVerticalGroup(
@@ -982,47 +689,41 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addComponent(txtStartDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtEndDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel9)
+                        .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(txtEndDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel12)
+                        .addComponent(txtQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(6, 6, 6)
                 .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel9)
-                    .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel10)
-                    .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel13)
+                    .addComponent(txtUnit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel17)
                     .addComponent(txtProNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel11)
-                    .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(panelProcessLayout.createSequentialGroup()
-                        .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel12)
-                            .addComponent(txtQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel13)
-                            .addComponent(txtUnit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel14))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel25)))
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel14))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel15)
-                    .addComponent(chkFinish)
-                    .addComponent(btnSave)
-                    .addComponent(lblStatus)
-                    .addComponent(btnDelete))
+                    .addComponent(jLabel11)
+                    .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel25))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(panelProcessLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel15)
+                        .addComponent(chkFinish))
+                    .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1064,11 +765,11 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 789, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2)
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 307, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel24, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel24, javax.swing.GroupLayout.DEFAULT_SIZE, 202, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(rdoProRecent)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1084,7 +785,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addComponent(rdoRecent)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 127, Short.MAX_VALUE))
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(rdoAvg)
@@ -1096,45 +797,24 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
                 .addContainerGap())
         );
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(panelProcess, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(panelProcess, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(panelProcess, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(panelProcess, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -1150,66 +830,25 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         vouStatusSetup();
     }//GEN-LAST:event_jButton2ActionPerformed
 
-    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-        // TODO add your handling code here:
-        deleteProcess();
-    }//GEN-LAST:event_btnDeleteActionPerformed
-
-    private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
-        // TODO add your handling code here:
-        saveProcess();
-    }//GEN-LAST:event_btnSaveActionPerformed
-
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        // TODO add your handling code here:
-        searchProcess();
-    }//GEN-LAST:event_jButton4ActionPerformed
-
-    private void txtAvgQtyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAvgQtyActionPerformed
-        // TODO add your handling code here:
-        calAvgPrice();
-    }//GEN-LAST:event_txtAvgQtyActionPerformed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnDelete;
-    private javax.swing.JButton btnSave;
-    private javax.swing.JCheckBox chkDel;
     private javax.swing.JCheckBox chkFinish;
-    private javax.swing.JCheckBox chkFinish1;
     private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton4;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
-    private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
-    private javax.swing.JLabel jLabel18;
-    private javax.swing.JLabel jLabel19;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel20;
-    private javax.swing.JLabel jLabel21;
-    private javax.swing.JLabel jLabel22;
-    private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel24;
     private javax.swing.JLabel jLabel25;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lblRecord;
     private javax.swing.JLabel lblStatus;
@@ -1217,30 +856,19 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
     private javax.swing.JRadioButton rdoAvg;
     private javax.swing.JRadioButton rdoProRecent;
     private javax.swing.JRadioButton rdoRecent;
-    private javax.swing.JTable tblProcess;
     private javax.swing.JTable tblProcessDetail;
     private javax.swing.JFormattedTextField txtAmt;
-    private javax.swing.JFormattedTextField txtAvgPrice;
-    private javax.swing.JFormattedTextField txtAvgQty;
     private com.toedter.calendar.JDateChooser txtEndDate;
-    private com.toedter.calendar.JDateChooser txtFromDate;
     private javax.swing.JTextField txtLocation;
-    private javax.swing.JTextField txtLocation1;
-    private javax.swing.JTextField txtPT1;
     private javax.swing.JFormattedTextField txtPrice;
     private javax.swing.JTextField txtProNo;
-    private javax.swing.JTextField txtProNo1;
     private javax.swing.JTextField txtPt;
     private javax.swing.JFormattedTextField txtQty;
     private javax.swing.JTextField txtRemark;
-    private javax.swing.JTextField txtRemark1;
     private com.toedter.calendar.JDateChooser txtStartDate;
     private javax.swing.JTextField txtStock;
-    private javax.swing.JTextField txtStock1;
-    private com.toedter.calendar.JDateChooser txtToDate;
     private javax.swing.JTextField txtUnit;
     private javax.swing.JTextField txtVouNo;
-    private javax.swing.JTextField txtVouNo1;
     // End of variables declaration//GEN-END:variables
 
     @Override
@@ -1260,6 +888,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
 
     @Override
     public void history() {
+        historyDialog();
     }
 
     @Override
@@ -1286,6 +915,11 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             Stock s = stockAutoCompleter.getStock();
             if (s != null) {
                 unitAutoCompleter.setStockUnit(inventoryRepo.findUnit(s.getPurUnitCode()));
+                getPattern();
+            }
+        } else if (str.equals("Selected")) {
+            if (selectObj instanceof ProcessHisKey key) {
+                setProcess(inventoryRepo.findProcess(key));
             }
         }
     }
@@ -1359,7 +993,6 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             }
             case "txtProNo" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    btnSave.requestFocus();
                 }
             }
         }

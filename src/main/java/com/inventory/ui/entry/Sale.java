@@ -212,7 +212,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         tblSale.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//
         if (ProUtil.isSalePriceChange()) {
             if (ProUtil.isPriceOption()) {
-                SalePriceCellEditor editor = new SalePriceCellEditor(inventoryRepo.getPriceOption());
+                SalePriceCellEditor editor = new SalePriceCellEditor(inventoryRepo.getPriceOption("Sale"));
                 editor.setSaleTableModel(saleTableModel);
                 tblSale.getColumnModel().getColumn(6).setCellEditor(editor);//price
             } else {
@@ -1012,7 +1012,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         lblStatus.setFont(new java.awt.Font("Tahoma", 0, 30)); // NOI18N
         lblStatus.setText("NEW");
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Report Type", 0, 0, Global.lableFont));
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Report Type", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, Global.lableFont));
 
         chkA5.setFont(Global.textFont);
         chkA5.setText("A5");
@@ -1322,7 +1322,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
         jScrollPane3.setViewportView(jPanel3);
 
-        sbPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Stock Balance", 0, 0, Global.lableFont));
+        sbPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Stock Balance", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, Global.lableFont));
 
         tblStockBalance.setFont(Global.textFont);
         tblStockBalance.setModel(new javax.swing.table.DefaultTableModel(
@@ -1376,8 +1376,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(4, 4, 4)
-                .addComponent(panelSale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(panelSale, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(sbPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)

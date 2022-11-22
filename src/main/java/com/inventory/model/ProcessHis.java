@@ -5,6 +5,7 @@
 package com.inventory.model;
 
 import java.util.Date;
+import java.util.List;
 import lombok.Data;
 
 /**
@@ -34,4 +35,5 @@ public class ProcessHis {
     private String createdBy;
     private String updatedBy;
     private String locName;
+    private List<ProcessHisDetail> listDetail;
 }

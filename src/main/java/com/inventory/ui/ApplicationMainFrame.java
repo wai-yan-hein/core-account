@@ -23,6 +23,7 @@ import com.common.Util1;
 import com.user.setup.MenuSetup;
 import com.user.model.Department;
 import com.inventory.model.VRoleMenu;
+import com.inventory.model.WeightLossDetail;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.Manufacture;
 import com.user.model.VRoleCompany;
@@ -62,6 +63,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import com.inventory.ui.entry.Reports;
 import com.inventory.ui.entry.Transfer;
+import com.inventory.ui.entry.WeightLossEntry;
 import com.inventory.ui.setup.OpeningSetup;
 import com.inventory.ui.setup.PatternSetup;
 import com.user.dialog.DepartmentDialog;
@@ -118,6 +120,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private Transfer transfer;
     @Autowired
     private Manufacture manufacture;
+    @Autowired
+    private WeightLossEntry weightLoss;
 //account
     @Autowired
     private DepartmentSetup departmentSetup;
@@ -405,6 +409,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 manufacture.setProgress(progress);
                 manufacture.initMain();
                 return manufacture;
+            }
+              case "Weight Loss" -> {
+                weightLoss.setName(menuName);
+                weightLoss.setObserver(this);
+                weightLoss.setProgress(progress);
+                weightLoss.initMain();
+                return weightLoss;
             }
             case "Menu" -> {
                 menuSetup.setName(menuName);

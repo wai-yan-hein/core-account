@@ -14,6 +14,7 @@ import com.common.TableCellRender;
 import com.inventory.editor.BrandAutoCompleter;
 import com.inventory.editor.CategoryAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
+import com.inventory.editor.PriceEditor;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.StockTypeAutoCompleter;
@@ -133,6 +134,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         }
         tblPD.requestFocusInWindow();
     }
+
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
@@ -148,6 +150,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
             deleteTran();
         }
     }
+
     private void initTableStock() {
         tblStock.setModel(stockTableModel);
         tblStock.getTableHeader().setFont(Global.tblHeaderFont);
@@ -208,6 +211,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         tblPD.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
         tblPD.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(lisetStockUnit));
         tblPD.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
+        tblPD.getColumnModel().getColumn(6).setCellEditor(new PriceEditor(inventoryRepo.getPriceOption("Purchase")));
         tblPD.getColumnModel().getColumn(0).setPreferredWidth(50);
         tblPD.getColumnModel().getColumn(1).setPreferredWidth(150);
         tblPD.getColumnModel().getColumn(2).setPreferredWidth(100);

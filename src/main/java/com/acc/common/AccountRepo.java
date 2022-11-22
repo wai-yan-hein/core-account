@@ -103,16 +103,6 @@ public class AccountRepo {
         return result.block().getBody();
     }
 
-    public List<ChartOfAccount> getCOA(String str) {
-        Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get()
-                .uri(builder -> builder.path("/account/get-coa-lv3")
-                .queryParam("compCode", Global.compCode)
-                .queryParam("str", str)
-                .build())
-                .retrieve().toEntityList(ChartOfAccount.class);
-        return result.block().getBody();
-    }
-
     public List<Currency> getCurrency() {
         Mono<ResponseEntity<List<Currency>>> result = accountApi.get()
                 .uri(builder -> builder.path("/account/get-currency")
@@ -189,14 +179,23 @@ public class AccountRepo {
     }
 
     public List<ChartOfAccount> getCOAChild(String coaCode) {
-        COAKey key = new COAKey();
-        key.setCoaCode(coaCode);
-        key.setCompCode(Global.compCode);
-        Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.post()
-                .uri("/account/get-coa-child")
-                .body(Mono.just(key), COAKey.class)
+        Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get()
+                .uri(builder -> builder.path("/account/get-coa-child")
+                .queryParam("coaCode", coaCode)
+                .queryParam("compCode", Global.compCode)
+                .build())
                 .retrieve().toEntityList(ChartOfAccount.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
+    }
+
+    public List<ChartOfAccount> getCOA(String str) {
+        Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get()
+                .uri(builder -> builder.path("/account/get-coa-lv3")
+                .queryParam("str", str)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().toEntityList(ChartOfAccount.class);
+        return result.block().getBody();
     }
 
     public ChartOfAccount findCOA(String coaCode) {

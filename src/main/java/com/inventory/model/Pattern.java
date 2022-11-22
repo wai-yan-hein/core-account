@@ -26,4 +26,6 @@ public class Pattern {
     private String locCode;
     private String locName;
     private Integer deptId;
+    private String priceTypeCode;
+    private String priceTypeName;
 }

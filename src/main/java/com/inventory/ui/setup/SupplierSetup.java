@@ -54,8 +54,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private int selectRow = -1;
     private Trader supplier = new Trader();
-    @Autowired
-    private SupplierTabelModel supplierTabelModel;
+    private SupplierTabelModel supplierTabelModel= new SupplierTabelModel();
     @Autowired
     private InventoryRepo inventoryRepo;
     @Autowired
@@ -107,7 +106,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         listTraderGroup = inventoryRepo.getTraderGroup();
         traderGroupAutoCompleter = new TraderGroupAutoCompleter(txtGroup, listTraderGroup, null, false);
         traderGroupAutoCompleter.setGroup(null);
-        cOAAutoCompleter = new COAAutoCompleter(txtAccount, accountRepo.getCOA(ProUtil.getProperty("creditor.account")), null, false);
+        cOAAutoCompleter = new COAAutoCompleter(txtAccount, accountRepo.getCOAChild(ProUtil.getProperty("creditor.account")), null, false);
         cOAAutoCompleter.setCoa(null);
     }
 

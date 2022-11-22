@@ -62,7 +62,7 @@ public class DateAutoCompleter implements KeyListener, SelectionObserver {
     private String stDate;
     private String endDate;
     private SelectionObserver selectionObserver;
-    private final Image image = new ImageIcon(getClass().getResource("/images/date.png")).getImage();
+    private final Image image = new ImageIcon(this.getClass().getResource("/images/date.png")).getImage();
 
     public void setSelectionObserver(SelectionObserver selectionObserver) {
         this.selectionObserver = selectionObserver;

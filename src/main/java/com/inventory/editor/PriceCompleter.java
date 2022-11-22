@@ -6,18 +6,16 @@
 package com.inventory.editor;
 
 import com.common.Global;
-import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.model.Trader;
-import com.inventory.ui.common.InventoryRepo;
-import com.inventory.ui.common.TraderTableModel;
+import com.common.Util1;
+import com.inventory.model.PriceOption;
+import com.inventory.ui.common.SalePriceTableModel;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
@@ -29,6 +27,8 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
@@ -39,82 +39,46 @@ import javax.swing.text.JTextComponent;
  *
  * @author Lenovo
  */
-public class TraderAutoCompleter implements KeyListener {
+public final class PriceCompleter implements KeyListener {
 
     private final JTable table = new JTable();
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private TraderTableModel traderTableModel;
-    private Trader trader;
+    private SalePriceTableModel priceTableModel;
+    private PriceOption price;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
-    private SelectionObserver observer;
-    private List<String> listOption = new ArrayList<>();
-    private InventoryRepo inventoryRepo;
-    private boolean filter;
-    private String traderType;
+    boolean popupOpen = false;
 
-    public SelectionObserver getObserver() {
-        return observer;
+    //private CashFilter cashFilter = Global.allCash;
+    public PriceCompleter() {
     }
 
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
-    public List<String> getListOption() {
-        return listOption;
-    }
-
-    public void setListOption(List<String> listOption) {
-        this.listOption = listOption;
-    }
-
-    public TraderAutoCompleter() {
-    }
-
-    public TraderAutoCompleter(JTextComponent comp, InventoryRepo inventoryRepo,
-            AbstractCellEditor editor, boolean filter, String traderType) {
+    public PriceCompleter(JTextComponent comp, List<PriceOption> list,
+            AbstractCellEditor editor) {
         this.textComp = comp;
         this.editor = editor;
-        this.filter = filter;
-        this.traderType = traderType;
-        this.inventoryRepo = inventoryRepo;
+
         textComp.putClientProperty(AUTOCOMPLETER, this);
-        if (filter) {
-            Trader t = new Trader("-", "All");
-            setTrader(t);
-        }
         textComp.setFont(Global.textFont);
-        textComp.addKeyListener(this);
-        traderTableModel = new TraderTableModel();
-        table.setModel(traderTableModel);
+        priceTableModel = new SalePriceTableModel();
+        priceTableModel.setListPrice(list);
+        table.setModel(priceTableModel);
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
-        table.setDefaultRenderer(Object.class, new TableCellRender());
         table.setRowHeight(Global.tblRowHeight);
         table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
-
-        scroll.setBorder(null);
-        table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
-        table.getColumnModel().getColumn(1).setPreferredWidth(150);//Name
-        table.getColumnModel().getColumn(2).setPreferredWidth(100);//Region
-
+        table.getColumnModel().getColumn(1).setPreferredWidth(100);//Name
+        table.getColumnModel().getColumn(2).setPreferredWidth(150);//Type
+        table.setDefaultRenderer(Object.class, new TableCellRender());
+        table.setDefaultRenderer(Float.class, new TableCellRender());
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -123,12 +87,10 @@ public class TraderAutoCompleter implements KeyListener {
                 }
             }
         });
-
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
 
-        popup.setPopupSize(500, 200);
-
+        popup.setPopupSize(350, 300);
         popup.add(scroll);
 
         if (textComp instanceof JTextField) {
@@ -137,10 +99,11 @@ public class TraderAutoCompleter implements KeyListener {
             textComp.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
+                    popupOpen = true;
                     showPopup();
                 }
-
             });
+            textComp.getDocument().addDocumentListener(documentListener);
         } else {
             textComp.registerKeyboardAction(showAction, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE,
                     KeyEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
@@ -154,69 +117,105 @@ public class TraderAutoCompleter implements KeyListener {
         popup.addPopupMenuListener(new PopupMenuListener() {
             @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+
             }
 
             @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                 textComp.unregisterKeyboardAction(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0));
-
+                popupOpen = false;
             }
 
             @Override
             public void popupMenuCanceled(PopupMenuEvent e) {
-                if (editor != null) {
-                    editor.stopCellEditing();
+                if (!popupOpen) {
+                    if (editor != null) {
+                        editor.stopCellEditing();
+                    }
                 }
+
             }
         });
 
         table.setRequestFocusEnabled(false);
+
+        if (!list.isEmpty()) {
+            //table.setRowSelectionInterval(0, 0);
+        }
     }
 
     public void mouseSelect() {
         if (table.getSelectedRow() != -1) {
-            trader = traderTableModel.getTrader(table.convertRowIndexToModel(
+            price = priceTableModel.getPriceOption(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            textComp.setText(trader.getTraderName());
-            listOption = new ArrayList<>();
-        }
-        popup.setVisible(false);
-        if (editor != null) {
-            editor.stopCellEditing();
-        }
-        if (observer != null) {
-            if (trader != null) {
-                observer.selected(trader.getType(), trader.getType());
+            textComp.setText(Util1.getString(price.getPrice()));
+            if (editor == null) {
             }
         }
 
+        popup.setVisible(false);
+        popupOpen = false;
+        if (editor != null) {
+            editor.stopCellEditing();
+        }
     }
 
     private final Action acceptAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             mouseSelect();
+        }
+    };
+    DocumentListener documentListener = new DocumentListener() {
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            if (editor != null) {
+                popupOpen = true;
+                showPopup();
+            }
+        }
 
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            if (editor != null) {
+                popupOpen = true;
+                showPopup();
+            }
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
         }
     };
 
     public void closePopup() {
         popup.setVisible(false);
+        popupOpen = false;
     }
 
     public void showPopup() {
-        if (!popup.isVisible()) {
-            if (textComp.isEnabled()) {
-                textComp.registerKeyboardAction(acceptAction, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
-                        JComponent.WHEN_FOCUSED);
-                if (x == 0) {
-                    x = textComp.getWidth();
-                    y = textComp.getHeight();
-                }
+        if (popupOpen) {
+            if (!popup.isVisible()) {
+                textComp.addKeyListener(this);
+                //popup.setVisible(false); 
+                if (textComp.isEnabled()) {
+                    if (textComp instanceof JTextField) {
+                        textComp.getDocument().addDocumentListener(documentListener);
+                    }
 
-                popup.show(textComp, x, y);
-            } else {
-                popup.setVisible(false);
+                    textComp.registerKeyboardAction(acceptAction, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
+                            JComponent.WHEN_FOCUSED);
+                    if (x == 0) {
+                        x = textComp.getWidth();
+                        y = textComp.getHeight();
+                    }
+                    popup.show(textComp, x, y);
+                    popupOpen = false;
+
+                } else {
+                    popup.setVisible(false);
+                    popupOpen = false;
+                }
             }
         }
         textComp.requestFocus();
@@ -225,22 +224,24 @@ public class TraderAutoCompleter implements KeyListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            TraderAutoCompleter completer = (TraderAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            PriceCompleter completer = (PriceCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 if (completer.popup.isVisible()) {
                     completer.selectNextPossibleValue();
                 } else {
-                    completer.showPopup();
-
+                    if (!popupOpen) {
+                        popupOpen = true;
+                        completer.showPopup();
+                    }
                 }
             }
         }
     };
-    static Action upAction = new AbstractAction() {
+    Action upAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            TraderAutoCompleter completer = (TraderAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            PriceCompleter completer = (PriceCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 if (completer.popup.isVisible()) {
                     completer.selectPreviousPossibleValue();
@@ -252,16 +253,16 @@ public class TraderAutoCompleter implements KeyListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            TraderAutoCompleter completer = (TraderAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            PriceCompleter completer = (PriceCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 completer.popup.setVisible(false);
+                popupOpen = false;
             }
         }
     };
 
     protected void selectNextPossibleValue() {
         int si = table.getSelectedRow();
-
         if (si < table.getRowCount() - 1) {
             try {
                 table.setRowSelectionInterval(si + 1, si + 1);
@@ -280,7 +281,6 @@ public class TraderAutoCompleter implements KeyListener {
      */
     protected void selectPreviousPossibleValue() {
         int si = table.getSelectedRow();
-
         if (si > 0) {
             try {
                 table.setRowSelectionInterval(si - 1, si - 1);
@@ -288,77 +288,38 @@ public class TraderAutoCompleter implements KeyListener {
 
             }
         }
-
         Rectangle rect = table.getCellRect(table.getSelectedRow(), 0, true);
         table.scrollRectToVisible(rect);
     }
 
-    public Trader getTrader() {
-        return trader;
+    public PriceOption getPrice() {
+        return price;
     }
 
-    public final void setTrader(Trader trader) {
-        this.trader = trader;
-        this.textComp.setText(trader == null ? null : trader.getTraderName());
-    }
-
-    public void setTrader(Trader t, int row) {
-        traderTableModel.setTrader(t, row);
-    }
-
-    public void addTrader(Trader t) {
-        traderTableModel.addTrader(t);
-    }
 
     /*
      * KeyListener implementation
      */
     /**
      * Handle the key typed event from the text field.
-     *
-     * @param e
      */
     @Override
     public void keyTyped(KeyEvent e) {
-
     }
 
     /**
      * Handle the key-pressed event from the text field.
-     *
-     * @param e
      */
     @Override
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() != 0) {
-            showPopup();
-        }
     }
 
     /**
      * Handle the key-released event from the text field.
-     *
-     * @param e
      */
     @Override
     public void keyReleased(KeyEvent e) {
-        String str = textComp.getText();
-        if (!str.isEmpty()) {
-            if (!containKey(e)) {
-                List<Trader> list = inventoryRepo.getTraderList(str, traderType);
-                if (this.filter) {
-                    Trader s = new Trader("-", "All");
-                    list.add(s);
-                }
-                traderTableModel.setListTrader(list);
-                if (!list.isEmpty()) {
-                    table.setRowSelectionInterval(0, 0);
-                }
-            }
-        }
+
     }
 
-    private boolean containKey(KeyEvent e) {
-        return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;
-    }
 }

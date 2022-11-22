@@ -15,10 +15,10 @@ import lombok.extern.slf4j.Slf4j;
  * @author Lenovo
  */
 @Slf4j
-public class PriceTableModel extends AbstractTableModel {
+public class SalePriceTableModel extends AbstractTableModel {
 
     private List<PriceOption> listPrice = new ArrayList();
-    private final String[] columnNames = {"Description"};
+    private final String[] columnNames = {"Type", "Description", "Price"};
 
     @Override
     public String getColumnName(int column) {
@@ -32,7 +32,7 @@ public class PriceTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        return String.class;
+        return column == 2 ? Float.class : String.class;
     }
 
     @Override
@@ -43,7 +43,13 @@ public class PriceTableModel extends AbstractTableModel {
             switch (column) {
                 case 0 -> {
                     //Code
+                    return price.getKey().getPriceType();
+                }
+                case 1 -> {
                     return price.getDescription();
+                }
+                case 2 -> {
+                    return price.getPrice();
                 }
             }
         } catch (Exception ex) {

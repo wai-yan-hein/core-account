@@ -11,7 +11,6 @@ import com.common.ProUtil;
 import com.common.ReportFilter;
 import com.common.RightCellRender;
 import com.common.SelectionObserver;
-import com.common.StartWithRowFilter;
 import com.common.Util1;
 import com.inventory.editor.BrandAutoCompleter;
 import com.inventory.editor.CategoryAutoCompleter;
@@ -25,9 +24,10 @@ import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.ReorderTableModel;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +35,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
@@ -68,7 +69,18 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
     private SelectionObserver observer;
     private List<StockUnit> listStockUnit = new ArrayList<>();
     private TableRowSorter<TableModel> sorter;
-    private StartWithRowFilter swrf;
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusLost(FocusEvent e) {
+        }
+
+        @Override
+        public void focusGained(FocusEvent e) {
+            JTextField jtf = (JTextField) e.getSource();
+            jtf.selectAll();
+        }
+
+    };
 
     public JProgressBar getProgress() {
         return progress;
@@ -92,6 +104,15 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
     public ReorderLevelEntry() {
         initComponents();
         chkGroup();
+        initFoucsAdapter();
+    }
+
+    private void initFoucsAdapter() {
+        txtStock.addFocusListener(fa);
+        txtLoc.addFocusListener(fa);
+        txtGroup.addFocusListener(fa);
+        txtCat.addFocusListener(fa);
+        txtBrand.addFocusListener(fa);
     }
 
     public void initMain() {
@@ -323,7 +344,7 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
         txtBrand.setFont(Global.textFont);
 
         jLabel4.setFont(Global.lableFont);
-        jLabel4.setText("Stock Name");
+        jLabel4.setText("Stock");
 
         txtStock.setFont(Global.textFont);
 

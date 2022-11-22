@@ -411,10 +411,12 @@ public class SaleTableModel extends AbstractTableModel {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Location.");
                     status = false;
                     parent.requestFocus();
+                    break;
                 } else if (sdh.getUnitCode() == null) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Sale Unit.");
                     status = false;
                     parent.requestFocus();
+                    break;
                 }
             }
         }
@@ -452,10 +454,10 @@ public class SaleTableModel extends AbstractTableModel {
         if (s == null) {
             s = inventoryRepo.findStock(listDetail.get(row).getStockCode());
         }
-        List<PriceOption> listPrice = inventoryRepo.getPriceOption();
+        List<PriceOption> listPrice = inventoryRepo.getPriceOption("-");
         if (!listPrice.isEmpty()) {
             for (PriceOption op : listPrice) {
-                switch (Util1.isNull(op.getPriceType(), "N")) {
+                switch (Util1.isNull(op.getKey().getPriceType(), "N")) {
                     case "A" ->
                         op.setPrice(s.getSalePriceA());
                     case "B" ->
