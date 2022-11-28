@@ -3,6 +3,7 @@ package com;
 import com.formdev.flatlaf.intellijthemes.FlatCyanLightIJTheme;
 import com.common.Global;
 import com.common.Util1;
+import com.formdev.flatlaf.FlatLightLaf;
 import com.inventory.ui.ApplicationMainFrame;
 import com.inventory.ui.LoginDialog;
 import java.awt.Color;
@@ -46,7 +47,7 @@ public class CvInventoryApplication {
         Properties loadProperty = loadProperty();
         initFont(Util1.getInteger(loadProperty.getProperty("font.size")));
         try {
-            UIManager.setLookAndFeel(new FlatCyanLightIJTheme());
+            UIManager.setLookAndFeel(new FlatLightLaf());
         } catch (UnsupportedLookAndFeelException ex) {
             System.err.println("Failed to initialize LaF");
         }
@@ -66,13 +67,13 @@ public class CvInventoryApplication {
         UIManager.put("Component.arc", 10);
         UIManager.put("ProgressBar.arc", 10);
         UIManager.put("TextComponent.arc", 10);
-        UIManager.put("TabbedPane.showTabSeparators", true);
-        UIManager.put("TableHeader.background", new Color(217, 217, 217));
-        UIManager.put("TableHeader.foreground", Color.black);
-        UIManager.put("TableHeader.separatorColor", Color.black);
-        UIManager.put("TableHeader.bottomSeparatorColor", Color.black);
+        //UIManager.put("TabbedPane.showTabSeparators", true);
+        UIManager.put("TableHeader.background", Global.selectionColor);
+        UIManager.put("TableHeader.foreground", Color.white);
+        //UIManager.put("TableHeader.separatorColor", Color.black);
+        //UIManager.put("TableHeader.bottomSeparatorColor", Color.black);
         //UIManager.put("Table.gridColor", UIManager.getDefaults().getColor("Table.selectionBackground"));
-        UIManager.put("Table.gridColor", new Color(213, 235, 226));
+       //UIManager.put("Table.gridColor", new Color(213, 235, 226));
         //FlatSolarizedLightIJTheme.setup();
         SpringApplicationBuilder builder = new SpringApplicationBuilder(CvInventoryApplication.class);
         builder.headless(false);
@@ -136,7 +137,7 @@ public class CvInventoryApplication {
                 Global.menuFont = font.deriveFont(Font.BOLD, fontSize + 2);
                 Global.lableFont = font.deriveFont(Font.BOLD, fontSize);
                 Global.amtFont = font.deriveFont(Font.BOLD, fontSize + 1);
-                Global.companyFont = font.deriveFont(Font.BOLD, fontSize + 4);
+                Global.companyFont = font.deriveFont(Font.BOLD, fontSize + 3);
                 Global.shortCutFont = font.deriveFont(Font.BOLD, fontSize + 2);
                 Global.tblHeaderFont = font.deriveFont(Font.BOLD, fontSize + 1);
                 Global.tblRowHeight = fontSize + 15;

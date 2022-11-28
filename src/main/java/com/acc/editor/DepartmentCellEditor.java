@@ -28,7 +28,6 @@ public class DepartmentCellEditor extends AbstractCellEditor implements TableCel
 
     private JComponent component = null;
     private DepartmentAutoCompleter completer;
-    private final boolean filter;
     private final List<Department> listDepartment;
 
     private final FocusAdapter fa = new FocusAdapter() {
@@ -46,8 +45,7 @@ public class DepartmentCellEditor extends AbstractCellEditor implements TableCel
 
     };
 
-    public DepartmentCellEditor(boolean filter, List<Department> listDepartment) {
-        this.filter = filter;
+    public DepartmentCellEditor(List<Department> listDepartment) {
         this.listDepartment = listDepartment;
     }
 
@@ -88,7 +86,7 @@ public class DepartmentCellEditor extends AbstractCellEditor implements TableCel
             jtf.setText(value.toString());
             jtf.selectAll();
         }
-        completer = new DepartmentAutoCompleter(jtf, listDepartment, this, filter, false);
+        completer = new DepartmentAutoCompleter(jtf, listDepartment, this, false, false);
         return component;
     }
 

@@ -22,7 +22,6 @@ import javax.swing.table.DefaultTableCellRenderer;
  */
 public class GLTableCellRender extends DefaultTableCellRenderer {
 
-    private final Color bgColor = new Color(213, 235, 226);
     private final Color zeroColor = new Color(204, 242, 196);
     private double drAmt = 0.0;
     private double crAmt = 0.0;
@@ -41,7 +40,7 @@ public class GLTableCellRender extends DefaultTableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        c.setBackground(row % 2 == 0 ? bgColor : Color.WHITE);
+        c.setBackground(row % 2 == 0 ? Global.BG_COLOR : Color.WHITE);
         drAmt = Util1.getDouble(table.getValueAt(row, row1));
         crAmt = Util1.getDouble(table.getValueAt(row, row2));
         if ((drAmt + crAmt) == 0) {

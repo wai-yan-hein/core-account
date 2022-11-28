@@ -4,6 +4,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
@@ -196,6 +197,11 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         tblProcessDetail.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
         tblProcessDetail.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));//unit
         tblProcessDetail.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//price
+        //
+        tblProcessDetail.getColumnModel().getColumn(4).setCellRenderer(new DecimalFormatRender());//qty
+        tblProcessDetail.getColumnModel().getColumn(6).setCellRenderer(new DecimalFormatRender());//price
+        tblProcessDetail.getColumnModel().getColumn(7).setCellRenderer(new DecimalFormatRender());//amount
+
         tblProcessDetail.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblProcessDetail.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -306,6 +312,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         txtProNo.setText(null);
         txtQty.setValue(1);
         txtPrice.setValue(null);
+        txtAmt.setValue(null);
         processHisDetailTableModel.clear();
         txtStartDate.requestFocusInWindow();
     }

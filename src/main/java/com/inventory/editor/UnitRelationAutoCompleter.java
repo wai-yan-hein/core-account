@@ -9,8 +9,8 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.inventory.model.UnitRelation;
-import com.inventory.ui.setup.dialog.OptionDialog;
 import com.inventory.ui.setup.dialog.common.RelationTableModel;
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -29,7 +29,6 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.RowFilter;
-import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
@@ -55,10 +54,8 @@ public final class UnitRelationAutoCompleter implements KeyListener {
     private int x = 0;
     private int y = 0;
     private List<String> listOption = new ArrayList<>();
-    private OptionDialog optionDialog;
     private SelectionObserver observer;
     private List<UnitRelation> listRelation;
-    private boolean custom;
 
     public SelectionObserver getObserver() {
         return observer;
@@ -84,7 +81,6 @@ public final class UnitRelationAutoCompleter implements KeyListener {
         this.textComp = comp;
         this.editor = editor;
         this.listRelation = list;
-        this.custom = custom;
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
@@ -94,13 +90,11 @@ public final class UnitRelationAutoCompleter implements KeyListener {
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
-        table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
+        table.setSelectionForeground(Color.WHITE);
         table.setDefaultRenderer(Object.class, new TableCellRender());
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
-
-        scroll.setBorder(null);
         table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(30);//Code
 

@@ -11,6 +11,7 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -82,6 +83,7 @@ public final class CurrencyAAutoCompleter implements KeyListener, SelectionObser
         table.setRowHeight(Global.tblRowHeight);
         table.getTableHeader().setFont(Global.lableFont);
         table.setDefaultRenderer(Object.class, new TableCellRender());
+        table.setSelectionForeground(Color.WHITE);
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);

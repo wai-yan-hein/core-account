@@ -28,8 +28,6 @@ public class CurrencyAEditor extends AbstractCellEditor implements TableCellEdit
 
     private JComponent component = null;
     private CurrencyAAutoCompleter completer;
-    private Object oldValue;
-    private boolean filter;
     private List<Currency> listCurrency;
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
@@ -44,10 +42,8 @@ public class CurrencyAEditor extends AbstractCellEditor implements TableCellEdit
 
     };
 
-    //private List<Medicine> listTrader = new ArrayList();
-    public CurrencyAEditor(List<Currency> listCurrency, boolean filter) {
+    public CurrencyAEditor(List<Currency> listCurrency) {
         this.listCurrency = listCurrency;
-        this.filter = filter;
     }
 
     @Override
@@ -55,7 +51,6 @@ public class CurrencyAEditor extends AbstractCellEditor implements TableCellEdit
             boolean isSelected, int rowIndex, int vColIndex) {
         JTextField jtf = new JTextField();
         jtf.setFont(Global.textFont);
-        oldValue = value;
         KeyListener keyListener = new KeyListener() {
             @Override
             public void keyPressed(KeyEvent keyEvent) {
@@ -88,7 +83,7 @@ public class CurrencyAEditor extends AbstractCellEditor implements TableCellEdit
             jtf.setText(value.toString());
             jtf.selectAll();
         }
-        completer = new CurrencyAAutoCompleter(jtf, listCurrency, this, filter);
+        completer = new CurrencyAAutoCompleter(jtf, listCurrency, this, false);
 
         return component;
     }

@@ -8,7 +8,7 @@ package com.common;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.text.DateFormat;
-import java.util.Objects;
+import java.util.Date;
 import javax.swing.JOptionPane;
 
 /**
@@ -80,11 +80,11 @@ public class ProUtil {
     }
 
     public static String getPLProcess() {
-        return Global.hmRoleProperty.get("system.profitlost.process");
+        return Global.hmRoleProperty.get("pl.process");
     }
 
-    public static String getInventoryAcc() {
-        return Global.hmRoleProperty.get("system.inventory.coa");
+    public static String getInvGroup() {
+        return Global.hmRoleProperty.get("inventory.group");
     }
 
     public static String getIEProcess() {
@@ -96,7 +96,7 @@ public class ProUtil {
     }
 
     public static String getBalanceSheetProcess() {
-        return Global.hmRoleProperty.get("system.balancesheet.process");
+        return Global.hmRoleProperty.get("balancesheet.process");
     }
 
     public static String getConversionAcc() {
@@ -107,24 +107,43 @@ public class ProUtil {
         return Global.hmRoleProperty.get("cash.group");
     }
 
-    public static String getIncomeGroup() {
-        String ig = Global.hmRoleProperty.get("income.group");
-        if (Objects.isNull(ig)) {
-            JOptionPane.showMessageDialog(Global.parentForm, "Invalid Income Group.");
-        }
+    public static String getIncomeExpenseProcess() {
+        String ig = Global.hmRoleProperty.get("income.expense.process");
         return ig;
-    }
-
-    public static String getExpenseGroup() {
-        String eg = Global.hmRoleProperty.get("expense.group");
-        if (Objects.isNull(eg)) {
-            JOptionPane.showMessageDialog(Global.parentForm, "Invalid Expense Group.");
-        }
-        return eg;
     }
 
     public static String getReportPath() {
         return "report/";
     }
 
+    public static Date lockDate() {
+        String value = ProUtil.getProperty("data.lock.date");
+        int day = lockDay();
+        if (day != 0) {
+            String today = Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd");
+            value = Util1.toDateStr(Util1.minusDay(today, day), "yyyy-MM-dd", "dd/MM/yyyy");
+        }
+        return value == null ? Util1.toDate(Global.startDate) : Util1.toDate(value, "dd/MM/yyyy");
+    }
+
+    public static int lockDay() {
+        String value = ProUtil.getProperty("data.lock.day");
+        return value == null ? 0 : Util1.getInteger(value);
+    }
+
+    public static boolean isValidDate(Date date) {
+        if (date.after(Util1.getTodayDate())) {
+            JOptionPane.showMessageDialog(Global.parentForm, "Date is due.", "Invalid Date", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        if (date.before(Util1.toDate(Global.startDate, Global.dateFormat))) {
+            JOptionPane.showMessageDialog(Global.parentForm, "Date is not in finacial period.", "Invalid Date", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        if (date.before(lockDate())) {
+            JOptionPane.showMessageDialog(Global.parentForm, "Date is locked.", "Invalid Date", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        return true;
+    }
 }

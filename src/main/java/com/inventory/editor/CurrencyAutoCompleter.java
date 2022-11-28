@@ -10,6 +10,7 @@ import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.user.model.Currency;
 import com.inventory.ui.common.CurrencyCompleterTabelModel;
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -28,13 +29,11 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.RowFilter;
-import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -42,7 +41,6 @@ import org.slf4j.LoggerFactory;
  */
 public class CurrencyAutoCompleter implements KeyListener, SelectionObserver {
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(CurrencyAutoCompleter.class);
     private final JTable table = new JTable();
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
@@ -54,7 +52,6 @@ public class CurrencyAutoCompleter implements KeyListener, SelectionObserver {
     private int x = 0;
     private int y = 0;
     private SelectionObserver selectionObserver;
-    private List<Currency> listCurrency;
 
     public void setSelectionObserver(SelectionObserver selectionObserver) {
         this.selectionObserver = selectionObserver;
@@ -68,7 +65,6 @@ public class CurrencyAutoCompleter implements KeyListener, SelectionObserver {
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
-        this.listCurrency = list;
         if (filter) {
             Currency cur = new Currency("-", "All");
             list = new ArrayList<>(list);
@@ -84,12 +80,11 @@ public class CurrencyAutoCompleter implements KeyListener, SelectionObserver {
         table.setRowHeight(Global.tblRowHeight);
         table.setDefaultRenderer(Object.class, new TableCellRender());
         table.getTableHeader().setFont(Global.tblHeaderFont);
-        table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
+        table.setSelectionForeground(Color.WHITE);
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
 
-        scroll.setBorder(null);
         table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(40);//Code
 

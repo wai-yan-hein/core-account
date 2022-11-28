@@ -36,7 +36,7 @@ public class ReportFilter {
     private String coaLv1;
     private Integer macId;
     private boolean closing;
-    private List<String> departments;
+    private List<String> listDepartment;
 
     public ReportFilter(String compCode, Integer macId) {
         this.compCode = compCode;

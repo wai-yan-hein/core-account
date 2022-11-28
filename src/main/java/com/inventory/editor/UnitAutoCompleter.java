@@ -78,9 +78,6 @@ public final class UnitAutoCompleter implements KeyListener {
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
         textComp.getDocument().addDocumentListener(documentListener);
-        /*        if (list.size() == 1) {
-        setStockUnit(list.get(0));
-        }*/
         unitTableModel = new StockUnitTableModel(list);
         table.setModel(unitTableModel);
         table.setSize(50, 50);
@@ -88,12 +85,10 @@ public final class UnitAutoCompleter implements KeyListener {
         table.setRowHeight(Global.tblRowHeight);
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setDefaultRenderer(Object.class, new TableCellRender());
-        table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
+        table.setSelectionForeground(Color.WHITE);
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
-
-        scroll.setBorder(null);
         table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(40);//Code
 

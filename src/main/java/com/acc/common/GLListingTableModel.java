@@ -5,6 +5,7 @@
 package com.acc.common;
 
 import com.acc.model.VTriBalance;
+import com.common.Util1;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -61,10 +62,11 @@ public class GLListingTableModel extends AbstractTableModel {
                     return apar.getCurCode();
                 }
                 case 3 -> {
-                    return apar.getDrAmt();
+                    return Util1.getDouble(apar.getDrAmt()) == 0 ? null : apar.getDrAmt();
                 }
                 case 4 -> {
-                    return apar.getCrAmt();
+                    return Util1.getDouble(apar.getCrAmt()) == 0 ? null : apar.getCrAmt();
+
                 }
             }
 

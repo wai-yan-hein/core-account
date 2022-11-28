@@ -195,7 +195,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         initTableCashInOut();
         initTableCashOP();
         initDateDecorator();
-        createDateFilter();
     }
 
     private void initDateDecorator() {
@@ -213,16 +212,15 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             hmDate.put(z, str);
             hmPage.put(str, z);
         }
-        decorator.setHmData(hmDate);
         decorator.setHmPage(hmPage);
-        //decorator.refreshButton(enDate);
+        decorator.setHmData(hmDate);
+        decorator.refreshButton(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
     }
 
     private void initFilter() {
         listDepartment = accounRepo.getDepartment();
-        listTrader = accounRepo.getTrader();
         listCurrency = accounRepo.getCurrency();
-        traderAutoCompleter = new TraderAAutoCompleter(txtPerson, listTrader, null, true, 2);
+        traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accounRepo, null, true);
         traderAutoCompleter.setSelectionObserver(this);
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDepartment, listDepartment, null, true, true);
         departmentAutoCompleter.setObserver(this);
@@ -247,23 +245,22 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         allCashTableModel.setSourceAccId(sourceAccId);
         allCashTableModel.addNewRow();
         tblCash.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
-        tblCash.getColumnModel().getColumn(1).setCellEditor(new DepartmentCellEditor(false, listDepartment));
+        tblCash.getColumnModel().getColumn(1).setCellEditor(new DepartmentCellEditor(listDepartment));
         tblCash.getColumnModel().getColumn(2).setCellEditor(new DespEditor(accounRepo));
         tblCash.getColumnModel().getColumn(3).setCellEditor(new RefCellEditor(accounRepo));
         tblCash.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
-        tblCash.getColumnModel().getColumn(5).setCellEditor(new TraderCellEditor(listTrader, false, 2));
-        tblCash.getColumnModel().getColumn(6).setCellEditor(new COA3CellEditor(accounRepo, false));
-        tblCash.getColumnModel().getColumn(7).setCellEditor(new CurrencyAEditor(listCurrency, false));
+        tblCash.getColumnModel().getColumn(5).setCellEditor(new TraderCellEditor(accounRepo));
+        tblCash.getColumnModel().getColumn(6).setCellEditor(new COA3CellEditor(accounRepo));
+        tblCash.getColumnModel().getColumn(7).setCellEditor(new CurrencyAEditor(listCurrency));
         tblCash.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
         tblCash.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
     }
 
     public void initMain() {
-        taskExecutor.execute(() -> {
-            initFilter();
-            clearFilter();
-        });
-        progress.setVisible(true);
+        initFilter();
+        createDateFilter();
+        clearFilter();
+
     }
 
     private void requestFoucsTable() {
@@ -282,10 +279,9 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tblCIO.setModel(inOutTableModel);
         tblCIO.getTableHeader().setFont(Global.tblHeaderFont);
         tblCIO.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblCIO.setCellSelectionEnabled(true);
         tblCIO.setFont(Global.amtFont);
-        tblCIO.setDefaultRenderer(Double.class, new TableCellRender());
-        tblCIO.setDefaultRenderer(Object.class, new TableCellRender());
+        tblCIO.setDefaultRenderer(Double.class, new OpeningCellRender());
+        tblCIO.setDefaultRenderer(Object.class, new OpeningCellRender());
         tblCIO.getColumnModel().getColumn(0).setPreferredWidth(10);
         tblCIO.getColumnModel().getColumn(1).setPreferredWidth(100);
         tblCIO.getColumnModel().getColumn(2).setPreferredWidth(100);
@@ -295,7 +291,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tblCashOP.setModel(opTableModel);
         tblCashOP.getTableHeader().setFont(Global.tblHeaderFont);
         tblCashOP.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblCashOP.setCellSelectionEnabled(true);
         tblCashOP.setFont(Global.amtFont);
         tblCashOP.setDefaultRenderer(Double.class, new OpeningCellRender());
         tblCashOP.setDefaultRenderer(Object.class, new OpeningCellRender());
@@ -418,16 +413,17 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void searchCash() {
+        log.info("search cash book.");
         progress.setIndeterminate(true);
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
-        filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), Global.dateFormat));
-        filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getEndDate(), Global.dateFormat));
+        filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
+        filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
         filter.setDesp(despAutoCompleter.getAutoText().getDescription().equals("All") ? "-" : despAutoCompleter.getAutoText().getDescription());
         filter.setSrcAcc(sourceAccId);
         filter.setReference(refAutoCompleter.getAutoText().getReference().equals("All") ? "-"
                 : refAutoCompleter.getAutoText().getReference());
         filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
-        filter.setDepartments(departmentAutoCompleter.getListOption());
+        filter.setListDepartment(departmentAutoCompleter.getListOption());
         filter.setTranSource(tranSourceAutoCompleter.getAutoText().getTranSource().equals("All") ? "-"
                 : tranSourceAutoCompleter.getAutoText().getTranSource());
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
@@ -455,6 +451,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 calOpeningClosing();
                 getLatestCurrency();
                 requestFoucsTable();
+                decorator.refreshButton(filter.getFromDate());
                 progress.setIndeterminate(false);
             } catch (IOException ex) {
                 log.error(ex.getMessage());
@@ -1056,14 +1053,14 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void calOpeningClosing() {
-        String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getEndDate(), Global.dateFormat);
+        String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat);
         String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
         String clDate = Util1.toDateStrMYSQL(stDate, "dd/MM/yyyy");
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
         filter.setOpeningDate(opDate);
         filter.setClosingDate(clDate);
         filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
-        filter.setDepartments(departmentAutoCompleter.getListOption());
+        filter.setListDepartment(departmentAutoCompleter.getListOption());
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setCoaCode(sourceAccId);
         Mono<ResponseEntity<List<TmpOpening>>> result = accountApi.post()
@@ -1087,6 +1084,12 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     @Override
     public void selected(Object source, Object selectObj) {
         if (selectObj != null) {
+            if (source.equals("Date-Search")) {
+                String date = Util1.toDateStr(selectObj.toString(), "yyyy-MM-dd", Global.dateFormat);
+                dateAutoCompleter.setStDate(date);
+                dateAutoCompleter.setEndDate(date);
+                txtDate.setText(date);
+            }
             searchCash();
         }
     }

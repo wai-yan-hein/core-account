@@ -11,6 +11,7 @@ import com.acc.model.VRef;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -43,11 +44,11 @@ import org.slf4j.LoggerFactory;
 public final class RefAutoCompleter implements KeyListener {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(RefAutoCompleter.class);
-    private JTable table = new JTable();
+    private final JTable table = new JTable();
     private JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private RefTableModel refModel = new RefTableModel();
+    private final RefTableModel refModel = new RefTableModel();
     private VRef ref;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
@@ -87,7 +88,7 @@ public final class RefAutoCompleter implements KeyListener {
         table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
         table.setDefaultRenderer(Object.class, new TableCellRender());
-
+        table.setSelectionForeground(Color.WHITE);
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);

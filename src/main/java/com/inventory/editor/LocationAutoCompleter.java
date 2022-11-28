@@ -32,7 +32,6 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.RowFilter;
-import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
@@ -40,7 +39,6 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -48,7 +46,6 @@ import org.slf4j.LoggerFactory;
  */
 public class LocationAutoCompleter implements KeyListener, SelectionObserver {
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(LocationAutoCompleter.class);
     private final JTable table = new JTable();
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
@@ -125,12 +122,10 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setDefaultRenderer(Object.class, new TableCellRender());
         table.setRowHeight(Global.tblRowHeight);
-        table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
+        table.setSelectionForeground(Color.WHITE);
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
-
-        scroll.setBorder(null);
         table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(40);//Code
 

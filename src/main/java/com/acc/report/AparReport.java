@@ -186,8 +186,8 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             isApPrCal = true;
             aPARTableModel.clear();
             String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
-            String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), "dd/MM/yyyy");
-            String endDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getEndDate(), "dd/MM/yyyy");
+            String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), "dd/MM/yyyy");
+            String endDate = Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), "dd/MM/yyyy");
             TraderA trader = traderAutoCompleter.getTrader();
             String traderType = trader.getTraderType();
             String traderCode = trader.getKey().getCode();
@@ -198,10 +198,10 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             filter.setTraderCode(traderCode);
             filter.setCurCode(Util1.isNull(filter.getCurCode(), "-"));
             filter.setTraderType(traderType);
-            filter.setDepartments(departmentAutoCompleter.getListOption());
+            filter.setListDepartment(departmentAutoCompleter.getListOption());
             filter.setCoaCode(cOAAutoCompleter.getCOA().getKey().getCoaCode());
             Mono<ResponseEntity<List<VApar>>> result = accountApi.post()
-                    .uri("/account/report/get-arap")
+                    .uri("/report/get-arap")
                     .body(Mono.just(filter), ReportFiller.class)
                     .retrieve()
                     .toEntityList(VApar.class);
@@ -241,7 +241,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         } else {
             outBal = ttlCrAmt - ttlDrAmt;
         }
-        txtFOFB.setValue(Util1.toFormatPattern(outBal));
+        txtFOFB.setValue(outBal);
     }
 
     private void initCombo() {
@@ -253,7 +253,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency,
                 userRepo.getCurrency(), null, true);
         currencyAutoCompleter.setSelectionObserver(this);
-        traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accountRepo.getTrader(), null, true, 1);
+        traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accountRepo, null, true);
         traderAutoCompleter.setSelectionObserver(this);
         cOAAutoCompleter = new COAAutoCompleter(txtAccount, accountRepo.getTraderAccount(), null, true);
         cOAAutoCompleter.setSelectionObserver(this);
@@ -484,14 +484,17 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         txtFTotalDrAmt.setEditable(false);
+        txtFTotalDrAmt.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0"))));
         txtFTotalDrAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtFTotalDrAmt.setFont(Global.amtFont);
 
         txtFTotalCrAmt.setEditable(false);
+        txtFTotalCrAmt.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0"))));
         txtFTotalCrAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtFTotalCrAmt.setFont(Global.amtFont);
 
         txtFOFB.setEditable(false);
+        txtFOFB.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0"))));
         txtFOFB.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtFOFB.setFont(Global.amtFont);
 

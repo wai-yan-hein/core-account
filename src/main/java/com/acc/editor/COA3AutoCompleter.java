@@ -12,6 +12,7 @@ import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -77,6 +78,7 @@ public class COA3AutoCompleter implements KeyListener {
         table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
         table.setDefaultRenderer(Object.class, new TableCellRender());
+        table.setSelectionForeground(Color.WHITE);
         JScrollPane scroll = new JScrollPane(table);
         table.getColumnModel().getColumn(0).setPreferredWidth(70);//Code
         table.getColumnModel().getColumn(1).setPreferredWidth(150);//Name

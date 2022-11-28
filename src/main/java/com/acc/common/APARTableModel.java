@@ -5,6 +5,7 @@
 package com.acc.common;
 
 import com.acc.model.VApar;
+import com.common.Util1;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -58,9 +59,9 @@ public class APARTableModel extends AbstractTableModel {
                 case 2 ->
                     apar.getCurCode();
                 case 3 ->
-                    apar.getDrAmt();
+                    Util1.getDouble(apar.getDrAmt()) == 0 ? null : apar.getDrAmt();
                 case 4 ->
-                    apar.getCrAmt();
+                    Util1.getDouble(apar.getCrAmt()) == 0 ? null : apar.getCrAmt();
                 default ->
                     null;
             };

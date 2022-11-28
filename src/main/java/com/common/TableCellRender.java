@@ -22,7 +22,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 public class TableCellRender extends DefaultTableCellRenderer {
 
     private final JCheckBox check = new JCheckBox();
-    private final Color bgColor = new Color(213, 235, 226);
     private final DecimalFormat formatter = new DecimalFormat(Util1.DECIMAL_FORMAT);
 
     public TableCellRender() {
@@ -31,7 +30,7 @@ public class TableCellRender extends DefaultTableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        c.setBackground(row % 2 == 0 ? bgColor : Color.WHITE);
+        c.setBackground(row % 2 == 0 ? Global.BG_COLOR : Color.WHITE);
         if (isSelected) {
             c.setBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
         }

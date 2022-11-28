@@ -160,7 +160,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         filter.setToDate(endDate);
         filter.setSrcAcc(coaCode);
         filter.setCurCode(curCode);
-        filter.setDepartments(department);
+        filter.setListDepartment(department);
         filter.setTraderCode(traderCode);
         Mono<ResponseEntity<List<Gl>>> result = accountApi.post()
                 .uri("/account/search-gl")

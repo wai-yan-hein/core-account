@@ -5,7 +5,7 @@
  */
 package com.acc.common;
 
-import java.awt.Color;
+import com.common.Util1;
 import java.awt.Component;
 import java.text.DecimalFormat;
 import javax.swing.JLabel;
@@ -20,19 +20,16 @@ import javax.swing.table.DefaultTableCellRenderer;
  */
 public class OpeningCellRender extends DefaultTableCellRenderer {
 
-    private final Color bgColor = new Color(213, 235, 226);
+    private final DecimalFormat formatter = new DecimalFormat(Util1.DECIMAL_FORMAT);
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        c.setBackground(row % 2 == 0 ? bgColor : Color.WHITE);
         if (isSelected) {
             c.setBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
         }
-        String s;
         if (value instanceof Double d) {
-            DecimalFormat dFormat = new DecimalFormat("#,##0.###;(#,##0.###)");
-            s = dFormat.format(d);
+            String s = formatter.format(d);
             c = getTableCellRendererComponent(table, s,
                     isSelected, hasFocus, row, column);
             ((JLabel) c).setHorizontalAlignment(SwingConstants.RIGHT);

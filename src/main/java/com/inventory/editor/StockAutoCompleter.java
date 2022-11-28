@@ -13,6 +13,7 @@ import com.common.Util1;
 import com.inventory.model.Stock;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.StockCompleterTableModel;
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -30,13 +31,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,7 +52,6 @@ public final class StockAutoCompleter implements KeyListener {
     private StockCompleterTableModel stockTableModel;
     private Stock stock;
     public AbstractCellEditor editor;
-    private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
     boolean popupOpen = false;
@@ -105,9 +102,7 @@ public final class StockAutoCompleter implements KeyListener {
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
-        table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
-        sorter = new TableRowSorter(table.getModel());
-        table.setRowSorter(sorter);
+        table.setSelectionForeground(Color.WHITE);
         JScrollPane scroll = new JScrollPane(table);
         table.getColumnModel().getColumn(0).setPreferredWidth(100);//Code
         table.getColumnModel().getColumn(1).setPreferredWidth(300);//Name

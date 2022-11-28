@@ -18,8 +18,11 @@ import com.inventory.model.Stock;
 import com.inventory.model.VouStatus;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.ProcessHisTableModel;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 
@@ -28,7 +31,7 @@ import javax.swing.ListSelectionModel;
  * @author DELL
  */
 public class ManufactureHistoryDialog extends javax.swing.JDialog implements SelectionObserver {
-    
+
     private final ProcessHisTableModel processHisTableModel = new ProcessHisTableModel();
     private int selectRow = -1;
     private InventoryRepo inventoryRepo;
@@ -36,22 +39,30 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
     private LocationAutoCompleter locationAutoCompleter;
     private VouStatusAutoCompleter vouStatusAutoCompleter;
     private SelectionObserver observer;
-    
+
     public SelectionObserver getObserver() {
         return observer;
     }
-    
+
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-    
+
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
     }
-    
+
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            if (e.getSource() instanceof JTextField txt) {
+                txt.selectAll();
+            }
+        }
+    };
 
     /**
      * Creates new form ManufactureHistoryDialog
@@ -59,15 +70,26 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
     public ManufactureHistoryDialog() {
         super(Global.parentForm, true);
         initComponents();
+        initFocusAdapter();
     }
-    
+
+    private void initFocusAdapter() {
+        txtProNo.addFocusListener(fa);
+        txtRemark.addFocusListener(fa);
+        txtVouNo.addFocusListener(fa);
+        txtStock.addFocusListener(fa);
+        txtPT.addFocusListener(fa);
+        txtLoc.addFocusListener(fa);
+
+    }
+
     public void initMain() {
         initDate();
         initCompleter();
         initTblProcess();
         searchProcess();
     }
-    
+
     private void clear() {
         initDate();
         txtProNo.setText(null);
@@ -78,9 +100,9 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         stockAutoCompleter.setStock(new Stock("-", "All"));
         chkDel.setSelected(false);
         chkFinish.setSelected(false);
-        
+
     }
-    
+
     private void initCompleter() {
         locationAutoCompleter = new LocationAutoCompleter(txtLoc, inventoryRepo.getLocation(), null, true, false);
         locationAutoCompleter.setObserver(this);
@@ -89,12 +111,12 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtPT, inventoryRepo, null, true);
         vouStatusAutoCompleter.setObserver(this);
     }
-    
+
     private void initDate() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
     }
-    
+
     private void initTblProcess() {
         tblProcess.setModel(processHisTableModel);
         tblProcess.getTableHeader().setFont(Global.tblHeaderFont);
@@ -112,7 +134,7 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         tblProcess.setDefaultRenderer(Object.class, new TableCellRender());
         tblProcess.setDefaultRenderer(Float.class, new TableCellRender());
     }
-    
+
     private void select() {
         if (tblProcess.getSelectedRow() >= 0) {
             selectRow = tblProcess.convertRowIndexToModel(tblProcess.getSelectedRow());
@@ -122,7 +144,7 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
             }
         }
     }
-    
+
     private void searchProcess() {
         FilterObject f = new FilterObject(Global.compCode, Global.deptId);
         f.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));

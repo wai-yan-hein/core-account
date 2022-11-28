@@ -9,6 +9,7 @@ import com.common.Global;
 import com.common.TableCellRender;
 import com.inventory.model.AppUser;
 import com.user.common.UserTableModel;
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -27,13 +28,11 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.RowFilter;
-import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -41,7 +40,6 @@ import org.slf4j.LoggerFactory;
  */
 public final class AppUserAutoCompleter implements KeyListener {
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(AppUserAutoCompleter.class);
     private final JTable table = new JTable();
     private final JPopupMenu popup = new JPopupMenu();
     private final JTextComponent textComp;
@@ -73,12 +71,10 @@ public final class AppUserAutoCompleter implements KeyListener {
         table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
         table.setDefaultRenderer(Object.class, new TableCellRender());
-        table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
+        table.setSelectionForeground(Color.WHITE);
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
-
-        scroll.setBorder(null);
         table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(10);//Code
         table.getColumnModel().getColumn(1).setPreferredWidth(30);//Name

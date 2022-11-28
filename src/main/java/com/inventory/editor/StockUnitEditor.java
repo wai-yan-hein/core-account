@@ -56,7 +56,6 @@ public class StockUnitEditor extends AbstractCellEditor implements TableCellEdit
         JTextField jtf = new JTextField();
         jtf.setFont(Global.textFont);
         jtf.setHighlighter(null);
-        //List<Medicine> listDepartment = dao.findAll("Medicine", "active = true");
         KeyListener keyListener = new KeyListener() {
             @Override
             public void keyPressed(KeyEvent keyEvent) {

@@ -5,19 +5,20 @@
  */
 package com.acc.editor;
 
+import com.acc.common.AccountRepo;
 import com.acc.common.TraderATableModel;
 import com.acc.model.TraderA;
 import com.acc.model.TraderAKey;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
@@ -28,7 +29,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.RowFilter;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
@@ -36,7 +36,6 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -44,19 +43,19 @@ import org.slf4j.LoggerFactory;
  */
 public final class TraderAAutoCompleter implements KeyListener {
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(TraderAAutoCompleter.class);
-    private JTable table = new JTable();
+    private final JTable table = new JTable();
     private JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
     private TraderATableModel traderTableModel;
     private TraderA trader;
     public AbstractCellEditor editor;
-    private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
     private boolean popupOpen = false;
     private SelectionObserver selectionObserver;
+    private AccountRepo accountRepo;
+    private boolean filter;
 
     public void setSelectionObserver(SelectionObserver selectionObserver) {
         this.selectionObserver = selectionObserver;
@@ -65,46 +64,28 @@ public final class TraderAAutoCompleter implements KeyListener {
     public TraderAAutoCompleter() {
     }
 
-    public TraderAAutoCompleter(JTextComponent comp, List<TraderA> list,
-            AbstractCellEditor editor, boolean filter, int max) {
+    public TraderAAutoCompleter(JTextComponent comp, AccountRepo accountRepo,
+            AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
-        textComp.putClientProperty(AUTOCOMPLETER, this);
-        if (filter) {
-            switch (max) {
-                case 1 -> {
-                    list = new ArrayList<>(list);
-                    TraderA t = new TraderA(new TraderAKey("-", Global.compCode), "All");
-                    list.add(0, t);
-                    setTrader(t);
-                }
-                case 2 -> {
-                    list = new ArrayList<>(list);
-                    TraderA t = new TraderA(new TraderAKey("-", Global.compCode), "All");
-                    list.add(0, t);
-                    list.add(1, new TraderA(new TraderAKey("C", Global.compCode), "All Customer"));
-                    list.add(2, new TraderA(new TraderAKey("S", Global.compCode), "All Supplier"));
-                    setTrader(t);
-                }
-                default -> {
-                }
-            }
+        this.accountRepo = accountRepo;
+        this.filter = filter;
+        if (this.filter) {
+            setTrader(new TraderA(new TraderAKey("-", Global.compCode), "All"));
         }
+        textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
-        traderTableModel = new TraderATableModel(list);
+        traderTableModel = new TraderATableModel();
         table.setModel(traderTableModel);
-        table.getTableHeader().setFont(Global.textFont);
+        table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
         table.setDefaultRenderer(Object.class, new TableCellRender());
-        sorter = new TableRowSorter(table.getModel());
-        table.setRowSorter(sorter);
+        table.setSelectionForeground(Color.WHITE);
         JScrollPane scroll = new JScrollPane(table);
-
-        scroll.setBorder(null);
         table.setFocusable(false);
-        table.getColumnModel().getColumn(0).setPreferredWidth(10);//Code
-        table.getColumnModel().getColumn(1).setPreferredWidth(120);//Name
+        table.getColumnModel().getColumn(0).setPreferredWidth(30);//Code
+        table.getColumnModel().getColumn(1).setPreferredWidth(200);//Name
 
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -118,7 +99,7 @@ public final class TraderAAutoCompleter implements KeyListener {
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
 
-        popup.setPopupSize(400, 200);
+        popup.setPopupSize(500, 200);
 
         popup.add(scroll);
 
@@ -168,11 +149,6 @@ public final class TraderAAutoCompleter implements KeyListener {
 
         table.setRequestFocusEnabled(false);
 
-        if (list != null) {
-            if (!list.isEmpty()) {
-                table.setRowSelectionInterval(0, 0);
-            }
-        }
     }
 
     public void mouseSelect() {
@@ -373,35 +349,22 @@ public final class TraderAAutoCompleter implements KeyListener {
      */
     @Override
     public void keyReleased(KeyEvent e) {
-        String filter = textComp.getText();
-        if (filter.length() == 0) {
-            sorter.setRowFilter(null);
-        } else {
-            sorter.setRowFilter(startsWithFilter);
-            try {
-                if (!containKey(e)) {
-                    if (table.getRowCount() >= 0) {
-                        table.setRowSelectionInterval(0, 0);
-                    }
+        String str = textComp.getText();
+        if (!str.isEmpty()) {
+            if (!containKey(e)) {
+                List<TraderA> list = accountRepo.getTrader(str);
+                if (this.filter) {
+                    TraderA s = new TraderA(new TraderAKey("-", Global.compCode), "All");
+                    list.add(s);
                 }
-            } catch (Exception ex) {
+                traderTableModel.setListTrader(list);
+                if (!list.isEmpty()) {
+                    table.setRowSelectionInterval(0, 0);
+                }
             }
 
         }
     }
-    private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
-        @Override
-        public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
-            String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
-            String tmp2 = entry.getStringValue(1).toUpperCase().replace(" ", "");
-            String tmp3 = entry.getStringValue(3).toUpperCase().replace(" ", "");
-            String tmp4 = entry.getStringValue(4).toUpperCase().replace(" ", "");
-            String tmp5 = entry.getStringValue(4).toUpperCase().replace(" ", "");
-            String text = textComp.getText().toUpperCase().replace(" ", "");
-            return tmp1.startsWith(text) || tmp2.startsWith(text)
-                    || tmp3.startsWith(text) || tmp4.startsWith(text) || tmp5.startsWith(text);
-        }
-    };
 
     private boolean containKey(KeyEvent e) {
         return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;

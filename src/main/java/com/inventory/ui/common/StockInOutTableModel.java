@@ -276,40 +276,43 @@ public class StockInOutTableModel extends AbstractTableModel {
     }
 
     private void genPattern(Stock s, StockInOutDetail iod) {
-        String stockCode = s.getKey().getStockCode();
-        boolean explode = s.isExplode();
-        List<Pattern> patterns = inventoryRepo.getPattern(stockCode);
-        if (!patterns.isEmpty()) {
-            String input = JOptionPane.showInputDialog("Enter Qty.");
-            if (Util1.isPositive(input)) {
-                float qty = Util1.getFloat(input);
-                patterns.forEach((p) -> {
-                    StockInOutDetail io = new StockInOutDetail();
-                    io.setUserCode(p.getUserCode());
+        boolean disable = Util1.getBoolean(ProUtil.getProperty("disable.pattern.stockio"));
+        if (!disable) {
+            String stockCode = s.getKey().getStockCode();
+            boolean explode = s.isExplode();
+            List<Pattern> patterns = inventoryRepo.getPattern(stockCode);
+            if (!patterns.isEmpty()) {
+                String input = JOptionPane.showInputDialog("Enter Qty.");
+                if (Util1.isPositive(input)) {
+                    float qty = Util1.getFloat(input);
+                    patterns.forEach((p) -> {
+                        StockInOutDetail io = new StockInOutDetail();
+                        io.setUserCode(p.getUserCode());
+                        if (explode) {
+                            io.setInQty(qty * p.getQty());
+                            io.setInUnitCode(p.getUnitCode());
+                        } else {
+                            io.setOutQty(qty * p.getQty());
+                            io.setOutUnitCode(p.getUnitCode());
+                        }
+                        io.setCostPrice(Util1.getFloat(p.getPrice()));
+                        io.setStockCode(p.getKey().getStockCode());
+                        io.setLocCode(p.getLocCode());
+                        io.setLocName(p.getLocName());
+                        io.setStockName(p.getStockName());
+                        addStockIO(io);
+                    });
                     if (explode) {
-                        io.setInQty(qty * p.getQty());
-                        io.setInUnitCode(p.getUnitCode());
+                        iod.setOutQty(qty);
+                        iod.setOutUnitCode(s.getPurUnitCode());
+                        iod.setInUnitCode(null);
                     } else {
-                        io.setOutQty(qty * p.getQty());
-                        io.setOutUnitCode(p.getUnitCode());
+                        iod.setInQty(qty);
+                        iod.setInUnitCode(s.getPurUnitCode());
+                        iod.setOutUnitCode(null);
                     }
-                    io.setCostPrice(Util1.getFloat(p.getPrice()));
-                    io.setStockCode(p.getKey().getStockCode());
-                    io.setLocCode(p.getLocCode());
-                    io.setLocName(p.getLocName());
-                    io.setStockName(p.getStockName());
-                    addStockIO(io);
-                });
-                if (explode) {
-                    iod.setOutQty(qty);
-                    iod.setOutUnitCode(s.getPurUnitCode());
-                    iod.setInUnitCode(null);
-                } else {
-                    iod.setInQty(qty);
-                    iod.setInUnitCode(s.getPurUnitCode());
-                    iod.setOutUnitCode(null);
+                    setRecord(listStock.size());
                 }
-                setRecord(listStock.size());
             }
         }
     }

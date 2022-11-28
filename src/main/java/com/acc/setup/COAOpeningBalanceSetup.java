@@ -108,13 +108,14 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel
     private String startDate, endDate, dept, accCode, ref, traderCode, currency, traderType, tranSource, coaLv2, coaLv1;
 
     ButtonGroup g = new ButtonGroup();
+
     /**
      * Creates new form COAOpeningBalanceSetup
      */
     // Constructor for opening balance
     public COAOpeningBalanceSetup() {
         initComponents();
-        chkGroup(); 
+        chkGroup();
     }
 
     public JProgressBar getProgress() {
@@ -141,6 +142,7 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel
     }
 
     public class DeleteAction extends AbstractAction {
+
         @Override
         public void actionPerformed(ActionEvent e) {
             // deleteTran();
@@ -148,7 +150,7 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel
     }
 
     public void initMain() {
-        txtDate.setDate(Util1.toDate(Global.startDate,"dd/MM/yyyy"));
+        txtDate.setDate(Util1.toDate(Global.startDate, "dd/MM/yyyy"));
         initKeyListener();
         initComboBox();
         initTable();
@@ -167,8 +169,7 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel
 
     // grouping check box
     private void chkGroup() {
-      
-       
+
         g.add(chkCus);
         g.add(chkSup);
     }
@@ -227,12 +228,12 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel
         tblOpening.getColumnModel().getColumn(7).setPreferredWidth(20);
         tblOpening.getColumnModel().getColumn(6).setCellRenderer(new DecimalFormatRender());
         tblOpening.getColumnModel().getColumn(7).setCellRenderer(new DecimalFormatRender());
-        tblOpening.getColumnModel().getColumn(0).setCellEditor(new COA3CellEditor(accountRepo, false));
-        tblOpening.getColumnModel().getColumn(1).setCellEditor(new COA3CellEditor(accountRepo, false));
-        tblOpening.getColumnModel().getColumn(2).setCellEditor(new TraderCellEditor(listTrader, false, 2));
-        tblOpening.getColumnModel().getColumn(3).setCellEditor(new TraderCellEditor(listTrader, false, 2));
-        tblOpening.getColumnModel().getColumn(4).setCellEditor(new DepartmentCellEditor(false, listDept));
-        tblOpening.getColumnModel().getColumn(5).setCellEditor(new CurrencyAEditor(listCurrency, false));
+        tblOpening.getColumnModel().getColumn(0).setCellEditor(new COA3CellEditor(accountRepo));
+        tblOpening.getColumnModel().getColumn(1).setCellEditor(new COA3CellEditor(accountRepo));
+        tblOpening.getColumnModel().getColumn(2).setCellEditor(new TraderCellEditor(accountRepo));
+        tblOpening.getColumnModel().getColumn(3).setCellEditor(new TraderCellEditor(accountRepo));
+        tblOpening.getColumnModel().getColumn(4).setCellEditor(new DepartmentCellEditor(listDept));
+        tblOpening.getColumnModel().getColumn(5).setCellEditor(new CurrencyAEditor(listCurrency));
         tblOpening.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
         tblOpening.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
         tblOpening.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -329,7 +330,7 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel
                 String reportOpDate = Util1.toDateStr(txtDate.getDate(), "yyyy-MM-dd");
                 Map<String, Object> parameters = new HashMap();
                 parameters.put("p_report_name", this.getName());
-                parameters.put("p_report_info","Opening Date - " + Util1.toDateStr(reportOpDate, "yyyy-MM-dd", "dd/MM/yyyy"));
+                parameters.put("p_report_info", "Opening Date - " + Util1.toDateStr(reportOpDate, "yyyy-MM-dd", "dd/MM/yyyy"));
                 parameters.put("p_op_date", reportOpDate);
                 parameters.put("p_dept_code", departmenttAutoCompleter.getListOption());
                 parameters.put("p_dept_name", "Dept : " + departmenttAutoCompleter.getDepartment().getDeptName());
@@ -594,12 +595,12 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel
     }// </editor-fold>//GEN-END:initComponents
 
     private void chkCusActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_chkCusActionPerformed
-         //   evt.set
+        //   evt.set
         searchOpening();
     }// GEN-LAST:event_chkCusActionPerformed
 
     private void chkSupActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_chkSupActionPerformed
-        
+
         searchOpening();
     }// GEN-LAST:event_chkSupActionPerformed
 
@@ -636,7 +637,7 @@ public class COAOpeningBalanceSetup extends javax.swing.JPanel
 
     // setting selected object for data call
     @Override
-    public void selected(Object source, Object selectObj) {   
+    public void selected(Object source, Object selectObj) {
         if (selectObj != null) {
             searchOpening();
         }

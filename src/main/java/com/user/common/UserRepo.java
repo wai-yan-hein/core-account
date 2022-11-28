@@ -12,6 +12,7 @@ import com.inventory.model.MachineInfo;
 import com.inventory.model.AppUser;
 import com.user.model.Department;
 import com.inventory.model.MachineInfo;
+import com.inventory.model.VRoleMenu;
 import com.user.model.SysProperty;
 import com.user.model.CompanyInfo;
 import com.user.model.Currency;
@@ -262,6 +263,16 @@ public class UserRepo {
                 .uri(builder -> builder.path("/user/get-department")
                 .build())
                 .retrieve().toEntityList(Department.class);
+        return result.block(Duration.ofMinutes(min)).getBody();
+    }
+
+    public List<VRoleMenu> getReport(String menuClass) {
+        Mono<ResponseEntity<List<VRoleMenu>>> result = userApi.get()
+                .uri(builder -> builder.path("/user/get-report")
+                .queryParam("roleCode", Global.roleCode)
+                .queryParam("menuClass", menuClass)
+                .build())
+                .retrieve().toEntityList(VRoleMenu.class);
         return result.block(Duration.ofMinutes(min)).getBody();
     }
 

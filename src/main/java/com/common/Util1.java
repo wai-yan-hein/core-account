@@ -748,4 +748,10 @@ public class Util1 {
         return dates;
     }
 
+    public static String minusDay(String sqlFormat, int minusDay) {
+        LocalDate date = LocalDate.parse(sqlFormat);
+        LocalDate minusDays = date.minusDays(minusDay);
+        return minusDays.toString();
+    }
+
 }

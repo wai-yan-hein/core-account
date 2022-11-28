@@ -88,6 +88,16 @@ public class AccountRepo {
         return result.block().getBody();
     }
 
+    public List<TraderA> getTrader(String text) {
+        Mono<ResponseEntity<List<TraderA>>> result = accountApi.get()
+                .uri(builder -> builder.path("/account/search-trader")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("text", text)
+                .build())
+                .retrieve().toEntityList(TraderA.class);
+        return result.block().getBody();
+    }
+
     public List<ChartOfAccount> getChartOfAccount() {
         Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get()
                 .uri(builder -> builder.path("/account/get-coa")
@@ -198,6 +208,16 @@ public class AccountRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve().toEntityList(ChartOfAccount.class);
+        return result.block().getBody();
+    }
+
+    public List<Gl> getJournal(String vouNo) {
+        Mono<ResponseEntity<List<Gl>>> result = accountApi.get()
+                .uri(builder -> builder.path("/account/get-journal")
+                .queryParam("glVouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().toEntityList(Gl.class);
         return result.block().getBody();
     }
 

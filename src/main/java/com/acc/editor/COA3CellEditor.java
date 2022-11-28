@@ -28,8 +28,7 @@ public class COA3CellEditor extends AbstractCellEditor implements TableCellEdito
 
     private JComponent component = null;
     private COA3AutoCompleter completer;
-    private final boolean filter;
-    private AccountRepo accountRepo;
+    private final AccountRepo accountRepo;
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusLost(FocusEvent e) {
@@ -49,9 +48,8 @@ public class COA3CellEditor extends AbstractCellEditor implements TableCellEdito
     };
     //private List<Medicine> listCOA = new ArrayList();
 
-    public COA3CellEditor(AccountRepo accountRepo, boolean filter) {
+    public COA3CellEditor(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
-        this.filter = filter;
     }
 
     @Override
@@ -90,7 +88,7 @@ public class COA3CellEditor extends AbstractCellEditor implements TableCellEdito
             jtf.setText(value.toString());
             jtf.selectAll();
         }
-        completer = new COA3AutoCompleter(jtf, accountRepo, this, filter);
+        completer = new COA3AutoCompleter(jtf, accountRepo, this, false);
         return component;
     }
 

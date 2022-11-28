@@ -8,6 +8,7 @@ package com.inventory.ui;
 import com.CvInventoryApplication;
 import com.acc.common.AccountRepo;
 import com.acc.entry.AllCash;
+import com.acc.entry.Journal;
 import com.acc.report.AparReport;
 import com.acc.report.FinancialReport;
 import com.acc.report.GLReport;
@@ -23,7 +24,6 @@ import com.common.Util1;
 import com.user.setup.MenuSetup;
 import com.user.model.Department;
 import com.inventory.model.VRoleMenu;
-import com.inventory.model.WeightLossDetail;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.Manufacture;
 import com.user.model.VRoleCompany;
@@ -142,6 +142,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private FinancialReport financialReport;
     @Autowired
     private COAOpeningBalanceSetup coaOpening;
+    @Autowired
+    private Journal journal;
 //user
     @Autowired
     private InventoryRepo inventoryRepo;
@@ -410,7 +412,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 manufacture.initMain();
                 return manufacture;
             }
-              case "Weight Loss" -> {
+            case "Weight Loss" -> {
                 weightLoss.setName(menuName);
                 weightLoss.setObserver(this);
                 weightLoss.setProgress(progress);
@@ -487,6 +489,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 coaOpening.initMain();
                 return coaOpening;
             }
+            case "Journal Voucher" -> {
+                journal.setName(menuName);
+                journal.setObserver(this);
+                journal.setProgress(progress);
+                journal.initMain();
+                return journal;
+            }
             default -> {
                 switch (cName) {
                     case "AllCash" -> {
@@ -533,6 +542,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             Global.companyName = vuca.getCompName();
             Global.companyAddress = vuca.getCompAddress();
             Global.companyPhone = vuca.getCompPhone();
+            Global.currency = vuca.getCurrency();
             Global.startDate = Util1.toDateStr(vuca.getStartDate(), "dd/MM/yyyy");
             Global.endate = Util1.toDateStr(vuca.getEndDate(), "dd/MM/yyyy");
         }
@@ -732,7 +742,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jMenu1.setText("jMenu1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Core Inventory (V.1.0)");
+        setTitle("Core Account  Cloud (V.2.0)");
         setAutoRequestFocus(false);
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {

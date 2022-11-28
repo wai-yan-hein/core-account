@@ -187,8 +187,8 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             initTableModel();
             glListingTableModel.clear();
             String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
-            stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), "dd/MM/yyyy");
-            endDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getEndDate(), "dd/MM/yyyy");
+            stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), "dd/MM/yyyy");
+            endDate = Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), "dd/MM/yyyy");
             ChartOfAccount coa = cOAAutoCompleter.getCOA();
             String coaLv1 = Util1.getInteger(coa.getCoaLevel()) == 1 ? coa.getKey().getCoaCode() : "-";
             String coaLv2 = Util1.getInteger(coa.getCoaLevel()) == 2 ? coa.getKey().getCoaCode() : "-";
@@ -202,9 +202,9 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             filter.setOpeningDate(opDate);
             filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
             filter.setClosing(chkClosing.isSelected());
-            filter.setDepartments(departmentAutoCompleter.getListOption());
+            filter.setListDepartment(departmentAutoCompleter.getListOption());
             Mono<ResponseEntity<List<VTriBalance>>> result = accountApi.post()
-                    .uri("/account/report/get-tri-balance")
+                    .uri("/report/get-tri-balance")
                     .body(Mono.just(filter), ReportFiller.class)
                     .retrieve()
                     .toEntityList(VTriBalance.class);
@@ -232,6 +232,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void openTBDDialog(String coaCode, String curCode, String coaName) {
+        dialog.setAccountRepo(accountRepo);
         dialog.setCoaCode(coaCode);
         dialog.setStDate(stDate);
         dialog.setEndDate(endDate);

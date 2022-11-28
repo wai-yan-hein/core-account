@@ -21,6 +21,7 @@ import javax.swing.JFrame;
  */
 public class Global {
 
+    public static final Color BG_COLOR = new Color(240, 242, 250);
     public static ServerSocket sock;
     public static Font lableFont = new java.awt.Font("Arial", 1, 13);
     public static Font amtFont = new java.awt.Font("Arial Nova Light", 1, 14);
@@ -60,4 +61,5 @@ public class Global {
     public static String fontName;
     public static Map<String, String> hmRoleProperty = new HashMap<>();
     public static Map<String, String> hmUser = new HashMap<>();
+    public static String currency;
 }

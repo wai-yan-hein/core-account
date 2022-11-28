@@ -1,6 +1,5 @@
 package com.acc.common;
 
-
 import com.common.SelectionObserver;
 import com.common.Util1;
 import javax.swing.*;
@@ -150,7 +149,7 @@ public class DateTableDecorator {
     private void search(int index) {
         if (observer != null) {
             String date = hmData.get(index);
-            observer.selected("Date-Search", String.format("%sto%s", date, date));
+            observer.selected("Date-Search", date);
         }
     }
 }

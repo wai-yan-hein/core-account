@@ -24,7 +24,7 @@
   </NonVisualComponents>
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="2"/>
-    <Property name="title" type="java.lang.String" value="Core Inventory (V.1.0)"/>
+    <Property name="title" type="java.lang.String" value="Core Account  Cloud (V.2.0)"/>
     <Property name="autoRequestFocus" type="boolean" value="false"/>
   </Properties>
   <SyntheticProperties>

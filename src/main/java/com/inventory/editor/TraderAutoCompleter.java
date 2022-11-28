@@ -11,6 +11,7 @@ import com.common.TableCellRender;
 import com.inventory.model.Trader;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.TraderTableModel;
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -28,7 +29,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
@@ -48,7 +48,6 @@ public class TraderAutoCompleter implements KeyListener {
     private TraderTableModel traderTableModel;
     private Trader trader;
     public AbstractCellEditor editor;
-    private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
     private SelectionObserver observer;
@@ -104,12 +103,8 @@ public class TraderAutoCompleter implements KeyListener {
         table.setFont(Global.textFont); // NOI18N
         table.setDefaultRenderer(Object.class, new TableCellRender());
         table.setRowHeight(Global.tblRowHeight);
-        table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
-        sorter = new TableRowSorter(table.getModel());
-        table.setRowSorter(sorter);
+        table.setSelectionForeground(Color.WHITE);
         JScrollPane scroll = new JScrollPane(table);
-
-        scroll.setBorder(null);
         table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
         table.getColumnModel().getColumn(1).setPreferredWidth(150);//Name

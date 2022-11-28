@@ -10,6 +10,7 @@ import com.acc.model.VTranSource;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -86,6 +87,7 @@ public final class TranSourceAutoCompleter implements KeyListener {
         table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
         table.setDefaultRenderer(Object.class, new TableCellRender());
+        table.setSelectionForeground(Color.WHITE);
 
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);

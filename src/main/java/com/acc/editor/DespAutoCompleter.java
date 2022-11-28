@@ -11,6 +11,7 @@ import com.acc.model.VDescription;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -41,11 +42,11 @@ import javax.swing.text.JTextComponent;
  */
 public final class DespAutoCompleter implements KeyListener {
 
-    private JTable table = new JTable();
+    private final JTable table = new JTable();
     private JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private DespTableModel despModel = new DespTableModel();
+    private final DespTableModel despModel = new DespTableModel();
     private VDescription desp;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
@@ -85,6 +86,7 @@ public final class DespAutoCompleter implements KeyListener {
         table.setRowHeight(Global.tblRowHeight);
         table.getTableHeader().setFont(Global.lableFont);
         table.setDefaultRenderer(Object.class, new TableCellRender());
+        table.setSelectionForeground(Color.WHITE);
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);

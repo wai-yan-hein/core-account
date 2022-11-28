@@ -25,22 +25,18 @@ import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
 import javax.swing.Action;
-import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
-import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
-import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -48,7 +44,6 @@ import org.slf4j.LoggerFactory;
  */
 public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(StockAutoCompleter1.class);
     private final JTable table = new JTable();
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
@@ -56,7 +51,6 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
     private StockCompleterTableModel tableModel;
     private Stock stock;
     public AbstractCellEditor editor;
-    private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
     private SelectionObserver observer;
@@ -94,17 +88,12 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
         textComp.getDocument().addDocumentListener(documentListener);
         tableModel = new StockCompleterTableModel();
         table.setModel(tableModel);
-        table.setSize(50, 50);
         table.setFont(Global.textFont); // NOI18N
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setDefaultRenderer(Object.class, new TableCellRender());
         table.setRowHeight(Global.tblRowHeight);
-        table.setSelectionBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
-        sorter = new TableRowSorter(table.getModel());
-        table.setRowSorter(sorter);
+        table.setSelectionForeground(Color.WHITE);
         JScrollPane scroll = new JScrollPane(table);
-
-        scroll.setBorder(null);
         table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
         table.getColumnModel().getColumn(1).setPreferredWidth(200);//Code
@@ -124,7 +113,6 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
 
-        popup.setBorder(BorderFactory.createLineBorder(Color.black));
         Resolution r = Util1.getPopSize();
         popup.setPopupSize(r.getWidth(), r.getHeight());
         popup.add(scroll);

@@ -21,12 +21,15 @@ import com.inventory.model.Stock;
 import com.inventory.model.WeightLossHis;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.WeightLossSearchTableModel;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.Duration;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -96,11 +99,28 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            if (e.getSource() instanceof JTextField txt) {
+                txt.selectAll();
+            }
+        }
+    };
 
     public WeightLossSearchDialog(JFrame frame) {
         super(frame, true);
         initComponents();
         initKeyListener();
+        initFocusAdapter();
+    }
+
+    private void initFocusAdapter() {
+        txtRemark.addFocusListener(fa);
+        txtVouNo.addFocusListener(fa);
+        txtStock.addFocusListener(fa);
+        txtLoc.addFocusListener(fa);
+
     }
 
     public void initMain() {

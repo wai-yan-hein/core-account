@@ -5,6 +5,7 @@
  */
 package com.acc.editor;
 
+import com.acc.common.AccountRepo;
 import com.acc.model.TraderA;
 import com.common.Global;
 import java.awt.event.FocusAdapter;
@@ -13,7 +14,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
-import java.util.List;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JComponent;
 import javax.swing.JTable;
@@ -28,20 +28,9 @@ import org.slf4j.LoggerFactory;
  */
 public class TraderCellEditor extends AbstractCellEditor implements TableCellEditor {
 
-    private static final Logger log = LoggerFactory.getLogger(TraderCellEditor.class);
     private JComponent component = null;
     private TraderAAutoCompleter completer;
-    private final boolean filter;
-    private final int max;
-    private List<TraderA> listTrader;
-
-    public List<TraderA> getListTrader() {
-        return listTrader;
-    }
-
-    public void setListTrader(List<TraderA> listTrader) {
-        this.listTrader = listTrader;
-    }
+    private AccountRepo accountRepo;
 
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
@@ -58,10 +47,8 @@ public class TraderCellEditor extends AbstractCellEditor implements TableCellEdi
 
     };
 
-    public TraderCellEditor(List<TraderA> listTrader, boolean filter, int max) {
-        this.listTrader = listTrader;
-        this.filter = filter;
-        this.max = max;
+    public TraderCellEditor(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
     }
 
     //private List<Medicine> listTrader = new ArrayList();
@@ -103,7 +90,7 @@ public class TraderCellEditor extends AbstractCellEditor implements TableCellEdi
             jtf.setText(value.toString());
             jtf.selectAll();
         }
-        completer = new TraderAAutoCompleter(jtf, listTrader, this, this.filter, this.max);
+        completer = new TraderAAutoCompleter(jtf, accountRepo, this, false);
         return component;
     }
 

@@ -414,7 +414,8 @@ public class DateAutoCompleter implements KeyListener, SelectionObserver {
     }
 
     private List<DateModel> generateDate() {
-        /*Date finDate = Util1.toDate(Global.startDate,Global.dateFormat);
+        Date finDate = Util1.toDate(Global.startDate, Global.dateFormat);
+        String stDateMysql = Util1.toDateStr(Global.startDate, "dd/MM/yyyy", "yyyy-MM-dd");
         Date toDay = new Date();
         LocalDate now = toDay.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         LocalDate fin = finDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -432,37 +433,36 @@ public class DateAutoCompleter implements KeyListener, SelectionObserver {
         date.setDay(now.getDayOfMonth() - 1);
         listDateModel.add(date);
         listDateModel.add(new DateModel(getMonthShortName(now.getMonth()), now.getMonthValue(), now.getYear(), "Custom"));
-        
         long monthsBetween = ChronoUnit.MONTHS.between(
-        LocalDate.parse(Global.startDate).withDayOfMonth(1),
-        LocalDate.parse(Util1.toDateStr(Util1.getTodayDate(), Global.dateFormat)).withDayOfMonth(1));
+                LocalDate.parse(stDateMysql).withDayOfMonth(1),
+                LocalDate.parse(Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd")).withDayOfMonth(1));
         for (int i = 0; i < monthsBetween; i++) {
-        LocalDate next = fin.plusMonths(i);
-        LocalDate monthBegin = next.withDayOfMonth(1);
-        LocalDate monthEnd = next.plusMonths(1).withDayOfMonth(1).minusDays(1);
-        Month month = next.getMonth();
-        int value = next.getMonth().getValue();
-        int year = next.getYear();
-        DateModel d = new DateModel(getMonthShortName(month), value, year, "-");
-        d.setStartDate(monthBegin.toString());
-        d.setEndDate(monthEnd.toString());
-        listDateModel.add(d);
+            LocalDate next = fin.plusMonths(i);
+            LocalDate monthBegin = next.withDayOfMonth(1);
+            LocalDate monthEnd = next.plusMonths(1).withDayOfMonth(1).minusDays(1);
+            Month month = next.getMonth();
+            int value = next.getMonth().getValue();
+            int year = next.getYear();
+            DateModel d = new DateModel(getMonthShortName(month), value, year, "-");
+            d.setStartDate(Util1.toDateStr(monthBegin.toString(), "yyyy-MM-dd", Global.dateFormat));
+            d.setEndDate(Util1.toDateStr(monthEnd.toString(), "yyyy-MM-dd", Global.dateFormat));
+            listDateModel.add(d);
         }
-        
+
         int oddMonth = 4;
         for (int i = 0; i < oddMonth; i++) {
-        LocalDate next = now.plusMonths(i);
-        LocalDate monthBegin = next.withDayOfMonth(1);
-        LocalDate monthEnd = next.plusMonths(1).withDayOfMonth(1).minusDays(1);
-        Month month = next.getMonth();
-        int value = next.getMonth().getValue();
-        int year = next.getYear();
-        DateModel d = new DateModel(getMonthShortName(month), value, year, "-");
-        d.setStartDate(monthBegin.toString());
-        d.setEndDate(monthEnd.toString());
-        listDateModel.add(d);
-        }*/
-        return new ArrayList<>();
+            LocalDate next = now.plusMonths(i);
+            LocalDate monthBegin = next.withDayOfMonth(1);
+            LocalDate monthEnd = next.plusMonths(1).withDayOfMonth(1).minusDays(1);
+            Month month = next.getMonth();
+            int value = next.getMonth().getValue();
+            int year = next.getYear();
+            DateModel d = new DateModel(getMonthShortName(month), value, year, "-");
+            d.setStartDate(Util1.toDateStr(monthBegin.toString(), "yyyy-MM-dd", Global.dateFormat));
+            d.setEndDate(Util1.toDateStr(monthEnd.toString(), "yyyy-MM-dd", Global.dateFormat));
+            listDateModel.add(d);
+        }
+        return listDateModel;
     }
 
     private String getMonthShortName(Month month) {

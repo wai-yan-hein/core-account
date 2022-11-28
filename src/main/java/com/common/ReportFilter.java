@@ -38,6 +38,7 @@ public class ReportFilter {
     private List<String> listStockType;
     private List<String> listTrader;
     private List<String> listSaleMan;
+    private List<String> listDepartment;
     private String locCode;
     private String stockCode;
     private String brandCode;
@@ -52,7 +53,11 @@ public class ReportFilter {
     private boolean calRI;
     private boolean calRO;
     private String status;
-
+    private String incomeExpenseProcess;
+    private String plProcess;
+    private String bsProcess;
+    private String invGroup;
+    private String coaCode;
     public ReportFilter(Integer macId, String compCode, Integer deptId) {
         this.macId = macId;
         this.compCode = compCode;
