@@ -13,7 +13,8 @@ import com.acc.report.AparReport;
 import com.acc.report.FinancialReport;
 import com.acc.report.GLReport;
 import com.acc.setup.COAManagment;
-import com.acc.setup.COAOpeningBalanceSetup;
+
+import com.acc.setup.COAOpening;
 import com.acc.setup.COASetup;
 import com.acc.setup.DepartmentSetup;
 import com.common.Global;
@@ -141,9 +142,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     @Autowired
     private FinancialReport financialReport;
     @Autowired
-    private COAOpeningBalanceSetup coaOpening;
-    @Autowired
     private Journal journal;
+    @Autowired
+    private COAOpening coaOpening;
 //user
     @Autowired
     private InventoryRepo inventoryRepo;

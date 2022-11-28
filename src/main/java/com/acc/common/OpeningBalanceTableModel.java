@@ -11,13 +11,10 @@ import com.acc.model.OpeningKey;
 import com.acc.model.TraderA;
 import com.user.model.Currency;
 
-import ch.qos.logback.classic.pattern.Util;
-
 import com.common.SelectionObserver;
 import com.common.Global;
 import com.common.Util1;
 
-import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.TraderAAutoCompleter;
 
 import com.toedter.calendar.JDateChooser;
@@ -44,20 +41,12 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
     private AccountRepo accountRepo;
     private JTable parent;
 
-    private Currency currency;
-    private Department department;
-
-    private DepartmentAutoCompleter deptAutoCompleter;
     private TraderAAutoCompleter tradeAutoCompleter;
     private SelectionObserver selectionObserver;
-    private DateAutoCompleter dateAutoCompleter;
 
-    private String[] columnsName = { "Code", "Chart Of Account", "Trader Code", "Trader Name", "Dept:", "Currency","Dr-Amt", "Cr-Amt" };
+    private String[] columnsName = {"Code", "Chart Of Account", "Trader Code", "Trader Name", "Dept:", "Currency", "Dr-Amt", "Cr-Amt"};
     private List<OpeningBalance> listOpening = new ArrayList();
-
     private JDateChooser opDate;
-    private boolean valid;
-    private String sourceAccId;
 
     public AccountRepo getAccountRepo() {
         return accountRepo;
@@ -75,14 +64,6 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
         this.parent = parent;
     }
 
-    public boolean isValid(){
-        return valid;
-    }
-
-    public void setValid(boolean valid){
-        this.valid=valid;
-    }
-
     public JDateChooser getOpDate() {
         return opDate;
     }
@@ -91,44 +72,12 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
         this.opDate = opDate;
     }
 
-    public Currency getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
-    }
-
-    public Department getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(Department department) {
-        this.department = department;
-    }
-
-    public DepartmentAutoCompleter getDeptAutoCompleter() {
-        return deptAutoCompleter;
-    }
-
-    public void setDeptAutoCompleter(DepartmentAutoCompleter deptAutoCompleter) {
-        this.deptAutoCompleter = deptAutoCompleter;
-    }
-
     public TraderAAutoCompleter getTradeAutoCompleter() {
         return tradeAutoCompleter;
     }
 
     public void setTradeAutoCompleter(TraderAAutoCompleter tradeAutoCompleter) {
         this.tradeAutoCompleter = tradeAutoCompleter;
-    }
-
-    public DateAutoCompleter getDateAutoCompleter() {
-        return dateAutoCompleter;
-    }
-
-    public void setDateAutoCompleter(DateAutoCompleter dateAutoCompleter) {
-        this.dateAutoCompleter = dateAutoCompleter;
     }
 
     public SelectionObserver getObserver() {
@@ -199,22 +148,10 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
                     return opening.getCurCode();
                 }
                 case 6 -> {
-                    if (opening.getDrAmt() != null) {
-                        if (opening.getDrAmt() == 0) {
-                            return null;
-                        } else {
-                            return opening.getDrAmt();
-                        }
-                    }
+                    return Util1.getDouble(opening.getDrAmt());
                 }
                 case 7 -> {
-                    if (opening.getCrAmt() != null) {
-                        if (opening.getCrAmt() == 0) {
-                            return null;
-                        } else {
-                            return opening.getCrAmt();
-                        }
-                    }
+                    return Util1.getDouble(opening.getCrAmt());
                 }
                 default -> {
                     return null;
@@ -236,7 +173,7 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
                             opening.setCoaUsrCode(coa.getCoaCodeUsr());
                             opening.setSourceAccId(coa.getKey().getCoaCode());
                             opening.setSrcAccName(coa.getCoaNameEng());
-                            parent.setRowSelectionInterval(rowIndex,rowIndex);
+                            parent.setRowSelectionInterval(rowIndex, rowIndex);
                             parent.setColumnSelectionInterval(2, 2);
                         }
                     }
@@ -246,9 +183,14 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
                         if (value instanceof TraderA trader) {
                             opening.setTraderCode(trader.getKey().getCode());
                             opening.setTraderName(trader.getTraderName());
-                            if (trader.getAccCode() != null) {
-                                opening.setSourceAccId(trader.getAccCode());
-                                opening.setSrcAccName(trader.getAccCode());
+                            String coaCode = trader.getAccCode();
+                            if (coaCode != null) {
+                                ChartOfAccount coa = accountRepo.findCOA(coaCode);
+                                if (coa != null) {
+                                    opening.setSourceAccId(coaCode);
+                                    opening.setSrcAccName(coa.getCoaNameEng());
+                                    opening.setCoaUsrCode(coa.getCoaCodeUsr());
+                                }
                             }
                             parent.setRowSelectionInterval(rowIndex, rowIndex);
                             parent.setColumnSelectionInterval(4, 4);
@@ -293,7 +235,7 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
 
     // check if the grid volumn data ais valid
     private boolean isValidEntry(OpeningBalance v, int col, int row) {
-        valid = true;
+        boolean valid = true;
         if (Util1.isNull(v.getSourceAccId())) {
             if (col > 1) {
                 JOptionPane.showMessageDialog(Global.parentForm, "Invalid Account.");
@@ -323,66 +265,57 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
 
     // save opening balance data from the grid view
     private void save(OpeningBalance opening, int row) {
-        opening = accountRepo.saveCOAOpening(opening);
-        if (opening != null) {
+        if (opening.getKey().getOpId() == null) {
+            opening.setCreatedDate(Util1.getTodayDate());
+        }
+        OpeningBalance op = accountRepo.saveCOAOpening(opening);
+        if (op != null) {
+            opening.setKey(op.getKey());
             listOpening.set(row, opening);
             addNewRow();
-            parent.setRowSelectionInterval(row + 1, row + 1);
-            parent.setColumnSelectionInterval(0, 0);
+            double amt = Util1.getDouble(opening.getDrAmt()) + Util1.getDouble(opening.getCrAmt());
+            if (amt == 0) {
+                parent.setColumnSelectionInterval(6, 6);
+            } else {
+                parent.setRowSelectionInterval(row + 1, row + 1);
+                parent.setColumnSelectionInterval(0, 0);
+            }
             selectionObserver.selected("CAL-TOTAL", "-");
         }
     }
 
     public void addNewRow() {
-        if (isEmptyRow()) {
+        if (!isEmptyRow()) {
             OpeningBalance opening = new OpeningBalance();
             OpeningKey key = new OpeningKey();
             key.setCompCode(Global.compCode);
             opening.setKey(key);
-            String deptCode = deptAutoCompleter.getDepartment().getDeptName();
-            String depUserCode = deptAutoCompleter.getDepartment().getUserCode();
-            opening.setOpDate(Util1.getTodayDate());
-            opening.setUserCode(Global.loginUser.getUserCode());
             opening.setOpDate(opDate.getDate());
-            opening.setDeptCode(deptCode.equals("-") ? getDepCode() : deptCode);
-            opening.setDeptUsrCode(Util1.isNull(depUserCode, getDepUserCode()));
+            OpeningBalance b = aboveObject();
+            if (b != null) {
+                opening.setDeptUsrCode(b.getDeptUsrCode());
+                opening.setDeptCode(b.getDeptCode());
+                opening.setCurCode(b.getCurCode());
+            }
             listOpening.add(opening);
             fireTableRowsInserted(listOpening.size() - 1, listOpening.size() - 1);
         }
     }
 
+    private OpeningBalance aboveObject() {
+        if (!listOpening.isEmpty()) {
+            return listOpening.get(listOpening.size() - 1);
+        }
+        return null;
+    }
+
     // check if the list is empty
     private boolean isEmptyRow() {
-        boolean status = true;
-        if (listOpening.isEmpty() || listOpening == null) {
-            status = true;
-        } else {
-            OpeningBalance opening = listOpening.get(listOpening.size() - 1);
-            if (Util1.isNull(opening.getDeptCode()) ||Util1.isNull(opening.getSourceAccId())) {
-                status = false;
-            }
+        if (listOpening.isEmpty()) {
+            return false;
         }
-        return status;
-    }
-
-    private String getDepCode() {
-        String depCode;
-        try {
-            depCode = listOpening.get(0).getDeptCode();
-        } catch (Exception e) {
-            depCode = null;
-        }
-        return depCode;
-    }
-
-    private String getDepUserCode() {
-        String depCode;
-        try {
-            depCode = listOpening.get(0).getDeptUsrCode();
-        } catch (Exception e) {
-            depCode = null;
-        }
-        return depCode;
+        OpeningBalance p = listOpening.get(listOpening.size() - 1);
+        return p.getKey().getOpId() == null;
     }
 
     @Override

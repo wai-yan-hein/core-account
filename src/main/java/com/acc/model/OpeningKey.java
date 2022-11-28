@@ -13,6 +13,6 @@ import lombok.Data;
 @Data
 public class OpeningKey {
 
-    private Integer opId;
+    private String opId;
     private String compCode;
 }
