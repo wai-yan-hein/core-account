@@ -9,13 +9,13 @@ import com.acc.model.ChartOfAccount;
 import com.acc.model.Department;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
+import com.acc.model.TraderA;
 import com.common.Global;
+import com.common.ProUtil;
 import com.common.Util1;
-import com.inventory.model.Trader;
 import com.user.model.Currency;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import javax.swing.JFormattedTextField;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -31,12 +31,13 @@ import lombok.extern.slf4j.Slf4j;
 public class JournalEntryTableModel extends AbstractTableModel {
 
     private List<Gl> listGV = new ArrayList();
-    String[] columnNames = {"Dept:", "Descripiton", "Cus / Sup", "Account", "Currency", "Dr-Amt", "Cr-Amt"};
+    private final String[] columnNames = {"Dept:", "Descripiton", "Cus / Sup", "Account", "Currency", "Dr-Amt", "Cr-Amt"};
     private JTable parent;
     private List<GlKey> delList = new ArrayList<>();
     JFormattedTextField ttlCrdAmt;
     JFormattedTextField ttlDrAmt;
     private JTextField txtRef;
+    private AccountRepo accountRepo;
     private boolean change = false;
 
     public List<GlKey> getDelList() {
@@ -46,7 +47,6 @@ public class JournalEntryTableModel extends AbstractTableModel {
     public void setDelList(List<GlKey> delList) {
         this.delList = delList;
     }
-
 
     public boolean isChange() {
         return change;
@@ -78,6 +78,14 @@ public class JournalEntryTableModel extends AbstractTableModel {
 
     public void setTtlDrAmt(JFormattedTextField ttlDrAmt) {
         this.ttlDrAmt = ttlDrAmt;
+    }
+
+    public AccountRepo getAccountRepo() {
+        return accountRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
     }
 
     @Override
@@ -140,89 +148,79 @@ public class JournalEntryTableModel extends AbstractTableModel {
                 Gl gv = listGV.get(row);
                 switch (column) {
                     case 0 -> {
-                        if (value != null) {
-                            if (value instanceof Department dep) {
-                                gv.setDeptUsrCode(dep.getUserCode());
-                                gv.setDeptCode(dep.getKey().getDeptCode());
-                                parent.setColumnSelectionInterval(1, 1);
-                            }
+                        if (value instanceof Department dep) {
+                            gv.setDeptUsrCode(dep.getUserCode());
+                            gv.setDeptCode(dep.getKey().getDeptCode());
+                            parent.setColumnSelectionInterval(1, 1);
                         }
                     }
                     case 1 -> {
-                        if (value != null) {
-                            gv.setDescription(value.toString());
-                        }
+                        gv.setDescription(value.toString());
                         parent.setColumnSelectionInterval(2, 2);
                     }
                     case 2 -> {
-                        if (value != null) {
-                            if (value instanceof Trader trader) {
-                                gv.setTraderCode(trader.getKey().getCode());
-                                gv.setTraderName(trader.getTraderName());
-                                if (trader.getAccount() != null) {
-                                    gv.setSrcAccCode(trader.getAccount());
-                                    //gv.setSrcAccName(trader.getAccount().getCoaNameEng());
-                                    parent.setColumnSelectionInterval(3, 3);
-                                } else {
-                                    parent.setColumnSelectionInterval(2, 3);
+                        if (value instanceof TraderA trader) {
+                            gv.setTraderCode(trader.getKey().getCode());
+                            gv.setTraderName(trader.getTraderName());
+                            String account = trader.getAccCode();
+                            if (account != null) {
+                                ChartOfAccount coa = accountRepo.findCOA(account);
+                                if (coa != null) {
+                                    gv.setSrcAccCode(account);
+                                    gv.setSrcAccName(coa.getCoaNameEng());
+                                    parent.setColumnSelectionInterval(5, 5);
                                 }
+                            } else {
+                                parent.setColumnSelectionInterval(2, 2);
                             }
                         }
                     }
                     case 3 -> {
-                        if (value != null) {
-                            if (value instanceof ChartOfAccount coa) {
-                                gv.setSrcAccCode(coa.getKey().getCoaCode());
-                                gv.setSrcAccName(coa.getCoaNameEng());
-                                gv.setTraderCode(null);
-                                gv.setTraderName(null);
-                            }
+                        if (value instanceof ChartOfAccount coa) {
+                            gv.setSrcAccCode(coa.getKey().getCoaCode());
+                            gv.setSrcAccName(coa.getCoaNameEng());
+                            gv.setTraderCode(null);
+                            gv.setTraderName(null);
                             parent.setColumnSelectionInterval(4, 4);
                         }
                     }
                     case 4 -> {
-                        if (!Objects.isNull(value)) {
-                            if (value instanceof Currency cur) {
-                                gv.setCurCode(cur.getCurCode());
-                                parent.setColumnSelectionInterval(5, 5);
-                            }
+                        if (value instanceof Currency cur) {
+                            gv.setCurCode(cur.getCurCode());
+                            parent.setColumnSelectionInterval(5, 5);
                         }
                     }
 
                     case 5 -> {
-                        if (value != null) {
-                            gv.setDrAmt(Util1.getDouble(value));
-                            gv.setCrAmt(0.0);
-                            try {
-                                Gl get = listGV.get(row + 1);
-                                if (!Util1.isNull(get.getDeptCode())) {
-                                    parent.setColumnSelectionInterval(1, 1);
-                                } else {
-                                    parent.setColumnSelectionInterval(0, 0);
-                                }
-                                parent.setRowSelectionInterval(row + 1, row + 1);
-                            } catch (Exception e) {
+                        gv.setDrAmt(Util1.getDouble(value));
+                        gv.setCrAmt(0.0);
+                        try {
+                            Gl get = listGV.get(row + 1);
+                            if (!Util1.isNull(get.getDeptCode())) {
+                                parent.setColumnSelectionInterval(1, 1);
+                            } else {
                                 parent.setColumnSelectionInterval(0, 0);
-                                parent.setRowSelectionInterval(row + 1, row + 1);
                             }
+                            parent.setRowSelectionInterval(row + 1, row + 1);
+                        } catch (Exception e) {
+                            parent.setColumnSelectionInterval(0, 0);
+                            parent.setRowSelectionInterval(row + 1, row + 1);
                         }
                     }
                     case 6 -> {
-                        if (value != null) {
-                            gv.setCrAmt(Util1.getDouble(value));
-                            gv.setDrAmt(0.0);
-                            try {
-                                Gl get = listGV.get(row + 1);
-                                if (!Util1.isNull(get.getDeptCode())) {
-                                    parent.setColumnSelectionInterval(1, 1);
-                                } else {
-                                    parent.setColumnSelectionInterval(0, 0);
-                                }
-                                parent.setRowSelectionInterval(row + 1, row + 1);
-                            } catch (Exception e) {
+                        gv.setCrAmt(Util1.getDouble(value));
+                        gv.setDrAmt(0.0);
+                        try {
+                            Gl get = listGV.get(row + 1);
+                            if (!Util1.isNull(get.getDeptCode())) {
+                                parent.setColumnSelectionInterval(1, 1);
+                            } else {
                                 parent.setColumnSelectionInterval(0, 0);
-                                parent.setRowSelectionInterval(row + 1, row + 1);
                             }
+                            parent.setRowSelectionInterval(row + 1, row + 1);
+                        } catch (Exception e) {
+                            parent.setColumnSelectionInterval(0, 0);
+                            parent.setRowSelectionInterval(row + 1, row + 1);
                         }
                     }
                 }
@@ -232,9 +230,9 @@ public class JournalEntryTableModel extends AbstractTableModel {
                 if (Util1.isNullOrEmpty(gv.getDescription())) {
                     gv.setDescription(txtRef.getText());
                 }
-                setCurrency(gv);
                 calTotalAmt();
                 change();
+                fireTableRowsUpdated(row, row);
                 parent.requestFocusInWindow();
             }
         } catch (Exception e) {
@@ -244,12 +242,6 @@ public class JournalEntryTableModel extends AbstractTableModel {
 
     public Gl getVGl(int row) {
         return listGV.get(row);
-    }
-
-    private void setCurrency(Gl vgl) {
-        if (Objects.isNull(vgl.getCurCode())) {
-            vgl.setCurCode(null);
-        }
     }
 
     private void change() {
@@ -286,6 +278,9 @@ public class JournalEntryTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
+        if (column == 4) {
+            return ProUtil.isMultiCur();
+        }
         return true;
 
     }
@@ -314,17 +309,6 @@ public class JournalEntryTableModel extends AbstractTableModel {
         this.parent = parent;
     }
 
-    public void saveGV(Gl gv, String status) {
-        //if (isValidCOA(gv, Global.compCode, Global.loginUser.getAppUserCode(), status)) {
-        // coaService.save(gv);
-        if (status.equals("NEW")) {
-            listGV.add(new Gl());
-            addEmptyRow();
-        }
-
-        //}
-    }
-
     private boolean hasEmptyRow() {
         boolean status = true;
         if (listGV.isEmpty() || listGV == null) {
@@ -344,6 +328,11 @@ public class JournalEntryTableModel extends AbstractTableModel {
             if (listGV != null) {
                 try {
                     Gl record = new Gl();
+                    GlKey key = new GlKey();
+                    key.setCompCode(Global.compCode);
+                    record.setKey(key);
+                    record.setTranSource("GV");
+                    record.setCurCode(Global.currency);
                     if (!listGV.isEmpty()) {
                         Gl get = listGV.get(listGV.size() - 1);
                         if (!Util1.isNull(get.getDeptCode())) {
@@ -410,7 +399,7 @@ public class JournalEntryTableModel extends AbstractTableModel {
         if (!listGV.isEmpty()) {
             Gl vgl = listGV.get(row);
             if (!Util1.isNull(vgl.getKey().getGlCode())) {
-                int status = JOptionPane.showConfirmDialog(Global.parentForm,
+                int status = JOptionPane.showConfirmDialog(parent,
                         "Are you sure to delete transaction.", "Delete Transaction", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (status == JOptionPane.YES_OPTION) {
                     delList.add(vgl.getKey());

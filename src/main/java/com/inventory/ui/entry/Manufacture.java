@@ -245,7 +245,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         unitAutoCompleter.setStockUnit(inventoryRepo.findUnit(ph.getUnit()));
         vouStatusAutoCompleter.setVoucher(inventoryRepo.findVouStatus(p.getPtCode()));
         stockAutoCompleter.setStock(inventoryRepo.findStock(ph.getKey().getStockCode()));
-        locationAutoCompleter.setLocation(inventoryRepo.findLocation(ph.getKey().getLocCode()));
+        locationAutoCompleter.setLocation(inventoryRepo.findLocation(ph.getLocCode()));
         if (p.isDeleted()) {
             enableProcess(false);
             lblStatus.setText("DELETED");
@@ -343,9 +343,9 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             key.setVouNo(txtVouNo.getText());
             key.setCompCode(Global.compCode);
             key.setDeptId(Global.deptId);
-            key.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             key.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
             ph.setKey(key);
+            ph.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             ph.setVouDate(txtStartDate.getDate());
             ph.setEndDate(txtEndDate.getDate());
             ph.setRemark(txtRemark.getText());

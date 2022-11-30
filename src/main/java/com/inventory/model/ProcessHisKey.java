@@ -14,7 +14,6 @@ import lombok.Data;
 public class ProcessHisKey {
     private String vouNo;
     private String stockCode;
-    private String locCode;
     private String compCode;
     private Integer deptId;
 }

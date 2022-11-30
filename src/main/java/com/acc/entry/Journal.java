@@ -125,13 +125,12 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     }
 
     public void openJournalEntryDialog(String glVou, String status) {
-        ImageIcon icon = new ImageIcon("image/book_26px.png");
         dialog.setAccountRepo(accountRepo);
         dialog.setVouNo(glVou);
         dialog.setStatus(status);
         dialog.initMain();
         dialog.setSize(Global.width - 100, Global.height - 100);
-        dialog.setIconImage(icon.getImage());
+        dialog.setIconImage(Global.parentForm.getIconImage());
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }

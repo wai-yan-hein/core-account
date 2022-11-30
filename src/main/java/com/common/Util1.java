@@ -702,8 +702,8 @@ public class Util1 {
 
     public static Resolution getPopSize() {
         Resolution r = getResolution();
-        r.setWidth(r.getWidth() / 3);
-        r.setHeight((r.getHeight() / 5) + 52);
+        r.setWidth(r.getWidth() / 4);
+        r.setHeight((r.getHeight() / 4));
         return r;
     }
 

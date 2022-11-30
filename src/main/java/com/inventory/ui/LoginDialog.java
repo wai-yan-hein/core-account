@@ -19,8 +19,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
-import javax.swing.JComboBox;
-import javax.swing.JFormattedTextField;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
@@ -293,7 +291,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
         lblStatus = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Login Core Inventory");
+        setTitle("Login Core Account Cloud");
         setFont(Global.lableFont);
         setResizable(false);
         addComponentListener(new java.awt.event.ComponentAdapter() {

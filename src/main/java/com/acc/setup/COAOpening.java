@@ -247,8 +247,18 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
             btnGenerateZero.setEnabled(listop.isEmpty());
             openingTableModel.addNewRow();
             calTotalAmt();
+            focusOnTable();
             progress.setIndeterminate(false);
         });
+    }
+
+    private void focusOnTable() {
+        int rc = tblOpening.getRowCount();
+        if (rc > 1) {
+            tblOpening.setRowSelectionInterval(rc - 1, rc - 1);
+            tblOpening.setColumnSelectionInterval(0, 0);
+            tblOpening.requestFocus();
+        }
     }
 
     // calculate dr-amt and cr-amt and total

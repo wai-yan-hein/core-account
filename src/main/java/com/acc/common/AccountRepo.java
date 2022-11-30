@@ -19,6 +19,7 @@ import com.acc.model.VRef;
 import com.acc.model.VTranSource;
 import com.common.FilterObject;
 import com.common.Global;
+import com.common.ReturnObject;
 import com.common.Util1;
 import java.time.Duration;
 import java.util.List;
@@ -159,6 +160,15 @@ public class AccountRepo {
                 .body(Mono.just(gl), Gl.class)
                 .retrieve()
                 .bodyToMono(Gl.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
+    public ReturnObject saveGl(List<Gl> gl) {
+        Mono<ReturnObject> result = accountApi.post()
+                .uri("/account/save-gl-list")
+                .body(Mono.just(gl), List.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
         return result.block(Duration.ofMinutes(min));
     }
 

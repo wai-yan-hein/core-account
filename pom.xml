@@ -86,7 +86,7 @@
     </dependencies>
 
     <build>
-        <finalName>core-account</finalName>
+        <finalName>core-inventory</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

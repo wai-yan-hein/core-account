@@ -15,15 +15,19 @@ import com.acc.model.Gl;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.ProUtil;
+import com.common.ReturnObject;
 import com.common.Util1;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
@@ -66,28 +70,55 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
 
     public void setStatus(String status) {
         this.status = status;
-        lblStatus.setText(status);
-        lblStatus.setForeground(status.equals("NEW") ? Color.GREEN : Color.BLUE);
-        txtVouNo.setEditable(status.equals("NEW"));
     }
 
     /**
      * Creates new form JournalEntryDialog
+     *
+     * @param frame
      */
     public JournalEntryDialog() {
         super(Global.parentForm, true);
         initComponents();
         initKeyListener();
+        initFocusListener();
         keyMapping();
     }
 
-    private void keyMapping() {
-        this.getRootPane().getInputMap().put(KeyStroke.getKeyStroke("F5"), "Save-Action");
-        this.getRootPane().getActionMap().put("Save-Action", actionSave);
-        this.getRootPane().getInputMap().put(KeyStroke.getKeyStroke("F6"), "Print-Action");
-        this.getRootPane().getActionMap().put("Print-Action", actionPrint);
-
+    private void initFocusListener() {
+        txtVouDate.getDateEditor().getUiComponent().addFocusListener(fa);
+        txtRefrence.addKeyListener(this);
     }
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            if (e.getSource() instanceof JTextFieldDateEditor edit) {
+                edit.selectAll();
+            } else if (e.getSource() instanceof JTextField txt) {
+                txt.selectAll();
+            }
+        }
+
+    };
+
+    private void keyMapping() {
+        KeyStroke delete = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
+        tblJournal.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(delete, "delete");
+        tblJournal.getActionMap().put("delete", actionDelete);
+        KeyStroke f5 = KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0);
+        tblJournal.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(f5, "f5");
+        tblJournal.getActionMap().put("f5", actionSave);
+        KeyStroke f6 = KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0);
+        tblJournal.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(f6, "f6");
+        tblJournal.getActionMap().put("f6", actionPrint);
+    }
+
+    private final Action actionDelete = new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            removeJournal();
+        }
+    };
     private final Action actionSave = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -105,6 +136,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         btnCurrency.setVisible(ProUtil.isMultiCur());
         initTable();
         searchJournalByVouId();
+        txtVouDate.requestFocusInWindow();
     }
 
     private void initTable() {
@@ -115,6 +147,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         journalTablModel.setTtlCrdAmt(txtFCrdAmt);
         journalTablModel.setTtlDrAmt(txtFDrAmt);
         journalTablModel.setTxtRef(txtRefrence);
+        journalTablModel.setAccountRepo(accountRepo);
         tblJournal.getTableHeader().setFont(Global.lableFont);
         tblJournal.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblJournal.getColumnModel().getColumn(0).setCellEditor(new DepartmentCellEditor(accountRepo.getDepartment()));
@@ -139,23 +172,57 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
     }
 
     private void searchJournalByVouId() {
+        journalTablModel.clear();
+        lblStatus.setText(status);
+        lblStatus.setForeground(status.equals("NEW") ? Color.GREEN : Color.BLUE);
         if (status.equals("EDIT")) {
-            lblStatus.setText(status);
             List<Gl> listGl = accountRepo.getJournal(vouNo);
             Date glDate = listGl.get(0).getGlDate();
             String ref = listGl.get(0).getReference();
             txtVouDate.setDate(glDate);
             txtRefrence.setText(ref);
+            txtVouNo.setText(vouNo);
             journalTablModel.setListGV(listGl);
-            journalTablModel.addEmptyRow();
-            focusOnTable();
         }
+        journalTablModel.addEmptyRow();
+        focusOnTable();
     }
 
     private boolean saveGeneralVoucher() {
-        boolean save = false;
+        if (isValidEntry() && isValidData()) {
+            ReturnObject ro = accountRepo.saveGl(journalTablModel.getListGV());
+            if (ro != null) {
+                clear();
+            }
+        }
+        return true;
+    }
 
-        return save;
+    public boolean isValidData() {
+        for (Gl g : journalTablModel.getListGV()) {
+            g.setGlDate(txtVouDate.getDate());
+            g.setMacId(Global.macId);
+            if (g.getSrcAccCode() != null) {
+                if (g.getDeptCode() == null) {
+                    JOptionPane.showMessageDialog(tblJournal, "Invalid Department.");
+                    return false;
+                } else if (Util1.getDouble(g.getDrAmt()) + Util1.getDouble(g.getCrAmt()) == 0) {
+                    JOptionPane.showMessageDialog(tblJournal, "Invalid Amount.");
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean isValidEntry() {
+        if (!Objects.equals(Util1.getDouble(txtFDrAmt.getValue()), Util1.getDouble(txtFCrdAmt.getValue()))) {
+            JOptionPane.showMessageDialog(this, "Out of balance.", "Invalid Entry", JOptionPane.WARNING_MESSAGE);
+            return false;
+        } else if (!ProUtil.isValidDate(txtVouDate.getDate())) {
+            return false;
+        }
+        return true;
     }
 
     private void initKeyListener() {
@@ -193,9 +260,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
     }
 
     private void removeJournal() {
-        if (tblJournal.getCellEditor() != null) {
-            tblJournal.getCellEditor().stopCellEditing();
-        }
         if (tblJournal.getSelectedRow() >= 0) {
             int selectRow = tblJournal.convertRowIndexToModel(tblJournal.getSelectedRow());
             journalTablModel.removeJournal(selectRow);
@@ -509,9 +573,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
 
     private void tblJournalKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblJournalKeyReleased
         // TODO add your handling code here:
-        if (evt.getKeyCode() == KeyEvent.VK_DELETE) {
-            removeJournal();
-        }
+
     }//GEN-LAST:event_tblJournalKeyReleased
 
     private void btnCurrencyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCurrencyActionPerformed

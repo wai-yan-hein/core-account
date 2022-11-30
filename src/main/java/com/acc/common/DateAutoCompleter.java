@@ -104,6 +104,7 @@ public class DateAutoCompleter implements KeyListener, SelectionObserver {
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setRowHeight(Global.tblRowHeight);
         table.setDefaultRenderer(Object.class, new TableCellRender());
+        table.setSelectionForeground(Color.white);
         JScrollPane scroll = new JScrollPane(table);
 
         scroll.setBorder(null);

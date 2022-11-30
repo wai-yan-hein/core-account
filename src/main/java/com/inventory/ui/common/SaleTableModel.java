@@ -167,8 +167,7 @@ public class SaleTableModel extends AbstractTableModel {
             case 6 -> {
                 return ProUtil.isSalePriceChange();
             }
-            //amt
-            case 7 -> {
+            case 2,7 -> {
                 return false;
             }
         }

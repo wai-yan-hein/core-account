@@ -16,6 +16,7 @@ import lombok.Data;
 public class ProcessHis {
 
     private ProcessHisKey key;
+    private String locCode;
     private String stockUsrCode;
     private String stockName;
     private Date vouDate;

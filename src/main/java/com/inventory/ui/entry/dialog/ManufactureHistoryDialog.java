@@ -39,6 +39,7 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
     private LocationAutoCompleter locationAutoCompleter;
     private VouStatusAutoCompleter vouStatusAutoCompleter;
     private SelectionObserver observer;
+    private boolean status = false;
 
     public SelectionObserver getObserver() {
         return observer;
@@ -84,9 +85,12 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
     }
 
     public void initMain() {
-        initDate();
-        initCompleter();
-        initTblProcess();
+        if (!status) {
+            initDate();
+            initCompleter();
+            initTblProcess();
+            status = true;
+        }
         searchProcess();
     }
 
@@ -195,6 +199,7 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         tblProcess = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Manufacture Search Dialog");
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -351,9 +356,8 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel4)
                     .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(chkDel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(chkFinish, javax.swing.GroupLayout.Alignment.LEADING))
+                    .addComponent(chkDel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(chkFinish)
                     .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(328, Short.MAX_VALUE))
         );

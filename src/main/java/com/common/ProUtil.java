@@ -121,9 +121,9 @@ public class ProUtil {
         int day = lockDay();
         if (day != 0) {
             String today = Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd");
-            value = Util1.toDateStr(Util1.minusDay(today, day), "yyyy-MM-dd", "dd/MM/yyyy");
+            value = Util1.toDateStr(Util1.minusDay(today, day), "yyyy-MM-dd", Global.dateFormat);
         }
-        return value == null ? Util1.toDate(Global.startDate) : Util1.toDate(value, "dd/MM/yyyy");
+        return value == null ? Util1.toDate(Global.startDate, Global.dateFormat) : Util1.toDate(value, Global.dateFormat);
     }
 
     public static int lockDay() {
