@@ -13,7 +13,6 @@ import lombok.Data;
 @Data
 public class ProcessHisKey {
     private String vouNo;
-    private String stockCode;
     private String compCode;
     private Integer deptId;
 }

@@ -417,6 +417,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         jLabel5.setFont(Global.lableFont);
         jLabel5.setText("Menu Type");
 
+        txtMenuType.setEditable(false);
         txtMenuType.setFont(Global.textFont);
         txtMenuType.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
@@ -427,7 +428,6 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         jLabel6.setFont(Global.lableFont);
         jLabel6.setText("Menu Class");
 
-        txtClass.setEditable(false);
         txtClass.setFont(Global.textFont);
         txtClass.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {

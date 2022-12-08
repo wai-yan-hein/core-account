@@ -51,7 +51,7 @@ public class ProcessHisTableModel extends AbstractTableModel {
                 case 0 ->
                     Util1.toDateStr(med.getVouDate(), "dd/MM/yyyy");
                 case 1 ->
-                    med.getStockUsrCode() == null ? med.getKey().getStockCode() : med.getStockUsrCode();
+                    med.getStockUsrCode() == null ? med.getStockCode() : med.getStockUsrCode();
                 case 2 ->
                     med.getStockName();
                 case 3 ->
