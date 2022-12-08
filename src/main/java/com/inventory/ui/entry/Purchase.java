@@ -22,6 +22,7 @@ import com.inventory.model.PurHis;
 import com.inventory.model.PurHisDetail;
 import com.inventory.model.PurHisKey;
 import com.inventory.model.Trader;
+import com.inventory.model.VPurchase;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.PurchaseTableModel;
 import com.inventory.ui.entry.dialog.PurVouSearchDialog;
@@ -460,22 +461,22 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     public void setVoucher(PurHis pur) {
-        if (ph != null) {
+        if (pur != null) {
             progress.setIndeterminate(true);
             ph = pur;
+            Integer deptId = ph.getKey().getDeptId();
             currAutoCompleter.setCurrency(inventoryRepo.findCurrency(ph.getCurCode()));
-            locationAutoCompleter.setLocation(inventoryRepo.findLocation(ph.getLocCode()));
-            traderAutoCompleter.setTrader(inventoryRepo.findTrader(ph.getTraderCode()));
+            locationAutoCompleter.setLocation(inventoryRepo.findLocation(ph.getLocCode(), deptId));
+            traderAutoCompleter.setTrader(inventoryRepo.findTrader(ph.getTraderCode(), deptId));
             String vouNo = ph.getKey().getVouNo();
             Mono<ResponseEntity<List<PurHisDetail>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/pur/get-pur-detail")
                     .queryParam("vouNo", vouNo)
                     .queryParam("compCode", Global.compCode)
-                    .queryParam("deptId", Global.deptId)
+                    .queryParam("deptId", ph.getKey().getDeptId())
                     .build())
                     .retrieve().toEntityList(PurHisDetail.class);
             result.subscribe((t) -> {
-                log.info("1");
                 purTableModel.setListDetail(t.getBody());
                 purTableModel.addNewRow();
                 if (!ProUtil.isPurchaseEdit()) {
@@ -1236,9 +1237,10 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             case "ORDER" -> {
             }
             case "PUR-HISTORY" -> {
-                String vouNo = selectObj.toString();
-                PurHis pur = inventoryRepo.findPurchase(vouNo);
-                setVoucher(pur);
+                if (selectObj instanceof VPurchase v) {
+                    PurHis pur = inventoryRepo.findPurchase(v.getVouNo(), v.getDeptId());
+                    setVoucher(pur);
+                }
             }
             case "Select" -> {
                 calculateTotalAmount(false);

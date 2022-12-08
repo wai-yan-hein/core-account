@@ -12,6 +12,7 @@ import com.common.TableCellRender;
 import com.user.common.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
+import com.inventory.editor.DepartmentAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.model.VOpening;
 import com.inventory.ui.common.InventoryRepo;
@@ -44,6 +45,8 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
     private AppUserAutoCompleter appUserAutoCompleter;
     private SelectionObserver observer;
     private StockAutoCompleter stockAutoCompleter;
+    private DepartmentAutoCompleter departmentAutoCompleter;
+    private boolean status = false;
 
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
@@ -86,15 +89,20 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
     }
 
     public void initMain() {
-        initCombo();
-        initTableVoucher();
-        setTodayDate();
+        if (!status) {
+            initCombo();
+            initTableVoucher();
+            setTodayDate();
+            status = true;
+        }
         search();
     }
 
     private void initCombo() {
         appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, userRepo.getDeparment(), null, true);
+        departmentAutoCompleter.setDepartment(userRepo.findDepartment(Global.deptId));
 
     }
 
@@ -107,13 +115,14 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
         tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(150);
         tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(50);
         tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(100);
+        tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(50);
         tblVoucher.setDefaultRenderer(Float.class, new TableCellRender());
         tblVoucher.setDefaultRenderer(Object.class, new TableCellRender());
     }
 
     private void setTodayDate() {
         if (txtFromDate.getDate() == null) {
-            txtFromDate.setDate(Util1.getTodayDate());
+            txtFromDate.setDate(Util1.toDate(Global.startDate, "dd/MM/yyyy"));
             txtToDate.setDate(Util1.getTodayDate());
         }
     }
@@ -127,6 +136,7 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
         filter.setVouNo(txtVouNo.getText());
         filter.setRemark(txtRemark.getText());
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
+        filter.setDeptId(departmentAutoCompleter.getDepartment().getDeptId());
         //
         Mono<ResponseEntity<List<VOpening>>> result = inventoryApi
                 .post()
@@ -136,14 +146,25 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
                 .toEntityList(VOpening.class);
         List<VOpening> listOP = result.block(Duration.ofMinutes(1)).getBody();
         tableModel.setListDetail(listOP);
+        txtTotalRecord.setValue(listOP.size());
+        calAmt();
         progess.setIndeterminate(false);
+    }
+
+    private void calAmt() {
+        List<VOpening> list = tableModel.getListDetail();
+        double ttlAmt = 0.0;
+        for (VOpening op : list) {
+            ttlAmt += Util1.getDouble(op.getAmount());
+        }
+        txtTotalAmt.setValue(ttlAmt);
     }
 
     private void select() {
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
             VOpening his = tableModel.getSelectVou(row);
-            observer.selected("OP-HISTORY", his.getVouNo());
+            observer.selected("OP-HISTORY", his);
             setVisible(false);
         } else {
             JOptionPane.showMessageDialog(this, "Please select the voucher.",
@@ -183,6 +204,8 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
         txtStock = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
         txtRemark = new javax.swing.JTextField();
+        jLabel9 = new javax.swing.JLabel();
+        txtDep = new javax.swing.JTextField();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
         progess = new javax.swing.JProgressBar();
@@ -256,6 +279,17 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
             }
         });
 
+        jLabel9.setFont(Global.lableFont);
+        jLabel9.setText("Department");
+
+        txtDep.setFont(Global.textFont);
+        txtDep.setName("txtUser"); // NOI18N
+        txtDep.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtDepFocusGained(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -267,7 +301,8 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
                     .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -281,7 +316,8 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
                     .addComponent(txtVouNo)
                     .addComponent(txtUser)
                     .addComponent(txtStock)
-                    .addComponent(txtRemark))
+                    .addComponent(txtRemark)
+                    .addComponent(txtDep))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -310,7 +346,11 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel8)
-                            .addComponent(txtUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(txtUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel9)
+                            .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(jSeparator2))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -472,6 +512,10 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtRemarkFocusGained
 
+    private void txtDepFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDepFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtDepFocusGained
+
     /**
      * @param args the command line arguments
      */
@@ -485,6 +529,7 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane2;
@@ -493,6 +538,7 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
     private javax.swing.JLabel lblTtlRecord;
     private javax.swing.JProgressBar progess;
     private javax.swing.JTable tblVoucher;
+    private javax.swing.JTextField txtDep;
     private com.toedter.calendar.JDateChooser txtFromDate;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtStock;

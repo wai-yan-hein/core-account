@@ -154,7 +154,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         chkMulti.setSelected(supplier.isMulti());
         txtCusName.requestFocus();
         lblStatus.setText("EDIT");
-        traderGroupAutoCompleter.setGroup(inventoryRepo.findTraderGroup(supplier.getGroupCode()));
+        traderGroupAutoCompleter.setGroup(inventoryRepo.findTraderGroup(supplier.getGroupCode(),supplier.getKey().getDeptId()));
     }
 
     private boolean isValidEntry() {

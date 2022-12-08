@@ -25,6 +25,7 @@ import com.inventory.model.TransferHis;
 import com.inventory.model.TransferHisDetail;
 import com.inventory.model.StockUnit;
 import com.inventory.model.TransferHisKey;
+import com.inventory.model.VTransfer;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.TransferTableModel;
 import com.inventory.ui.entry.dialog.TransferSearchDialog;
@@ -308,14 +309,15 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private void setVoucher(TransferHis s) {
         progress.setIndeterminate(true);
         io = s;
-        fromLocaitonCompleter.setLocation(inventoryRepo.findLocation(io.getLocCodeFrom()));
-        toLocaitonCompleter.setLocation(inventoryRepo.findLocation(io.getLocCodeTo()));
+        Integer deptId = io.getKey().getDeptId();
+        fromLocaitonCompleter.setLocation(inventoryRepo.findLocation(io.getLocCodeFrom(), deptId));
+        toLocaitonCompleter.setLocation(inventoryRepo.findLocation(io.getLocCodeTo(), deptId));
         String vouNo = io.getKey().getVouNo();
         Mono<ResponseEntity<List<TransferHisDetail>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/transfer/get-transfer-detail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", Global.deptId)
+                .queryParam("deptId", io.getKey().getDeptId())
                 .build())
                 .retrieve().toEntityList(TransferHisDetail.class);
         result.subscribe((t) -> {
@@ -618,10 +620,8 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     @Override
     public void selected(Object source, Object selectObj) {
         if (source.toString().equals("TR-HISTORY")) {
-            if (selectObj != null) {
-                String vouNo = selectObj.toString();
-                setVoucher(inventoryRepo.findTransfer(vouNo));
-
+            if (selectObj instanceof VTransfer v) {
+                setVoucher(inventoryRepo.findTransfer(v.getVouNo(), v.getDeptId()));
             }
         }
 

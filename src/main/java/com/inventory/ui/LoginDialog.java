@@ -148,6 +148,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
         MachineInfo machine = new MachineInfo();
         machine.setMachineIp(ipAddress);
         machine.setMachineName(machineName);
+        machine.setProUpdate(true);
         MachineInfo mac = userRepo.register(machine);
         if (mac.getMacId() != null) {
             Global.macId = mac.getMacId();

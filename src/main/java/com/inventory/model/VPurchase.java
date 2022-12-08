@@ -58,4 +58,5 @@ public class VPurchase {
     private String compAddress;
     private String stockUserCode;
     private String stockName;
+    private Integer deptId;
 }

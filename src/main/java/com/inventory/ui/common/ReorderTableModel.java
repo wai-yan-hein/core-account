@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.common;
 
+import com.common.Global;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.common.Util1;
@@ -136,7 +137,7 @@ public class ReorderTableModel extends AbstractTableModel {
                     case 3 -> {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             p.setMinQty(Util1.getFloat(value));
-                            p.setMinUnitCode(getPurUnit(p.getKey().getStockCode()));
+                            p.setMinUnitCode(getPurUnit(p.getKey().getStockCode(),p.getKey().getDeptId()));
                             table.setColumnSelectionInterval(3, 3);
                         } else {
                             JOptionPane.showMessageDialog(table, "Invalid Amount.");
@@ -151,7 +152,7 @@ public class ReorderTableModel extends AbstractTableModel {
                     case 5 -> {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             p.setMaxQty(Util1.getFloat(value));
-                            p.setMaxUnitCode(getPurUnit(p.getKey().getStockCode()));
+                            p.setMaxUnitCode(getPurUnit(p.getKey().getStockCode(), p.getKey().getDeptId()));
                             table.setColumnSelectionInterval(5, 5);
                         } else {
                             JOptionPane.showMessageDialog(table, "Invalid Amount.");
@@ -182,8 +183,8 @@ public class ReorderTableModel extends AbstractTableModel {
         }
     }
 
-    private String getPurUnit(String stockCode) {
-        return inventoryRepo.findStock(stockCode).getPurUnitCode();
+    private String getPurUnit(String stockCode, Integer deptId) {
+        return inventoryRepo.findStock(stockCode, deptId).getPurUnitCode();
     }
 
     private float getSmallQty(String stockCode, String unit) {

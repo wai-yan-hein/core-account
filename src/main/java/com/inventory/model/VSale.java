@@ -65,4 +65,5 @@ public class VSale {
     private String regionName;
     private String stockTypeName;
     private String refNo;
+    private Integer deptId;
 }

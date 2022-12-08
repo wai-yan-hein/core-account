@@ -30,6 +30,7 @@ import com.inventory.model.SaleHisDetail;
 import com.inventory.model.SaleHisKey;
 import com.inventory.model.SaleMan;
 import com.inventory.model.Trader;
+import com.inventory.model.VSale;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.SaleTableModel;
 import com.inventory.ui.common.StockBalanceTableModel;
@@ -538,18 +539,19 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     public void setSaleVoucher(SaleHis sh) {
         if (sh != null) {
-            saleHis = sh;
             progress.setIndeterminate(true);
-            locationAutoCompleter.setLocation(inventoryRepo.findLocation(saleHis.getLocCode()));
-            traderAutoCompleter.setTrader(inventoryRepo.findTrader(saleHis.getTraderCode()));
+            saleHis = sh;
+            Integer deptId = sh.getKey().getDeptId();
+            locationAutoCompleter.setLocation(inventoryRepo.findLocation(saleHis.getLocCode(),deptId));
+            traderAutoCompleter.setTrader(inventoryRepo.findTrader(saleHis.getTraderCode(),deptId));
             currAutoCompleter.setCurrency(inventoryRepo.findCurrency(saleHis.getCurCode()));
-            saleManCompleter.setSaleMan(inventoryRepo.findSaleMan(saleHis.getSaleManCode()));
+            saleManCompleter.setSaleMan(inventoryRepo.findSaleMan(saleHis.getSaleManCode(),deptId));
             String vouNo = sh.getKey().getVouNo();
             Mono<ResponseEntity<List<SaleHisDetail>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/sale/get-sale-detail")
                     .queryParam("vouNo", vouNo)
                     .queryParam("compCode", Global.compCode)
-                    .queryParam("deptId", Global.deptId)
+                    .queryParam("deptId", sh.getKey().getDeptId())
                     .build())
                     .retrieve().toEntityList(SaleHisDetail.class);
             result.subscribe((t) -> {
@@ -1546,9 +1548,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 searchOrder(od);
             }
             case "SALE-HISTORY" -> {
-                String vouNo = selectObj.toString();
-                SaleHis sh = inventoryRepo.findSale(vouNo);
-                setSaleVoucher(sh);
+                if (selectObj instanceof VSale s) {
+                    SaleHis sh = inventoryRepo.findSale(s.getVouNo(), s.getDeptId());
+                    setSaleVoucher(sh);
+                }
             }
             case "Select" -> {
                 calculateTotalAmount(false);

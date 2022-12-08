@@ -280,7 +280,7 @@ public class StockInOutTableModel extends AbstractTableModel {
         if (!disable) {
             String stockCode = s.getKey().getStockCode();
             boolean explode = s.isExplode();
-            List<Pattern> patterns = inventoryRepo.getPattern(stockCode);
+            List<Pattern> patterns = inventoryRepo.getPattern(stockCode, s.getKey().getDeptId());
             if (!patterns.isEmpty()) {
                 String input = JOptionPane.showInputDialog("Enter Qty.");
                 if (Util1.isPositive(input)) {

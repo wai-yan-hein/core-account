@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry.dialog;
 
+import com.inventory.editor.DepartmentAutoCompleter;
 import com.common.FilterObject;
 import com.common.Global;
 import com.common.SelectionObserver;
@@ -55,6 +56,7 @@ public class PurVouSearchDialog extends javax.swing.JDialog implements KeyListen
     private AppUserAutoCompleter appUserAutoCompleter;
     private StockAutoCompleter stockAutoCompleter;
     private LocationAutoCompleter locationAutoCompleter;
+    private DepartmentAutoCompleter departmentAutoCompleter;
     private SelectionObserver observer;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
@@ -104,7 +106,6 @@ public class PurVouSearchDialog extends javax.swing.JDialog implements KeyListen
         if (!status) {
             initCombo();
             initTableVoucher();
-            initTableStock();
             setTodayDate();
             status = true;
         }
@@ -116,6 +117,8 @@ public class PurVouSearchDialog extends javax.swing.JDialog implements KeyListen
         appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, true, false);
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, userRepo.getDeparment(), null, true);
+        departmentAutoCompleter.setDepartment(userRepo.findDepartment(Global.deptId));
     }
 
     private void initTableVoucher() {
@@ -138,16 +141,6 @@ public class PurVouSearchDialog extends javax.swing.JDialog implements KeyListen
         tblVoucher.setRowSorter(sorter);
     }
 
-    private void initTableStock() {
-        /* tblStock.setModel(codeTableModel);
-        tblStock.getTableHeader().setFont(Global.tblHeaderFont);
-        codeTableModel.addEmptyRow();
-        tblStock.getColumnModel().getColumn(0).setPreferredWidth(50);
-        tblStock.getColumnModel().getColumn(1).setPreferredWidth(200);
-        tblStock.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor());
-        tblStock.setDefaultRenderer(Object.class, new TableCellRender());*/
-    }
-
     private void setTodayDate() {
         if (txtFromDate.getDate() == null) {
             txtFromDate.setDate(Util1.getTodayDate());
@@ -168,6 +161,7 @@ public class PurVouSearchDialog extends javax.swing.JDialog implements KeyListen
         filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
         filter.setReference(txtRef.getText());
         filter.setDeleted(chkDel.isSelected());
+        filter.setDeptId(departmentAutoCompleter.getDepartment().getDeptId());
         //
         Mono<ResponseEntity<List<VPurchase>>> result = inventoryApi
                 .post()
@@ -217,7 +211,7 @@ public class PurVouSearchDialog extends javax.swing.JDialog implements KeyListen
             int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
             if (row >= 0) {
                 VPurchase his = tableModel.getSelectVou(row);
-                observer.selected("PUR-HISTORY", his.getVouNo());
+                observer.selected("PUR-HISTORY", his);
                 setVisible(false);
             } else {
                 JOptionPane.showMessageDialog(this, "Please select the voucher.",
@@ -271,6 +265,8 @@ public class PurVouSearchDialog extends javax.swing.JDialog implements KeyListen
         jLabel9 = new javax.swing.JLabel();
         txtLocation = new javax.swing.JTextField();
         chkDel = new javax.swing.JCheckBox();
+        jLabel10 = new javax.swing.JLabel();
+        txtDep = new javax.swing.JTextField();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
         progess = new javax.swing.JProgressBar();
@@ -393,6 +389,17 @@ public class PurVouSearchDialog extends javax.swing.JDialog implements KeyListen
         chkDel.setFont(Global.lableFont);
         chkDel.setText("Deleted");
 
+        jLabel10.setFont(Global.lableFont);
+        jLabel10.setText("Department");
+
+        txtDep.setFont(Global.textFont);
+        txtDep.setName("txtUser"); // NOI18N
+        txtDep.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtDepFocusGained(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -413,7 +420,8 @@ public class PurVouSearchDialog extends javax.swing.JDialog implements KeyListen
                             .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -434,7 +442,8 @@ public class PurVouSearchDialog extends javax.swing.JDialog implements KeyListen
                                         .addGap(18, 18, 18)
                                         .addComponent(txtToDate, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addComponent(chkDel))
-                                .addGap(0, 0, Short.MAX_VALUE)))))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(txtDep))))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -476,6 +485,10 @@ public class PurVouSearchDialog extends javax.swing.JDialog implements KeyListen
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel8)
                             .addComponent(txtUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel10)
+                            .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(8, 8, 8)
                         .addComponent(chkDel))
                     .addComponent(jSeparator2))
@@ -486,7 +499,7 @@ public class PurVouSearchDialog extends javax.swing.JDialog implements KeyListen
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton1)))
-                .addContainerGap(38, Short.MAX_VALUE))
+                .addContainerGap(10, Short.MAX_VALUE))
         );
 
         tblVoucher.setFont(Global.textFont);
@@ -704,6 +717,10 @@ public class PurVouSearchDialog extends javax.swing.JDialog implements KeyListen
         // TODO add your handling code here:
     }//GEN-LAST:event_txtLocationFocusGained
 
+    private void txtDepFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDepFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtDepFocusGained
+
     /**
      * @param args the command line arguments
      */
@@ -714,6 +731,7 @@ public class PurVouSearchDialog extends javax.swing.JDialog implements KeyListen
     private javax.swing.JCheckBox chkDel;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -734,6 +752,7 @@ public class PurVouSearchDialog extends javax.swing.JDialog implements KeyListen
     private javax.swing.JProgressBar progess;
     private javax.swing.JTable tblVoucher;
     private javax.swing.JTextField txtCus;
+    private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
     private javax.swing.JTextField txtLocation;
