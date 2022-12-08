@@ -26,6 +26,7 @@ import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
 import com.inventory.model.StockUnit;
+import com.inventory.model.VStockIO;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.StockInOutTableModel;
 import com.inventory.ui.entry.dialog.StockIOSearchDialog;
@@ -336,13 +337,13 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         if (s != null) {
             progress.setIndeterminate(true);
             io = s;
-            vouStatusAutoCompleter.setVoucher(inventoryRepo.findVouStatus(io.getVouStatusCode()));
+            vouStatusAutoCompleter.setVoucher(inventoryRepo.findVouStatus(io.getVouStatusCode(),io.getKey().getDeptId()));
             String vouNo = io.getKey().getVouNo();
             Mono<ResponseEntity<List<StockInOutDetail>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/stockio/get-stockio-detail")
                     .queryParam("vouNo", vouNo)
                     .queryParam("compCode", Global.compCode)
-                    .queryParam("deptId", Global.deptId)
+                    .queryParam("deptId", io.getKey().getDeptId())
                     .build())
                     .retrieve().toEntityList(StockInOutDetail.class);
             result.subscribe((t) -> {
@@ -684,8 +685,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     @Override
     public void selected(Object source, Object selectObj) {
         if (source.toString().equals("IO-HISTORY")) {
-            String vouNo = selectObj.toString();
-            setVoucher(inventoryRepo.findStockIO(vouNo));
+            if (selectObj instanceof VStockIO v) {
+                setVoucher(inventoryRepo.findStockIO(v.getVouNo(), v.getDeptId()));
+            }
         }
         if (source.toString().equals("CAL-TOTAL")) {
             calTotalAmt();

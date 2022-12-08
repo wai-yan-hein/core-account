@@ -29,6 +29,7 @@ import com.inventory.ui.entry.dialog.ManufactureHistoryDialog;
 import com.inventory.ui.setup.dialog.VouStatusSetupDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
+import com.user.common.UserRepo;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -61,6 +62,8 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
     private final Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
     @Autowired
     private InventoryRepo inventoryRepo;
+    @Autowired
+    private UserRepo userRepo;
     private JProgressBar progress;
     private SelectionObserver observer;
     private final ProcessHisDetailTableModel processHisDetailTableModel = new ProcessHisDetailTableModel();
@@ -233,6 +236,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
 
     private void setProcess(ProcessHis p) {
         ph = p;
+        Integer deptId = ph.getKey().getDeptId();
         txtVouNo.setText(ph.getKey().getVouNo());
         txtStartDate.setDate(ph.getVouDate());
         txtEndDate.setDate(ph.getEndDate());
@@ -242,10 +246,10 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         txtPrice.setValue(ph.getPrice());
         txtAmt.setValue(ph.getQty() * ph.getPrice());
         chkFinish.setSelected(ph.isFinished());
-        unitAutoCompleter.setStockUnit(inventoryRepo.findUnit(ph.getUnit()));
-        vouStatusAutoCompleter.setVoucher(inventoryRepo.findVouStatus(p.getPtCode()));
-        stockAutoCompleter.setStock(inventoryRepo.findStock(ph.getStockCode()));
-        locationAutoCompleter.setLocation(inventoryRepo.findLocation(ph.getLocCode()));
+        unitAutoCompleter.setStockUnit(inventoryRepo.findUnit(ph.getUnit(), deptId));
+        vouStatusAutoCompleter.setVoucher(inventoryRepo.findVouStatus(p.getPtCode(), deptId));
+        stockAutoCompleter.setStock(inventoryRepo.findStock(ph.getStockCode(), deptId));
+        locationAutoCompleter.setLocation(inventoryRepo.findLocation(ph.getLocCode(), deptId));
         if (p.isDeleted()) {
             enableProcess(false);
             lblStatus.setText("DELETED");
@@ -255,7 +259,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             lblStatus.setText("EDIT");
             lblStatus.setForeground(Color.blue);
         }
-        processHisDetailTableModel.setListDetail(inventoryRepo.getProcessDetail(ph.getKey().getVouNo()));
+        processHisDetailTableModel.setListDetail(inventoryRepo.getProcessDetail(ph.getKey().getVouNo(), ph.getKey().getDeptId()));
         processHisDetailTableModel.addNewRow();
         lblRecord.setText("Records : " + String.valueOf(processHisDetailTableModel.getListDetail().size() - 1));
         focusOnTable();
@@ -391,6 +395,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         dialog.setIconImage(searchIcon);
         dialog.setObserver(this);
         dialog.setInventoryRepo(inventoryRepo);
+        dialog.setUserRepo(userRepo);
         dialog.initMain();
         dialog.setSize(Global.width - 100, Global.height - 100);
         dialog.setLocationRelativeTo(null);
@@ -401,15 +406,16 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         Stock s = stockAutoCompleter.getStock();
         if (s != null) {
             String stockCode = s.getKey().getStockCode();
+            Integer deptId = s.getKey().getDeptId();
             if (processHisDetailTableModel.getListDetail().size() >= 1) {
                 int status = JOptionPane.showConfirmDialog(this, "Are you sure to generate pattern.?");
                 if (status == JOptionPane.OK_OPTION) {
                     processHisDetailTableModel.clear();
-                    generatePattern(stockCode);
+                    generatePattern(stockCode, deptId);
 
                 }
             } else {
-                generatePattern(stockCode);
+                generatePattern(stockCode, deptId);
             }
         } else {
             JOptionPane.showMessageDialog(this, "Please select stock.");
@@ -417,9 +423,9 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         }
     }
 
-    private void generatePattern(String code) {
+    private void generatePattern(String code, Integer deptId) {
         Date vouDate = txtStartDate.getDate();
-        List<Pattern> patterns = inventoryRepo.getPattern(code);
+        List<Pattern> patterns = inventoryRepo.getPattern(code, deptId);
         if (!patterns.isEmpty()) {
             String input = JOptionPane.showInputDialog("Enter Qty.");
             float qty = Util1.getFloat(input);
@@ -921,7 +927,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         if (str.equals("STOCK")) {
             Stock s = stockAutoCompleter.getStock();
             if (s != null) {
-                unitAutoCompleter.setStockUnit(inventoryRepo.findUnit(s.getPurUnitCode()));
+                unitAutoCompleter.setStockUnit(inventoryRepo.findUnit(s.getPurUnitCode(),s.getKey().getDeptId()));
                 getPattern();
             }
         } else if (str.equals("Selected")) {

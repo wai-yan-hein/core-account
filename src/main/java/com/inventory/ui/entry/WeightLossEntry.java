@@ -263,7 +263,7 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
                 .uri(builder -> builder.path("/weight/get-weight-loss-detail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", Global.deptId)
+                .queryParam("deptId", his.getKey().getDeptId())
                 .build())
                 .retrieve().toEntityList(WeightLossDetail.class);
         result.subscribe((t) -> {
@@ -350,20 +350,20 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
                 .addContainerGap()
                 .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtVouNo, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE)
+                .addComponent(txtVouNo, javax.swing.GroupLayout.DEFAULT_SIZE, 162, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel5)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE)
+                .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 162, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE)
+                .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 162, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel7)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtRefNo, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE)
-                .addGap(54, 54, 54))
+                .addComponent(txtRefNo, javax.swing.GroupLayout.DEFAULT_SIZE, 144, Short.MAX_VALUE)
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -478,7 +478,9 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
     public void selected(Object source, Object selectObj) {
         if (source != null) {
             if (source.equals("WL-HISTORY")) {
-                setVoucher(inventoryRepo.findWeightLoss(selectObj.toString()));
+                if (selectObj instanceof WeightLossHisKey key) {
+                    setVoucher(inventoryRepo.findWeightLoss(key.getVouNo(), key.getDeptId()));
+                }
             }
         }
     }

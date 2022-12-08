@@ -13,6 +13,7 @@ import com.common.TableCellRender;
 import com.user.common.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
+import com.inventory.editor.DepartmentAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
@@ -54,10 +55,12 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
     private TraderAutoCompleter traderAutoCompleter;
     private AppUserAutoCompleter appUserAutoCompleter;
     private StockAutoCompleter stockAutoCompleter;
+    private DepartmentAutoCompleter departmentAutoCompleter;
     private SelectionObserver observer;
     private StartWithRowFilter tblFilter;
     private TableRowSorter<TableModel> sorter;
     private LocationAutoCompleter locationAutoCompleter;
+    private boolean status = false;
 
     public WebClient getInventoryApi() {
         return inventoryApi;
@@ -100,9 +103,12 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
     }
 
     public void initMain() {
-        initCombo();
-        initTableVoucher();
-        setTodayDate();
+        if (!status) {
+            initCombo();
+            initTableVoucher();
+            setTodayDate();
+            status = true;
+        }
         search();
     }
 
@@ -111,6 +117,8 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
         appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, true, false);
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, userRepo.getDeparment(), null, true);
+        departmentAutoCompleter.setDepartment(userRepo.findDepartment(Global.deptId));
     }
 
     private void initTableVoucher() {
@@ -160,6 +168,7 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
         filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         filter.setDeleted(chkDel.isSelected());
+        filter.setDeptId(departmentAutoCompleter.getDepartment().getDeptId());
         //
         Mono<ResponseEntity<List<VReturnOut>>> result = inventoryApi
                 .post()
@@ -196,7 +205,7 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
             VReturnOut his = tableModel.getSelectVou(row);
-            observer.selected("RO-HISTORY", his.getVouNo());
+            observer.selected("RO-HISTORY", his);
             setVisible(false);
         } else {
             JOptionPane.showMessageDialog(this, "Please select the voucher.",
@@ -244,6 +253,8 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
         jLabel7 = new javax.swing.JLabel();
         txtLocation = new javax.swing.JTextField();
         chkDel = new javax.swing.JCheckBox();
+        jLabel9 = new javax.swing.JLabel();
+        txtDep = new javax.swing.JTextField();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
         txtFilter = new javax.swing.JTextField();
@@ -354,6 +365,17 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
         chkDel.setFont(Global.lableFont);
         chkDel.setText("Deleted");
 
+        jLabel9.setFont(Global.lableFont);
+        jLabel9.setText("Department");
+
+        txtDep.setFont(Global.textFont);
+        txtDep.setName("txtUser"); // NOI18N
+        txtDep.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtDepFocusGained(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -373,7 +395,8 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
                             .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -391,7 +414,8 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
                             .addComponent(txtRemark)
                             .addComponent(txtStock)
                             .addComponent(txtLocation)
-                            .addComponent(chkDel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(chkDel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtDep))))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -429,6 +453,10 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel8)
                             .addComponent(txtUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel9)
+                            .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(chkDel))
                     .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -436,7 +464,7 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton1))
-                .addContainerGap(65, Short.MAX_VALUE))
+                .addContainerGap(39, Short.MAX_VALUE))
         );
 
         tblVoucher.setFont(Global.textFont);
@@ -645,6 +673,10 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
         // TODO add your handling code here:
     }//GEN-LAST:event_txtLocationFocusGained
 
+    private void txtDepFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDepFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtDepFocusGained
+
     /**
      * @param args the command line arguments
      */
@@ -663,6 +695,7 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane2;
@@ -673,6 +706,7 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
     private javax.swing.JLabel lblTtlRecord;
     private javax.swing.JTable tblVoucher;
     private javax.swing.JTextField txtCus;
+    private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
     private javax.swing.JTextField txtLocation;

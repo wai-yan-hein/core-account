@@ -116,6 +116,10 @@ public class ProUtil {
         return "report/";
     }
 
+    public static Integer getDepId() {
+        return Util1.getBoolean(Global.hmRoleProperty.get("department.filter")) ? Global.deptId : 0;
+    }
+
     public static Date lockDate() {
         String value = ProUtil.getProperty("data.lock.date");
         int day = lockDay();

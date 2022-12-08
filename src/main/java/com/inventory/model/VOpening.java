@@ -27,4 +27,5 @@ public class VOpening {
     private String stockTypeName;
     private String createdBy;
     private boolean deleted;
+    private Integer deptId;
 }

@@ -164,7 +164,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtPrice.setText(customer.getPriceType());
         txtCusName.requestFocus();
         lblStatus.setText("EDIT");
-        traderGroupAutoCompleter.setGroup(inventoryRepo.findTraderGroup(customer.getGroupCode()));
+        traderGroupAutoCompleter.setGroup(inventoryRepo.findTraderGroup(customer.getGroupCode(),customer.getKey().getDeptId()));
     }
 
     private boolean isValidEntry() {

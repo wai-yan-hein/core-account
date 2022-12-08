@@ -8,7 +8,6 @@ import com.common.Global;
 import com.common.RoleProperty;
 import com.common.Util1;
 import com.inventory.model.AppRole;
-import com.inventory.model.MachineInfo;
 import com.inventory.model.AppUser;
 import com.user.model.Department;
 import com.inventory.model.MachineInfo;
@@ -39,6 +38,8 @@ public class UserRepo {
     int min = 1;
     @Autowired
     private WebClient userApi;
+    private Department department;
+    private List<Department> listDept;
 
     public List<Currency> getCurrency() {
         Mono<ResponseEntity<List<Currency>>> result = userApi.get()
@@ -169,6 +170,20 @@ public class UserRepo {
         return result.block(Duration.ofMinutes(min)).getBody();
     }
 
+    public Department findDepartment(Integer deptId) {
+        if (department != null) {
+            return department;
+        } else {
+            Mono<ResponseEntity<Department>> result = userApi.get()
+                    .uri(builder -> builder.path("/user/find-department")
+                    .queryParam("deptId", deptId)
+                    .build())
+                    .retrieve().toEntity(Department.class);
+            department = result.block(Duration.ofMinutes(min)).getBody();
+            return department;
+        }
+    }
+
     public Currency getDefaultCurrency() {
         String curCode = Global.hmRoleProperty.get("default.currency");
         return findCurrency(Util1.isNull(curCode, "-"));
@@ -259,11 +274,15 @@ public class UserRepo {
     }
 
     public List<Department> getDeparment() {
-        Mono<ResponseEntity<List<Department>>> result = userApi.get()
-                .uri(builder -> builder.path("/user/get-department")
-                .build())
-                .retrieve().toEntityList(Department.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        if (listDept == null) {
+            Mono<ResponseEntity<List<Department>>> result = userApi.get()
+                    .uri(builder -> builder.path("/user/get-department")
+                    .build())
+                    .retrieve().toEntityList(Department.class);
+            listDept = result.block(Duration.ofMinutes(min)).getBody();
+            return listDept;
+        }
+        return listDept;
     }
 
     public List<VRoleMenu> getReport(String menuClass) {

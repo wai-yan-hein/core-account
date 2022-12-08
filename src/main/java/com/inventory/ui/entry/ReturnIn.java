@@ -23,6 +23,7 @@ import com.inventory.model.RetInHis;
 import com.inventory.model.RetInHisDetail;
 import com.inventory.model.RetInHisKey;
 import com.inventory.model.Trader;
+import com.inventory.model.VReturnIn;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.ReturnInTableModel;
 import com.inventory.ui.entry.dialog.RetInVouSearchDialog;
@@ -424,18 +425,19 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     public void setVoucher(RetInHis retin) {
-        if (ri != null) {
+        if (retin != null) {
             progress.setIndeterminate(true);
             ri = retin;
-            locationAutoCompleter.setLocation(inventoryRepo.findLocation(ri.getLocCode()));
-            traderAutoCompleter.setTrader(inventoryRepo.findTrader(ri.getTraderCode()));
+            Integer deptId = ri.getKey().getDeptId();
+            locationAutoCompleter.setLocation(inventoryRepo.findLocation(ri.getLocCode(), deptId));
+            traderAutoCompleter.setTrader(inventoryRepo.findTrader(ri.getTraderCode(), deptId));
             currAutoCompleter.setCurrency(inventoryRepo.findCurrency(ri.getCurCode()));
             String vouNo = ri.getKey().getVouNo();
             Mono<ResponseEntity<List<RetInHisDetail>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/retin/get-retin-detail")
                     .queryParam("vouNo", vouNo)
                     .queryParam("compCode", Global.compCode)
-                    .queryParam("deptId", Global.deptId)
+                    .queryParam("deptId", ri.getKey().getDeptId())
                     .build())
                     .retrieve().toEntityList(RetInHisDetail.class);
             result.subscribe((t) -> {
@@ -1143,9 +1145,10 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                 Order od = (Order) selectObj;
             }
             case "RI-HISTORY" -> {
-                String vouNo = selectObj.toString();
-                RetInHis s = inventoryRepo.findReturnIn(vouNo);
-                setVoucher(s);
+                if (selectObj instanceof VReturnIn v) {
+                    RetInHis s = inventoryRepo.findReturnIn(v.getVouNo(), v.getDeptId());
+                    setVoucher(s);
+                }
             }
         }
     }

@@ -168,12 +168,13 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtStockName.setText(stock.getStockName());
         chkActive.setSelected(stock.isActive());
         chkEx.setSelected(stock.isExplode());
-        brandAutoCompleter.setBrand(inventoryRepo.findBrand(stock.getBrandCode()));
-        categoryAutoCompleter.setCategory(inventoryRepo.findCategory(stock.getCatCode()));
-        saleUnitCompleter.setStockUnit(inventoryRepo.findUnit(stock.getSaleUnitCode()));
-        typeAutoCompleter.setStockType(inventoryRepo.findGroup(stock.getTypeCode()));
-        purUnitCompleter.setStockUnit(inventoryRepo.findUnit(stock.getPurUnitCode()));
-        relationAutoCompleter.setRelation(inventoryRepo.findRelation(stock.getRelCode()));
+        Integer deptId = stock.getKey().getDeptId();
+        brandAutoCompleter.setBrand(inventoryRepo.findBrand(stock.getBrandCode(), deptId));
+        categoryAutoCompleter.setCategory(inventoryRepo.findCategory(stock.getCatCode(), deptId));
+        saleUnitCompleter.setStockUnit(inventoryRepo.findUnit(stock.getSaleUnitCode(), deptId));
+        typeAutoCompleter.setStockType(inventoryRepo.findGroup(stock.getTypeCode(), deptId));
+        purUnitCompleter.setStockUnit(inventoryRepo.findUnit(stock.getPurUnitCode(), deptId));
+        relationAutoCompleter.setRelation(inventoryRepo.findRelation(stock.getRelCode(), deptId));
         txtPurPrice.setText(Util1.getString(stock.getPurPrice()));
         txtSalePrice.setText(Util1.getString(stock.getSalePriceN()));
         txtSalePriceA.setText(Util1.getString(stock.getSalePriceA()));
@@ -1287,7 +1288,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
                         txtStockName.requestFocus();
-      
+
                 }
             }
             case "txtType" -> {

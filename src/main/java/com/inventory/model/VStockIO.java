@@ -31,4 +31,5 @@ public class VStockIO {
     private Float amount;
     private String createdBy;
     private boolean deleted;
+    private Integer deptId;
 }

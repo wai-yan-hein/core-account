@@ -24,6 +24,7 @@ import com.inventory.model.RetOutHis;
 import com.inventory.model.RetOutHisDetail;
 import com.inventory.model.RetOutHisKey;
 import com.inventory.model.Trader;
+import com.inventory.model.VReturnOut;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.ReturnOutTableModel;
 import com.inventory.ui.entry.dialog.RetOutVouSearchDialog;
@@ -455,18 +456,19 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     }
 
     public void setVoucher(RetOutHis ro) {
-        if (ri != null) {
+        if (ro != null) {
             progress.setIndeterminate(true);
             ri = ro;
-            locationAutoCompleter.setLocation(inventoryRepo.findLocation(ri.getLocCode()));
-            traderAutoCompleter.setTrader(inventoryRepo.findTrader(ri.getTraderCode()));
+            Integer deptId = ri.getKey().getDeptId();
+            locationAutoCompleter.setLocation(inventoryRepo.findLocation(ri.getLocCode(), deptId));
+            traderAutoCompleter.setTrader(inventoryRepo.findTrader(ri.getTraderCode(), deptId));
             currAutoCompleter.setCurrency(inventoryRepo.findCurrency(ri.getCurCode()));
             String vouNo = ri.getKey().getVouNo();
             Mono<ResponseEntity<List<RetOutHisDetail>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/retout/get-retout-detail")
                     .queryParam("vouNo", vouNo)
                     .queryParam("compCode", Global.compCode)
-                    .queryParam("deptId", Global.deptId)
+                    .queryParam("deptId", ri.getKey().getDeptId())
                     .build())
                     .retrieve().toEntityList(RetOutHisDetail.class);
             result.subscribe((t) -> {
@@ -1135,11 +1137,11 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                 Order od = (Order) selectObj;
             }
             case "RO-HISTORY" -> {
-                String vouNo = selectObj.toString();
-                RetOutHis s = inventoryRepo.findReturnOut(vouNo);
-                if (!Objects.isNull(s)) {
+                if (selectObj instanceof VReturnOut v) {
+                    RetOutHis s = inventoryRepo.findReturnOut(v.getVouNo(), v.getDeptId());
                     setVoucher(s);
                 }
+
             }
         }
     }

@@ -39,4 +39,5 @@ public class VReturnIn {
     private String traderName;
     private String stockName;
     private String locationName;
+    private Integer deptId;
 }

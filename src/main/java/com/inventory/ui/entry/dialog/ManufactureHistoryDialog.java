@@ -10,6 +10,7 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.inventory.editor.DepartmentAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.VouStatusAutoCompleter;
@@ -18,6 +19,7 @@ import com.inventory.model.Stock;
 import com.inventory.model.VouStatus;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.ProcessHisTableModel;
+import com.user.common.UserRepo;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
@@ -35,11 +37,21 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
     private final ProcessHisTableModel processHisTableModel = new ProcessHisTableModel();
     private int selectRow = -1;
     private InventoryRepo inventoryRepo;
+    private UserRepo userRepo;
     private StockAutoCompleter stockAutoCompleter;
     private LocationAutoCompleter locationAutoCompleter;
     private VouStatusAutoCompleter vouStatusAutoCompleter;
+    private DepartmentAutoCompleter departmentAutoCompleter;
     private SelectionObserver observer;
     private boolean status = false;
+
+    public UserRepo getUserRepo() {
+        return userRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
 
     public SelectionObserver getObserver() {
         return observer;
@@ -114,6 +126,8 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         stockAutoCompleter.setObserver(this);
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtPT, inventoryRepo, null, true);
         vouStatusAutoCompleter.setObserver(this);
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, userRepo.getDeparment(), null, true);
+        departmentAutoCompleter.setDepartment(userRepo.findDepartment(Global.deptId));
     }
 
     private void initDate() {
@@ -161,6 +175,7 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         f.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
         f.setFinished(chkFinish.isSelected());
         f.setDeleted(chkDel.isSelected());
+        f.setDeptId(departmentAutoCompleter.getDepartment().getDeptId());
         processHisTableModel.setListDetail(inventoryRepo.getProcess(f));
     }
 
@@ -195,6 +210,8 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         chkDel = new javax.swing.JCheckBox();
         jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
+        jLabel23 = new javax.swing.JLabel();
+        txtDep = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblProcess = new javax.swing.JTable();
 
@@ -270,6 +287,11 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
             }
         });
 
+        jLabel23.setFont(Global.lableFont);
+        jLabel23.setText("Department");
+
+        txtDep.setFont(Global.textFont);
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -284,7 +306,8 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
                                 .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jLabel20, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel23, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addComponent(jLabel21))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -300,7 +323,8 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jButton5)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton4))))
+                                .addComponent(jButton4))
+                            .addComponent(txtDep)))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -353,13 +377,17 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
                     .addComponent(jLabel22)
                     .addComponent(txtLoc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel23)
+                    .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel4)
                     .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkDel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkFinish)
                     .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(328, Short.MAX_VALUE))
+                .addContainerGap(300, Short.MAX_VALUE))
         );
 
         tblProcess.setModel(new javax.swing.table.DefaultTableModel(
@@ -436,11 +464,13 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable tblProcess;
+    private javax.swing.JTextField txtDep;
     private com.toedter.calendar.JDateChooser txtFromDate;
     private javax.swing.JTextField txtLoc;
     private javax.swing.JTextField txtPT;
