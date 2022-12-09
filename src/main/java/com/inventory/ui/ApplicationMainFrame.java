@@ -70,6 +70,7 @@ import com.inventory.ui.setup.PatternSetup;
 import com.user.dialog.DepartmentDialog;
 import com.user.setup.SystemProperty;
 import com.user.setup.AppUserSetup;
+import com.user.setup.CloudConfig;
 import com.user.setup.CompanySetup;
 import java.time.Duration;
 import java.util.HashMap;
@@ -148,7 +149,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 //user
     @Autowired
     private InventoryRepo inventoryRepo;
-    private SystemProperty systemProperty;
+    @Autowired
+    private CloudConfig cloudConfig;
     @Autowired
     private AppUserSetup userSetup;
     @Autowired
@@ -364,7 +366,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return report;
             }
             case "System Propery" -> {
-                systemProperty = new SystemProperty();
+                SystemProperty systemProperty = new SystemProperty();
                 systemProperty.setUserRepo(userRepo);
                 systemProperty.setInventoryRepo(inventoryRepo);
                 systemProperty.setName(menuName);
@@ -375,7 +377,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return systemProperty;
             }
             case "Machine Property" -> {
-                systemProperty = new SystemProperty();
+                SystemProperty systemProperty = new SystemProperty();
                 systemProperty.setUserRepo(userRepo);
                 systemProperty.setInventoryRepo(inventoryRepo);
                 systemProperty.setName(menuName);
@@ -384,6 +386,12 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 systemProperty.setProperyType("Machine");
                 systemProperty.initMain();
                 return systemProperty;
+            }
+            case "Cloud Config" -> {
+                cloudConfig.setName(menuName);
+                cloudConfig.setObserver(this);
+                cloudConfig.initMain();
+                return cloudConfig;
             }
             case "Pattern Setup" -> {
                 patternSetup.setName(menuName);

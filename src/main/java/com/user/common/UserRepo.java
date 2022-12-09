@@ -184,6 +184,15 @@ public class UserRepo {
         }
     }
 
+    public Department saveDepartment(Department d) {
+        Mono<Department> result = userApi.post()
+                .uri("/user/save-department")
+                .body(Mono.just(d), Department.class)
+                .retrieve()
+                .bodyToMono(Department.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
     public Currency getDefaultCurrency() {
         String curCode = Global.hmRoleProperty.get("default.currency");
         return findCurrency(Util1.isNull(curCode, "-"));

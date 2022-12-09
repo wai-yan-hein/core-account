@@ -542,10 +542,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             progress.setIndeterminate(true);
             saleHis = sh;
             Integer deptId = sh.getKey().getDeptId();
-            locationAutoCompleter.setLocation(inventoryRepo.findLocation(saleHis.getLocCode(),deptId));
-            traderAutoCompleter.setTrader(inventoryRepo.findTrader(saleHis.getTraderCode(),deptId));
+            locationAutoCompleter.setLocation(inventoryRepo.findLocation(saleHis.getLocCode(), deptId));
+            traderAutoCompleter.setTrader(inventoryRepo.findTrader(saleHis.getTraderCode(), deptId));
             currAutoCompleter.setCurrency(inventoryRepo.findCurrency(saleHis.getCurCode()));
-            saleManCompleter.setSaleMan(inventoryRepo.findSaleMan(saleHis.getSaleManCode(),deptId));
+            saleManCompleter.setSaleMan(inventoryRepo.findSaleMan(saleHis.getSaleManCode(), deptId));
             String vouNo = sh.getKey().getVouNo();
             Mono<ResponseEntity<List<SaleHisDetail>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/sale/get-sale-detail")
