@@ -67,15 +67,18 @@ public class CloudConfig extends javax.swing.JPanel {
     }
 
     private void initKeyName() {
-        txtSvrQ.setName("cloud.activemq.server.queue");
+        txtSvrQ.setName("cloud.activemq.inventory.server.queue");
+        txtAccSvrQ.setName("cloud.activemq.account.server.queue");
         txtMQUrl.setName("cloud.activemq.url");
         chkUpServer.setName("cloud.upload.server");
     }
 
     private void initKeyListener() {
         txtSvrQ.addActionListener(action);
+        txtAccSvrQ.addActionListener(action);
         txtMQUrl.addActionListener(action);
         chkUpServer.addActionListener(action);
+
     }
 
     public void initMain() {
@@ -116,6 +119,7 @@ public class CloudConfig extends javax.swing.JPanel {
         tableModel.setListDepartment(userRepo.getDeparment());
         tableModel.addNewRow();
         txtSvrQ.setText(Global.hmRoleProperty.get(txtSvrQ.getName()));
+        txtAccSvrQ.setText(Global.hmRoleProperty.get(txtAccSvrQ.getName()));
         txtMQUrl.setText(Global.hmRoleProperty.get(txtMQUrl.getName()));
         chkUpServer.setSelected(Util1.getBoolean(Global.hmRoleProperty.get(chkUpServer.getName())));
     }
@@ -137,6 +141,8 @@ public class CloudConfig extends javax.swing.JPanel {
         jLabel2 = new javax.swing.JLabel();
         txtMQUrl = new javax.swing.JTextField();
         chkUpServer = new javax.swing.JCheckBox();
+        jLabel3 = new javax.swing.JLabel();
+        txtAccSvrQ = new javax.swing.JTextField();
 
         tblDepartment.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -161,7 +167,7 @@ public class CloudConfig extends javax.swing.JPanel {
         });
 
         jLabel1.setFont(Global.lableFont);
-        jLabel1.setText("Server Queue");
+        jLabel1.setText("Inventory Server Q");
 
         jLabel2.setFont(Global.lableFont);
         jLabel2.setText("Active MQ Url");
@@ -175,22 +181,34 @@ public class CloudConfig extends javax.swing.JPanel {
 
         chkUpServer.setText("Upload Server");
 
+        jLabel3.setFont(Global.lableFont);
+        jLabel3.setText("Account Server Q");
+
+        txtAccSvrQ.setFont(Global.textFont);
+        txtAccSvrQ.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtAccSvrQActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel2))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel2)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(8, 8, 8)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtMQUrl)
                     .addComponent(txtSvrQ)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(chkUpServer)
-                        .addGap(0, 348, Short.MAX_VALUE)))
+                        .addGap(0, 334, Short.MAX_VALUE))
+                    .addComponent(txtAccSvrQ))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -200,6 +218,10 @@ public class CloudConfig extends javax.swing.JPanel {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtSvrQ, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtAccSvrQ, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtMQUrl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -215,7 +237,7 @@ public class CloudConfig extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 560, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 545, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -239,14 +261,20 @@ public class CloudConfig extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtMQUrlActionPerformed
 
+    private void txtAccSvrQActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAccSvrQActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtAccSvrQActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkUpServer;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable tblDepartment;
+    private javax.swing.JTextField txtAccSvrQ;
     private javax.swing.JTextField txtMQUrl;
     private javax.swing.JTextField txtSvrQ;
     // End of variables declaration//GEN-END:variables
