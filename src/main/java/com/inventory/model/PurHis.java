@@ -44,7 +44,6 @@ public class PurHis implements java.io.Serializable {
     private Float discP;
     private Float taxP;
     private Float taxAmt;
-    private String intgUpdStatus;
     private String reference;
     private Integer macId;
     @NonNull

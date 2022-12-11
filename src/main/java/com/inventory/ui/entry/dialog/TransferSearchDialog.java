@@ -123,7 +123,6 @@ public class TransferSearchDialog extends javax.swing.JDialog implements KeyList
         fromLocationCompleter = new LocationAutoCompleter(txtLocF, listLocation, null, true, false);
         toLocationCompleter = new LocationAutoCompleter(txtLocTo, listLocation, null, true, false);
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, userRepo.getDeparment(), null, true);
-        departmentAutoCompleter.setDepartment(userRepo.findDepartment(Global.deptId));
     }
 
     private void initTableVoucher() {

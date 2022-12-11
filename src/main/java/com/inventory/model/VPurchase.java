@@ -33,7 +33,6 @@ public class VPurchase {
     private Float discountPrice;
     private Float taxPrice;
     private Float taxAmount;
-    private String intgUpdStatus;
     private Integer macId;
     private String compCode;
     private String vouNo;

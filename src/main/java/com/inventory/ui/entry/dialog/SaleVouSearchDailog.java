@@ -142,7 +142,6 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
         saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, inventoryRepo.getSaleMan(), null, true, false);
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, true, false);
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, userRepo.getDeparment(), null, true);
-        departmentAutoCompleter.setDepartment(userRepo.findDepartment(Global.deptId));
     }
 
     private void initTableVoucher() {

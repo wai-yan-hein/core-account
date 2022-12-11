@@ -32,7 +32,6 @@ public class RetOutHis implements java.io.Serializable {
     private Integer session;
     private String curCode;
     private Float discP;
-    private String intgUpdStatus;
     private Integer macId;
     private String status = "STATUS";
     private List<RetOutHisDetail> listRD;

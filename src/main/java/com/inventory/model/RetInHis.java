@@ -33,7 +33,6 @@ public class RetInHis implements java.io.Serializable {
     private Integer session;
     private String curCode;
     private Float discP;
-    private String intgUpdStatus;
     private Integer macId;
     private String status = "STATUS";
     private List<RetInHisDetail> listRD;
