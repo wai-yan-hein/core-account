@@ -459,18 +459,15 @@ public class COAManagment extends javax.swing.JPanel implements
         }
     }
 
-    private Menu saveMenu(Menu menu) {
+    private void saveMenu(Menu menu) {
         Mono<ReturnObject> result = userApi.post()
                 .uri("/user/save-menu")
                 .body(Mono.just(menu), Menu.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        ReturnObject block = result.block();
-        if (!Objects.isNull(block)) {
-            menu = gson.fromJson(gson.toJson(block.getData()), Menu.class);
-            JOptionPane.showMessageDialog(this, block.getMessage());
-        }
-        return menu;
+        result.block();
+        clear();
+        observer.selected("menu", "menu");
     }
 
     private void importCOA() {
@@ -493,7 +490,7 @@ public class COAManagment extends javax.swing.JPanel implements
     private void readFile(String path, String parentCode) {
         String line;
         int lineCount = 0;
-        try ( BufferedReader br = new BufferedReader(new InputStreamReader(
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(
                 new FileInputStream(path), "UTF8"))) {
             while ((line = br.readLine()) != null) {
                 ChartOfAccount coa = new ChartOfAccount();

@@ -27,8 +27,7 @@ public class COAGroupTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(COAGroupTableModel.class);
     private List<ChartOfAccount> listCOA = new ArrayList();
-    //String  userCode=Global.loginUser.getAppUserCode();
-    String[] columnNames = {"System Code", "User Code", "Name", "Active"};
+    String[] columnNames = {"No", "System Code", "User Code", "Name", "Active"};
     private JTable parent;
     private String coaHeadCode;
     private JLabel paretnDesp;
@@ -78,12 +77,14 @@ public class COAGroupTableModel extends AbstractTableModel {
             ChartOfAccount coa = listCOA.get(row);
             return switch (column) {
                 case 0 ->
-                    coa.getKey() == null ? null : coa.getKey().getCoaCode();
+                    String.valueOf(row + 1 + ". ");
                 case 1 ->
-                    coa.getCoaCodeUsr();
+                    coa.getKey() == null ? null : coa.getKey().getCoaCode();
                 case 2 ->
-                    coa.getCoaNameEng();
+                    coa.getCoaCodeUsr();
                 case 3 ->
+                    coa.getCoaNameEng();
+                case 4 ->
                     coa.isActive();
                 default ->
                     null;
@@ -103,9 +104,7 @@ public class COAGroupTableModel extends AbstractTableModel {
         try {
             ChartOfAccount coa = listCOA.get(row);
             switch (column) {
-                case 0 -> {
-                }
-                case 1 -> {
+                case 2 -> {
                     //user code
                     if (value != null) {
                         coa.setCoaCodeUsr(value.toString());
@@ -113,12 +112,12 @@ public class COAGroupTableModel extends AbstractTableModel {
                     }
                 }
 
-                case 2 -> {
+                case 3 -> {
                     if (value != null) {
                         coa.setCoaNameEng(value.toString());
                     }
                 }
-                case 3 -> {
+                case 4 -> {
                     if (value != null) {
                         Boolean active = (Boolean) value;
                         coa.setActive(active);
@@ -126,9 +125,6 @@ public class COAGroupTableModel extends AbstractTableModel {
                         coa.setActive(Boolean.TRUE);
                     }
                 }
-                default -> {
-                }
-
             }
             coa.setCoaLevel(2);
             coa.setCoaParent(coaHeadCode);
@@ -160,23 +156,21 @@ public class COAGroupTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 0 ->
-                String.class;
-            case 1 ->
-                String.class;
-            case 2 ->
-                String.class;
-            case 3 ->
+            case 4 ->
                 Boolean.class;
             default ->
-                Object.class;
+                String.class;
         };
     }
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return column > 0;
-
+        return switch (column) {
+            case 0, 1 ->
+                false;
+            default ->
+                true;
+        };
     }
 
     public ChartOfAccount getChartOfAccount(int row) {
