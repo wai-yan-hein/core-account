@@ -1089,8 +1089,11 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 dateAutoCompleter.setStDate(date);
                 dateAutoCompleter.setEndDate(date);
                 txtDate.setText(date);
+            } else if (source.equals("CAL-TOTAL")) {
+                calDebitCredit();
+            } else {
+                searchCash();
             }
-            searchCash();
         }
     }
 
