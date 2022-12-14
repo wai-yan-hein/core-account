@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DepartmentConfigTableModel extends AbstractTableModel {
 
     private List<Department> listDepartment = new ArrayList();
-    private final String[] columnNames = {"Id", "Short Name", "Department Name", "Client Queue Name"};
+    private final String[] columnNames = {"Id", "Short Name", "Department Name", "Inventory Q", "Account Q"};
     private UserRepo userRepo;
     private JTable table;
 
@@ -69,7 +69,10 @@ public class DepartmentConfigTableModel extends AbstractTableModel {
                     return p.getDeptName();
                 }
                 case 3 -> {
-                    return p.getQueueName();
+                    return p.getInventoryQ();
+                }
+                case 4 -> {
+                    return p.getAccountQ();
                 }
             }
         } catch (Exception e) {
@@ -79,7 +82,8 @@ public class DepartmentConfigTableModel extends AbstractTableModel {
     }
 
     @Override
-    public void setValueAt(Object value, int row, int column) {
+    public void setValueAt(Object value, int row, int column
+    ) {
         Department p = listDepartment.get(row);
         if (value != null) {
             switch (column) {
@@ -93,7 +97,10 @@ public class DepartmentConfigTableModel extends AbstractTableModel {
                     p.setDeptName(value.toString());
                 }
                 case 3 -> {
-                    p.setQueueName(value.toString());
+                    p.setInventoryQ(value.toString());
+                }
+                case 4 -> {
+                    p.setAccountQ(value.toString());
                 }
             }
             save(p);
