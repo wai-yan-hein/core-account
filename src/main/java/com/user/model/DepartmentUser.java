@@ -16,7 +16,8 @@ public class DepartmentUser {
     private Integer deptId;
     private String userCode;
     private String deptName;
-    private String queueName;
+    private String inventoryQ;
+    private String accountQ;
 
     public DepartmentUser(Integer deptId) {
         this.deptId = deptId;
@@ -26,10 +27,8 @@ public class DepartmentUser {
         this.deptId = deptId;
         this.deptName = deptName;
     }
-    
 
     public DepartmentUser() {
     }
-    
 
 }

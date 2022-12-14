@@ -109,6 +109,7 @@ public class CloudConfig extends javax.swing.JPanel {
         tblDepartment.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
         tblDepartment.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
         tblDepartment.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
+        tblDepartment.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
 
         tblDepartment.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblDepartment.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
