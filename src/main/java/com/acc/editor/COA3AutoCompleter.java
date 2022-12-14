@@ -6,6 +6,8 @@
 package com.acc.editor;
 
 import com.acc.common.AccountRepo;
+import com.acc.common.COA1TableModel;
+import com.acc.common.COA2TableModel;
 import com.acc.common.COA3TableModel;
 import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
@@ -48,6 +50,8 @@ public class COA3AutoCompleter implements KeyListener {
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
     private final COA3TableModel cOATableModel = new COA3TableModel();
+    private final COA2TableModel cOA2TableModel = new COA2TableModel();
+    private final COA1TableModel cOA1TableModel = new COA1TableModel();
     private ChartOfAccount coa;
     public AbstractCellEditor editor;
     private int x = 0;
@@ -56,24 +60,37 @@ public class COA3AutoCompleter implements KeyListener {
     private SelectionObserver selectionObserver;
     private AccountRepo accountRepo;
     private boolean filter;
+    private int level;
 
     public void setSelectionObserver(SelectionObserver selectionObserver) {
         this.selectionObserver = selectionObserver;
     }
 
-    //private CashFilter cashFilter = Global.allCash;
     public COA3AutoCompleter() {
     }
 
     public COA3AutoCompleter(JTextComponent comp, AccountRepo accountRepo,
-            AbstractCellEditor editor, boolean filter) {
+            AbstractCellEditor editor, boolean filter, int level) {
         this.textComp = comp;
         this.editor = editor;
         this.accountRepo = accountRepo;
         this.filter = filter;
+        this.level = level;
+        switch (this.level) {
+            case 1 -> {
+                table.setModel(cOA1TableModel);
+            }
+            case 2 -> {
+                table.setModel(cOA2TableModel);
+            }
+            case 3 -> {
+                table.setModel(cOATableModel);
+                table.getColumnModel().getColumn(2).setPreferredWidth(120);//Name
+                table.getColumnModel().getColumn(3).setPreferredWidth(120);//Name
+            }
+        }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
-        table.setModel(cOATableModel);
         table.getTableHeader().setFont(Global.lableFont);
         table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
@@ -82,8 +99,6 @@ public class COA3AutoCompleter implements KeyListener {
         JScrollPane scroll = new JScrollPane(table);
         table.getColumnModel().getColumn(0).setPreferredWidth(70);//Code
         table.getColumnModel().getColumn(1).setPreferredWidth(150);//Name
-        table.getColumnModel().getColumn(2).setPreferredWidth(120);//Name
-        table.getColumnModel().getColumn(3).setPreferredWidth(120);//Name
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -147,8 +162,20 @@ public class COA3AutoCompleter implements KeyListener {
 
     public void mouseSelect() {
         if (table.getSelectedRow() != -1) {
-            coa = cOATableModel.getCOA(table.convertRowIndexToModel(
-                    table.getSelectedRow()));
+            switch (this.level) {
+                case 1 ->
+                    coa = cOA1TableModel.getCOA(table.convertRowIndexToModel(
+                            table.getSelectedRow()));
+                case 2 ->
+                    coa = cOA2TableModel.getCOA(table.convertRowIndexToModel(
+                            table.getSelectedRow()));
+                case 3 ->
+                    coa = cOATableModel.getCOA(table.convertRowIndexToModel(
+                            table.getSelectedRow()));
+                default ->
+                    throw new AssertionError();
+            }
+
             ((JTextField) textComp).setText(coa.getCoaNameEng());
             if (editor == null) {
                 if (selectionObserver != null) {
@@ -337,12 +364,39 @@ public class COA3AutoCompleter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                List<ChartOfAccount> list = accountRepo.getCOA(str);
-                if (this.filter) {
-                    ChartOfAccount s = new ChartOfAccount(new COAKey("-", Global.compCode), "All");
-                    list.add(s);
+                List<ChartOfAccount> list;
+                switch (this.level) {
+                    case 1 -> {
+                        list = accountRepo.getCOA(str, this.level);
+                        if (this.filter) {
+                            ChartOfAccount s = new ChartOfAccount(new COAKey("-", Global.compCode), "All");
+                            list.add(s);
+                        }
+                        cOA1TableModel.setListCOA(list);
+                        if (!list.isEmpty()) {
+                            table.setRowSelectionInterval(0, 0);
+                        }
+                    }
+                    case 2 -> {
+                        list = accountRepo.getCOA(str, this.level);
+                        if (this.filter) {
+                            ChartOfAccount s = new ChartOfAccount(new COAKey("-", Global.compCode), "All");
+                            list.add(s);
+                        }
+                        cOA2TableModel.setListCOA(list);
+
+                    }
+                    case 3 -> {
+                        list = accountRepo.getCOA(str, this.level);
+                        if (this.filter) {
+                            ChartOfAccount s = new ChartOfAccount(new COAKey("-", Global.compCode), "All");
+                            list.add(s);
+                        }
+                        cOATableModel.setListCOA(list);
+                    }
+                    default ->
+                        throw new AssertionError();
                 }
-                cOATableModel.setListCOA(list);
                 if (!list.isEmpty()) {
                     table.setRowSelectionInterval(0, 0);
                 }

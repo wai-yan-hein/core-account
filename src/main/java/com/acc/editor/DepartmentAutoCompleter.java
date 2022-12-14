@@ -231,7 +231,7 @@ public final class DepartmentAutoCompleter implements KeyListener {
                 }
             }
             if (observer != null) {
-                observer.selected("Selected", department.getKey().getDeptCode());
+                observer.selected("Department", department.getKey().getDeptCode());
             }
             popup.setVisible(false);
             popupOpen = false;

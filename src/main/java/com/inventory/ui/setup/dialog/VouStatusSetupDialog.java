@@ -9,7 +9,7 @@ import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.user.model.Department;
+import com.user.model.DepartmentUser;
 import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
 import com.inventory.ui.common.InventoryRepo;

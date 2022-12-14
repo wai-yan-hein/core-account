@@ -9,6 +9,7 @@ import com.acc.common.AccountRepo;
 import com.acc.common.COAGroupChildTableModel;
 import com.acc.common.COAGroupTableModel;
 import com.acc.common.COAHeadTableModel;
+import com.acc.editor.COA3CellEditor;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.PanelControl;
@@ -104,7 +105,7 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
     }
 
     private void searchHead() {
-        coaHeadTableModel.setlistCoaHead(accountRepo.getCOAChild("#"));
+        coaHeadTableModel.setListCoaHead(accountRepo.getCOAChild("#"));
         tblCoaHead.requestFocus();
     }
 
@@ -123,6 +124,7 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         tblCoaGroup.getColumnModel().getColumn(4).setPreferredWidth(1);// Active
         tblCoaGroup.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
         tblCoaGroup.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
+        tblCoaGroup.getColumnModel().getColumn(5).setCellEditor(new COA3CellEditor(accountRepo, 1));
         tblCoaGroup.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCoaGroup.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
@@ -156,6 +158,7 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         tblCOAGroupChild.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
         tblCOAGroupChild.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
         tblCOAGroupChild.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
+        tblCOAGroupChild.getColumnModel().getColumn(5).setCellEditor(new COA3CellEditor(accountRepo, 2));
         tblCOAGroupChild.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCOAGroupChild.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");

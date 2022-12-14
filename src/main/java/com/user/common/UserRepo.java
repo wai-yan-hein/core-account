@@ -9,7 +9,7 @@ import com.common.RoleProperty;
 import com.common.Util1;
 import com.inventory.model.AppRole;
 import com.inventory.model.AppUser;
-import com.user.model.Department;
+import com.user.model.DepartmentUser;
 import com.inventory.model.MachineInfo;
 import com.inventory.model.VRoleMenu;
 import com.user.model.SysProperty;
@@ -38,8 +38,8 @@ public class UserRepo {
     int min = 1;
     @Autowired
     private WebClient userApi;
-    private Department department;
-    private List<Department> listDept;
+    private DepartmentUser department;
+    private List<DepartmentUser> listDept;
 
     public List<Currency> getCurrency() {
         Mono<ResponseEntity<List<Currency>>> result = userApi.get()
@@ -170,26 +170,26 @@ public class UserRepo {
         return result.block(Duration.ofMinutes(min)).getBody();
     }
 
-    public Department findDepartment(Integer deptId) {
+    public DepartmentUser findDepartment(Integer deptId) {
         if (department != null) {
             return department;
         } else {
-            Mono<ResponseEntity<Department>> result = userApi.get()
+            Mono<ResponseEntity<DepartmentUser>> result = userApi.get()
                     .uri(builder -> builder.path("/user/find-department")
                     .queryParam("deptId", deptId)
                     .build())
-                    .retrieve().toEntity(Department.class);
+                    .retrieve().toEntity(DepartmentUser.class);
             department = result.block(Duration.ofMinutes(min)).getBody();
             return department;
         }
     }
 
-    public Department saveDepartment(Department d) {
-        Mono<Department> result = userApi.post()
+    public DepartmentUser saveDepartment(DepartmentUser d) {
+        Mono<DepartmentUser> result = userApi.post()
                 .uri("/user/save-department")
-                .body(Mono.just(d), Department.class)
+                .body(Mono.just(d), DepartmentUser.class)
                 .retrieve()
-                .bodyToMono(Department.class);
+                .bodyToMono(DepartmentUser.class);
         return result.block(Duration.ofMinutes(min));
     }
 
@@ -282,12 +282,12 @@ public class UserRepo {
         return result.block();
     }
 
-    public List<Department> getDeparment() {
+    public List<DepartmentUser> getDeparment() {
         if (listDept == null) {
-            Mono<ResponseEntity<List<Department>>> result = userApi.get()
+            Mono<ResponseEntity<List<DepartmentUser>>> result = userApi.get()
                     .uri(builder -> builder.path("/user/get-department")
                     .build())
-                    .retrieve().toEntityList(Department.class);
+                    .retrieve().toEntityList(DepartmentUser.class);
             listDept = result.block(Duration.ofMinutes(min)).getBody();
             return listDept;
         }

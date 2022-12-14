@@ -4,7 +4,7 @@
  */
 package com.user.common;
 
-import com.user.model.Department;
+import com.user.model.DepartmentUser;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DepartmentTableModel extends AbstractTableModel {
 
-    private List<Department> listDepartment = new ArrayList();
+    private List<DepartmentUser> listDepartment = new ArrayList();
     private final String[] columnNames = {"Short", "Department Name"};
     private UserRepo userRepo;
 
@@ -47,7 +47,7 @@ public class DepartmentTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
         try {
-            Department p = listDepartment.get(row);
+            DepartmentUser p = listDepartment.get(row);
             switch (column) {
                 case 0 -> {
                     return p.getUserCode();
@@ -77,24 +77,24 @@ public class DepartmentTableModel extends AbstractTableModel {
         return columnNames.length;
     }
 
-    public void addDepartment(Department info) {
+    public void addDepartment(DepartmentUser info) {
         listDepartment.add(info);
         fireTableRowsInserted(listDepartment.size() - 1, listDepartment.size() - 1);
     }
 
-    public void setDepartment(int row, Department user) {
+    public void setDepartment(int row, DepartmentUser user) {
         if (!listDepartment.isEmpty()) {
             listDepartment.set(row, user);
             fireTableRowsUpdated(row, row);
         }
     }
 
-    public Department getDepartment(int row) {
+    public DepartmentUser getDepartment(int row) {
         return listDepartment.get(row);
     }
 
     public void addNewRow() {
-        listDepartment.add(new Department());
+        listDepartment.add(new DepartmentUser());
         fireTableRowsInserted(listDepartment.size() - 1, listDepartment.size() - 1);
     }
 
@@ -103,11 +103,11 @@ public class DepartmentTableModel extends AbstractTableModel {
         fireTableRowsDeleted(row, row);
     }
 
-    public List<Department> getListDepartment() {
+    public List<DepartmentUser> getListDepartment() {
         return listDepartment;
     }
 
-    public void setListDepartment(List<Department> listDepartment) {
+    public void setListDepartment(List<DepartmentUser> listDepartment) {
         this.listDepartment = listDepartment;
         fireTableDataChanged();
     }

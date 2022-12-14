@@ -9,7 +9,9 @@ import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.Util1;
+import java.awt.HeadlessException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -25,10 +27,11 @@ public class COAGroupChildTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(COAGroupChildTableModel.class);
     private List<ChartOfAccount> listCOA = new ArrayList();
-    String[] columnNames = {"No", "System Code", "User Code", "Name", "Active"};
+    String[] columnNames = {"No", "System Code", "User Code", "Name", "Active", "Group"};
     private JTable parent;
     private String coaGroupCode;
     private AccountRepo accountRepo;
+    private HashMap<String, String> hmCOA = new HashMap<>();
 
     public AccountRepo getAccountRepo() {
         return accountRepo;
@@ -64,20 +67,26 @@ public class COAGroupChildTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
         try {
             ChartOfAccount coa = listCOA.get(row);
-            return switch (column) {
-                case 0 ->
-                    String.valueOf(row + 1 + ". ");
-                case 1 ->
-                    coa.getKey() == null ? null : coa.getKey().getCoaCode();
-                case 2 ->
-                    coa.getCoaCodeUsr();
-                case 3 ->
-                    coa.getCoaNameEng();
-                case 4 ->
-                    coa.isActive();
-                default ->
-                    null;
-            }; //Code
+            switch (column) {
+                case 0 -> {
+                    return String.valueOf(row + 1 + ". ");
+                }
+                case 1 -> {
+                    return coa.getKey() == null ? null : coa.getKey().getCoaCode();
+                }
+                case 2 -> {
+                    return coa.getCoaCodeUsr();
+                }
+                case 3 -> {
+                    return coa.getCoaNameEng();
+                }
+                case 4 -> {
+                    return coa.isActive();
+                }
+                case 5 -> {
+                    return getParentName(coa.getCoaParent());
+                }
+            } //Code
             //User Code
             //Name
             //Active
@@ -86,6 +95,16 @@ public class COAGroupChildTableModel extends AbstractTableModel {
         }
 
         return null;
+    }
+
+    private String getParentName(String parentCode) {
+        if (hmCOA.get(parentCode) == null) {
+            ChartOfAccount obj = accountRepo.findCOA(parentCode);
+            if (obj != null) {
+                hmCOA.put(parentCode, obj.getCoaNameEng());
+            }
+        }
+        return hmCOA.get(parentCode);
     }
 
     @Override
@@ -114,12 +133,20 @@ public class COAGroupChildTableModel extends AbstractTableModel {
                         coa.setActive(Boolean.TRUE);
                     }
                 }
+                case 5 -> {
+                    if (value instanceof ChartOfAccount c) {
+                        int yn = JOptionPane.showConfirmDialog(parent, "Do you want to change group?", "Confirm Dialog", JOptionPane.WARNING_MESSAGE);
+                        if (yn == JOptionPane.YES_OPTION) {
+                            coa.setCoaParent(c.getKey().getCoaCode());
+                        }
+                    }
+                }
             }
             coa.setCoaLevel(3);
-            coa.setCoaParent(coaGroupCode);
+            coa.setCoaParent(Util1.isNull(coa.getCoaParent(), coaGroupCode));
             save(coa, row);
             parent.requestFocus();
-        } catch (Exception ex) {
+        } catch (HeadlessException ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
 
@@ -249,6 +276,7 @@ public class COAGroupChildTableModel extends AbstractTableModel {
     }
 
     public void clear() {
+        hmCOA.clear();
         if (listCOA != null) {
             listCOA.clear();
             fireTableDataChanged();

@@ -153,7 +153,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         tblJournal.getColumnModel().getColumn(0).setCellEditor(new DepartmentCellEditor(accountRepo.getDepartment()));
         tblJournal.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
         tblJournal.getColumnModel().getColumn(2).setCellEditor(new TraderCellEditor(accountRepo));
-        tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountRepo));
+        tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountRepo, 3));
         tblJournal.getColumnModel().getColumn(4).setCellEditor(new CurrencyAEditor(accountRepo.getCurrency()));
         tblJournal.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
         tblJournal.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());

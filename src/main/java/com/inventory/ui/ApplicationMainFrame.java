@@ -23,7 +23,7 @@ import com.common.SelectionObserver;
 import com.user.common.UserRepo;
 import com.common.Util1;
 import com.user.setup.MenuSetup;
-import com.user.model.Department;
+import com.user.model.DepartmentUser;
 import com.inventory.model.VRoleMenu;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.Manufacture;
@@ -365,10 +365,11 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 report.initMain();
                 return report;
             }
-            case "System Propery" -> {
+            case "System Property" -> {
                 SystemProperty systemProperty = new SystemProperty();
                 systemProperty.setUserRepo(userRepo);
                 systemProperty.setInventoryRepo(inventoryRepo);
+                systemProperty.setAccountRepo(accounRepo);
                 systemProperty.setName(menuName);
                 systemProperty.setObserver(this);
                 systemProperty.setProgress(progress);
@@ -565,8 +566,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void departmentAssign() {
-        Department dep;
-        List<Department> listDep = userRepo.getDeparment();
+        DepartmentUser dep;
+        List<DepartmentUser> listDep = userRepo.getDeparment();
         if (listDep.size() > 1) {
             DepartmentDialog dialog = new DepartmentDialog(listDep);
             dialog.initMain();

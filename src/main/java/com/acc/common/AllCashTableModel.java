@@ -127,7 +127,7 @@ public class AllCashTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
 
-        try {   
+        try {
             if (!listVGl.isEmpty()) {
                 Gl vgi = listVGl.get(row);
                 switch (column) {
@@ -359,10 +359,13 @@ public class AllCashTableModel extends AbstractTableModel {
             int yn = JOptionPane.showConfirmDialog(Global.parentForm,
                     "Are you sure to edit?", "Edit",
                     JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE);
+            gl.setModifyBy(Global.loginUser.getUserCode());
             status = yn == JOptionPane.YES_OPTION;
         } else if (gl.getSrcAccCode().equals(gl.getAccCode())) {
             JOptionPane.showMessageDialog(parent, "Invalid Account.");
             status = false;
+        } else {
+            gl.setCreatedBy(Global.loginUser.getUserCode());
         }
         return status;
     }

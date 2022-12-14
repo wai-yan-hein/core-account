@@ -211,10 +211,11 @@ public class AccountRepo {
         return result.block().getBody();
     }
 
-    public List<ChartOfAccount> getCOA(String str) {
+    public List<ChartOfAccount> getCOA(String str, Integer level) {
         Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get()
-                .uri(builder -> builder.path("/account/get-coa-lv3")
+                .uri(builder -> builder.path("/account/search-coa")
                 .queryParam("str", str)
+                .queryParam("level", level)
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve().toEntityList(ChartOfAccount.class);

@@ -63,15 +63,12 @@ public class COAHeadTableModel extends AbstractTableModel {
         try {
             ChartOfAccount coa = listCoaHead.get(row);
 
-            switch (column) {
-                case 0: //Code
-                    return coa.getCoaCodeUsr();
-                case 1: //Name
-                    return coa.getCoaNameEng();
-
-                default:
-                    return null;
-            }
+            return switch (column) {
+                case 0 -> coa.getCoaCodeUsr();
+                case 1 -> coa.getCoaNameEng();
+                default -> null;
+            }; //Code
+            //Name
         } catch (Exception ex) {
             log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
@@ -84,8 +81,12 @@ public class COAHeadTableModel extends AbstractTableModel {
 
     }
 
-    public void setlistCoaHead(List<ChartOfAccount> listCoa) {
-        this.listCoaHead = listCoa;
+    public List<ChartOfAccount> getListCoaHead() {
+        return listCoaHead;
+    }
+
+    public void setListCoaHead(List<ChartOfAccount> listCoaHead) {
+        this.listCoaHead = listCoaHead;
         fireTableDataChanged();
     }
 

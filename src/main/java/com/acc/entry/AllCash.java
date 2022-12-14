@@ -250,7 +250,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tblCash.getColumnModel().getColumn(3).setCellEditor(new RefCellEditor(accounRepo));
         tblCash.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
         tblCash.getColumnModel().getColumn(5).setCellEditor(new TraderCellEditor(accounRepo));
-        tblCash.getColumnModel().getColumn(6).setCellEditor(new COA3CellEditor(accounRepo));
+        tblCash.getColumnModel().getColumn(6).setCellEditor(new COA3CellEditor(accounRepo, 3));
         tblCash.getColumnModel().getColumn(7).setCellEditor(new CurrencyAEditor(listCurrency));
         tblCash.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
         tblCash.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
@@ -372,8 +372,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     public void printVoucher() {
         String currency = currencyAutoCompleter.getCurrency().getCurCode();
-        String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), Global.dateFormat);
-        String endDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getEndDate(), Global.dateFormat);
+        String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat);
+        String endDate = Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat);
         if (!currency.equals("-") || !ProUtil.isMultiCur()) {
             progress.setIndeterminate(true);
             taskExecutor.execute(() -> {

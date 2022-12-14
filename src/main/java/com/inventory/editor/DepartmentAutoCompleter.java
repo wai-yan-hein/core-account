@@ -5,7 +5,7 @@
  */
 package com.inventory.editor;
 
-import com.user.model.Department;
+import com.user.model.DepartmentUser;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
@@ -49,7 +49,7 @@ public class DepartmentAutoCompleter implements KeyListener, SelectionObserver {
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER";
     private DepartmentTableModel departmentTableModel = new DepartmentTableModel();
-    private Department department;
+    private DepartmentUser department;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
@@ -70,12 +70,12 @@ public class DepartmentAutoCompleter implements KeyListener, SelectionObserver {
     public DepartmentAutoCompleter() {
     }
 
-    public DepartmentAutoCompleter(JTextComponent comp, List<Department> list,
+    public DepartmentAutoCompleter(JTextComponent comp, List<DepartmentUser> list,
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
         if (filter) {
-            Department loc = new Department(0, "All");
+            DepartmentUser loc = new DepartmentUser(0, "All");
             list = new ArrayList<>(list);
             list.add(0, loc);
             setDepartment(loc);
@@ -158,11 +158,11 @@ public class DepartmentAutoCompleter implements KeyListener, SelectionObserver {
         }
     }
 
-    public Department getDepartment() {
+    public DepartmentUser getDepartment() {
         return department;
     }
 
-    public final void setDepartment(Department department) {
+    public final void setDepartment(DepartmentUser department) {
         this.department = department;
         if (this.department != null) {
             this.textComp.setText(department.getDeptName());

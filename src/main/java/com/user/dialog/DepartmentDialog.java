@@ -6,7 +6,7 @@ package com.user.dialog;
 
 import com.common.Global;
 import com.user.common.DepartmentTableModel;
-import com.user.model.Department;
+import com.user.model.DepartmentUser;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.List;
@@ -23,7 +23,7 @@ import javax.swing.ListSelectionModel;
 public class DepartmentDialog extends javax.swing.JDialog {
 
     private final DepartmentTableModel departmentTableModel = new DepartmentTableModel();
-    private final List<Department> listDep;
+    private final List<DepartmentUser> listDep;
     private static final String solve = "Solve";
 
     /**
@@ -31,7 +31,7 @@ public class DepartmentDialog extends javax.swing.JDialog {
      *
      * @param listDep
      */
-    public DepartmentDialog(List<Department> listDep) {
+    public DepartmentDialog(List<DepartmentUser> listDep) {
         super(Global.parentForm, true);
         this.listDep = listDep;
         initComponents();
@@ -67,7 +67,7 @@ public class DepartmentDialog extends javax.swing.JDialog {
         }
     }
 
-    public Department getDeparment() {
+    public DepartmentUser getDeparment() {
         int row = tblDepartment.convertRowIndexToModel(tblDepartment.getSelectedRow());
         return departmentTableModel.getDepartment(row);
     }

@@ -5,6 +5,9 @@
  */
 package com.user.setup;
 
+import com.acc.common.AccountRepo;
+import com.acc.editor.DepartmentAutoCompleter;
+import com.acc.model.Department;
 import com.common.Global;
 import com.common.RoleProperty;
 import com.common.RolePropertyKey;
@@ -20,6 +23,7 @@ import com.inventory.ui.common.InventoryRepo;
 import com.user.common.UserRepo;
 import com.user.editor.MacAutoCompleter;
 import com.user.editor.TextAutoCompleter;
+import com.user.model.DepartmentUser;
 import com.user.model.MachineProperty;
 import com.user.model.MachinePropertyKey;
 import com.user.model.PropertyKey;
@@ -44,17 +48,27 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
     private UserRepo userRepo;
     private InventoryRepo inventoryRepo;
+    private AccountRepo accountRepo;
     private SelectionObserver observer;
     private JProgressBar progress;
     private TextAutoCompleter printerAutoCompleter;
     private TraderAutoCompleter cusCompleter;
     private TraderAutoCompleter supCompleter;
     private LocationAutoCompleter locCompleter;
+    private DepartmentAutoCompleter departmentAutoCompleter;
     private MacAutoCompleter macAutoCompleter;
     private HashMap<String, String> hmProperty;
     private String properyType = "System";
     private String roleCode;
     private Integer macId;
+
+    public AccountRepo getAccountRepo() {
+        return accountRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
 
     public UserRepo getUserRepo() {
         return userRepo;
@@ -130,6 +144,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     public SystemProperty() {
         initComponents();
         initAction();
+        txtDep.setName("default.department");
     }
 
     private void initProperty() {
@@ -284,6 +299,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         locCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, false, false);
         locCompleter.setObserver(this);
         locCompleter.setLocation(inventoryRepo.getDefaultLocation());
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, accountRepo.getDepartment(), null, false, false);
+        departmentAutoCompleter.setObserver(this);
+        departmentAutoCompleter.setDepartment(accountRepo.getDefaultDepartment());
     }
 
     private void save(String key, String value) {
@@ -359,6 +377,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         jLabel4 = new javax.swing.JLabel();
         txtLocation = new javax.swing.JTextField();
         jSeparator3 = new javax.swing.JSeparator();
+        jLabel19 = new javax.swing.JLabel();
+        txtDep = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         chkPrint = new javax.swing.JCheckBox();
         chkSWB = new javax.swing.JCheckBox();
@@ -433,6 +453,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         txtLocation.setFont(Global.textFont);
 
+        jLabel19.setText("Department");
+
+        txtDep.setFont(Global.textFont);
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
@@ -445,12 +469,14 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel2)
                             .addComponent(jLabel3)
-                            .addComponent(jLabel4))
+                            .addComponent(jLabel4)
+                            .addComponent(jLabel19))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtCustomer)
                             .addComponent(txtSupplier)
-                            .addComponent(txtLocation))))
+                            .addComponent(txtLocation)
+                            .addComponent(txtDep))))
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
@@ -468,6 +494,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel19)
+                    .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -914,6 +944,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -940,6 +971,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JTextField txtCus;
     private javax.swing.JTextField txtCustomer;
     private javax.swing.JTextField txtDebtor;
+    private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtIE;
     private javax.swing.JTextField txtInvGroup;
     private javax.swing.JTextField txtLocation;
@@ -986,6 +1018,11 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         } else if (source.equals("Mac")) {
             macId = macAutoCompleter.getInfo().getMacId();
             initMain();
+        } else if (source.equals("Department")) {
+            Department d = departmentAutoCompleter.getDepartment();
+            if (d != null) {
+                save(txtDep.getName(), d.getKey().getDeptCode());
+            }
         }
     }
 }

@@ -11,24 +11,24 @@ import lombok.Data;
  * @author DELL
  */
 @Data
-public class Department {
+public class DepartmentUser {
 
     private Integer deptId;
     private String userCode;
     private String deptName;
     private String queueName;
 
-    public Department(Integer deptId) {
+    public DepartmentUser(Integer deptId) {
         this.deptId = deptId;
     }
 
-    public Department(Integer deptId, String deptName) {
+    public DepartmentUser(Integer deptId, String deptName) {
         this.deptId = deptId;
         this.deptName = deptName;
     }
     
 
-    public Department() {
+    public DepartmentUser() {
     }
     
 
