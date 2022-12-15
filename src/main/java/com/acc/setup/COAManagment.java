@@ -21,8 +21,6 @@ import com.common.TableCellRender;
 import com.common.TreeTransferHandler;
 import com.common.Util1;
 import com.common.model.Menu;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.inventory.editor.MenuAutoCompleter;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import java.awt.FileDialog;
@@ -35,11 +33,9 @@ import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.text.DateFormat;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import javax.swing.DropMode;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -81,7 +77,6 @@ public class COAManagment extends javax.swing.JPanel implements
         TreeSelectionListener, KeyListener,
         PanelControl {
 
-    private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     private DefaultMutableTreeNode selectedNode;
     DefaultTreeModel treeModel;
     private final String parentRootName = "Core Account";
