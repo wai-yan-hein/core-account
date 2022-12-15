@@ -19,6 +19,7 @@ import com.acc.setup.COASetup;
 import com.acc.setup.DepartmentSetup;
 import com.common.Global;
 import com.common.PanelControl;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.user.common.UserRepo;
 import com.common.Util1;
@@ -560,20 +561,22 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     public void initMain() {
         companyUserRoleAssign();
+        initializeData();
         departmentAssign();
         initMenu();
-        initializeData();
     }
 
     private void departmentAssign() {
-        DepartmentUser dep;
+        DepartmentUser dep = null;
         List<DepartmentUser> listDep = userRepo.getDeparment();
-        if (listDep.size() > 1) {
-            DepartmentDialog dialog = new DepartmentDialog(listDep);
-            dialog.initMain();
-            dialog.setLocationRelativeTo(null);
-            dialog.setVisible(true);
-            dep = dialog.getDeparment();
+        if (Util1.getBoolean(ProUtil.getProperty("department.option"))) {
+            if (listDep.size() > 1) {
+                DepartmentDialog dialog = new DepartmentDialog(listDep);
+                dialog.initMain();
+                dialog.setLocationRelativeTo(null);
+                dialog.setVisible(true);
+                dep = dialog.getDeparment();
+            }
         } else {
             dep = listDep.get(0);
         }

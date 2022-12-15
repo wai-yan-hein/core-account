@@ -13,6 +13,7 @@ import com.common.Util1;
 import com.common.model.Menu;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -74,23 +75,20 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
     }
 
     JPopupMenu popupmenu;
-    private final ActionListener menuListener = (java.awt.event.ActionEvent evt) -> {
-        JMenuItem actionMenu = (JMenuItem) evt.getSource();
-        String menuName = actionMenu.getText();
-        log.info("Selected Menu : " + menuName);
-        switch (menuName) {
-            case "New Menu" ->
-                newMenu("Menu");
-            case "Delete" ->
-                deleteMenu();//deleteCOA();
-            case "New Function" ->
-                newMenu("Function");
-            case "New Report" ->
-                newMenu("Report");
-            default -> {
+    private final ActionListener menuListener = (ActionEvent evt) -> {
+        if (evt.getSource() instanceof JMenuItem actionMenu) {
+            String menuName = actionMenu.getText();
+            switch (menuName) {
+                case "New Menu" ->
+                    newMenu("Menu");
+                case "Delete" ->
+                    deleteMenu();
+                case "New Function" ->
+                    newMenu("Function");
+                case "New Report" ->
+                    newMenu("Report");
             }
         }
-
     };
 
     /**
@@ -199,47 +197,42 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
 
     private void initPopup() {
         popupmenu = new JPopupMenu("Edit");
+        popupmenu.setFont(Global.textFont);
         JMenuItem newMenu = new JMenuItem("New Menu");
         JMenuItem delete = new JMenuItem("Delete");
-        JMenuItem newFun = new JMenuItem("New Function");
         JMenuItem newReport = new JMenuItem("New Report");
         newMenu.addActionListener(menuListener);
         delete.addActionListener(menuListener);
         newReport.addActionListener(menuListener);
-        newFun.addActionListener(menuListener);
         popupmenu.add(newMenu);
-        popupmenu.add(newFun);
         popupmenu.add(newReport);
         popupmenu.add(delete);
     }
 
     private void newMenu(String type) {
+        if (selectedNode.getUserObject() instanceof Menu obj) {
+            Menu menu = new Menu();
+            menu.setMenuClass(obj.getMenuClass());
+            switch (type) {
+                case "Menu" -> {
+                    menu.setMenuName("New Menu");
+                    menu.setMenuType("Menu");
 
-        Menu menu = new Menu();
-        switch (type) {
-            case "Menu" -> {
-                menu.setMenuName("New Menu");
-                menu.setMenuType("Menu");
+                }
+                case "Report" -> {
+                    menu.setMenuName("New Report");
+                    menu.setMenuType("Report");
+                }
             }
-            case "Function" -> {
-                menu.setMenuName("New Function");
-                menu.setMenuType("Function");
-                menu.setMenuClass("Report");
-            }
-            case "Report" -> {
-                menu.setMenuName("New Report");
-                menu.setMenuType("Report");
-                menu.setMenuClass("Report");
-            }
-            default -> {
-            }
-        }
-        DefaultMutableTreeNode child = new DefaultMutableTreeNode(menu);
-        if (selectedNode != null) {
+            DefaultMutableTreeNode child = new DefaultMutableTreeNode(menu);
             selectedNode.add(child);
             treeModel.insertNodeInto(child, selectedNode, selectedNode.getChildCount() - 1);
-            treeCOA.setSelectionInterval(selectedNode.getChildCount(), selectedNode.getChildCount());
+            int count = selectedNode.getChildCount();
+            log.info(String.valueOf(count));
+            treeCOA.setSelectionInterval(count, count);
+            treeCOA.requestFocus();
         }
+
     }
 
     private void saveMenu() {

@@ -214,6 +214,7 @@
                       <Component id="chkDisableRO" max="32767" attributes="0"/>
                       <Component id="chkDisableStockIO" max="32767" attributes="0"/>
                       <Component id="chkDepFilter" alignment="1" max="32767" attributes="0"/>
+                      <Component id="chkDepOption" alignment="1" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -242,6 +243,8 @@
                   <Component id="jSeparator2" min="-2" pref="4" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="chkDepFilter" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="chkDepOption" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -327,6 +330,11 @@
         <Component class="javax.swing.JCheckBox" name="chkDepFilter">
           <Properties>
             <Property name="text" type="java.lang.String" value="Department Filter"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="chkDepOption">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Department Option"/>
           </Properties>
         </Component>
       </SubComponents>

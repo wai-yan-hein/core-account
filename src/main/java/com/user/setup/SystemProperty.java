@@ -145,6 +145,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         initComponents();
         initAction();
         txtDep.setName("default.department");
+        chkDepFilter.setName("department.filter");
+        chkDepOption.setName("department.option");
     }
 
     private void initProperty() {
@@ -198,6 +200,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkDisableRO.addActionListener(action);
         chkDisableStockIO.addActionListener(action);
         chkDepFilter.addActionListener(action);
+        chkDepOption.addActionListener(action);
         //txt
         txtA4Report.addActionListener(action);
         txtA5Report.addActionListener(action);
@@ -253,8 +256,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkDisableRO.setSelected(Util1.getBoolean(hmProperty.get("disable.calculate.returnout.stock")));
         chkDisableStockIO.setName("disable.pattern.stockio");
         chkDisableStockIO.setSelected(Util1.getBoolean(hmProperty.get("disable.pattern.stockio")));
-        chkDepFilter.setName("department.filter");
-        chkDepFilter.setSelected(Util1.getBoolean(hmProperty.get("department.filter")));
+        chkDepFilter.setSelected(Util1.getBoolean(hmProperty.get(chkDepFilter.getName())));
+        chkDepOption.setSelected(Util1.getBoolean(hmProperty.get(chkDepOption.getName())));
     }
 
     private void initTextBox() {
@@ -394,6 +397,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkDisableRO = new javax.swing.JCheckBox();
         chkDisableStockIO = new javax.swing.JCheckBox();
         chkDepFilter = new javax.swing.JCheckBox();
+        chkDepOption = new javax.swing.JCheckBox();
         jPanel1 = new javax.swing.JPanel();
         chkSA4 = new javax.swing.JCheckBox();
         chkSA5 = new javax.swing.JCheckBox();
@@ -531,6 +535,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         chkDepFilter.setText("Department Filter");
 
+        chkDepOption.setText("Department Option");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -555,7 +561,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     .addComponent(chkDisableRI, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkDisableRO, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkDisableStockIO, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkDepFilter, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(chkDepFilter, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(chkDepOption, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -581,6 +588,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 4, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkDepFilter)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkDepOption)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
@@ -917,6 +926,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JCheckBox chkBalance;
     private javax.swing.JCheckBox chkCalStock;
     private javax.swing.JCheckBox chkDepFilter;
+    private javax.swing.JCheckBox chkDepOption;
     private javax.swing.JCheckBox chkDisablePur;
     private javax.swing.JCheckBox chkDisableRI;
     private javax.swing.JCheckBox chkDisableRO;
