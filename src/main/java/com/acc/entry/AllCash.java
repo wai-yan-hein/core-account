@@ -831,15 +831,15 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(tblScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 1210, Short.MAX_VALUE)
+                    .addComponent(tblScrollPane)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 398, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 563, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 563, Short.MAX_VALUE)
                             .addComponent(panelDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 400, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 563, Short.MAX_VALUE))
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -1053,12 +1053,12 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void calOpeningClosing() {
-        String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat);
+        String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat);
         String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
         String clDate = Util1.toDateStrMYSQL(stDate, "dd/MM/yyyy");
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
         filter.setOpeningDate(opDate);
-        filter.setClosingDate(clDate);
+        filter.setFromDate(clDate);
         filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
         filter.setListDepartment(departmentAutoCompleter.getListOption());
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());

@@ -424,6 +424,7 @@ public class AllCashTableModel extends AbstractTableModel {
         if (hasEmptyRow()) {
             Gl gl = new Gl();
             GlKey key = new GlKey();
+            key.setDeptId(Global.deptId);
             key.setCompCode(Global.compCode);
             gl.setKey(key);
             gl.setMacId(Global.macId);

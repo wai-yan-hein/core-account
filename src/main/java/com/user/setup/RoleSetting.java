@@ -5,6 +5,7 @@
  */
 package com.user.setup;
 
+import com.acc.common.AccountRepo;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
@@ -45,6 +46,8 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl {
     private UserRepo userRepo;
     @Autowired
     private InventoryRepo inventoryRepo;
+    @Autowired
+    private AccountRepo accountRepo;
     private SelectionObserver observer;
     private JProgressBar progress;
     private int selectRow = -1;
@@ -105,6 +108,7 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl {
     private void initTabMain() {
         sysProperty.setUserRepo(userRepo);
         sysProperty.setInventoryRepo(inventoryRepo);
+        sysProperty.setAccountRepo(accountRepo);
         sysProperty.setProgress(progress);
         roleCompany.initTable();
         roleCompany.setProgress(progress);

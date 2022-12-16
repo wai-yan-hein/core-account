@@ -329,6 +329,7 @@ public class JournalEntryTableModel extends AbstractTableModel {
                 try {
                     Gl record = new Gl();
                     GlKey key = new GlKey();
+                    key.setDeptId(Global.deptId);
                     key.setCompCode(Global.compCode);
                     record.setKey(key);
                     record.setTranSource("GV");

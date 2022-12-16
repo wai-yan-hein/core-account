@@ -121,8 +121,9 @@ public class RoleMenuSetup extends javax.swing.JPanel implements KeyListener, Se
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(scrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 318, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnApply))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnApply, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -150,6 +151,8 @@ public class RoleMenuSetup extends javax.swing.JPanel implements KeyListener, Se
 
     private void btnApplyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnApplyActionPerformed
         // TODO add your handling code here:
+        if (observer != null)
+            observer.selected("menu", "menu");
     }//GEN-LAST:event_btnApplyActionPerformed
 
 
@@ -174,7 +177,7 @@ public class RoleMenuSetup extends javax.swing.JPanel implements KeyListener, Se
 
     @Override
     public void selected(Object source, Object selectObj) {
-        if (source.equals("CHANGE")) {
+        if (source.equals("Menu-Change")) {
             btnApply.setEnabled(true);
         }
     }

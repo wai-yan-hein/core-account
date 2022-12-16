@@ -587,11 +587,9 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         selectedNode = (DefaultMutableTreeNode) treeCOA.getLastSelectedPathComponent();
         if (selectedNode != null) {
             if (!selectedNode.getUserObject().toString().equals(parentRootName)) {
-                if (selectedNode.getUserObject() instanceof Menu) {
-                    Menu menu = (Menu) selectedNode.getUserObject();
+                if (selectedNode.getUserObject() instanceof Menu menu) {
                     setMenu(menu);
-                } else if (selectedNode.getUserObject() instanceof Menu) {
-                    Menu menu = (Menu) selectedNode.getUserObject();
+                } else if (selectedNode.getUserObject() instanceof Menu menu) {
                     txtMenuName.setText(menu.getMenuName());
                     txtMenuUrl.setText(menu.getMenuUrl());
                 }

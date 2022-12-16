@@ -69,27 +69,30 @@ public class MyDataModel extends MyAbstractTreeTableModel {
     @Override
     public Object getValueAt(Object node, int column) {
         switch (column) {
-            case 0:
+            case 0 -> {
                 return ((VRoleMenu) node).getMenuName();
-            case 1:
+            }
+            case 1 -> {
                 return ((VRoleMenu) node).getMenuType();
-            case 2:
+            }
+            case 2 -> {
                 return ((VRoleMenu) node).isAllow();
-            default:
-                break;
+            }
+            default -> {
+            }
         }
         return null;
     }
 
     @Override
     public boolean isCellEditable(Object node, int column) {
-        return true; // Important to activate TreeExpandListener
+        return column != 1; // Important to activate TreeExpandListener
     }
 
     @Override
     public void setValueAt(Object aValue, Object node, int column) {
         switch (column) {
-            case 2:
+            case 2 -> {
                 if (aValue != null) {
                     if (node instanceof VRoleMenu roleMenu) {
                         if (roleMenu.getChild() != null) {
@@ -100,9 +103,7 @@ public class MyDataModel extends MyAbstractTreeTableModel {
 
                     }
                 }
-                break;
-            default:
-                break;
+            }
         }
     }
 
@@ -136,6 +137,7 @@ public class MyDataModel extends MyAbstractTreeTableModel {
                 if (observer != null) {
                     observer.selected("Menu-Change", "-");
                 }
+
             }
         } catch (Exception e) {
             log.error("Save Priviliges  :" + e.getMessage());
