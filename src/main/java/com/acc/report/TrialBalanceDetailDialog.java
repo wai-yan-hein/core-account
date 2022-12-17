@@ -14,10 +14,22 @@ import com.acc.model.ReportFilter;
 import com.acc.model.Gl;
 import com.common.Global;
 import com.common.ProUtil;
+import com.common.ReturnObject;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +48,7 @@ import reactor.core.publisher.Mono;
  */
 @Slf4j
 public class TrialBalanceDetailDialog extends javax.swing.JDialog implements SelectionObserver {
-    
+
     private final CrAmtTableModel crAmtTableModel = new CrAmtTableModel();
     private final DrAmtTableModel drAmtTableModel = new DrAmtTableModel();
     private TableRowSorter<TableModel> sorter;
@@ -52,80 +64,81 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private AccountRepo accountRepo;
     private DateAutoCompleter dateAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
-    
+    private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
+
     public AccountRepo getAccountRepo() {
         return accountRepo;
     }
-    
+
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
-    
+
     public WebClient getAccountApi() {
         return accountApi;
     }
-    
+
     public void setAccountApi(WebClient accountApi) {
         this.accountApi = accountApi;
     }
-    
+
     public List<String> getDepartment() {
         return department;
     }
-    
+
     public void setDepartment(List<String> department) {
         this.department = department;
     }
-    
+
     public String getStDate() {
         return stDate;
     }
-    
+
     public void setStDate(String stDate) {
         this.stDate = stDate;
     }
-    
+
     public String getEndDate() {
         return endDate;
     }
-    
+
     public void setEndDate(String endDate) {
         this.endDate = endDate;
     }
-    
+
     public String getCurCode() {
         return curCode;
     }
-    
+
     public void setCurCode(String curCode) {
         this.curCode = curCode;
         this.txtCur.setText(curCode);
     }
-    
+
     public String getTraderCode() {
         return traderCode;
     }
-    
+
     public void setTraderCode(String traderCode) {
         this.traderCode = traderCode;
     }
-    
+
     public String getCoaCode() {
         return coaCode;
     }
-    
+
     public void setCoaCode(String coaCode) {
         this.coaCode = coaCode;
     }
-    
+
     public Double getOpeningAmt() {
         return openingAmt;
     }
-    
+
     public void setOpeningAmt(Double openingAmt) {
         this.openingAmt = openingAmt;
     }
-    
+
     public void setDesp(String desp) {
         this.desp = desp;
         lblName.setText(this.desp);
@@ -139,22 +152,23 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         initComponents();
         initFormat();
     }
-    
+
     private void initCombo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
         dateAutoCompleter.setSelectionObserver(this);
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, accountRepo.getDepartment(), null, true, true);
         departmentAutoCompleter.setObserver(this);
     }
-    
+
     private void initFormat() {
         txtOpening.setFormatterFactory(Util1.getDecimalFormat());
         txtClosing.setFormatterFactory(Util1.getDecimalFormat());
         txtDrAmt.setFormatterFactory(Util1.getDecimalFormat());
         txtCrAmt.setFormatterFactory(Util1.getDecimalFormat());
     }
-    
+
     private void searchTriBalDetail() {
+        progress.setIndeterminate(true);
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
         filter.setFromDate(stDate);
         filter.setToDate(endDate);
@@ -162,19 +176,31 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         filter.setCurCode(curCode);
         filter.setListDepartment(department);
         filter.setTraderCode(traderCode);
-        Mono<ResponseEntity<List<Gl>>> result = accountApi.post()
+        Mono<ReturnObject> result = accountApi.post()
                 .uri("/account/search-gl")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .toEntityList(Gl.class);
+                .bodyToMono(ReturnObject.class);
         result.subscribe((t) -> {
-            List<Gl> listVGl = t.getBody();
-            calculateOpeningClosing(listVGl);
+            try {
+                String path = "temp/Ledger" + Global.macId;
+                Util1.extractZipToJson(t.getFile(), path);
+                Reader reader = Files.newBufferedReader(Paths.get(path.concat(".json")));
+                List<Gl> listVGl = gson.fromJson(reader, new TypeToken<ArrayList<Gl>>() {
+                }.getType());
+                calculateOpeningClosing(listVGl);
+                progress.setIndeterminate(false);
+            } catch (JsonIOException | JsonSyntaxException | IOException e) {
+                log.error("searchTriBalDetail : " + e.getMessage());
+                progress.setIndeterminate(false);
+            }
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
+            progress.setIndeterminate(false);
+
         });
     }
-    
+
     private void calculateOpeningClosing(List<Gl> listVGl) {
         double opAmt = Util1.getDouble(txtOpening.getValue());
         double ttlDrAmt = 0.0;
@@ -200,33 +226,35 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         txtOpening.setValue(opAmt);
         double closingAmt = opAmt + ttlDrAmt - ttlCrAmt;
         txtClosing.setValue(closingAmt);
-        
+
     }
-    
+
     public void initMain() {
         initTable();
         initCombo();
         initData();
         searchTriBalDetail();
     }
-    
+
     private void initData() {
-        txtDate.setText(String.format("%s to %s", stDate, endDate));
+        String d1 = Util1.toDateStr(stDate, "yyyy-MM-dd", Global.dateFormat);
+        String d2 = Util1.toDateStr(endDate, "yyyy-MM-dd", Global.dateFormat);
+        txtDate.setText(String.format("%s to %s", d1, d2));
     }
-    
+
     private void initTable() {
         tblCR();
         tblDR();
         clear();
     }
-    
+
     private void clear() {
         txtDrAmt.setValue(0);
         txtCrAmt.setValue(0);
         txtOpening.setValue(0);
         txtClosing.setValue(0);
     }
-    
+
     private void tblCR() {
         crAmtTableModel.clear();
         tblCr.setModel(crAmtTableModel);
@@ -243,9 +271,9 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         tblCr.setDefaultRenderer(Object.class, new TableCellRender());
         sorter = new TableRowSorter<>(tblCr.getModel());
         tblCr.setRowSorter(sorter);
-        
+
     }
-    
+
     private void tblDR() {
         drAmtTableModel.clear();
         tblDr.setModel(drAmtTableModel);
@@ -262,9 +290,9 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         tblDr.setDefaultRenderer(Object.class, new TableCellRender());
         sorter = new TableRowSorter<>(tblDr.getModel());
         tblDr.setRowSorter(sorter);
-        
+
     }
-    
+
     private void print() {
         try {
             this.dispose();
@@ -594,16 +622,16 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
                 .addContainerGap()
                 .addComponent(jLabel8)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtDate)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel9)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtDep)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel10)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtCur, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(txtCur)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton1)
                 .addContainerGap())
         );
@@ -635,7 +663,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -723,5 +751,5 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     @Override
     public void selected(Object source, Object selectObj) {
     }
-    
+
 }

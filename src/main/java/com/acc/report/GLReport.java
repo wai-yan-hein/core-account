@@ -232,7 +232,9 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void openTBDDialog(String coaCode, String curCode, String coaName) {
+        dialog.setIconImage(Global.parentForm.getIconImage());
         dialog.setAccountRepo(accountRepo);
+        dialog.setAccountApi(accountApi);
         dialog.setCoaCode(coaCode);
         dialog.setStDate(stDate);
         dialog.setEndDate(endDate);

@@ -1084,15 +1084,16 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     @Override
     public void selected(Object source, Object selectObj) {
         if (selectObj != null) {
-            if (source.equals("Date-Search")) {
+            if (source.equals("Date")) {
+                searchCash();
+            } else if (source.equals("Date-Search")) {
                 String date = Util1.toDateStr(selectObj.toString(), "yyyy-MM-dd", Global.dateFormat);
                 dateAutoCompleter.setStDate(date);
                 dateAutoCompleter.setEndDate(date);
                 txtDate.setText(date);
+                searchCash();
             } else if (source.equals("CAL-TOTAL")) {
                 calDebitCredit();
-            } else {
-                searchCash();
             }
         }
     }
