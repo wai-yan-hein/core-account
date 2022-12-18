@@ -69,6 +69,7 @@ public final class DepartmentAutoCompleter implements KeyListener {
 
     public void setListOption(List<String> listOption) {
         this.listOption = listOption;
+        this.textComp.setText("Custom");
     }
 
     public boolean isCustom() {

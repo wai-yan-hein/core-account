@@ -9,9 +9,11 @@ import com.acc.common.AccountRepo;
 import com.acc.common.CrAmtTableModel;
 import com.acc.common.DateAutoCompleter;
 import com.acc.common.DrAmtTableModel;
+import com.acc.editor.CurrencyAAutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.model.ReportFilter;
 import com.acc.model.Gl;
+import com.acc.model.TmpOpening;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.ReturnObject;
@@ -38,7 +40,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -64,7 +65,17 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private AccountRepo accountRepo;
     private DateAutoCompleter dateAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
+    private CurrencyAAutoCompleter currencyAAutoCompleter;
     private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
+    private boolean status = false;
+
+    public List<String> getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(List<String> department) {
+        this.department = department;
+    }
 
     public AccountRepo getAccountRepo() {
         return accountRepo;
@@ -80,14 +91,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
     public void setAccountApi(WebClient accountApi) {
         this.accountApi = accountApi;
-    }
-
-    public List<String> getDepartment() {
-        return department;
-    }
-
-    public void setDepartment(List<String> department) {
-        this.department = department;
     }
 
     public String getStDate() {
@@ -158,6 +161,8 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         dateAutoCompleter.setSelectionObserver(this);
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, accountRepo.getDepartment(), null, true, true);
         departmentAutoCompleter.setObserver(this);
+        currencyAAutoCompleter = new CurrencyAAutoCompleter(txtCur, accountRepo.getCurrency(), null, false);
+
     }
 
     private void initFormat() {
@@ -169,12 +174,13 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
     private void searchTriBalDetail() {
         progress.setIndeterminate(true);
+        calOpening();
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
-        filter.setFromDate(stDate);
-        filter.setToDate(endDate);
+        filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
+        filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
         filter.setSrcAcc(coaCode);
         filter.setCurCode(curCode);
-        filter.setListDepartment(department);
+        filter.setListDepartment(departmentAutoCompleter.getListOption());
         filter.setTraderCode(traderCode);
         Mono<ReturnObject> result = accountApi.post()
                 .uri("/account/search-gl")
@@ -201,23 +207,48 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         });
     }
 
+    private void calOpening() {
+        String startDate = Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat);
+        String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
+        String clDate = Util1.toDateStrMYSQL(startDate, "dd/MM/yyyy");
+        ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
+        filter.setOpeningDate(opDate);
+        filter.setFromDate(clDate);
+        filter.setCurCode(currencyAAutoCompleter.getCurrency().getCurCode());
+        filter.setListDepartment(departmentAutoCompleter.getListOption());
+        filter.setCoaCode(coaCode);
+        filter.setTraderCode(traderCode);
+        List<TmpOpening> listTmp = accountRepo.getOpening(filter);
+        if (!listTmp.isEmpty()) {
+            txtOpening.setValue(listTmp.get(0).getOpening());
+        } else {
+            txtOpening.setValue(0);
+        }
+    }
+
     private void calculateOpeningClosing(List<Gl> listVGl) {
+        drAmtTableModel.clear();
+        crAmtTableModel.clear();
         double opAmt = Util1.getDouble(txtOpening.getValue());
         double ttlDrAmt = 0.0;
         double ttlCrAmt = 0.0;
         if (!listVGl.isEmpty()) {
+            List<Gl> listDr = new ArrayList<>();
+            List<Gl> listCr = new ArrayList<>();
             for (Gl vgl : listVGl) {
                 double drAmt = Util1.getDouble(vgl.getDrAmt());
                 double crAmt = Util1.getDouble(vgl.getCrAmt());
                 if (drAmt > 0) {
                     ttlDrAmt += drAmt;
-                    drAmtTableModel.addVGl(vgl);
+                    listDr.add(vgl);
                 }
                 if (crAmt > 0) {
                     ttlCrAmt += crAmt;
-                    crAmtTableModel.addVGl(vgl);
+                    listCr.add(vgl);
                 }
             }
+            drAmtTableModel.setListVGl(listDr);
+            crAmtTableModel.setListVGl(listCr);
             txtDrCount.setValue(drAmtTableModel.getListVGl().size());
             txtCrCount.setValue(crAmtTableModel.getListVGl().size());
             txtCrAmt.setValue(ttlCrAmt);
@@ -230,13 +261,21 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     }
 
     public void initMain() {
-        initTable();
-        initCombo();
+        if (!status) {
+            setIconImage(Global.parentForm.getIconImage());
+            initTable();
+            initCombo();
+            status = true;
+        }
         initData();
         searchTriBalDetail();
     }
 
     private void initData() {
+        departmentAutoCompleter.setListOption(department);
+        currencyAAutoCompleter.setCurrency(accountRepo.findCurrency(curCode));
+        dateAutoCompleter.setStDate(stDate);
+        dateAutoCompleter.setEndDate(endDate);
         String d1 = Util1.toDateStr(stDate, "yyyy-MM-dd", Global.dateFormat);
         String d2 = Util1.toDateStr(endDate, "yyyy-MM-dd", Global.dateFormat);
         txtDate.setText(String.format("%s to %s", d1, d2));
@@ -256,7 +295,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     }
 
     private void tblCR() {
-        crAmtTableModel.clear();
         tblCr.setModel(crAmtTableModel);
         tblCr.getTableHeader().setFont(Global.lableFont);
         tblCr.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -275,7 +313,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     }
 
     private void tblDR() {
-        drAmtTableModel.clear();
         tblDr.setModel(drAmtTableModel);
         tblDr.setRowHeight(Global.tblRowHeight);
         tblDr.getTableHeader().setFont(Global.lableFont);
@@ -389,6 +426,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         lblName.setFont(Global.menuFont);
+        lblName.setForeground(Global.selectionColor);
         lblName.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblName.setText("Name");
 
@@ -613,6 +651,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
         txtCur.setEditable(false);
         txtCur.setFont(Global.textFont);
+        txtCur.setEnabled(false);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -750,6 +789,9 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
     @Override
     public void selected(Object source, Object selectObj) {
+        if (source != null) {
+            searchTriBalDetail();
+        }
     }
 
 }

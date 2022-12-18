@@ -45,7 +45,6 @@ public class GLListingTableModel extends AbstractTableModel {
                 String.class;
         };
     }
-
     @Override
     public Object getValueAt(int row, int column) {
 

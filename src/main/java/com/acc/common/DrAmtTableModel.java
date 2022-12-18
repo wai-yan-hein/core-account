@@ -136,6 +136,7 @@ public class DrAmtTableModel extends AbstractTableModel {
     public void clear() {
         if (listVGl != null) {
             listVGl.clear();
+            fireTableDataChanged();
         }
     }
 

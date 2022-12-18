@@ -55,4 +55,8 @@ public class Gl {
     public Gl() {
     }
 
+    public Gl(String tranSource) {
+        this.tranSource = tranSource;
+    }
+
 }

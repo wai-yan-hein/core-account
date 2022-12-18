@@ -45,6 +45,10 @@ public class APARTableModel extends AbstractTableModel {
         };
     }
 
+    private String getCode(VApar a) {
+        return a.getUserCode() == null ? a.getTraderCode() : a.getUserCode();
+    }
+
     @Override
     public Object getValueAt(int row, int column) {
 
@@ -53,7 +57,7 @@ public class APARTableModel extends AbstractTableModel {
 
             return switch (column) {
                 case 0 ->
-                    apar.getUserCode();
+                    getCode(apar);
                 case 1 ->
                     apar.getTraderName();
                 case 2 ->

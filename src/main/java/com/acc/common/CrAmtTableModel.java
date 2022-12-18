@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class CrAmtTableModel extends AbstractTableModel {
+
     private List<Gl> listVGl = new ArrayList();
     private String[] columnNames = {"Date", "Dep :", "Description", "Ref", "No :", "Cr-Amt"};
 
@@ -134,6 +135,7 @@ public class CrAmtTableModel extends AbstractTableModel {
     public void clear() {
         if (listVGl != null) {
             listVGl.clear();
+            fireTableDataChanged();
         }
     }
 

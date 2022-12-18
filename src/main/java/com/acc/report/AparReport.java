@@ -12,6 +12,7 @@ import com.acc.common.GLTableCellRender;
 import com.acc.editor.COAAutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.TraderAAutoCompleter;
+import com.acc.model.Gl;
 import com.acc.model.ReportFilter;
 import com.acc.model.TraderA;
 import com.acc.model.VApar;
@@ -21,6 +22,11 @@ import com.common.PanelControl;
 import com.common.ReturnObject;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import com.inventory.editor.CurrencyAutoCompleter;
 import com.user.common.UserRepo;
 import java.awt.event.KeyEvent;
@@ -29,13 +35,21 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
+import lombok.extern.slf4j.Slf4j;
 import net.coderazzi.filters.gui.AutoChoices;
 import net.coderazzi.filters.gui.TableFilterHeader;
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
@@ -46,9 +60,7 @@ import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.engine.fill.ReportFiller;
 import net.sf.jasperreports.view.JasperViewer;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -57,12 +69,13 @@ import reactor.core.publisher.Mono;
  *
  * @author Lenovo
  */
+@Slf4j
 @Component
 public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         PanelControl, KeyListener {
 
+    private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     private int selectRow = -1;
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(AparReport.class);
     /**
      * Creates new form AparReport
      */
@@ -173,11 +186,6 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         dialog.setVisible(true);
     }
 
-    private String getTarget() {
-        VApar apar = aPARTableModel.getAPAR(selectRow);
-        return apar.getCoaCode();
-    }
-
     private void searchAPAR() {
         if (!isApPrCal) {
             long start = new GregorianCalendar().getTimeInMillis();
@@ -200,21 +208,29 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             filter.setTraderType(traderType);
             filter.setListDepartment(departmentAutoCompleter.getListOption());
             filter.setCoaCode(cOAAutoCompleter.getCOA().getKey().getCoaCode());
-            Mono<ResponseEntity<List<VApar>>> result = accountApi.post()
+            Mono<ReturnObject> result = accountApi.post()
                     .uri("/report/get-arap")
                     .body(Mono.just(filter), ReportFiller.class)
                     .retrieve()
-                    .toEntityList(VApar.class);
+                    .bodyToMono(ReturnObject.class);
             result.subscribe((t) -> {
-                List<VApar> list = t.getBody();
-                aPARTableModel.setListAPAR(list);
-                calAPARTotalAmount();
-                isApPrCal = false;
-                progress.setIndeterminate(false);
-                long end = new GregorianCalendar().getTimeInMillis();
-                long pt = (end - start) / 1000;
-                lblCalTime.setText(pt + " s");
-                tblAPAR.requestFocus();
+                try {
+                    String path = "temp/ARAP"+Global.macId;
+                    Util1.extractZipToJson(t.getFile(), path);
+                    Reader reader = Files.newBufferedReader(Paths.get(path.concat(".json")));
+                    List<VApar> list = gson.fromJson(reader, new TypeToken<ArrayList<VApar>>() {
+                    }.getType());
+                    aPARTableModel.setListAPAR(list);
+                    calAPARTotalAmount();
+                    isApPrCal = false;
+                    progress.setIndeterminate(false);
+                    long end = new GregorianCalendar().getTimeInMillis();
+                    long pt = (end - start) / 1000;
+                    lblCalTime.setText(pt + " s");
+                    tblAPAR.requestFocus();
+                } catch (JsonIOException | JsonSyntaxException | IOException e) {
+                    log.error("searchAPAR : " + e.getMessage());
+                }
             }, (e) -> {
                 isApPrCal = false;
                 progress.setIndeterminate(false);
@@ -259,13 +275,9 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         cOAAutoCompleter.setSelectionObserver(this);
     }
 
-    public void printApar() {
-
-    }
-
-    private void printReport(String reportUrl, String reportName, Map<String, Object> param) {
+    private void printReport() {
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
-        filter.setReportName(reportName);
+        filter.setReportName("ARAP");
         Mono<ReturnObject> result = accountApi
                 .post()
                 .uri("/report/get-report")
@@ -275,16 +287,15 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         result.subscribe((t) -> {
             try {
                 if (t != null) {
-                    log.info(String.format("printReport %s", t.getMessage()));
-                    String filePath = String.format("%s%s%s", Global.reportPath, File.separator, reportUrl.concat(".jasper"));
+                    String filePath = String.format("%s%s%s", Global.accountRP, File.separator, "ARAP.jasper");
                     if (t.getFile().length > 0) {
-                        log.info("font: " + Global.fontName);
                         JasperReportsContext jc = DefaultJasperReportsContext.getInstance();
                         jc.setProperty("net.sf.jasperreports.default.pdf.font.name", Global.fontName);
                         jc.setProperty("net.sf.jasperreports.default.pdf.encoding", "Identity-H");
                         jc.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
                         InputStream input = new ByteArrayInputStream(t.getFile());
                         JsonDataSource ds = new JsonDataSource(input);
+                        Map<String, Object> param = new HashMap<>();
                         JasperPrint js = JasperFillManager.fillReport(filePath, param, ds);
                         JasperViewer.viewReport(js, false);
                     } else {
@@ -661,7 +672,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
 
     @Override
     public void print() {
-        printApar();
+        printReport();
     }
 
     @Override

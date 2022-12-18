@@ -5,7 +5,7 @@
  */
 package com.acc.common;
 
-import com.acc.model.VTranSource;
+import com.acc.model.Gl;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -19,10 +19,10 @@ import org.slf4j.LoggerFactory;
 public class TranSourceTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(TranSourceTableModel.class);
-    private List<VTranSource> listAutoText = new ArrayList<>();
+    private List<Gl> listAutoText = new ArrayList<>();
     private final String[] columnNames = {"Transource"};
 
-    public TranSourceTableModel(List<VTranSource> listAutoText) {
+    public TranSourceTableModel(List<Gl> listAutoText) {
         this.listAutoText = listAutoText;
     }
 
@@ -46,8 +46,7 @@ public class TranSourceTableModel extends AbstractTableModel {
 
         try {
             if (!listAutoText.isEmpty()) {
-                VTranSource auto = listAutoText.get(row);
-
+                Gl auto = listAutoText.get(row);
                 return switch (column) {
                     case 0 ->
                         auto == null ? null : auto.getTranSource();
@@ -80,7 +79,7 @@ public class TranSourceTableModel extends AbstractTableModel {
         return columnNames.length;
     }
 
-    public VTranSource getRemark(int row) {
+    public Gl getRemark(int row) {
         if (listAutoText == null) {
             return null;
         } else if (listAutoText.isEmpty()) {

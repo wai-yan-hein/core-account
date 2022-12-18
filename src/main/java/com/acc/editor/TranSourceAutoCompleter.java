@@ -6,7 +6,7 @@
 package com.acc.editor;
 
 import com.acc.common.TranSourceTableModel;
-import com.acc.model.VTranSource;
+import com.acc.model.Gl;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
@@ -48,7 +48,7 @@ public final class TranSourceAutoCompleter implements KeyListener {
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
     private TranSourceTableModel refModel;
-    private VTranSource ref;
+    private Gl ref;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
@@ -68,13 +68,13 @@ public final class TranSourceAutoCompleter implements KeyListener {
     public TranSourceAutoCompleter() {
     }
 
-    public TranSourceAutoCompleter(JTextComponent comp, List<VTranSource> list,
+    public TranSourceAutoCompleter(JTextComponent comp, List<Gl> list,
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
         if (filter) {
             list = new ArrayList<>(list);
-            VTranSource v = new VTranSource("All");
+            Gl v = new Gl("All");
             list.add(0, v);
             setAutoText(v);
         }
@@ -321,12 +321,12 @@ public final class TranSourceAutoCompleter implements KeyListener {
         table.scrollRectToVisible(rect);
     }
 
-    public VTranSource getAutoText() {
+    public Gl getAutoText() {
         return ref;
 
     }
 
-    public void setAutoText(VTranSource ref) {
+    public void setAutoText(Gl ref) {
         this.ref = ref;
         textComp.setText(ref == null ? null : ref.getTranSource());
 

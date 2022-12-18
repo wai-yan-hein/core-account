@@ -15,12 +15,9 @@ import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.user.model.Currency;
 import java.awt.HeadlessException;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -38,11 +35,9 @@ public class AllCashTableModel extends AbstractTableModel {
     private static final Logger log = LoggerFactory.getLogger(AllCashTableModel.class);
     private List<Gl> listVGl = new ArrayList();
     private String[] columnNames = {"Date", "Dept:", "Description", "Ref :", "No :", "Person", "Account", "Curr", "Cash In / Dr", "Cash Out / Cr"};
-    private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     private String sourceAccId;
     private JTable parent;
     private SelectionObserver selectionObserver;
-    private TraderA trader;
     private DateAutoCompleter dateAutoCompleter;
     private String glDate;
     private Currency currency;
@@ -253,15 +248,15 @@ public class AllCashTableModel extends AbstractTableModel {
                 }
                 case 5 -> {
                     if (value != null) {
-                        if (value instanceof TraderA trader1) {
-                            trader = trader1;
-                        }
-                        if (trader != null) {
-                            gl.setTraderCode(trader.getKey().getCode());
-                            gl.setTraderName(trader.getTraderName());
-                            if (trader.getAccCode() != null) {
-                                gl.setAccCode(trader.getAccCode());
-                                gl.setAccName(trader.getAccCode());
+                        if (value instanceof TraderA t) {
+                            gl.setTraderCode(t.getKey().getCode());
+                            gl.setTraderName(t.getTraderName());
+                            if (t.getAccCode() != null) {
+                                gl.setAccCode(t.getAccCode());
+                                ChartOfAccount coa = accountRepo.findCOA(t.getAccCode());
+                                if (coa != null) {
+                                    gl.setAccName(coa.getCoaNameEng());
+                                }
                                 if (ProUtil.isMultiCur()) {
                                     parent.setColumnSelectionInterval(7, 7);
                                 } else {

@@ -58,7 +58,7 @@ public class CvInventoryApplication {
             System.exit(1);
         }
         Global.selectionColor = UIManager.getDefaults().getColor("Table.selectionBackground");
-        System.setProperty("flatlaf.useWindowDecorations", "false");
+        System.setProperty("flatlaf.useWindowDecorations", "true");
         System.setProperty("flatlaf.menuBarEmbedded", "false");
         System.setProperty("flatlaf.animation", "true");
         System.setProperty("flatlaf.uiScale.enabled", "true");
@@ -73,7 +73,7 @@ public class CvInventoryApplication {
         //UIManager.put("TableHeader.separatorColor", Color.black);
         //UIManager.put("TableHeader.bottomSeparatorColor", Color.black);
         //UIManager.put("Table.gridColor", UIManager.getDefaults().getColor("Table.selectionBackground"));
-       //UIManager.put("Table.gridColor", new Color(213, 235, 226));
+        //UIManager.put("Table.gridColor", new Color(213, 235, 226));
         //FlatSolarizedLightIJTheme.setup();
         SpringApplicationBuilder builder = new SpringApplicationBuilder(CvInventoryApplication.class);
         builder.headless(false);

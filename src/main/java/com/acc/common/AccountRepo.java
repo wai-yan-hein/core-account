@@ -13,6 +13,7 @@ import com.acc.model.Gl;
 import com.acc.model.GlKey;
 import com.acc.model.OpeningBalance;
 import com.acc.model.ReportFilter;
+import com.acc.model.TmpOpening;
 import com.acc.model.TraderA;
 import com.acc.model.VDescription;
 import com.acc.model.VRef;
@@ -145,12 +146,12 @@ public class AccountRepo {
         return result.block().getBody();
     }
 
-    public List<VTranSource> getTranSource() {
-        Mono<ResponseEntity<List<VTranSource>>> result = accountApi.get()
+    public List<Gl> getTranSource() {
+        Mono<ResponseEntity<List<Gl>>> result = accountApi.get()
                 .uri(builder -> builder.path("/account/get-tran-source")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().toEntityList(VTranSource.class);
+                .retrieve().toEntityList(Gl.class);
         return result.block().getBody();
     }
 
@@ -277,6 +278,15 @@ public class AccountRepo {
                 .retrieve()
                 .bodyToMono(OpeningBalance.class);
         return result.block();
+    }
+
+    public List<TmpOpening> getOpening(ReportFilter filter) {
+        Mono<ResponseEntity<List<TmpOpening>>> result = accountApi.post()
+                .uri("/account/get-coa-opening")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .toEntityList(TmpOpening.class);
+        return result.block().getBody();
     }
 
 }
