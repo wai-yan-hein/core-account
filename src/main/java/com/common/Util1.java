@@ -31,6 +31,8 @@ import javax.swing.text.NumberFormatter;
 import lombok.extern.slf4j.Slf4j;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
+import net.sf.jasperreports.engine.DefaultJasperReportsContext;
+import net.sf.jasperreports.engine.JasperReportsContext;
 
 /**
  * @author WSwe
@@ -680,7 +682,7 @@ public class Util1 {
     public static void extractZipToJson(byte[] zipData, String exportPath) {
         try {
             File file = new File(exportPath.concat(".zip"));
-            try ( FileOutputStream stream = new FileOutputStream(file)) {
+            try (FileOutputStream stream = new FileOutputStream(file)) {
                 stream.write(zipData);
             }
         } catch (IOException ex) {
@@ -752,6 +754,15 @@ public class Util1 {
         LocalDate date = LocalDate.parse(sqlFormat);
         LocalDate minusDays = date.minusDays(minusDay);
         return minusDays.toString();
+    }
+
+    public static void initJasperContext() {
+        JasperReportsContext jc = DefaultJasperReportsContext.getInstance();
+        jc.setProperty("net.sf.jasperreports.default.font.name", Global.fontName);
+        jc.setProperty("net.sf.jasperreports.default.pdf.font.name", Global.fontName);
+        jc.setProperty("net.sf.jasperreports.default.pdf.encoding", "Identity-H");
+        jc.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
+        jc.setProperty("net.sf.jasperreports.viewer.zoom", "1");
     }
 
 }

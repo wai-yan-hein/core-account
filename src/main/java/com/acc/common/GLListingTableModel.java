@@ -52,7 +52,7 @@ public class GLListingTableModel extends AbstractTableModel {
             VTriBalance apar = listTBal.get(row);
             switch (column) {
                 case 0 -> {
-                    return apar.getUsrCoaCode();
+                    return apar.getCoaUsrCode();
                 }
                 case 1 -> {
                     return apar.getCoaName();

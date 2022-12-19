@@ -13,7 +13,6 @@ import com.acc.editor.COAAutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.ReportFilter;
-import com.acc.model.VApar;
 import com.acc.model.VTriBalance;
 import com.common.Global;
 import com.common.PanelControl;
@@ -45,7 +44,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
@@ -62,7 +60,6 @@ import net.sf.jasperreports.view.JasperViewer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -256,8 +253,8 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         dialog.setAccountRepo(accountRepo);
         dialog.setAccountApi(accountApi);
         dialog.setCoaCode(coaCode);
-        dialog.setStDate(stDate);
-        dialog.setEndDate(endDate);
+        dialog.setStDate(dateAutoCompleter.getStDate());
+        dialog.setEndDate(dateAutoCompleter.getEndDate());
         dialog.setCurCode(curCode);
         dialog.setDesp(coaName);
         dialog.setTraderCode(null);
@@ -307,27 +304,24 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             progress.setIndeterminate(true);
             Map<String, Object> p = new HashMap();
             p.put("p_report_name", "Trial Balance");
-            p.put("p_date", String.format("Between %s and %s", stDate, endDate));
+            p.put("p_date", String.format("Between %s and %s", dateAutoCompleter.getStDate(), dateAutoCompleter.getEndDate()));
             p.put("p_print_date", Util1.getTodayDateTime());
             p.put("p_comp_name", Global.companyName);
             p.put("p_comp_address", Global.companyAddress);
             p.put("p_comp_phone", Global.companyPhone);
             p.put("p_currency", currencyAutoCompleter.getCurrency().getCurCode());
             p.put("p_department", txtDep.getText());
+            Util1.initJasperContext();
             ObjectMapper mapper = new ObjectMapper();
-            Gson gson = new Gson();
             JsonNode node = mapper.readTree(gson.toJson(glListingTableModel.getListTBAL()));
-            JsonDataSource ds = new JsonDataSource(node, null) {
-            };
+            JsonDataSource ds = new JsonDataSource(node, null) {};
             JasperPrint js = JasperFillManager.fillReport(Global.accountRP + "TriBalance.jasper", p, ds);
             JasperViewer.viewReport(js, false);
             progress.setIndeterminate(false);
-        } catch (JsonProcessingException ex) {
+        } catch (JsonProcessingException | JRException ex) {
             progress.setIndeterminate(false);
             JOptionPane.showMessageDialog(Global.parentForm, "Report", ex.getMessage(), JOptionPane.ERROR_MESSAGE);
             log.error("printGLListing : " + ex.getMessage());
-        } catch (JRException ex) {
-            java.util.logging.Logger.getLogger(GLReport.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }

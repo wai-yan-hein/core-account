@@ -350,7 +350,7 @@ public class InventoryRepo {
         key.setDeptId(deptId);
         key.setCatCode(catCode);
         Mono<Category> result = inventoryApi.post()
-                .uri("/setup/find-brand")
+                .uri("/setup/find-category")
                 .body(Mono.just(key), CategoryKey.class)
                 .retrieve()
                 .bodyToMono(Category.class);

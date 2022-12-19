@@ -75,6 +75,8 @@ import com.user.setup.CloudConfig;
 import com.user.setup.CompanySetup;
 import java.time.Duration;
 import java.util.HashMap;
+import net.sf.jasperreports.engine.DefaultJasperReportsContext;
+import net.sf.jasperreports.engine.JasperReportsContext;
 import org.springframework.core.task.TaskExecutor;
 
 /**

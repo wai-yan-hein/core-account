@@ -26,7 +26,10 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -40,6 +43,11 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.data.JsonDataSource;
+import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -276,9 +284,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         currencyAAutoCompleter.setCurrency(accountRepo.findCurrency(curCode));
         dateAutoCompleter.setStDate(stDate);
         dateAutoCompleter.setEndDate(endDate);
-        String d1 = Util1.toDateStr(stDate, "yyyy-MM-dd", Global.dateFormat);
-        String d2 = Util1.toDateStr(endDate, "yyyy-MM-dd", Global.dateFormat);
-        txtDate.setText(String.format("%s to %s", d1, d2));
+        txtDate.setText(String.format("%s to %s", stDate, endDate));
     }
 
     private void initTable() {
@@ -330,27 +336,38 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
     }
 
-    private void print() {
-        try {
-            this.dispose();
-            String compName = Global.companyName;
-            String reportPath = ProUtil.getReportPath();
-            String filePath = reportPath + File.separator + "TriBalanceDetail";
-            Map<String, Object> p = new HashMap();
-            p.put("p_company_name", compName);
-            p.put("p_mac_id", Global.macId);
-            p.put("p_comp_code", Global.compCode);
-            p.put("p_report_info", lblName.getText());
-            p.put("p_from_date", stDate);
-            p.put("p_to_date", endDate);
-            p.put("p_account_code", coaCode);
-            p.put("p_cur_code", curCode);
-            p.put("p_trader_code", Util1.isNull(traderCode, "-"));
-            p.put("p_opening", txtOpening.getValue());
-            p.put("p_closing", txtClosing.getValue());
-        } catch (Exception ex) {
-            log.error("print: " + ex.getMessage());
+    public void printVoucher() {
+        String currency = currencyAAutoCompleter.getCurrency().getCurCode();
+        String fromDate = dateAutoCompleter.getStDate();
+        String toDate = dateAutoCompleter.getEndDate();
+        if (!currency.equals("-") || !ProUtil.isMultiCur()) {
+            try {
+                String path = "temp/Ledger" + Global.macId;
+                Map<String, Object> p = new HashMap();
+                p.put("p_report_name", lblName.getText());
+                p.put("p_date", String.format("Between %s and %s", fromDate, toDate));
+                p.put("p_print_date", Util1.getTodayDateTime());
+                p.put("p_comp_name", Global.companyName);
+                p.put("p_comp_address", Global.companyAddress);
+                p.put("p_comp_phone", Global.companyPhone);
+                p.put("p_currency", currencyAAutoCompleter.getCurrency().getCurCode());
+                double opening = Util1.getDouble(txtOpening.getValue());
+                double closing = Util1.getDouble(txtClosing.getValue());
+                p.put("p_opening", opening);
+                p.put("p_closing", closing);
+                String filePath = String.format(Global.accountRP + "IndividualLedger.jasper");
+                InputStream input = new FileInputStream(new File(path.concat(".json")));
+                JsonDataSource ds = new JsonDataSource(input);
+                JasperPrint js = JasperFillManager.fillReport(filePath, p, ds);
+                JasperViewer.viewReport(js, false);
+            } catch (JRException | FileNotFoundException ex) {
+                JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
+                log.error("printVoucher : " + ex.getMessage());
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Select Currency.");
         }
+
     }
 
     /**
@@ -407,6 +424,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Trial Balance");
         setBackground(new java.awt.Color(255, 255, 255));
+        setModalityType(java.awt.Dialog.ModalityType.DOCUMENT_MODAL);
         addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 formFocusLost(evt);
@@ -651,6 +669,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
         txtCur.setEditable(false);
         txtCur.setFont(Global.textFont);
+        txtCur.setDisabledTextColor(new java.awt.Color(0, 0, 0));
         txtCur.setEnabled(false);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
@@ -747,7 +766,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        print();
+        printVoucher();
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**

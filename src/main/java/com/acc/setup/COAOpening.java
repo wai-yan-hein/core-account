@@ -6,7 +6,6 @@ package com.acc.setup;
 
 import com.acc.common.AccountRepo;
 import com.acc.common.OpeningBalanceTableModel;
-import com.acc.common.DateAutoCompleter;
 import com.acc.model.OpeningBalance;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.ReportFilter;
@@ -18,12 +17,13 @@ import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.COAAutoCompleter;
 import com.acc.editor.TraderAAutoCompleter;
 import com.acc.editor.CurrencyAAutoCompleter;
-import com.user.common.UserRepo;
 import com.common.SelectionObserver;
 import com.common.PanelControl;
 import com.common.Global;
 import com.common.Util1;
 import com.common.DecimalFormatRender;
+import com.common.FilterObject;
+import com.common.ReturnObject;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Dimension;
@@ -31,9 +31,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.HashMap;
@@ -41,11 +40,13 @@ import java.util.Map;
 //import com.cv.accountswing.util.Util1;
 
 import javax.swing.AbstractAction;
+import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import lombok.extern.slf4j.Slf4j;
 
 import net.coderazzi.filters.gui.AutoChoices;
 
@@ -67,16 +68,14 @@ import reactor.core.publisher.Mono;
  *
  * @author myoht
  */
+@Slf4j
 @Component
 public class COAOpening extends javax.swing.JPanel implements SelectionObserver, PanelControl {
 
     private final OpeningBalanceTableModel openingTableModel = new OpeningBalanceTableModel();
-    private final String path = String.format("%s%s%s", "temp", File.separator, "Ledger" + Global.macId);
 
     @Autowired
     private AccountRepo accountRepo;
-    @Autowired
-    private UserRepo userRepo;
     @Autowired
     private WebClient accountApi;
 
@@ -84,12 +83,10 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     private CurrencyAAutoCompleter currencyAutoCompleter;
     private COAAutoCompleter coaAutoCompleter;
     private TraderAAutoCompleter tradeAutoCompleter;
-    private DateAutoCompleter dateAutoCompleter;
 
     private SelectionObserver observer;
     private TableFilterHeader filterHeader;
     private JProgressBar progress;
-    private TaskExecutor taskExecutor;
 
     /**
      * Creates new form COAOpening
@@ -279,30 +276,44 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
 
     private void printOpening() {
         progress.setIndeterminate(true);
-        taskExecutor.execute(() -> {
+        ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
+        filter.setReportName("OpeningTri");
+        filter.setOpeningDate(Util1.toDateStr(txtDate.getDate(), "yyyy-MM-dd"));
+        filter.setDeptCode(departmenttAutoCompleter.getDepartment().getKey().getDeptCode());
+        filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
+        Mono<ReturnObject> result = accountApi
+                .post()
+                .uri("/report/get-report")
+                .body(Mono.just(filter), FilterObject.class
+                )
+                .retrieve()
+                .bodyToMono(ReturnObject.class
+                );
+        result.subscribe((t) -> {
             try {
-                String reportOpDate = Util1.toDateStr(txtDate.getDate(), "yyyy-MM-dd");
-                Map<String, Object> parameters = new HashMap();
-                parameters.put("p_report_name", this.getName());
-                parameters.put("p_report_info", "Opening Date - " + Util1.toDateStr(reportOpDate, "yyyy-MM-dd", "dd/MM/yyyy"));
-                parameters.put("p_op_date", reportOpDate);
-                parameters.put("p_dept_code", departmenttAutoCompleter.getListOption());
-                parameters.put("p_dept_name", "Dept : " + departmenttAutoCompleter.getDepartment().getDeptName());
-                parameters.put("p_print_date", Util1.getTodayDateTime());
-                String filePath = String.format(Global.accountRP + "Opening.jasper");
-                InputStream input = new FileInputStream(new File(path.concat(".json")));
+                Map<String, Object> p = new HashMap();
+                p.put("p_report_name", "Opening Tri Balance");
+                p.put("p_date", "Opening Date : " + Util1.toDateStr(txtDate.getDate(), "dd/MM/yyyy"));
+                p.put("p_print_date", Util1.getTodayDateTime());
+                p.put("p_comp_name", Global.companyName);
+                p.put("p_comp_address", Global.companyAddress);
+                p.put("p_comp_phone", Global.companyPhone);
+                p.put("p_currency", currencyAutoCompleter.getCurrency().getCurCode());
+                String filePath = String.format(Global.accountRP + "OpeningTri.jasper");
+                InputStream input = new ByteArrayInputStream(t.getFile());
                 JsonDataSource ds = new JsonDataSource(input);
-                JasperPrint js = JasperFillManager.fillReport(filePath, parameters, ds);
+                JasperPrint js = JasperFillManager.fillReport(filePath, p, ds);
                 JasperViewer.viewReport(js, false);
                 progress.setIndeterminate(false);
-
-            } catch (FileNotFoundException | JRException e) {
+            } catch (JRException e) {
                 progress.setIndeterminate(false);
-                //log.error("printVoucher : " + e.getMessage());
+                log.error("printVoucher : " + e.getMessage());
             }
+        }, (e) -> {
+            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+            progress.setIndeterminate(false);
         });
-        String reportPath = "report";
-        // String filePath=reportPath
+
     }
 
     @Override
@@ -334,6 +345,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
 
     @Override
     public void print() {
+        printOpening();
     }
 
     @Override

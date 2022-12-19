@@ -375,8 +375,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     public void printVoucher() {
         String currency = currencyAutoCompleter.getCurrency().getCurCode();
-        String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat);
-        String endDate = Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat);
+        String stDate = dateAutoCompleter.getStDate();
+        String endDate = dateAutoCompleter.getEndDate();
         if (!currency.equals("-") || !ProUtil.isMultiCur()) {
             progress.setIndeterminate(true);
             taskExecutor.execute(() -> {

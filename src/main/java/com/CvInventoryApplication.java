@@ -92,7 +92,7 @@ public class CvInventoryApplication {
             if (Global.macId != null) {
                 ApplicationMainFrame appMain = context.getBean(ApplicationMainFrame.class);
                 java.awt.EventQueue.invokeLater(() -> {
-                    URL appUrl = CvInventoryApplication.class.getResource("/images/warehouse.png");
+                    URL appUrl = CvInventoryApplication.class.getResource("/images/applogo.png");
                     appMain.setIconImage(new ImageIcon(appUrl).getImage());
                     appMain.setExtendedState(JFrame.MAXIMIZED_BOTH);
                     appMain.initMain();

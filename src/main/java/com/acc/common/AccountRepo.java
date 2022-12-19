@@ -75,9 +75,7 @@ public class AccountRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .onStatus(HttpStatus::is4xxClientError, response -> {
-                    return Mono.error(new IllegalStateException(response.statusCode().getReasonPhrase()));
-                }).toEntityList(Department.class);
+                .toEntityList(Department.class);
         return result.block().getBody();
     }
 

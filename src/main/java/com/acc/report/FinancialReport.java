@@ -204,12 +204,6 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                         long end = new GregorianCalendar().getTimeInMillis();
                         long pt = end - start;
                         lblTime.setText(pt / 1000 + " s");
-                        JasperReportsContext jc = DefaultJasperReportsContext.getInstance();
-                        jc.setProperty("net.sf.jasperreports.default.font.name", Global.fontName);
-                        jc.setProperty("net.sf.jasperreports.default.pdf.font.name", Global.fontName);
-                        jc.setProperty("net.sf.jasperreports.default.pdf.encoding", "Identity-H");
-                        jc.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
-                        jc.setProperty("net.sf.jasperreports.viewer.zoom", "1");
                         InputStream input = new ByteArrayInputStream(t.getFile());
                         JsonDataSource ds = new JsonDataSource(input);
                         param.put("p_gross_profit", t.getGrossProfit());

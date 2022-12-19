@@ -20,7 +20,7 @@ public class VTriBalance implements java.io.Serializable {
     private Double drAmt;
     private Double crAmt;
     private String coaName;
-    private String usrCoaCode;
+    private String coaUsrCode;
     private Integer macId;
 
 }

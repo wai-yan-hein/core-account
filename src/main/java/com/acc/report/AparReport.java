@@ -12,7 +12,6 @@ import com.acc.common.GLTableCellRender;
 import com.acc.editor.COAAutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.TraderAAutoCompleter;
-import com.acc.model.Gl;
 import com.acc.model.ReportFilter;
 import com.acc.model.TraderA;
 import com.acc.model.VApar;
@@ -174,8 +173,8 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         dialog.setAccountApi(accountApi);
         dialog.setAccountRepo(accountRepo);
         dialog.setCoaCode(coaCode);
-        dialog.setStDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), "dd/MM/yyyy"));
-        dialog.setEndDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), "dd/MM/yyyy"));
+        dialog.setStDate(dateAutoCompleter.getStDate());
+        dialog.setEndDate(dateAutoCompleter.getEndDate());
         dialog.setCurCode(curCode);
         dialog.setDesp(traderName);
         dialog.setTraderCode(traderCode);
@@ -215,7 +214,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
                     .bodyToMono(ReturnObject.class);
             result.subscribe((t) -> {
                 try {
-                    String path = "temp/ARAP"+Global.macId;
+                    String path = "temp/ARAP" + Global.macId;
                     Util1.extractZipToJson(t.getFile(), path);
                     Reader reader = Files.newBufferedReader(Paths.get(path.concat(".json")));
                     List<VApar> list = gson.fromJson(reader, new TypeToken<ArrayList<VApar>>() {
