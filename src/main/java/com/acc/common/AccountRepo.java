@@ -13,11 +13,12 @@ import com.acc.model.Gl;
 import com.acc.model.GlKey;
 import com.acc.model.OpeningBalance;
 import com.acc.model.ReportFilter;
+import com.acc.model.StockOP;
 import com.acc.model.TmpOpening;
 import com.acc.model.TraderA;
 import com.acc.model.VDescription;
 import com.acc.model.VRef;
-import com.acc.model.VTranSource;
+import com.acc.report.StockOPKey;
 import com.common.FilterObject;
 import com.common.Global;
 import com.common.ReturnObject;
@@ -25,7 +26,6 @@ import com.common.Util1;
 import java.time.Duration;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -171,10 +171,19 @@ public class AccountRepo {
         return result.block(Duration.ofMinutes(min));
     }
 
-    public boolean deleteGl(GlKey gl) {
+    public boolean delete(GlKey key) {
         Mono<Boolean> result = accountApi.post()
                 .uri("/account/delete-gl")
-                .body(Mono.just(gl), GlKey.class)
+                .body(Mono.just(key), GlKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
+    public boolean delete(StockOPKey key) {
+        Mono<Boolean> result = accountApi.post()
+                .uri("/account/delete-stock-op")
+                .body(Mono.just(key), StockOPKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class);
         return result.block(Duration.ofMinutes(min));
@@ -285,6 +294,15 @@ public class AccountRepo {
                 .retrieve()
                 .toEntityList(TmpOpening.class);
         return result.block().getBody();
+    }
+
+    public StockOP save(StockOP op) {
+        Mono<StockOP> result = accountApi.post()
+                .uri("/account/save-stock-op")
+                .body(Mono.just(op), StockOP.class)
+                .retrieve()
+                .bodyToMono(StockOP.class);
+        return result.block();
     }
 
 }

@@ -9,6 +9,7 @@ import com.CvInventoryApplication;
 import com.acc.common.AccountRepo;
 import com.acc.entry.AllCash;
 import com.acc.entry.Journal;
+import com.acc.entry.JournalClosingStock;
 import com.acc.report.AparReport;
 import com.acc.report.FinancialReport;
 import com.acc.report.GLReport;
@@ -75,8 +76,6 @@ import com.user.setup.CloudConfig;
 import com.user.setup.CompanySetup;
 import java.time.Duration;
 import java.util.HashMap;
-import net.sf.jasperreports.engine.DefaultJasperReportsContext;
-import net.sf.jasperreports.engine.JasperReportsContext;
 import org.springframework.core.task.TaskExecutor;
 
 /**
@@ -147,6 +146,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private FinancialReport financialReport;
     @Autowired
     private Journal journal;
+    @Autowired
+    private JournalClosingStock journalClosingStock;
     @Autowired
     private COAOpening coaOpening;
 //user
@@ -508,6 +509,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 journal.setProgress(progress);
                 journal.initMain();
                 return journal;
+            }
+             case "Journal Stock Closing" -> {
+                journalClosingStock.setName(menuName);
+                journalClosingStock.setObserver(this);
+                journalClosingStock.setProgress(progress);
+                journalClosingStock.initMain();
+                return journalClosingStock;
             }
             default -> {
                 switch (cName) {

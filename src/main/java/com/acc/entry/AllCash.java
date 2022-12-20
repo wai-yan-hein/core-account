@@ -326,7 +326,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblCash.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblCash.getActionMap().put(solve, actionDelete);
-
     }
 
     private void initPopup() {
@@ -364,7 +363,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 yes_no = JOptionPane.showConfirmDialog(Global.parentForm, "Are you sure to delete?",
                         "Delete", JOptionPane.YES_NO_OPTION);
                 if (yes_no == 0) {
-                    if (accountRepo.deleteGl(vgl.getKey())) {
+                    if (accountRepo.delete(vgl.getKey())) {
                         allCashTableModel.deleteVGl(selectRow);
                     }
                     calDebitCredit();

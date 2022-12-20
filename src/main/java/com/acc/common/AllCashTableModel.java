@@ -201,8 +201,9 @@ public class AllCashTableModel extends AbstractTableModel {
                         if (Util1.isValidDateFormat(value.toString(), "dd/MM/yyyy")) {
                             gl.setGlDate(Util1.toDate(value, "dd/MM/yyyy"));
                         } else {
-                            if (value.toString().length() == 8) {
-                                String toFormatDate = Util1.toFormatDate(value.toString());
+                            int length = value.toString().length();
+                            if (length == 8 || length == 6) {
+                                String toFormatDate = Util1.toFormatDate(value.toString(), length);
                                 gl.setGlDate(Util1.toDate(toFormatDate, "dd/MM/yyyy"));
                             } else {
                                 gl.setGlDate(Util1.getTodayDate());

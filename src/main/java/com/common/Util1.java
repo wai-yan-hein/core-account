@@ -652,11 +652,6 @@ public class Util1 {
 
     }
 
-    public static String toFormatDate(String obj) {
-        String[] arr = obj.split("(?<=\\G.{2})");
-        return arr[0] + "/" + arr[1] + "/" + arr[2] + arr[3];
-    }
-
     public static String getString(boolean value) {
         return value ? "true" : "false";
     }

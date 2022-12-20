@@ -6,26 +6,35 @@ package com.acc.entry;
 
 import com.acc.common.AccountRepo;
 import com.acc.common.DateAutoCompleter;
-import com.acc.common.JournalTableModel;
+import com.acc.common.JournalClosingStockTableModel;
 import com.acc.dialog.JournalEntryDialog;
+import com.acc.editor.COA3CellEditor;
+import com.acc.editor.CurrencyAAutoCompleter;
+import com.acc.editor.CurrencyAEditor;
 import com.acc.editor.DepartmentAutoCompleter;
-import com.acc.model.Gl;
+import com.acc.editor.DepartmentCellEditor;
+import com.acc.model.Department;
+import com.acc.model.StockOP;
 import com.common.Global;
 import com.acc.model.ReportFilter;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.model.Currency;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.KeyEvent;
 import java.util.List;
-import javax.swing.ImageIcon;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
+import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -40,17 +49,19 @@ import reactor.core.publisher.Mono;
 @Component
 public class JournalClosingStock extends javax.swing.JPanel implements SelectionObserver, PanelControl {
 
-    private final JournalTableModel tableModel = new JournalTableModel();
+    private final JournalClosingStockTableModel tableModel = new JournalClosingStockTableModel();
     private DateAutoCompleter dateAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
+    private CurrencyAAutoCompleter currencyAAutoCompleter;
     private JProgressBar progress;
     private SelectionObserver observer;
     private final JournalEntryDialog dialog = new JournalEntryDialog();
-    private int selectRow = 0;
     @Autowired
     private AccountRepo accountRepo;
     @Autowired
     private WebClient accountApi;
+    private List<Department> listDep;
+    private List<Currency> listCurrency;
 
     public JProgressBar getProgress() {
         return progress;
@@ -74,6 +85,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
     public JournalClosingStock() {
         initComponents();
         initListener();
+        actionMapping();
     }
 
     public void initMain() {
@@ -84,15 +96,9 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
 
     private void initListener() {
         txtDep.addFocusListener(fa);
-        txtRefrence.addFocusListener(fa);
-        txtDesp.addFocusListener(fa);
-        txtVouNo.addFocusListener(fa);
-        txtRefrence.addActionListener(action);
-        txtDesp.addActionListener(action);
+        txtCur.addFocusListener(fa);
     }
-    private final ActionListener action = (ActionEvent e) -> {
-        searchJournal();
-    };
+
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusGained(FocusEvent e) {
@@ -102,25 +108,57 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         }
     };
 
+    private void actionMapping() {
+        String solve = "delete";
+        KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
+        tblJournal.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
+        tblJournal.getActionMap().put(solve, actionDelete);
+    }
+    private final Action actionDelete = new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            deleteVoucher();
+        }
+    };
+
+    private void deleteVoucher() {
+        int selectRow = tblJournal.convertRowIndexToModel(tblJournal.getSelectedRow());
+        int yes_no;
+        if (tblJournal.getSelectedRow() >= 0) {
+            StockOP op = tableModel.getGl(selectRow);
+            if (op.getKey().getTranCode() != null) {
+                yes_no = JOptionPane.showConfirmDialog(Global.parentForm, "Are you sure to delete?",
+                        "Delete", JOptionPane.YES_NO_OPTION);
+                if (yes_no == 0) {
+                    if (accountRepo.delete(op.getKey())) {
+                        tableModel.delete(selectRow);
+                        focusOnTable();
+                    }
+                }
+            }
+        }
+
+    }
+
     private void searchJournal() {
         progress.setIndeterminate(true);
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
         filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
         filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
-        filter.setListDepartment(departmentAutoCompleter.getListOption());
-        filter.setDesp(txtDesp.getText());
-        filter.setReference(txtRefrence.getText());
-        filter.setGlVouNo(txtVouNo.getText());
-        Mono<ResponseEntity<List<Gl>>> result = accountApi
+        filter.setDeptCode(departmentAutoCompleter.getDepartment().getKey().getDeptCode());
+        filter.setCurCode(currencyAAutoCompleter.getCurrency().getCurCode());
+        Mono<ResponseEntity<List<StockOP>>> result = accountApi
                 .post()
-                .uri("/account/search-journal")
+                .uri("/account/search-stock-op")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .toEntityList(Gl.class);
+                .toEntityList(StockOP.class);
         result.subscribe((t) -> {
             tableModel.setListGV(t.getBody());
+            tableModel.addNewRow();
             lblCount.setText(tableModel.getListSize() + "");
             progress.setIndeterminate(false);
+            focusOnTable();
         });
     }
 
@@ -136,37 +174,53 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
     }
 
     private void initCompleter() {
+        listDep = accountRepo.getDepartment();
+        listCurrency = accountRepo.getCurrency();
         dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
         dateAutoCompleter.setSelectionObserver(this);
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, accountRepo.getDepartment(), null, true, true);
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, listDep, null, true, false);
         departmentAutoCompleter.setObserver(this);
+        currencyAAutoCompleter = new CurrencyAAutoCompleter(txtCur, listCurrency, null, true);
+        currencyAAutoCompleter.setSelectionObserver(this);
+
     }
 
     private void initTable() {
+        tableModel.setParent(tblJournal);
+        tableModel.setDepartment(accountRepo.getDefaultDepartment());
+        tableModel.setAccountRepo(accountRepo);
         tblJournal.setModel(tableModel);
-        tblJournal.getTableHeader().setFont(Global.lableFont);
+        tblJournal.getTableHeader().setFont(Global.tblHeaderFont);
+        tblJournal.setRowHeight(Global.tblRowHeight);
         tblJournal.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblJournal.getColumnModel().getColumn(0).setPreferredWidth(5);//Date
-        tblJournal.getColumnModel().getColumn(1).setPreferredWidth(50);//Vou
-        tblJournal.getColumnModel().getColumn(2).setPreferredWidth(400);//Ref
+        tblJournal.getColumnModel().getColumn(1).setPreferredWidth(1);//Vou
+        tblJournal.getColumnModel().getColumn(2).setPreferredWidth(5);//Ref
         tblJournal.getColumnModel().getColumn(3).setPreferredWidth(400);//Ref
-        tblJournal.getColumnModel().getColumn(4).setPreferredWidth(50);//Ref
-        tblJournal.setDefaultRenderer(Object.class, new TableCellRender());
-        tblJournal.setDefaultRenderer(Double.class, new TableCellRender());
-        tblJournal.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-                    if (tblJournal.getSelectedRow() >= 0) {
-                        selectRow = tblJournal.convertRowIndexToModel(tblJournal.getSelectedRow());
-                        Gl vGl = tableModel.getGl(selectRow);
-                        openJournalEntryDialog(vGl.getGlVouNo(), "EDIT");
-                    }
-                }
-            }
+        tblJournal.getColumnModel().getColumn(4).setPreferredWidth(1);//Ref
+        tblJournal.getColumnModel().getColumn(5).setPreferredWidth(100);//amt
+        tblJournal.setShowGrid(true);
+        tblJournal.setCellSelectionEnabled(true);
+        tblJournal.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
+        tblJournal.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
+        tblJournal.getColumnModel().getColumn(1).setCellEditor(new DepartmentCellEditor(listDep));
+        tblJournal.getColumnModel().getColumn(2).setCellEditor(new COA3CellEditor(accountRepo, 3));
+        tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountRepo, 3));
+        tblJournal.getColumnModel().getColumn(4).setCellEditor(new CurrencyAEditor(listCurrency));
+        tblJournal.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
 
-        });
+    }
 
+    private void focusOnTable() {
+        int rc = tblJournal.getRowCount();
+        if (rc > 1) {
+            tblJournal.setRowSelectionInterval(rc - 1, rc - 1);
+            tblJournal.setColumnSelectionInterval(0, 0);
+            tblJournal.requestFocus();
+        } else {
+            txtDate.requestFocusInWindow();
+        }
     }
 
     /**
@@ -185,16 +239,11 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         tblJournal = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        txtVouNo = new javax.swing.JTextField();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        txtRefrence = new javax.swing.JTextField();
-        btnEntry = new javax.swing.JButton();
         txtDate = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         txtDep = new javax.swing.JTextField();
-        jLabel6 = new javax.swing.JLabel();
-        txtDesp = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
+        txtCur = new javax.swing.JTextField();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -253,35 +302,6 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("Date");
 
-        txtVouNo.setFont(Global.shortCutFont);
-        txtVouNo.setName("txtVouNo"); // NOI18N
-
-        jLabel3.setFont(Global.lableFont);
-        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel3.setText("Voucher No");
-
-        jLabel4.setFont(Global.lableFont);
-        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel4.setText("Refrence");
-
-        txtRefrence.setFont(Global.shortCutFont);
-        txtRefrence.setName("txtRefrence"); // NOI18N
-        txtRefrence.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtRefrenceActionPerformed(evt);
-            }
-        });
-
-        btnEntry.setFont(Global.lableFont);
-        btnEntry.setText("New Journal");
-        btnEntry.setToolTipText("New Journal");
-        btnEntry.setName("btnEntry"); // NOI18N
-        btnEntry.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnEntryActionPerformed(evt);
-            }
-        });
-
         txtDate.setFont(Global.textFont);
 
         jLabel2.setFont(Global.lableFont);
@@ -290,17 +310,11 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
 
         txtDep.setFont(Global.textFont);
 
-        jLabel6.setFont(Global.lableFont);
-        jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel6.setText("Description");
+        jLabel7.setFont(Global.lableFont);
+        jLabel7.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel7.setText("Currency");
 
-        txtDesp.setFont(Global.shortCutFont);
-        txtDesp.setName("txtRefrence"); // NOI18N
-        txtDesp.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtDespActionPerformed(evt);
-            }
-        });
+        txtCur.setFont(Global.textFont);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -315,40 +329,23 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtDep)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtVouNo)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtRefrence)
+                .addComponent(jLabel7)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel6)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtDesp)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnEntry)
+                .addComponent(txtCur)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel3)
-                        .addComponent(jLabel4)
-                        .addComponent(txtRefrence, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel6)
-                        .addComponent(txtDesp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtCur, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -359,9 +356,9 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 932, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -382,38 +379,20 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         observer.selected("control", this);
     }//GEN-LAST:event_formComponentShown
 
-    private void txtRefrenceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtRefrenceActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtRefrenceActionPerformed
-
-    private void btnEntryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEntryActionPerformed
-        // TODO add your handling code here:
-        openJournalEntryDialog("-", "NEW");
-    }//GEN-LAST:event_btnEntryActionPerformed
-
-    private void txtDespActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtDespActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtDespActionPerformed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnEntry;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblCount;
     private javax.swing.JTable tblJournal;
+    private javax.swing.JTextField txtCur;
     private javax.swing.JTextField txtDate;
     private javax.swing.JTextField txtDep;
-    private javax.swing.JTextField txtDesp;
-    private javax.swing.JTextField txtRefrence;
-    private javax.swing.JTextField txtVouNo;
     // End of variables declaration//GEN-END:variables
 
     @Override
@@ -429,6 +408,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
 
     @Override
     public void delete() {
+        deleteVoucher();
     }
 
     @Override

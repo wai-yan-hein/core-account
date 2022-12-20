@@ -280,7 +280,7 @@ public class DatePickerDialog extends javax.swing.JDialog implements KeyListener
                         if (sourceObj != null) {
                             String date = ((JTextFieldDateEditor) sourceObj).getText();
                             if (date.length() == 8) {
-                                String toFormatDate = Util1.toFormatDate(date);
+                                String toFormatDate = Util1.toFormatDate(date,date.length());
                                 txtFromDate.setDate(Util1.toDate(toFormatDate, "dd/MM/yyyy"));
                             }
                         }
@@ -302,7 +302,7 @@ public class DatePickerDialog extends javax.swing.JDialog implements KeyListener
                         if (sourceObj != null) {
                             String date = ((JTextFieldDateEditor) sourceObj).getText();
                             if (date.length() == 8) {
-                                String toFormatDate = Util1.toFormatDate(date);
+                                String toFormatDate = Util1.toFormatDate(date,date.length());
                                 txtToDate.setDate(Util1.toDate(toFormatDate, "dd/MM/yyyy"));
                             }
                         }
