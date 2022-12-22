@@ -9,6 +9,7 @@ import com.acc.common.DateAutoCompleter;
 import com.acc.common.JournalTableModel;
 import com.acc.dialog.JournalEntryDialog;
 import com.acc.editor.DepartmentAutoCompleter;
+import com.acc.model.DeleteObj;
 import com.acc.model.Gl;
 import com.common.Global;
 import com.acc.model.ReportFilter;
@@ -20,12 +21,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
-import javax.swing.ImageIcon;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
+import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -74,12 +80,60 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     public Journal() {
         initComponents();
         initListener();
+        actionMapping();
     }
 
     public void initMain() {
         initCompleter();
         initTable();
         searchJournal();
+    }
+
+    private void actionMapping() {
+        String solve = "delete";
+        KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
+        tblJournal.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
+        tblJournal.getActionMap().put(solve, actionDelete);
+    }
+    private final Action actionDelete = new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            deleteVoucher();
+        }
+    };
+
+    private void deleteVoucher() {
+        selectRow = tblJournal.convertRowIndexToModel(tblJournal.getSelectedRow());
+        int yes_no;
+        if (tblJournal.getSelectedRow() >= 0) {
+            Gl gl = tableModel.getGl(selectRow);
+            String glVouNo = gl.getGlVouNo();
+            if (glVouNo != null) {
+                yes_no = JOptionPane.showConfirmDialog(Global.parentForm, "Are you sure to delete journal?",
+                        "Delete", JOptionPane.YES_NO_OPTION);
+                if (yes_no == 0) {
+                    DeleteObj obj = new DeleteObj();
+                    obj.setGlVouNo(glVouNo);
+                    obj.setCompCode(Global.compCode);
+                    obj.setModifyBy(Global.loginUser.getUserCode());
+                    if (accountRepo.deleteJouranl(obj)) {
+                        tableModel.delete(selectRow);
+                        focusOnTable();
+                    }
+                }
+            }
+        }
+    }
+
+    private void focusOnTable() {
+        int rc = tblJournal.getRowCount();
+        if (rc > 1) {
+            tblJournal.setRowSelectionInterval(rc - 1, rc - 1);
+            tblJournal.setColumnSelectionInterval(0, 0);
+            tblJournal.requestFocus();
+        } else {
+            txtDate.requestFocusInWindow();
+        }
     }
 
     private void initListener() {
@@ -429,6 +483,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
 
     @Override
     public void delete() {
+        deleteVoucher();
     }
 
     @Override

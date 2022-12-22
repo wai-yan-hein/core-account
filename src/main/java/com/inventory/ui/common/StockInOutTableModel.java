@@ -154,7 +154,7 @@ public class StockInOutTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 3,5,7,8 ->
+            case 3, 5, 7, 8 ->
                 Float.class;
             default ->
                 String.class;
@@ -172,7 +172,7 @@ public class StockInOutTableModel extends AbstractTableModel {
         try {
             if (value != null) {
                 switch (column) {
-                    case 0,1 -> {
+                    case 0, 1 -> {
                         if (value instanceof Stock s) {
                             io.setStockCode(s.getKey().getStockCode());
                             io.setStockName(s.getStockName());
@@ -186,7 +186,11 @@ public class StockInOutTableModel extends AbstractTableModel {
                                 io.setLocCode(l.getKey().getLocCode());
                                 io.setLocName(l.getLocName());
                             }
-                            genPattern(s, io);
+                            boolean disable = Util1.getBoolean(ProUtil.getProperty("disable.pattern.stockio"));
+                            if (!disable) {
+                                float costPrice = genPattern(s, io);
+                                io.setCostPrice(costPrice);
+                            }
                             setColumnSelection(3);
                         }
                         addNewRow();
@@ -250,14 +254,16 @@ public class StockInOutTableModel extends AbstractTableModel {
                 }
             }
             if (column != 7) {
-                if (io.getStockCode() != null) {
-                    if (io.getInUnitCode() != null || io.getOutUnitCode() != null) {
-                        String unit = Util1.isNull(io.getInUnitCode(), io.getOutUnitCode());
-                        io.setCostPrice(inventoryRepo.getPurRecentPrice(io.getStockCode(),
-                                Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), unit));
-                        if (io.getCostPrice() == 0) {
-                            io.setCostPrice(inventoryRepo.getStockIORecentPrice(io.getStockCode(),
+                if (Util1.getFloat(io.getCostPrice()) == 0) {
+                    if (io.getStockCode() != null) {
+                        if (io.getInUnitCode() != null || io.getOutUnitCode() != null) {
+                            String unit = Util1.isNull(io.getInUnitCode(), io.getOutUnitCode());
+                            io.setCostPrice(inventoryRepo.getPurRecentPrice(io.getStockCode(),
                                     Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), unit));
+                            if (io.getCostPrice() == 0) {
+                                io.setCostPrice(inventoryRepo.getStockIORecentPrice(io.getStockCode(),
+                                        Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), unit));
+                            }
                         }
                     }
                 }
@@ -275,46 +281,49 @@ public class StockInOutTableModel extends AbstractTableModel {
         lblRec.setText("Records : " + size);
     }
 
-    private void genPattern(Stock s, StockInOutDetail iod) {
-        boolean disable = Util1.getBoolean(ProUtil.getProperty("disable.pattern.stockio"));
-        if (!disable) {
-            String stockCode = s.getKey().getStockCode();
-            boolean explode = s.isExplode();
-            List<Pattern> patterns = inventoryRepo.getPattern(stockCode, s.getKey().getDeptId());
-            if (!patterns.isEmpty()) {
-                String input = JOptionPane.showInputDialog("Enter Qty.");
-                if (Util1.isPositive(input)) {
-                    float qty = Util1.getFloat(input);
-                    patterns.forEach((p) -> {
-                        StockInOutDetail io = new StockInOutDetail();
-                        io.setUserCode(p.getUserCode());
-                        if (explode) {
-                            io.setInQty(qty * p.getQty());
-                            io.setInUnitCode(p.getUnitCode());
-                        } else {
-                            io.setOutQty(qty * p.getQty());
-                            io.setOutUnitCode(p.getUnitCode());
-                        }
-                        io.setCostPrice(Util1.getFloat(p.getPrice()));
-                        io.setStockCode(p.getKey().getStockCode());
-                        io.setLocCode(p.getLocCode());
-                        io.setLocName(p.getLocName());
-                        io.setStockName(p.getStockName());
-                        addStockIO(io);
-                    });
+    private float genPattern(Stock s, StockInOutDetail iod) {
+        String stockCode = s.getKey().getStockCode();
+        boolean explode = s.isExplode();
+        List<Pattern> patterns = inventoryRepo.getPattern(stockCode, s.getKey().getDeptId());
+        if (!patterns.isEmpty()) {
+            String input = JOptionPane.showInputDialog("Enter Qty.");
+            if (Util1.isPositive(input)) {
+                float totalPrice = 0.0f;
+                float qty = Util1.getFloat(input);
+                for (Pattern p : patterns) {
+                    StockInOutDetail io = new StockInOutDetail();
+                    io.setUserCode(p.getUserCode());
                     if (explode) {
-                        iod.setOutQty(qty);
-                        iod.setOutUnitCode(s.getPurUnitCode());
-                        iod.setInUnitCode(null);
+                        io.setInQty(qty * p.getQty());
+                        io.setInUnitCode(p.getUnitCode());
                     } else {
-                        iod.setInQty(qty);
-                        iod.setInUnitCode(s.getPurUnitCode());
-                        iod.setOutUnitCode(null);
+                        io.setOutQty(qty * p.getQty());
+                        io.setOutUnitCode(p.getUnitCode());
                     }
-                    setRecord(listStock.size());
+                    float costPrice = Util1.getFloat(p.getPrice());
+                    io.setCostPrice(costPrice);
+                    io.setStockCode(p.getKey().getStockCode());
+                    io.setLocCode(p.getLocCode());
+                    io.setLocName(p.getLocName());
+                    io.setStockName(p.getStockName());
+                    addStockIO(io);
+                    totalPrice += costPrice;
                 }
+                if (explode) {
+                    iod.setOutQty(qty);
+                    iod.setOutUnitCode(s.getPurUnitCode());
+                    iod.setInUnitCode(null);
+                } else {
+                    iod.setInQty(qty);
+                    iod.setInUnitCode(s.getPurUnitCode());
+                    iod.setOutUnitCode(null);
+                }
+                setRecord(listStock.size());
+                return totalPrice;
             }
         }
+
+        return 0.0f;
     }
 
     public List<String> getDeleteList() {

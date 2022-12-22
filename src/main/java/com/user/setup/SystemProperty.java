@@ -147,6 +147,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtDep.setName("default.department");
         chkDepFilter.setName("department.filter");
         chkDepOption.setName("department.option");
+        chkPriceOption.setName("sale.price.option");
     }
 
     private void initProperty() {
@@ -201,6 +202,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkDisableStockIO.addActionListener(action);
         chkDepFilter.addActionListener(action);
         chkDepOption.addActionListener(action);
+        chkPriceOption.addActionListener(action);
         //txt
         txtA4Report.addActionListener(action);
         txtA5Report.addActionListener(action);
@@ -258,6 +260,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkDisableStockIO.setSelected(Util1.getBoolean(hmProperty.get("disable.pattern.stockio")));
         chkDepFilter.setSelected(Util1.getBoolean(hmProperty.get(chkDepFilter.getName())));
         chkDepOption.setSelected(Util1.getBoolean(hmProperty.get(chkDepOption.getName())));
+        chkPriceOption.setSelected(Util1.getBoolean(hmProperty.get(chkPriceOption.getName())));
     }
 
     private void initTextBox() {
@@ -416,6 +419,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkVouEdit = new javax.swing.JCheckBox();
         chkPriceChange = new javax.swing.JCheckBox();
         chkBalance = new javax.swing.JCheckBox();
+        chkPriceOption = new javax.swing.JCheckBox();
         jPanel3 = new javax.swing.JPanel();
         chkPurVouEdit = new javax.swing.JCheckBox();
         jSeparator4 = new javax.swing.JSeparator();
@@ -640,6 +644,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         chkBalance.setText("Trader Balance");
 
+        chkPriceOption.setText("Price Option");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -667,7 +673,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                             .addComponent(txtA4Report)))
                     .addComponent(chkVouEdit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkPriceChange, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkBalance, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(chkBalance, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(chkPriceOption, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -682,6 +689,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addComponent(chkSLP)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkCalStock)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkPriceOption)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkPricePopup)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -933,6 +942,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JCheckBox chkDisableSale;
     private javax.swing.JCheckBox chkDisableStockIO;
     private javax.swing.JCheckBox chkPriceChange;
+    private javax.swing.JCheckBox chkPriceOption;
     private javax.swing.JCheckBox chkPricePopup;
     private javax.swing.JCheckBox chkPrint;
     private javax.swing.JCheckBox chkPurVouEdit;

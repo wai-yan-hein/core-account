@@ -45,6 +45,7 @@ public class Gl {
     private String traderName;
     private String srcAccName;
     private String accName;
+    private boolean edit;
 
     public Gl(String curCode, Double drAmt, Double crAmt) {
         this.curCode = curCode;

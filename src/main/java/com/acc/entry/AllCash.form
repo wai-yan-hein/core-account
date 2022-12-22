@@ -34,10 +34,13 @@
                       <Component id="jScrollPane2" pref="563" max="32767" attributes="0"/>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="jScrollPane4" pref="563" max="32767" attributes="0"/>
                           <Component id="panelDate" max="32767" attributes="0"/>
+                          <Group type="102" attributes="0">
+                              <Component id="chkSummary" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                          </Group>
                       </Group>
-                      <EmptySpace min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="jScrollPane1" pref="563" max="32767" attributes="0"/>
                   </Group>
                   <Component id="jPanel1" alignment="0" max="32767" attributes="0"/>
@@ -60,7 +63,7 @@
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="panelDate" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jScrollPane4" pref="0" max="32767" attributes="0"/>
+                      <Component id="chkSummary" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -129,28 +132,6 @@
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
       <SubComponents>
         <Component class="javax.swing.JTable" name="tblCashOP">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.shortCutFont" type="code"/>
-            </Property>
-            <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-              <Table columnCount="0" rowCount="0"/>
-            </Property>
-            <Property name="rowHeight" type="int" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.tblRowHeight" type="code"/>
-            </Property>
-          </Properties>
-        </Component>
-      </SubComponents>
-    </Container>
-    <Container class="javax.swing.JScrollPane" name="jScrollPane4">
-      <AuxValues>
-        <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
-      </AuxValues>
-
-      <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
-      <SubComponents>
-        <Component class="javax.swing.JTable" name="tblCurrency">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.shortCutFont" type="code"/>
@@ -452,7 +433,7 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+              <EmptySpace min="0" pref="561" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
@@ -462,5 +443,16 @@
         </DimensionLayout>
       </Layout>
     </Container>
+    <Component class="javax.swing.JCheckBox" name="chkSummary">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="Global.lableFont" type="code"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Summary Mode"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkSummaryActionPerformed"/>
+      </Events>
+    </Component>
   </SubComponents>
 </Form>

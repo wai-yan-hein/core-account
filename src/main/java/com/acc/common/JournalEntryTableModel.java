@@ -17,6 +17,7 @@ import com.user.model.Currency;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFormattedTextField;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -33,27 +34,27 @@ public class JournalEntryTableModel extends AbstractTableModel {
     private List<Gl> listGV = new ArrayList();
     private final String[] columnNames = {"Dept:", "Descripiton", "Cus / Sup", "Account", "Currency", "Dr-Amt", "Cr-Amt"};
     private JTable parent;
-    private List<GlKey> delList = new ArrayList<>();
+    private List<String> delList = new ArrayList<>();
     JFormattedTextField ttlCrdAmt;
     JFormattedTextField ttlDrAmt;
     private JTextField txtRef;
     private AccountRepo accountRepo;
-    private boolean change = false;
+    private boolean edit =false;
 
-    public List<GlKey> getDelList() {
+    public boolean isEdit() {
+        return edit;
+    }
+
+    public void setEdit(boolean edit) {
+        this.edit = edit;
+    }
+
+    public List<String> getDelList() {
         return delList;
     }
 
-    public void setDelList(List<GlKey> delList) {
+    public void setDelList(List<String> delList) {
         this.delList = delList;
-    }
-
-    public boolean isChange() {
-        return change;
-    }
-
-    public void setChange(boolean change) {
-        this.change = change;
     }
 
     public JTextField getTxtRef() {
@@ -230,8 +231,9 @@ public class JournalEntryTableModel extends AbstractTableModel {
                 if (Util1.isNullOrEmpty(gv.getDescription())) {
                     gv.setDescription(txtRef.getText());
                 }
+                edit =true;
+                log.info("edit.");
                 calTotalAmt();
-                change();
                 fireTableRowsUpdated(row, row);
                 parent.requestFocusInWindow();
             }
@@ -242,10 +244,6 @@ public class JournalEntryTableModel extends AbstractTableModel {
 
     public Gl getVGl(int row) {
         return listGV.get(row);
-    }
-
-    private void change() {
-        change = true;
     }
 
     @Override
@@ -377,6 +375,7 @@ public class JournalEntryTableModel extends AbstractTableModel {
         if (listGV != null) {
             listGV.clear();
             delList.clear();
+            edit = false;
             fireTableDataChanged();
         }
     }
@@ -403,7 +402,7 @@ public class JournalEntryTableModel extends AbstractTableModel {
                 int status = JOptionPane.showConfirmDialog(parent,
                         "Are you sure to delete transaction.", "Delete Transaction", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (status == JOptionPane.YES_OPTION) {
-                    delList.add(vgl.getKey());
+                    delList.add(vgl.getKey().getGlCode());
                     listGV.remove(row);
                     fireTableRowsDeleted(row, row);
                     calTotalAmt();

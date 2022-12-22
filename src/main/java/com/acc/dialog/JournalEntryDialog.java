@@ -190,7 +190,12 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
 
     private boolean saveGeneralVoucher() {
         if (isValidEntry() && isValidData()) {
-            ReturnObject ro = accountRepo.saveGl(journalTablModel.getListGV());
+            List<Gl> list = journalTablModel.getListGV();
+            if (lblStatus.getText().equals("EDIT")) {
+                list.get(0).setEdit(journalTablModel.isEdit());
+                list.get(0).setDelList(journalTablModel.getDelList());
+            }
+            ReturnObject ro = accountRepo.saveGl(list);
             if (ro != null) {
                 clear();
             }
@@ -202,6 +207,9 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         for (Gl g : journalTablModel.getListGV()) {
             g.setGlDate(txtVouDate.getDate());
             g.setMacId(Global.macId);
+            if (lblStatus.getText().equals("EDIT")) {
+                g.setModifyBy(Global.loginUser.getUserCode());
+            }
             if (g.getSrcAccCode() != null) {
                 if (g.getDeptCode() == null) {
                     JOptionPane.showMessageDialog(tblJournal, "Invalid Department.");
@@ -656,7 +664,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                     }
                     txtRefrence.requestFocus();
                 }
-                tabToTable(e);
                 break;
             case "txtVouNo":
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_RIGHT) {
@@ -665,7 +672,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                 if (e.getKeyCode() == KeyEvent.VK_LEFT) {
                     txtVouDate.getDateEditor().getUiComponent().requestFocusInWindow();
                 }
-                tabToTable(e);
                 break;
             case "txtRefrence":
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_RIGHT) {
@@ -677,7 +683,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                 if (e.getKeyCode() == KeyEvent.VK_LEFT) {
                     txtVouNo.requestFocus();
                 }
-                tabToTable(e);
                 break;
             case "btnSave":
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_RIGHT) {
@@ -686,22 +691,12 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                 if (e.getKeyCode() == KeyEvent.VK_LEFT) {
                     txtRefrence.requestFocus();
                 }
-                tabToTable(e);
             case "tblJournal":
                 if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
                     txtVouDate.getDateEditor().getUiComponent().requestFocusInWindow();
                 }
                 break;
 
-        }
-    }
-
-    private void tabToTable(KeyEvent e) {
-        if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            tblJournal.requestFocus();
-            if (tblJournal.getRowCount() >= 0) {
-                tblJournal.setRowSelectionInterval(0, 0);
-            }
         }
     }
 

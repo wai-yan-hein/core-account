@@ -6,6 +6,7 @@ package com.acc.common;
 
 import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
+import com.acc.model.DeleteObj;
 import com.user.model.Currency;
 import com.acc.model.Department;
 import com.acc.model.DepartmentKey;
@@ -171,10 +172,19 @@ public class AccountRepo {
         return result.block(Duration.ofMinutes(min));
     }
 
-    public boolean delete(GlKey key) {
+    public boolean delete(DeleteObj obj) {
         Mono<Boolean> result = accountApi.post()
                 .uri("/account/delete-gl")
-                .body(Mono.just(key), GlKey.class)
+                .body(Mono.just(obj), DeleteObj.class)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
+    public boolean deleteJouranl(DeleteObj gl) {
+        Mono<Boolean> result = accountApi.post()
+                .uri("/account/delete-journal")
+                .body(Mono.just(gl), DeleteObj.class)
                 .retrieve()
                 .bodyToMono(Boolean.class);
         return result.block(Duration.ofMinutes(min));

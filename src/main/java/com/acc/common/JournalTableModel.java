@@ -23,6 +23,7 @@ public class JournalTableModel extends AbstractTableModel {
     private List<Gl> listGV = new ArrayList();
     private final String[] columnNames = {"Date", "Voucher No", "Description", "Refrence", "Amount"};
     private JTable parent;
+  
 
     @Override
     public int getRowCount() {
@@ -124,4 +125,10 @@ public class JournalTableModel extends AbstractTableModel {
         return listGV.size();
     }
 
+    public void delete(int row) {
+        if (!listGV.isEmpty()) {
+            listGV.remove(row);
+            fireTableRowsDeleted(row, row);
+        }
+    }
 }

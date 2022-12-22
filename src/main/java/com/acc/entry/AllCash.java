@@ -27,6 +27,7 @@ import com.acc.common.DateAutoCompleter;
 import com.acc.common.DateTableDecorator;
 import com.acc.common.OpeningCellRender;
 import com.acc.model.ChartOfAccount;
+import com.acc.model.DeleteObj;
 import com.user.model.Currency;
 import com.acc.model.Department;
 import com.acc.model.ReportFilter;
@@ -359,11 +360,20 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         int yes_no;
         if (tblCash.getSelectedRow() >= 0) {
             Gl vgl = allCashTableModel.getVGl(selectRow);
-            if (vgl.getKey().getGlCode() != null) {
+            if (vgl.getTranSource().equals("Report")) {
+                return;
+            }
+            String glCode = vgl.getKey().getGlCode();
+            if (glCode != null) {
+                DeleteObj obj = new DeleteObj();
+                obj.setGlCode(glCode);
+                obj.setCompCode(vgl.getKey().getCompCode());
+                obj.setDeptId(vgl.getKey().getDeptId());
+                obj.setModifyBy(Global.loginUser.getUserCode());
                 yes_no = JOptionPane.showConfirmDialog(Global.parentForm, "Are you sure to delete?",
                         "Delete", JOptionPane.YES_NO_OPTION);
                 if (yes_no == 0) {
-                    if (accountRepo.delete(vgl.getKey())) {
+                    if (accountRepo.delete(obj)) {
                         allCashTableModel.deleteVGl(selectRow);
                     }
                     calDebitCredit();
@@ -393,7 +403,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                     double closing = vGl.getCrAmt();
                     p.put("p_opening", opening);
                     p.put("p_closing", closing);
-                    String filePath = String.format(Global.accountRP + "IndividualLedger.jasper");
+                    String rpName = chkSummary.isSelected() ? "IndividualLedgerSummary.jasper" : "IndividualLedger.jasper";
+                    String filePath = String.format(Global.accountRP + rpName);
                     InputStream input = new FileInputStream(new File(path.concat(".json")));
                     JsonDataSource ds = new JsonDataSource(input);
                     JasperPrint js = JasperFillManager.fillReport(filePath, p, ds);
@@ -415,7 +426,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void searchCash() {
-        log.info("search cash book.");
         progress.setIndeterminate(true);
         calOpeningClosing();
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
@@ -437,7 +447,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         filter.setCoaLv1(coaLv1);
         filter.setCoaLv2(coaLv2);
         filter.setAcc(accCode);
-
+        filter.setSummary(chkSummary.isSelected());
         Mono<ReturnObject> result = accountApi.post()
                 .uri("/account/search-gl")
                 .body(Mono.just(filter), ReportFilter.class)
@@ -452,7 +462,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 allCashTableModel.setListVGl(listVGl);
                 allCashTableModel.addNewRow();
                 calDebitCredit();
-                getLatestCurrency();
+                //getLatestCurrency();
                 requestFoucsTable();
                 decorator.refreshButton(filter.getFromDate());
                 progress.setIndeterminate(false);
@@ -471,26 +481,25 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     }
 
-    private void getLatestCurrency() {
-        if (ProUtil.isMultiCur()) {
-            initCurrency();
-        } else {
-            tblCurrency.setVisible(false);
-            jScrollPane4.setBorder(null);
-        }
+    /*  private void getLatestCurrency() {
+    if (ProUtil.isMultiCur()) {
+    initCurrency();
+    } else {
+    tblCurrency.setVisible(false);
+    jScrollPane4.setBorder(null);
     }
-
+    }
+    
     private void initCurrency() {
-        tblCurrency.setModel(curExchangeRateTableModel);
-        tblCurrency.getTableHeader().setFont(Global.tblHeaderFont);
-        tblCurrency.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblCurrency.setFont(Global.shortCutFont);
-        tblCurrency.setCellSelectionEnabled(true);
-        tblCurrency.setDefaultRenderer(Object.class, new TableCellRender());
-        tblCurrency.setDefaultRenderer(Double.class, new TableCellRender());
-        //curExchangeRateTableModel.setListEx(exchangeService.getLatestExchange(Global.compCode, Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd")));
-    }
-
+    tblCurrency.setModel(curExchangeRateTableModel);
+    tblCurrency.getTableHeader().setFont(Global.tblHeaderFont);
+    tblCurrency.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    tblCurrency.setFont(Global.shortCutFont);
+    tblCurrency.setCellSelectionEnabled(true);
+    tblCurrency.setDefaultRenderer(Object.class, new TableCellRender());
+    tblCurrency.setDefaultRenderer(Double.class, new TableCellRender());
+    //curExchangeRateTableModel.setListEx(exchangeService.getLatestExchange(Global.compCode, Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd")));
+    }*/
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -507,8 +516,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tblCIO = new javax.swing.JTable();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblCashOP = new javax.swing.JTable();
-        jScrollPane4 = new javax.swing.JScrollPane();
-        tblCurrency = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
         txtDate = new javax.swing.JFormattedTextField();
         jLabel1 = new javax.swing.JLabel();
@@ -527,6 +534,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         txtOption = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         panelDate = new javax.swing.JPanel();
+        chkSummary = new javax.swing.JCheckBox();
 
         jMenuItem1.setText("jMenuItem1");
 
@@ -573,18 +581,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         ));
         tblCashOP.setRowHeight(Global.tblRowHeight);
         jScrollPane2.setViewportView(tblCashOP);
-
-        tblCurrency.setFont(Global.shortCutFont);
-        tblCurrency.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-
-            }
-        ));
-        tblCurrency.setRowHeight(Global.tblRowHeight);
-        jScrollPane4.setViewportView(tblCurrency);
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -820,12 +816,20 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         panelDate.setLayout(panelDateLayout);
         panelDateLayout.setHorizontalGroup(
             panelDateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addGap(0, 561, Short.MAX_VALUE)
         );
         panelDateLayout.setVerticalGroup(
             panelDateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 33, Short.MAX_VALUE)
         );
+
+        chkSummary.setFont(Global.lableFont);
+        chkSummary.setText("Summary Mode");
+        chkSummary.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkSummaryActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -839,8 +843,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 563, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 563, Short.MAX_VALUE)
-                            .addComponent(panelDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(panelDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(chkSummary)
+                                .addGap(0, 0, Short.MAX_VALUE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 563, Short.MAX_VALUE))
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -860,7 +866,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(panelDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                        .addComponent(chkSummary)))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -997,8 +1003,15 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         // TODO add your handling code here:
     }//GEN-LAST:event_txtOptionActionPerformed
 
+    private void chkSummaryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkSummaryActionPerformed
+        // TODO add your handling code here:
+        chkSummary.setText(chkSummary.isSelected() ? "Summary Mode " : "Detail Mode");
+        searchCash();
+    }//GEN-LAST:event_chkSummaryActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox chkSummary;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -1011,12 +1024,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JPanel panelDate;
     private javax.swing.JTable tblCIO;
     private javax.swing.JTable tblCash;
     private javax.swing.JTable tblCashOP;
-    private javax.swing.JTable tblCurrency;
     private javax.swing.JScrollPane tblScrollPane;
     private javax.swing.JTextField txtAccount;
     private javax.swing.JTextField txtCurrency;
@@ -1120,6 +1131,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     @Override
     public void refresh() {
+        chkSummary.setSelected(false);
+        chkSummary.setText("Detail Mode");
         searchCash();
     }
 

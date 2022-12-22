@@ -380,6 +380,7 @@
                       <Component id="chkVouEdit" max="32767" attributes="0"/>
                       <Component id="chkPriceChange" max="32767" attributes="0"/>
                       <Component id="chkBalance" max="32767" attributes="0"/>
+                      <Component id="chkPriceOption" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -397,6 +398,8 @@
                   <Component id="chkSLP" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="chkCalStock" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="chkPriceOption" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="chkPricePopup" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
@@ -519,6 +522,11 @@
         <Component class="javax.swing.JCheckBox" name="chkBalance">
           <Properties>
             <Property name="text" type="java.lang.String" value="Trader Balance"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="chkPriceOption">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Price Option"/>
           </Properties>
         </Component>
       </SubComponents>
