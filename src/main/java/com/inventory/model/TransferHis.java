@@ -29,4 +29,6 @@ public class TransferHis {
     private List<TransferHisDetail> listTD;
     private List<String> delList;
     private String status;
+    private boolean vouLock;
+
 }

@@ -101,7 +101,7 @@ public class InventoryRepo {
 
     public SaleMan getDefaultSaleMan() {
         String code = Global.hmRoleProperty.get("default.saleman");
-        return findSaleMan(code,Global.deptId);
+        return findSaleMan(code, Global.deptId);
     }
 
     public List<PriceOption> getPriceOption(String option) {
@@ -195,18 +195,21 @@ public class InventoryRepo {
     }
 
     public Trader findTrader(String code, Integer deptId) {
-        TraderKey key = new TraderKey();
-        key.setCode(Util1.isNull(code, "-"));
-        key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
-        Mono<Trader> result = inventoryApi.post()
-                .uri("/setup/find-trader")
-                .body(Mono.just(key), TraderKey.class)
-                .retrieve()
-                .bodyToMono(Trader.class);
-        return result.doOnError((t) -> {
-            log.error(t.getMessage());
-        }).block();
+        try {
+            TraderKey key = new TraderKey();
+            key.setCode(Util1.isNull(code, "-"));
+            key.setCompCode(Global.compCode);
+            key.setDeptId(deptId);
+            Mono<Trader> result = inventoryApi.post()
+                    .uri("/setup/find-trader")
+                    .body(Mono.just(key), TraderKey.class)
+                    .retrieve()
+                    .bodyToMono(Trader.class);
+            return result.block();
+        } catch (Exception e) {
+            log.error("findTrader : " + e.getMessage());
+        }
+        return null;
     }
 
     public TraderGroup findTraderGroup(String code, Integer deptId) {
@@ -415,13 +418,18 @@ public class InventoryRepo {
     }
 
     public List<Location> getLocation() {
-        Mono<ResponseEntity<List<Location>>> result = inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-location")
-                .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", ProUtil.getDepId())
-                .build())
-                .retrieve().toEntityList(Location.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        try {
+            Mono<ResponseEntity<List<Location>>> result = inventoryApi.get()
+                    .uri(builder -> builder.path("/setup/get-location")
+                    .queryParam("compCode", Global.compCode)
+                    .queryParam("deptId", ProUtil.getDepId())
+                    .build())
+                    .retrieve().toEntityList(Location.class);
+            return result.block(Duration.ofMinutes(min)).getBody();
+        } catch (Exception e) {
+            log.error("getLocation : " + e.getMessage());
+        }
+        return null;
     }
 
     public List<Stock> getStock(boolean active) {

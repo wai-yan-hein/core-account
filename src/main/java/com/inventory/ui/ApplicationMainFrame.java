@@ -198,22 +198,46 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 case KeyEvent.KEY_PRESSED -> {
                     if (control != null) {
                         switch (ke.getKeyCode()) {
-                            case KeyEvent.VK_F5 ->
-                                control.save();
-                            case KeyEvent.VK_F6 ->
-                                control.print();
-                            case KeyEvent.VK_F7 ->
-                                control.refresh();
-                            case KeyEvent.VK_F8 ->
-                                control.delete();
-                            case KeyEvent.VK_F9 ->
-                                control.history();
-                            case KeyEvent.VK_F10 ->
-                                control.newForm();
-                            case KeyEvent.VK_F11 ->
-                                logout();
-                            case KeyEvent.VK_F12 ->
-                                control.filter();
+                            case KeyEvent.VK_F5 -> {
+                                if (btnSave.isEnabled()) {
+                                    control.save();
+                                }
+                            }
+                            case KeyEvent.VK_F6 -> {
+                                if (btnPrint.isEnabled()) {
+                                    control.print();
+                                }
+                            }
+                            case KeyEvent.VK_F7 -> {
+                                if (btnRefresh.isEnabled()) {
+                                    control.refresh();
+                                }
+                            }
+                            case KeyEvent.VK_F8 -> {
+                                if (btnDelete.isEnabled()) {
+                                    control.delete();
+                                }
+                            }
+                            case KeyEvent.VK_F9 -> {
+                                if (btnHistory.isEnabled()) {
+                                    control.history();
+                                }
+                            }
+                            case KeyEvent.VK_F10 -> {
+                                if (btnNew.isEnabled()) {
+                                    control.newForm();
+                                }
+                            }
+                            case KeyEvent.VK_F11 -> {
+                                if (btnLogout.isEnabled()) {
+                                    logout();
+                                }
+                            }
+                            case KeyEvent.VK_F12 -> {
+                                if (btnFilter.isEnabled()) {
+                                    control.filter();
+                                }
+                            }
 
                         }
                     }
@@ -510,7 +534,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 journal.initMain();
                 return journal;
             }
-             case "Journal Stock Closing" -> {
+            case "Journal Stock Closing" -> {
                 journalClosingStock.setName(menuName);
                 journalClosingStock.setObserver(this);
                 journalClosingStock.setProgress(progress);
@@ -719,6 +743,18 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             case "menu" -> {
                 initMenu();
             }
+            case "save" -> {
+                btnSave.setEnabled(Util1.getBoolean(selectObj.toString()));
+            }
+            case "delete" -> {
+                btnDelete.setEnabled(Util1.getBoolean(selectObj.toString()));
+            }
+            case "print" -> {
+                btnPrint.setEnabled(Util1.getBoolean(selectObj.toString()));
+            }
+            case "history" -> {
+                btnHistory.setEnabled(Util1.getBoolean(selectObj.toString()));
+            }
         }
     }
 
@@ -734,11 +770,11 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jMenu1 = new javax.swing.JMenu();
         tabMain = new javax.swing.JTabbedPane();
         jToolBar1 = new javax.swing.JToolBar();
-        btnSave1 = new javax.swing.JButton();
+        btnSave = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JToolBar.Separator();
         btnPrint = new javax.swing.JButton();
         jSeparator6 = new javax.swing.JToolBar.Separator();
-        btnNew1 = new javax.swing.JButton();
+        btnRefresh = new javax.swing.JButton();
         jSeparator5 = new javax.swing.JToolBar.Separator();
         btnDelete = new javax.swing.JButton();
         jSeparator2 = new javax.swing.JToolBar.Separator();
@@ -746,11 +782,11 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jSeparator7 = new javax.swing.JToolBar.Separator();
         btnNew = new javax.swing.JButton();
         jSeparator3 = new javax.swing.JToolBar.Separator();
-        btnNew2 = new javax.swing.JButton();
+        btnLogout = new javax.swing.JButton();
         jSeparator8 = new javax.swing.JToolBar.Separator();
         btnFilter = new javax.swing.JButton();
         jSeparator11 = new javax.swing.JToolBar.Separator();
-        btnFilter2 = new javax.swing.JButton();
+        btnExit = new javax.swing.JButton();
         jSeparator9 = new javax.swing.JToolBar.Separator();
         jSeparator4 = new javax.swing.JSeparator();
         progress = new javax.swing.JProgressBar();
@@ -777,18 +813,18 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
         jToolBar1.setFocusable(false);
 
-        btnSave1.setFont(Global.lableFont);
-        btnSave1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/save_18px.png"))); // NOI18N
-        btnSave1.setText("Save - F5");
-        btnSave1.setFocusable(false);
-        btnSave1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnSave1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        btnSave1.addActionListener(new java.awt.event.ActionListener() {
+        btnSave.setFont(Global.lableFont);
+        btnSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/save_18px.png"))); // NOI18N
+        btnSave.setText("Save - F5");
+        btnSave.setFocusable(false);
+        btnSave.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnSave.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSave1ActionPerformed(evt);
+                btnSaveActionPerformed(evt);
             }
         });
-        jToolBar1.add(btnSave1);
+        jToolBar1.add(btnSave);
         jToolBar1.add(jSeparator1);
 
         btnPrint.setFont(Global.lableFont);
@@ -805,18 +841,18 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.add(btnPrint);
         jToolBar1.add(jSeparator6);
 
-        btnNew1.setFont(Global.lableFont);
-        btnNew1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh_18px.png"))); // NOI18N
-        btnNew1.setText("Refresh - F7");
-        btnNew1.setFocusable(false);
-        btnNew1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnNew1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        btnNew1.addActionListener(new java.awt.event.ActionListener() {
+        btnRefresh.setFont(Global.lableFont);
+        btnRefresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh_18px.png"))); // NOI18N
+        btnRefresh.setText("Refresh - F7");
+        btnRefresh.setFocusable(false);
+        btnRefresh.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnRefresh.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnRefresh.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnNew1ActionPerformed(evt);
+                btnRefreshActionPerformed(evt);
             }
         });
-        jToolBar1.add(btnNew1);
+        jToolBar1.add(btnRefresh);
         jToolBar1.add(jSeparator5);
 
         btnDelete.setFont(Global.lableFont);
@@ -861,18 +897,18 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.add(btnNew);
         jToolBar1.add(jSeparator3);
 
-        btnNew2.setFont(Global.lableFont);
-        btnNew2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/logout_rounded_down_18px.png"))); // NOI18N
-        btnNew2.setText("Logout - F11");
-        btnNew2.setFocusable(false);
-        btnNew2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnNew2.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        btnNew2.addActionListener(new java.awt.event.ActionListener() {
+        btnLogout.setFont(Global.lableFont);
+        btnLogout.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/logout_rounded_down_18px.png"))); // NOI18N
+        btnLogout.setText("Logout - F11");
+        btnLogout.setFocusable(false);
+        btnLogout.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnLogout.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnLogout.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnNew2ActionPerformed(evt);
+                btnLogoutActionPerformed(evt);
             }
         });
-        jToolBar1.add(btnNew2);
+        jToolBar1.add(btnLogout);
         jToolBar1.add(jSeparator8);
 
         btnFilter.setFont(Global.lableFont);
@@ -890,18 +926,18 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.add(btnFilter);
         jToolBar1.add(jSeparator11);
 
-        btnFilter2.setFont(Global.lableFont);
-        btnFilter2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/cancel_18px.png"))); // NOI18N
-        btnFilter2.setText("Exit - Alt+F4");
-        btnFilter2.setToolTipText("Filter Bar");
-        btnFilter2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnFilter2.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        btnFilter2.addActionListener(new java.awt.event.ActionListener() {
+        btnExit.setFont(Global.lableFont);
+        btnExit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/cancel_18px.png"))); // NOI18N
+        btnExit.setText("Exit - Alt+F4");
+        btnExit.setToolTipText("Filter Bar");
+        btnExit.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnExit.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnExit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnFilter2ActionPerformed(evt);
+                btnExitActionPerformed(evt);
             }
         });
-        jToolBar1.add(btnFilter2);
+        jToolBar1.add(btnExit);
         jToolBar1.add(jSeparator9);
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
@@ -1019,11 +1055,11 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         assignWindoInfo();
     }//GEN-LAST:event_formComponentShown
 
-    private void btnSave1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSave1ActionPerformed
+    private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         // TODO add your handling code here:
         if (control != null)
             control.save();
-    }//GEN-LAST:event_btnSave1ActionPerformed
+    }//GEN-LAST:event_btnSaveActionPerformed
 
     private void btnHistoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHistoryActionPerformed
         // TODO add your handling code here:
@@ -1050,17 +1086,17 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             control.print();
     }//GEN-LAST:event_btnPrintActionPerformed
 
-    private void btnNew1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNew1ActionPerformed
+    private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
         // TODO add your handling code here:
         if (control != null) {
             control.refresh();
         }
-    }//GEN-LAST:event_btnNew1ActionPerformed
+    }//GEN-LAST:event_btnRefreshActionPerformed
 
-    private void btnNew2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNew2ActionPerformed
+    private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
         // TODO add your handling code here:
         logout();
-    }//GEN-LAST:event_btnNew2ActionPerformed
+    }//GEN-LAST:event_btnLogoutActionPerformed
 
     private void btnFilterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFilterActionPerformed
         // TODO add your handling code here:
@@ -1069,24 +1105,24 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         }
     }//GEN-LAST:event_btnFilterActionPerformed
 
-    private void btnFilter2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFilter2ActionPerformed
+    private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
         // TODO add your handling code here:
         System.exit(0);
-    }//GEN-LAST:event_btnFilter2ActionPerformed
+    }//GEN-LAST:event_btnExitActionPerformed
 
     /**
      * @param args the command line arguments
      */
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnDelete;
+    private javax.swing.JButton btnExit;
     private javax.swing.JButton btnFilter;
-    private javax.swing.JButton btnFilter2;
     private javax.swing.JButton btnHistory;
+    private javax.swing.JButton btnLogout;
     private javax.swing.JButton btnNew;
-    private javax.swing.JButton btnNew1;
-    private javax.swing.JButton btnNew2;
     private javax.swing.JButton btnPrint;
-    private javax.swing.JButton btnSave1;
+    private javax.swing.JButton btnRefresh;
+    private javax.swing.JButton btnSave;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;

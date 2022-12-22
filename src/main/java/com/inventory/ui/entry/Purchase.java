@@ -479,7 +479,11 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             result.subscribe((t) -> {
                 purTableModel.setListDetail(t.getBody());
                 purTableModel.addNewRow();
-                if (!ProUtil.isPurchaseEdit()) {
+                if (ph.isVouLock()) {
+                    lblStatus.setText("Voucher is locked.");
+                    lblStatus.setForeground(Color.RED);
+                    disableForm(false);
+                } else if (!ProUtil.isPurchaseEdit()) {
                     lblStatus.setText("No Permission.");
                     lblStatus.setForeground(Color.RED);
                     disableForm(false);
@@ -532,6 +536,9 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         txtVouDiscount.setEnabled(status);
         txtGrandTotal.setEnabled(status);
         txtReference.setEnabled(status);
+        observer.selected("save", status);
+        observer.selected("delete", status);
+        observer.selected("print", status);
     }
 
     private void setAllLocation() {

@@ -327,7 +327,11 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             txtDate.setDate(Util1.toDateFormat(io.getVouDate(), "dd/MM/yyyy"));
             txtRemark.setText(io.getRemark());
             txtRefNo.setText(io.getRefNo());
-            if (Util1.getBoolean(io.isDeleted())) {
+            if (io.isVouLock()) {
+                lblStatus.setText("Voucher is locked.");
+                lblStatus.setForeground(Color.RED);
+                disableForm(false);
+            } else if (Util1.getBoolean(io.isDeleted())) {
                 lblStatus.setText("DELETED");
                 lblStatus.setForeground(Color.red);
                 disableForm(false);
@@ -355,6 +359,9 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         tblTransfer.setEnabled(status);
         txtFrom.setEnabled(status);
         txtTo.setEnabled(status);
+        observer.selected("save", status);
+        observer.selected("delete", status);
+        observer.selected("print", status);
 
     }
 
