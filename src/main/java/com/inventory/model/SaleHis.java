@@ -48,6 +48,7 @@ public class SaleHis implements java.io.Serializable {
     private String remark;
     private String reference;
     private Region region;
+    private boolean vouLock;
     @NonNull
     private String locCode;
     @NonNull

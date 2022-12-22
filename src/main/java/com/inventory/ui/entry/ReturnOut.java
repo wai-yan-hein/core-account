@@ -474,7 +474,11 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             result.subscribe((t) -> {
                 roTableModel.setListDetail(t.getBody());
                 roTableModel.addNewRow();
-                if (Util1.getBoolean(ri.getDeleted())) {
+                if (ri.isVouLock()) {
+                    lblStatus.setText("Voucher is locked.");
+                    lblStatus.setForeground(Color.RED);
+                    disableForm(false);
+                } else if (Util1.getBoolean(ri.getDeleted())) {
                     lblStatus.setText("DELETED");
                     lblStatus.setForeground(Color.RED);
                     disableForm(false);
@@ -516,6 +520,9 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         txtVouDiscP.setEnabled(status);
         txtVouDiscount.setEnabled(status);
         txtGrandTotal.setEnabled(status);
+        observer.selected("save", status);
+        observer.selected("delete", status);
+        observer.selected("print", status);
     }
 
     private void setAllLocation() {

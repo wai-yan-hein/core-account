@@ -23,7 +23,6 @@ import com.inventory.ui.common.InventoryRepo;
 import com.user.common.UserRepo;
 import com.user.editor.MacAutoCompleter;
 import com.user.editor.TextAutoCompleter;
-import com.user.model.DepartmentUser;
 import com.user.model.MachineProperty;
 import com.user.model.MachinePropertyKey;
 import com.user.model.PropertyKey;

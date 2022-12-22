@@ -46,6 +46,7 @@ public class PurHis implements java.io.Serializable {
     private Float taxAmt;
     private String reference;
     private Integer macId;
+    private boolean vouLock;
     @NonNull
     private String status = "STATUS";
     private List<PurHisDetail> listPD;

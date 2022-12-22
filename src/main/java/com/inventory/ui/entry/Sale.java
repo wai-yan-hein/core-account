@@ -557,7 +557,11 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             result.subscribe((t) -> {
                 saleTableModel.setListDetail(t.getBody());
                 saleTableModel.addNewRow();
-                if (!ProUtil.isSaleEdit()) {
+                if (sh.isVouLock()) {
+                    lblStatus.setText("Voucher is locked.");
+                    lblStatus.setForeground(Color.RED);
+                    disableForm(false);
+                } else if (!ProUtil.isSaleEdit()) {
                     lblStatus.setText("No Permission.");
                     lblStatus.setForeground(Color.RED);
                     disableForm(false);
@@ -610,6 +614,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtVouDiscount.setEnabled(status);
         txtGrandTotal.setEnabled(status);
         txtReference.setEnabled(status);
+        observer.selected("save", status);
+        observer.selected("delete", status);
+        observer.selected("print", status);
+
     }
 
     private void setAllLocation() {

@@ -36,4 +36,5 @@ public class RetOutHis implements java.io.Serializable {
     private String status = "STATUS";
     private List<RetOutHisDetail> listRD;
     private List<String> listDel;
+    private boolean vouLock;
 }
