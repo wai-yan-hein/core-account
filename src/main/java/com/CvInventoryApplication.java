@@ -129,9 +129,9 @@ public class CvInventoryApplication {
     public static void initFont(int fontSize) {
         try {
             List<File> files = Files.list(Paths.get("font")).map(Path::toFile).filter(File::isFile).collect(Collectors.toList());
-            for (File file : files) {
+            if (!files.isEmpty()) {
                 InputStream inputStream = new BufferedInputStream(
-                        new FileInputStream(file.getPath()));
+                        new FileInputStream(files.get(0).getPath()));
                 Font font = Font.createFont(Font.TRUETYPE_FONT, inputStream);
                 Global.textFont = font.deriveFont(Font.PLAIN, fontSize);
                 Global.menuFont = font.deriveFont(Font.BOLD, fontSize + 2);
@@ -141,8 +141,8 @@ public class CvInventoryApplication {
                 Global.shortCutFont = font.deriveFont(Font.BOLD, fontSize + 2);
                 Global.tblHeaderFont = font.deriveFont(Font.BOLD, fontSize + 1);
                 Global.tblRowHeight = fontSize + 15;
-                Global.fontName = "font" + File.separator + file.getName();
-                log.info("font apply.");
+                Global.fontName = "font" + File.separator + font.getName();
+                log.info(Global.fontName);
             }
 
         } catch (FontFormatException | IOException ex) {

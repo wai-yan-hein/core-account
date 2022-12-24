@@ -4,6 +4,8 @@
  */
 package com.common;
 
+import com.google.myanmartools.TransliterateZ2U;
+import com.google.myanmartools.ZawgyiDetector;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -758,6 +760,17 @@ public class Util1 {
         jc.setProperty("net.sf.jasperreports.default.pdf.encoding", "Identity-H");
         jc.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
         jc.setProperty("net.sf.jasperreports.viewer.zoom", "1");
+    }
+
+    public static String convertToUniCode(String str) {
+        ZawgyiDetector zd = new ZawgyiDetector();
+        double score = zd.getZawgyiProbability(str);
+        log.info("score : " + score);
+        if (score > 1) {
+            TransliterateZ2U z2U = new TransliterateZ2U("Zawgyi to Unicode");
+            return z2U.convert(str);
+        }
+        return str;
     }
 
 }

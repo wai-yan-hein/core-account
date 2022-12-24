@@ -275,7 +275,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     private void setVoucher(OPHis op) {
         if (op != null) {
             oPHis = op;
-            locationAutoCompleter.setLocation(inventoryRepo.findLocation(oPHis.getLocCode(),oPHis.getKey().getDeptId()));
+            locationAutoCompleter.setLocation(inventoryRepo.findLocation(oPHis.getLocCode(), oPHis.getKey().getDeptId()));
             currencyAAutoCompleter.setCurrency(inventoryRepo.findCurrency(oPHis.getCurCode()));
             progress.setIndeterminate(true);
             Mono<ResponseEntity<List<OPHisDetail>>> result = inventoryApi.get()
@@ -374,10 +374,10 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     private void readFile(String path) {
         HashMap<String, Stock> hm = new HashMap<>();
-        listStock = inventoryRepo.getStock(true);
+        listStock = inventoryRepo.getStock(false);
         if (!listStock.isEmpty()) {
             for (Stock s : listStock) {
-                hm.put(s.getUserCode(), s);
+                hm.put(s.getUserCode().toLowerCase(), s);
             }
         }
         String line;
@@ -385,7 +385,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         int lineCount = 0;
         List<OPHisDetail> listOP = new ArrayList<>();
         try {
-            try ( BufferedReader br = new BufferedReader(new InputStreamReader(
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(
                     new FileInputStream(path), "UTF8"))) {
                 while ((line = br.readLine()) != null) //returns a Boolean value
                 {
@@ -403,8 +403,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                     } catch (IndexOutOfBoundsException e) {
                         //JOptionPane.showMessageDialog(Global.parentForm, "FORMAT ERROR IN LINE:" + lineCount + e.getMessage());
                     }
-                    String[] str = stockCode.split("-");
-                    Stock s = hm.get(str[0]);
+                    Stock s = hm.get(stockCode.toLowerCase());
                     if (s != null) {
                         op.setStockCode(s.getKey().getStockCode());
                         op.setQty(Util1.getFloat(qty));
