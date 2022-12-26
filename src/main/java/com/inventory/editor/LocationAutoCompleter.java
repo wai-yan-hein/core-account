@@ -87,9 +87,12 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
 
     private void initOption() {
         listOption.clear();
-        listLocation.forEach(t -> {
-            listOption.add(t.getKey().getLocCode());
-        });
+        if (listLocation != null) {
+            listLocation.forEach(t -> {
+                listOption.add(t.getKey().getLocCode());
+            });
+
+        }
     }
 
     public LocationAutoCompleter() {
@@ -184,8 +187,10 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
 
         table.setRequestFocusEnabled(false);
 
-        if (!list.isEmpty()) {
-            table.setRowSelectionInterval(0, 0);
+        if (list != null) {
+            if (!list.isEmpty()) {
+                table.setRowSelectionInterval(0, 0);
+            }
         }
     }
 

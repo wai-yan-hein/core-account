@@ -281,18 +281,21 @@ public class InventoryRepo {
     }
 
     public Location findLocation(String locCode, Integer deptId) {
-        LocationKey key = new LocationKey();
-        key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
-        key.setLocCode(locCode);
-        Mono<Location> result = inventoryApi.post()
-                .uri("/setup/find-location")
-                .body(Mono.just(key), LocationKey.class)
-                .retrieve()
-                .bodyToMono(Location.class);
-        return result.doOnError((t) -> {
-            log.error(t.getMessage());
-        }).block();
+        try {
+            LocationKey key = new LocationKey();
+            key.setCompCode(Global.compCode);
+            key.setDeptId(deptId);
+            key.setLocCode(locCode);
+            Mono<Location> result = inventoryApi.post()
+                    .uri("/setup/find-location")
+                    .body(Mono.just(key), LocationKey.class)
+                    .retrieve()
+                    .bodyToMono(Location.class);
+            return result.block();
+        } catch (Exception e) {
+            log.error("findLocation : " + e.getMessage());
+        }
+        return null;
     }
 
     public StockBrand findBrand(String brandCode, Integer deptId) {

@@ -46,6 +46,7 @@ public class Util1 {
      *
      */
     public static final String DECIMAL_FORMAT = "###,##0.##;(###,##0.##)";
+    private static final DecimalFormat df2 = new DecimalFormat("0");
 
     public static void print(String pName) {
 
@@ -764,9 +765,8 @@ public class Util1 {
 
     public static String convertToUniCode(String str) {
         ZawgyiDetector zd = new ZawgyiDetector();
-        double score = zd.getZawgyiProbability(str);
-        log.info("score : " + score);
-        if (score > 1) {
+        Double score = zd.getZawgyiProbability(str);
+        if (getBoolean(df2.format(score))) {
             TransliterateZ2U z2U = new TransliterateZ2U("Zawgyi to Unicode");
             return z2U.convert(str);
         }

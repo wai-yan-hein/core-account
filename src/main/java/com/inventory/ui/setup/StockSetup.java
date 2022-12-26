@@ -165,7 +165,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtStockCode.setText(stock.getKey().getStockCode());
         txtBarCode.setText(stock.getBarcode());
         txtUserCode.setText(stock.getUserCode());
-        txtStockName.setText(Util1.convertToUniCode(stock.getStockName()));
+        txtStockName.setText(stock.getStockName());
         chkActive.setSelected(stock.isActive());
         chkEx.setSelected(stock.isExplode());
         Integer deptId = stock.getKey().getDeptId();
