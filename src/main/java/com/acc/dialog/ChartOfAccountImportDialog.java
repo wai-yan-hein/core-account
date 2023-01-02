@@ -5,50 +5,55 @@
  */
 package com.acc.dialog;
 
+import com.acc.common.AccountRepo;
 import com.acc.common.ChartOfAccountImportTableModel;
+import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
-import com.common.ReturnObject;
 import com.common.Util1;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.inventory.model.CFont;
+import com.inventory.ui.common.InventoryRepo;
 import java.awt.FileDialog;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import javax.swing.ImageIcon;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 public class ChartOfAccountImportDialog extends javax.swing.JDialog {
 
-    private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     private static final Logger log = LoggerFactory.getLogger(ChartOfAccountImportDialog.class);
     private final ChartOfAccountImportTableModel importTableModel = new ChartOfAccountImportTableModel();
-    @Autowired
-    private WebClient inventoryApi;
-    @Autowired
-    private TaskExecutor taskExecutor;
+    private AccountRepo accountRepo;
+    private InventoryRepo inventoryRepo;
     private final List<ChartOfAccount> listCOA = new ArrayList<>();
     private final HashMap<Integer, Integer> hmZG = new HashMap<>();
     private final HashMap<String, String> hmCOA = new HashMap<>();
+
+    public AccountRepo getAccountRepo() {
+        return accountRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
 
     /**
      * Creates new form CustomerImportDialog
@@ -78,46 +83,53 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
     }
 
     private void readFile(String path) {
+        List<CFont> listFont = inventoryRepo.getFont();
+        if (listFont != null) {
+            listFont.forEach(f -> {
+                hmZG.put(f.getIntCode(), f.getFontKey().getZwKeyCode());
+            });
+        }
+        List<ChartOfAccount> list = accountRepo.getChartOfAccount();
+        list.forEach((t) -> {
+            hmCOA.put(t.getCoaCodeUsr(), t.getKey().getCoaCode());
+        });
         String line;
         String splitBy = ",";
         int lineCount = 0;
 
         try {
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(path), "UTF8"))) {
-                while ((line = br.readLine()) != null) //returns a Boolean value
-                {
+            try ( FileInputStream fis = new FileInputStream(path);  InputStreamReader isr = new InputStreamReader(fis);  BufferedReader reader = new BufferedReader(isr)) {
+                while ((line = reader.readLine()) != null) {
                     ChartOfAccount coa = new ChartOfAccount();
                     String[] data = line.split(splitBy);    // use comma as separator
-                    String code = null;
                     String userCode = null;
                     String name = null;
                     String parentCode = null;
                     lineCount++;
                     try {
-                        code = data[0];
-                        userCode = data[1];
-                        name = data[2].replaceAll("\"", "");
-                        parentCode = data[3];
+                        userCode = data[0];
+                        name = data[1].replaceAll("\"", "");
+                        parentCode = data[2];
 
                     } catch (IndexOutOfBoundsException e) {
                         JOptionPane.showMessageDialog(Global.parentForm, "FORMAT ERROR IN LINE:" + lineCount);
                     }
-                    coa.setCoaParent(parentCode);
+                    COAKey key = new COAKey();
+                    key.setCompCode(Global.compCode);
+                    coa.setKey(key);
+                    coa.setCoaParent(hmCOA.get(parentCode));
                     coa.setCoaCodeUsr(userCode);
-                    coa.setMigCode(code);
-                    coa.setCoaNameEng(name);
+                    coa.setCoaNameEng(chkIntegra.isSelected() ? getZawgyiText(name) : name);
                     coa.setActive(Boolean.TRUE);
                     coa.setCreatedDate(Util1.getTodayDate());
                     coa.setCreatedBy(Global.loginUser.getUserCode());
                     coa.setMacId(Global.macId);
+                    coa.setCoaLevel(Util1.getInteger(txtLevel.getText()));
+                    coa.setOption("USR");
                     listCOA.add(coa);
-
                 }
             }
-            if (chkIntegra.isSelected()) {
-                toZawgyiFont();
-            }
+
             importTableModel.setListCOA(listCOA);
         } catch (IOException e) {
             log.error("Read CSV File :" + e.getMessage());
@@ -125,7 +137,11 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
         }
     }
 
-    private void toZawgyiFont() {
+    private void saveCOA() {
+        listCOA.forEach((t) -> {
+            accountRepo.saveCOA(t);
+            log.info("saved.");
+        });
 
     }
 
@@ -159,85 +175,6 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
         }
 
         return tmpStr;
-    }
-
-    private void saveCOA() {
-        if (!txtLevel.getText().isEmpty()) {
-            int level = Util1.getInteger(txtLevel.getText());
-            switch (level) {
-                case 1:
-                    saveLevelOne();
-                    break;
-                case 2:
-                    saveLevel("1");
-                    break;
-                case 3:
-                    saveLevel("2");
-                    break;
-            }
-        }
-
-    }
-
-    private void saveLevelOne() {
-        log.info("Save ChartOfAccount Level One.");
-        JDialog loading = Util1.getLoading(this, null);
-        taskExecutor.execute(() -> {
-            importTableModel.getListCOA().forEach(coa -> {
-                try {
-                    coa.setOption("SYS");
-                    coa.setCoaLevel(1);
-                    saveCOA(coa);
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
-                }
-            });
-            importTableModel.clear();
-            loading.setVisible(false);
-        });
-        loading.setVisible(true);
-
-    }
-
-    private ChartOfAccount saveCOA(ChartOfAccount coa) {
-        Mono<ReturnObject> result = inventoryApi.post()
-                .uri("/account/save-coa")
-                .body(Mono.just(coa), ChartOfAccount.class)
-                .retrieve()
-                .bodyToMono(ReturnObject.class);
-        ReturnObject block = result.block();
-        return gson.fromJson(gson.toJson(block.getData()), ChartOfAccount.class);
-    }
-
-    private void saveLevel(String level) {
-        log.info("Save ChartOfAccount Level :" + level);
-        /*JDialog loading = Util1.getLoading(this, loadingIcon);
-        List<ChartOfAccount> listLevelOne = cOAService.search("-", "-", Global.compCode, level, "-", "-", "-");
-        listLevelOne.forEach(one -> {
-            hmCOA.put(one.getMigCode(), one.getCode());
-        });
-        taskExecutor.execute(() -> {
-            importTableModel.getListCOA().stream().map(levelTwo -> {
-                String pCode = hmCOA.get(levelTwo.getCoaParent());
-                levelTwo.setCoaParent(pCode);
-                return levelTwo;
-            }).map(levelTwo -> {
-                levelTwo.setOption("USR");
-                return levelTwo;
-            }).map(levelTwo -> {
-                levelTwo.setCoaLevel(Integer.parseInt(txtLevel.getText()));
-                return levelTwo;
-            }).forEachOrdered(levelTwo -> {
-                try {
-                    cOAService.save(levelTwo);
-                } catch (Exception ex) {
-                    log.error("saveLevel : " + ex.getMessage());
-                }
-            });
-            importTableModel.clear();
-            loading.setVisible(false);
-        });*/
-        //loading.setVisible(true);
     }
 
     /**

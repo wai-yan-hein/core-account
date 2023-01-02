@@ -22,7 +22,7 @@ public class WeightLossHis {
     private String updatedBy;
     private String createdBy;
     private boolean deleted;
-    private Date updatedDate;
+    
     private Integer macId;
     private List<WeightLossDetail> listDetail;
     private List<WeightLossDetailKey> delKeys;

@@ -17,6 +17,6 @@ public class MachineInfo implements java.io.Serializable {
     private Integer macId;
     private String machineName;
     private String machineIp;
-    private Date updatedDate;
+    
     private boolean proUpdate;
 }

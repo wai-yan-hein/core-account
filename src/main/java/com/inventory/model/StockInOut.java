@@ -20,7 +20,6 @@ public class StockInOut implements Serializable {
     private StockIOKey key;
     private String remark;
     private String description;
-    private Date updatedDate;
     private String createdBy;
     private String updatedBy;
     private Date createdDate;

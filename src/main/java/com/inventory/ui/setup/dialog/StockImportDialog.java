@@ -37,8 +37,8 @@ public class StockImportDialog extends javax.swing.JDialog {
     private final StockImportTableModel tableModel = new StockImportTableModel();
     private TaskExecutor taskExecutor;
     private InventoryRepo inventoryRepo;
-    private final HashMap<Integer, Integer> hmIn = new HashMap<>();
-    private final HashMap<Integer, Integer> hmWin = new HashMap<>();
+    private final HashMap<Integer, Integer> hmIntToZw = new HashMap<>();
+    private final HashMap<String, String> hmGroup = new HashMap<>();
 
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
@@ -80,7 +80,6 @@ public class StockImportDialog extends javax.swing.JDialog {
         tblTrader.getTableHeader().setFont(Global.tblHeaderFont);
         tblTrader.setDefaultRenderer(Object.class, new TableCellRender());
         tblTrader.setDefaultRenderer(Float.class, new TableCellRender());
-        tblTrader.setFont(Global.textFont);
 
     }
 
@@ -111,9 +110,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         List<CFont> listFont = inventoryRepo.getFont();
         if (listFont != null) {
             listFont.forEach(f -> {
-                //hmZG.put(f.getFontKey().getWinKeyCode(), f.getFontKey().getZwKeyCode());
-                hmIn.put(f.getIntCode(), f.getFontKey().getZwKeyCode());
-                hmWin.put(f.getFontKey().getWinKeyCode(), f.getFontKey().getZwKeyCode());
+                hmIntToZw.put(f.getIntCode(), f.getFontKey().getZwKeyCode());
             });
         }
         HashMap<String, StockType> hm = new HashMap<>();
@@ -128,31 +125,33 @@ public class StockImportDialog extends javax.swing.JDialog {
         int lineCount = 0;
         List<Stock> listStock = new ArrayList<>();
         try {
-            try ( BufferedReader br = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(path), "UTF8"))) {
-                while ((line = br.readLine()) != null) //returns a Boolean value
+            try ( FileInputStream fis = new FileInputStream(path);  InputStreamReader isr = new InputStreamReader(fis);  BufferedReader reader = new BufferedReader(isr)) {
+                while ((line = reader.readLine()) != null) //returns a Boolean value
                 {
                     Stock t = new Stock();
                     String[] data = line.split(splitBy);    // use comma as separator
                     String userCode = null;
                     String stockName = null;
+                    String price = null;
                     String typeCode = null;
                     lineCount++;
                     try {
                         userCode = data[0];
                         stockName = data[1];
-                        typeCode = data[2];
+                        price = data[2];
+                        typeCode = data[3];
                     } catch (IndexOutOfBoundsException e) {
                         //JOptionPane.showMessageDialog(Global.parentForm, "FORMAT ERROR IN LINE:" + lineCount + e.getMessage());
                     }
-                    if (!Util1.isNull(typeCode, "0").equals("0")) {
+                    if (true) {
                         StockKey key = new StockKey();
                         key.setCompCode(Global.compCode);
                         key.setDeptId(Global.deptId);
                         key.setStockCode(null);
                         t.setKey(key);
                         t.setUserCode(userCode);
-                        t.setStockName(stockName);
+                        t.setStockName(getZawgyiText(stockName));
+                        t.setSalePriceN(Util1.getFloat(price));
                         t.setTypeCode(getGroupCode(typeCode));
                         t.setActive(true);
                         t.setCreatedDate(Util1.getTodayDate());
@@ -172,26 +171,18 @@ public class StockImportDialog extends javax.swing.JDialog {
 
     private String getZawgyiText(String text) {
         String tmpStr = "";
-
         if (text != null) {
             for (int i = 0; i < text.length(); i++) {
                 String tmpS = Character.toString(text.charAt(i));
                 int tmpChar = (int) text.charAt(i);
-                if (hmIn.containsKey(tmpChar)) {
-                    char tmpc = (char) hmIn.get(tmpChar).intValue();
+                if (hmIntToZw.containsKey(tmpChar)) {
+                    char tmpc = (char) hmIntToZw.get(tmpChar).intValue();
                     if (tmpStr.isEmpty()) {
                         tmpStr = Character.toString(tmpc);
                     } else {
                         tmpStr = tmpStr + Character.toString(tmpc);
                     }
-                } /*else if (hmWin.containsKey(tmpChar)) {
-                char tmpc = (char) hmWin.get(tmpChar).intValue();
-                if (tmpStr.isEmpty()) {
-                tmpStr = Character.toString(tmpc);
-                } else {
-                tmpStr = tmpStr + Character.toString(tmpc);
-                }
-                }*/ else if (tmpS.equals("ƒ")) {
+                } else if (tmpS.equals("ƒ")) {
                     if (tmpStr.isEmpty()) {
                         tmpStr = "ႏ";
                     } else {
@@ -199,6 +190,8 @@ public class StockImportDialog extends javax.swing.JDialog {
                     }
                 } else if (tmpStr.isEmpty()) {
                     tmpStr = tmpS;
+                } else {
+                    tmpStr = tmpStr + tmpS;
                 }
             }
         }
@@ -207,18 +200,13 @@ public class StockImportDialog extends javax.swing.JDialog {
     }
 
     private String getGroupCode(String str) {
-        return switch (str) {
-            case "11" ->
-                "30-001";
-
-            case "96" ->
-                "30-002";
-            case "97" ->
-                "30-003";
-
-            default ->
-                null;
-        };
+        if (hmGroup.isEmpty()) {
+            List<StockType> list = inventoryRepo.getStockType();
+            list.forEach((t) -> {
+                hmGroup.put(t.getUserCode(), t.getKey().getStockTypeCode());
+            });
+        }
+        return hmGroup.get(str);
     }
 
     /**
@@ -238,7 +226,7 @@ public class StockImportDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        tblTrader.setFont(Global.textFont);
+        tblTrader.setFont(new java.awt.Font("Zawgyi-One", 0, 12)); // NOI18N
         tblTrader.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},

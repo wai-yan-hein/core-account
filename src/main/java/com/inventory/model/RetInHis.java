@@ -28,7 +28,6 @@ public class RetInHis implements java.io.Serializable {
     private String createdBy;
     private Date createdDate;
     private String updatedBy;
-    private Date updatedDate;
     private String remark;
     private Integer session;
     private String curCode;

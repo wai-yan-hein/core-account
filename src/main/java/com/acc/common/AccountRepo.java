@@ -25,7 +25,9 @@ import com.common.Global;
 import com.common.ReturnObject;
 import com.common.Util1;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -36,6 +38,7 @@ import reactor.core.publisher.Mono;
  *
  * @author Lenovo
  */
+@Slf4j
 @Component
 public class AccountRepo {
 
@@ -220,13 +223,18 @@ public class AccountRepo {
     }
 
     public List<ChartOfAccount> getCOAChild(String coaCode) {
-        Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get()
-                .uri(builder -> builder.path("/account/get-coa-child")
-                .queryParam("coaCode", coaCode)
-                .queryParam("compCode", Global.compCode)
-                .build())
-                .retrieve().toEntityList(ChartOfAccount.class);
-        return result.block().getBody();
+        try {
+            Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get()
+                    .uri(builder -> builder.path("/account/get-coa-child")
+                    .queryParam("coaCode", coaCode)
+                    .queryParam("compCode", Global.compCode)
+                    .build())
+                    .retrieve().toEntityList(ChartOfAccount.class);
+            return result.block().getBody();
+        } catch (Exception e) {
+            log.error("getCOAChild : " + e.getMessage());
+        }
+        return new ArrayList<>();
     }
 
     public List<ChartOfAccount> getCOA(String str, Integer level) {
@@ -251,14 +259,19 @@ public class AccountRepo {
     }
 
     public ChartOfAccount findCOA(String coaCode) {
-        COAKey key = new COAKey();
-        key.setCoaCode(coaCode);
-        key.setCompCode(Global.compCode);
-        Mono<ResponseEntity<ChartOfAccount>> result = accountApi.post()
-                .uri("/account/find-coa")
-                .body(Mono.just(key), COAKey.class)
-                .retrieve().toEntity(ChartOfAccount.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        try {
+            COAKey key = new COAKey();
+            key.setCoaCode(coaCode);
+            key.setCompCode(Global.compCode);
+            Mono<ResponseEntity<ChartOfAccount>> result = accountApi.post()
+                    .uri("/account/find-coa")
+                    .body(Mono.just(key), COAKey.class)
+                    .retrieve().toEntity(ChartOfAccount.class);
+            return result.block(Duration.ofMinutes(min)).getBody();
+        } catch (Exception e) {
+            log.error("findCOA : " + e.getMessage());
+        }
+        return null;
     }
 
     public Department saveDepartment(Department dep) {

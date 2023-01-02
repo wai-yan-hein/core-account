@@ -20,7 +20,7 @@ public class SaleMan implements Serializable {
     private String saleManName;
     private Boolean active;
     private String phone;
-    private Date updatedDate;
+    
     private Gender genderId;
     private String address;
     private Integer macId;

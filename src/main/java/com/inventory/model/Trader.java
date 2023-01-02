@@ -28,7 +28,7 @@ public class Trader implements java.io.Serializable {
     private String appShortName; //use integration with other application
     private String appTraderCode; //Original trader id from integration app
     private String migCode;
-    private Date updatedDate;
+    
     private String updatedBy;
     private Date createdDate;
     private String createdBy;

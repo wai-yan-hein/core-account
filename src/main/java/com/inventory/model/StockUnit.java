@@ -17,7 +17,7 @@ public class StockUnit implements java.io.Serializable {
 
     private StockUnitKey key;
     private String unitName;
-    private Date updatedDate;
+    
     private String updatedBy;
     private Date createdDate;
     private String createdBy;

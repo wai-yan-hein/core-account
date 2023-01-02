@@ -18,7 +18,7 @@ public class StockBrand implements java.io.Serializable {
     private StockBrandKey key;
     private String brandName;
     private Integer migId;
-    private Date updatedDate;
+    
     private String updatedBy;
     private Date createdDate;
     private String createdBy;

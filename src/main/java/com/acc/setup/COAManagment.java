@@ -22,6 +22,8 @@ import com.common.TreeTransferHandler;
 import com.common.Util1;
 import com.common.model.Menu;
 import com.inventory.editor.MenuAutoCompleter;
+import com.inventory.model.CFont;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import java.awt.FileDialog;
 import java.awt.HeadlessException;
@@ -77,6 +79,7 @@ public class COAManagment extends javax.swing.JPanel implements
         TreeSelectionListener, KeyListener,
         PanelControl {
 
+    private final HashMap<Integer, Integer> hmIntToZw = new HashMap<>();
     private DefaultMutableTreeNode selectedNode;
     DefaultTreeModel treeModel;
     private final String parentRootName = "Core Account";
@@ -93,7 +96,7 @@ public class COAManagment extends javax.swing.JPanel implements
     @Autowired
     private AccountRepo accountRepo;
     @Autowired
-    private ChartOfAccountImportDialog importDialog;
+    private InventoryRepo inventoryRepo;
     private MenuAutoCompleter completer;
     private TableRowSorter<TableModel> sorter;
     private JPopupMenu popupmenu;
@@ -483,17 +486,28 @@ public class COAManagment extends javax.swing.JPanel implements
     }
 
     private void readFile(String path, String parentCode) {
+        List<CFont> listFont = inventoryRepo.getFont();
+        if (listFont != null) {
+            listFont.forEach(f -> {
+                hmIntToZw.put(f.getIntCode(), f.getFontKey().getZwKeyCode());
+            });
+        }
         String line;
         int lineCount = 0;
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(
-                new FileInputStream(path), "UTF8"))) {
-            while ((line = br.readLine()) != null) {
+        try ( FileInputStream fis = new FileInputStream(path);  InputStreamReader isr = new InputStreamReader(fis);  BufferedReader reader = new BufferedReader(isr)) {
+            while ((line = reader.readLine()) != null) {
+                String[] data = line.split(",");
+                String userCode = data[0];
+                String coaName = data[1];
                 ChartOfAccount coa = new ChartOfAccount();
-                lineCount++;
+                COAKey key = new COAKey();
+                key.setCompCode(Global.compCode);
+                coa.setKey(key);
+                coa.setCoaCodeUsr(userCode);
                 coa.setOption("USR");
                 coa.setCoaLevel(3);
                 coa.setCoaParent(parentCode);
-                coa.setCoaNameEng(line);
+                coa.setCoaNameEng(getZawgyiText(coaName));
                 coa.setActive(Boolean.TRUE);
                 coa.setCreatedDate(Util1.getTodayDate());
                 coa.setCreatedBy(Global.loginUser.getUserCode());
@@ -504,6 +518,36 @@ public class COAManagment extends javax.swing.JPanel implements
         } catch (Exception ex) {
             log.error("readFile : " + ex.getMessage());
         }
+    }
+
+    private String getZawgyiText(String text) {
+        String tmpStr = "";
+        if (text != null) {
+            for (int i = 0; i < text.length(); i++) {
+                String tmpS = Character.toString(text.charAt(i));
+                int tmpChar = (int) text.charAt(i);
+                if (hmIntToZw.containsKey(tmpChar)) {
+                    char tmpc = (char) hmIntToZw.get(tmpChar).intValue();
+                    if (tmpStr.isEmpty()) {
+                        tmpStr = Character.toString(tmpc);
+                    } else {
+                        tmpStr = tmpStr + Character.toString(tmpc);
+                    }
+                } else if (tmpS.equals("ƒ")) {
+                    if (tmpStr.isEmpty()) {
+                        tmpStr = "ႏ";
+                    } else {
+                        tmpStr = tmpStr + "ႏ";
+                    }
+                } else if (tmpStr.isEmpty()) {
+                    tmpStr = tmpS;
+                } else {
+                    tmpStr = tmpStr + tmpS;
+                }
+            }
+        }
+
+        return tmpStr;
     }
 
     private void tblCOAStandard() {
@@ -964,6 +1008,9 @@ public class COAManagment extends javax.swing.JPanel implements
 
     private void btnImportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImportActionPerformed
         // TODO add your handling code here:
+        ChartOfAccountImportDialog importDialog = new ChartOfAccountImportDialog();
+        importDialog.setInventoryRepo(inventoryRepo);
+        importDialog.setAccountRepo(accountRepo);
         importDialog.setSize(Global.width - 400, Global.height - 400);
         importDialog.setLocationRelativeTo(null);
         importDialog.setVisible(true);

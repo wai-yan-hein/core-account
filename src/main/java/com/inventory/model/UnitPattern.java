@@ -18,7 +18,7 @@ public class UnitPattern implements Serializable {
 
     private String patternCode;
     private String patternName;
-    private Date updatedDate;
+    
     private AppUser updatedBy;
     private Date createdDate;
     private AppUser createdBy;
