@@ -33,12 +33,12 @@ public class ChartOfAccountImportTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        switch (column) {
-            case 6:
-                return Boolean.class;
-            default:
-                return String.class;
-        }
+        return switch (column) {
+            case 6 ->
+                Boolean.class;
+            default ->
+                String.class;
+        };
     }
 
     @Override
@@ -48,14 +48,22 @@ public class ChartOfAccountImportTableModel extends AbstractTableModel {
             ChartOfAccount coa = listCOA.get(row);
 
             return switch (column) {
-                case 0 -> coa.getMigCode();
-                case 1 -> coa.getCoaCodeUsr();
-                case 2 -> coa.getCoaNameEng();
-                case 3 -> coa.getCoaParent();
-                case 4 -> coa.getOption();
-                case 5 -> coa.getKey().getCompCode();
-                case 6 -> coa.isActive();
-                default -> null;
+                case 0 ->
+                    coa.getMigCode();
+                case 1 ->
+                    coa.getCoaCodeUsr();
+                case 2 ->
+                    coa.getCoaNameEng();
+                case 3 ->
+                    coa.getCoaParent();
+                case 4 ->
+                    coa.getOption();
+                case 5 ->
+                    coa.getKey().getCompCode();
+                case 6 ->
+                    coa.isActive();
+                default ->
+                    null;
             }; //Id
             //Name
             //Name

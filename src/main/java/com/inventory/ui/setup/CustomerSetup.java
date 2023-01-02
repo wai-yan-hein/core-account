@@ -181,7 +181,6 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
             customer.setEmail(txtCusEmail.getText());
             customer.setAddress(txtCusAddress.getText());
             customer.setActive(chkActive.isSelected());
-            customer.setUpdatedDate(Util1.getTodayDate());
             customer.setCreditLimit(Util1.getInteger(txtCreditLimit.getText()));
             customer.setCreditDays(Util1.getInteger(txtCreditTerm.getText()));
             Region r = regionAutoCompleter.getRegion();

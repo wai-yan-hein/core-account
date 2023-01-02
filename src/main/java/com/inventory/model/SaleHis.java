@@ -42,7 +42,6 @@ public class SaleHis implements java.io.Serializable {
     private String createdBy;
     private Integer session;
     private String updatedBy;
-    private Date updatedDate;
     private String address;
     private String orderCode;
     private String remark;

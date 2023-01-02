@@ -19,7 +19,7 @@ public class Location implements java.io.Serializable {
     private String locName;
     private String parentCode;
     private boolean calcStock;
-    private Date updatedDate;
+    
     private String updatedBy;
     private Date createdDate;
     private String createdBy;

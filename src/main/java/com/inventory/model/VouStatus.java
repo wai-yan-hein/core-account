@@ -17,7 +17,7 @@ public class VouStatus {
 
     private VouStatusKey key;
     private String description;
-    private Date updatedDate;
+    
     private String updatedBy;
     private Date createdDate;
     private String createdBy;

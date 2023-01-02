@@ -28,7 +28,7 @@ public class TraderA {
     private String appShortName;
     private String appTraderCode;
     private String migCode;
-    private Date updatedDate;
+    
     private String updatedUser;
     private Date createdDate;
     private String createdBy;

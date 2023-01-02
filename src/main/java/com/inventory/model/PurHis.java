@@ -4,7 +4,6 @@
  */
 package com.inventory.model;
 
-import com.user.model.Currency;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
@@ -36,7 +35,6 @@ public class PurHis implements java.io.Serializable {
     @NonNull
     private Date createdDate;
     private String updatedBy;
-    private Date updatedDate;
     private String remark;
     private Integer session;
     @NonNull

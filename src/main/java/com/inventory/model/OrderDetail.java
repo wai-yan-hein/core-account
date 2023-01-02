@@ -23,6 +23,6 @@ public class OrderDetail implements Serializable {
     private Float amount;
     private Integer uniqueId;
     private String orderCode;
-    private Date updatedDate;
+    
 
 }

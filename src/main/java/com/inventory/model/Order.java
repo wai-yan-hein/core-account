@@ -22,7 +22,7 @@ public class Order implements Serializable {
     private Trader trader;
     private Boolean isOrder;
     private Float orderTotal;
-    private Date updatedDate;
+    
     private String orderAddres;
 
 }

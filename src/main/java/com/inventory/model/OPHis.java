@@ -24,7 +24,7 @@ public class OPHis {
     private String locCode;
     private Date createdDate;
     private String updatedBy;
-    private Date updatedDate;
+    
     private boolean deleted;
     private Integer macId;
     private float opAmt;
