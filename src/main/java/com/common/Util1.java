@@ -472,10 +472,18 @@ public class Util1 {
 
     public static Double getDouble(Object number) {
         double value = 0.0;
-        if (number != null) {
-            if (!number.toString().isEmpty()) {
-                value = Double.parseDouble(number.toString());
+        try {
+            if (number != null) {
+                String str = number.toString();
+                if (!str.isEmpty()) {
+                    if (str.contains(",")) {
+                        str = str.replaceAll(",", "");
+                    }
+                    value = Double.parseDouble(str);
+                }
             }
+        } catch (NumberFormatException e) {
+            log.error(String.format("getDouble: %s", e.getMessage()));
         }
         return value;
     }

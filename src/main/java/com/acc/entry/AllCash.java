@@ -1078,8 +1078,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setCoaCode(sourceAccId);
         List<TmpOpening> listTmp = accountRepo.getOpening(filter);
+        hmOpening.clear();
         if (!listTmp.isEmpty()) {
-            hmOpening.clear();
             listTmp.forEach(op -> {
                 hmOpening.put(op.getKey().getCurCode(), new Gl(op.getKey().getCurCode(), op.getOpening(), op.getClosing()));
             });

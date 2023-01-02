@@ -1,6 +1,5 @@
 package com;
 
-import com.formdev.flatlaf.intellijthemes.FlatCyanLightIJTheme;
 import com.common.Global;
 import com.common.Util1;
 import com.formdev.flatlaf.FlatLightLaf;

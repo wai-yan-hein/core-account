@@ -54,6 +54,9 @@ public class CompanyDialog extends javax.swing.JDialog {
             Global.roleCode = company.getRoleCode();
             Global.compCode = company.getCompCode();
             Global.companyName = company.getCompName();
+            Global.currency = company.getCurrency();
+            Global.companyPhone = company.getCompPhone();
+            Global.companyAddress = company.getCompAddress();
             Global.startDate = Util1.toDateStr(company.getStartDate(), "dd/MM/yyyy");
             Global.endate = Util1.toDateStr(company.getEndDate(), "dd/MM/yyyy");
             this.dispose();
