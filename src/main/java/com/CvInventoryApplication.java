@@ -8,6 +8,7 @@ import com.inventory.ui.LoginDialog;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontFormatException;
+import java.awt.Image;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,6 +42,7 @@ public class CvInventoryApplication {
 
     private static ConfigurableApplicationContext context;
     private static Tray tray;
+    private static final Image appIcon = new ImageIcon(CvInventoryApplication.class.getResource("/images/applogo.png")).getImage();
 
     public static void main(String[] args) throws IOException {
         Properties loadProperty = loadProperty();
@@ -53,6 +55,9 @@ public class CvInventoryApplication {
         try {
             Global.sock = new ServerSocket(10004);//Pharmacy
         } catch (IOException e) {
+            if(tray!=null){
+                tray.openMF();
+            }
             JOptionPane.showMessageDialog(new JFrame(), "Core Inventory is already running.", "Duplicate Program", JOptionPane.ERROR_MESSAGE);
             System.exit(1);
         }
@@ -80,7 +85,7 @@ public class CvInventoryApplication {
         builder.bannerMode(Banner.Mode.OFF);
         context = builder.run(args);
         tray = context.getBean(Tray.class);
-        tray.startup();
+        tray.startup(appIcon);
         LoginDialog lg = context.getBean(LoginDialog.class);
         URL imgUrl = CvInventoryApplication.class.getResource("/images/male_user_16px.png");
         lg.setIconImage(new ImageIcon(imgUrl).getImage());
@@ -91,8 +96,7 @@ public class CvInventoryApplication {
             if (Global.macId != null) {
                 ApplicationMainFrame appMain = context.getBean(ApplicationMainFrame.class);
                 java.awt.EventQueue.invokeLater(() -> {
-                    URL appUrl = CvInventoryApplication.class.getResource("/images/applogo.png");
-                    appMain.setIconImage(new ImageIcon(appUrl).getImage());
+                    appMain.setIconImage(appIcon);
                     appMain.setExtendedState(JFrame.MAXIMIZED_BOTH);
                     appMain.initMain();
                     appMain.setVisible(true);

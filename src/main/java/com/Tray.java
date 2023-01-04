@@ -9,7 +9,6 @@ import java.awt.*;
 import java.awt.TrayIcon.MessageType;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.ImageIcon;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,11 +34,10 @@ public class Tray {
         this.tray = tray;
     }
 
-    public void startup() {
+    public void startup(Image icon) {
         if (SystemTray.isSupported()) {
             log.info("Tray started.");
             tray = SystemTray.getSystemTray();
-            ImageIcon icon = new ImageIcon("images/icon.png");
             PopupMenu menu = new PopupMenu();
             MenuItem closeItem = new MenuItem("Exit");
             closeItem.addActionListener((e) -> {
@@ -47,7 +45,7 @@ public class Tray {
                 System.exit(0);
             });
             menu.add(closeItem);
-            trayIcon = new TrayIcon(icon.getImage(), "Core Inventory", menu);
+            trayIcon = new TrayIcon(icon, "Core Account", menu);
             trayIcon.setImageAutoSize(true);
             trayIcon.addMouseListener(new MouseAdapter() {
                 @Override
