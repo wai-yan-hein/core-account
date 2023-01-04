@@ -142,6 +142,7 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
             accountRepo.saveCOA(t);
             log.info("saved.");
         });
+        this.dispose();
 
     }
 

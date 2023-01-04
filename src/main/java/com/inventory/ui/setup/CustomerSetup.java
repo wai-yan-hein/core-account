@@ -692,6 +692,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
         CustomerImportDialog dialog = new CustomerImportDialog(Global.parentForm);
+        dialog.setAccountRepo(accountRepo);
         dialog.setTaskExecutor(taskExecutor);
         dialog.setInventoryRepo(inventoryRepo);
         dialog.setLocationRelativeTo(null);

@@ -4,6 +4,8 @@
  */
 package com.inventory.ui.setup.dialog;
 
+import com.acc.common.AccountRepo;
+import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.TableCellRender;
 import com.common.Util1;
@@ -32,9 +34,19 @@ import org.springframework.core.task.TaskExecutor;
 public class CustomerImportDialog extends javax.swing.JDialog {
 
     private InventoryRepo inventoryRepo;
+    private AccountRepo accountRepo;
     private final TraderImportTableModel tableModel = new TraderImportTableModel();
     private TaskExecutor taskExecutor;
     private final HashMap<Integer, Integer> hmZG = new HashMap<>();
+    private final HashMap<String, String> hmCOA = new HashMap<>();
+
+    public AccountRepo getAccountRepo() {
+        return accountRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
 
     public TaskExecutor getTaskExecutor() {
         return taskExecutor;
@@ -68,7 +80,6 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         tblTrader.setModel(tableModel);
         tblTrader.getTableHeader().setFont(Global.tblHeaderFont);
         tblTrader.setDefaultRenderer(Object.class, new TableCellRender());
-        tblTrader.setFont(Global.textFont);
     }
 
     private void chooseFile() {
@@ -133,15 +144,17 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                 hmZG.put(f.getIntCode(), f.getFontKey().getZwKeyCode());
             });
         }
+        List<ChartOfAccount> list = accountRepo.getChartOfAccount();
+        list.forEach((t) -> {
+            hmCOA.put(t.getCoaCodeUsr(), t.getKey().getCoaCode());
+        });
         String line;
         String splitBy = ",";
         int lineCount = 0;
         List<Trader> listTrader = new ArrayList<>();
         try {
-            try ( BufferedReader br = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(path), "UTF8"))) {
-                while ((line = br.readLine()) != null) //returns a Boolean value
-                {
+            try ( FileInputStream fis = new FileInputStream(path);  InputStreamReader isr = new InputStreamReader(fis);  BufferedReader reader = new BufferedReader(isr)) {
+                while ((line = reader.readLine()) != null) {
                     Trader t = new Trader();
                     String[] data = line.split(splitBy);    // use comma as separator
                     String userCode = null;
@@ -173,6 +186,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                     t.setCreatedBy(Global.loginUser.getUserCode());
                     t.setMacId(Global.macId);
                     t.setType(getTraderType(account));
+                    t.setAccount(hmCOA.get(account));
                     listTrader.add(t);
                 }
             }
@@ -185,7 +199,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
 
     private String getTraderType(String code) {
         return switch (code) {
-            case "16" ->
+            case "310001" ->
                 "SUP";
             default ->
                 "CUS";
@@ -212,7 +226,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        tblTrader.setFont(Global.textFont);
+        tblTrader.setFont(new java.awt.Font("Zawgyi-One", 0, 15)); // NOI18N
         tblTrader.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -255,7 +269,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 668, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(chkIntegra, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)

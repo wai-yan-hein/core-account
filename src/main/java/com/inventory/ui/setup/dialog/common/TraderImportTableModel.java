@@ -16,7 +16,7 @@ import javax.swing.table.AbstractTableModel;
  */
 public class TraderImportTableModel extends AbstractTableModel {
 
-    private final String[] columnNames = {"User Code", "Trader Name", "Address", "Phone No"};
+    private final String[] columnNames = {"User Code", "Trader Name", "Address", "Account"};
     private List<Trader> listTrader = new ArrayList<>();
 
     public TraderImportTableModel() {
@@ -52,7 +52,7 @@ public class TraderImportTableModel extends AbstractTableModel {
             case 2 ->
                 t.getAddress();
             case 3 ->
-                t.getPhone();
+                t.getAccount();
             default ->
                 null;
         };
