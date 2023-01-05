@@ -8,6 +8,7 @@ package com.inventory.ui;
 import com.CvInventoryApplication;
 import com.acc.common.AccountRepo;
 import com.acc.entry.AllCash;
+import com.acc.entry.DrCrVoucher;
 import com.acc.entry.Journal;
 import com.acc.entry.JournalClosingStock;
 import com.acc.report.AparReport;
@@ -150,6 +151,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private JournalClosingStock journalClosingStock;
     @Autowired
     private COAOpening coaOpening;
+    @Autowired
+    private DrCrVoucher drcrVoucher;
 //user
     @Autowired
     private InventoryRepo inventoryRepo;
@@ -533,6 +536,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 journal.setProgress(progress);
                 journal.initMain();
                 return journal;
+            }
+            case "Dr & Cr Voucher" -> {
+                drcrVoucher.setName(menuName);
+                drcrVoucher.setObserver(this);
+                drcrVoucher.setProgress(progress);
+                drcrVoucher.initMain();
+                return drcrVoucher;
             }
             case "Journal Stock Closing" -> {
                 journalClosingStock.setName(menuName);
