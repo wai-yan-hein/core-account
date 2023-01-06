@@ -16,6 +16,7 @@ public class AppRole implements java.io.Serializable {
 
     private String roleCode;
     private String roleName;
+    private String exampleRole;
 
     public AppRole() {
     }

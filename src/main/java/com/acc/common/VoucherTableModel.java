@@ -19,7 +19,7 @@ import javax.swing.table.AbstractTableModel;
 public class VoucherTableModel extends AbstractTableModel {
 
     private List<Gl> listGV = new ArrayList();
-    String[] columnNames = {"Date", "Voucher", "Description", "Refrence", "Vou Type", "Amount"};
+    String[] columnNames = {"Date", "Voucher", "Description", "Refrence", "Ref No", "Vou Type", "Amount"};
     private JTable parent;
 
     @Override
@@ -40,27 +40,24 @@ public class VoucherTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
         Gl gv = listGV.get(row);
-        switch (column) {
-            case 0 -> {
-                return Util1.toDateStr(gv.getGlDate(), "dd/MM/yyyy");
-            }
-            case 1 -> {
-                return gv.getVouNo();
-            }
-            case 2 -> {
-                return gv.getDescription();
-            }
-            case 3 -> {
-                return gv.getReference();
-            }
-            case 4 -> {
-                return gv.getTranSource().equals("DR") ? "Payment / Debit" : "Receipt / Credit";
-            }
-            case 5 -> {
-                return gv.getTranSource().equals("DR") ? gv.getCrAmt() : gv.getDrAmt();
-            }
-        }
-        return null;
+        return switch (column) {
+            case 0 ->
+                Util1.toDateStr(gv.getGlDate(), "dd/MM/yyyy");
+            case 1 ->
+                gv.getGlVouNo();
+            case 2 ->
+                gv.getDescription();
+            case 3 ->
+                gv.getReference();
+            case 4 ->
+                gv.getRefNo();
+            case 5 ->
+                gv.getTranSource().equals("DR") ? "Payment / Debit" : "Receipt / Credit";
+            case 6 ->
+                gv.getTranSource().equals("DR") ? gv.getCrAmt() : gv.getDrAmt();
+            default ->
+                null;
+        };
     }
 
     @Override
@@ -74,7 +71,7 @@ public class VoucherTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        return column == 5 ? Double.class : String.class;
+        return column == 6 ? Double.class : String.class;
     }
 
     public List<Gl> getListGV() {

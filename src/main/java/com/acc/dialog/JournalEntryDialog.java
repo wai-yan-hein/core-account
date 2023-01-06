@@ -87,7 +87,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
 
     private void initFocusListener() {
         txtVouDate.getDateEditor().getUiComponent().addFocusListener(fa);
-        txtRefrence.addKeyListener(this);
+        txtRefrence.addFocusListener(fa);
     }
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
@@ -299,7 +299,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         lblStatus = new javax.swing.JLabel();
         btnCurrency = new javax.swing.JButton();
         btnSave = new javax.swing.JButton();
-        btnPrint = new javax.swing.JButton();
         btnPrint1 = new javax.swing.JButton();
 
         jLabel3.setText("jLabel3");
@@ -461,15 +460,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
             }
         });
 
-        btnPrint.setFont(Global.lableFont);
-        btnPrint.setText("Save & Print- F6");
-        btnPrint.setName("btnSave"); // NOI18N
-        btnPrint.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnPrintActionPerformed(evt);
-            }
-        });
-
         btnPrint1.setFont(Global.lableFont);
         btnPrint1.setText("New");
         btnPrint1.setName("btnSave"); // NOI18N
@@ -491,8 +481,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnSave)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnPrint)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnPrint1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtFDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -504,16 +492,15 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                         .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtFCrdAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtFDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(lblStatus))
                         .addGroup(jPanel1Layout.createSequentialGroup()
-                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                .addComponent(btnPrint)
-                                .addComponent(btnSave, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(btnPrint1))
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(btnPrint1)
+                                .addComponent(btnSave, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addGap(4, 4, 4)))
                     .addComponent(btnCurrency))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -571,14 +558,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         saveGeneralVoucher();
     }//GEN-LAST:event_btnSaveActionPerformed
 
-    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
-        try {
-            printJournal();
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
-        }
-    }//GEN-LAST:event_btnPrintActionPerformed
-
     private void tblJournalKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblJournalKeyReleased
         // TODO add your handling code here:
 
@@ -608,7 +587,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
      */
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCurrency;
-    private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnPrint1;
     private javax.swing.JButton btnSave;
     private javax.swing.JLabel jLabel1;

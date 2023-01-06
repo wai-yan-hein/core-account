@@ -459,6 +459,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 Reader reader = Files.newBufferedReader(Paths.get(path.concat(".json")));
                 List<Gl> listVGl = gson.fromJson(reader, new TypeToken<ArrayList<Gl>>() {
                 }.getType());
+                allCashTableModel.setGlDate(filter.getFromDate());
                 allCashTableModel.setListVGl(listVGl);
                 allCashTableModel.addNewRow();
                 calDebitCredit();

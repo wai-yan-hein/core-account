@@ -21,6 +21,9 @@ import com.common.PanelControl;
 import com.common.ReturnObject;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
@@ -34,6 +37,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -274,42 +278,29 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         cOAAutoCompleter.setSelectionObserver(this);
     }
 
-    private void printReport() {
-        ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
-        filter.setReportName("ARAP");
-        Mono<ReturnObject> result = accountApi
-                .post()
-                .uri("/report/get-report")
-                .body(Mono.just(filter), FilterObject.class)
-                .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.subscribe((t) -> {
-            try {
-                if (t != null) {
-                    String filePath = String.format("%s%s%s", Global.accountRP, File.separator, "ARAP.jasper");
-                    if (t.getFile().length > 0) {
-                        JasperReportsContext jc = DefaultJasperReportsContext.getInstance();
-                        jc.setProperty("net.sf.jasperreports.default.pdf.font.name", Global.fontName);
-                        jc.setProperty("net.sf.jasperreports.default.pdf.encoding", "Identity-H");
-                        jc.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
-                        InputStream input = new ByteArrayInputStream(t.getFile());
-                        JsonDataSource ds = new JsonDataSource(input);
-                        Map<String, Object> param = new HashMap<>();
-                        JasperPrint js = JasperFillManager.fillReport(filePath, param, ds);
-                        JasperViewer.viewReport(js, false);
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Report Does Not Exists.");
-                    }
-                }
-                progress.setIndeterminate(false);
-            } catch (JRException ex) {
-                log.error("printVoucher : " + ex.getMessage());
-                JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
-            }
-        }, (e) -> {
-            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+    private void printARAP() {
+        try {
+            progress.setIndeterminate(true);
+            Map<String, Object> p = new HashMap();
+            p.put("p_report_name", "Account Receivable & Payable");
+            p.put("p_date", String.format("Between %s and %s", dateAutoCompleter.getStDate(), dateAutoCompleter.getEndDate()));
+            p.put("p_print_date", Util1.getTodayDateTime());
+            p.put("p_comp_name", Global.companyName);
+            p.put("p_comp_address", Global.companyAddress);
+            p.put("p_comp_phone", Global.companyPhone);
+            p.put("p_currency", currencyAutoCompleter.getCurrency().getCurCode());
+            p.put("p_department", txtDep.getText());
+            Util1.initJasperContext();
+            String path = "temp/ARAP" + Global.macId + ".json";
+            JsonDataSource ds = new JsonDataSource(new File(path));
+            JasperPrint js = JasperFillManager.fillReport(Global.accountRP + "ARAP.jasper", p, ds);
+            JasperViewer.viewReport(js, false);
             progress.setIndeterminate(false);
-        });
+        } catch (FileNotFoundException | JRException ex) {
+            progress.setIndeterminate(false);
+            JOptionPane.showMessageDialog(Global.parentForm, "Report", ex.getMessage(), JOptionPane.ERROR_MESSAGE);
+            log.error("printARAP : " + ex.getMessage());
+        }
 
     }
 
@@ -671,7 +662,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
 
     @Override
     public void print() {
-        printReport();
+        printARAP();
     }
 
     @Override

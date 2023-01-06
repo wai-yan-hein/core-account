@@ -6,7 +6,9 @@
 package com.user.setup;
 
 import com.acc.common.AccountRepo;
+import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
+import com.acc.model.ChartOfAccount;
 import com.acc.model.Department;
 import com.common.Global;
 import com.common.RoleProperty;
@@ -55,6 +57,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private TraderAutoCompleter supCompleter;
     private LocationAutoCompleter locCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
+    private COA3AutoCompleter cOA3AutoCompleter;
     private MacAutoCompleter macAutoCompleter;
     private HashMap<String, String> hmProperty;
     private String properyType = "System";
@@ -147,6 +150,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkDepFilter.setName("department.filter");
         chkDepOption.setName("department.option");
         chkPriceOption.setName("sale.price.option");
+        txtCash.setName("default.cash");
     }
 
     private void initProperty() {
@@ -216,6 +220,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtPl.addActionListener(action);
         txtInvGroup.addActionListener(action);
         txtBS.addActionListener(action);
+        txtCash.addActionListener(action);
     }
 
     private void initCheckBox() {
@@ -307,6 +312,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, accountRepo.getDepartment(), null, false, false);
         departmentAutoCompleter.setObserver(this);
         departmentAutoCompleter.setDepartment(accountRepo.getDefaultDepartment());
+        cOA3AutoCompleter = new COA3AutoCompleter(txtCash, accountRepo, null, false, 3);
+        cOA3AutoCompleter.setSelectionObserver(this);
+        cOA3AutoCompleter.setCoa(accountRepo.getDefaultCash());
+
     }
 
     private void save(String key, String value) {
@@ -384,6 +393,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         jSeparator3 = new javax.swing.JSeparator();
         jLabel19 = new javax.swing.JLabel();
         txtDep = new javax.swing.JTextField();
+        jLabel20 = new javax.swing.JLabel();
+        txtCash = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         chkPrint = new javax.swing.JCheckBox();
         chkSWB = new javax.swing.JCheckBox();
@@ -464,6 +475,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         txtDep.setFont(Global.textFont);
 
+        jLabel20.setText("Cash");
+
+        txtCash.setFont(Global.textFont);
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
@@ -473,17 +488,19 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jSeparator3)
                     .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabel2)
                             .addComponent(jLabel3)
                             .addComponent(jLabel4)
-                            .addComponent(jLabel19))
+                            .addComponent(jLabel19, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtCustomer)
                             .addComponent(txtSupplier)
                             .addComponent(txtLocation)
-                            .addComponent(txtDep))))
+                            .addComponent(txtDep)
+                            .addComponent(txtCash))))
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
@@ -505,6 +522,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel19)
                     .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel20)
+                    .addComponent(txtCash, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -965,6 +986,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -986,6 +1008,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JTextField txtA4Report;
     private javax.swing.JTextField txtA5Report;
     private javax.swing.JTextField txtBS;
+    private javax.swing.JTextField txtCash;
     private javax.swing.JTextField txtCreditor;
     private javax.swing.JTextField txtCus;
     private javax.swing.JTextField txtCustomer;
@@ -1041,6 +1064,11 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             Department d = departmentAutoCompleter.getDepartment();
             if (d != null) {
                 save(txtDep.getName(), d.getKey().getDeptCode());
+            }
+        } else if (source.equals("COA")) {
+            ChartOfAccount coa = cOA3AutoCompleter.getCOA();
+            if (coa != null) {
+                save(txtCash.getName(), coa.getKey().getCoaCode());
             }
         }
     }

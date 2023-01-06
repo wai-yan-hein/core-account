@@ -47,7 +47,7 @@ public class UserRoleTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return false;
+        return true;
     }
 
     @Override

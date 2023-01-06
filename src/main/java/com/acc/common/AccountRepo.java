@@ -52,6 +52,11 @@ public class AccountRepo {
         return findDepartment(Util1.isNull(deptCode, "-"));
     }
 
+    public ChartOfAccount getDefaultCash() {
+        String coaCode = Global.hmRoleProperty.get("default.cash");
+        return findCOA(Util1.isNull(coaCode, "-"));
+    }
+
     public Department findDepartment(String deptCode) {
         DepartmentKey key = new DepartmentKey();
         key.setDeptCode(Util1.isNull(deptCode, "-"));
@@ -184,14 +189,15 @@ public class AccountRepo {
         return result.block(Duration.ofMinutes(min));
     }
 
-    public boolean deleteJouranl(DeleteObj gl) {
+    public boolean deleteVoucher(DeleteObj gl) {
         Mono<Boolean> result = accountApi.post()
-                .uri("/account/delete-journal")
+                .uri("/account/delete-voucher")
                 .body(Mono.just(gl), DeleteObj.class)
                 .retrieve()
                 .bodyToMono(Boolean.class);
         return result.block(Duration.ofMinutes(min));
     }
+
 
     public boolean delete(StockOPKey key) {
         Mono<Boolean> result = accountApi.post()
@@ -251,6 +257,15 @@ public class AccountRepo {
     public List<Gl> getJournal(String vouNo) {
         Mono<ResponseEntity<List<Gl>>> result = accountApi.get()
                 .uri(builder -> builder.path("/account/get-journal")
+                .queryParam("glVouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().toEntityList(Gl.class);
+        return result.block().getBody();
+    }
+    public List<Gl> getVoucher(String vouNo) {
+        Mono<ResponseEntity<List<Gl>>> result = accountApi.get()
+                .uri(builder -> builder.path("/account/get-voucher")
                 .queryParam("glVouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .build())

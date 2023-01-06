@@ -260,8 +260,8 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     String filePath = String.format("%s%s%s", Global.reportPath, File.separator, reportUrl.concat(".jasper"));
                     if (t.getFile().length > 0) {
                         JasperReportsContext jc = DefaultJasperReportsContext.getInstance();
-                        jc.setProperty("net.sf.jasperreports.default.font.name", Global.fontName);
-                        jc.setProperty("net.sf.jasperreports.default.pdf.font.name", Global.fontName);
+                        jc.setProperty("net.sf.jasperreports.default.font.name", Global.fontName.concat(".ttf"));
+                        jc.setProperty("net.sf.jasperreports.default.pdf.font.name", Global.fontName.concat(".ttf"));
                         jc.setProperty("net.sf.jasperreports.default.pdf.encoding", "Identity-H");
                         jc.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
                         jc.setProperty("net.sf.jasperreports.viewer.zoom", "1");

@@ -14,16 +14,40 @@ import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.acc.editor.DepartmentAutoCompleter;
+import com.acc.editor.DespAutoCompleter;
+import com.acc.editor.RefAutoCompleter;
+import com.acc.model.DeleteObj;
+import com.acc.model.ReportFilter;
+import static com.common.ProUtil.gson;
+import com.common.Util1;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.toedter.calendar.JTextFieldDateEditor;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.HashMap;
 import java.util.List;
-import javax.swing.ImageIcon;
+import java.util.Map;
+import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.data.JsonDataSource;
+import net.sf.jasperreports.view.JasperViewer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 /**
  *
@@ -36,11 +60,15 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     private int selectRow = -1;
     private DateAutoCompleter dateAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
+    private DespAutoCompleter despAutoCompleter;
+    private RefAutoCompleter refAutoCompleter;
     private SelectionObserver observer;
     private JProgressBar progress;
     private final VoucherTableModel voucherTableModel = new VoucherTableModel();
     @Autowired
     private AccountRepo accountRepo;
+    @Autowired
+    private WebClient accountApi;
 
     public JProgressBar getProgress() {
         return progress;
@@ -64,6 +92,28 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     public DrCrVoucher() {
         initComponents();
         initKeyListener();
+        initFocusListener();
+    }
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            if (e.getSource() instanceof JTextFieldDateEditor edit) {
+                edit.selectAll();
+            } else if (e.getSource() instanceof JTextField txt) {
+                txt.selectAll();
+            }
+        }
+
+    };
+
+    private void initFocusListener() {
+        txtDate.addFocusListener(fa);
+        txtDept.addFocusListener(fa);
+        txtVouNo.addFocusListener(fa);
+        txtDesp.addFocusListener(fa);
+        txtRef.addFocusListener(fa);
+        txtRefNo.addFocusListener(fa);
+
     }
 
     private void initTable() {
@@ -72,6 +122,20 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         tblVoucher.setDefaultRenderer(Object.class, new TableCellRender());
         tblVoucher.setDefaultRenderer(Double.class, new TableCellRender());
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
+        tblVoucher.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    if (tblVoucher.getSelectedRow() >= 0) {
+                        selectRow = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
+                        Gl gl = voucherTableModel.getVGl(selectRow);
+                        List<Gl> list = accountRepo.getVoucher(gl.getGlVouNo());
+                        openVoucherDialog(gl.getTranSource(), list);
+                    }
+                }
+            }
+
+        });
     }
 
     private void initCombo() {
@@ -79,6 +143,10 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         dateAutoCompleter.setSelectionObserver(this);
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDept, accountRepo.getDepartment(), null, true, true);
         departmentAutoCompleter.setObserver(this);
+        despAutoCompleter = new DespAutoCompleter(txtDesp, accountRepo, null, true);
+        despAutoCompleter.setSelectionObserver(this);
+        refAutoCompleter = new RefAutoCompleter(txtRef, accountRepo, null, true);
+        refAutoCompleter.setSelectionObserver(this);
     }
 
     public void initMain() {
@@ -99,26 +167,102 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     private void search() {
         if (progress != null) {
             progress.setIndeterminate(true);
+            ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
+            filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
+            filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
+            filter.setListDepartment(departmentAutoCompleter.getListOption());
+            filter.setDesp(txtDesp.getText());
+            filter.setGlVouNo(txtVouNo.getText());
+            filter.setReference(txtRef.getText());
+            Mono<ResponseEntity<List<Gl>>> result = accountApi
+                    .post()
+                    .uri("/account/search-voucher")
+                    .body(Mono.just(filter), ReportFilter.class)
+                    .retrieve()
+                    .toEntityList(Gl.class);
+            result.subscribe((t) -> {
+                voucherTableModel.setListGV(t.getBody());
+                lblRecord.setText(voucherTableModel.getListSize() + "");
+                progress.setIndeterminate(false);
+            });
         }
 
     }
 
     public void openVoucherDialog(String type, List<Gl> listVGl) {
         VoucherEntryDailog dailog = new VoucherEntryDailog();
-        dailog.setIconImage(new ImageIcon("image/book_26px.png").getImage());
+        dailog.setIconImage(Global.parentForm.getIconImage());
+        dailog.setAccountRepo(accountRepo);
         dailog.setVouType(type);
         dailog.setObserver(this);
         dailog.setListVGl(listVGl);
-        dailog.initTable();
+        dailog.initMain();
         dailog.setSize(Global.width - 200, Global.height - 200);
         dailog.setLocationRelativeTo(null);
         dailog.setVisible(true);
     }
 
-    private void searchDetail() {
-        int row = tblVoucher.getSelectedRow();
+    private void deleteVoucher() {
+        int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
+        int yes_no;
         if (row >= 0) {
+            Gl gl = voucherTableModel.getVGl(row);
+            String glVouNo = gl.getGlVouNo();
+            if (glVouNo != null) {
+                yes_no = JOptionPane.showConfirmDialog(Global.parentForm, "Are you sure to delete voucher?",
+                        "Delete", JOptionPane.YES_NO_OPTION);
+                if (yes_no == 0) {
+                    DeleteObj obj = new DeleteObj();
+                    obj.setGlVouNo(glVouNo);
+                    obj.setCompCode(Global.compCode);
+                    obj.setModifyBy(Global.loginUser.getUserCode());
+                    if (accountRepo.deleteVoucher(obj)) {
+                        voucherTableModel.remove(selectRow);
+                        focusOnTable();
+                    }
+                }
+            }
+        }
+    }
 
+    private void focusOnTable() {
+        int rc = tblVoucher.getRowCount();
+        if (rc >= 1) {
+            tblVoucher.setRowSelectionInterval(rc - 1, rc - 1);
+            tblVoucher.setColumnSelectionInterval(0, 0);
+            tblVoucher.requestFocus();
+        } else {
+            txtDate.requestFocusInWindow();
+        }
+    }
+
+    private void printVoucher() {
+        int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
+        if (row >= 0) {
+            try {
+                Gl gl = voucherTableModel.getVGl(row);
+                String glVouNo = gl.getGlVouNo();
+                String rpName = gl.getTranSource().equals("DR") ? "Payment / Debit Voucher" : "Receipt / Credit Voucher";
+                String rpPath = Global.accountRP + "DrCrVoucherA5.jasper";
+                Map<String, Object> p = new HashMap();
+                p.put("p_report_name", rpName);
+                p.put("p_date", String.format("Between %s and %s", dateAutoCompleter.getStDate(), dateAutoCompleter.getEndDate()));
+                p.put("p_print_date", Util1.getTodayDateTime());
+                p.put("p_comp_name", Global.companyName);
+                p.put("p_comp_address", Global.companyAddress);
+                p.put("p_comp_phone", Global.companyPhone);
+                Util1.initJasperContext();
+                List<Gl> list = accountRepo.getVoucher(glVouNo);
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode node = mapper.readTree(gson.toJson(list));
+                JsonDataSource ds = new JsonDataSource(node, null) {
+                };
+                JasperPrint js = JasperFillManager.fillReport(rpPath, p, ds);
+                JasperViewer.viewReport(js, false);
+            } catch (JsonProcessingException | JRException ex) {
+                log.error("printVoucher : " + ex.getMessage());
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
@@ -348,14 +492,12 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         // TODO add your handling code here:
-        observer.selected("CONTROL", this);
+        observer.selected("control", this);
     }//GEN-LAST:event_formComponentShown
 
     private void tblVoucherMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblVoucherMouseClicked
         // TODO add your handling code here:
-        if (evt.getClickCount() == 2) {
-            searchDetail();
-        }
+
     }//GEN-LAST:event_tblVoucherMouseClicked
 
     private void txtDateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtDateActionPerformed
@@ -402,6 +544,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
 
     @Override
     public void delete() {
+        deleteVoucher();
     }
 
     @Override
@@ -414,6 +557,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
 
     @Override
     public void print() {
+        printVoucher();
     }
 
     @Override

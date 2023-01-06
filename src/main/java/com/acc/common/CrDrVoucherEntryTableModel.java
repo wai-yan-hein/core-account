@@ -8,6 +8,7 @@ package com.acc.common;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.Department;
 import com.acc.model.Gl;
+import com.acc.model.GlKey;
 import com.acc.model.TraderA;
 import com.common.Global;
 import com.common.ProUtil;
@@ -35,10 +36,19 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
     private JTable parent;
     private JFormattedTextField ttlAmt;
     private String vouType;
-    private List<String> delLIst = new ArrayList<>();
+    private List<String> delList = new ArrayList<>();
     private boolean change = false;
     private AccountRepo accountRepo;
     private Department department;
+    private boolean edit = false;
+
+    public boolean isEdit() {
+        return edit;
+    }
+
+    public void setEdit(boolean edit) {
+        this.edit = edit;
+    }
 
     public Department getDepartment() {
         return department;
@@ -64,12 +74,12 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
         this.change = change;
     }
 
-    public List<String> getDelLIst() {
-        return delLIst;
+    public List<String> getDelList() {
+        return delList;
     }
 
-    public void setDelLIst(List<String> delLIst) {
-        this.delLIst = delLIst;
+    public void setDelList(List<String> delList) {
+        this.delList = delList;
     }
 
     public void setVouType(String vouType) {
@@ -161,9 +171,9 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
                                         gl.setAccName(coa.getCoaNameEng());
                                     }
                                     if (ProUtil.isMultiCur()) {
-                                        parent.setColumnSelectionInterval(7, 7);
+                                        parent.setColumnSelectionInterval(4, 4);
                                     } else {
-                                        parent.setColumnSelectionInterval(8, 8);
+                                        parent.setColumnSelectionInterval(5, 5);
                                     }
                                 } else {
                                     parent.setColumnSelectionInterval(5, 5);
@@ -302,13 +312,18 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
 
     public void addEmptyRow() {
         if (hasEmptyRow()) {
-            Gl vGl = new Gl();
+            Gl gl = new Gl();
+            GlKey key = new GlKey();
+            key.setCompCode(Global.compCode);
+            key.setDeptId(Global.deptId);
+            gl.setKey(key);
             if (department != null) {
-                vGl.setDeptCode(department.getKey().getDeptCode());
-                vGl.setDeptUsrCode(department.getUserCode());
+                gl.setDeptCode(department.getKey().getDeptCode());
+                gl.setDeptUsrCode(department.getUserCode());
             }
-            vGl.setCurCode(Global.currency);
-            listVGl.add(vGl);
+            gl.setCurCode(Global.currency);
+            gl.setTranSource(vouType);
+            listVGl.add(gl);
             fireTableRowsInserted(listVGl.size() - 1, listVGl.size() - 1);
         }
 
@@ -324,7 +339,6 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
                 status = false;
             }
         }
-
         return status;
     }
 
@@ -363,7 +377,7 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
                 int status = JOptionPane.showConfirmDialog(Global.parentForm,
                         "Are you sure to delete transaction.", "Delete Transaction", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (status == JOptionPane.YES_OPTION) {
-                    delLIst.add(gl.getKey().getGlCode());
+                    delList.add(gl.getKey().getGlCode());
                     listVGl.remove(row);
                     fireTableRowsDeleted(row, row);
                     calAmount();

@@ -34,6 +34,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
@@ -312,13 +314,15 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             p.put("p_currency", currencyAutoCompleter.getCurrency().getCurCode());
             p.put("p_department", txtDep.getText());
             Util1.initJasperContext();
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode node = mapper.readTree(gson.toJson(glListingTableModel.getListTBAL()));
-            JsonDataSource ds = new JsonDataSource(node, null) {};
+            /*            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = mapper.readTree(gson.toJson(glListingTableModel.getListTBAL()));*/
+            String path = "temp/TRI" + Global.macId + ".json";
+            JsonDataSource ds = new JsonDataSource(new File(path)) {
+            };
             JasperPrint js = JasperFillManager.fillReport(Global.accountRP + "TriBalance.jasper", p, ds);
             JasperViewer.viewReport(js, false);
             progress.setIndeterminate(false);
-        } catch (JsonProcessingException | JRException ex) {
+        } catch (FileNotFoundException | JRException ex) {
             progress.setIndeterminate(false);
             JOptionPane.showMessageDialog(Global.parentForm, "Report", ex.getMessage(), JOptionPane.ERROR_MESSAGE);
             log.error("printGLListing : " + ex.getMessage());

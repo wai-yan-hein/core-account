@@ -9,6 +9,8 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Image;
+import java.awt.SystemTray;
+import java.awt.TrayIcon;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -47,6 +49,9 @@ public class CvInventoryApplication {
     public static void main(String[] args) throws IOException {
         Properties loadProperty = loadProperty();
         initFont(Util1.getInteger(loadProperty.getProperty("font.size")));
+        SystemTray systemTray = SystemTray.getSystemTray();
+        TrayIcon[] icons =systemTray.getTrayIcons();
+        log.info("icon"+icons.length);
         try {
             UIManager.setLookAndFeel(new FlatLightLaf());
         } catch (UnsupportedLookAndFeelException ex) {
@@ -59,7 +64,7 @@ public class CvInventoryApplication {
                 tray.openMF();
             }
             JOptionPane.showMessageDialog(new JFrame(), "Core Inventory is already running.", "Duplicate Program", JOptionPane.ERROR_MESSAGE);
-            System.exit(1);
+            //System.exit(1);
         }
         Global.selectionColor = UIManager.getDefaults().getColor("Table.selectionBackground");
         System.setProperty("flatlaf.useWindowDecorations", "true");
@@ -125,7 +130,7 @@ public class CvInventoryApplication {
                 log.error("restart :" + e.getMessage());
             }
         });
-        thread.setDaemon(false);
+        thread.setDaemon(true);
         thread.start();
     }
 

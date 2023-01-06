@@ -14,6 +14,8 @@ import com.user.common.UserRepo;
 import com.inventory.model.AppRole;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.UserRoleTableModel;
+import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.dialog.RoleSetupDialog;
 import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.Objects;
@@ -32,9 +34,9 @@ import reactor.core.publisher.Mono;
  * @author Lenovo
  */
 @Component
-public class RoleSetting extends javax.swing.JPanel implements PanelControl {
+public class RoleSetting extends javax.swing.JPanel implements PanelControl, SelectionObserver {
 
-    private final SystemProperty sysProperty= new SystemProperty();
+    private final SystemProperty sysProperty = new SystemProperty();
     @Autowired
     private RoleMenuSetup roleMenuSetup;
     @Autowired
@@ -87,8 +89,6 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl {
                 if (tblRole.getSelectedRow() >= 0) {
                     selectRow = tblRole.convertRowIndexToModel(tblRole.getSelectedRow());
                     role = userRoleTableModel.getRole(selectRow);
-                    txtRoleName.setText(role.getRoleName());
-                    lblStatus.setText("EDIT");
                     String roleCode = role.getRoleCode();
                     if (roleCode != null) {
                         sysProperty.setProperyType("Role");
@@ -101,6 +101,7 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl {
             }
         });
         tblRole.setDefaultRenderer(Object.class, new TableCellRender());
+        tblRole.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
         searchRole();
         initTabMain();
     }
@@ -147,7 +148,6 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl {
 
     @Override
     public void save() {
-        saveRole();
     }
 
     @Override
@@ -157,9 +157,6 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl {
     @Override
     public void newForm() {
         role = new AppRole();
-        txtRoleName.setText(null);
-        lblStatus.setText("NEW");
-
     }
 
     @Override
@@ -184,18 +181,6 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl {
         return this.getName();
     }
 
-    private void saveRole() {
-        role.setRoleName(txtRoleName.getText());
-        userRepo.saveAppRole(role);
-        if (Objects.isNull(role.getRoleCode())) {
-            userRoleTableModel.addRole(role);
-        } else {
-            userRoleTableModel.setRole(selectRow, role);
-        }
-        role = new AppRole();
-        txtRoleName.setText(null);
-    }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -208,10 +193,7 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl {
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblRole = new javax.swing.JTable();
-        jPanel3 = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
-        txtRoleName = new javax.swing.JTextField();
-        lblStatus = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         tabMain = new javax.swing.JTabbedPane();
 
@@ -243,40 +225,15 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl {
         });
         jScrollPane1.setViewportView(tblRole);
 
-        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
-
-        jLabel2.setFont(Global.lableFont);
-        jLabel2.setText("Role Name");
-
-        txtRoleName.setFont(Global.textFont);
-
-        lblStatus.setFont(Global.lableFont);
-        lblStatus.setText("NEW");
-
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtRoleName, javax.swing.GroupLayout.PREFERRED_SIZE, 163, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblStatus)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(txtRoleName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(lblStatus))
-                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
+        jButton1.setBackground(Global.selectionColor);
+        jButton1.setFont(Global.lableFont);
+        jButton1.setForeground(new java.awt.Color(255, 255, 255));
+        jButton1.setText("New Role ");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -285,21 +242,23 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE)
+                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 251, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE)
+                .addComponent(jButton1)
                 .addContainerGap())
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        tabMain.setFont(Global.menuFont);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -358,16 +317,31 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl {
         }
     }//GEN-LAST:event_tblRoleKeyReleased
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        RoleSetupDialog d = new RoleSetupDialog(Global.parentForm);
+        d.setObserver(this);
+        d.setUserRepo(userRepo);
+        d.initTable();
+        d.setLocationRelativeTo(null);
+        d.setVisible(true);
+    }//GEN-LAST:event_jButton1ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel2;
+    private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JLabel lblStatus;
     private javax.swing.JTabbedPane tabMain;
     private javax.swing.JTable tblRole;
-    private javax.swing.JTextField txtRoleName;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void selected(Object source, Object selectObj) {
+        String str = source.toString();
+        if (str.equals("Refresh")) {
+            searchRole();
+        }
+    }
 }

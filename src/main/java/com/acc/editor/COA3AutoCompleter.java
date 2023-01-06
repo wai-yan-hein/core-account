@@ -179,7 +179,7 @@ public class COA3AutoCompleter implements KeyListener {
             ((JTextField) textComp).setText(coa.getCoaNameEng());
             if (editor == null) {
                 if (selectionObserver != null) {
-                    selectionObserver.selected("COA_OBJ", coa.getKey().getCoaCode());
+                    selectionObserver.selected("COA", coa.getKey().getCoaCode());
                 }
             }
         }

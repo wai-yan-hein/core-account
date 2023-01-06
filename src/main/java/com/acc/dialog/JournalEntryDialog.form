@@ -227,8 +227,6 @@
                   <EmptySpace max="32767" attributes="0"/>
                   <Component id="btnSave" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="btnPrint" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
                   <Component id="btnPrint1" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="txtFDrAmt" min="-2" pref="170" max="-2" attributes="0"/>
@@ -242,17 +240,16 @@
               <Group type="102" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                      <Group type="103" groupAlignment="1" attributes="0">
                           <Group type="103" alignment="0" groupAlignment="3" attributes="0">
                               <Component id="txtFCrdAmt" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="txtFDrAmt" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="lblStatus" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <Group type="102" alignment="1" attributes="0">
-                              <Group type="103" groupAlignment="1" attributes="0">
-                                  <Component id="btnPrint" alignment="1" min="-2" max="-2" attributes="0"/>
-                                  <Component id="btnSave" max="32767" attributes="0"/>
-                                  <Component id="btnPrint1" alignment="1" min="-2" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="btnPrint1" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="btnSave" alignment="3" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace min="4" pref="4" max="-2" attributes="0"/>
                           </Group>
@@ -332,18 +329,6 @@
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSaveActionPerformed"/>
-          </Events>
-        </Component>
-        <Component class="javax.swing.JButton" name="btnPrint">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.lableFont" type="code"/>
-            </Property>
-            <Property name="text" type="java.lang.String" value="Save &amp; Print- F6"/>
-            <Property name="name" type="java.lang.String" value="btnSave" noResource="true"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnPrintActionPerformed"/>
           </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btnPrint1">

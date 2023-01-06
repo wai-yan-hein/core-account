@@ -13,6 +13,6 @@ import lombok.Data;
 @Data
 public class PrivilegeCompany {
 
-    private PCKey pcKey;
+    private PCKey key;
     private boolean allow;
 }

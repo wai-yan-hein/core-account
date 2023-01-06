@@ -17,6 +17,7 @@ public class Gl {
 
     private GlKey key;
     private Date glDate;
+    private String glDateStr;
     private String description;
     private String srcAccCode;
     private String accCode;
