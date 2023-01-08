@@ -198,7 +198,6 @@ public class AccountRepo {
         return result.block(Duration.ofMinutes(min));
     }
 
-
     public boolean delete(StockOPKey key) {
         Mono<Boolean> result = accountApi.post()
                 .uri("/account/delete-stock-op")
@@ -263,6 +262,7 @@ public class AccountRepo {
                 .retrieve().toEntityList(Gl.class);
         return result.block().getBody();
     }
+
     public List<Gl> getVoucher(String vouNo) {
         Mono<ResponseEntity<List<Gl>>> result = accountApi.get()
                 .uri(builder -> builder.path("/account/get-voucher")
@@ -304,15 +304,6 @@ public class AccountRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve().toEntityList(Department.class);
-        return result.block().getBody();
-    }
-
-    public List<OpeningBalance> getCOAOpening(ReportFilter filter) {
-        Mono<ResponseEntity<List<OpeningBalance>>> result = accountApi
-                .post()
-                .uri("/report/get-coa-opening")
-                .body(Mono.just(filter), FilterObject.class
-                ).retrieve().toEntityList(OpeningBalance.class);
         return result.block().getBody();
     }
 

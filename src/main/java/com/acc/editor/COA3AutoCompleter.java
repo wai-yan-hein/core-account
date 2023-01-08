@@ -43,7 +43,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Lenovo
  */
 @Slf4j
-public class COA3AutoCompleter implements KeyListener {
+public final class COA3AutoCompleter implements KeyListener {
 
     private final JTable table = new JTable();
     private JPopupMenu popup = new JPopupMenu();
@@ -76,6 +76,9 @@ public class COA3AutoCompleter implements KeyListener {
         this.accountRepo = accountRepo;
         this.filter = filter;
         this.level = level;
+        if (this.filter) {
+            setCoa(new ChartOfAccount(new COAKey("-", Global.compCode), "All"));
+        }
         switch (this.level) {
             case 1 -> {
                 table.setModel(cOA1TableModel);

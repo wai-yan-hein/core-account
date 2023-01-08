@@ -58,6 +58,8 @@ public class ReportFilter {
     private String bsProcess;
     private String invGroup;
     private String coaCode;
+    private String srcAcc;
+
     public ReportFilter(Integer macId, String compCode, Integer deptId) {
         this.macId = macId;
         this.compCode = compCode;
