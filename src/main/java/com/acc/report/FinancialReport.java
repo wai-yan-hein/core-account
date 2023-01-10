@@ -204,9 +204,11 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                 return false;
             }
         } else if (url.equals("IndividualStatement")) {
-            JOptionPane.showMessageDialog(this, "Please select COA.", "Report Validation", JOptionPane.INFORMATION_MESSAGE);
-            txtCOA.requestFocus();
-            return false;
+            if (cOA3AutoCompleter.getCOA().getKey().getCoaCode().equals("-")) {
+                JOptionPane.showMessageDialog(this, "Please select COA.", "Report Validation", JOptionPane.INFORMATION_MESSAGE);
+                txtCOA.requestFocus();
+                return false;
+            }
         }
         return true;
     }
