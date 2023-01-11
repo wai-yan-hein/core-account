@@ -90,12 +90,17 @@ public class UserRepo {
     }
 
     public MachineInfo register(String macName) {
-        Mono<ResponseEntity<MachineInfo>> result = userApi.get()
-                .uri(builder -> builder.path("/user/get-mac-info")
-                .queryParam("macName", macName)
-                .build())
-                .retrieve().toEntity(MachineInfo.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        try {
+            Mono<ResponseEntity<MachineInfo>> result = userApi.get()
+                    .uri(builder -> builder.path("/user/get-mac-info")
+                    .queryParam("macName", macName)
+                    .build())
+                    .retrieve().toEntity(MachineInfo.class);
+            return result.block(Duration.ofMinutes(min)).getBody();
+        } catch (Exception e) {
+            log.info("register : " + e.getMessage());
+        }
+        return null;
     }
 
     public MachineInfo register(MachineInfo mac) {

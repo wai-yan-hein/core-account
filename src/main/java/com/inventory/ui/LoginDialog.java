@@ -80,6 +80,10 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
         try {
             Global.machineName = Util1.getComputerName();
             MachineInfo mac = userRepo.register(Global.machineName);
+            if (mac == null) {
+                JOptionPane.showMessageDialog(this, "Core User Api is not running.", "Machine", JOptionPane.ERROR_MESSAGE);
+                System.exit(1);
+            }
             int macId = mac.getMacId();
             if (macId == 0) {
                 SecurityDialog dialog = new SecurityDialog();

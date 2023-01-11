@@ -13,6 +13,6 @@ import lombok.Data;
 @Data
 public class PrivilegeMenu {
 
-    private PMKey pmKey;
+    private PMKey key;
     private boolean allow;
 }

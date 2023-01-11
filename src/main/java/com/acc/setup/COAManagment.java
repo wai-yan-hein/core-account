@@ -102,7 +102,7 @@ public class COAManagment extends javax.swing.JPanel implements
     private JPopupMenu popupmenu;
     private SelectionObserver observer;
     private final HashMap<String, Menu> hmMenu = new HashMap<>();
-    private ChartOfAccount chartOfAccount;
+    private ChartOfAccount coa;
     private boolean isNew = false;
     private JProgressBar progress;
 
@@ -184,11 +184,8 @@ public class COAManagment extends javax.swing.JPanel implements
     }
 
     private void newCOA() {
-        ChartOfAccount coa = new ChartOfAccount();
-        COAKey key = new COAKey();
-        key.setCompCode(Global.compCode);
-        key.setCoaCode(txtSysCode.getText());
-        coa.setKey(key);
+        coa = new ChartOfAccount();
+        coa.setKey(new COAKey());
         coa.setCoaNameEng("New Chart of Account");
         DefaultMutableTreeNode child = new DefaultMutableTreeNode(coa);
         if (selectedNode != null) {
@@ -215,21 +212,24 @@ public class COAManagment extends javax.swing.JPanel implements
                     option = "USR";
                 }
                 if (isNew) {
-                    chartOfAccount.setCreatedBy(Global.loginUser.getUserCode());
-                    chartOfAccount.setCreatedDate(Util1.getTodayDate());
+                    coa.setCreatedBy(Global.loginUser.getUserCode());
+                    coa.setCreatedDate(Util1.getTodayDate());
                 }
                 int level = selectedNode.getLevel();
-                chartOfAccount.setCoaNameEng(txtName.getText());
-                chartOfAccount.setCoaCodeUsr(txtUsrCode.getText());
-                chartOfAccount.setCoaParent(parentCode);
-                chartOfAccount.setCoaLevel(level);
-                chartOfAccount.setModifiedBy(Global.loginUser.getUserCode());
-                chartOfAccount.setModifiedDate(Util1.getTodayDate());
-                chartOfAccount.setOption(option);
-                chartOfAccount.setActive(chkActive.isSelected());
-                chartOfAccount.setCurCode(Util1.isNull(txtCurrency.getText(), null));
-                chartOfAccount.setMacId(Global.macId);
-                ChartOfAccount coaSave = accountRepo.saveCOA(chartOfAccount);
+                COAKey key = new COAKey(txtSysCode.getText(), Global.compCode);
+                coa.setKey(key);
+                coa.setCoaNameEng(txtName.getText());
+                coa.setCoaCodeUsr(txtUsrCode.getText());
+                coa.setCoaParent(parentCode);
+                coa.setCoaLevel(level);
+                coa.setModifiedBy(Global.loginUser.getUserCode());
+                coa.setModifiedDate(Util1.getTodayDate());
+                coa.setOption(option);
+                coa.setActive(chkActive.isSelected());
+                coa.setMarked(chkDefault.isSelected());
+                coa.setCurCode(Util1.isNull(txtCurrency.getText(), null));
+                coa.setMacId(Global.macId);
+                ChartOfAccount coaSave = accountRepo.saveCOA(coa);
                 if (coaSave != null) {
                     if (lblStatus.getText().equals("EDIT")) {
                         selectedNode.setUserObject(coaSave);
@@ -388,18 +388,19 @@ public class COAManagment extends javax.swing.JPanel implements
     }
 
     private void setCOA(ChartOfAccount coa) {
-        chartOfAccount = coa;
+        this.coa = coa;
         setEnabledControl(true);
-        txtSysCode.setText(chartOfAccount.getKey().getCoaCode());
-        txtName.setText(chartOfAccount.getCoaNameEng());
-        txtUsrCode.setText(chartOfAccount.getCoaCodeUsr());
-        chkActive.setSelected(Util1.getBoolean(chartOfAccount.isActive()));
+        txtSysCode.setText(coa.getKey().getCoaCode());
+        txtName.setText(coa.getCoaNameEng());
+        txtUsrCode.setText(coa.getCoaCodeUsr());
+        chkActive.setSelected(Util1.getBoolean(coa.isActive()));
         txtCurrency.setText(coa.getCurCode());
+        chkDefault.setSelected(coa.isMarked());
         lblStatus.setText("EDIT");
-        if (chartOfAccount.getCoaLevel() != null) {
-            if (chartOfAccount.getCoaLevel() == 3) {
+        if (coa.getCoaLevel() != null) {
+            if (coa.getCoaLevel() == 3) {
                 btnCreate.setEnabled(true);
-                Menu menu = hmMenu.get(chartOfAccount.getKey().getCoaCode());
+                Menu menu = hmMenu.get(coa.getKey().getCoaCode());
                 completer.setMenu(menu);
             } else {
                 btnCreate.setEnabled(false);
@@ -415,7 +416,7 @@ public class COAManagment extends javax.swing.JPanel implements
         chkActive.setSelected(false);
         txtCurrency.setText(null);
         treeCOA.requestFocus();
-        chartOfAccount = new ChartOfAccount();
+        coa = new ChartOfAccount();
         isNew = false;
     }
 
@@ -614,6 +615,7 @@ public class COAManagment extends javax.swing.JPanel implements
         jButton1 = new javax.swing.JButton();
         lblCurrency = new javax.swing.JLabel();
         txtCurrency = new javax.swing.JTextField();
+        chkDefault = new javax.swing.JCheckBox();
         jScrollPane1 = new javax.swing.JScrollPane();
         treeCOA = new javax.swing.JTree();
         jPanel2 = new javax.swing.JPanel();
@@ -688,6 +690,7 @@ public class COAManagment extends javax.swing.JPanel implements
         jLabel3.setText("Name");
 
         chkActive.setFont(Global.lableFont);
+        chkActive.setSelected(true);
         chkActive.setText("Active");
         chkActive.setEnabled(false);
         chkActive.setName("chkActive"); // NOI18N
@@ -720,7 +723,7 @@ public class COAManagment extends javax.swing.JPanel implements
             panelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelMenuLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(txtMenu, javax.swing.GroupLayout.DEFAULT_SIZE, 144, Short.MAX_VALUE)
+                .addComponent(txtMenu, javax.swing.GroupLayout.DEFAULT_SIZE, 153, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnCreate)
                 .addContainerGap())
@@ -766,6 +769,15 @@ public class COAManagment extends javax.swing.JPanel implements
             }
         });
 
+        chkDefault.setFont(Global.lableFont);
+        chkDefault.setText("Default");
+        chkDefault.setName("chkActive"); // NOI18N
+        chkDefault.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkDefaultActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -786,8 +798,12 @@ public class COAManagment extends javax.swing.JPanel implements
                             .addComponent(txtName)
                             .addComponent(txtUsrCode)
                             .addComponent(txtSysCode)
-                            .addComponent(chkActive, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtCurrency)))
+                            .addComponent(txtCurrency)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(chkActive)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(chkDefault)
+                                .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jButton1)
                         .addGap(0, 0, Short.MAX_VALUE))
@@ -818,7 +834,8 @@ public class COAManagment extends javax.swing.JPanel implements
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkActive)
-                    .addComponent(lblStatus))
+                    .addComponent(lblStatus)
+                    .addComponent(chkDefault))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnImport)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -842,7 +859,7 @@ public class COAManagment extends javax.swing.JPanel implements
             panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 276, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 285, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -961,7 +978,7 @@ public class COAManagment extends javax.swing.JPanel implements
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(tabMain, javax.swing.GroupLayout.DEFAULT_SIZE, 570, Short.MAX_VALUE))
+                .addComponent(tabMain))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1076,11 +1093,17 @@ public class COAManagment extends javax.swing.JPanel implements
         // TODO add your handling code here:
     }//GEN-LAST:event_txtMenuFocusGained
 
+    private void chkDefaultActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkDefaultActionPerformed
+        // TODO add your handling code here:
+        txtSysCode.setEditable(chkDefault.isSelected());
+    }//GEN-LAST:event_chkDefaultActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCreate;
     private javax.swing.JButton btnImport;
     private javax.swing.JCheckBox chkActive;
+    private javax.swing.JCheckBox chkDefault;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;

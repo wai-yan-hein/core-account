@@ -62,7 +62,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
                       <EmptySpace min="-2" max="-2" attributes="0"/>
-                      <Component id="jScrollPane1" pref="276" max="32767" attributes="0"/>
+                      <Component id="jScrollPane1" pref="285" max="32767" attributes="0"/>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
                       <Component id="jPanel1" max="32767" attributes="0"/>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -115,8 +115,13 @@
                                       <Component id="txtName" max="32767" attributes="0"/>
                                       <Component id="txtUsrCode" max="32767" attributes="0"/>
                                       <Component id="txtSysCode" max="32767" attributes="0"/>
-                                      <Component id="chkActive" alignment="0" max="32767" attributes="0"/>
                                       <Component id="txtCurrency" max="32767" attributes="0"/>
+                                      <Group type="102" alignment="0" attributes="0">
+                                          <Component id="chkActive" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace max="-2" attributes="0"/>
+                                          <Component id="chkDefault" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                                      </Group>
                                   </Group>
                               </Group>
                               <Group type="102" alignment="0" attributes="0">
@@ -159,6 +164,7 @@
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="chkActive" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="lblStatus" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="chkDefault" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Component id="btnImport" min="-2" max="-2" attributes="0"/>
@@ -231,6 +237,7 @@
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
                       <Connection code="Global.lableFont" type="code"/>
                     </Property>
+                    <Property name="selected" type="boolean" value="true"/>
                     <Property name="text" type="java.lang.String" value="Active"/>
                     <Property name="enabled" type="boolean" value="false"/>
                     <Property name="name" type="java.lang.String" value="chkActive" noResource="true"/>
@@ -260,7 +267,7 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="0" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="txtMenu" pref="144" max="32767" attributes="0"/>
+                              <Component id="txtMenu" pref="153" max="32767" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="btnCreate" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
@@ -353,6 +360,18 @@
                   </Properties>
                   <Events>
                     <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtCurrencyFocusGained"/>
+                  </Events>
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="chkDefault">
+                  <Properties>
+                    <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                      <Connection code="Global.lableFont" type="code"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" value="Default"/>
+                    <Property name="name" type="java.lang.String" value="chkActive" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkDefaultActionPerformed"/>
                   </Events>
                 </Component>
               </SubComponents>

@@ -126,7 +126,7 @@ public class MyDataModel extends MyAbstractTreeTableModel {
                 key.setMenuCode(roleMenu.getMenuCode());
                 key.setRoleCode(roleMenu.getRoleCode());
                 PrivilegeMenu privilege = new PrivilegeMenu();
-                privilege.setPmKey(key);
+                privilege.setKey(key);
                 privilege.setAllow(allow);
                 Mono<ReturnObject> result = userApi.post()
                         .uri("/user/save-privilege-menu")
