@@ -164,9 +164,9 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
                             if (value instanceof TraderA t) {
                                 gl.setTraderCode(t.getKey().getCode());
                                 gl.setTraderName(t.getTraderName());
-                                if (t.getAccCode() != null) {
-                                    gl.setAccCode(t.getAccCode());
-                                    ChartOfAccount coa = accountRepo.findCOA(t.getAccCode());
+                                if (t.getAccount() != null) {
+                                    gl.setAccCode(t.getAccount());
+                                    ChartOfAccount coa = accountRepo.findCOA(t.getAccount());
                                     if (coa != null) {
                                         gl.setAccName(coa.getCoaNameEng());
                                     }

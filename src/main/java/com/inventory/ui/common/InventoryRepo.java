@@ -59,7 +59,6 @@ import com.inventory.model.UnitRelation;
 import com.inventory.model.UnitRelationDetail;
 import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
-import com.inventory.model.WeightLossDetail;
 import com.inventory.model.WeightLossHis;
 import com.inventory.model.WeightLossHisKey;
 import java.time.Duration;

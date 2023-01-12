@@ -183,7 +183,7 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
                         if (value instanceof TraderA trader) {
                             opening.setTraderCode(trader.getKey().getCode());
                             opening.setTraderName(trader.getTraderName());
-                            String coaCode = trader.getAccCode();
+                            String coaCode = trader.getAccount();
                             if (coaCode != null) {
                                 ChartOfAccount coa = accountRepo.findCOA(coaCode);
                                 if (coa != null) {

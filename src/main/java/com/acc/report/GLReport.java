@@ -20,9 +20,6 @@ import com.common.ProUtil;
 import com.common.ReturnObject;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
@@ -91,7 +88,6 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
      */
     private final GLListingTableModel glListingTableModel = new GLListingTableModel();
 
-    private final TrialBalanceDetailDialog dialog = new TrialBalanceDetailDialog();
     private COAAutoCompleter cOAAutoCompleter;
     private SelectionObserver observer;
     private DepartmentAutoCompleter departmentAutoCompleter;
@@ -252,6 +248,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void openTBDDialog(String coaCode, String curCode, String coaName) {
+        TrialBalanceDetailDialog dialog = new TrialBalanceDetailDialog(Global.parentForm);
         dialog.setAccountRepo(accountRepo);
         dialog.setAccountApi(accountApi);
         dialog.setCoaCode(coaCode);

@@ -21,7 +21,7 @@ import com.inventory.model.Trader;
 import com.inventory.model.TraderGroup;
 import com.inventory.model.TraderKey;
 import com.inventory.ui.common.InventoryRepo;
-import com.inventory.ui.common.SupplierTabelModel;
+import com.inventory.ui.setup.common.SupplierTabelModel;
 import com.inventory.ui.setup.dialog.RegionSetup;
 import com.inventory.ui.setup.dialog.TraderGroupDialog;
 import java.awt.event.KeyEvent;

@@ -89,7 +89,6 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     @Autowired
     private WebClient accountApi;
     private final APARTableModel aPARTableModel = new APARTableModel();
-    private final TrialBalanceDetailDialog dialog = new TrialBalanceDetailDialog();
     private DateAutoCompleter dateAutoCompleter;
     private CurrencyAutoCompleter currencyAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
@@ -174,6 +173,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void openTBDDialog(String coaCode, String curCode, String traderCode, String traderName) {
+        TrialBalanceDetailDialog dialog = new TrialBalanceDetailDialog(Global.parentForm);
         dialog.setAccountApi(accountApi);
         dialog.setAccountRepo(accountRepo);
         dialog.setCoaCode(coaCode);

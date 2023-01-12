@@ -28,14 +28,11 @@ import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author wai yan
  */
-@Component
 public class SaleTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(SaleTableModel.class);
@@ -46,15 +43,29 @@ public class SaleTableModel extends AbstractTableModel {
     private final List<String> deleteList = new ArrayList();
     private LocationAutoCompleter locationAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
-    @Autowired
     private StockBalanceTableModel sbTableModel;
-    @Autowired
     private InventoryRepo inventoryRepo;
     private JLabel lblStockName;
     private JButton btnProgress;
     private JDateChooser vouDate;
     private boolean change = false;
     private JLabel lblRecord;
+
+    public StockBalanceTableModel getSbTableModel() {
+        return sbTableModel;
+    }
+
+    public void setSbTableModel(StockBalanceTableModel sbTableModel) {
+        this.sbTableModel = sbTableModel;
+    }
+
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
 
     public JLabel getLblRecord() {
         return lblRecord;

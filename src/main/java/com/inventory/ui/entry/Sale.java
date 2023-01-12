@@ -83,11 +83,9 @@ import reactor.core.publisher.Mono;
 public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
 
     private List<SaleHisDetail> listDetail = new ArrayList();
-    @Autowired
-    private SaleTableModel saleTableModel;
+    private final SaleTableModel saleTableModel = new SaleTableModel();
     private final SaleVouSearchDailog vouSearchDialog = new SaleVouSearchDailog(Global.parentForm);
-    @Autowired
-    private StockBalanceTableModel stockBalanceTableModel;
+    private final StockBalanceTableModel stockBalanceTableModel = new StockBalanceTableModel();
     @Autowired
     private WebClient inventoryApi;
     @Autowired
@@ -180,8 +178,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     public void initMain() {
         initCombo();
-        initSaleTable();
         initStockBalanceTable();
+        initSaleTable();
         assignDefaultValue();
         txtSaleDate.setDate(Util1.getTodayDate());
     }
@@ -195,6 +193,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         saleTableModel.addNewRow();
         saleTableModel.setSelectionObserver(this);
         saleTableModel.setVouDate(txtSaleDate);
+        saleTableModel.setInventoryRepo(inventoryRepo);
+        saleTableModel.setSbTableModel(stockBalanceTableModel);
         tblSale.getTableHeader().setFont(Global.tblHeaderFont);
         tblSale.setCellSelectionEnabled(true);
         tblSale.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
@@ -283,6 +283,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     private void initStockBalanceTable() {
         if (ProUtil.isCalStock()) {
+            stockBalanceTableModel.setInventoryApi(inventoryApi);
             tblStockBalance.setModel(stockBalanceTableModel);
             stockBalanceTableModel.setProgress(sbProgress);
             tblStockBalance.getColumnModel().getColumn(0).setPreferredWidth(100);//Unit

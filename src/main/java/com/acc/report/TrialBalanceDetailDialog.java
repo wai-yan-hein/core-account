@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
@@ -157,9 +158,10 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
     /**
      * Creates new form TrialBalanceDetailDialog
+     * @param frame
      */
-    public TrialBalanceDetailDialog() {
-        super(Global.parentForm, true);
+    public TrialBalanceDetailDialog(JFrame frame) {
+        super(frame, true);
         initComponents();
         initFormat();
     }
@@ -424,7 +426,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Trial Balance");
         setBackground(new java.awt.Color(255, 255, 255));
-        setModalityType(java.awt.Dialog.ModalityType.DOCUMENT_MODAL);
         addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 formFocusLost(evt);

@@ -22,7 +22,6 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.VRoleMenu;
 import com.inventory.ui.common.ReportTableModel;
-import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.common.UserRepo;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -173,7 +172,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                     filter.setPlProcess(ProUtil.getPLProcess());
                     filter.setBsProcess(ProUtil.getBalanceSheetProcess());
                     filter.setInvGroup(ProUtil.getInvGroup());
-                    filter.setCoaCode(traderAutoCompleter.getTrader().getAccCode());
+                    filter.setCoaCode(traderAutoCompleter.getTrader().getAccount());
                     filter.setSrcAcc(cOA3AutoCompleter.getCOA().getKey().getCoaCode());
                     log.info("Report Date : " + stDate + " - " + enDate);
                     Map<String, Object> param = new HashMap<>();

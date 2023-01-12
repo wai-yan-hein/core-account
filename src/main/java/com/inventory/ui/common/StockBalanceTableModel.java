@@ -25,15 +25,22 @@ import reactor.core.publisher.Mono;
  *
  * @author Lenovo
  */
-@Component
 public class StockBalanceTableModel extends AbstractTableModel {
 
     static Logger log = LoggerFactory.getLogger(StockBalanceTableModel.class.getName());
     private List<VStockBalance> listStockBalance = new ArrayList();
     private final String[] columnNames = {"Locaiton", "Qty",};
-    @Autowired
     private WebClient inventoryApi;
     private JProgressBar progress;
+
+    public WebClient getInventoryApi() {
+        return inventoryApi;
+    }
+
+    public void setInventoryApi(WebClient inventoryApi) {
+        this.inventoryApi = inventoryApi;
+    }
+    
 
     public JProgressBar getProgress() {
         return progress;

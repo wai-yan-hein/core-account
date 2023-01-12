@@ -15,25 +15,23 @@ import lombok.Data;
 public class TraderA {
 
     private TraderAKey key;
+    private String userCode;
     private String traderName;
     private String traderType;
     private String address;
-    private String regCode;
     private String phone;
     private String email;
-    private String accCode;
+    private String account;
     private boolean active;
     private String remark;
     private String parent;
     private String appShortName;
     private String appTraderCode;
     private String migCode;
-    
-    private String updatedUser;
+    private String updatedBy;
     private Date createdDate;
     private String createdBy;
     private Integer macId;
-    private String userCode;
 
     public TraderA(TraderAKey key, String traderName) {
         this.key = key;

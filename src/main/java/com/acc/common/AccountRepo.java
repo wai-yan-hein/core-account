@@ -11,16 +11,15 @@ import com.user.model.Currency;
 import com.acc.model.Department;
 import com.acc.model.DepartmentKey;
 import com.acc.model.Gl;
-import com.acc.model.GlKey;
 import com.acc.model.OpeningBalance;
 import com.acc.model.ReportFilter;
 import com.acc.model.StockOP;
 import com.acc.model.TmpOpening;
 import com.acc.model.TraderA;
+import com.acc.model.TraderAKey;
 import com.acc.model.VDescription;
 import com.acc.model.VRef;
 import com.acc.report.StockOPKey;
-import com.common.FilterObject;
 import com.common.Global;
 import com.common.ReturnObject;
 import com.common.Util1;
@@ -58,15 +57,20 @@ public class AccountRepo {
     }
 
     public Department findDepartment(String deptCode) {
-        DepartmentKey key = new DepartmentKey();
-        key.setDeptCode(Util1.isNull(deptCode, "-"));
-        key.setCompCode(Global.compCode);
-        Mono<Department> result = accountApi.post()
-                .uri("/account/find-department")
-                .body(Mono.just(key), DepartmentKey.class)
-                .retrieve()
-                .bodyToMono(Department.class);
-        return result.block(Duration.ofMinutes(min));
+        try {
+            DepartmentKey key = new DepartmentKey();
+            key.setDeptCode(Util1.isNull(deptCode, "-"));
+            key.setCompCode(Global.compCode);
+            Mono<Department> result = accountApi.post()
+                    .uri("/account/find-department")
+                    .body(Mono.just(key), DepartmentKey.class)
+                    .retrieve()
+                    .bodyToMono(Department.class);
+            return result.block(Duration.ofMinutes(min));
+        } catch (Exception e) {
+            log.error("findDepartment : " + e.getMessage());
+        }
+        return null;
     }
 
     public Currency findCurrency(String curCode) {
@@ -79,13 +83,18 @@ public class AccountRepo {
     }
 
     public List<Department> getDepartment() {
-        Mono<ResponseEntity<List<Department>>> result = accountApi.get()
-                .uri(builder -> builder.path("/account/get-department")
-                .queryParam("compCode", Global.compCode)
-                .build())
-                .retrieve()
-                .toEntityList(Department.class);
-        return result.block().getBody();
+        try {
+            Mono<ResponseEntity<List<Department>>> result = accountApi.get()
+                    .uri(builder -> builder.path("/account/get-department")
+                    .queryParam("compCode", Global.compCode)
+                    .build())
+                    .retrieve()
+                    .toEntityList(Department.class);
+            return result.block().getBody();
+        } catch (Exception e) {
+            log.error("getDepartment : " + e.getMessage());
+        }
+        return new ArrayList<>();
     }
 
     public List<TraderA> getTrader() {
@@ -332,6 +341,19 @@ public class AccountRepo {
                 .retrieve()
                 .bodyToMono(StockOP.class);
         return result.block();
+    }
+
+    public TraderA saveTrader(TraderA t) {
+        Mono<TraderA> result = accountApi.post()
+                .uri("/account/save-trader")
+                .body(Mono.just(t), TraderA.class)
+                .retrieve()
+                .bodyToMono(TraderA.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
+    public List<String> deleteTrader(TraderAKey key) {
+        return null;
     }
 
 }

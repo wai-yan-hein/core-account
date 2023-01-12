@@ -163,7 +163,7 @@ public class JournalEntryTableModel extends AbstractTableModel {
                         if (value instanceof TraderA trader) {
                             gv.setTraderCode(trader.getKey().getCode());
                             gv.setTraderName(trader.getTraderName());
-                            String account = trader.getAccCode();
+                            String account = trader.getAccount();
                             if (account != null) {
                                 ChartOfAccount coa = accountRepo.findCOA(account);
                                 if (coa != null) {

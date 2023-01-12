@@ -33,6 +33,7 @@ import com.inventory.ui.entry.Manufacture;
 import com.user.model.VRoleCompany;
 import com.inventory.ui.entry.OtherSetup;
 import com.inventory.ui.entry.Purchase;
+import com.inventory.ui.entry.RFID;
 import com.inventory.ui.entry.ReorderLevelEntry;
 import com.inventory.ui.entry.ReturnIn;
 import com.inventory.ui.entry.ReturnOut;
@@ -99,6 +100,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private OpeningSetup openingSetup;
     @Autowired
     private Sale sale;
+    @Autowired
+    private RFID rfid;
     @Autowired
     private Purchase purchase;
     @Autowired
@@ -321,6 +324,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 sale.setProgress(progress);
                 sale.initMain();
                 return sale;
+            }
+            case "RFID" -> {
+                rfid.setName(menuName);
+                rfid.setObserver(this);
+                rfid.setProgress(progress);
+                rfid.initMain();
+                return rfid;
             }
             case "Purchase" -> {
                 purchase.setName(menuName);

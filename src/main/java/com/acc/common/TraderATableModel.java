@@ -22,7 +22,7 @@ public class TraderATableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(TraderATableModel.class);
     private List<TraderA> listTrader = new ArrayList<>();
-    private final String[] columnNames = {"Code", "Name", "Region"};
+    private final String[] columnNames = {"Code", "Name"};
     private JTable table;
 
     public JTable getTable() {
@@ -81,8 +81,6 @@ public class TraderATableModel extends AbstractTableModel {
                     Util1.isNull(trader.getUserCode(), trader.getKey().getCode());
                 case 1 ->
                     trader.getTraderName();
-                case 2 ->
-                    null;
                 default ->
                     null;
             }; //Code
@@ -121,6 +119,21 @@ public class TraderATableModel extends AbstractTableModel {
         } else {
             return listTrader.get(row);
         }
+    }
+
+    public void setTrader(int row, TraderA t) {
+        listTrader.set(row, t);
+        fireTableRowsUpdated(row, row);
+    }
+
+    public void addTrader(TraderA t) {
+        listTrader.add(t);
+        fireTableRowsInserted(listTrader.size() - 1, listTrader.size() - 1);
+    }
+
+    public void deleteTrader(int row) {
+        listTrader.remove(row);
+        fireTableRowsDeleted(row, row);
     }
 
     public int getSize() {
