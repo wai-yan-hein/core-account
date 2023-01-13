@@ -269,6 +269,18 @@ public class InventoryRepo {
         return result.block(Duration.ofMinutes(min)).getBody();
     }
 
+    public Trader findTraderRFID(String rfId) {
+        Mono<Trader> result = inventoryApi.get()
+                .uri(builder -> builder.path("/setup/find-trader-rfid")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", ProUtil.getDepId())
+                .queryParam("rfId", rfId)
+                .build())
+                .retrieve()
+                .bodyToMono(Trader.class);
+        return result.block(Duration.ofMinutes(min));
+    }
+
     public List<Region> getRegion() {
         Mono<ResponseEntity<List<Region>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-region")

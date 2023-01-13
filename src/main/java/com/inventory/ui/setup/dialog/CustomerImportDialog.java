@@ -5,7 +5,6 @@
 package com.inventory.ui.setup.dialog;
 
 import com.acc.common.AccountRepo;
-import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.TableCellRender;
 import com.common.Util1;
@@ -19,6 +18,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -149,11 +149,11 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         hmCOA.put(t.getCoaCodeUsr(), t.getKey().getCoaCode());
         });*/
         String line;
-        String splitBy = ",";
+        String splitBy = "\t";
         int lineCount = 0;
         List<Trader> listTrader = new ArrayList<>();
         try {
-            try (FileInputStream fis = new FileInputStream(path); InputStreamReader isr = new InputStreamReader(fis); BufferedReader reader = new BufferedReader(isr)) {
+            try (FileInputStream fis = new FileInputStream(path); InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8); BufferedReader reader = new BufferedReader(isr)) {
                 while ((line = reader.readLine()) != null) {
                     Trader t = new Trader();
                     String[] data = line.split(splitBy);    // use comma as separator
@@ -165,25 +165,32 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                     String ph2 = null;
                     String remark = null;
                     String address = null;
+                    String nrc = null;
+                    String cp = null;
                     lineCount++;
                     try {
-                        no = data[0];
-                        code = data[1];
-                        rfid = data[2];
-                        name = data[3];
-                        ph1 = data[4];
-                        ph2 = data[5];
-                        remark = data[6];
-                        address = data[7];
+                        name = data[0];
+                        nrc = data[1];
+                        no = data[2];
+                        code = data[3];
+                        rfid = data[4];
+                        address = data[5];
+                        ph1 = data[6];
+                        ph2 = data[7];
+                        cp = data[8];
+                        remark = data[9];
 
                     } catch (IndexOutOfBoundsException e) {
+                        log.error(e.getMessage());
                     }
-                    t.setUserCode(no.concat(code));
+                    t.setUserCode(no == null ? code : no.concat(code));
                     t.setRfId(rfid);
                     t.setTraderName(Util1.convertToUniCode(name));
                     t.setAddress(Util1.convertToUniCode(address));
-                    t.setPhone(Util1.convertToUniCode(ph1.concat(ph2)));
+                    t.setPhone(Util1.convertToUniCode(Util1.getString(ph1).concat("," + Util1.getString(ph2))));
                     t.setRemark(Util1.convertToUniCode(remark));
+                    t.setContactPerson(Util1.convertToUniCode(cp));
+                    t.setNrc(Util1.convertToUniCode(nrc));
                     TraderKey key = new TraderKey();
                     key.setCompCode(Global.compCode);
                     key.setDeptId(Global.deptId);
@@ -232,7 +239,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        tblTrader.setFont(new java.awt.Font("Zawgyi-One", 0, 15)); // NOI18N
+        tblTrader.setFont(Global.textFont);
         tblTrader.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},

@@ -5,7 +5,6 @@
  */
 package com.inventory.ui.entry;
 
-import com.acc.common.AccountRepo;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.JasperReportUtil;
@@ -14,10 +13,7 @@ import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.editor.CurrencyAutoCompleter;
-import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
-import com.inventory.editor.SaleManAutoCompleter;
 import com.inventory.editor.SalePriceCellEditor;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
@@ -30,7 +26,6 @@ import com.inventory.model.Trader;
 import com.inventory.model.VSale;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.SaleTableModel;
-import com.inventory.ui.common.StockBalanceTableModel;
 import com.inventory.ui.entry.dialog.SaleVouSearchDailog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
@@ -229,6 +224,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         traderAutoCompleter.setTrader(inventoryRepo.getDefaultCustomer());
         progress.setIndeterminate(false);
         txtVouNo.setText(null);
+        txtRFID.setText(null);
     }
 
     private void clear() {
@@ -423,6 +419,17 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     }
 
+    private void findTrader() {
+        String rfId = txtRFID.getText();
+        if (!rfId.isEmpty()) {
+            Trader t = inventoryRepo.findTraderRFID(rfId);
+            traderAutoCompleter.setTrader(t);
+            if (t == null) {
+                JOptionPane.showMessageDialog(this, "Customer Not Found.", "Message", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }
+
     private void printVoucher(String vouNo, String reportName, boolean print) {
         clear();
         Mono<byte[]> result = inventoryApi.get()
@@ -515,7 +522,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         jScrollPane1 = new javax.swing.JScrollPane();
         tblSale = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
-        jTextField1 = new javax.swing.JTextField();
+        txtRFID = new javax.swing.JTextField();
         jLabel18 = new javax.swing.JLabel();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -665,6 +672,13 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         });
         jScrollPane1.setViewportView(tblSale);
 
+        txtRFID.setFont(Global.textFont);
+        txtRFID.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtRFIDActionPerformed(evt);
+            }
+        });
+
         jLabel18.setFont(Global.lableFont);
         jLabel18.setText("RFID ");
 
@@ -676,7 +690,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 .addContainerGap()
                 .addComponent(jLabel18)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jTextField1)
+                .addComponent(txtRFID)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -684,7 +698,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtRFID, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel18))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -764,6 +778,11 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         // TODO add your handling code here:
     }//GEN-LAST:event_txtSaleDateFocusGained
 
+    private void txtRFIDActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtRFIDActionPerformed
+        // TODO add your handling code here:
+        findTrader();
+    }//GEN-LAST:event_txtRFIDActionPerformed
+
     @Override
     public void keyEvent(KeyEvent e) {
 
@@ -817,11 +836,11 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextField jTextField1;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelSale;
     private javax.swing.JTable tblSale;
     private javax.swing.JTextField txtCus;
+    private javax.swing.JTextField txtRFID;
     private javax.swing.JTextField txtRemark;
     private com.toedter.calendar.JDateChooser txtSaleDate;
     private javax.swing.JFormattedTextField txtVouNo;
