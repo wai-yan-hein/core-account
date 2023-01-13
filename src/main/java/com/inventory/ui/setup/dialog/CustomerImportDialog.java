@@ -144,39 +144,46 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                 hmZG.put(f.getIntCode(), f.getFontKey().getZwKeyCode());
             });
         }
-        List<ChartOfAccount> list = accountRepo.getChartOfAccount();
+        /*  List<ChartOfAccount> list = accountRepo.getChartOfAccount();
         list.forEach((t) -> {
-            hmCOA.put(t.getCoaCodeUsr(), t.getKey().getCoaCode());
-        });
+        hmCOA.put(t.getCoaCodeUsr(), t.getKey().getCoaCode());
+        });*/
         String line;
         String splitBy = ",";
         int lineCount = 0;
         List<Trader> listTrader = new ArrayList<>();
         try {
-            try ( FileInputStream fis = new FileInputStream(path);  InputStreamReader isr = new InputStreamReader(fis);  BufferedReader reader = new BufferedReader(isr)) {
+            try (FileInputStream fis = new FileInputStream(path); InputStreamReader isr = new InputStreamReader(fis); BufferedReader reader = new BufferedReader(isr)) {
                 while ((line = reader.readLine()) != null) {
                     Trader t = new Trader();
                     String[] data = line.split(splitBy);    // use comma as separator
-                    String userCode = null;
-                    String traderName = null;
+                    String no = null;
+                    String code = null;
+                    String rfid = null;
+                    String name = null;
+                    String ph1 = null;
+                    String ph2 = null;
+                    String remark = null;
                     String address = null;
-                    String phone;
-                    String account = null;
                     lineCount++;
                     try {
-                        userCode = getZawgyiText(data[0]);
-                        traderName = getZawgyiText(data[1]);
-                        address = getZawgyiText(data[2]);
-                        phone = getZawgyiText(data[3]);
-                        account = data[4];
+                        no = data[0];
+                        code = data[1];
+                        rfid = data[2];
+                        name = data[3];
+                        ph1 = data[4];
+                        ph2 = data[5];
+                        remark = data[6];
+                        address = data[7];
 
                     } catch (IndexOutOfBoundsException e) {
-                        phone = null;
                     }
-                    t.setUserCode(userCode);
-                    t.setTraderName(traderName);
-                    t.setAddress(address);
-                    t.setPhone(phone);
+                    t.setUserCode(no.concat(code));
+                    t.setRfId(rfid);
+                    t.setTraderName(Util1.convertToUniCode(name));
+                    t.setAddress(Util1.convertToUniCode(address));
+                    t.setPhone(Util1.convertToUniCode(ph1.concat(ph2)));
+                    t.setRemark(Util1.convertToUniCode(remark));
                     TraderKey key = new TraderKey();
                     key.setCompCode(Global.compCode);
                     key.setDeptId(Global.deptId);
@@ -185,8 +192,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                     t.setCreatedDate(Util1.getTodayDate());
                     t.setCreatedBy(Global.loginUser.getUserCode());
                     t.setMacId(Global.macId);
-                    t.setType(getTraderType(account));
-                    t.setAccount(hmCOA.get(account));
+                    t.setType("CUS");
                     listTrader.add(t);
                 }
             }

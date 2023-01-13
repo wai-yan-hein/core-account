@@ -24,9 +24,6 @@ public class TraderA {
     private String account;
     private boolean active;
     private String remark;
-    private String parent;
-    private String appShortName;
-    private String appTraderCode;
     private String migCode;
     private String updatedBy;
     private Date createdDate;

@@ -78,7 +78,7 @@ import reactor.core.publisher.Mono;
 public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
 
     private List<SaleHisDetail> listDetail = new ArrayList();
-    private SaleTableModel saleTableModel= new SaleTableModel();
+    private final SaleTableModel saleTableModel = new SaleTableModel();
     private final SaleVouSearchDailog vouSearchDialog = new SaleVouSearchDailog(Global.parentForm);
     @Autowired
     private WebClient inventoryApi;
@@ -86,18 +86,13 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private InventoryRepo inventoryRepo;
     @Autowired
     private UserRepo userRepo;
-    private CurrencyAutoCompleter currAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
-    private SaleManAutoCompleter saleManCompleter;
-    private LocationAutoCompleter locationAutoCompleter;
     private SelectionObserver observer;
     private SaleHis saleHis = new SaleHis();
     private Region region;
     private String orderCode;
     private JProgressBar progress;
     private List<Location> listLocation = new ArrayList<>();
-    private double prvBal = 0;
-    private double balance = 0;
 
     public JProgressBar getProgress() {
         return progress;
@@ -167,7 +162,6 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private void initSaleTable() {
         tblSale.setModel(saleTableModel);
         saleTableModel.setParent(tblSale);
-        saleTableModel.setLocationAutoCompleter(locationAutoCompleter);
         saleTableModel.setTraderAutoCompleter(traderAutoCompleter);
         saleTableModel.addNewRow();
         saleTableModel.setSelectionObserver(this);
@@ -212,7 +206,6 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         listLocation = inventoryRepo.getLocation();
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
-        locationAutoCompleter.setObserver(this);
     }
 
     private void initKeyListener() {
@@ -233,9 +226,6 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }
 
     private void assignDefaultValue() {
-        currAutoCompleter.setCurrency(userRepo.getDefaultCurrency());
-        saleManCompleter.setSaleMan(inventoryRepo.getDefaultSaleMan());
-        locationAutoCompleter.setLocation(inventoryRepo.getDefaultLocation());
         traderAutoCompleter.setTrader(inventoryRepo.getDefaultCustomer());
         progress.setIndeterminate(false);
         txtVouNo.setText(null);
@@ -287,11 +277,9 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             clear();
         } else {
             saleHis.setRemark(txtRemark.getText());
-            saleHis.setCurCode(currAutoCompleter.getCurrency().getCurCode());
             saleHis.setDeleted(Util1.getNullTo(saleHis.getDeleted()));
             saleHis.setOrderCode(orderCode);
             saleHis.setRegion(region);
-            saleHis.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             saleHis.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
             saleHis.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
             saleHis.setStatus(lblStatus.getText());
@@ -381,10 +369,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             progress.setIndeterminate(true);
             saleHis = sh;
             Integer deptId = sh.getKey().getDeptId();
-            locationAutoCompleter.setLocation(inventoryRepo.findLocation(saleHis.getLocCode(), deptId));
             traderAutoCompleter.setTrader(inventoryRepo.findTrader(saleHis.getTraderCode(), deptId));
-            currAutoCompleter.setCurrency(inventoryRepo.findCurrency(saleHis.getCurCode()));
-            saleManCompleter.setSaleMan(inventoryRepo.findSaleMan(saleHis.getSaleManCode(), deptId));
             String vouNo = sh.getKey().getVouNo();
             Mono<ResponseEntity<List<SaleHisDetail>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/sale/get-sale-detail")
@@ -438,18 +423,6 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     }
 
-    private void setAllLocation() {
-        List<SaleHisDetail> listSaleDetail = saleTableModel.getListDetail();
-        Location loc = locationAutoCompleter.getLocation();
-        if (listSaleDetail != null) {
-            listSaleDetail.forEach(sd -> {
-                sd.setLocCode(loc.getKey().getLocCode());
-                sd.setLocName(loc.getLocName());
-            });
-        }
-        saleTableModel.setListDetail(listSaleDetail);
-    }
-
     private void printVoucher(String vouNo, String reportName, boolean print) {
         clear();
         Mono<byte[]> result = inventoryApi.get()
@@ -484,8 +457,6 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             param.put("p_comp_address", Global.companyAddress);
             param.put("p_comp_phone", Global.companyPhone);
             param.put("p_logo_path", logoPath);
-            param.put("p_balance", balance);
-            param.put("p_prv_balance", prvBal);
             String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");
             ByteArrayInputStream stream = new ByteArrayInputStream(t);
             JsonDataSource ds = new JsonDataSource(stream);
@@ -626,11 +597,11 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     .addGroup(panelSaleLayout.createSequentialGroup()
                         .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE))
+                        .addComponent(txtRemark))
                     .addGroup(panelSaleLayout.createSequentialGroup()
                         .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtSaleDate, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                        .addComponent(txtSaleDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -640,13 +611,12 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelSaleLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel17)
                         .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(txtSaleDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(txtSaleDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -727,27 +697,27 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 244, Short.MAX_VALUE)
-                        .addGap(607, 607, 607)
-                        .addComponent(jLabel13)
+                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE)
+                        .addGap(476, 476, 476)
+                        .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtVouTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtVouTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 207, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(panelSale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(panelSale, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(panelSale, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel13)
@@ -814,8 +784,6 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
             case "SALE-TOTAL" ->
                 calculateTotalAmount();
-            case "Location" ->
-                setAllLocation();
             case "SALE-HISTORY" -> {
                 if (selectObj instanceof VSale s) {
                     SaleHis sh = inventoryRepo.findSale(s.getVouNo(), s.getDeptId());

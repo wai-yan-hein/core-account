@@ -772,6 +772,9 @@ public class Util1 {
     }
 
     public static String convertToUniCode(String str) {
+        if (str == null) {
+            return null;
+        }
         ZawgyiDetector zd = new ZawgyiDetector();
         Double score = zd.getZawgyiProbability(str);
         if (getBoolean(df2.format(score))) {

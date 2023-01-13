@@ -24,11 +24,9 @@ public class Trader implements java.io.Serializable {
     private String email;
     private boolean active;
     private String remark;
-    private String parent;
-    private String appShortName; //use integration with other application
-    private String appTraderCode; //Original trader id from integration app
+    private String rfId;
+    private String nrc;
     private String migCode;
-    
     private String updatedBy;
     private Date createdDate;
     private String createdBy;
