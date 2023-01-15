@@ -526,6 +526,10 @@ public class Util1 {
         return Util1.isNull(obj) ? 0 : Integer.valueOf(obj.toString());
     }
 
+    public static Integer getIntegerOne(Object obj) {
+        return Util1.isNull(obj) ? 1 : Integer.valueOf(obj.toString());
+    }
+
     public static String getString(String str) {
         String value = "";
         if (str != null) {

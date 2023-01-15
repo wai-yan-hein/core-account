@@ -34,10 +34,13 @@ public class JasperReportUtil {
             config.setPrintRequestAttributeSet(printRequestAttributeSet);
             config.setPrintServiceAttributeSet(printServiceAttributeSet);
             config.setDisplayPageDialog(false);
-            config.setDisplayPrintDialog(true);
+            config.setDisplayPrintDialog(false);
             exporter.setConfiguration(config);
             exporter.setExporterInput(new SimpleExporterInput(jp));
-            exporter.exportReport();
+            int count = Util1.getIntegerOne(ProUtil.getProperty("printer.pages"));
+            for (int i = 0; i < count; i++) {
+                exporter.exportReport();
+            }
         } catch (JRException e) {
             JOptionPane.showMessageDialog(Global.parentForm, e.getMessage(), "Voucher Printer", JOptionPane.ERROR_MESSAGE);
         }

@@ -9,20 +9,21 @@ import com.inventory.model.StockType;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 public class StockTypeTableModel extends AbstractTableModel {
 
-    private final String[] columnNames = {"Code", "Type Name"};
+    private final String[] columnNames = {"Code", "Group Name"};
     private List<StockType> listType = new ArrayList<>();
 
     public StockTypeTableModel(List<StockType> listType) {
         this.listType = listType;
+    }
+
+    public StockTypeTableModel() {
     }
 
     @Override

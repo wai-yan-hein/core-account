@@ -149,7 +149,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         hmCOA.put(t.getCoaCodeUsr(), t.getKey().getCoaCode());
         });*/
         String line;
-        String splitBy = "\t";
+        String splitBy = ",";
         int lineCount = 0;
         List<Trader> listTrader = new ArrayList<>();
         try {
@@ -157,40 +157,21 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                 while ((line = reader.readLine()) != null) {
                     Trader t = new Trader();
                     String[] data = line.split(splitBy);    // use comma as separator
-                    String no = null;
                     String code = null;
                     String rfid = null;
                     String name = null;
-                    String ph1 = null;
-                    String ph2 = null;
-                    String remark = null;
-                    String address = null;
-                    String nrc = null;
-                    String cp = null;
                     lineCount++;
                     try {
-                        name = data[0];
-                        nrc = data[1];
-                        no = data[2];
-                        code = data[3];
-                        rfid = data[4];
-                        address = data[5];
-                        ph1 = data[6];
-                        ph2 = data[7];
-                        cp = data[8];
-                        remark = data[9];
+                        code = data[0];
+                        name = data[1];
+                        rfid = data[2];
 
                     } catch (IndexOutOfBoundsException e) {
                         log.error(e.getMessage());
                     }
-                    t.setUserCode(no == null ? code : no.concat(code));
+                    t.setUserCode(code);
                     t.setRfId(rfid);
-                    t.setTraderName(Util1.convertToUniCode(name));
-                    t.setAddress(Util1.convertToUniCode(address));
-                    t.setPhone(Util1.convertToUniCode(Util1.getString(ph1).concat("," + Util1.getString(ph2))));
-                    t.setRemark(Util1.convertToUniCode(remark));
-                    t.setContactPerson(Util1.convertToUniCode(cp));
-                    t.setNrc(Util1.convertToUniCode(nrc));
+                    t.setTraderName(name);
                     TraderKey key = new TraderKey();
                     key.setCompCode(Global.compCode);
                     key.setDeptId(Global.deptId);

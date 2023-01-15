@@ -473,7 +473,7 @@
                                       <Group type="102" alignment="0" attributes="0">
                                           <EmptySpace max="-2" attributes="0"/>
                                           <Group type="103" groupAlignment="0" attributes="0">
-                                              <Component id="txtSalePriceB" pref="229" max="32767" attributes="0"/>
+                                              <Component id="txtSalePriceB" pref="235" max="32767" attributes="0"/>
                                               <Component id="txtSalePriceA" max="32767" attributes="0"/>
                                           </Group>
                                       </Group>
@@ -481,16 +481,16 @@
                                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" attributes="0">
                                       <Group type="102" attributes="0">
-                                          <Component id="jLabel16" min="-2" pref="80" max="-2" attributes="0"/>
-                                          <EmptySpace type="separate" max="-2" attributes="0"/>
-                                          <Component id="txtSalePriceC" pref="229" max="32767" attributes="0"/>
+                                          <Component id="jLabel16" linkSize="12" min="-2" pref="80" max="-2" attributes="0"/>
+                                          <EmptySpace max="-2" attributes="0"/>
+                                          <Component id="txtSalePriceC" pref="235" max="32767" attributes="0"/>
                                       </Group>
                                       <Group type="102" alignment="0" attributes="0">
                                           <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                                              <Component id="jLabel18" alignment="0" pref="80" max="32767" attributes="0"/>
-                                              <Component id="jLabel17" alignment="0" max="32767" attributes="0"/>
+                                              <Component id="jLabel18" linkSize="12" alignment="0" pref="80" max="32767" attributes="0"/>
+                                              <Component id="jLabel17" linkSize="12" alignment="0" max="32767" attributes="0"/>
                                           </Group>
-                                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                                          <EmptySpace max="-2" attributes="0"/>
                                           <Group type="103" groupAlignment="0" attributes="0">
                                               <Component id="txtSalePriceD" max="32767" attributes="0"/>
                                               <Component id="txtSalePriceE" max="32767" attributes="0"/>

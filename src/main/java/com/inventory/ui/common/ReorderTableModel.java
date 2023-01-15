@@ -184,7 +184,7 @@ public class ReorderTableModel extends AbstractTableModel {
     }
 
     private String getPurUnit(String stockCode, Integer deptId) {
-        return inventoryRepo.findStock(stockCode, deptId).getPurUnitCode();
+        return inventoryRepo.findStock(stockCode).getPurUnitCode();
     }
 
     private float getSmallQty(String stockCode, String unit) {

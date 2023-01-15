@@ -462,7 +462,7 @@ public class SaleTableModel extends AbstractTableModel {
     public List<PriceOption> getPriceOption(int row) {
         Stock s = listDetail.get(row).getStock();
         if (s == null) {
-            s = inventoryRepo.findStock(listDetail.get(row).getStockCode(),s.getKey().getDeptId());
+            s = inventoryRepo.findStock(listDetail.get(row).getStockCode());
         }
         List<PriceOption> listPrice = inventoryRepo.getPriceOption("-");
         if (!listPrice.isEmpty()) {

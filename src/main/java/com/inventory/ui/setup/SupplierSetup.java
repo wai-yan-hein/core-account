@@ -54,7 +54,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private int selectRow = -1;
     private Trader supplier = new Trader();
-    private SupplierTabelModel supplierTabelModel= new SupplierTabelModel();
+    private SupplierTabelModel supplierTabelModel = new SupplierTabelModel();
     @Autowired
     private InventoryRepo inventoryRepo;
     @Autowired
@@ -113,6 +113,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     private void initTable() {
         tblCustomer.setModel(supplierTabelModel);
         tblCustomer.getTableHeader().setFont(Global.textFont);
+        tblCustomer.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCustomer.getColumnModel().getColumn(0).setPreferredWidth(40);// Code
         tblCustomer.getColumnModel().getColumn(1).setPreferredWidth(320);// Name
         tblCustomer.getColumnModel().getColumn(2).setPreferredWidth(40);// Active 
@@ -154,7 +155,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         chkMulti.setSelected(supplier.isMulti());
         txtCusName.requestFocus();
         lblStatus.setText("EDIT");
-        traderGroupAutoCompleter.setGroup(inventoryRepo.findTraderGroup(supplier.getGroupCode(),supplier.getKey().getDeptId()));
+        traderGroupAutoCompleter.setGroup(inventoryRepo.findTraderGroup(supplier.getGroupCode(), supplier.getKey().getDeptId()));
     }
 
     private boolean isValidEntry() {

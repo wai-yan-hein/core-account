@@ -459,6 +459,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 Reader reader = Files.newBufferedReader(Paths.get(path.concat(".json")));
                 List<Gl> listVGl = gson.fromJson(reader, new TypeToken<ArrayList<Gl>>() {
                 }.getType());
+                txtRecord.setValue(listVGl.size());
                 allCashTableModel.setGlDate(filter.getFromDate());
                 allCashTableModel.setListVGl(listVGl);
                 allCashTableModel.addNewRow();
@@ -535,7 +536,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         txtOption = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         panelDate = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
+        jLabel9 = new javax.swing.JLabel();
         chkSummary = new javax.swing.JCheckBox();
+        txtRecord = new javax.swing.JFormattedTextField();
 
         jMenuItem1.setText("jMenuItem1");
 
@@ -817,20 +821,52 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         panelDate.setLayout(panelDateLayout);
         panelDateLayout.setHorizontalGroup(
             panelDateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 561, Short.MAX_VALUE)
+            .addGap(0, 569, Short.MAX_VALUE)
         );
         panelDateLayout.setVerticalGroup(
             panelDateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 33, Short.MAX_VALUE)
         );
 
-        chkSummary.setFont(Global.lableFont);
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel9.setText("Records : ");
+
         chkSummary.setText("Summary Mode");
         chkSummary.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkSummaryActionPerformed(evt);
             }
         });
+
+        txtRecord.setEditable(false);
+        txtRecord.setBorder(null);
+        txtRecord.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
+        txtRecord.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(chkSummary)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel9)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkSummary)
+                    .addComponent(jLabel9)
+                    .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -841,15 +877,13 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(tblScrollPane)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 563, Short.MAX_VALUE)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 559, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(panelDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(chkSummary)
-                                .addGap(0, 0, Short.MAX_VALUE)))
+                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 563, Short.MAX_VALUE))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 559, Short.MAX_VALUE))
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -867,7 +901,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(panelDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(chkSummary)))
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -1021,8 +1055,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JPanel panelDate;
@@ -1037,6 +1073,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JTextField txtDesp;
     private javax.swing.JTextField txtOption;
     private javax.swing.JTextField txtPerson;
+    private javax.swing.JFormattedTextField txtRecord;
     private javax.swing.JTextField txtRefrence;
     // End of variables declaration//GEN-END:variables
 

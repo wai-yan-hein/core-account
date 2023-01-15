@@ -37,6 +37,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
@@ -120,6 +121,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
 
         tblCustomer.setModel(customerTabelModel);
         tblCustomer.getTableHeader().setFont(Global.textFont);
+        tblCustomer.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCustomer.getColumnModel().getColumn(0).setPreferredWidth(40);// Code
         tblCustomer.getColumnModel().getColumn(1).setPreferredWidth(320);// Name
         tblCustomer.getColumnModel().getColumn(2).setPreferredWidth(40);// Active   
@@ -167,7 +169,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtPrice.setText(customer.getPriceType());
         txtCusName.requestFocus();
         lblStatus.setText("EDIT");
-        traderGroupAutoCompleter.setGroup(inventoryRepo.findTraderGroup(customer.getGroupCode(),customer.getKey().getDeptId()));
+        traderGroupAutoCompleter.setGroup(inventoryRepo.findTraderGroup(customer.getGroupCode(), customer.getKey().getDeptId()));
     }
 
     private boolean isValidEntry() {

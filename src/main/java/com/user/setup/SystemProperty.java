@@ -16,9 +16,11 @@ import com.common.RolePropertyKey;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
+import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.MachineInfo;
+import com.inventory.model.Stock;
 import com.user.model.SysProperty;
 import com.inventory.model.Trader;
 import com.inventory.ui.common.InventoryRepo;
@@ -55,6 +57,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private TextAutoCompleter printerAutoCompleter;
     private TraderAutoCompleter cusCompleter;
     private TraderAutoCompleter supCompleter;
+    private StockAutoCompleter stockAutoCompleter;
     private LocationAutoCompleter locCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
     private COA3AutoCompleter cOA3AutoCompleter;
@@ -150,7 +153,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkDepFilter.setName("department.filter");
         chkDepOption.setName("department.option");
         chkPriceOption.setName("sale.price.option");
+        txtStock.setName("default.stock");
         txtCash.setName("default.cash");
+        txtPages.setName("printer.pages");
+        chkPrint.setName("printer.print");
     }
 
     private void initProperty() {
@@ -221,6 +227,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtInvGroup.addActionListener(action);
         txtBS.addActionListener(action);
         txtCash.addActionListener(action);
+        txtPages.addActionListener(action);
     }
 
     private void initCheckBox() {
@@ -232,8 +239,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkSVou.setSelected(Util1.getBoolean(hmProperty.get("check.sale.voucher")));
         chkSLP.setName("sale.last.price");
         chkSLP.setSelected(Util1.getBoolean(hmProperty.get("sale.last.price")));
-        chkPrint.setName("printer.print");
-        chkPrint.setSelected(Util1.getBoolean(hmProperty.get("printer.print")));
+        chkPrint.setSelected(Util1.getBoolean(hmProperty.get(chkPrint.getName())));
         chkSWB.setName("stock.name.with.brand");
         chkSWB.setSelected(Util1.getBoolean(hmProperty.get("stock.name.with.brand")));
         chkPricePopup.setName("sale.price.popup");
@@ -294,6 +300,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtInvGroup.setText(hmProperty.get("inventory.group"));
         txtBS.setName("balancesheet.process");
         txtBS.setText(hmProperty.get("balancesheet.process"));
+        txtPages.setText(hmProperty.get(txtPages.getName()));
     }
 
     private void initCombo() {
@@ -309,6 +316,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         locCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, false, false);
         locCompleter.setObserver(this);
         locCompleter.setLocation(inventoryRepo.getDefaultLocation());
+        stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, false);
+        stockAutoCompleter.setObserver(this);
+        stockAutoCompleter.setStock(inventoryRepo.getDefaultStock());
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, accountRepo.getDepartment(), null, false, false);
         departmentAutoCompleter.setObserver(this);
         departmentAutoCompleter.setDepartment(accountRepo.getDefaultDepartment());
@@ -395,6 +405,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtDep = new javax.swing.JTextField();
         jLabel20 = new javax.swing.JLabel();
         txtCash = new javax.swing.JTextField();
+        jLabel22 = new javax.swing.JLabel();
+        txtStock = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         chkPrint = new javax.swing.JCheckBox();
         chkSWB = new javax.swing.JCheckBox();
@@ -411,6 +423,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkDisableStockIO = new javax.swing.JCheckBox();
         chkDepFilter = new javax.swing.JCheckBox();
         chkDepOption = new javax.swing.JCheckBox();
+        jLabel21 = new javax.swing.JLabel();
+        txtPages = new javax.swing.JTextField();
         jPanel1 = new javax.swing.JPanel();
         chkSA4 = new javax.swing.JCheckBox();
         chkSA5 = new javax.swing.JCheckBox();
@@ -479,6 +493,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         txtCash.setFont(Global.textFont);
 
+        jLabel22.setText("Stock");
+
+        txtStock.setFont(Global.textFont);
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
@@ -493,14 +511,16 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                             .addComponent(jLabel3)
                             .addComponent(jLabel4)
                             .addComponent(jLabel19, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel22, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtCustomer)
                             .addComponent(txtSupplier)
                             .addComponent(txtLocation)
                             .addComponent(txtDep)
-                            .addComponent(txtCash))))
+                            .addComponent(txtCash)
+                            .addComponent(txtStock))))
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
@@ -518,6 +538,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel22)
+                    .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel19)
@@ -561,6 +585,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         chkDepOption.setText("Department Option");
 
+        jLabel21.setText("Pages");
+
+        txtPages.setFont(Global.textFont);
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -574,11 +602,13 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtPrinter)
-                            .addComponent(txtLogoName)))
+                            .addComponent(txtLogoName)
+                            .addComponent(txtPages)))
                     .addComponent(chkWeight, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkDisableSale, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkDisablePur, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -618,6 +648,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(txtPrinter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel21)
+                    .addComponent(txtPages, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel8)
@@ -987,6 +1021,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -1019,9 +1055,11 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JTextField txtLocation;
     private javax.swing.JTextField txtLogoName;
     private javax.swing.JTextField txtMac;
+    private javax.swing.JTextField txtPages;
     private javax.swing.JTextField txtPl;
     private javax.swing.JTextField txtPrinter;
     private javax.swing.JTextField txtPurReport;
+    private javax.swing.JTextField txtStock;
     private javax.swing.JTextField txtSup;
     private javax.swing.JTextField txtSupplier;
     private javax.swing.JTextField txtVouReport;
@@ -1069,6 +1107,11 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             ChartOfAccount coa = cOA3AutoCompleter.getCOA();
             if (coa != null) {
                 save(txtCash.getName(), coa.getKey().getCoaCode());
+            }
+        } else if (source.equals("STOCK")) {
+            Stock s = stockAutoCompleter.getStock();
+            if (s != null) {
+                save(txtStock.getName(), s.getKey().getStockCode());
             }
         }
     }

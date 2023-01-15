@@ -16,6 +16,7 @@ public class TraderGroup {
     private TraderGroupKey key;
     private String userCode;
     private String groupName;
+    private String account;
 
     public TraderGroup(String groupCode, String groupName) {
         this.key = new TraderGroupKey();

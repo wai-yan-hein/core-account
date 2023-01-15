@@ -98,6 +98,11 @@ public class InventoryRepo {
         return findLocation(locCode, Global.deptId);
     }
 
+    public Stock getDefaultStock() {
+        String stockCode = Global.hmRoleProperty.get("default.stock");
+        return findStock(stockCode);
+    }
+
     public SaleMan getDefaultSaleMan() {
         String code = Global.hmRoleProperty.get("default.saleman");
         return findSaleMan(code, Global.deptId);
@@ -374,17 +379,22 @@ public class InventoryRepo {
         return result.block(Duration.ofMinutes(min));
     }
 
-    public Stock findStock(String stockCode, Integer deptId) {
-        StockKey key = new StockKey();
-        key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
-        key.setStockCode(stockCode);
-        Mono<Stock> result = inventoryApi.post()
-                .uri("/setup/find-stock")
-                .body(Mono.just(key), StockKey.class)
-                .retrieve()
-                .bodyToMono(Stock.class);
-        return result.block(Duration.ofMinutes(min));
+    public Stock findStock(String stockCode) {
+        try {
+            StockKey key = new StockKey();
+            key.setCompCode(Global.compCode);
+            key.setDeptId(Global.deptId);
+            key.setStockCode(stockCode);
+            Mono<Stock> result = inventoryApi.post()
+                    .uri("/setup/find-stock")
+                    .body(Mono.just(key), StockKey.class)
+                    .retrieve()
+                    .bodyToMono(Stock.class);
+            return result.block(Duration.ofMinutes(min));
+        } catch (Exception e) {
+            log.info("findStock : " + e.getMessage());
+        }
+        return null;
     }
 
     public StockType findGroup(String typeCode, Integer deptId) {
@@ -461,6 +471,16 @@ public class InventoryRepo {
         Mono<ResponseEntity<List<Stock>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-stock-list")
                 .queryParam("text", str)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", ProUtil.getDepId())
+                .build())
+                .retrieve().toEntityList(Stock.class);
+        return result.block(Duration.ofMinutes(min)).getBody();
+    }
+
+    public List<Stock> getService() {
+        Mono<ResponseEntity<List<Stock>>> result = inventoryApi.get()
+                .uri(builder -> builder.path("/setup/get-service")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())

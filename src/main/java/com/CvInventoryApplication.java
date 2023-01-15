@@ -5,6 +5,7 @@ import com.common.Util1;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.inventory.ui.ApplicationMainFrame;
 import com.inventory.ui.LoginDialog;
+import jakarta.annotation.PostConstruct;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontFormatException;
@@ -45,13 +46,15 @@ public class CvInventoryApplication {
     private static ConfigurableApplicationContext context;
     private static Tray tray;
     private static final Image appIcon = new ImageIcon(CvInventoryApplication.class.getResource("/images/applogo.png")).getImage();
+    private static final SplashWindow SPLASH_WINDOW = new SplashWindow();
 
     public static void main(String[] args) throws IOException {
+        SPLASH_WINDOW.run();
         Properties loadProperty = loadProperty();
         initFont(Util1.getInteger(loadProperty.getProperty("font.size")));
         SystemTray systemTray = SystemTray.getSystemTray();
-        TrayIcon[] icons =systemTray.getTrayIcons();
-        log.info("icon"+icons.length);
+        TrayIcon[] icons = systemTray.getTrayIcons();
+        log.info("icon" + icons.length);
         try {
             UIManager.setLookAndFeel(new FlatLightLaf());
         } catch (UnsupportedLookAndFeelException ex) {
@@ -60,7 +63,7 @@ public class CvInventoryApplication {
         try {
             Global.sock = new ServerSocket(10004);//Pharmacy
         } catch (IOException e) {
-            if(tray!=null){
+            if (tray != null) {
                 tray.openMF();
             }
             JOptionPane.showMessageDialog(new JFrame(), "Core Inventory is already running.", "Duplicate Program", JOptionPane.ERROR_MESSAGE);
@@ -91,6 +94,7 @@ public class CvInventoryApplication {
         context = builder.run(args);
         tray = context.getBean(Tray.class);
         tray.startup(appIcon);
+        SPLASH_WINDOW.stopSplah();
         LoginDialog lg = context.getBean(LoginDialog.class);
         URL imgUrl = CvInventoryApplication.class.getResource("/images/male_user_16px.png");
         lg.setIconImage(new ImageIcon(imgUrl).getImage());

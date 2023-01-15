@@ -63,8 +63,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
     private int selectRow = -1;
     @Autowired
-    private StockTypeSetupDialog itemTypeSetupDialog;
-    @Autowired
     private CategorySetupDialog categorySetupDailog;
     @Autowired
     private StockBrandSetupDialog itemBrandDailog;
@@ -682,19 +680,19 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtSalePriceB, javax.swing.GroupLayout.DEFAULT_SIZE, 229, Short.MAX_VALUE)
+                                    .addComponent(txtSalePriceB, javax.swing.GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE)
                                     .addComponent(txtSalePriceA))))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(txtSalePriceC, javax.swing.GroupLayout.DEFAULT_SIZE, 229, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtSalePriceC, javax.swing.GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE))
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                                     .addComponent(jLabel18, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
                                     .addComponent(jLabel17, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGap(18, 18, 18)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(txtSalePriceD)
                                     .addComponent(txtSalePriceE)))))
@@ -706,6 +704,8 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         );
 
         jPanel2Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel11, jLabel12, jLabel14, jLabel15});
+
+        jPanel2Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel16, jLabel17, jLabel18});
 
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1040,12 +1040,13 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
     private void btnAddItemTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddItemTypeActionPerformed
         // TODO add your handling code here:
-        itemTypeSetupDialog.setListStockType(listStockType);
-        itemTypeSetupDialog.setIconImage(icon);
-        itemTypeSetupDialog.initMain();
-        itemTypeSetupDialog.setSize(Global.width / 2, Global.height / 2);
-        itemTypeSetupDialog.setLocationRelativeTo(null);
-        itemTypeSetupDialog.setVisible(true);
+        StockTypeSetupDialog dialog = new StockTypeSetupDialog(Global.parentForm);
+        dialog.setInventoryRepo(inventoryRepo);
+        dialog.setListStockType(listStockType);
+        dialog.initMain();
+        dialog.setSize(Global.width / 2, Global.height / 2);
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
     }//GEN-LAST:event_btnAddItemTypeActionPerformed
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown

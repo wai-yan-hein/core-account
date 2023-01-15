@@ -5,6 +5,9 @@
  */
 package com.inventory.ui.setup.dialog;
 
+import com.acc.common.AccountRepo;
+import com.acc.editor.COA3AutoCompleter;
+import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
@@ -23,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -30,23 +34,17 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
-@Component
+@Slf4j
 public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyListener {
 
-    private static final Logger log = LoggerFactory.getLogger(StockTypeSetupDialog.class);
     private int selectRow = - 1;
-    @Autowired
-    private StockTypeTableModel stockTypeTableModel;
-    @Autowired
+    private final StockTypeTableModel stockTypeTableModel = new StockTypeTableModel();
     private InventoryRepo inventoryRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
@@ -61,11 +59,21 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         this.listStockType = listStockType;
     }
 
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
     /**
      * Creates new form ItemTypeSetupDialog
+     *
+     * @param frame
      */
-    public StockTypeSetupDialog() {
-        super(Global.parentForm, true);
+    public StockTypeSetupDialog(JFrame frame) {
+        super(frame, true);
         initComponents();
         initKeyListener();
         lblStatus.setForeground(Color.GREEN);
@@ -113,6 +121,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         stockType = item;
         txtUserCode.setText(stockType.getUserCode());
         txtName.setText(stockType.getStockTypeName());
+        txtAccount.setText(stockType.getAccount());
         lblStatus.setText("EDIT");
         lblStatus.setForeground(Color.blue);
         txtUserCode.requestFocus();
@@ -134,12 +143,12 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         txtUserCode.setText(null);
         txtFilter.setText(null);
         txtName.setText(null);
+        txtAccount.setText(null);
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.GREEN);
         txtUserCode.setEnabled(true);
         stockType = new StockType();
         stockTypeTableModel.refresh();
-        tblItemType.requestFocus();
         txtUserCode.requestFocus();
     }
 
@@ -153,6 +162,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         } else {
             stockType.setUserCode(txtUserCode.getText().trim());
             stockType.setStockTypeName(txtName.getText());
+            stockType.setAccount(txtAccount.getText());
             if (lblStatus.getText().equals("NEW")) {
                 StockTypeKey key = new StockTypeKey();
                 key.setCompCode(Global.compCode);
@@ -186,7 +196,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         String splitBy = ",";
         int lineCount = 0;
         try {
-            try ( BufferedReader br = new BufferedReader(new InputStreamReader(
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(
                     new FileInputStream(path), "UTF8"))) {
                 while ((line = br.readLine()) != null) //returns a Boolean value
                 {
@@ -244,6 +254,8 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         jSeparator1 = new javax.swing.JSeparator();
         btnSave1 = new javax.swing.JButton();
         lblLog = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        txtAccount = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Stock Type Setup");
@@ -339,6 +351,22 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
             }
         });
 
+        jLabel4.setFont(Global.lableFont);
+        jLabel4.setText("Account");
+
+        txtAccount.setFont(Global.textFont);
+        txtAccount.setName("txtName"); // NOI18N
+        txtAccount.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtAccountFocusGained(evt);
+            }
+        });
+        txtAccount.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtAccountActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -350,11 +378,13 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE))
+                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE))
                         .addGap(12, 12, 12)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtName, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtUserCode, javax.swing.GroupLayout.Alignment.LEADING)))
+                            .addComponent(txtUserCode, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtAccount, javax.swing.GroupLayout.Alignment.LEADING)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -377,18 +407,22 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(txtUserCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnClear)
                     .addComponent(btnSave)
                     .addComponent(lblStatus))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 238, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 222, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(btnSave1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblLog, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -470,6 +504,14 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
         chooseFile();
     }//GEN-LAST:event_btnSave1ActionPerformed
 
+    private void txtAccountFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtAccountFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtAccountFocusGained
+
+    private void txtAccountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAccountActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtAccountActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -480,12 +522,14 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JButton btnSave1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblLog;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JTable tblItemType;
+    private javax.swing.JTextField txtAccount;
     private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtName;
     private javax.swing.JTextField txtUserCode;
