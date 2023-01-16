@@ -30,11 +30,11 @@ import org.slf4j.LoggerFactory;
  *
  * @author winswe
  */
-public class AllCashTableModel extends AbstractTableModel {
+public class DayBookTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(AllCashTableModel.class);
+    private static final Logger log = LoggerFactory.getLogger(DayBookTableModel.class);
     private List<Gl> listVGl = new ArrayList();
-    private String[] columnNames = {"Date", "Dept:", "Description", "Ref :", "No :", "Person", "Account", "Curr", "Cash In / Dr", "Cash Out / Cr"};
+    private String[] columnNames = {"Date", "Dept:", "Description", "Ref :", "No :", "Person", "Account", "Curr", "Amount"};
     private String sourceAccId;
     private JTable parent;
     private SelectionObserver observer;
@@ -43,6 +43,11 @@ public class AllCashTableModel extends AbstractTableModel {
     private Currency currency;
     private Department department;
     private AccountRepo accountRepo;
+    private final String nature;
+
+    public DayBookTableModel(String nature) {
+        this.nature = nature;
+    }
 
     public AccountRepo getAccountRepo() {
         return accountRepo;
@@ -116,8 +121,6 @@ public class AllCashTableModel extends AbstractTableModel {
         return switch (column) {
             case 8 ->
                 Double.class;
-            case 9 ->
-                Double.class;
             default ->
                 String.class;
         };
@@ -162,26 +165,7 @@ public class AllCashTableModel extends AbstractTableModel {
                         return vgi.getCurCode();
                     }
                     case 8 -> {
-                        if (vgi.getDrAmt() != null) {
-                            if (vgi.getDrAmt() == 0) {
-                                return null;
-                            } else {
-                                return vgi.getDrAmt();
-                            }
-                        } else {
-                            return vgi.getDrAmt();
-                        }
-                    }
-                    case 9 -> {
-                        if (vgi.getCrAmt() != null) {
-                            if (vgi.getCrAmt() == 0) {
-                                return null;
-                            } else {
-                                return vgi.getCrAmt();
-                            }
-                        } else {
-                            return vgi.getCrAmt();
-                        }
+                        return nature.equals("CR") ? vgi.getCrAmt() : vgi.getDrAmt();
                     }
                     default -> {
                         return null;
@@ -303,12 +287,13 @@ public class AllCashTableModel extends AbstractTableModel {
                     parent.setColumnSelectionInterval(7, 7);
                 }
                 case 8 -> {
-                    gl.setDrAmt(Util1.getDouble(value));
-                    gl.setCrAmt(null);
-                }
-                case 9 -> {
-                    gl.setCrAmt(Util1.getDouble(value));
-                    gl.setDrAmt(null);
+                    if (nature.equals("CR")) {
+                        gl.setDrAmt(null);
+                        gl.setCrAmt(Util1.getDouble(value));
+                    } else {
+                        gl.setDrAmt(Util1.getDouble(value));
+                        gl.setCrAmt(null);
+                    }
                 }
             }
             save(gl, row, column);
@@ -332,7 +317,6 @@ public class AllCashTableModel extends AbstractTableModel {
                 }
             } catch (JsonSyntaxException ex) {
                 JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
-                log.error("Save Gl :" + ex.getMessage());
             }
         }
     }
