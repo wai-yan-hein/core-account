@@ -33,6 +33,7 @@ public class ChartOfAccount {
     private String migCode;
     private Integer macId;
     private boolean marked;
+    private boolean credit;
     private String curCode;
     private String groupCode;
     private String groupUsrCode;

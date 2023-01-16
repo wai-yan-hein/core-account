@@ -201,8 +201,12 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     private void initTableModel() {
         if (single) {
-            //need condition
-            dayBookTableModel = new DayBookTableModel("DR");
+            ChartOfAccount coa = accountRepo.findCOA(sourceAccId);
+            if (coa == null) {
+                JOptionPane.showMessageDialog(this, "mapping coa does not exists.");
+                return;
+            }
+            dayBookTableModel = new DayBookTableModel(coa.isCredit());
             dayBookTableModel.setParent(tblCash);
             dayBookTableModel.setAccountRepo(accountRepo);
             dayBookTableModel.setDateAutoCompleter(dateAutoCompleter);

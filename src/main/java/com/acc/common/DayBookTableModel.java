@@ -43,10 +43,10 @@ public class DayBookTableModel extends AbstractTableModel {
     private Currency currency;
     private Department department;
     private AccountRepo accountRepo;
-    private final String nature;
+    private boolean credit;
 
-    public DayBookTableModel(String nature) {
-        this.nature = nature;
+    public DayBookTableModel(boolean credit) {
+        this.credit = credit;
     }
 
     public AccountRepo getAccountRepo() {
@@ -165,7 +165,7 @@ public class DayBookTableModel extends AbstractTableModel {
                         return vgi.getCurCode();
                     }
                     case 8 -> {
-                        return nature.equals("CR") ? vgi.getCrAmt() : vgi.getDrAmt();
+                        return credit ? vgi.getCrAmt() : vgi.getDrAmt();
                     }
                     default -> {
                         return null;
@@ -287,7 +287,7 @@ public class DayBookTableModel extends AbstractTableModel {
                     parent.setColumnSelectionInterval(7, 7);
                 }
                 case 8 -> {
-                    if (nature.equals("CR")) {
+                    if (credit) {
                         gl.setDrAmt(null);
                         gl.setCrAmt(Util1.getDouble(value));
                     } else {

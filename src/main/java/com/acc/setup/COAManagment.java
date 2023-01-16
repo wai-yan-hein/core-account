@@ -227,6 +227,7 @@ public class COAManagment extends javax.swing.JPanel implements
                 coa.setOption(option);
                 coa.setActive(chkActive.isSelected());
                 coa.setMarked(chkDefault.isSelected());
+                coa.setCredit(chkCredit.isSelected());
                 coa.setCurCode(Util1.isNull(txtCurrency.getText(), null));
                 coa.setMacId(Global.macId);
                 ChartOfAccount coaSave = accountRepo.saveCOA(coa);
@@ -308,31 +309,6 @@ public class COAManagment extends javax.swing.JPanel implements
         createTreeNode(treeRoot);
     }
 
-    private void expandTree(JTree tree, boolean expand) {
-        TreeNode root = (TreeNode) tree.getModel().getRoot();
-        expandAll(tree, new TreePath(root), expand);
-    }
-
-    private void expandAll(JTree tree, TreePath path, boolean expand) {
-        TreeNode node = (TreeNode) path.getLastPathComponent();
-
-        if (node.getChildCount() >= 0) {
-            Enumeration<? extends TreeNode> enumeration = node.children();
-            while (enumeration.hasMoreElements()) {
-                TreeNode treeNode = enumeration.nextElement();
-                TreePath treePath = path.pathByAddingChild(treeNode);
-
-                expandAll(tree, treePath, expand);
-            }
-        }
-
-        if (expand) {
-            tree.expandPath(path);
-        } else {
-            tree.collapsePath(path);
-        }
-    }
-
     private void createTreeNode(DefaultMutableTreeNode treeRoot) {
         Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get()
                 .uri(builder -> builder.path("/account/get-coa-tree")
@@ -396,6 +372,7 @@ public class COAManagment extends javax.swing.JPanel implements
         chkActive.setSelected(Util1.getBoolean(coa.isActive()));
         txtCurrency.setText(coa.getCurCode());
         chkDefault.setSelected(coa.isMarked());
+        chkCredit.setSelected(chkCredit.isSelected());
         lblStatus.setText("EDIT");
         if (coa.getCoaLevel() != null) {
             if (coa.getCoaLevel() == 3) {
@@ -416,6 +393,7 @@ public class COAManagment extends javax.swing.JPanel implements
         chkActive.setSelected(false);
         txtCurrency.setText(null);
         treeCOA.requestFocus();
+        chkCredit.setSelected(false);
         coa = new ChartOfAccount();
         isNew = false;
     }
@@ -616,6 +594,7 @@ public class COAManagment extends javax.swing.JPanel implements
         lblCurrency = new javax.swing.JLabel();
         txtCurrency = new javax.swing.JTextField();
         chkDefault = new javax.swing.JCheckBox();
+        chkCredit = new javax.swing.JCheckBox();
         jScrollPane1 = new javax.swing.JScrollPane();
         treeCOA = new javax.swing.JTree();
         jPanel2 = new javax.swing.JPanel();
@@ -723,7 +702,7 @@ public class COAManagment extends javax.swing.JPanel implements
             panelMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelMenuLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(txtMenu, javax.swing.GroupLayout.DEFAULT_SIZE, 153, Short.MAX_VALUE)
+                .addComponent(txtMenu)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnCreate)
                 .addContainerGap())
@@ -778,6 +757,15 @@ public class COAManagment extends javax.swing.JPanel implements
             }
         });
 
+        chkCredit.setFont(Global.lableFont);
+        chkCredit.setText("Credit");
+        chkCredit.setName("chkActive"); // NOI18N
+        chkCredit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkCreditActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -803,6 +791,8 @@ public class COAManagment extends javax.swing.JPanel implements
                                 .addComponent(chkActive)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(chkDefault)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(chkCredit)
                                 .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jButton1)
@@ -835,7 +825,8 @@ public class COAManagment extends javax.swing.JPanel implements
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkActive)
                     .addComponent(lblStatus)
-                    .addComponent(chkDefault))
+                    .addComponent(chkDefault)
+                    .addComponent(chkCredit))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnImport)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -859,7 +850,7 @@ public class COAManagment extends javax.swing.JPanel implements
             panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 285, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 222, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -1098,11 +1089,16 @@ public class COAManagment extends javax.swing.JPanel implements
         txtSysCode.setEditable(chkDefault.isSelected());
     }//GEN-LAST:event_chkDefaultActionPerformed
 
+    private void chkCreditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkCreditActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_chkCreditActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCreate;
     private javax.swing.JButton btnImport;
     private javax.swing.JCheckBox chkActive;
+    private javax.swing.JCheckBox chkCredit;
     private javax.swing.JCheckBox chkDefault;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
