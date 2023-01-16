@@ -564,7 +564,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             default -> {
                 switch (cName) {
                     case "AllCash" -> {
-                        AllCash cash = new AllCash();
+                        AllCash cash = new AllCash(false);
                         cash.setName(menuName);
                         cash.setObserver(this);
                         cash.setProgress(progress);
@@ -576,7 +576,22 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                         cash.initMain();
                         return cash;
                     }
+                    case "DayBook" -> {
+                        AllCash db = new AllCash(true);
+                        db.setName(menuName);
+                        db.setObserver(this);
+                        db.setProgress(progress);
+                        db.setTaskExecutor(taskExecutor);
+                        db.setAccountApi(accountApi);
+                        db.setSourceAccId(srcAcc);
+                        db.setAccounRepo(accounRepo);
+                        db.setUserRepo(userRepo);
+                        db.initMain();
+                        return db;
+                    }
+
                 }
+
             }
         }
         return null;

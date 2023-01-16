@@ -25,7 +25,6 @@ import com.acc.common.CashOpeningTableModel;
 import com.acc.common.CurExchangeRateTableModel;
 import com.acc.common.DateAutoCompleter;
 import com.acc.common.DateTableDecorator;
-import com.acc.common.DayBookTableModel;
 import com.acc.common.OpeningCellRender;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.DeleteObj;
@@ -39,7 +38,6 @@ import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.ReturnObject;
 import com.common.SelectionObserver;
-import com.common.TableCellRender;
 import com.common.Util1;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -92,10 +90,11 @@ import reactor.core.publisher.Mono;
  * @author Lenovo
  */
 @Slf4j
-public class AllCash extends javax.swing.JPanel implements SelectionObserver,
+public class DayBook extends javax.swing.JPanel implements SelectionObserver,
         PanelControl {
 
     private TaskExecutor taskExecutor;
+    private final AllCashTableModel allCashTableModel = new AllCashTableModel();
     private WebClient accountApi;
     private DateAutoCompleter dateAutoCompleter;
     private TraderAAutoCompleter traderAutoCompleter;
@@ -108,7 +107,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private TranSourceAutoCompleter tranSourceAutoCompleter;
     private final CashInOutTableModel inOutTableModel = new CashInOutTableModel();
     private final CashOpeningTableModel opTableModel = new CashOpeningTableModel();
-    private final CurExchangeRateTableModel curExchangeRateTableModel = new CurExchangeRateTableModel();
     private SelectionObserver observer;
     private String sourceAccId;
     private final JPopupMenu popupmenu = new JPopupMenu();
@@ -123,9 +121,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     private final String path = String.format("%s%s%s", "temp", File.separator, "Ledger" + Global.macId);
     private DateTableDecorator decorator;
-    private final boolean single;
-    private AllCashTableModel allCashTableModel;
-    private DayBookTableModel dayBookTableModel;
 
     public UserRepo getUserRepo() {
         return userRepo;
@@ -187,43 +182,15 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     /**
      * Creates new form CashBook
      *
-     * @param single
      */
-    public AllCash(boolean single) {
-        this.single = single;
+    public DayBook() {
         initComponents();
         initPopup();
+        initTableCB();
         initTableCashInOut();
         initTableCashOP();
         initDateDecorator();
         actionMapping();
-    }
-
-    private void initTableModel() {
-        if (single) {
-            //need condition
-            dayBookTableModel = new DayBookTableModel("DR");
-            dayBookTableModel.setParent(tblCash);
-            dayBookTableModel.setAccountRepo(accountRepo);
-            dayBookTableModel.setDateAutoCompleter(dateAutoCompleter);
-            dayBookTableModel.setObserver(this);
-            dayBookTableModel.setDepartment(accountRepo.getDefaultDepartment());
-            dayBookTableModel.setCurrency(userRepo.getDefaultCurrency());
-            dayBookTableModel.setSourceAccId(sourceAccId);
-            dayBookTableModel.addNewRow();
-            tblCash.setModel(dayBookTableModel);
-        } else {
-            allCashTableModel = new AllCashTableModel();
-            allCashTableModel.setParent(tblCash);
-            allCashTableModel.setAccountRepo(accountRepo);
-            allCashTableModel.setDateAutoCompleter(dateAutoCompleter);
-            allCashTableModel.setObserver(this);
-            allCashTableModel.setDepartment(accountRepo.getDefaultDepartment());
-            allCashTableModel.setCurrency(userRepo.getDefaultCurrency());
-            allCashTableModel.setSourceAccId(sourceAccId);
-            allCashTableModel.addNewRow();
-            tblCash.setModel(allCashTableModel);
-        }
     }
 
     private void initDateDecorator() {
@@ -266,12 +233,26 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tranSourceAutoCompleter = new TranSourceAutoCompleter(txtOption, accountRepo.getTranSource(), null, true);
         tranSourceAutoCompleter.setSelectionObserver(this);
 //model
-
+        allCashTableModel.setAccountRepo(accountRepo);
+        allCashTableModel.setDateAutoCompleter(dateAutoCompleter);
+        allCashTableModel.setObserver(this);
+        allCashTableModel.setDepartment(accountRepo.getDefaultDepartment());
+        allCashTableModel.setCurrency(userRepo.getDefaultCurrency());
+        allCashTableModel.setSourceAccId(sourceAccId);
+        allCashTableModel.addNewRow();
+        tblCash.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
+        tblCash.getColumnModel().getColumn(1).setCellEditor(new DepartmentCellEditor(listDepartment));
+        tblCash.getColumnModel().getColumn(2).setCellEditor(new DespEditor(accountRepo));
+        tblCash.getColumnModel().getColumn(3).setCellEditor(new RefCellEditor(accountRepo));
+        tblCash.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
+        tblCash.getColumnModel().getColumn(5).setCellEditor(new TraderCellEditor(accountRepo));
+        tblCash.getColumnModel().getColumn(6).setCellEditor(new COA3CellEditor(accountRepo, 3));
+        tblCash.getColumnModel().getColumn(7).setCellEditor(new CurrencyAEditor(listCurrency));
+        tblCash.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
+        tblCash.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
     }
 
     public void initMain() {
-        initTableModel();
-        initTableCB();
         initFilter();
         createDateFilter();
         clearFilter();
@@ -315,10 +296,11 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void initTableCB() {
-
+        tblCash.setModel(allCashTableModel);
         tblCash.getTableHeader().setFont(Global.tblHeaderFont);
         tblCash.getTableHeader().setPreferredSize(new Dimension(25, 25));
         tblCash.setCellSelectionEnabled(true);
+        allCashTableModel.setParent(tblCash);
         tblCash.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCash.getColumnModel().getColumn(0).setPreferredWidth(20);// Date
         tblCash.getColumnModel().getColumn(1).setPreferredWidth(13);// Department
@@ -329,19 +311,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tblCash.getColumnModel().getColumn(6).setPreferredWidth(150);// Account
         tblCash.getColumnModel().getColumn(7).setPreferredWidth(1);// Curr      
         tblCash.getColumnModel().getColumn(8).setPreferredWidth(90);// Dr-Amt   
-        tblCash.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
-        tblCash.getColumnModel().getColumn(1).setCellEditor(new DepartmentCellEditor(listDepartment));
-        tblCash.getColumnModel().getColumn(2).setCellEditor(new DespEditor(accountRepo));
-        tblCash.getColumnModel().getColumn(3).setCellEditor(new RefCellEditor(accountRepo));
-        tblCash.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
-        tblCash.getColumnModel().getColumn(5).setCellEditor(new TraderCellEditor(accountRepo));
-        tblCash.getColumnModel().getColumn(6).setCellEditor(new COA3CellEditor(accountRepo, 3));
-        tblCash.getColumnModel().getColumn(7).setCellEditor(new CurrencyAEditor(listCurrency));
-        tblCash.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
-        if (!single) {
-            tblCash.getColumnModel().getColumn(9).setPreferredWidth(90);// Cr-Amt  
-            tblCash.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
-        }
+        tblCash.getColumnModel().getColumn(9).setPreferredWidth(90);// Cr-Amt  
         tblCash.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         filterHeader = new TableFilterHeader(tblCash, AutoChoices.ENABLED);
@@ -387,12 +357,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         int selectRow = tblCash.convertRowIndexToModel(tblCash.getSelectedRow());
         int yes_no;
         if (tblCash.getSelectedRow() >= 0) {
-            Gl vgl;
-            if (single) {
-                vgl = dayBookTableModel.getVGl(selectRow);
-            } else {
-                vgl = allCashTableModel.getVGl(selectRow);
-            }
+            Gl vgl = allCashTableModel.getVGl(selectRow);
             if (vgl.getTranSource().equals("Report")) {
                 return;
             }
@@ -407,11 +372,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                         "Delete", JOptionPane.YES_NO_OPTION);
                 if (yes_no == 0) {
                     if (accountRepo.delete(obj)) {
-                        if (single) {
-                            dayBookTableModel.deleteVGl(selectRow);
-                        } else {
-                            allCashTableModel.deleteVGl(selectRow);
-                        }
+                        allCashTableModel.deleteVGl(selectRow);
                     }
                     calDebitCredit();
                 }
@@ -497,15 +458,9 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 List<Gl> listVGl = gson.fromJson(reader, new TypeToken<ArrayList<Gl>>() {
                 }.getType());
                 txtRecord.setValue(listVGl.size());
-                if (single) {
-                    dayBookTableModel.setGlDate(filter.getFromDate());
-                    dayBookTableModel.setListVGl(listVGl);
-                    dayBookTableModel.addNewRow();
-                } else {
-                    allCashTableModel.setGlDate(filter.getFromDate());
-                    allCashTableModel.setListVGl(listVGl);
-                    allCashTableModel.addNewRow();
-                }
+                allCashTableModel.setGlDate(filter.getFromDate());
+                allCashTableModel.setListVGl(listVGl);
+                allCashTableModel.addNewRow();
                 calDebitCredit();
                 //getLatestCurrency();
                 requestFoucsTable();
@@ -1123,12 +1078,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private void calDebitCredit() {
         opTableModel.clear();
         inOutTableModel.clear();
-        List<Gl> listVGl;
-        if (single) {
-            listVGl = dayBookTableModel.getListVGl();
-        } else {
-            listVGl = allCashTableModel.getListVGl();
-        }
+        List<Gl> listVGl = allCashTableModel.getListVGl();
         //lblTotalCount.setText(listVGl.size() - 1 + "");
         Map<String, List<Gl>> hmGroup = listVGl.stream().collect(Collectors.groupingBy(w -> w.getCurCode()));
         hmGroup.forEach((t, u) -> {
