@@ -274,9 +274,9 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     public void initMain() {
+        initFilter();
         initTableModel();
         initTableCB();
-        initFilter();
         createDateFilter();
         clearFilter();
 

@@ -372,7 +372,7 @@ public class COAManagment extends javax.swing.JPanel implements
         chkActive.setSelected(Util1.getBoolean(coa.isActive()));
         txtCurrency.setText(coa.getCurCode());
         chkDefault.setSelected(coa.isMarked());
-        chkCredit.setSelected(chkCredit.isSelected());
+        chkCredit.setSelected(coa.isCredit());
         lblStatus.setText("EDIT");
         if (coa.getCoaLevel() != null) {
             if (coa.getCoaLevel() == 3) {
