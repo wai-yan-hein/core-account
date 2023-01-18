@@ -570,6 +570,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     lblStatus.setText("DELETED");
                     lblStatus.setForeground(Color.RED);
                     disableForm(false);
+                    observer.selected("delete", true);
                 } else {
                     lblStatus.setText("EDIT");
                     lblStatus.setForeground(Color.blue);

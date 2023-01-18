@@ -39,7 +39,6 @@ import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.ReturnObject;
 import com.common.SelectionObserver;
-import com.common.TableCellRender;
 import com.common.Util1;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -400,8 +399,13 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             if (vgl.getTranSource().equals("Report")) {
                 return;
             }
+            if (!vgl.getTranSource().equals("CB")) {
+                JOptionPane.showMessageDialog(Global.parentForm, "delete in original voucher.");
+                return;
+            }
             String glCode = vgl.getKey().getGlCode();
             if (glCode != null) {
+
                 DeleteObj obj = new DeleteObj();
                 obj.setGlCode(glCode);
                 obj.setCompCode(vgl.getKey().getCompCode());
