@@ -201,11 +201,9 @@ public class SaleVouSearchDailog extends javax.swing.JDialog implements KeyListe
         List<VSale> listSale = saleVouTableModel.getListSaleHis();
         if (!listSale.isEmpty()) {
             for (VSale sh : listSale) {
-                if (!sh.isDeleted()) {
-                    ttlAmt += sh.getVouTotal();
-                    paidAmt += sh.getPaid();
-                    count += 1;
-                }
+                ttlAmt += sh.getVouTotal();
+                paidAmt += sh.getPaid();
+                count += 1;
             }
         }
         txtPaid.setValue(paidAmt);

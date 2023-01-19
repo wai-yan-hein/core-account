@@ -6,6 +6,7 @@
 package com.inventory.ui.entry.dialog.common;
 
 import com.common.Global;
+import com.common.Util1;
 import com.inventory.model.VSale;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +60,7 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         switch (column) {
-            case 6,5 -> {
+            case 6, 5 -> {
                 return Float.class;
             }
         }
@@ -85,6 +86,9 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
                         }
                     }
                     case 2 -> {
+                        if (!Util1.isNullOrEmpty(his.getTraderCode())) {
+                            return String.format("%s - %s", his.getTraderCode(), his.getTraderName());
+                        }
                         //customer
                         return his.getTraderName();
                     }

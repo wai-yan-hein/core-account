@@ -14,5 +14,6 @@ import lombok.Data;
 public class General {
 
     private Float amount;
+    private int qty;
 
 }

@@ -1125,4 +1125,21 @@ public class InventoryRepo {
                 );
         return result.block(Duration.ofMinutes(1)).getBody();
     }
+
+    public General getSaleVoucherInfo(String vouDate) {
+        try {
+            Mono<General> result = inventoryApi.get()
+                    .uri(builder -> builder.path("/sale/get-sale-voucher-info")
+                    .queryParam("vouDate", vouDate)
+                    .queryParam("compCode", Global.compCode)
+                    .queryParam("deptId", Global.deptId)
+                    .build())
+                    .retrieve().bodyToMono(General.class);
+            return result.block(Duration.ofMinutes(min));
+        } catch (Exception e) {
+            log.error("getSaleVoucherCount : " + e.getMessage());
+        }
+        return new General();
+    }
+
 }

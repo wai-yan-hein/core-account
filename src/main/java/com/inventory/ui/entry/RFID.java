@@ -15,6 +15,7 @@ import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
+import com.inventory.model.General;
 import com.inventory.model.Location;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
@@ -155,7 +156,6 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         initCombo();
         initSaleTable();
         assignDefaultValue();
-        txtSaleDate.setDate(Util1.getTodayDate());
     }
 
     private void initSaleTable() {
@@ -206,10 +206,12 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }
 
     private void assignDefaultValue() {
+        txtSaleDate.setDate(Util1.getTodayDate());
         traderAutoCompleter.setTrader(inventoryRepo.getDefaultCustomer());
         progress.setIndeterminate(false);
         txtVouNo.setText(null);
         txtRFID.setText(null);
+        setSaleInfo();
     }
 
     private void clear() {
@@ -226,6 +228,12 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         lblStatus.setForeground(Color.GREEN);
         progress.setIndeterminate(false);
         txtRFID.requestFocus();
+    }
+
+    private void setSaleInfo() {
+        General g = inventoryRepo.getSaleVoucherInfo(Util1.toDateStr(txtSaleDate.getDate(), "yyyy-MM-dd"));
+        txtVouCount.setValue(Util1.getInteger(g.getQty()));
+        txtVouAmt.setValue(Util1.getFloat(g.getAmount()));
     }
 
     public void saveSale(boolean print) {
@@ -397,8 +405,8 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         panelSale.setEnabled(status);
         txtSaleDate.setEnabled(status);
         txtCus.setEnabled(status);
+        txtRFID.setEnabled(status);
         observer.selected("save", status);
-        observer.selected("delete", status);
         observer.selected("print", status);
 
     }
@@ -408,10 +416,29 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         if (!rfId.isEmpty()) {
             Trader t = inventoryRepo.findTraderRFID(rfId);
             traderAutoCompleter.setTrader(t);
-            if (t == null) {
-                JOptionPane.showMessageDialog(this, "Customer Not Found.", "Message", JOptionPane.WARNING_MESSAGE);
-            } else {
-                generateTransaction();
+            generateTransaction();
+        }
+    }
+
+    private void generateTransaction() {
+        Trader t = traderAutoCompleter.getTrader();
+        if (t == null) {
+            JOptionPane.showMessageDialog(this, "Customer Not Found.", "Message", JOptionPane.WARNING_MESSAGE);
+        } else {
+            Stock s = inventoryRepo.getDefaultStock();
+            if (s != null) {
+                tableModel.clear();
+                SaleHisDetail sd = new SaleHisDetail();
+                sd.setUserCode(sd.getUserCode());
+                sd.setStockCode(s.getKey().getStockCode());
+                sd.setStockName(s.getStockName());
+                sd.setQty(1.0f);
+                sd.setUnitCode(s.getSaleUnitCode());
+                sd.setPrice(s.getSalePriceN());
+                sd.setAmount(Util1.getFloat(sd.getQty()) * Util1.getFloat(sd.getPrice()));
+                sd.setLocCode(locCode);
+                tableModel.addSale(sd);
+                calculateTotalAmount();
                 if (chkPrint.isSelected()) {
                     saveSale(true);
                 } else {
@@ -420,25 +447,6 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 }
             }
         }
-    }
-
-    private void generateTransaction() {
-        Stock s = inventoryRepo.getDefaultStock();
-        if (s != null) {
-            tableModel.clear();
-            SaleHisDetail sd = new SaleHisDetail();
-            sd.setUserCode(sd.getUserCode());
-            sd.setStockCode(s.getKey().getStockCode());
-            sd.setStockName(s.getStockName());
-            sd.setQty(1.0f);
-            sd.setUnitCode(s.getSaleUnitCode());
-            sd.setPrice(s.getSalePriceN());
-            sd.setAmount(Util1.getFloat(sd.getQty()) * Util1.getFloat(sd.getPrice()));
-            sd.setLocCode(locCode);
-            tableModel.addSale(sd);
-            calculateTotalAmount();
-        }
-
     }
 
     private void printVoucher(String vouNo) {
@@ -517,6 +525,11 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         jScrollPane1 = new javax.swing.JScrollPane();
         tblRFID = new javax.swing.JTable();
         chkPrint = new javax.swing.JCheckBox();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        txtVouCount = new javax.swing.JFormattedTextField();
+        txtVouAmt = new javax.swing.JFormattedTextField();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -666,6 +679,53 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
         });
 
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel1.setFont(Global.lableFont);
+        jLabel1.setText("Total Vou :");
+
+        jLabel3.setFont(Global.lableFont);
+        jLabel3.setText("Total Amt :");
+
+        txtVouCount.setEditable(false);
+        txtVouCount.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
+        txtVouCount.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtVouCount.setFont(Global.amtFont);
+
+        txtVouAmt.setEditable(false);
+        txtVouAmt.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,###"))));
+        txtVouAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtVouAmt.setFont(Global.amtFont);
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel3))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtVouAmt, javax.swing.GroupLayout.DEFAULT_SIZE, 185, Short.MAX_VALUE)
+                    .addComponent(txtVouCount))
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(txtVouCount)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtVouAmt))
+                .addContainerGap(12, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -673,29 +733,32 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(panelSale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(chkPrint)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 127, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 173, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel13)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtVouTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(txtVouTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(panelSale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(chkPrint)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 70, Short.MAX_VALUE)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(panelSale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(chkPrint))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(panelSale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(chkPrint)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 144, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel13)
@@ -771,6 +834,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 }
             }
             case "CUS" -> {
+                generateTransaction();
                 focusTable();
             }
         }
@@ -793,11 +857,14 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkPrint;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelSale;
@@ -805,6 +872,8 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private javax.swing.JTextField txtCus;
     private javax.swing.JTextField txtRFID;
     private com.toedter.calendar.JDateChooser txtSaleDate;
+    private javax.swing.JFormattedTextField txtVouAmt;
+    private javax.swing.JFormattedTextField txtVouCount;
     private javax.swing.JFormattedTextField txtVouNo;
     private javax.swing.JFormattedTextField txtVouTotal;
     // End of variables declaration//GEN-END:variables
