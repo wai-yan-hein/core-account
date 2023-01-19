@@ -103,7 +103,6 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         initCombo();
         initTable();
         searchCustomer();
-        log.info("ok");
     }
 
     private void initCombo() {
