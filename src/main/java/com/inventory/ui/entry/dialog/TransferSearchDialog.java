@@ -56,8 +56,7 @@ public class TransferSearchDialog extends javax.swing.JDialog implements KeyList
     private SelectionObserver observer;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
-    private LocationAutoCompleter fromLocationCompleter;
-    private LocationAutoCompleter toLocationCompleter;
+    private LocationAutoCompleter locationAutoCompleter;
     private boolean status = false;
 
     public InventoryRepo getInventoryRepo() {
@@ -120,8 +119,7 @@ public class TransferSearchDialog extends javax.swing.JDialog implements KeyList
         List<Location> listLocation = inventoryRepo.getLocation();
         appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
-        fromLocationCompleter = new LocationAutoCompleter(txtLocF, listLocation, null, true, false);
-        toLocationCompleter = new LocationAutoCompleter(txtLocTo, listLocation, null, true, false);
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, listLocation, null, true, false);
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, userRepo.getDeparment(), null, true);
     }
 
@@ -161,8 +159,7 @@ public class TransferSearchDialog extends javax.swing.JDialog implements KeyList
         filter.setRemark(Util1.isNull(txtRemark.getText(), "-"));
         filter.setRefNo(Util1.isNull(txtRefNo.getText(), "-"));
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
-        filter.setLocCode(fromLocationCompleter.getLocation().getKey().getLocCode());
-        filter.setLocCodeTo(toLocationCompleter.getLocation().getKey().getLocCode());
+        filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(departmentAutoCompleter.getDepartment().getDeptId());
 
@@ -221,8 +218,7 @@ public class TransferSearchDialog extends javax.swing.JDialog implements KeyList
         txtRefNo.setText(null);
         txtRemark.setText(null);
         stockAutoCompleter.setStock(new Stock("-", "All"));
-        fromLocationCompleter.setLocation(new Location("-", "All"));
-        toLocationCompleter.setLocation(new Location("-", "All"));
+        locationAutoCompleter.setLocation(new Location("-", "All"));
         appUserAutoCompleter.setAppUser(new AppUser("-", "All"));
     }
 
@@ -253,10 +249,8 @@ public class TransferSearchDialog extends javax.swing.JDialog implements KeyList
         jLabel9 = new javax.swing.JLabel();
         txtStock = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
-        jLabel10 = new javax.swing.JLabel();
-        txtLocF = new javax.swing.JTextField();
         jLabel12 = new javax.swing.JLabel();
-        txtLocTo = new javax.swing.JTextField();
+        txtLocation = new javax.swing.JTextField();
         chkDel = new javax.swing.JCheckBox();
         jLabel13 = new javax.swing.JLabel();
         txtDep = new javax.swing.JTextField();
@@ -357,25 +351,14 @@ public class TransferSearchDialog extends javax.swing.JDialog implements KeyList
             }
         });
 
-        jLabel10.setFont(Global.lableFont);
-        jLabel10.setText("Location Fr");
-
-        txtLocF.setFont(Global.textFont);
-        txtLocF.setName("txtVouNo"); // NOI18N
-        txtLocF.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                txtLocFFocusGained(evt);
-            }
-        });
-
         jLabel12.setFont(Global.lableFont);
-        jLabel12.setText("Location To");
+        jLabel12.setText("Location");
 
-        txtLocTo.setFont(Global.textFont);
-        txtLocTo.setName("txtVouNo"); // NOI18N
-        txtLocTo.addFocusListener(new java.awt.event.FocusAdapter() {
+        txtLocation.setFont(Global.textFont);
+        txtLocation.setName("txtVouNo"); // NOI18N
+        txtLocation.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
-                txtLocToFocusGained(evt);
+                txtLocationFocusGained(evt);
             }
         });
 
@@ -404,16 +387,15 @@ public class TransferSearchDialog extends javax.swing.JDialog implements KeyList
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton1))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE)
+                            .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -422,8 +404,7 @@ public class TransferSearchDialog extends javax.swing.JDialog implements KeyList
                             .addComponent(txtUser, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtStock)
                             .addComponent(txtRemark)
-                            .addComponent(txtLocF)
-                            .addComponent(txtLocTo)
+                            .addComponent(txtLocation)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addComponent(txtVouNo, javax.swing.GroupLayout.Alignment.TRAILING)
@@ -438,8 +419,6 @@ public class TransferSearchDialog extends javax.swing.JDialog implements KeyList
                             .addComponent(txtDep, javax.swing.GroupLayout.Alignment.TRAILING))))
                 .addContainerGap())
         );
-
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel10, jLabel11, jLabel12, jLabel4, jLabel6, jLabel7, jLabel8, jLabel9});
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtFromDate, txtToDate});
 
@@ -473,12 +452,8 @@ public class TransferSearchDialog extends javax.swing.JDialog implements KeyList
                             .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel10)
-                            .addComponent(txtLocF, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel12)
-                            .addComponent(txtLocTo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel8)
@@ -689,13 +664,9 @@ public class TransferSearchDialog extends javax.swing.JDialog implements KeyList
         }
     }//GEN-LAST:event_txtFilterKeyReleased
 
-    private void txtLocFFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtLocFFocusGained
+    private void txtLocationFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtLocationFocusGained
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtLocFFocusGained
-
-    private void txtLocToFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtLocToFocusGained
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtLocToFocusGained
+    }//GEN-LAST:event_txtLocationFocusGained
 
     private void txtDepFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDepFocusGained
         // TODO add your handling code here:
@@ -710,7 +681,6 @@ public class TransferSearchDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JCheckBox chkDel;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
@@ -732,8 +702,7 @@ public class TransferSearchDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
-    private javax.swing.JTextField txtLocF;
-    private javax.swing.JTextField txtLocTo;
+    private javax.swing.JTextField txtLocation;
     private javax.swing.JTextField txtRefNo;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtStock;
