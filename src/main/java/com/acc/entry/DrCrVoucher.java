@@ -236,34 +236,31 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         }
     }
 
-    private void printVoucher() {
-        int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
-        if (row >= 0) {
-            try {
-                Gl gl = voucherTableModel.getVGl(row);
-                String glVouNo = gl.getGlVouNo();
-                String rpName = gl.getTranSource().equals("DR") ? "Payment / Debit Voucher" : "Receipt / Credit Voucher";
-                String rpPath = Global.accountRP + "DrCrVoucherA5.jasper";
-                Map<String, Object> p = new HashMap();
-                p.put("p_report_name", rpName);
-                p.put("p_date", String.format("Between %s and %s", dateAutoCompleter.getStDate(), dateAutoCompleter.getEndDate()));
-                p.put("p_print_date", Util1.getTodayDateTime());
-                p.put("p_comp_name", Global.companyName);
-                p.put("p_comp_address", Global.companyAddress);
-                p.put("p_comp_phone", Global.companyPhone);
-                Util1.initJasperContext();
-                List<Gl> list = accountRepo.getVoucher(glVouNo);
-                ObjectMapper mapper = new ObjectMapper();
-                JsonNode node = mapper.readTree(gson.toJson(list));
-                JsonDataSource ds = new JsonDataSource(node, null) {
-                };
-                JasperPrint js = JasperFillManager.fillReport(rpPath, p, ds);
-                JasperViewer.viewReport(js, false);
-            } catch (JsonProcessingException | JRException ex) {
-                log.error("printVoucher : " + ex.getMessage());
-                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
+    private void printVoucher(Gl gl) {
+        try {
+            String glVouNo = gl.getGlVouNo();
+            String rpName = gl.getTranSource().equals("DR") ? "Payment / Debit Voucher" : "Receipt / Credit Voucher";
+            String rpPath = Global.accountRP + "DrCrVoucherA5.jasper";
+            Map<String, Object> p = new HashMap();
+            p.put("p_report_name", rpName);
+            p.put("p_date", String.format("Between %s and %s", dateAutoCompleter.getStDate(), dateAutoCompleter.getEndDate()));
+            p.put("p_print_date", Util1.getTodayDateTime());
+            p.put("p_comp_name", Global.companyName);
+            p.put("p_comp_address", Global.companyAddress);
+            p.put("p_comp_phone", Global.companyPhone);
+            Util1.initJasperContext();
+            List<Gl> list = accountRepo.getVoucher(glVouNo);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = mapper.readTree(gson.toJson(list));
+            JsonDataSource ds = new JsonDataSource(node, null) {
+            };
+            JasperPrint js = JasperFillManager.fillReport(rpPath, p, ds);
+            JasperViewer.viewReport(js, false);
+        } catch (JsonProcessingException | JRException ex) {
+            log.error("printVoucher : " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+
     }
 
     /**
@@ -535,6 +532,11 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     public void selected(Object source, Object selectObj) {
         if (source != null) {
             search();
+            if (source.equals("print")) {
+                if (selectObj instanceof Gl gl) {
+                    printVoucher(gl);
+                }
+            }
         }
     }
 
@@ -557,7 +559,10 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
 
     @Override
     public void print() {
-        printVoucher();
+        int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
+        if (row >= 0) {
+            printVoucher(voucherTableModel.getVGl(row));
+        }
     }
 
     @Override

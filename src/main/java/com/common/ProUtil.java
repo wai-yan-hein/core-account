@@ -75,6 +75,10 @@ public class ProUtil {
         return Util1.getBoolean(Global.hmRoleProperty.get("system.multi.currency.flag"));
     }
 
+    public static boolean isDisableDep() {
+        return Util1.getBoolean(Global.hmRoleProperty.get("disable.department"));
+    }
+
     public static boolean isPrint() {
         return Util1.getBoolean(Global.hmRoleProperty.get("printer.print"));
     }

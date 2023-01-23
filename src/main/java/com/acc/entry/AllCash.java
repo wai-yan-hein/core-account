@@ -48,6 +48,7 @@ import com.user.common.UserRepo;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileInputStream;
@@ -354,10 +355,12 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void actionMapping() {
-        String solve = "delete";
-        KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
-        tblCash.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
-        tblCash.getActionMap().put(solve, actionDelete);
+        tblCash.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "delete");
+        tblCash.getActionMap().put("delete", actionDelete);
+        tblCash.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.SHIFT_DOWN_MASK), "force-delete");
+        tblCash.getActionMap().put("force-delete", forceDelete);
     }
 
     private void initPopup() {
@@ -375,7 +378,13 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private final Action actionDelete = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            deleteVoucher();
+            deleteVoucher(false);
+        }
+    };
+    private final Action forceDelete = new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            deleteVoucher(true);
         }
     };
 
@@ -385,7 +394,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         }
     }
 
-    private void deleteVoucher() {
+    private void deleteVoucher(boolean force) {
         closeCellEditor();
         int selectRow = tblCash.convertRowIndexToModel(tblCash.getSelectedRow());
         int yes_no;
@@ -399,13 +408,14 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             if (vgl.getTranSource().equals("Report")) {
                 return;
             }
-            if (!vgl.getTranSource().equals("CB")) {
-                JOptionPane.showMessageDialog(Global.parentForm, "delete in original voucher.");
-                return;
+            if (!force) {
+                if (!vgl.getTranSource().equals("CB")) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "delete in original voucher.");
+                    return;
+                }
             }
             String glCode = vgl.getKey().getGlCode();
             if (glCode != null) {
-
                 DeleteObj obj = new DeleteObj();
                 obj.setGlCode(glCode);
                 obj.setCompCode(vgl.getKey().getCompCode());
@@ -1206,7 +1216,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     @Override
     public void delete() {
-        deleteVoucher();
+        deleteVoucher(false);
     }
 
     @Override

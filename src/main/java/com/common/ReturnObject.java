@@ -39,4 +39,6 @@ public class ReturnObject {
     private byte[] file;
     private double opAmt;
     private double clAmt;
+    private String glVouNo;
+    private String tranSource;
 }
