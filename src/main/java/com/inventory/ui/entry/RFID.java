@@ -47,6 +47,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
@@ -142,11 +143,17 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtSaleDate.getDateEditor().getUiComponent().setName("txtSaleDate");
         txtSaleDate.getDateEditor().getUiComponent().addKeyListener(this);
         txtSaleDate.getDateEditor().getUiComponent().addFocusListener(fa);
+        txtRFID.addFocusListener(fa);
+        txtCus.addFocusListener(fa);
     }
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusGained(FocusEvent e) {
-            ((JTextFieldDateEditor) e.getSource()).selectAll();
+            if (e.getSource() instanceof JTextFieldDateEditor editor) {
+                editor.selectAll();
+            } else if (e.getSource() instanceof JTextField txt) {
+                txt.selectAll();
+            }
         }
 
     };

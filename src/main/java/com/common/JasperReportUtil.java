@@ -30,24 +30,23 @@ public class JasperReportUtil {
     public static void print(JasperPrint jp) {
         try {
             String printerName = ProUtil.getProperty("printer.name");
-            if (isOnline(printerName)) {
-                PrintRequestAttributeSet printRequestAttributeSet = new HashPrintRequestAttributeSet();
-                printRequestAttributeSet.add(MediaSizeName.ISO_A4);
-                PrintServiceAttributeSet printServiceAttributeSet = new HashPrintServiceAttributeSet();
-                printServiceAttributeSet.add(new PrinterName(printerName, null));
-                JRPrintServiceExporter exporter = new JRPrintServiceExporter();
-                SimplePrintServiceExporterConfiguration config = new SimplePrintServiceExporterConfiguration();
-                config.setPrintRequestAttributeSet(printRequestAttributeSet);
-                config.setPrintServiceAttributeSet(printServiceAttributeSet);
-                config.setDisplayPageDialog(false);
-                config.setDisplayPrintDialog(false);
-                exporter.setConfiguration(config);
-                exporter.setExporterInput(new SimpleExporterInput(jp));
-                int count = Util1.getIntegerOne(ProUtil.getProperty("printer.pages"));
-                for (int i = 0; i < count; i++) {
-                    exporter.exportReport();
-                }
+            PrintRequestAttributeSet printRequestAttributeSet = new HashPrintRequestAttributeSet();
+            printRequestAttributeSet.add(MediaSizeName.ISO_A4);
+            PrintServiceAttributeSet printServiceAttributeSet = new HashPrintServiceAttributeSet();
+            printServiceAttributeSet.add(new PrinterName(printerName, null));
+            JRPrintServiceExporter exporter = new JRPrintServiceExporter();
+            SimplePrintServiceExporterConfiguration config = new SimplePrintServiceExporterConfiguration();
+            config.setPrintRequestAttributeSet(printRequestAttributeSet);
+            config.setPrintServiceAttributeSet(printServiceAttributeSet);
+            config.setDisplayPageDialog(false);
+            config.setDisplayPrintDialog(false);
+            exporter.setConfiguration(config);
+            exporter.setExporterInput(new SimpleExporterInput(jp));
+            int count = Util1.getIntegerOne(ProUtil.getProperty("printer.pages"));
+            for (int i = 0; i < count; i++) {
+                exporter.exportReport();
             }
+
         } catch (JRException e) {
             JOptionPane.showMessageDialog(Global.parentForm, e.getMessage(), "Voucher Printer", JOptionPane.ERROR_MESSAGE);
         }

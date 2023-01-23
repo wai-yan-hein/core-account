@@ -906,7 +906,7 @@ public class InventoryRepo {
         Mono<ResponseEntity<List<TraderGroup>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-trader-group")
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", ProUtil.getDepId())
+                .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().toEntityList(TraderGroup.class);
         return result.block(Duration.ofMinutes(min)).getBody();

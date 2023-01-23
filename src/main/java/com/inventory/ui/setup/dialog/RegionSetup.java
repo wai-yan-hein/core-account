@@ -23,7 +23,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.RowFilter;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -159,6 +158,7 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
                 key.setCompCode(Global.compCode);
                 key.setDeptId(Global.deptId);
                 key.setRegCode(null);
+                region.setKey(key);
                 region.setCreatedBy(Global.loginUser.getUserCode());
                 region.setCreatedDate(Util1.getTodayDate());
                 region.setMacId(Global.macId);
@@ -168,18 +168,6 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
         }
         return status;
     }
-    private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
-        @Override
-        public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
-            if (Util1.isNumber(txtFilter.getText())) {
-                return entry.getStringValue(0).toUpperCase().startsWith(
-                        txtFilter.getText().toUpperCase());
-            } else {
-                return entry.getStringValue(1).toUpperCase().startsWith(
-                        txtFilter.getText().toUpperCase());
-            }
-        }
-    };
 
     /**
      * This method is called from within the constructor to initialize the form.

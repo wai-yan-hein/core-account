@@ -222,8 +222,12 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
     private void addNewRow(Gl gl, int row, int column) {
         if (isValidEntry(gl, column)) {
             if (hasEmptyRow()) {
-                Gl vGl = new Gl();
                 Gl up = listVGl.get(row);
+                Gl vGl = new Gl();
+                GlKey key = new GlKey();
+                key.setCompCode(Global.compCode);
+                key.setDeptId(Global.deptId);
+                vGl.setKey(key);
                 vGl.setDeptCode(up.getDeptCode());
                 vGl.setDeptUsrCode(up.getDeptUsrCode());
                 vGl.setCurCode(up.getCurCode());
