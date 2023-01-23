@@ -66,8 +66,8 @@ public class CvInventoryApplication {
             if (tray != null) {
                 tray.openMF();
             }
-            JOptionPane.showMessageDialog(new JFrame(), "Core Inventory is already running.", "Duplicate Program", JOptionPane.ERROR_MESSAGE);
-            //System.exit(1);
+            JOptionPane.showMessageDialog(new JFrame(), "Core Account is already running.", "Duplicate Program", JOptionPane.ERROR_MESSAGE);
+            System.exit(0);
         }
         Global.selectionColor = UIManager.getDefaults().getColor("Table.selectionBackground");
         System.setProperty("flatlaf.useWindowDecorations", "true");

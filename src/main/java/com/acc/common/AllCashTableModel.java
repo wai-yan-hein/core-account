@@ -108,6 +108,11 @@ public class AllCashTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         Gl gl = listVGl.get(row);
+        if (column == 1) {
+            if (gl.getKey().getGlCode() != null) {
+                return !ProUtil.isDisableDep();
+            }
+        }
         return Util1.isNull(gl.getTranSource(), "CB").equals("CB");
     }
 
