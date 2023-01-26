@@ -22,6 +22,8 @@ import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.VouStatusAutoCompleter;
 import com.inventory.model.Location;
+import com.inventory.model.OPHis;
+import com.inventory.model.OPHisDetail;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
@@ -29,6 +31,7 @@ import com.inventory.model.StockUnit;
 import com.inventory.model.VStockIO;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.StockInOutTableModel;
+import com.inventory.ui.entry.dialog.OPSearchDialog;
 import com.inventory.ui.entry.dialog.StockIOSearchDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
@@ -337,7 +340,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         if (s != null) {
             progress.setIndeterminate(true);
             io = s;
-            vouStatusAutoCompleter.setVoucher(inventoryRepo.findVouStatus(io.getVouStatusCode(),io.getKey().getDeptId()));
+            vouStatusAutoCompleter.setVoucher(inventoryRepo.findVouStatus(io.getVouStatusCode(), io.getKey().getDeptId()));
             String vouNo = io.getKey().getVouNo();
             Mono<ResponseEntity<List<StockInOutDetail>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/stockio/get-stockio-detail")
@@ -382,6 +385,58 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         tblStock.setEnabled(status);
         txtVouType.setEnabled(status);
 
+    }
+
+    public void historyOP() {
+        try {
+            OPSearchDialog dialog = new OPSearchDialog(Global.parentForm);
+            dialog.setUserRepo(userRepo);
+            dialog.setInventoryRepo(inventoryRepo);
+            dialog.setWebClient(inventoryApi);
+            dialog.setObserver(this);
+            dialog.initMain();
+            dialog.setSize(Global.width - 200, Global.height - 200);
+            dialog.setLocationRelativeTo(null);
+            dialog.setIconImage(new ImageIcon(getClass().getResource("/images/search.png")).getImage());
+            dialog.setVisible(true);
+        } catch (Exception e) {
+            log.error(String.format("historyOPhistoryOP: %s", e.getMessage()));
+        }
+
+    }
+
+    private void importOP(OPHis op) {
+        outTableModel.clear();
+        Mono<ResponseEntity<List<OPHisDetail>>> result = inventoryApi.get()
+                .uri(builder -> builder.path("/setup/get-opening-detail")
+                .queryParam("vouNo", op.getKey().getVouNo())
+                .queryParam("compCode", op.getKey().getCompCode())
+                .queryParam("deptId", op.getKey().getDeptId())
+                .build())
+                .retrieve().toEntityList(OPHisDetail.class);
+        result.subscribe((t) -> {
+            List<OPHisDetail> list = t.getBody();
+            for (int i = 0; i < list.size(); i++) {
+                OPHisDetail his = list.get(i);
+                StockInOutDetail iod = new StockInOutDetail();
+                iod.setStockCode(his.getStockCode());
+                iod.setStockName(his.getStockName());
+                iod.setInQty(his.getQty());
+                iod.setCostPrice(his.getPrice());
+                iod.setInUnitCode(his.getUnitCode());
+                iod.setLocCode(op.getLocCode());
+                iod.setLocName(op.getLocName());
+                iod.setUniqueId(i + 1);
+                outTableModel.addObject(iod);
+            }
+            calTotalAmt();
+            outTableModel.setNegative(true);
+            focusOnTable();
+            progress.setIndeterminate(false);
+        }, (e) -> {
+            progress.setIndeterminate(false);
+            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+        });
     }
 
     /**
@@ -556,6 +611,11 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         lblRec.setText("Records");
 
         jButton1.setText("Import");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -618,6 +678,11 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     private void tblStockKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblStockKeyReleased
         // TODO add your handling code here:
     }//GEN-LAST:event_tblStockKeyReleased
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        historyOP();
+    }//GEN-LAST:event_jButton1ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -698,6 +763,12 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         }
         if (source.toString().equals("CAL-TOTAL")) {
             calTotalAmt();
+        }
+        if (source.toString().equals("OP-HISTORY")) {
+            if (selectObj instanceof OPHis v) {
+                OPHis op = inventoryRepo.findOpening(v.getKey());
+                importOP(op);
+            }
         }
 
     }

@@ -41,6 +41,15 @@ public class StockInOutTableModel extends AbstractTableModel {
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
     private JLabel lblRec;
+    private boolean negative = false;
+
+    public boolean isNegative() {
+        return negative;
+    }
+
+    public void setNegative(boolean negative) {
+        this.negative = negative;
+    }
 
     public JLabel getLblRec() {
         return lblRec;
@@ -353,6 +362,9 @@ public class StockInOutTableModel extends AbstractTableModel {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Unit.");
                     parent.requestFocus();
                 } else if (Util1.getFloat(od.getInQty()) <= 0 && Util1.getFloat(od.getOutQty()) <= 0) {
+                    if (negative) {
+                        return true;
+                    }
                     status = false;
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Qty.");
                     parent.requestFocus();
@@ -437,5 +449,10 @@ public class StockInOutTableModel extends AbstractTableModel {
             parent.setRowSelectionInterval(0, 0);
         }
         parent.requestFocus();
+    }
+
+    public void addObject(StockInOutDetail io) {
+        this.listStock.add(io);
+        fireTableRowsInserted(listStock.size() - 1, listStock.size() - 1);
     }
 }
