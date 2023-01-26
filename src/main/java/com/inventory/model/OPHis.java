@@ -22,6 +22,7 @@ public class OPHis {
     private String remark;
     private String createdBy;
     private String locCode;
+    private String locName;
     private Date createdDate;
     private String updatedBy;
     

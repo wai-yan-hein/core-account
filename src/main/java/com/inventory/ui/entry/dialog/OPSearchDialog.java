@@ -14,6 +14,7 @@ import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
 import com.inventory.editor.DepartmentAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
+import com.inventory.model.OPHis;
 import com.inventory.model.VOpening;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.OPVouSearchTableModel;
@@ -138,13 +139,13 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         filter.setDeptId(departmentAutoCompleter.getDepartment().getDeptId());
         //
-        Mono<ResponseEntity<List<VOpening>>> result = inventoryApi
+        Mono<ResponseEntity<List<OPHis>>> result = inventoryApi
                 .post()
                 .uri("/setup/get-opening")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
-                .toEntityList(VOpening.class);
-        List<VOpening> listOP = result.block(Duration.ofMinutes(1)).getBody();
+                .toEntityList(OPHis.class);
+        List<OPHis> listOP = result.block(Duration.ofMinutes(1)).getBody();
         tableModel.setListDetail(listOP);
         txtTotalRecord.setValue(listOP.size());
         calAmt();
@@ -152,10 +153,10 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
     }
 
     private void calAmt() {
-        List<VOpening> list = tableModel.getListDetail();
+        List<OPHis> list = tableModel.getListDetail();
         double ttlAmt = 0.0;
-        for (VOpening op : list) {
-            ttlAmt += Util1.getDouble(op.getAmount());
+        for (OPHis op : list) {
+            ttlAmt += Util1.getDouble(op.getOpAmt());
         }
         txtTotalAmt.setValue(ttlAmt);
     }
@@ -163,7 +164,7 @@ public class OPSearchDialog extends javax.swing.JDialog implements KeyListener {
     private void select() {
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
-            VOpening his = tableModel.getSelectVou(row);
+            OPHis his = tableModel.getSelectVou(row);
             observer.selected("OP-HISTORY", his);
             setVisible(false);
         } else {
