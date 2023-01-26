@@ -7,7 +7,7 @@ package com.inventory.ui.entry.dialog.common;
 
 import com.common.Global;
 import com.common.Util1;
-import com.inventory.model.VOpening;
+import com.inventory.model.OPHis;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;
@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class OPVouSearchTableModel extends AbstractTableModel {
 
-    private List<VOpening> listDetail = new ArrayList();
+    private List<OPHis> listDetail = new ArrayList();
     private final String[] columnNames = {"Opening Date", "Vou No", "Location", "Remark", "Amount", "Created By"};
     private JTable parent;
 
@@ -61,7 +61,7 @@ public class OPVouSearchTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
         try {
-            VOpening his = listDetail.get(row);
+            OPHis his = listDetail.get(row);
 
             switch (column) {
                 case 0 -> {
@@ -71,21 +71,21 @@ public class OPVouSearchTableModel extends AbstractTableModel {
                 case 1 -> {
                     //vou-no
                     if (his.isDeleted()) {
-                        return his.getVouNo() + "***";
+                        return his.getKey().getVouNo() + "***";
                     } else {
-                        return his.getVouNo();
+                        return his.getKey().getVouNo();
                     }
                 }
                 case 2 -> {
                     //location
-                    return his.getLocationName();
+                    return his.getLocName();
                 }
                 case 3 -> {
                     //remark
                     return his.getRemark();
                 }
                 case 4 -> {
-                    return Util1.getFloat(his.getAmount());
+                    return Util1.getFloat(his.getOpAmt());
                 }
                 case 5 -> {
                     //user
@@ -98,16 +98,16 @@ public class OPVouSearchTableModel extends AbstractTableModel {
         return null;
     }
 
-    public List<VOpening> getListDetail() {
+    public List<OPHis> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<VOpening> listDetail) {
+    public void setListDetail(List<OPHis> listDetail) {
         this.listDetail = listDetail;
         fireTableDataChanged();
     }
 
-    public VOpening getSelectVou(int row) {
+    public OPHis getSelectVou(int row) {
         return listDetail.get(row);
     }
 }

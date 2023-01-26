@@ -749,8 +749,8 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     @Override
     public void selected(Object source, Object selectObj) {
         if (source.toString().equals("OP-HISTORY")) {
-            if (selectObj instanceof VOpening v) {
-                OPHis op = inventoryRepo.findOpening(v.getVouNo(), v.getDeptId());
+            if (selectObj instanceof OPHis v) {
+                OPHis op = inventoryRepo.findOpening(v.getKey());
                 setVoucher(op);
             }
         }

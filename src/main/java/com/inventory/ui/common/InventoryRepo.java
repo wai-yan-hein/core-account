@@ -811,11 +811,7 @@ public class InventoryRepo {
         return result.block(Duration.ofMinutes(min));
     }
 
-    public OPHis findOpening(String vouNo, Integer deptId) {
-        OPHisKey key = new OPHisKey();
-        key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
-        key.setVouNo(vouNo);
+    public OPHis findOpening(OPHisKey key) {
         Mono<OPHis> result = inventoryApi.post()
                 .uri("/setup/find-opening")
                 .body(Mono.just(key), OPHisKey.class)
