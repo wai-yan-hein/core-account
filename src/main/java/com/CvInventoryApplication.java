@@ -5,7 +5,6 @@ import com.common.Util1;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.inventory.ui.ApplicationMainFrame;
 import com.inventory.ui.LoginDialog;
-import jakarta.annotation.PostConstruct;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontFormatException;
@@ -61,7 +60,13 @@ public class CvInventoryApplication {
             System.err.println("Failed to initialize LaF");
         }
         try {
-            Global.sock = new ServerSocket(10004);//Pharmacy
+            int port = 100;
+            Object programId = loadProperty.get("program.id");
+            if (programId != null) {
+                port = Integer.parseInt(programId.toString());
+            }
+            log.info("progarm id : " + port);
+            Global.sock = new ServerSocket(port);
         } catch (IOException e) {
             if (tray != null) {
                 tray.openMF();

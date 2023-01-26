@@ -4,8 +4,8 @@
  */
 package com.acc.common;
 
-import com.acc.model.VExchange;
 import com.common.Util1;
+import com.user.model.CurExchange;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 public class CurExchangeRateTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(CurExchangeRateTableModel.class);
-    private List<VExchange> listEx = new ArrayList();
+    private List<CurExchange> listEx = new ArrayList();
     private String[] columnNames = {"Date", "H-Currency", "F-Currency", "Exchange Rate"};
 
     @Override
@@ -46,16 +46,16 @@ public class CurExchangeRateTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
 
         try {
-            VExchange apar = listEx.get(row);
+            CurExchange apar = listEx.get(row);
             return switch (column) {
                 case 0 -> {
-                    yield Util1.toDateStr(apar.getExchangeDate(), "dd/MM/yyyy");
+                    yield Util1.toDateStr(apar.getExDate(), "dd/MM/yyyy");
                 }
                 case 1 -> {
-                    yield apar.getKey().getHomeCur();
+                    yield apar.getHomeCur();
                 }
                 case 2 -> {
-                    yield apar.getKey().getExchangeCur();
+                    yield apar.getExCur();
                 }
                 case 3 ->
                     apar.getExRate();
@@ -99,16 +99,16 @@ public class CurExchangeRateTableModel extends AbstractTableModel {
         this.columnNames = columnNames;
     }
 
-    public List<VExchange> getListEx() {
+    public List<CurExchange> getListEx() {
         return listEx;
     }
 
-    public void setListEx(List<VExchange> listEx) {
+    public void setListEx(List<CurExchange> listEx) {
         this.listEx = listEx;
         fireTableDataChanged();
     }
 
-    public VExchange getEX(int row) {
+    public CurExchange getEX(int row) {
         return listEx.get(row);
     }
 
@@ -120,12 +120,12 @@ public class CurExchangeRateTableModel extends AbstractTableModel {
 
     }
 
-    public void addEX(VExchange apar) {
+    public void addEX(CurExchange apar) {
         listEx.add(apar);
         fireTableRowsInserted(listEx.size() - 1, listEx.size() - 1);
     }
 
-    public void setEX(int row, VExchange apar) {
+    public void setEX(int row, CurExchange apar) {
         if (!listEx.isEmpty()) {
             listEx.set(row, apar);
             fireTableRowsUpdated(row, row);

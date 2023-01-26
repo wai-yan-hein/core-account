@@ -82,7 +82,6 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
     private final ActionListener menuListener = (java.awt.event.ActionEvent evt) -> {
         JMenuItem actionMenu = (JMenuItem) evt.getSource();
         String menuName = actionMenu.getText();
-        log.info("Selected Department : " + menuName);
         switch (menuName) {
             case "New" ->
                 newDepartment();

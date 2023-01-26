@@ -23,6 +23,8 @@ import com.acc.report.StockOPKey;
 import com.common.Global;
 import com.common.ReturnObject;
 import com.common.Util1;
+import com.user.model.CurExchange;
+import com.user.model.ExchangeKey;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -197,6 +199,14 @@ public class AccountRepo {
                 .bodyToMono(Boolean.class);
         return result.block(Duration.ofMinutes(min));
     }
+    public boolean delete(ExchangeKey obj) {
+        Mono<Boolean> result = accountApi.post()
+                .uri("/account/delete-exchange")
+                .body(Mono.just(obj), DeleteObj.class)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+        return result.block(Duration.ofMinutes(min));
+    }
 
     public boolean deleteVoucher(DeleteObj gl) {
         Mono<Boolean> result = accountApi.post()
@@ -354,6 +364,10 @@ public class AccountRepo {
 
     public List<String> deleteTrader(TraderAKey key) {
         return null;
+    }
+
+    public List<CurExchange> searchExchange() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
 }
