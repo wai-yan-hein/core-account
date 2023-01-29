@@ -308,8 +308,8 @@ public class RFIDTableModel extends AbstractTableModel {
 
     public void delete(int row) {
         SaleHisDetail sdh = listDetail.get(row);
-        if (sdh.getSdKey() != null) {
-            deleteList.add(sdh.getSdKey().getSdCode());
+        if (sdh.getKey()!= null) {
+            deleteList.add(sdh.getKey().getSdCode());
         }
         listDetail.remove(row);
         addNewRow();

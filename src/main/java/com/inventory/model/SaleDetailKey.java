@@ -6,30 +6,18 @@
 package com.inventory.model;
 
 import java.io.Serializable;
+import lombok.Data;
+
 
 /**
  *
  * @author wai yan
  */
+@Data
 public class SaleDetailKey implements Serializable {
-
+    private String compCode;
     private String vouNo;
     private String sdCode;
-
-    public String getVouNo() {
-        return vouNo;
-    }
-
-    public void setVouNo(String vouNo) {
-        this.vouNo = vouNo;
-    }
-
-    public String getSdCode() {
-        return sdCode;
-    }
-
-    public void setSdCode(String sdCode) {
-        this.sdCode = sdCode;
-    }
+    private Integer uniqueId;
 
 }
