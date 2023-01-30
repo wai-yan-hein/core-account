@@ -142,11 +142,11 @@
                       <Component id="txtCusAddress" linkSize="1" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Component id="txtAccount" alignment="0" min="-2" pref="23" max="-2" attributes="0"/>
-                      <Component id="lblGroup1" linkSize="3" alignment="0" max="32767" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="lblGroup1" linkSize="3" max="32767" attributes="0"/>
+                      <Component id="txtAccount" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
                   <Component id="jSeparator1" min="-2" pref="2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="chkActive" min="-2" max="-2" attributes="0"/>

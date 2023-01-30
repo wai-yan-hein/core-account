@@ -386,6 +386,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     lblStatus.setText("No Permission.");
                     lblStatus.setForeground(Color.RED);
                     disableForm(false);
+                    observer.selected("print", true);
                 } else if (Util1.getBoolean(sh.getDeleted())) {
                     lblStatus.setText("DELETED");
                     lblStatus.setForeground(Color.RED);

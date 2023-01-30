@@ -7,17 +7,15 @@ package com.acc.setup;
 
 import com.acc.common.AccountRepo;
 import com.acc.common.TraderATableModel;
-import com.acc.editor.COAAutoCompleter;
+import com.acc.editor.COA3AutoCompleter;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.TraderA;
 import com.acc.model.TraderAKey;
 import com.common.Global;
 import com.common.PanelControl;
-import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.inventory.editor.RegionAutoCompleter;
 import com.inventory.ui.setup.dialog.CustomerImportDialog;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -50,10 +48,9 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
     private int selectRow = -1;
     private TraderA trader = new TraderA();
     private final TraderATableModel traderATableModel = new TraderATableModel();
-    private COAAutoCompleter cOAAutoCompleter;
+    private COA3AutoCompleter cOAAutoCompleter;
     @Autowired
     private AccountRepo accountRepo;
-    private RegionAutoCompleter regionAutoCompleter;
     private SelectionObserver observer;
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
@@ -90,7 +87,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
     }
 
     private void initCombo() {
-        cOAAutoCompleter = new COAAutoCompleter(txtAccount, accountRepo.getCOAChild(ProUtil.getProperty("debtor.account")), null, false);
+        cOAAutoCompleter = new COA3AutoCompleter(txtAccount, accountRepo, null, false, 3);
         cOAAutoCompleter.setCoa(null);
     }
 
@@ -99,7 +96,6 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         tblCustomer.getTableHeader().setFont(Global.textFont);
         tblCustomer.getColumnModel().getColumn(0).setPreferredWidth(40);// Code
         tblCustomer.getColumnModel().getColumn(1).setPreferredWidth(320);// Name
-        tblCustomer.getColumnModel().getColumn(2).setPreferredWidth(40);// Active   
         tblCustomer.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblCustomer.setDefaultRenderer(Object.class, new TableCellRender());
         tblCustomer.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
@@ -143,6 +139,10 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
             JOptionPane.showMessageDialog(Global.parentForm, "Trader Name can't be empty");
             txtCusName.requestFocus();
             status = false;
+        } else if (cOAAutoCompleter.getCOA() == null) {
+            JOptionPane.showMessageDialog(Global.parentForm, "Chart of account can't be empty");
+            txtAccount.requestFocus();
+            status = false;
         } else {
             trader.setUserCode(txtCusCode.getText());
             trader.setTraderName(txtCusName.getText());
@@ -151,10 +151,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
             trader.setAddress(txtCusAddress.getText());
             trader.setActive(chkActive.isSelected());
             trader.setTraderType("T");
-            ChartOfAccount coa = cOAAutoCompleter.getCOA();
-            if (coa != null) {
-                trader.setAccount(coa.getKey().getCoaCode());
-            }
+            trader.setAccount(cOAAutoCompleter.getCOA().getKey().getCoaCode());
             if (lblStatus.getText().equals("NEW")) {
                 trader.setMacId(Global.macId);
                 trader.setCreatedBy(Global.loginUser.getUserCode());
@@ -191,7 +188,6 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         txtCusName.setText(null);
         txtCusEmail.setText(null);
         txtCusPhone.setText(null);
-        regionAutoCompleter.setRegion(null);
         txtCusAddress.setText(null);
         chkActive.setSelected(true);
         lblStatus.setText("NEW");
@@ -389,10 +385,10 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
                     .addComponent(jLabel5)
                     .addComponent(txtCusAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblGroup1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblGroup1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkActive)

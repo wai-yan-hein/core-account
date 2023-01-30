@@ -228,7 +228,8 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
             g.setReference(txtRefrence.getText());
             g.setRefNo(txtRefNo.getText());
             g.setMacId(Global.macId);
-
+            g.setTranSource(vouType);
+            g.setGlVouNo(txtVouNo.getText());
             if (lblStatus.getText().equals("EDIT")) {
                 g.setModifyBy(Global.loginUser.getUserCode());
             }

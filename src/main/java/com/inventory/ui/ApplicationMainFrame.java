@@ -19,6 +19,7 @@ import com.acc.setup.COAManagment;
 import com.acc.setup.COAOpening;
 import com.acc.setup.COASetup;
 import com.acc.setup.DepartmentSetup;
+import com.acc.setup.TraderSetup;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -141,6 +142,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private GLReport gLReport;
     @Autowired
     private AparReport aparReport;
+    @Autowired
+    private TraderSetup traderSetup;
 
     @Autowired
     private TaskExecutor taskExecutor;
@@ -561,6 +564,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 journalClosingStock.initMain();
                 return journalClosingStock;
             }
+            case "Trader" -> {
+                traderSetup.setName(menuName);
+                traderSetup.setObserver(this);
+                traderSetup.setProgress(progress);
+                traderSetup.initMain();
+                return traderSetup;
+            }
             default -> {
                 switch (cName) {
                     case "AllCash" -> {
@@ -645,6 +655,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 dialog.setLocationRelativeTo(null);
                 dialog.setVisible(true);
                 dep = dialog.getDeparment();
+            } else {
+                dep = listDep.get(0);
             }
         } else {
             dep = listDep.get(0);
@@ -654,7 +666,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     public void initMenu() {
-        log.info("init menu.");
         menuBar.removeAll();
         Mono<ResponseEntity<List<VRoleMenu>>> result = userApi.get()
                 .uri(builder -> builder.path("/user/get-privilege-role-menu-tree")

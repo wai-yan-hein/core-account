@@ -176,18 +176,16 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         tblPur.getColumnModel().getColumn(2).setPreferredWidth(100);//amt
         tblPur.getColumnModel().getColumn(3).setPreferredWidth(60);//Location
         tblPur.getColumnModel().getColumn(4).setPreferredWidth(60);//qty
-        tblPur.getColumnModel().getColumn(5).setPreferredWidth(1);//Std wt
-        tblPur.getColumnModel().getColumn(6).setPreferredWidth(1);//unit
-        tblPur.getColumnModel().getColumn(7).setPreferredWidth(1);//price
-        tblPur.getColumnModel().getColumn(8).setPreferredWidth(40);//amt
+        tblPur.getColumnModel().getColumn(5).setPreferredWidth(1);//unit
+        tblPur.getColumnModel().getColumn(6).setPreferredWidth(1);//price
+        tblPur.getColumnModel().getColumn(7).setPreferredWidth(40);//amt
         tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         tblPur.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(listLocation));
         tblPur.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
-        tblPur.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
-        tblPur.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
+        tblPur.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
+        tblPur.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
-        tblPur.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
         tblPur.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblPur.setDefaultRenderer(Float.class, new DecimalFormatRender());
         tblPur.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -1237,7 +1235,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                     log.error("selected CustomerList : " + selectObj + " - " + ex.getMessage());
                 }
             }
-            case "SALE-TOTAL" ->
+            case "CAL-TOTAL" ->
                 calculateTotalAmount(false);
             case "Location" ->
                 setAllLocation();

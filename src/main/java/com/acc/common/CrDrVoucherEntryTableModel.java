@@ -13,7 +13,6 @@ import com.acc.model.TraderA;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.Util1;
-import com.inventory.editor.CurrencyAutoCompleter;
 import com.user.model.Currency;
 import java.util.ArrayList;
 import java.util.List;
@@ -326,7 +325,6 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
                 gl.setDeptUsrCode(department.getUserCode());
             }
             gl.setCurCode(Global.currency);
-            gl.setTranSource(vouType);
             listVGl.add(gl);
             fireTableRowsInserted(listVGl.size() - 1, listVGl.size() - 1);
         }

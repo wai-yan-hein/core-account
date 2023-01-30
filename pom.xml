@@ -8,13 +8,13 @@
         <version>3.0.2</version>
         <relativePath/> 
     </parent>
-    <groupId>com.inventory</groupId>
+    <groupId>com.account</groupId>
     <artifactId>core-account</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>core-account</name>
     <description>Core Account Cloud </description>
     <properties>
-        <java.version>19</java.version>
+        <java.version>17</java.version>
     </properties>
     <dependencies>
         <dependency>
@@ -31,7 +31,6 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
-            <version>1.18.24</version>
             <type>jar</type>
         </dependency>
         <dependency>
