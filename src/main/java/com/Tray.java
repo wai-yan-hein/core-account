@@ -4,7 +4,7 @@
  */
 package com;
 
-import com.inventory.ui.ApplicationMainFrame;
+import com.common.ui.ApplicationMainFrame;
 import java.awt.*;
 import java.awt.TrayIcon.MessageType;
 import java.awt.event.MouseAdapter;

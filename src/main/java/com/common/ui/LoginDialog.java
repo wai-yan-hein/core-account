@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.inventory.ui;
+package com.common.ui;
 
 import com.common.Global;
 import com.user.common.UserRepo;

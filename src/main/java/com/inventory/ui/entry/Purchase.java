@@ -21,11 +21,13 @@ import com.inventory.model.Location;
 import com.inventory.model.PurHis;
 import com.inventory.model.PurHisDetail;
 import com.inventory.model.PurHisKey;
+import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
 import com.inventory.model.VPurchase;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.PurchaseTableModel;
 import com.inventory.ui.entry.dialog.PurVouSearchDialog;
+import com.inventory.ui.setup.dialog.PurAvgPriceDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
@@ -38,6 +40,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.ArrayList;
@@ -91,6 +94,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     private JProgressBar progress;
     private PurHis ph = new PurHis();
     private List<Location> listLocation = new ArrayList<>();
+    private final List<StockUnit> listStockUnit = new ArrayList<>();
 
     public JProgressBar getProgress() {
         return progress;
@@ -611,6 +615,25 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
 
     public void setTrader(Trader t, int row) {
         traderAutoCompleter.setTrader(t, row);
+    }
+
+    private void openAvgPriceDialog(MouseEvent evt) {
+        if (evt.getClickCount() > 1) {
+            int row = tblPur.convertRowIndexToModel(tblPur.getSelectedRow());
+            int column = tblPur.convertColumnIndexToModel(tblPur.getSelectedColumn());
+            if (row >= 0) {
+                if (column == 6) {
+                    PurHisDetail pd = purTableModel.getObject(row);
+                    PurAvgPriceDialog dialog = new PurAvgPriceDialog(Global.parentForm);
+                    dialog.setPd(pd);
+                    dialog.setInventoryRepo(inventoryRepo);
+                    dialog.setListUnit(listStockUnit);
+                    dialog.initMain();
+                    dialog.setLocationRelativeTo(null);
+                    dialog.setVisible(true);
+                }
+            }
+        }
     }
 
     /**
@@ -1151,6 +1174,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
 
     private void tblPurMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblPurMouseClicked
         // TODO add your handling code here:
+        openAvgPriceDialog(evt);
     }//GEN-LAST:event_tblPurMouseClicked
 
     private void tblPurKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblPurKeyReleased

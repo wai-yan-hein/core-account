@@ -6,12 +6,12 @@
 package com.inventory.ui.common;
 
 import com.common.Global;
-import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.model.Location;
-import com.inventory.model.PurHisDetail;
+import com.inventory.model.GRNDetail;
+import com.inventory.model.GRNDetailKey;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.toedter.calendar.JDateChooser;
@@ -28,14 +28,13 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class PurchaseTableModel extends AbstractTableModel {
+public class GRNTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Description", "Relation", "Location",
-        "Qty", "Unit", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Description", "Relation", "Location", "Qty", "Unit"};
     private JTable parent;
-    private List<PurHisDetail> listDetail = new ArrayList();
-    private SelectionObserver selectionObserver;
-    private final List<String> deleteList = new ArrayList();
+    private List<GRNDetail> listDetail = new ArrayList();
+    private SelectionObserver observer;
+    private final List<GRNDetailKey> deleteList = new ArrayList();
     private LocationAutoCompleter locationAutoCompleter;
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
@@ -81,12 +80,12 @@ public class PurchaseTableModel extends AbstractTableModel {
         this.locationAutoCompleter = locationAutoCompleter;
     }
 
-    public SelectionObserver getSelectionObserver() {
-        return selectionObserver;
+    public SelectionObserver getObserver() {
+        return observer;
     }
 
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
     }
 
     @Override
@@ -118,7 +117,7 @@ public class PurchaseTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 4,6,7 ->
+            case 4 ->
                 Float.class;
             default ->
                 String.class;
@@ -128,7 +127,7 @@ public class PurchaseTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case 2,7 ->
+            case 3 ->
                 false;
             default ->
                 true;
@@ -139,7 +138,7 @@ public class PurchaseTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
         try {
             if (!listDetail.isEmpty()) {
-                PurHisDetail record = listDetail.get(row);
+                GRNDetail record = listDetail.get(row);
                 switch (column) {
                     case 0 -> {
                         //code
@@ -150,11 +149,6 @@ public class PurchaseTableModel extends AbstractTableModel {
                         String stockName = null;
                         if (record.getStockCode() != null) {
                             stockName = record.getStockName();
-                            if (ProUtil.isStockNameWithCategory()) {
-                                if (record.getCatName() != null) {
-                                    stockName = String.format("%s (%s)", stockName, record.getCatName());
-                                }
-                            }
                         }
                         return stockName;
                     }
@@ -171,15 +165,7 @@ public class PurchaseTableModel extends AbstractTableModel {
                     }
                     case 5 -> {
                         //unit
-                        return record.getUnitCode();
-                    }
-                    case 6 -> {
-                        //price
-                        return record.getPrice();
-                    }
-                    case 7 -> {
-                        //amount
-                        return record.getAmount();
+                        return record.getUnit();
                     }
                     default -> {
                         return new Object();
@@ -195,9 +181,9 @@ public class PurchaseTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object value, int row, int column) {
         try {
-            PurHisDetail record = listDetail.get(row);
+            GRNDetail record = listDetail.get(row);
             switch (column) {
-                case 0,1 -> {
+                case 0, 1 -> {
                     //Code
                     if (value != null) {
                         if (value instanceof Stock s) {
@@ -206,8 +192,6 @@ public class PurchaseTableModel extends AbstractTableModel {
                             record.setUserCode(s.getUserCode());
                             record.setRelName(s.getRelName());
                             record.setQty(1.0f);
-                            record.setAvgQty(1.0f);
-                            record.setUnitCode(s.getPurUnitCode());
                             addNewRow();
                         }
                     }
@@ -225,14 +209,6 @@ public class PurchaseTableModel extends AbstractTableModel {
                     if (Util1.isNumber(value)) {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             record.setQty(Util1.getFloat(value));
-                            record.setAvgQty(record.getQty());
-                            if (record.getUnitCode() != null) {
-                                if (ProUtil.isWeightOption()) {
-                                    parent.setColumnSelectionInterval(5, 5);
-                                } else {
-                                    parent.setColumnSelectionInterval(6, 6);
-                                }
-                            }
                         } else {
                             showMessageBox("Input value must be positive");
                             parent.setColumnSelectionInterval(column, column);
@@ -247,43 +223,15 @@ public class PurchaseTableModel extends AbstractTableModel {
                     //Unit
                     if (value != null) {
                         if (value instanceof StockUnit u) {
-                            record.setUnitCode(u.getKey().getUnitCode());
+                            record.setUnit(u.getKey().getUnitCode());
                         }
                     }
                     parent.setColumnSelectionInterval(6, 6);
                 }
-                case 6 -> {
-                    //Pur Price
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            record.setPrice(Util1.getFloat(value));
-                            parent.setColumnSelectionInterval(0, 0);
-                            parent.setRowSelectionInterval(row + 1, row + 1);
-                        } else {
-                            showMessageBox("Input value must be positive");
-                            parent.setColumnSelectionInterval(column, column);
-                        }
-                    } else {
-                        showMessageBox("Input value must be number.");
-                        parent.setColumnSelectionInterval(column, column);
-                    }
-                }
-                case 7 -> {
-                    //Amount
-                    if (value != null) {
-                        record.setAmount(Util1.getFloat(value));
-                    }
-                }
+
             }
-            if (column != 6) {
-                if (Util1.getFloat(record.getPrice()) == 0) {
-                    if (record.getStockCode() != null && record.getUnitCode() != null) {
-                        record.setPrice(inventoryRepo.getPurRecentPrice(record.getStockCode(),
-                                Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnitCode()));
-                    }
-                }
-            }
-            calculateAmount(record);
+
+            //calculateAmount(record);
             if (record.getLocCode() == null) {
                 Location l = locationAutoCompleter.getLocation();
                 if (l != null) {
@@ -293,7 +241,7 @@ public class PurchaseTableModel extends AbstractTableModel {
             }
             setRecord(listDetail.size() - 1);
             fireTableRowsUpdated(row, row);
-            selectionObserver.selected("CAL-TOTAL", "CAL-TOTAL");
+            observer.selected("CAL-TOTAL", "CAL-TOTAL");
             parent.requestFocusInWindow();
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
@@ -307,7 +255,7 @@ public class PurchaseTableModel extends AbstractTableModel {
     public void addNewRow() {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
-                PurHisDetail pd = new PurHisDetail();
+                GRNDetail pd = new GRNDetail();
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }
@@ -317,7 +265,7 @@ public class PurchaseTableModel extends AbstractTableModel {
     private boolean hasEmptyRow() {
         boolean status = false;
         if (listDetail.size() >= 1) {
-            PurHisDetail get = listDetail.get(listDetail.size() - 1);
+            GRNDetail get = listDetail.get(listDetail.size() - 1);
             if (get.getStockCode() == null) {
                 status = true;
             }
@@ -325,24 +273,14 @@ public class PurchaseTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<PurHisDetail> getListDetail() {
+    public List<GRNDetail> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<PurHisDetail> listDetail) {
+    public void setListDetail(List<GRNDetail> listDetail) {
         this.listDetail = listDetail;
         setRecord(listDetail.size());
         fireTableDataChanged();
-    }
-
-    private void calculateAmount(PurHisDetail pur) {
-        float price = Util1.getFloat(pur.getPrice());
-        float avgQty = Util1.getFloat(pur.getAvgQty());
-        if (pur.getStockCode() != null) {
-            float amount = avgQty * price;
-            pur.setPrice(price);
-            pur.setAmount(Util1.getFloat(Math.round(amount)));
-        }
     }
 
     private void showMessageBox(String text) {
@@ -351,30 +289,12 @@ public class PurchaseTableModel extends AbstractTableModel {
 
     public boolean isValidEntry() {
         boolean status = true;
-        for (PurHisDetail sdh : listDetail) {
+        for (GRNDetail sdh : listDetail) {
             if (sdh.getStockCode() != null) {
-                if (Util1.getFloat(sdh.getAmount()) <= 0) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
-                            "Invalid.", JOptionPane.ERROR_MESSAGE);
-                    status = false;
-                    parent.requestFocus();
-                    break;
-                } else if (sdh.getLocCode() == null) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Location.");
-                    status = false;
-                    parent.requestFocus();
-                } else if (sdh.getUnitCode() == null) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Purchase Unit.");
-                    status = false;
-                    parent.requestFocus();
-                }
+
             }
         }
         return status;
-    }
-
-    public List<String> getDelList() {
-        return deleteList;
     }
 
     public void clearDelList() {
@@ -384,9 +304,9 @@ public class PurchaseTableModel extends AbstractTableModel {
     }
 
     public void delete(int row) {
-        PurHisDetail sdh = listDetail.get(row);
-        if (sdh.getKey()!= null) {
-            deleteList.add(sdh.getKey().getPdCode());
+        GRNDetail sdh = listDetail.get(row);
+        if (sdh.getKey() != null) {
+            deleteList.add(sdh.getKey());
         }
         listDetail.remove(row);
         addNewRow();
@@ -399,13 +319,14 @@ public class PurchaseTableModel extends AbstractTableModel {
         parent.requestFocus();
     }
 
-    public void addPurchase(PurHisDetail sd) {
+    public void addPurchase(GRNDetail sd) {
         if (listDetail != null) {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
         }
     }
-    public PurHisDetail getObject(int row){
+
+    public GRNDetail getObject(int row) {
         return listDetail.get(row);
     }
 

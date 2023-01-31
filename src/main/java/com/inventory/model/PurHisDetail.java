@@ -15,7 +15,7 @@ import lombok.Data;
 @Data
 public class PurHisDetail implements Serializable {
 
-    private PurDetailKey pdKey;
+    private PurDetailKey key;
     private String stockCode;
     private String userCode;
     private String stockName;

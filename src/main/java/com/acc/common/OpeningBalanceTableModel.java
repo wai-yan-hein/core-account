@@ -224,6 +224,7 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
                     opening.setDrAmt(null);
                 }
             }
+            opening.setOpDate(opDate.getDate());
             if (isValidEntry(opening, columnIndex, rowIndex)) {
                 save(opening, rowIndex);
                 parent.requestFocus();

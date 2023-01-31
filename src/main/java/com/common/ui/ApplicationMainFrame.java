@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.inventory.ui;
+package com.common.ui;
 
 import com.CvInventoryApplication;
 import com.acc.common.AccountRepo;
@@ -30,6 +30,7 @@ import com.user.setup.MenuSetup;
 import com.user.model.DepartmentUser;
 import com.inventory.model.VRoleMenu;
 import com.inventory.ui.common.InventoryRepo;
+import com.inventory.ui.entry.GRNEntry;
 import com.inventory.ui.entry.Manufacture;
 import com.user.model.VRoleCompany;
 import com.inventory.ui.entry.OtherSetup;
@@ -131,6 +132,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private Manufacture manufacture;
     @Autowired
     private WeightLossEntry weightLoss;
+    @Autowired
+    private GRNEntry grnEntry;
 //account
     @Autowired
     private DepartmentSetup departmentSetup;
@@ -472,6 +475,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 weightLoss.setProgress(progress);
                 weightLoss.initMain();
                 return weightLoss;
+            }
+             case "GRN" -> {
+                grnEntry.setName(menuName);
+                grnEntry.setObserver(this);
+                grnEntry.setProgress(progress);
+                grnEntry.initMain();
+                return grnEntry;
             }
             case "Menu" -> {
                 menuSetup.setName(menuName);
