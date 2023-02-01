@@ -25,7 +25,7 @@ import com.inventory.model.Trader;
 import com.inventory.model.VSale;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.RFIDTableModel;
-import com.inventory.ui.entry.dialog.SaleVouSearchDailog;
+import com.inventory.ui.entry.dialog.SaleHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.common.UserRepo;
@@ -72,7 +72,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     private List<SaleHisDetail> listDetail = new ArrayList();
     private final RFIDTableModel tableModel = new RFIDTableModel();
-    private final SaleVouSearchDailog vouSearchDialog = new SaleVouSearchDailog(Global.parentForm);
+    private final SaleHistoryDialog vouSearchDialog = new SaleHistoryDialog(Global.parentForm);
     @Autowired
     private WebClient inventoryApi;
     @Autowired

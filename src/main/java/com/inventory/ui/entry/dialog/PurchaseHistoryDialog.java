@@ -43,7 +43,7 @@ import reactor.core.publisher.Mono;
  * @author wai yan
  */
 @Slf4j
-public class PurVouSearchDialog extends javax.swing.JDialog implements KeyListener {
+public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyListener {
 
     /**
      * Creates new form SaleVouSearchDialog
@@ -94,7 +94,7 @@ public class PurVouSearchDialog extends javax.swing.JDialog implements KeyListen
         this.observer = observer;
     }
 
-    public PurVouSearchDialog(JFrame frame) {
+    public PurchaseHistoryDialog(JFrame frame) {
         super(frame, true);
         initComponents();
         initKeyListener();

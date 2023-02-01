@@ -26,7 +26,7 @@ import com.inventory.model.Trader;
 import com.inventory.model.VReturnIn;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.ReturnInTableModel;
-import com.inventory.ui.entry.dialog.RetInVouSearchDialog;
+import com.inventory.ui.entry.dialog.ReturnInHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
@@ -77,7 +77,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
     private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
     private List<RetInHisDetail> listDetail = new ArrayList();
     private final ReturnInTableModel retInTableModel = new ReturnInTableModel();
-    private final RetInVouSearchDialog vouSearchDialog = new RetInVouSearchDialog(Global.parentForm);
+    private final ReturnInHistoryDialog vouSearchDialog = new ReturnInHistoryDialog(Global.parentForm);
     @Autowired
     private WebClient inventoryApi;
     @Autowired

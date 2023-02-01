@@ -29,5 +29,7 @@ public class SaleHisDetail implements java.io.Serializable {
     private String locCode;
     private String locName;
     private Stock stock;
-    private String batchCode;
+    private String batchNo;
+    private String ownerCode;
+    private String ownerName;
 }

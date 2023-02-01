@@ -69,6 +69,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import com.inventory.ui.entry.Reports;
+import com.inventory.ui.entry.SaleByBatch;
 import com.inventory.ui.entry.Transfer;
 import com.inventory.ui.entry.WeightLossEntry;
 import com.inventory.ui.setup.OpeningSetup;
@@ -102,6 +103,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private OpeningSetup openingSetup;
     @Autowired
     private Sale sale;
+    @Autowired
+    private SaleByBatch saleByBatch;
     @Autowired
     private RFID rfid;
     @Autowired
@@ -331,6 +334,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 sale.initMain();
                 return sale;
             }
+            case "Sale By Batch" -> {
+                saleByBatch.setName(menuName);
+                saleByBatch.setObserver(this);
+                saleByBatch.setProgress(progress);
+                saleByBatch.initMain();
+                return saleByBatch;
+            }
             case "RFID" -> {
                 rfid.setName(menuName);
                 rfid.setObserver(this);
@@ -476,7 +486,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 weightLoss.initMain();
                 return weightLoss;
             }
-             case "GRN" -> {
+            case "GRN" -> {
                 grnEntry.setName(menuName);
                 grnEntry.setObserver(this);
                 grnEntry.setProgress(progress);

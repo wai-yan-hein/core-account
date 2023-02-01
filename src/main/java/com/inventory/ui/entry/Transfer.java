@@ -28,7 +28,7 @@ import com.inventory.model.TransferHisKey;
 import com.inventory.model.VTransfer;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.TransferTableModel;
-import com.inventory.ui.entry.dialog.TransferSearchDialog;
+import com.inventory.ui.entry.dialog.TransferHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
@@ -58,7 +58,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
 
     private static final Logger log = LoggerFactory.getLogger(Transfer.class);
     private final TransferTableModel tranTableModel = new TransferTableModel();
-    private final TransferSearchDialog historyDialog = new TransferSearchDialog(Global.parentForm);
+    private final TransferHistoryDialog historyDialog = new TransferHistoryDialog(Global.parentForm);
     @Autowired
     private WebClient inventoryApi;
     @Autowired

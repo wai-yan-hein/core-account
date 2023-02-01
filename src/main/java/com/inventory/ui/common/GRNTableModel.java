@@ -34,11 +34,27 @@ public class GRNTableModel extends AbstractTableModel {
     private JTable parent;
     private List<GRNDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
-    private final List<GRNDetailKey> deleteList = new ArrayList();
-    private LocationAutoCompleter locationAutoCompleter;
+    private List<GRNDetailKey> listDel = new ArrayList();
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
     private JLabel lblRec;
+    private Location location;
+
+    public List<GRNDetailKey> getListDel() {
+        return listDel;
+    }
+
+    public void setListDel(List<GRNDetailKey> listDel) {
+        this.listDel = listDel;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     public JLabel getLblRec() {
         return lblRec;
@@ -70,14 +86,6 @@ public class GRNTableModel extends AbstractTableModel {
 
     public void setParent(JTable parent) {
         this.parent = parent;
-    }
-
-    public LocationAutoCompleter getLocationAutoCompleter() {
-        return locationAutoCompleter;
-    }
-
-    public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
-        this.locationAutoCompleter = locationAutoCompleter;
     }
 
     public SelectionObserver getObserver() {
@@ -192,10 +200,11 @@ public class GRNTableModel extends AbstractTableModel {
                             record.setUserCode(s.getUserCode());
                             record.setRelName(s.getRelName());
                             record.setQty(1.0f);
+                            record.setUnit(s.getPurUnitCode());
                             addNewRow();
+                            parent.setColumnSelectionInterval(4, 4);
                         }
                     }
-                    parent.setColumnSelectionInterval(4, 4);
                 }
                 case 3 -> {
                     //Loc
@@ -209,15 +218,18 @@ public class GRNTableModel extends AbstractTableModel {
                     if (Util1.isNumber(value)) {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             record.setQty(Util1.getFloat(value));
+                            parent.setColumnSelectionInterval(0, 0);
+                            parent.setRowSelectionInterval(row + 1, row + 1);
                         } else {
                             showMessageBox("Input value must be positive");
                             parent.setColumnSelectionInterval(column, column);
+                            parent.setRowSelectionInterval(row, row);
                         }
                     } else {
                         showMessageBox("Input value must be number.");
                         parent.setColumnSelectionInterval(column, column);
+                        parent.setRowSelectionInterval(row, row);
                     }
-                    parent.setRowSelectionInterval(row, row);
                 }
                 case 5 -> {
                     //Unit
@@ -230,18 +242,8 @@ public class GRNTableModel extends AbstractTableModel {
                 }
 
             }
-
-            //calculateAmount(record);
-            if (record.getLocCode() == null) {
-                Location l = locationAutoCompleter.getLocation();
-                if (l != null) {
-                    record.setLocCode(l.getKey().getLocCode());
-                    record.setLocName(l.getLocName());
-                }
-            }
             setRecord(listDetail.size() - 1);
             fireTableRowsUpdated(row, row);
-            observer.selected("CAL-TOTAL", "CAL-TOTAL");
             parent.requestFocusInWindow();
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
@@ -256,6 +258,14 @@ public class GRNTableModel extends AbstractTableModel {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
                 GRNDetail pd = new GRNDetail();
+                GRNDetailKey key = new GRNDetailKey();
+                key.setCompCode(Global.compCode);
+                key.setDeptId(Global.deptId);
+                pd.setKey(key);
+                if (location != null) {
+                    pd.setLocCode(location.getKey().getLocCode());
+                    pd.setLocName(location.getLocName());
+                }
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }
@@ -291,22 +301,30 @@ public class GRNTableModel extends AbstractTableModel {
         boolean status = true;
         for (GRNDetail sdh : listDetail) {
             if (sdh.getStockCode() != null) {
-
-            }
+                if (sdh.getLocCode() == null) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Location.");
+                    status = false;
+                    parent.requestFocus();
+                } else if (sdh.getUnit() == null) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Unit.");
+                    status = false;
+                    parent.requestFocus();
+                }
+            } 
         }
         return status;
     }
 
     public void clearDelList() {
-        if (deleteList != null) {
-            deleteList.clear();
+        if (listDel != null) {
+            listDel.clear();
         }
     }
 
     public void delete(int row) {
         GRNDetail sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
-            deleteList.add(sdh.getKey());
+            listDel.add(sdh.getKey());
         }
         listDetail.remove(row);
         addNewRow();
@@ -319,7 +337,7 @@ public class GRNTableModel extends AbstractTableModel {
         parent.requestFocus();
     }
 
-    public void addPurchase(GRNDetail sd) {
+    public void addObject(GRNDetail sd) {
         if (listDetail != null) {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
@@ -333,6 +351,7 @@ public class GRNTableModel extends AbstractTableModel {
     public void clear() {
         if (listDetail != null) {
             listDetail.clear();
+            clearDelList();
             fireTableDataChanged();
         }
     }

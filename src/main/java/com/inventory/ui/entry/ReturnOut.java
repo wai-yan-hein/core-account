@@ -27,7 +27,7 @@ import com.inventory.model.Trader;
 import com.inventory.model.VReturnOut;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.ReturnOutTableModel;
-import com.inventory.ui.entry.dialog.RetOutVouSearchDialog;
+import com.inventory.ui.entry.dialog.RetOutHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
@@ -79,7 +79,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
     private List<RetOutHisDetail> listDetail = new ArrayList();
     private final ReturnOutTableModel roTableModel = new ReturnOutTableModel();
-    private final RetOutVouSearchDialog vouSearchDialog = new RetOutVouSearchDialog(Global.parentForm);
+    private final RetOutHistoryDialog vouSearchDialog = new RetOutHistoryDialog(Global.parentForm);
     @Autowired
     private WebClient inventoryApi;
     @Autowired

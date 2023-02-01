@@ -18,7 +18,7 @@ import com.inventory.model.WeightLossHis;
 import com.inventory.model.WeightLossHisKey;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.WeightLossTableModel;
-import com.inventory.ui.entry.dialog.WeightLossSearchDialog;
+import com.inventory.ui.entry.dialog.WeightLossHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.user.common.UserRepo;
@@ -56,7 +56,7 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
     @Autowired
     private UserRepo userRepo;
     private final WeightLossTableModel tableModel = new WeightLossTableModel();
-    private final WeightLossSearchDialog dialog = new WeightLossSearchDialog(Global.parentForm);
+    private final WeightLossHistoryDialog dialog = new WeightLossHistoryDialog(Global.parentForm);
     private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
     private LocationAutoCompleter locationAutoCompleter;
     private StockAutoCompleter stockAutoCompleter;

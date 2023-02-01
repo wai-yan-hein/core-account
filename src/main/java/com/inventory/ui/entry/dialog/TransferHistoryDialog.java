@@ -19,18 +19,15 @@ import com.inventory.editor.StockAutoCompleter;
 import com.inventory.model.AppUser;
 import com.inventory.model.Location;
 import com.inventory.model.Stock;
-import com.inventory.model.WeightLossHis;
+import com.inventory.model.VTransfer;
 import com.inventory.ui.common.InventoryRepo;
-import com.inventory.ui.entry.dialog.common.WeightLossSearchTableModel;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
+import com.inventory.ui.entry.dialog.common.TransferVouSearchTableModel;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.Duration;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -44,12 +41,12 @@ import reactor.core.publisher.Mono;
  * @author wai yan
  */
 @Slf4j
-public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyListener {
+public class TransferHistoryDialog extends javax.swing.JDialog implements KeyListener {
 
     /**
      * Creates new form SaleVouSearchDialog
      */
-    private final WeightLossSearchTableModel tableModel = new WeightLossSearchTableModel();
+    private final TransferVouSearchTableModel tableModel = new TransferVouSearchTableModel();
     private WebClient inventoryApi;
     private UserRepo userRepo;
     private InventoryRepo inventoryRepo;
@@ -101,28 +98,11 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            if (e.getSource() instanceof JTextField txt) {
-                txt.selectAll();
-            }
-        }
-    };
 
-    public WeightLossSearchDialog(JFrame frame) {
+    public TransferHistoryDialog(JFrame frame) {
         super(frame, true);
         initComponents();
         initKeyListener();
-        initFocusAdapter();
-    }
-
-    private void initFocusAdapter() {
-        txtRemark.addFocusListener(fa);
-        txtVouNo.addFocusListener(fa);
-        txtStock.addFocusListener(fa);
-        txtLoc.addFocusListener(fa);
-
     }
 
     public void initMain() {
@@ -139,9 +119,8 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
         List<Location> listLocation = inventoryRepo.getLocation();
         appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
-        locationAutoCompleter = new LocationAutoCompleter(txtLoc, listLocation, null, true, false);
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, listLocation, null, true, false);
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, userRepo.getDeparment(), null, true);
-        departmentAutoCompleter.setDepartment(userRepo.findDepartment(Global.deptId));
     }
 
     private void initTableVoucher() {
@@ -150,9 +129,11 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
         tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(5);
         tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(15);
-        tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(200);
-        tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(200);
-        tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(10);
+        tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(10);
+        tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(10);
+        tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(200);
+        tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(200);
+        tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(5);
         tblVoucher.setDefaultRenderer(Object.class, new TableCellRender());
         tblVoucher.setDefaultRenderer(Float.class, new TableCellRender());
         tblVoucher.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -176,18 +157,20 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
         filter.setUserCode(appUserAutoCompleter.getAppUser().getUserCode());
         filter.setVouNo(txtVouNo.getText());
         filter.setRemark(Util1.isNull(txtRemark.getText(), "-"));
+        filter.setRefNo(Util1.isNull(txtRefNo.getText(), "-"));
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(departmentAutoCompleter.getDepartment().getDeptId());
+
         //
-        Mono<ResponseEntity<List<WeightLossHis>>> result = inventoryApi
+        Mono<ResponseEntity<List<VTransfer>>> result = inventoryApi
                 .post()
-                .uri("/weight/get-weight-loss")
+                .uri("/transfer/get-transfer")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
-                .toEntityList(WeightLossHis.class);
-        List<WeightLossHis> listOP = result.block(Duration.ofMinutes(1)).getBody();
+                .toEntityList(VTransfer.class);
+        List<VTransfer> listOP = result.block(Duration.ofMinutes(1)).getBody();
         tableModel.setListDetail(listOP);
         progess.setIndeterminate(false);
         calAmount();
@@ -195,9 +178,9 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
 
     private void calAmount() {
         int count = 0;
-        List<WeightLossHis> listIO = tableModel.getListDetail();
+        List<VTransfer> listIO = tableModel.getListDetail();
         if (!listIO.isEmpty()) {
-            for (WeightLossHis ro : listIO) {
+            for (VTransfer ro : listIO) {
                 if (!ro.isDeleted()) {
                     count += 1;
                 }
@@ -210,8 +193,8 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
     private void select() {
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
-            WeightLossHis his = tableModel.getSelectVou(row);
-            observer.selected("WL-HISTORY", his.getKey());
+            VTransfer his = tableModel.getSelectVou(row);
+            observer.selected("TR-HISTORY", his);
             setVisible(false);
         } else {
             JOptionPane.showMessageDialog(this, "Please select the voucher.",
@@ -232,6 +215,7 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
         txtVouNo.setText(null);
+        txtRefNo.setText(null);
         txtRemark.setText(null);
         stockAutoCompleter.setStock(new Stock("-", "All"));
         locationAutoCompleter.setLocation(new Location("-", "All"));
@@ -258,16 +242,16 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
         txtUser = new javax.swing.JTextField();
         jSeparator2 = new javax.swing.JSeparator();
         jSeparator3 = new javax.swing.JSeparator();
+        txtRefNo = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         txtRemark = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
         txtStock = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
-        jLabel10 = new javax.swing.JLabel();
-        txtLoc = new javax.swing.JTextField();
-        chkDel = new javax.swing.JCheckBox();
         jLabel12 = new javax.swing.JLabel();
-        txtRefNo = new javax.swing.JTextField();
+        txtLocation = new javax.swing.JTextField();
+        chkDel = new javax.swing.JCheckBox();
         jLabel13 = new javax.swing.JLabel();
         txtDep = new javax.swing.JTextField();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -284,7 +268,7 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
         btnSelect = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Weight Loss Search Dialog");
+        setTitle("Transfer Voucher Search Dialog");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -326,6 +310,17 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
 
         jSeparator2.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
+        txtRefNo.setFont(Global.textFont);
+        txtRefNo.setName("txtVouNo"); // NOI18N
+        txtRefNo.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtRefNoFocusGained(evt);
+            }
+        });
+
+        jLabel6.setFont(Global.lableFont);
+        jLabel6.setText("Ref No");
+
         jLabel7.setFont(Global.lableFont);
         jLabel7.setText("Remark");
 
@@ -356,29 +351,18 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
             }
         });
 
-        jLabel10.setFont(Global.lableFont);
-        jLabel10.setText("Location");
+        jLabel12.setFont(Global.lableFont);
+        jLabel12.setText("Location");
 
-        txtLoc.setFont(Global.textFont);
-        txtLoc.setName("txtVouNo"); // NOI18N
-        txtLoc.addFocusListener(new java.awt.event.FocusAdapter() {
+        txtLocation.setFont(Global.textFont);
+        txtLocation.setName("txtVouNo"); // NOI18N
+        txtLocation.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
-                txtLocFocusGained(evt);
+                txtLocationFocusGained(evt);
             }
         });
 
         chkDel.setText("Deleted");
-
-        jLabel12.setFont(Global.lableFont);
-        jLabel12.setText("Ref No");
-
-        txtRefNo.setFont(Global.textFont);
-        txtRefNo.setName("txtVouNo"); // NOI18N
-        txtRefNo.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                txtRefNoFocusGained(evt);
-            }
-        });
 
         jLabel13.setFont(Global.lableFont);
         jLabel13.setText("Department");
@@ -403,23 +387,24 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton1))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE)
+                            .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel12, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 3, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtRefNo, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtUser, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtStock)
                             .addComponent(txtRemark)
-                            .addComponent(txtLoc)
+                            .addComponent(txtLocation)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addComponent(txtVouNo, javax.swing.GroupLayout.Alignment.TRAILING)
@@ -431,12 +416,9 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
                                         .addComponent(txtToDate, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addComponent(chkDel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtRefNo)
                             .addComponent(txtDep, javax.swing.GroupLayout.Alignment.TRAILING))))
                 .addContainerGap())
         );
-
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel10, jLabel11, jLabel4, jLabel7, jLabel8, jLabel9});
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtFromDate, txtToDate});
 
@@ -444,7 +426,7 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -458,20 +440,20 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
                             .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel7)
-                            .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel6)
+                            .addComponent(txtRefNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel12)
-                            .addComponent(txtRefNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel7)
+                            .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel9)
                             .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel10)
-                            .addComponent(txtLoc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel12)
+                            .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel8)
@@ -482,12 +464,12 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
                             .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(chkDel))
-                    .addComponent(jSeparator2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 246, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(7, 7, 7)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton1))
-                .addContainerGap(118, Short.MAX_VALUE))
+                .addContainerGap(89, Short.MAX_VALUE))
         );
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel11, jLabel3, txtFromDate, txtToDate});
@@ -620,7 +602,7 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel1))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(18, 18, 18)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -656,6 +638,10 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
         txtUser.requestFocus();
     }//GEN-LAST:event_txtUserFocusGained
 
+    private void txtRefNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtRefNoFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtRefNoFocusGained
+
     private void txtRemarkFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtRemarkFocusGained
         // TODO add your handling code here:
     }//GEN-LAST:event_txtRemarkFocusGained
@@ -678,13 +664,9 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
         }
     }//GEN-LAST:event_txtFilterKeyReleased
 
-    private void txtLocFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtLocFocusGained
+    private void txtLocationFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtLocationFocusGained
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtLocFocusGained
-
-    private void txtRefNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtRefNoFocusGained
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtRefNoFocusGained
+    }//GEN-LAST:event_txtLocationFocusGained
 
     private void txtDepFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDepFocusGained
         // TODO add your handling code here:
@@ -693,19 +675,18 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
     /**
      * @param args the command line arguments
      */
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnSelect;
     private javax.swing.JCheckBox chkDel;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
@@ -721,7 +702,7 @@ public class WeightLossSearchDialog extends javax.swing.JDialog implements KeyLi
     private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
-    private javax.swing.JTextField txtLoc;
+    private javax.swing.JTextField txtLocation;
     private javax.swing.JTextField txtRefNo;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtStock;

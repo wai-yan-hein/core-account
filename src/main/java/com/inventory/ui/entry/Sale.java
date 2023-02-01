@@ -34,7 +34,7 @@ import com.inventory.model.VSale;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.SaleTableModel;
 import com.inventory.ui.common.StockBalanceTableModel;
-import com.inventory.ui.entry.dialog.SaleVouSearchDailog;
+import com.inventory.ui.entry.dialog.SaleHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
@@ -84,7 +84,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     private List<SaleHisDetail> listDetail = new ArrayList();
     private final SaleTableModel saleTableModel = new SaleTableModel();
-    private final SaleVouSearchDailog vouSearchDialog = new SaleVouSearchDailog(Global.parentForm);
+    private final SaleHistoryDialog vouSearchDialog = new SaleHistoryDialog(Global.parentForm);
     private final StockBalanceTableModel stockBalanceTableModel = new StockBalanceTableModel();
     @Autowired
     private WebClient inventoryApi;
@@ -459,7 +459,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             default ->
                 JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }
-
     }
 
     private void deleteTran() {

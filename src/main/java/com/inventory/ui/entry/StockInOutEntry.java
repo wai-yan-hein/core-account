@@ -31,8 +31,8 @@ import com.inventory.model.StockUnit;
 import com.inventory.model.VStockIO;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.StockInOutTableModel;
-import com.inventory.ui.entry.dialog.OPSearchDialog;
-import com.inventory.ui.entry.dialog.StockIOSearchDialog;
+import com.inventory.ui.entry.dialog.OPHistoryDialog;
+import com.inventory.ui.entry.dialog.StockIOHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
@@ -62,7 +62,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     private static final Logger log = LoggerFactory.getLogger(StockInOutEntry.class);
     private final StockInOutTableModel outTableModel = new StockInOutTableModel();
-    private final StockIOSearchDialog historyDialog = new StockIOSearchDialog(Global.parentForm);
+    private final StockIOHistoryDialog historyDialog = new StockIOHistoryDialog(Global.parentForm);
     @Autowired
     private WebClient inventoryApi;
     @Autowired
@@ -389,7 +389,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     public void historyOP() {
         try {
-            OPSearchDialog dialog = new OPSearchDialog(Global.parentForm);
+            OPHistoryDialog dialog = new OPHistoryDialog(Global.parentForm);
             dialog.setUserRepo(userRepo);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setWebClient(inventoryApi);

@@ -20,9 +20,9 @@ import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.AppUser;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;
-import com.inventory.model.VReturnOut;
+import com.inventory.model.VReturnIn;
 import com.inventory.ui.common.InventoryRepo;
-import com.inventory.ui.entry.dialog.common.RetOutVouSearchTableModel;
+import com.inventory.ui.entry.dialog.common.RetInVouSearchTableModel;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.Duration;
@@ -42,13 +42,12 @@ import reactor.core.publisher.Mono;
  * @author wai yan
  */
 @Slf4j
-public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyListener {
+public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyListener {
 
     /**
      * Creates new form SaleVouSearchDialog
      */
-    private final RetOutVouSearchTableModel tableModel = new RetOutVouSearchTableModel();
-
+    private final RetInVouSearchTableModel tableModel = new RetInVouSearchTableModel();
     private WebClient inventoryApi;
     private InventoryRepo inventoryRepo;
     private UserRepo userRepo;
@@ -94,7 +93,7 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
         this.observer = observer;
     }
 
-    public RetOutVouSearchDialog(JFrame frame) {
+    public ReturnInHistoryDialog(JFrame frame) {
         super(frame, true);
         initComponents();
         initKeyListener();
@@ -113,7 +112,7 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
     }
 
     private void initCombo() {
-        traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "SUP");
+        traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "CUS");
         appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, true, false);
@@ -126,18 +125,19 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
         tblVoucher.setModel(tableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
         tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(20);
-        tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(80);
+        tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(50);
         tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(180);
         tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(180);
         tblVoucher.getColumnModel().getColumn(4).setPreferredWidth(15);
         tblVoucher.getColumnModel().getColumn(5).setPreferredWidth(100);
         tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(100);
-        tblVoucher.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblVoucher.setDefaultRenderer(Float.class, new TableCellRender());
         tblVoucher.setDefaultRenderer(Object.class, new TableCellRender());
+        tblVoucher.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         sorter = new TableRowSorter<>(tblVoucher.getModel());
         tblFilter = new StartWithRowFilter(txtFilter);
         tblVoucher.setRowSorter(sorter);
+
     }
 
     private void clearFilter() {
@@ -170,13 +170,13 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(departmentAutoCompleter.getDepartment().getDeptId());
         //
-        Mono<ResponseEntity<List<VReturnOut>>> result = inventoryApi
+        Mono<ResponseEntity<List<VReturnIn>>> result = inventoryApi
                 .post()
-                .uri("/retout/get-retout")
+                .uri("/retin/get-retin")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
-                .toEntityList(VReturnOut.class);
-        List<VReturnOut> listOP = result.block(Duration.ofMinutes(1)).getBody();
+                .toEntityList(VReturnIn.class);
+        List<VReturnIn> listOP = result.block(Duration.ofMinutes(1)).getBody();
         tableModel.setListDetail(listOP);
         calAmount();
     }
@@ -185,12 +185,12 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
         int count = 0;
         float ttlAmt = 0.0f;
         float paidAmt = 0.0f;
-        List<VReturnOut> listRO = tableModel.getListDetail();
-        if (!listRO.isEmpty()) {
-            for (VReturnOut ro : listRO) {
-                if (!ro.isDeleted()) {
-                    ttlAmt += ro.getVouTotal();
-                    paidAmt += ro.getPaid();
+        List<VReturnIn> listRI = tableModel.getListDetail();
+        if (!listRI.isEmpty()) {
+            for (VReturnIn r : listRI) {
+                if (!r.isDeleted()) {
+                    ttlAmt += r.getVouTotal();
+                    paidAmt += r.getPaid();
                     count += 1;
                 }
             }
@@ -204,8 +204,8 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
     private void select() {
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
-            VReturnOut his = tableModel.getSelectVou(row);
-            observer.selected("RO-HISTORY", his);
+            VReturnIn his = tableModel.getSelectVou(row);
+            observer.selected("RI-HISTORY", his);
             setVisible(false);
         } else {
             JOptionPane.showMessageDialog(this, "Please select the voucher.",
@@ -260,22 +260,22 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
         txtFilter = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
-        lblTtlAmount1 = new javax.swing.JLabel();
+        txtPaid = new javax.swing.JFormattedTextField();
         btnSelect = new javax.swing.JButton();
         lblTtlRecord = new javax.swing.JLabel();
-        btnSearch = new javax.swing.JButton();
         txtTotalRecord = new javax.swing.JFormattedTextField();
+        lblTtlAmount1 = new javax.swing.JLabel();
         lblTtlAmount = new javax.swing.JLabel();
-        txtPaid = new javax.swing.JFormattedTextField();
         txtTotalAmt = new javax.swing.JFormattedTextField();
+        btnSearch = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Return Out Voucher Search");
+        setTitle("Return In Voucher Search");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel2.setFont(Global.lableFont);
-        jLabel2.setText("Supplier");
+        jLabel2.setText("Customer");
 
         jLabel4.setFont(Global.lableFont);
         jLabel4.setText("Vou No");
@@ -352,7 +352,7 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
         });
 
         jLabel7.setFont(Global.lableFont);
-        jLabel7.setText("Location");
+        jLabel7.setText("Locaiton");
 
         txtLocation.setFont(Global.textFont);
         txtLocation.setName("txtCus"); // NOI18N
@@ -401,6 +401,12 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
                         .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtVouNo)
+                            .addComponent(txtCus)
+                            .addComponent(txtUser)
+                            .addComponent(txtRemark)
+                            .addComponent(txtStock)
+                            .addComponent(txtLocation)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(txtFromDate, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -408,12 +414,6 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
                                 .addGap(18, 18, 18)
                                 .addComponent(txtToDate, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(txtVouNo)
-                            .addComponent(txtCus)
-                            .addComponent(txtUser)
-                            .addComponent(txtRemark)
-                            .addComponent(txtStock)
-                            .addComponent(txtLocation)
                             .addComponent(chkDel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(txtDep))))
                 .addContainerGap())
@@ -424,11 +424,11 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtFromDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtToDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel11, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtFromDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtToDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel11, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel4)
@@ -457,9 +457,9 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel9)
                             .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(8, 8, 8)
                         .addComponent(chkDel))
-                    .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jSeparator2))
                 .addGap(7, 7, 7)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -499,8 +499,10 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        lblTtlAmount1.setFont(Global.lableFont);
-        lblTtlAmount1.setText("Total Paid");
+        txtPaid.setEditable(false);
+        txtPaid.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
+        txtPaid.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtPaid.setFont(Global.amtFont);
 
         btnSelect.setFont(Global.lableFont);
         btnSelect.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/checked_20px.png"))); // NOI18N
@@ -514,6 +516,21 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
         lblTtlRecord.setFont(Global.lableFont);
         lblTtlRecord.setText("Total Record :");
 
+        txtTotalRecord.setEditable(false);
+        txtTotalRecord.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtTotalRecord.setFont(Global.amtFont);
+
+        lblTtlAmount1.setFont(Global.lableFont);
+        lblTtlAmount1.setText("Total Paid :");
+
+        lblTtlAmount.setFont(Global.lableFont);
+        lblTtlAmount.setText("Total Amount :");
+
+        txtTotalAmt.setEditable(false);
+        txtTotalAmt.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
+        txtTotalAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtTotalAmt.setFont(Global.amtFont);
+
         btnSearch.setFont(Global.lableFont);
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/search.png"))); // NOI18N
         btnSearch.setText("Search");
@@ -522,23 +539,6 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
                 btnSearchActionPerformed(evt);
             }
         });
-
-        txtTotalRecord.setEditable(false);
-        txtTotalRecord.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtTotalRecord.setFont(Global.amtFont);
-
-        lblTtlAmount.setFont(Global.lableFont);
-        lblTtlAmount.setText("Total Amount");
-
-        txtPaid.setEditable(false);
-        txtPaid.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
-        txtPaid.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtPaid.setFont(Global.amtFont);
-
-        txtTotalAmt.setEditable(false);
-        txtTotalAmt.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
-        txtTotalAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtTotalAmt.setFont(Global.amtFont);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -600,7 +600,7 @@ public class RetOutVouSearchDialog extends javax.swing.JDialog implements KeyLis
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(8, 8, 8)
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)

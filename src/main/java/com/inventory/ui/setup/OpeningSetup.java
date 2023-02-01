@@ -24,7 +24,7 @@ import com.inventory.model.Stock;
 import com.inventory.model.VOpening;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.OpeningTableModel;
-import com.inventory.ui.entry.dialog.OPSearchDialog;
+import com.inventory.ui.entry.dialog.OPHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import java.awt.Color;
@@ -71,7 +71,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     private InventoryRepo inventoryRepo;
     @Autowired
     private UserRepo userRepo;
-    private final OPSearchDialog vouSearchDialog = new OPSearchDialog(Global.parentForm);
+    private final OPHistoryDialog vouSearchDialog = new OPHistoryDialog(Global.parentForm);
     private OPHis oPHis = new OPHis();
     private JProgressBar progress;
     private SelectionObserver observer;

@@ -4,6 +4,7 @@
  */
 package com.inventory.ui.common;
 
+import com.acc.model.ReportFilter;
 import com.common.FilterObject;
 import com.inventory.model.CFont;
 import com.user.model.Currency;
@@ -13,6 +14,8 @@ import com.common.ReturnObject;
 import com.common.Util1;
 import com.inventory.model.Category;
 import com.inventory.model.CategoryKey;
+import com.inventory.model.GRN;
+import com.inventory.model.GRNKey;
 import com.inventory.model.General;
 import com.inventory.model.Location;
 import com.inventory.model.LocationKey;
@@ -57,6 +60,7 @@ import com.inventory.model.TransferHis;
 import com.inventory.model.TransferHisKey;
 import com.inventory.model.UnitRelation;
 import com.inventory.model.UnitRelationDetail;
+import com.inventory.model.VSale;
 import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
 import com.inventory.model.WeightLossHis;
@@ -1045,6 +1049,15 @@ public class InventoryRepo {
         result.block(Duration.ofMinutes(min));
     }
 
+    public void delete(GRNKey key) {
+        Mono<ReturnObject> result = inventoryApi.post()
+                .uri("/grn/delete-grn")
+                .body(Mono.just(key), GRNKey.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+        result.block(Duration.ofMinutes(min));
+    }
+
     public void delete(ProcessHisDetailKey key) {
         Mono<ReturnObject> result = inventoryApi.post()
                 .uri("/process/delete-process-detail")
@@ -1136,6 +1149,25 @@ public class InventoryRepo {
             log.error("getSaleVoucherCount : " + e.getMessage());
         }
         return new General();
+    }
+
+    public GRN saveGRN(GRN grn) {
+        Mono<GRN> result = inventoryApi.post()
+                .uri("/grn")
+                .body(Mono.just(grn), GRN.class)
+                .retrieve()
+                .bodyToMono(GRN.class);
+        return result.block(Duration.ofMinutes(1));
+    }
+
+    public List<GRN> getGRNHistory(FilterObject filter) {
+        Mono<ResponseEntity<List<GRN>>> result = inventoryApi
+                .post()
+                .uri("/grn/history")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .toEntityList(GRN.class);
+        return result.block(Duration.ofMinutes(5)).getBody();
     }
 
 }
