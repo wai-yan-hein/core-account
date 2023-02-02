@@ -182,6 +182,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         filter.setReference(txtRef.getText());
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(departmentAutoCompleter.getDepartment().getDeptId());
+        filter.setNullBatch(chkBatch.isSelected());
         //
         Mono<ResponseEntity<List<VSale>>> result = inventoryApi
                 .post()
@@ -282,6 +283,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         chkDel = new javax.swing.JCheckBox();
         jLabel12 = new javax.swing.JLabel();
         txtDep = new javax.swing.JTextField();
+        chkBatch = new javax.swing.JCheckBox();
         txtFilter = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
@@ -427,6 +429,14 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
             }
         });
 
+        chkBatch.setFont(Global.lableFont);
+        chkBatch.setText("No Batch No");
+        chkBatch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkBatchActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -469,7 +479,10 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                                 .addGap(18, 18, 18)
                                 .addComponent(txtToDate, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(chkDel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(chkDel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(chkBatch, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addComponent(txtDep))))
                 .addContainerGap())
         );
@@ -527,7 +540,9 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                             .addComponent(jLabel12)
                             .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(chkDel))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(chkDel, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(chkBatch, javax.swing.GroupLayout.Alignment.TRAILING)))
                     .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 274, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(7, 7, 7)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -758,6 +773,10 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         // TODO add your handling code here:
     }//GEN-LAST:event_txtDepFocusGained
 
+    private void chkBatchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkBatchActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_chkBatchActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -765,6 +784,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnSelect;
+    private javax.swing.JCheckBox chkBatch;
     private javax.swing.JCheckBox chkDel;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;

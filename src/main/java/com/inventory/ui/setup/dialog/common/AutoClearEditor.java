@@ -43,8 +43,6 @@ public class AutoClearEditor extends javax.swing.AbstractCellEditor implements T
             boolean isSelected, int rowIndex, int vColIndex) {
         oldValue = value;
         JTextField jtf = new JTextField();
-        Color color = UIManager.getColor("Component.focusedBorderColor");
-        jtf.setBorder(BorderFactory.createLineBorder(color, 3, true));
         jtf.setFont(Global.textFont);
         if (value != null) {
             jtf.setText(value.toString());

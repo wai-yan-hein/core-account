@@ -278,6 +278,17 @@ public class InventoryRepo {
         return result.block(Duration.ofMinutes(min)).getBody();
     }
 
+    public List<GRN> getBatchList(String batchNo) {
+        Mono<ResponseEntity<List<GRN>>> result = inventoryApi.get()
+                .uri(builder -> builder.path("/grn/get-batch-list")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", ProUtil.getDepId())
+                .queryParam("batchNo", batchNo)
+                .build())
+                .retrieve().toEntityList(GRN.class);
+        return result.block(Duration.ofMinutes(min)).getBody();
+    }
+
     public Trader findTraderRFID(String rfId) {
         Mono<Trader> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/find-trader-rfid")
