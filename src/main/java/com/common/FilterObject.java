@@ -36,6 +36,7 @@ public class FilterObject {
     private boolean finished;
     private boolean close;
     private String traderCode;
+    private boolean nullBatch;
     public FilterObject(String compCode, Integer deptId) {
         this.compCode = compCode;
         this.deptId = deptId;

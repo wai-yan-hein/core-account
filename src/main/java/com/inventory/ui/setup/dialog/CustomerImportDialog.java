@@ -153,29 +153,31 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         int lineCount = 0;
         List<Trader> listTrader = new ArrayList<>();
         try {
-            try (FileInputStream fis = new FileInputStream(path); InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8); BufferedReader reader = new BufferedReader(isr)) {
-                while ((line = reader.readLine()) != null) {
+            {
+                BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(path), "UTF-8"));
+                while ((line = in.readLine()) != null) {
                     Trader t = new Trader();
                     String[] data = line.split(splitBy);    // use comma as separator
                     String code = null;
-                    String rfid = null;
                     String name = null;
+                    String address = null;
                     lineCount++;
                     try {
                         code = data[0];
                         name = data[1];
-                        rfid = data[2];
+                        address = data[2];
 
                     } catch (IndexOutOfBoundsException e) {
-                        log.error(e.getMessage());
+
+                        log.error(e.getMessage() + lineCount);
                     }
                     t.setUserCode(code);
-                    t.setRfId(rfid);
                     t.setTraderName(name);
                     TraderKey key = new TraderKey();
                     key.setCompCode(Global.compCode);
                     key.setDeptId(Global.deptId);
                     t.setKey(key);
+                    t.setAddress(address);
                     t.setActive(Boolean.TRUE);
                     t.setCreatedDate(Util1.getTodayDate());
                     t.setCreatedBy(Global.loginUser.getUserCode());
@@ -189,15 +191,6 @@ public class CustomerImportDialog extends javax.swing.JDialog {
             log.error("Read CSV File :" + e.getMessage());
 
         }
-    }
-
-    private String getTraderType(String code) {
-        return switch (code) {
-            case "310001" ->
-                "SUP";
-            default ->
-                "CUS";
-        };
     }
 
     /**

@@ -8,9 +8,9 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.model.Trader;
+import com.inventory.model.GRN;
+import com.inventory.ui.common.BatchTableModel;
 import com.inventory.ui.common.InventoryRepo;
-import com.inventory.ui.common.TraderTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -18,49 +18,43 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
 
 /**
  *
- * @author Lenovo
+ * @author wai yan
  */
-public class TraderAutoCompleter implements KeyListener {
+public class BatchAutoCompeter implements KeyListener, SelectionObserver {
 
     private final JTable table = new JTable();
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
-    private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private TraderTableModel traderTableModel;
-    private Trader trader;
+    private static final String AUTOCOMPLETER = "AUTOCOMPLETER";
+    private BatchTableModel tableModel;
+    private GRN grn;
     public AbstractCellEditor editor;
+    private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
     private SelectionObserver observer;
-    private List<String> listOption = new ArrayList<>();
     private InventoryRepo inventoryRepo;
-    private boolean filter;
-    private String traderType;
-
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
 
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
@@ -70,43 +64,39 @@ public class TraderAutoCompleter implements KeyListener {
         this.inventoryRepo = inventoryRepo;
     }
 
-    public List<String> getListOption() {
-        return listOption;
+    public SelectionObserver getObserver() {
+        return observer;
     }
 
-    public void setListOption(List<String> listOption) {
-        this.listOption = listOption;
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
     }
 
-    public TraderAutoCompleter() {
+    public BatchAutoCompeter() {
     }
 
-    public TraderAutoCompleter(JTextComponent comp, InventoryRepo inventoryRepo,
-            AbstractCellEditor editor, boolean filter, String traderType) {
+    public BatchAutoCompeter(JTextComponent comp, InventoryRepo inventoryRepo,
+            AbstractCellEditor editor) {
         this.textComp = comp;
         this.editor = editor;
-        this.filter = filter;
-        this.traderType = traderType;
         this.inventoryRepo = inventoryRepo;
         textComp.putClientProperty(AUTOCOMPLETER, this);
-        if (filter) {
-            Trader t = new Trader("-", "All");
-            setTrader(t);
-        }
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
-        traderTableModel = new TraderTableModel();
-        table.setModel(traderTableModel);
-        table.getTableHeader().setFont(Global.tblHeaderFont);
+        textComp.getDocument().addDocumentListener(documentListener);
+        tableModel = new BatchTableModel();
+        table.setModel(tableModel);
+        table.setSize(50, 50);
         table.setFont(Global.textFont); // NOI18N
+        table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setDefaultRenderer(Object.class, new TableCellRender());
         table.setRowHeight(Global.tblRowHeight);
         table.setSelectionForeground(Color.WHITE);
+        sorter = new TableRowSorter(table.getModel());
+        table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
         table.setFocusable(false);
-        table.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
-        table.getColumnModel().getColumn(1).setPreferredWidth(150);//Name
-        table.getColumnModel().getColumn(2).setPreferredWidth(150);//Region
+        table.getColumnModel().getColumn(0).setPreferredWidth(40);//Code
 
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -120,7 +110,8 @@ public class TraderAutoCompleter implements KeyListener {
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
 
-        popup.setPopupSize(600, 200);
+        popup.setBorder(BorderFactory.createLineBorder(Color.black));
+        popup.setPopupSize(400, 200);
 
         popup.add(scroll);
 
@@ -157,30 +148,38 @@ public class TraderAutoCompleter implements KeyListener {
 
             @Override
             public void popupMenuCanceled(PopupMenuEvent e) {
-                if (editor != null) {
-                    editor.stopCellEditing();
-                }
             }
         });
-
         table.setRequestFocusEnabled(false);
+    }
+
+    public GRN getBatch() {
+        return grn;
+    }
+
+    public final void setBatch(GRN grn) {
+        this.grn = grn;
+        if (this.grn != null) {
+            this.textComp.setText(grn.getBatchNo());
+        } else {
+            this.textComp.setText(null);
+        }
     }
 
     public void mouseSelect() {
         if (table.getSelectedRow() != -1) {
-            trader = traderTableModel.getTrader(table.convertRowIndexToModel(
+            grn = tableModel.getBatch(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            textComp.setText(trader.getTraderName());
-            listOption = new ArrayList<>();
+            textComp.setText(grn.getBatchNo());
+            if (editor == null) {
+                if (observer != null) {
+                    observer.selected("Batch", grn.getBatchNo());
+                }
+            }
         }
         popup.setVisible(false);
         if (editor != null) {
             editor.stopCellEditing();
-        }
-        if (observer != null) {
-            if (trader != null) {
-                observer.selected(trader.getType(), trader.getType());
-            }
         }
 
     }
@@ -189,7 +188,6 @@ public class TraderAutoCompleter implements KeyListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             mouseSelect();
-
         }
     };
 
@@ -214,26 +212,26 @@ public class TraderAutoCompleter implements KeyListener {
         }
         textComp.requestFocus();
     }
+
     Action showAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            TraderAutoCompleter completer = (TraderAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            BatchAutoCompeter completer = (BatchAutoCompeter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 if (completer.popup.isVisible()) {
                     completer.selectNextPossibleValue();
                 } else {
                     completer.showPopup();
-
                 }
             }
         }
     };
-    static Action upAction = new AbstractAction() {
+    Action upAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            TraderAutoCompleter completer = (TraderAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            BatchAutoCompeter completer = (BatchAutoCompeter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 if (completer.popup.isVisible()) {
                     completer.selectPreviousPossibleValue();
@@ -245,7 +243,7 @@ public class TraderAutoCompleter implements KeyListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            TraderAutoCompleter completer = (TraderAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            BatchAutoCompeter completer = (BatchAutoCompeter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 completer.popup.setVisible(false);
             }
@@ -286,64 +284,50 @@ public class TraderAutoCompleter implements KeyListener {
         table.scrollRectToVisible(rect);
     }
 
-    public Trader getTrader() {
-        return trader;
-    }
-
-    public final void setTrader(Trader trader) {
-        this.trader = trader;
-        this.textComp.setText(trader == null ? null : trader.getTraderName());
-    }
-
-    public void setTrader(Trader t, int row) {
-        traderTableModel.setTrader(t, row);
-    }
-
-    public void addTrader(Trader t) {
-        traderTableModel.addTrader(t);
-    }
-
-    /*
-     * KeyListener implementation
-     */
-    /**
-     * Handle the key typed event from the text field.
-     *
-     * @param e
-     */
     @Override
     public void keyTyped(KeyEvent e) {
 
     }
 
-    /**
-     * Handle the key-pressed event from the text field.
-     *
-     * @param e
-     */
     @Override
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() != 0) {
+        if (e.getKeyCode() != 10) {
             showPopup();
         }
+
+    }
+    private final DocumentListener documentListener = new DocumentListener() {
+        @Override
+        public void insertUpdate(DocumentEvent e) {
+            if (editor != null) {
+                showPopup();
+            }
+        }
+
+        @Override
+        public void removeUpdate(DocumentEvent e) {
+            if (editor != null) {
+                showPopup();
+            }
+        }
+
+        @Override
+        public void changedUpdate(DocumentEvent e) {
+        }
+    };
+
+    @Override
+    public void selected(Object source, Object selectObj) {
+
     }
 
-    /**
-     * Handle the key-released event from the text field.
-     *
-     * @param e
-     */
     @Override
     public void keyReleased(KeyEvent e) {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                List<Trader> list = inventoryRepo.getTraderList(str, traderType);
-                if (this.filter) {
-                    Trader s = new Trader("-", "All");
-                    list.add(s);
-                }
-                traderTableModel.setListTrader(list);
+                List<GRN> list = inventoryRepo.getBatchList(str);
+                tableModel.setListTrader(list);
                 if (!list.isEmpty()) {
                     table.setRowSelectionInterval(0, 0);
                 }
@@ -354,4 +338,5 @@ public class TraderAutoCompleter implements KeyListener {
     private boolean containKey(KeyEvent e) {
         return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;
     }
+
 }

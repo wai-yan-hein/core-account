@@ -11,6 +11,7 @@ import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
+import com.inventory.model.GRN;
 import com.inventory.model.Location;
 import com.inventory.model.PriceOption;
 import com.inventory.model.SaleHisDetail;
@@ -36,7 +37,7 @@ import org.slf4j.LoggerFactory;
 public class SaleByBatchTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(SaleByBatchTableModel.class);
-    private String[] columnNames = {"Code", "Description", "Relation", "Location", "Qty", "Unit", "Price", "Amount", "Supplier", "Batch No"};
+    private String[] columnNames = {"Batch No/ Sup", "Code", "Description", "Relation", "Location", "Qty", "Unit", "Price", "Amount"};
     private JTable parent;
     private List<SaleHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
@@ -165,7 +166,7 @@ public class SaleByBatchTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 4, 6, 7 ->
+            case 5, 7, 8 ->
                 Float.class;
             default ->
                 String.class;
@@ -175,10 +176,10 @@ public class SaleByBatchTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 6 -> {
+            case 7 -> {
                 return ProUtil.isSalePriceChange();
             }
-            case 2, 7 -> {
+            case 3, 8 -> {
                 return false;
             }
         }
@@ -191,10 +192,13 @@ public class SaleByBatchTableModel extends AbstractTableModel {
             SaleHisDetail sd = listDetail.get(row);
             switch (column) {
                 case 0 -> {
+                    return sd.getBatchNo();
+                }
+                case 1 -> {
                     //code
                     return sd.getUserCode() == null ? sd.getStockCode() : sd.getUserCode();
                 }
-                case 1 -> {
+                case 2 -> {
                     String stockName = null;
                     if (sd.getStockCode() != null) {
                         stockName = sd.getStockName();
@@ -206,33 +210,27 @@ public class SaleByBatchTableModel extends AbstractTableModel {
                     }
                     return stockName;
                 }
-                case 2 -> {
+                case 3 -> {
                     return sd.getRelName();
                 }
-                case 3 -> {
+                case 4 -> {
                     //loc
                     return sd.getLocName();
                 }
-                case 4 -> {
+                case 5 -> {
                     //qty
                     return sd.getQty();
                 }
-                case 5 -> {
+                case 6 -> {
                     return sd.getUnitCode();
                 }
-                case 6 -> {
+                case 7 -> {
                     //price
                     return sd.getPrice();
                 }
-                case 7 -> {
+                case 8 -> {
                     //amount
                     return sd.getAmount();
-                }
-                case 8 -> {
-                    return sd.getBatchNo();
-                }
-                case 9 -> {
-                    return sd.getOwnerCode();
                 }
                 default -> {
                     return null;
@@ -250,7 +248,15 @@ public class SaleByBatchTableModel extends AbstractTableModel {
             SaleHisDetail sd = listDetail.get(row);
             if (value != null) {
                 switch (column) {
-                    case 0, 1 -> {
+                    case 0 -> {
+                        if (value instanceof GRN g) {
+                            log.info(g.getBatchNo());
+                            sd.setBatchNo(g.getBatchNo());
+                            parent.setColumnSelectionInterval(1, 1);
+                        }
+                        //batch
+                    }
+                    case 1, 2 -> {
                         //Code
                         if (value instanceof Stock s) {
                             sbTableModel.calStockBalance(s.getKey().getStockCode());
@@ -266,11 +272,11 @@ public class SaleByBatchTableModel extends AbstractTableModel {
                                 sd.setPrice(getPopupPrice(row, true));
                             }
                             sd.setPrice(sd.getPrice() == 0 ? s.getSalePriceN() : sd.getPrice());
-                            parent.setColumnSelectionInterval(4, 4);
+                            parent.setColumnSelectionInterval(5, 5);
                             addNewRow();
                         }
                     }
-                    case 3 -> {
+                    case 4 -> {
                         //Loc
                         if (value instanceof Location l) {
                             sd.setLocCode(l.getKey().getLocCode());
@@ -278,15 +284,15 @@ public class SaleByBatchTableModel extends AbstractTableModel {
 
                         }
                     }
-                    case 4 -> {
+                    case 5 -> {
                         //Qty
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 sd.setQty(Util1.getFloat(value));
                                 if (sd.getUnitCode() == null) {
-                                    parent.setColumnSelectionInterval(5, 5);
-                                } else {
                                     parent.setColumnSelectionInterval(6, 6);
+                                } else {
+                                    parent.setColumnSelectionInterval(7, 7);
                                 }
                             } else {
                                 showMessageBox("Input value must be positive");
@@ -297,7 +303,7 @@ public class SaleByBatchTableModel extends AbstractTableModel {
                             parent.setColumnSelectionInterval(column, column);
                         }
                     }
-                    case 5 -> {
+                    case 6 -> {
                         //Unit
                         if (value instanceof StockUnit stockUnit) {
                             sd.setUnitCode(stockUnit.getKey().getUnitCode());
@@ -305,7 +311,7 @@ public class SaleByBatchTableModel extends AbstractTableModel {
 
                     }
 
-                    case 6 -> {
+                    case 7 -> {
                         //price
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
@@ -321,26 +327,12 @@ public class SaleByBatchTableModel extends AbstractTableModel {
                             parent.setColumnSelectionInterval(column, column);
                         }
                     }
-                    case 7 -> {
-                        //amt
-                        sd.setAmount(Util1.getFloat(value));
-
-                    }
                     case 8 -> {
-                        //batch
+                        //amt
+                        //sd.setAmount(Util1.getFloat(value));
 
                     }
 
-                }
-                if (column != 6) {
-                    if (Util1.getFloat(sd.getPrice()) == 0) {
-                        if (ProUtil.isSaleLastPrice()) {
-                            if (sd.getStockCode() != null && sd.getUnitCode() != null) {
-                                sd.setPrice(inventoryRepo.getSaleRecentPrice(sd.getStockCode(),
-                                        Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), sd.getUnitCode()));
-                            }
-                        }
-                    }
                 }
                 change = true;
                 calculateAmount(sd);

@@ -124,7 +124,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
     };
 
     private void initCombo() {
-        traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "SUP");
+        traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "-");
         traderAutoCompleter.setObserver(this);
     }
 

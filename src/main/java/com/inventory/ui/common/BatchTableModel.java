@@ -5,24 +5,22 @@
  */
 package com.inventory.ui.common;
 
-import com.common.Util1;
-import com.inventory.model.Trader;
+import com.inventory.model.GRN;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
-public class TraderTableModel extends AbstractTableModel {
+@Slf4j
+public class BatchTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(TraderTableModel.class);
-    private List<Trader> listTrader = new ArrayList<>();
-    private final String[] columnNames = {"Code", "Name", "Address"};
+    private List<GRN> listDetail = new ArrayList<>();
+    private final String[] columnNames = {"Batch No", "Supplier Name"};
     private JTable table;
 
     public JTable getTable() {
@@ -33,7 +31,7 @@ public class TraderTableModel extends AbstractTableModel {
         this.table = table;
     }
 
-    public TraderTableModel() {
+    public BatchTableModel() {
     }
 
     @Override
@@ -51,34 +49,27 @@ public class TraderTableModel extends AbstractTableModel {
         return String.class;
     }
 
-    public List<Trader> getListTrader() {
-        return listTrader;
+    public List<GRN> getListTrader() {
+        return listDetail;
     }
 
-    public void setListTrader(List<Trader> listTrader) {
-        this.listTrader = listTrader;
+    public void setListTrader(List<GRN> listDetail) {
+        this.listDetail = listDetail;
         fireTableDataChanged();
     }
 
     @Override
     public Object getValueAt(int row, int column) {
-        if (listTrader == null) {
+        if (listDetail.isEmpty()) {
             return null;
         }
-
-        if (listTrader.isEmpty()) {
-            return null;
-        }
-
         try {
-            Trader trader = listTrader.get(row);
+            GRN b = listDetail.get(row);
             return switch (column) {
                 case 0 ->
-                    Util1.isNull(trader.getUserCode(), trader.getKey().getCode());
+                    b.getBatchNo();
                 case 1 ->
-                    trader.getTraderName();
-                case 2 ->
-                    trader.getAddress();
+                    b.getTraderName();
                 default ->
                     null;
             }; //Code
@@ -95,22 +86,22 @@ public class TraderTableModel extends AbstractTableModel {
 
     }
 
-    public void setTrader(Trader t, int row) {
-        listTrader.set(row, t);
+    public void setBatch(GRN t, int row) {
+        listDetail.set(row, t);
         fireTableRowsUpdated(row, row);
     }
 
-    public void addTrader(Trader t) {
-        listTrader.add(t);
-        fireTableRowsInserted(listTrader.size() - 1, listTrader.size() - 1);
+    public void addBatch(GRN t) {
+        listDetail.add(t);
+        fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
     }
 
     @Override
     public int getRowCount() {
-        if (listTrader == null) {
+        if (listDetail == null) {
             return 0;
         } else {
-            return listTrader.size();
+            return listDetail.size();
         }
     }
 
@@ -119,21 +110,21 @@ public class TraderTableModel extends AbstractTableModel {
         return columnNames.length;
     }
 
-    public Trader getTrader(int row) {
-        if (listTrader == null) {
+    public GRN getBatch(int row) {
+        if (listDetail == null) {
             return null;
-        } else if (listTrader.isEmpty()) {
+        } else if (listDetail.isEmpty()) {
             return null;
         } else {
-            return listTrader.get(row);
+            return listDetail.get(row);
         }
     }
 
     public int getSize() {
-        if (listTrader == null) {
+        if (listDetail == null) {
             return 0;
         } else {
-            return listTrader.size();
+            return listDetail.size();
         }
     }
 }

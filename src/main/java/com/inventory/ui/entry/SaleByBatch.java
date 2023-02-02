@@ -15,6 +15,8 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.inventory.editor.BatchAutoCompeter;
+import com.inventory.editor.BatchCellEditor;
 import com.inventory.editor.CurrencyAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
@@ -167,7 +169,6 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
         public void focusGained(FocusEvent e) {
             ((JTextFieldDateEditor) e.getSource()).selectAll();
         }
-
     };
 
     private void initButtonGroup() {
@@ -198,22 +199,22 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
         saleTableModel.setSbTableModel(stockBalanceTableModel);
         tblSale.getTableHeader().setFont(Global.tblHeaderFont);
         tblSale.setCellSelectionEnabled(true);
-        tblSale.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
-        tblSale.getColumnModel().getColumn(1).setPreferredWidth(450);//Name
-        tblSale.getColumnModel().getColumn(2).setPreferredWidth(60);//Rel
-        tblSale.getColumnModel().getColumn(3).setPreferredWidth(60);//Location
-        tblSale.getColumnModel().getColumn(4).setPreferredWidth(60);//qty
-        tblSale.getColumnModel().getColumn(5).setPreferredWidth(1);//unit
-        tblSale.getColumnModel().getColumn(6).setPreferredWidth(1);//price
-        tblSale.getColumnModel().getColumn(7).setPreferredWidth(40);//amt
-        tblSale.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblSale.getColumnModel().getColumn(0).setPreferredWidth(50);//batch
+        tblSale.getColumnModel().getColumn(1).setPreferredWidth(50);//Code
+        tblSale.getColumnModel().getColumn(2).setPreferredWidth(450);//Name
+        tblSale.getColumnModel().getColumn(3).setPreferredWidth(60);//Rel
+        tblSale.getColumnModel().getColumn(4).setPreferredWidth(60);//Location
+        tblSale.getColumnModel().getColumn(5).setPreferredWidth(60);//qty
+        tblSale.getColumnModel().getColumn(6).setPreferredWidth(1);//unit
+        tblSale.getColumnModel().getColumn(7).setPreferredWidth(1);//price
+        tblSale.getColumnModel().getColumn(8).setPreferredWidth(40);//amt
+        tblSale.getColumnModel().getColumn(0).setCellEditor(new BatchCellEditor(inventoryRepo));//
         tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblSale.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(listLocation));
-        tblSale.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
-        tblSale.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
-        tblSale.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//
-        tblSale.getColumnModel().getColumn(8).setCellEditor(new TraderCellEditor(inventoryRepo));//
-        tblSale.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());//
+        tblSale.getColumnModel().getColumn(2).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblSale.getColumnModel().getColumn(4).setCellEditor(new LocationCellEditor(listLocation));
+        tblSale.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());//qty
+        tblSale.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
+        tblSale.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());//
         tblSale.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblSale.setDefaultRenderer(Float.class, new DecimalFormatRender());
         tblSale.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
