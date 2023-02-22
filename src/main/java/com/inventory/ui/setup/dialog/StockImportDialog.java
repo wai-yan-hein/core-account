@@ -125,21 +125,16 @@ public class StockImportDialog extends javax.swing.JDialog {
         int lineCount = 0;
         List<Stock> listStock = new ArrayList<>();
         try {
-            try ( FileInputStream fis = new FileInputStream(path);  InputStreamReader isr = new InputStreamReader(fis);  BufferedReader reader = new BufferedReader(isr)) {
-                while ((line = reader.readLine()) != null) //returns a Boolean value
+            {
+                BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(path), "UTF-8"));
+                while ((line = in.readLine()) != null) //returns a Boolean value
                 {
                     Stock t = new Stock();
                     String[] data = line.split(splitBy);    // use comma as separator
-                    String userCode = null;
                     String stockName = null;
-                    String price = null;
-                    String typeCode = null;
                     lineCount++;
                     try {
-                        userCode = data[0];
-                        stockName = data[1];
-                        price = data[2];
-                        typeCode = data[3];
+                        stockName = data[0];
                     } catch (IndexOutOfBoundsException e) {
                         //JOptionPane.showMessageDialog(Global.parentForm, "FORMAT ERROR IN LINE:" + lineCount + e.getMessage());
                     }
@@ -149,10 +144,8 @@ public class StockImportDialog extends javax.swing.JDialog {
                         key.setDeptId(Global.deptId);
                         key.setStockCode(null);
                         t.setKey(key);
-                        t.setUserCode(userCode);
-                        t.setStockName(getZawgyiText(stockName));
-                        t.setSalePriceN(Util1.getFloat(price));
-                        t.setTypeCode(getGroupCode(typeCode));
+                        t.setStockName(stockName);
+                        t.setSalePriceN(0.0f);
                         t.setActive(true);
                         t.setCreatedDate(Util1.getTodayDate());
                         t.setCreatedBy(Global.loginUser.getUserCode());
@@ -226,7 +219,7 @@ public class StockImportDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        tblTrader.setFont(new java.awt.Font("Zawgyi-One", 0, 12)); // NOI18N
+        tblTrader.setFont(Global.textFont);
         tblTrader.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},

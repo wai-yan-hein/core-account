@@ -19,8 +19,7 @@ import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.TableCellEditor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
@@ -30,7 +29,7 @@ public class TraderCellEditor extends AbstractCellEditor implements TableCellEdi
 
     private JComponent component = null;
     private TraderAAutoCompleter completer;
-    private AccountRepo accountRepo;
+    private WebClient webClient;
 
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
@@ -47,8 +46,8 @@ public class TraderCellEditor extends AbstractCellEditor implements TableCellEdi
 
     };
 
-    public TraderCellEditor(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
+    public TraderCellEditor(WebClient webClient) {
+        this.webClient = webClient;
     }
 
     //private List<Medicine> listTrader = new ArrayList();
@@ -90,7 +89,7 @@ public class TraderCellEditor extends AbstractCellEditor implements TableCellEdi
             jtf.setText(value.toString());
             jtf.selectAll();
         }
-        completer = new TraderAAutoCompleter(jtf, accountRepo, this, false);
+        completer = new TraderAAutoCompleter(jtf, webClient, this, false);
         return component;
     }
 

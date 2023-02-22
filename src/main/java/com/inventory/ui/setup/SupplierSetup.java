@@ -106,7 +106,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         listTraderGroup = inventoryRepo.getTraderGroup();
         traderGroupAutoCompleter = new TraderGroupAutoCompleter(txtGroup, listTraderGroup, null, false);
         traderGroupAutoCompleter.setGroup(null);
-        cOAAutoCompleter = new COAAutoCompleter(txtAccount, accountRepo.getCOAChild(ProUtil.getProperty("creditor.account")), null, false);
+        cOAAutoCompleter = new COAAutoCompleter(txtAccount, accountRepo.getCOAChild(ProUtil.CREDITOR_GROUP), null, false);
         cOAAutoCompleter.setCoa(null);
     }
 
@@ -177,6 +177,8 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
             ChartOfAccount coa = cOAAutoCompleter.getCOA();
             if (coa != null) {
                 supplier.setAccount(coa.getKey().getCoaCode());
+            } else {
+                supplier.setAccount(ProUtil.getProperty(ProUtil.CREDITOR_ACC));
             }
             supplier.setType("SUP");
             supplier.setCashDown(chkCD.isSelected());

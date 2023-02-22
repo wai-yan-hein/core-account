@@ -39,6 +39,7 @@ import com.inventory.model.RetInHisKey;
 import com.inventory.model.RetOutHis;
 import com.inventory.model.RetOutHisKey;
 import com.inventory.model.SaleHis;
+import com.inventory.model.SaleHisDetail;
 import com.inventory.model.SaleHisKey;
 import com.inventory.model.SaleMan;
 import com.inventory.model.SaleManKey;
@@ -1179,6 +1180,17 @@ public class InventoryRepo {
                 .retrieve()
                 .toEntityList(GRN.class);
         return result.block(Duration.ofMinutes(5)).getBody();
+    }
+
+    public List<SaleHisDetail> getSaleByBatch(String batchNo) {
+        Mono<ResponseEntity<List<SaleHisDetail>>> result = inventoryApi.get()
+                .uri(builder -> builder.path("/sale/get-sale-by-batch")
+                .queryParam("batchNo", batchNo)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
+                .build())
+                .retrieve().toEntityList(SaleHisDetail.class);
+        return result.block(Duration.ofMinutes(min)).getBody();
     }
 
 }

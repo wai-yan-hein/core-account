@@ -58,7 +58,7 @@ public class BatchCellEditor extends AbstractCellEditor implements TableCellEdit
         if (value != null) {
             jtf.setText(value.toString());
         }
-        completer = new BatchAutoCompeter(jtf, inventoryRepo,this);
+        completer = new BatchAutoCompeter(jtf, inventoryRepo, this, false);
         return component;
     }
 

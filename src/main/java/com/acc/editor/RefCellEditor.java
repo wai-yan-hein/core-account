@@ -19,6 +19,7 @@ import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.TableCellEditor;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
@@ -28,7 +29,7 @@ public class RefCellEditor extends AbstractCellEditor implements TableCellEditor
 
     private JComponent component = null;
     private RefAutoCompleter completer;
-    private AccountRepo accountRepo;
+    private WebClient webClient;
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusLost(FocusEvent e) {
@@ -43,8 +44,8 @@ public class RefCellEditor extends AbstractCellEditor implements TableCellEditor
     };
     //private List<Medicine> listCOA = new ArrayList();
 
-    public RefCellEditor(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
+    public RefCellEditor(WebClient webClient) {
+        this.webClient = webClient;
     }
 
     @Override
@@ -84,7 +85,7 @@ public class RefCellEditor extends AbstractCellEditor implements TableCellEditor
             jtf.setText(value.toString());
             jtf.selectAll();
         }
-        completer = new RefAutoCompleter(jtf, accountRepo, this, false);
+        completer = new RefAutoCompleter(jtf, webClient, this, false);
         return component;
     }
 

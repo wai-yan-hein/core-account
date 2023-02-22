@@ -112,7 +112,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         listTraderGroup = inventoryRepo.getTraderGroup();
         traderGroupAutoCompleter = new TraderGroupAutoCompleter(txtGroup, listTraderGroup, null, false);
         traderGroupAutoCompleter.setGroup(null);
-        cOAAutoCompleter = new COAAutoCompleter(txtAccount, accountRepo.getCOAChild(ProUtil.getProperty("debtor.account")), null, false);
+        cOAAutoCompleter = new COAAutoCompleter(txtAccount, accountRepo.getCOAChild(ProUtil.DEBTOR_GROUP), null, false);
         cOAAutoCompleter.setCoa(null);
     }
 
@@ -205,6 +205,8 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
             ChartOfAccount coa = cOAAutoCompleter.getCOA();
             if (coa != null) {
                 customer.setAccount(coa.getKey().getCoaCode());
+            } else {
+                customer.setAccount(ProUtil.getProperty(ProUtil.DEBTOR_ACC));
             }
             if (lblStatus.getText().equals("NEW")) {
                 customer.setMacId(Global.macId);

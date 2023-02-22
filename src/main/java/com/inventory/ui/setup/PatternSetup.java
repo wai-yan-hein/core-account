@@ -11,6 +11,7 @@ import com.common.PanelControl;
 import com.common.ReportFilter;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.common.Util1;
 import com.inventory.editor.BrandAutoCompleter;
 import com.inventory.editor.CategoryAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
@@ -101,11 +102,19 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
     }
 
     public void initMain() {
+        initTextBox();
         initCombo();
         initTableStock();
         initTablePD();
         actionMapping();
 
+    }
+
+    private void initTextBox() {
+        txtPrice.setFont(Global.amtFont);
+        txtPrice.setFormatterFactory(Util1.getDecimalFormat());
+        txtPrice.setHorizontalAlignment(JTextField.RIGHT);
+        txtPrice.setValue(0);
     }
 
     private void initFocus() {
@@ -236,7 +245,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
             patternTableModel.setListPattern(list);
             patternTableModel.setStockCode(stockCode);
             focusOnPD();
-
+            calPrice();
         }
     }
 
@@ -251,6 +260,15 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
                 focusOnPD();
             }
         }
+    }
+
+    private void calPrice() {
+        float ttlPrice = 0.0f;
+        List<Pattern> list = patternTableModel.getListPattern();
+        for (Pattern p : list) {
+            ttlPrice += Util1.getFloat(p.getQty()) * Util1.getFloat(p.getPrice());
+        }
+        txtPrice.setValue(ttlPrice);
     }
 
     /**
@@ -281,6 +299,9 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         chkEx = new javax.swing.JCheckBox();
         lblRec = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        jPanel3 = new javax.swing.JPanel();
+        txtPrice = new javax.swing.JFormattedTextField();
+        jLabel5 = new javax.swing.JLabel();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -423,6 +444,36 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
             }
         });
 
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        txtPrice.setEditable(false);
+        txtPrice.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtPrice.setFont(Global.amtFont);
+
+        jLabel5.setFont(Global.lableFont);
+        jLabel5.setText("Price");
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5))
+                .addContainerGap())
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -443,7 +494,8 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(lblRec)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton1)))
+                        .addComponent(jButton1))
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -459,7 +511,9 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
                             .addComponent(chkEx)
                             .addComponent(jButton1))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE))
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jSeparator1)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -526,8 +580,10 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
@@ -538,12 +594,18 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
     private javax.swing.JTextField txtBrand;
     private javax.swing.JTextField txtCat;
     private javax.swing.JTextField txtGroup;
+    private javax.swing.JFormattedTextField txtPrice;
     private javax.swing.JTextField txtStock;
     // End of variables declaration//GEN-END:variables
 
     @Override
     public void selected(Object source, Object selectObj) {
         if (source != null) {
+            String str = source.toString();
+            if (str.equals("CAL_PRICE")) {
+                calPrice();
+                return;
+            }
             searchStock();
         }
     }

@@ -53,12 +53,22 @@ public class ReportFilter {
     private boolean calRI;
     private boolean calRO;
     private String status;
-    private String incomeExpenseProcess;
-    private String plProcess;
-    private String bsProcess;
     private String invGroup;
     private String coaCode;
     private String srcAcc;
+    private String cashGroup;
+    
+    private String fixedAcc;
+    private String currentAcc;
+    private String capitalAcc;
+    private String liaAcc;
+    private String incomeAcc;
+    private String otherIncomeAcc;
+    private String purchaseAcc;
+    private String expenseAcc;
+    private String plAcc;
+    private String reAcc;
+    private String batchNo;
 
     public ReportFilter(Integer macId, String compCode, Integer deptId) {
         this.macId = macId;

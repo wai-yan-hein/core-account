@@ -18,6 +18,20 @@ import javax.swing.JOptionPane;
 public class ProUtil {
 
     public static final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
+    public static final String FIXED = "fixed.account";
+    public static final String CURRENT = "current.account";
+    public static final String CAPITAL = "capital.account";
+    public static final String LIA = "liability.account";
+    public static final String INCOME = "income.account";
+    public static final String OTHER_INCOME = "otherincome.account";
+    public static final String PURCHASE = "purchase.account";
+    public static final String EXPENSE = "expense.account";
+    public static final String PL = "pl.account";
+    public static final String RE = "re.account";
+    public static final String DEBTOR_GROUP = "debtor.group";
+    public static final String DEBTOR_ACC = "debtor.account";
+    public static final String CREDITOR_GROUP = "creditor.group";
+    public static final String CREDITOR_ACC = "creditor.account";
 
     public static String getFontPath() {
         return Global.hmRoleProperty.get("font.path");
@@ -83,10 +97,6 @@ public class ProUtil {
         return Util1.getBoolean(Global.hmRoleProperty.get("printer.print"));
     }
 
-    public static String getPLProcess() {
-        return Global.hmRoleProperty.get("pl.process");
-    }
-
     public static String getInvGroup() {
         return Global.hmRoleProperty.get("inventory.group");
     }
@@ -95,25 +105,12 @@ public class ProUtil {
         return Global.hmRoleProperty.get("system.income.expense.process");
     }
 
-    public static String getCashProcess() {
-        return Global.hmRoleProperty.get("system.cash.all.process");
-    }
-
-    public static String getBalanceSheetProcess() {
-        return Global.hmRoleProperty.get("balancesheet.process");
-    }
-
     public static String getConversionAcc() {
         return Global.hmRoleProperty.get("conversion.account");
     }
 
     public static String getCashGroup() {
         return Global.hmRoleProperty.get("cash.group");
-    }
-
-    public static String getIncomeExpenseProcess() {
-        String ig = Global.hmRoleProperty.get("income.expense.process");
-        return ig;
     }
 
     public static String getReportPath() {

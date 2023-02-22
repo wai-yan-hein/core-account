@@ -16,8 +16,11 @@ import com.common.TableCellRender;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.DespAutoCompleter;
 import com.acc.editor.RefAutoCompleter;
+import com.acc.model.ChartOfAccount;
 import com.acc.model.DeleteObj;
 import com.acc.model.ReportFilter;
+import com.acc.model.TmpOpening;
+import com.common.ProUtil;
 import static com.common.ProUtil.gson;
 import com.common.Util1;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -93,6 +96,18 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         initComponents();
         initKeyListener();
         initFocusListener();
+        initDateFormat();
+    }
+
+    private void initDateFormat() {
+        txtDr.setFormatterFactory(Util1.getDecimalFormat());
+        txtCr.setFormatterFactory(Util1.getDecimalFormat());
+        txtOpening.setFormatterFactory(Util1.getDecimalFormat());
+        txtClosing.setFormatterFactory(Util1.getDecimalFormat());
+        txtDr.setHorizontalAlignment(JTextField.RIGHT);
+        txtCr.setHorizontalAlignment(JTextField.RIGHT);
+        txtClosing.setHorizontalAlignment(JTextField.RIGHT);
+        txtOpening.setHorizontalAlignment(JTextField.RIGHT);
     }
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
@@ -143,9 +158,9 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         dateAutoCompleter.setSelectionObserver(this);
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDept, accountRepo.getDepartment(), null, true, true);
         departmentAutoCompleter.setObserver(this);
-        despAutoCompleter = new DespAutoCompleter(txtDesp, accountRepo, null, true);
+        despAutoCompleter = new DespAutoCompleter(txtDesp, accountApi, null, true);
         despAutoCompleter.setSelectionObserver(this);
-        refAutoCompleter = new RefAutoCompleter(txtRef, accountRepo, null, true);
+        refAutoCompleter = new RefAutoCompleter(txtRef, accountApi, null, true);
         refAutoCompleter.setSelectionObserver(this);
     }
 
@@ -167,6 +182,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     private void search() {
         if (progress != null) {
             progress.setIndeterminate(true);
+            calOpening();
             ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
             filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
             filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
@@ -183,16 +199,52 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
             result.subscribe((t) -> {
                 voucherTableModel.setListGV(t.getBody());
                 lblRecord.setText(voucherTableModel.getListSize() + "");
+                calAmt();
                 progress.setIndeterminate(false);
             });
         }
+    }
 
+    private void calAmt() {
+        double ttlDr = 0.0;
+        double ttlCr = 0.0;
+        double opening = Util1.getDouble(txtOpening.getValue());
+        List<Gl> listGl = voucherTableModel.getListGV();
+        for (Gl g : listGl) {
+            ttlDr += Util1.getDouble(g.getDrAmt());
+            ttlCr += Util1.getDouble(g.getCrAmt());
+        }
+        txtDr.setValue(ttlDr);
+        txtCr.setValue(ttlCr);
+        txtClosing.setValue(ttlDr - ttlCr + opening);
+    }
+
+    private void calOpening() {
+        ChartOfAccount coa = accountRepo.getDefaultCash();
+        if (coa != null) {
+            String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat);
+            String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
+            String clDate = Util1.toDateStrMYSQL(stDate, "dd/MM/yyyy");
+            ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
+            filter.setOpeningDate(opDate);
+            filter.setFromDate(clDate);
+            filter.setCurCode(Global.currency);
+            filter.setListDepartment(departmentAutoCompleter.getListOption());
+            filter.setCoaCode(coa.getKey().getCoaCode());
+            List<TmpOpening> listTmp = accountRepo.getOpening(filter);
+            if (!listTmp.isEmpty()) {
+                txtOpening.setValue(listTmp.get(0).getOpening());
+            } else {
+                txtOpening.setValue(0);
+            }
+        }
     }
 
     public void openVoucherDialog(String type, List<Gl> listVGl) {
         VoucherEntryDailog dailog = new VoucherEntryDailog();
         dailog.setIconImage(Global.parentForm.getIconImage());
         dailog.setAccountRepo(accountRepo);
+        dailog.setAccountApi(accountApi);
         dailog.setVouType(type);
         dailog.setObserver(this);
         dailog.setListVGl(listVGl);
@@ -248,6 +300,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
             p.put("p_comp_name", Global.companyName);
             p.put("p_comp_address", Global.companyAddress);
             p.put("p_comp_phone", Global.companyPhone);
+            p.put("p_vou_type", gl.getTranSource());
             Util1.initJasperContext();
             List<Gl> list = accountRepo.getVoucher(glVouNo);
             ObjectMapper mapper = new ObjectMapper();
@@ -289,8 +342,17 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         txtDept = new javax.swing.JTextField();
         txtVouNo = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        txtClosing = new javax.swing.JFormattedTextField();
+        txtCr = new javax.swing.JFormattedTextField();
         lblRecord = new javax.swing.JLabel();
+        txtDr = new javax.swing.JFormattedTextField();
+        jLabel7 = new javax.swing.JLabel();
+        txtOpening = new javax.swing.JFormattedTextField();
+        jLabel8 = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -440,11 +502,90 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jLabel7.setFont(Global.lableFont);
-        jLabel7.setText("Record :");
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        txtClosing.setEditable(false);
+        txtClosing.setFont(Global.amtFont);
+
+        txtCr.setEditable(false);
+        txtCr.setFont(Global.amtFont);
 
         lblRecord.setFont(Global.lableFont);
         lblRecord.setText("0");
+
+        txtDr.setEditable(false);
+        txtDr.setFont(Global.amtFont);
+
+        jLabel7.setFont(Global.lableFont);
+        jLabel7.setText("Record :");
+
+        txtOpening.setEditable(false);
+        txtOpening.setFont(Global.amtFont);
+
+        jLabel8.setFont(Global.lableFont);
+        jLabel8.setText("Opening");
+
+        jLabel9.setFont(Global.lableFont);
+        jLabel9.setText("Dr Amt");
+
+        jLabel10.setFont(Global.lableFont);
+        jLabel10.setText("Cr Amt");
+
+        jLabel11.setFont(Global.lableFont);
+        jLabel11.setText("Closing");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jLabel8)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtOpening, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel9)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtDr, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel10))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel11)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(txtClosing, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(txtCr, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 162, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtCr, txtDr});
+
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtCr, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtDr, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtOpening, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel8)
+                    .addComponent(jLabel9)
+                    .addComponent(jLabel10))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtClosing, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7)
+                    .addComponent(lblRecord)
+                    .addComponent(jLabel11))
+                .addContainerGap())
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -455,11 +596,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1)
                     .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel7)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -468,11 +605,9 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
                 .addContainerGap()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 109, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 181, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel7)
-                    .addComponent(lblRecord))
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -510,19 +645,28 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblRecord;
     private javax.swing.JTable tblVoucher;
+    private javax.swing.JFormattedTextField txtClosing;
+    private javax.swing.JFormattedTextField txtCr;
     private javax.swing.JTextField txtDate;
     private javax.swing.JTextField txtDept;
     private javax.swing.JTextField txtDesp;
+    private javax.swing.JFormattedTextField txtDr;
+    private javax.swing.JFormattedTextField txtOpening;
     private javax.swing.JTextField txtRef;
     private javax.swing.JTextField txtRefNo;
     private javax.swing.JTextField txtVouNo;

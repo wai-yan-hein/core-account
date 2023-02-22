@@ -5,7 +5,6 @@
  */
 package com.acc.editor;
 
-import com.acc.common.AccountRepo;
 import com.acc.common.RefTableModel;
 import com.acc.model.VRef;
 import com.common.Global;
@@ -35,12 +34,17 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public final class RefAutoCompleter implements KeyListener {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(RefAutoCompleter.class);
@@ -56,7 +60,7 @@ public final class RefAutoCompleter implements KeyListener {
     private int y = 0;
     boolean popupOpen = false;
     private SelectionObserver selectionObserver;
-    private AccountRepo accountRepo;
+    private WebClient webClient;
     private boolean filter;
 
     public SelectionObserver getSelectionObserver() {
@@ -71,11 +75,11 @@ public final class RefAutoCompleter implements KeyListener {
     public RefAutoCompleter() {
     }
 
-    public RefAutoCompleter(JTextComponent comp, AccountRepo accountRepo,
+    public RefAutoCompleter(JTextComponent comp, WebClient webClient,
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
-        this.accountRepo = accountRepo;
+        this.webClient = webClient;
         this.filter = filter;
         if (this.filter) {
             setAutoText(new VRef("All"));
@@ -353,13 +357,22 @@ public final class RefAutoCompleter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                List<VRef> list = accountRepo.getReference(str);
-                if (this.filter) {
-                    VRef s = new VRef("All");
-                    list.add(s);
-                }
-                refModel.setListAutoText(list);
-
+                Mono<ResponseEntity<List<VRef>>> result = webClient.get()
+                        .uri(builder -> builder.path("/account/get-reference")
+                        .queryParam("compCode", Global.compCode)
+                        .queryParam("str", str)
+                        .build())
+                        .retrieve().toEntityList(VRef.class);
+                result.subscribe((t) -> {
+                    List<VRef> list = t.getBody();
+                    if (this.filter) {
+                        VRef s = new VRef("All");
+                        list.add(s);
+                    }
+                    refModel.setListAutoText(list);
+                }, (er) -> {
+                    log.error(er.getMessage());
+                });
             }
 
         }

@@ -27,6 +27,7 @@ import com.acc.common.DateAutoCompleter;
 import com.acc.common.DateTableDecorator;
 import com.acc.common.DayBookTableModel;
 import com.acc.common.OpeningCellRender;
+import com.acc.common.TraderAdjustmentTableModel;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.DeleteObj;
 import com.user.model.Currency;
@@ -34,6 +35,7 @@ import com.acc.model.Department;
 import com.acc.model.ReportFilter;
 import com.acc.model.TmpOpening;
 import com.acc.model.Gl;
+import com.acc.model.TraderA;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -92,7 +94,7 @@ import reactor.core.publisher.Mono;
  * @author Lenovo
  */
 @Slf4j
-public class AllCash extends javax.swing.JPanel implements SelectionObserver,
+public class TraderAdjustment extends javax.swing.JPanel implements SelectionObserver,
         PanelControl {
 
     private TaskExecutor taskExecutor;
@@ -108,9 +110,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private TranSourceAutoCompleter tranSourceAutoCompleter;
     private final CashInOutTableModel inOutTableModel = new CashInOutTableModel();
     private final CashOpeningTableModel opTableModel = new CashOpeningTableModel();
-    private final CurExchangeRateTableModel curExchangeRateTableModel = new CurExchangeRateTableModel();
     private SelectionObserver observer;
-    private String sourceAccId;
     private final JPopupMenu popupmenu = new JPopupMenu();
     private final JLabel lblMessage = new JLabel();
     private TableFilterHeader filterHeader;
@@ -123,9 +123,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     private final String path = String.format("%s%s%s", "temp", File.separator, "Ledger" + Global.macId);
     private DateTableDecorator decorator;
-    private final boolean single;
-    private AllCashTableModel allCashTableModel;
-    private DayBookTableModel dayBookTableModel;
+    private TraderAdjustmentTableModel adjustmentTableModel = new TraderAdjustmentTableModel();
 
     public UserRepo getUserRepo() {
         return userRepo;
@@ -167,15 +165,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         this.progress = progress;
     }
 
-    public String getSourceAccId() {
-        return sourceAccId;
-    }
-
-    public void setSourceAccId(String sourceAccId) {
-        this.sourceAccId = sourceAccId;
-
-    }
-
     public SelectionObserver getObserver() {
         return observer;
     }
@@ -187,10 +176,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     /**
      * Creates new form CashBook
      *
-     * @param single
      */
-    public AllCash(boolean single) {
-        this.single = single;
+    public TraderAdjustment() {
         initComponents();
         initPopup();
         initTableCashInOut();
@@ -200,34 +187,14 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void initTableModel() {
-        if (single) {
-            ChartOfAccount coa = accountRepo.findCOA(sourceAccId);
-            if (coa == null) {
-                JOptionPane.showMessageDialog(this, "mapping coa does not exists.");
-                return;
-            }
-            dayBookTableModel = new DayBookTableModel(coa.isCredit());
-            dayBookTableModel.setParent(tblCash);
-            dayBookTableModel.setAccountRepo(accountRepo);
-            dayBookTableModel.setDateAutoCompleter(dateAutoCompleter);
-            dayBookTableModel.setObserver(this);
-            dayBookTableModel.setDepartment(accountRepo.getDefaultDepartment());
-            dayBookTableModel.setCurrency(userRepo.getDefaultCurrency());
-            dayBookTableModel.setSourceAccId(sourceAccId);
-            dayBookTableModel.addNewRow();
-            tblCash.setModel(dayBookTableModel);
-        } else {
-            allCashTableModel = new AllCashTableModel();
-            allCashTableModel.setParent(tblCash);
-            allCashTableModel.setAccountRepo(accountRepo);
-            allCashTableModel.setDateAutoCompleter(dateAutoCompleter);
-            allCashTableModel.setObserver(this);
-            allCashTableModel.setDepartment(accountRepo.getDefaultDepartment());
-            allCashTableModel.setCurrency(userRepo.getDefaultCurrency());
-            allCashTableModel.setSourceAccId(sourceAccId);
-            allCashTableModel.addNewRow();
-            tblCash.setModel(allCashTableModel);
-        }
+        tblCash.setModel(adjustmentTableModel);
+        adjustmentTableModel.setParent(tblCash);
+        adjustmentTableModel.setAccountRepo(accountRepo);
+        adjustmentTableModel.setDateAutoCompleter(dateAutoCompleter);
+        adjustmentTableModel.setObserver(this);
+        adjustmentTableModel.setDepartment(accountRepo.getDefaultDepartment());
+        adjustmentTableModel.setCurrency(userRepo.getDefaultCurrency());
+        adjustmentTableModel.addNewRow();
     }
 
     private void initDateDecorator() {
@@ -278,7 +245,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         initTableModel();
         initTableCB();
         createDateFilter();
-        clearFilter();
 
     }
 
@@ -291,7 +257,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         }
         tblCash.setColumnSelectionInterval(0, 0);
         tblCash.requestFocus();
-
     }
 
     private void initTableCashInOut() {
@@ -342,10 +307,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tblCash.getColumnModel().getColumn(6).setCellEditor(new COA3CellEditor(accountApi, 3));
         tblCash.getColumnModel().getColumn(7).setCellEditor(new CurrencyAEditor(listCurrency));
         tblCash.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
-        if (!single) {
-            tblCash.getColumnModel().getColumn(9).setPreferredWidth(90);// Cr-Amt  
-            tblCash.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
-        }
+        tblCash.getColumnModel().getColumn(9).setPreferredWidth(90);// Cr-Amt  
+        tblCash.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
         tblCash.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         filterHeader = new TableFilterHeader(tblCash, AutoChoices.ENABLED);
@@ -399,12 +362,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         int selectRow = tblCash.convertRowIndexToModel(tblCash.getSelectedRow());
         int yes_no;
         if (tblCash.getSelectedRow() >= 0) {
-            Gl vgl;
-            if (single) {
-                vgl = dayBookTableModel.getVGl(selectRow);
-            } else {
-                vgl = allCashTableModel.getVGl(selectRow);
-            }
+            Gl vgl = adjustmentTableModel.getVGl(selectRow);
             if (vgl.getTranSource().equals("Report")) {
                 return;
             }
@@ -425,11 +383,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                         "Delete", JOptionPane.YES_NO_OPTION);
                 if (yes_no == 0) {
                     if (accountRepo.delete(obj)) {
-                        if (single) {
-                            dayBookTableModel.deleteVGl(selectRow);
-                        } else {
-                            allCashTableModel.deleteVGl(selectRow);
-                        }
+                        adjustmentTableModel.deleteVGl(selectRow);
                     }
                     calDebitCredit();
                 }
@@ -481,20 +435,28 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void searchCash() {
+        TraderA trader = traderAutoCompleter.getTrader();
+        String traderCode = trader.getKey().getCode();
+        if (traderCode.equals("-")) {
+            JOptionPane.showMessageDialog(this, "Select Trader.");
+            return;
+        } else if (trader.getAccount().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Selected trader does not have account.");
+            return;
+        }
         progress.setIndeterminate(true);
-        calOpeningClosing();
+        calOpeningClosing(traderCode,trader.getAccount());
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
         filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
         filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
         filter.setDesp(despAutoCompleter.getAutoText().getDescription().equals("All") ? "-" : despAutoCompleter.getAutoText().getDescription());
-        filter.setSrcAcc(sourceAccId);
         filter.setReference(refAutoCompleter.getAutoText().getReference().equals("All") ? "-"
                 : refAutoCompleter.getAutoText().getReference());
         filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
         filter.setListDepartment(departmentAutoCompleter.getListOption());
         filter.setTranSource(tranSourceAutoCompleter.getAutoText().getTranSource().equals("All") ? "-"
                 : tranSourceAutoCompleter.getAutoText().getTranSource());
-        filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
+        filter.setTraderCode(traderCode);
         ChartOfAccount coa = coaAutoCompleter.getCOA();
         String coaLv1 = Util1.getInteger(coa.getCoaLevel()) == 1 ? coa.getKey().getCoaCode() : "-";
         String coaLv2 = Util1.getInteger(coa.getCoaLevel()) == 2 ? coa.getKey().getCoaCode() : "-";
@@ -502,6 +464,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         filter.setCoaLv1(coaLv1);
         filter.setCoaLv2(coaLv2);
         filter.setAcc(accCode);
+        filter.setSrcAcc(trader.getAccount());
         filter.setSummary(chkSummary.isSelected());
         Mono<ReturnObject> result = accountApi.post()
                 .uri("/account/search-gl")
@@ -515,17 +478,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 List<Gl> listVGl = gson.fromJson(reader, new TypeToken<ArrayList<Gl>>() {
                 }.getType());
                 txtRecord.setValue(listVGl.size());
-                if (single) {
-                    dayBookTableModel.setGlDate(filter.getFromDate());
-                    dayBookTableModel.setListVGl(listVGl);
-                    dayBookTableModel.addNewRow();
-                } else {
-                    allCashTableModel.setGlDate(filter.getFromDate());
-                    allCashTableModel.setListVGl(listVGl);
-                    allCashTableModel.addNewRow();
-                }
+                adjustmentTableModel.setGlDate(filter.getFromDate());
+                adjustmentTableModel.setListVGl(listVGl);
+                adjustmentTableModel.addNewRow();
                 calDebitCredit();
-                //getLatestCurrency();
                 requestFoucsTable();
                 decorator.refreshButton(filter.getFromDate());
                 progress.setIndeterminate(false);
@@ -812,67 +768,76 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtDate)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtDepartment))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtPerson)
+                    .addComponent(txtPerson, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtAccount)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
+                    .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtDesp)
-                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 222, Short.MAX_VALUE)
+                    .addComponent(txtDepartment, javax.swing.GroupLayout.DEFAULT_SIZE, 222, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtRefrence)
-                    .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(txtAccount, javax.swing.GroupLayout.DEFAULT_SIZE, 222, Short.MAX_VALUE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 222, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtDesp, javax.swing.GroupLayout.DEFAULT_SIZE, 222, Short.MAX_VALUE)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, 222, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtRefrence, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)
+                    .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(txtCurrency, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)
+                    .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(txtCurrency, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(txtOption, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(txtOption, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE))
                 .addContainerGap())
         );
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {txtDate, txtPerson});
+
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel7)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel1)
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel7)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel4)
+                                    .addComponent(jLabel5)
+                                    .addComponent(jLabel6)
+                                    .addComponent(jLabel3))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(txtDesp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(txtRefrence, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(txtPerson, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel8)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtOption, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(jPanel1Layout.createSequentialGroup()
                             .addComponent(jLabel2)
-                            .addComponent(jLabel4)
-                            .addComponent(jLabel5)
-                            .addComponent(jLabel6)
-                            .addComponent(jLabel3))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtDepartment, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtDesp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtRefrence, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtPerson, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel8)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtOption, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(txtDepartment, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -882,7 +847,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         panelDate.setLayout(panelDateLayout);
         panelDateLayout.setHorizontalGroup(
             panelDateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 569, Short.MAX_VALUE)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
         panelDateLayout.setVerticalGroup(
             panelDateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -916,7 +881,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 .addComponent(jLabel9)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(240, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -938,13 +903,13 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(tblScrollPane)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 559, Short.MAX_VALUE)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 685, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(panelDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 559, Short.MAX_VALUE))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 685, Short.MAX_VALUE))
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -954,7 +919,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tblScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)
+                .addComponent(tblScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 131, Short.MAX_VALUE)
@@ -1141,12 +1106,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private void calDebitCredit() {
         opTableModel.clear();
         inOutTableModel.clear();
-        List<Gl> listVGl;
-        if (single) {
-            listVGl = dayBookTableModel.getListVGl();
-        } else {
-            listVGl = allCashTableModel.getListVGl();
-        }
+        List<Gl> listVGl = adjustmentTableModel.getListVGl();
         //lblTotalCount.setText(listVGl.size() - 1 + "");
         Map<String, List<Gl>> hmGroup = listVGl.stream().collect(Collectors.groupingBy(w -> w.getCurCode()));
         hmGroup.forEach((t, u) -> {
@@ -1170,7 +1130,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         });
     }
 
-    private void calOpeningClosing() {
+    private void calOpeningClosing(String traderCode, String account) {
         String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat);
         String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
         String clDate = Util1.toDateStrMYSQL(stDate, "dd/MM/yyyy");
@@ -1179,8 +1139,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         filter.setFromDate(clDate);
         filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
         filter.setListDepartment(departmentAutoCompleter.getListOption());
-        filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
-        filter.setCoaCode(sourceAccId);
+        filter.setTraderCode(traderCode);
+        filter.setCoaCode(account);
         List<TmpOpening> listTmp = accountRepo.getOpening(filter);
         hmOpening.clear();
         if (!listTmp.isEmpty()) {

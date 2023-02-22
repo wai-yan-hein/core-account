@@ -205,8 +205,8 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblJournal.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
         tblJournal.getColumnModel().getColumn(1).setCellEditor(new DepartmentCellEditor(listDep));
-        tblJournal.getColumnModel().getColumn(2).setCellEditor(new COA3CellEditor(accountRepo, 3));
-        tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountRepo, 3));
+        tblJournal.getColumnModel().getColumn(2).setCellEditor(new COA3CellEditor(accountApi, 3));
+        tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountApi, 3));
         tblJournal.getColumnModel().getColumn(4).setCellEditor(new CurrencyAEditor(listCurrency));
         tblJournal.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
 
