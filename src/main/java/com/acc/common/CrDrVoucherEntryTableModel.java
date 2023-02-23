@@ -35,7 +35,7 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
     private JTable parent;
     private JFormattedTextField ttlAmt;
     private String vouType;
-    private List<String> delList = new ArrayList<>();
+    private List<GlKey> delList = new ArrayList<>();
     private boolean change = false;
     private AccountRepo accountRepo;
     private Department department;
@@ -73,13 +73,14 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
         this.change = change;
     }
 
-    public List<String> getDelList() {
+    public List<GlKey> getDelList() {
         return delList;
     }
 
-    public void setDelList(List<String> delList) {
+    public void setDelList(List<GlKey> delList) {
         this.delList = delList;
     }
+
 
     public void setVouType(String vouType) {
         this.vouType = vouType;
@@ -379,7 +380,7 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
                 int status = JOptionPane.showConfirmDialog(Global.parentForm,
                         "Are you sure to delete transaction.", "Delete Transaction", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (status == JOptionPane.YES_OPTION) {
-                    delList.add(gl.getKey().getGlCode());
+                    delList.add(gl.getKey());
                     listVGl.remove(row);
                     fireTableRowsDeleted(row, row);
                     calAmount();

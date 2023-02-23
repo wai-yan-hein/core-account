@@ -11,6 +11,8 @@ import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.Department;
 import com.common.Global;
+import com.common.PanelControl;
+import com.common.ProUtil;
 import com.common.RoleProperty;
 import com.common.RolePropertyKey;
 import com.common.SelectionObserver;
@@ -41,13 +43,14 @@ import javax.swing.JCheckBox;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
  * @author Lenovo
  */
 @Slf4j
-public class SystemProperty extends javax.swing.JPanel implements SelectionObserver {
+public class SystemProperty extends javax.swing.JPanel implements SelectionObserver, PanelControl {
 
     private UserRepo userRepo;
     private InventoryRepo inventoryRepo;
@@ -60,12 +63,30 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private StockAutoCompleter stockAutoCompleter;
     private LocationAutoCompleter locCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
-    private COA3AutoCompleter cOA3AutoCompleter;
+    private COA3AutoCompleter cashAutoCompleter;
+    private COA3AutoCompleter plAutoCompleter;
+    private COA3AutoCompleter reAutoCompleter;
+    private COA3AutoCompleter inventoryAutoCompleter;
+    private COA3AutoCompleter cashGroupAutoCompleter;
+    private COA3AutoCompleter fixedAutoCompleter;
+    private COA3AutoCompleter currentAutoCompleter;
+    private COA3AutoCompleter capitalAutoCompleter;
+    private COA3AutoCompleter liaAutoCompleter;
+    private COA3AutoCompleter incomeAutoCompleter;
+    private COA3AutoCompleter otherIncomeAutoCompleter;
+    private COA3AutoCompleter purchaseAutoCompleter;
+    private COA3AutoCompleter expenseAutoCompleter;
+    private COA3AutoCompleter debtorGroupAutoCompleter;
+    private COA3AutoCompleter debtorAccAutoCompleter;
+    private COA3AutoCompleter creditorGroupAutoCompleter;
+    private COA3AutoCompleter creditorAccAutoCompleter;
+
     private MacAutoCompleter macAutoCompleter;
     private HashMap<String, String> hmProperty;
     private String properyType = "System";
     private String roleCode;
     private Integer macId;
+    private WebClient accountApi;
 
     public AccountRepo getAccountRepo() {
         return accountRepo;
@@ -130,6 +151,15 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
+
+    public WebClient getAccountApi() {
+        return accountApi;
+    }
+
+    public void setAccountApi(WebClient accountApi) {
+        this.accountApi = accountApi;
+    }
+
     private final ActionListener action = (ActionEvent e) -> {
         if (e.getSource() instanceof JCheckBox chk) {
             String key = chk.getName();
@@ -156,8 +186,26 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtStock.setName("default.stock");
         txtCash.setName("default.cash");
         txtPages.setName("printer.pages");
+        txtInvGroup.setName("inventory.group");
+        txtCashGroup.setName("cash.group");
+        txtComP.setName("purchase.commission");
         chkPrint.setName("printer.print");
         chkDisableDep.setName("disable.department");
+
+        txtPlAcc.setName(ProUtil.PL);
+        txtREAcc.setName(ProUtil.RE);
+        txtFixed.setName(ProUtil.FIXED);
+        txtCurrent.setName(ProUtil.CURRENT);
+        txtLiability.setName(ProUtil.LIA);
+        txtCapital.setName(ProUtil.CAPITAL);
+        txtIncome.setName(ProUtil.INCOME);
+        txtOtherIncome.setName(ProUtil.OTHER_INCOME);
+        txtPurchase.setName(ProUtil.PURCHASE);
+        txtExpense.setName(ProUtil.EXPENSE);
+        txtDebtor.setName(ProUtil.DEBTOR_GROUP);
+        txtCreditor.setName(ProUtil.CREDITOR_GROUP);
+        txtCus.setName(ProUtil.DEBTOR_ACC);
+        txtSup.setName(ProUtil.CREDITOR_ACC);
     }
 
     private void initProperty() {
@@ -224,12 +272,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtCreditor.addActionListener(action);
         txtCus.addActionListener(action);
         txtSup.addActionListener(action);
-        txtIE.addActionListener(action);
-        txtPl.addActionListener(action);
-        txtInvGroup.addActionListener(action);
-        txtBS.addActionListener(action);
         txtCash.addActionListener(action);
         txtPages.addActionListener(action);
+        txtComP.addActionListener(action);
     }
 
     private void initCheckBox() {
@@ -287,23 +332,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtLogoName.setText(hmProperty.get("logo.name"));
         txtPurReport.setName("report.purchase.voucher");
         txtPurReport.setText(hmProperty.get("report.purchase.voucher"));
-        txtCreditor.setName("creditor.account");
-        txtCreditor.setText(hmProperty.get("creditor.account"));
-        txtDebtor.setName("debtor.account");
-        txtDebtor.setText(hmProperty.get("debtor.account"));
-        txtCus.setName("customer.account");
-        txtCus.setText(hmProperty.get("customer.account"));
-        txtSup.setName("supplier.account");
-        txtSup.setText(hmProperty.get("supplier.account"));
-        txtIE.setName("income.expense.process");
-        txtIE.setText(hmProperty.get("income.expense.process"));
-        txtPl.setName("pl.process");
-        txtPl.setText(hmProperty.get("pl.process"));
-        txtInvGroup.setName("inventory.group");
-        txtInvGroup.setText(hmProperty.get("inventory.group"));
-        txtBS.setName("balancesheet.process");
-        txtBS.setText(hmProperty.get("balancesheet.process"));
         txtPages.setText(hmProperty.get(txtPages.getName()));
+        txtComP.setText(hmProperty.get(txtComP.getName()));
     }
 
     private void initCombo() {
@@ -325,10 +355,69 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, accountRepo.getDepartment(), null, false, false);
         departmentAutoCompleter.setObserver(this);
         departmentAutoCompleter.setDepartment(accountRepo.getDefaultDepartment());
-        cOA3AutoCompleter = new COA3AutoCompleter(txtCash, accountRepo, null, false, 3);
-        cOA3AutoCompleter.setSelectionObserver(this);
-        cOA3AutoCompleter.setCoa(accountRepo.getDefaultCash());
+        cashAutoCompleter = new COA3AutoCompleter(txtCash, accountApi, null, false, 3);
+        cashAutoCompleter.setSelectionObserver(this);
+        cashAutoCompleter.setCoa(accountRepo.getDefaultCash());
+        plAutoCompleter = new COA3AutoCompleter(txtPlAcc, accountApi, null, false, 3);
+        plAutoCompleter.setSelectionObserver(this);
+        plAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtPlAcc.getName())));
+        reAutoCompleter = new COA3AutoCompleter(txtREAcc, accountApi, null, false, 3);
+        reAutoCompleter.setSelectionObserver(this);
+        reAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtREAcc.getName())));
+        inventoryAutoCompleter = new COA3AutoCompleter(txtInvGroup, accountApi, null, false, 2);
+        inventoryAutoCompleter.setSelectionObserver(this);
+        inventoryAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtInvGroup.getName())));
+        cashGroupAutoCompleter = new COA3AutoCompleter(txtCashGroup, accountApi, null, false, 2);
+        cashGroupAutoCompleter.setSelectionObserver(this);
+        cashGroupAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtCashGroup.getName())));
 
+        fixedAutoCompleter = new COA3AutoCompleter(txtFixed, accountApi, null, false, 1);
+        fixedAutoCompleter.setSelectionObserver(this);
+        fixedAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtFixed.getName())));
+
+        currentAutoCompleter = new COA3AutoCompleter(txtCurrent, accountApi, null, false, 1);
+        currentAutoCompleter.setSelectionObserver(this);
+        currentAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtCurrent.getName())));
+
+        liaAutoCompleter = new COA3AutoCompleter(txtLiability, accountApi, null, false, 1);
+        liaAutoCompleter.setSelectionObserver(this);
+        liaAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtLiability.getName())));
+
+        capitalAutoCompleter = new COA3AutoCompleter(txtCapital, accountApi, null, false, 1);
+        capitalAutoCompleter.setSelectionObserver(this);
+        capitalAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtCapital.getName())));
+
+        incomeAutoCompleter = new COA3AutoCompleter(txtIncome, accountApi, null, false, 1);
+        incomeAutoCompleter.setSelectionObserver(this);
+        incomeAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtIncome.getName())));
+
+        otherIncomeAutoCompleter = new COA3AutoCompleter(txtOtherIncome, accountApi, null, false, 1);
+        otherIncomeAutoCompleter.setSelectionObserver(this);
+        otherIncomeAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtOtherIncome.getName())));
+
+        purchaseAutoCompleter = new COA3AutoCompleter(txtPurchase, accountApi, null, false, 1);
+        purchaseAutoCompleter.setSelectionObserver(this);
+        purchaseAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtPurchase.getName())));
+
+        expenseAutoCompleter = new COA3AutoCompleter(txtExpense, accountApi, null, false, 1);
+        expenseAutoCompleter.setSelectionObserver(this);
+        expenseAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtExpense.getName())));
+
+        debtorGroupAutoCompleter = new COA3AutoCompleter(txtDebtor, accountApi, null, false, 2);
+        debtorGroupAutoCompleter.setSelectionObserver(this);
+        debtorGroupAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtDebtor.getName())));
+
+        debtorAccAutoCompleter = new COA3AutoCompleter(txtCus, accountApi, null, false, 3);
+        debtorAccAutoCompleter.setSelectionObserver(this);
+        debtorAccAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtCus.getName())));
+
+        creditorGroupAutoCompleter = new COA3AutoCompleter(txtCreditor, accountApi, null, false, 2);
+        creditorGroupAutoCompleter.setSelectionObserver(this);
+        creditorGroupAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtCreditor.getName())));
+
+        creditorAccAutoCompleter = new COA3AutoCompleter(txtSup, accountApi, null, false, 3);
+        creditorAccAutoCompleter.setSelectionObserver(this);
+        creditorAccAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtSup.getName())));
     }
 
     private void save(String key, String value) {
@@ -406,10 +495,24 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         jSeparator3 = new javax.swing.JSeparator();
         jLabel19 = new javax.swing.JLabel();
         txtDep = new javax.swing.JTextField();
-        jLabel20 = new javax.swing.JLabel();
-        txtCash = new javax.swing.JTextField();
         jLabel22 = new javax.swing.JLabel();
         txtStock = new javax.swing.JTextField();
+        jlablel = new javax.swing.JLabel();
+        txtFixed = new javax.swing.JTextField();
+        jlablee = new javax.swing.JLabel();
+        txtCurrent = new javax.swing.JTextField();
+        txtLiability = new javax.swing.JTextField();
+        lablel = new javax.swing.JLabel();
+        jLabel29 = new javax.swing.JLabel();
+        txtCapital = new javax.swing.JTextField();
+        txtIncome = new javax.swing.JTextField();
+        jLabel30 = new javax.swing.JLabel();
+        jLabel31 = new javax.swing.JLabel();
+        txtOtherIncome = new javax.swing.JTextField();
+        txtPurchase = new javax.swing.JTextField();
+        jLabel32 = new javax.swing.JLabel();
+        jLabel33 = new javax.swing.JLabel();
+        txtExpense = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         chkPrint = new javax.swing.JCheckBox();
         chkSWB = new javax.swing.JCheckBox();
@@ -452,6 +555,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         jSeparator4 = new javax.swing.JSeparator();
         jLabel9 = new javax.swing.JLabel();
         txtPurReport = new javax.swing.JTextField();
+        jLabel15 = new javax.swing.JLabel();
+        txtComP = new javax.swing.JTextField();
         panelMac = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
         txtMac = new javax.swing.JTextField();
@@ -465,16 +570,24 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         jLabel13 = new javax.swing.JLabel();
         txtSup = new javax.swing.JTextField();
         jLabel14 = new javax.swing.JLabel();
-        jLabel15 = new javax.swing.JLabel();
-        txtIE = new javax.swing.JTextField();
-        jLabel16 = new javax.swing.JLabel();
-        txtPl = new javax.swing.JTextField();
         jLabel17 = new javax.swing.JLabel();
         txtInvGroup = new javax.swing.JTextField();
-        jLabel18 = new javax.swing.JLabel();
-        txtBS = new javax.swing.JTextField();
         jSeparator6 = new javax.swing.JSeparator();
         chkDisableDep = new javax.swing.JCheckBox();
+        jLabel23 = new javax.swing.JLabel();
+        txtPlAcc = new javax.swing.JTextField();
+        jLabel24 = new javax.swing.JLabel();
+        txtREAcc = new javax.swing.JTextField();
+        jLabel25 = new javax.swing.JLabel();
+        txtCashGroup = new javax.swing.JTextField();
+        jLabel20 = new javax.swing.JLabel();
+        txtCash = new javax.swing.JTextField();
+
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentShown(java.awt.event.ComponentEvent evt) {
+                formComponentShown(evt);
+            }
+        });
 
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Default", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, Global.menuFont));
 
@@ -494,13 +607,41 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         txtDep.setFont(Global.textFont);
 
-        jLabel20.setText("Cash");
-
-        txtCash.setFont(Global.textFont);
-
         jLabel22.setText("Stock");
 
         txtStock.setFont(Global.textFont);
+
+        jlablel.setText("Fixed");
+
+        txtFixed.setFont(Global.textFont);
+
+        jlablee.setText("Current");
+
+        txtCurrent.setFont(Global.textFont);
+
+        txtLiability.setFont(Global.textFont);
+
+        lablel.setText("Liability");
+
+        jLabel29.setText("Capital");
+
+        txtCapital.setFont(Global.textFont);
+
+        txtIncome.setFont(Global.textFont);
+
+        jLabel30.setText("Income");
+
+        jLabel31.setText("Other Income");
+
+        txtOtherIncome.setFont(Global.textFont);
+
+        txtPurchase.setFont(Global.textFont);
+
+        jLabel32.setText("Purchase");
+
+        jLabel33.setText("Expense");
+
+        txtExpense.setFont(Global.textFont);
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -516,16 +657,34 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                             .addComponent(jLabel3)
                             .addComponent(jLabel4)
                             .addComponent(jLabel19, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel22, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtCustomer)
+                            .addComponent(txtCustomer, javax.swing.GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE)
                             .addComponent(txtSupplier)
                             .addComponent(txtLocation)
                             .addComponent(txtDep)
-                            .addComponent(txtCash)
-                            .addComponent(txtStock))))
+                            .addComponent(txtStock)))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jlablel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jlablee, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(lablel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel29, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel30, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel31, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel32, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel33, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtFixed)
+                            .addComponent(txtCurrent)
+                            .addComponent(txtLiability)
+                            .addComponent(txtCapital)
+                            .addComponent(txtIncome)
+                            .addComponent(txtOtherIncome)
+                            .addComponent(txtPurchase)
+                            .addComponent(txtExpense))))
                 .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
@@ -552,11 +711,39 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     .addComponent(jLabel19)
                     .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel20)
-                    .addComponent(txtCash, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jlablel)
+                    .addComponent(txtFixed, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jlablee)
+                    .addComponent(txtCurrent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lablel)
+                    .addComponent(txtLiability, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel29)
+                    .addComponent(txtCapital, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel30)
+                    .addComponent(txtIncome, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel31)
+                    .addComponent(txtOtherIncome, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel32)
+                    .addComponent(txtPurchase, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel33)
+                    .addComponent(txtExpense, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -618,7 +805,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     .addComponent(chkDisableSale, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkDisablePur, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkDisableRI, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkDisableRO, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(chkDisableRO, javax.swing.GroupLayout.DEFAULT_SIZE, 322, Short.MAX_VALUE)
                     .addComponent(chkDisableStockIO, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkDepFilter, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkDepOption, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -727,7 +914,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                             .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtA5Report)
+                            .addComponent(txtA5Report, javax.swing.GroupLayout.DEFAULT_SIZE, 129, Short.MAX_VALUE)
                             .addComponent(txtVouReport)
                             .addComponent(txtA4Report)))
                     .addComponent(chkVouEdit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -785,6 +972,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         txtPurReport.setFont(Global.textFont);
 
+        jLabel15.setText("Comm %");
+
+        txtComP.setFont(Global.textFont);
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -797,7 +988,11 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtPurReport)))
+                        .addComponent(txtPurReport, javax.swing.GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtComP, javax.swing.GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -811,6 +1006,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
                     .addComponent(txtPurReport, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel15)
+                    .addComponent(txtComP, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -859,23 +1058,27 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         jLabel14.setText("Supplier Acc");
 
-        jLabel15.setText("IE Process");
-
-        txtIE.setFont(Global.textFont);
-
-        jLabel16.setText("PL Process");
-
-        txtPl.setFont(Global.textFont);
-
         jLabel17.setText("Inv Group");
 
         txtInvGroup.setFont(Global.textFont);
 
-        jLabel18.setText("BS Process");
-
-        txtBS.setFont(Global.textFont);
-
         chkDisableDep.setText("Disable Department");
+
+        jLabel23.setText("PL Acc");
+
+        txtPlAcc.setFont(Global.textFont);
+
+        jLabel24.setText("RE Acc");
+
+        txtREAcc.setFont(Global.textFont);
+
+        jLabel25.setText("Cash Group");
+
+        txtCashGroup.setFont(Global.textFont);
+
+        jLabel20.setText("Cash");
+
+        txtCash.setFont(Global.textFont);
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
@@ -896,23 +1099,25 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                                     .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtCreditor)
+                                    .addComponent(txtCreditor, javax.swing.GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE)
                                     .addComponent(txtDebtor)
                                     .addComponent(txtCus)
                                     .addComponent(txtSup)))
+                            .addComponent(chkDisableDep, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(jPanel5Layout.createSequentialGroup()
-                                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel15)
-                                    .addComponent(jLabel16)
-                                    .addComponent(jLabel17)
-                                    .addComponent(jLabel18))
+                                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(jLabel20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel17, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel23, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel24, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 90, Short.MAX_VALUE)
+                                    .addComponent(jLabel25, javax.swing.GroupLayout.Alignment.LEADING))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtPl)
-                                    .addComponent(txtIE)
                                     .addComponent(txtInvGroup)
-                                    .addComponent(txtBS)))
-                            .addComponent(chkDisableDep, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                    .addComponent(txtPlAcc)
+                                    .addComponent(txtREAcc)
+                                    .addComponent(txtCashGroup)
+                                    .addComponent(txtCash))))))
                 .addContainerGap())
         );
         jPanel5Layout.setVerticalGroup(
@@ -938,21 +1143,25 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addComponent(jSeparator5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel25)
+                    .addComponent(txtCashGroup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel17)
                     .addComponent(txtInvGroup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel15)
-                    .addComponent(txtIE, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel23)
+                    .addComponent(txtPlAcc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel16)
-                    .addComponent(txtPl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel24)
+                    .addComponent(txtREAcc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel18)
-                    .addComponent(txtBS, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(jLabel20)
+                    .addComponent(txtCash, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(261, 261, 261)
                 .addComponent(jSeparator6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkDisableDep)
@@ -999,6 +1208,11 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         // TODO add your handling code here:
     }//GEN-LAST:event_chkSA4ActionPerformed
 
+    private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
+        // TODO add your handling code here:
+        observer.selected("control", this);
+    }//GEN-LAST:event_formComponentShown
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkBalance;
@@ -1031,15 +1245,21 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
-    private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
-    private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel23;
+    private javax.swing.JLabel jLabel24;
+    private javax.swing.JLabel jLabel25;
+    private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel30;
+    private javax.swing.JLabel jLabel31;
+    private javax.swing.JLabel jLabel32;
+    private javax.swing.JLabel jLabel33;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
@@ -1057,25 +1277,37 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JSeparator jSeparator5;
     private javax.swing.JSeparator jSeparator6;
+    private javax.swing.JLabel jlablee;
+    private javax.swing.JLabel jlablel;
+    private javax.swing.JLabel lablel;
     private javax.swing.JPanel panelMac;
     private javax.swing.JTextField txtA4Report;
     private javax.swing.JTextField txtA5Report;
-    private javax.swing.JTextField txtBS;
+    private javax.swing.JTextField txtCapital;
     private javax.swing.JTextField txtCash;
+    private javax.swing.JTextField txtCashGroup;
+    private javax.swing.JTextField txtComP;
     private javax.swing.JTextField txtCreditor;
+    private javax.swing.JTextField txtCurrent;
     private javax.swing.JTextField txtCus;
     private javax.swing.JTextField txtCustomer;
     private javax.swing.JTextField txtDebtor;
     private javax.swing.JTextField txtDep;
-    private javax.swing.JTextField txtIE;
+    private javax.swing.JTextField txtExpense;
+    private javax.swing.JTextField txtFixed;
+    private javax.swing.JTextField txtIncome;
     private javax.swing.JTextField txtInvGroup;
+    private javax.swing.JTextField txtLiability;
     private javax.swing.JTextField txtLocation;
     private javax.swing.JTextField txtLogoName;
     private javax.swing.JTextField txtMac;
+    private javax.swing.JTextField txtOtherIncome;
     private javax.swing.JTextField txtPages;
-    private javax.swing.JTextField txtPl;
+    private javax.swing.JTextField txtPlAcc;
     private javax.swing.JTextField txtPrinter;
     private javax.swing.JTextField txtPurReport;
+    private javax.swing.JTextField txtPurchase;
+    private javax.swing.JTextField txtREAcc;
     private javax.swing.JTextField txtStock;
     private javax.swing.JTextField txtSup;
     private javax.swing.JTextField txtSupplier;
@@ -1121,15 +1353,118 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 save(txtDep.getName(), d.getKey().getDeptCode());
             }
         } else if (source.equals("COA")) {
-            ChartOfAccount coa = cOA3AutoCompleter.getCOA();
-            if (coa != null) {
-                save(txtCash.getName(), coa.getKey().getCoaCode());
+            ChartOfAccount cash = cashAutoCompleter.getCOA();
+            if (cash != null) {
+                save(txtCash.getName(), cash.getKey().getCoaCode());
             }
+            ChartOfAccount inv = inventoryAutoCompleter.getCOA();
+            if (inv != null) {
+                save(txtInvGroup.getName(), inv.getKey().getCoaCode());
+            }
+            ChartOfAccount pl = plAutoCompleter.getCOA();
+            if (pl != null) {
+                save(txtPlAcc.getName(), pl.getKey().getCoaCode());
+            }
+            ChartOfAccount re = reAutoCompleter.getCOA();
+            if (re != null) {
+                save(txtREAcc.getName(), re.getKey().getCoaCode());
+            }
+            ChartOfAccount cg = cashGroupAutoCompleter.getCOA();
+            if (cg != null) {
+                save(txtCashGroup.getName(), cg.getKey().getCoaCode());
+            }
+
+            ChartOfAccount f = fixedAutoCompleter.getCOA();
+            if (f != null) {
+                save(txtFixed.getName(), f.getKey().getCoaCode());
+            }
+            ChartOfAccount c = currentAutoCompleter.getCOA();
+            if (c != null) {
+                save(txtCurrent.getName(), c.getKey().getCoaCode());
+            }
+            ChartOfAccount ca = capitalAutoCompleter.getCOA();
+            if (ca != null) {
+                save(txtCapital.getName(), ca.getKey().getCoaCode());
+            }
+            ChartOfAccount l = liaAutoCompleter.getCOA();
+            if (l != null) {
+                save(txtLiability.getName(), l.getKey().getCoaCode());
+            }
+            ChartOfAccount i = incomeAutoCompleter.getCOA();
+            if (i != null) {
+                save(txtIncome.getName(), i.getKey().getCoaCode());
+            }
+
+            ChartOfAccount o = otherIncomeAutoCompleter.getCOA();
+            if (o != null) {
+                save(txtOtherIncome.getName(), o.getKey().getCoaCode());
+            }
+
+            ChartOfAccount p = purchaseAutoCompleter.getCOA();
+            if (p != null) {
+                save(txtPurchase.getName(), p.getKey().getCoaCode());
+            }
+
+            ChartOfAccount g = expenseAutoCompleter.getCOA();
+            if (g != null) {
+                save(txtExpense.getName(), g.getKey().getCoaCode());
+            }
+            ChartOfAccount ct = creditorGroupAutoCompleter.getCOA();
+            if (ct != null) {
+                save(txtCreditor.getName(), ct.getKey().getCoaCode());
+            }
+            ChartOfAccount cta = creditorAccAutoCompleter.getCOA();
+            if (cta != null) {
+                save(txtSup.getName(), cta.getKey().getCoaCode());
+            }
+            ChartOfAccount dbg = debtorGroupAutoCompleter.getCOA();
+            if (dbg != null) {
+                save(txtDebtor.getName(), dbg.getKey().getCoaCode());
+            }
+            ChartOfAccount dba = debtorAccAutoCompleter.getCOA();
+            if (dba != null) {
+                save(txtCus.getName(), dba.getKey().getCoaCode());
+            }
+
         } else if (source.equals("STOCK")) {
             Stock s = stockAutoCompleter.getStock();
             if (s != null) {
                 save(txtStock.getName(), s.getKey().getStockCode());
             }
         }
+    }
+
+    @Override
+    public void save() {
+    }
+
+    @Override
+    public void delete() {
+    }
+
+    @Override
+    public void newForm() {
+    }
+
+    @Override
+    public void history() {
+    }
+
+    @Override
+    public void print() {
+    }
+
+    @Override
+    public void refresh() {
+        initMain();
+    }
+
+    @Override
+    public void filter() {
+    }
+
+    @Override
+    public String panelName() {
+        return this.getName();
     }
 }

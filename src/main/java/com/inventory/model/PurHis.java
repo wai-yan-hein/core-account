@@ -45,10 +45,13 @@ public class PurHis implements java.io.Serializable {
     private String reference;
     private Integer macId;
     private boolean vouLock;
+    private String batchNo;
     @NonNull
     private String status = "STATUS";
     private List<PurHisDetail> listPD;
     private List<String> listDel;
+    private Float commP;
+    private Float commAmt;
 
     public PurHis() {
     }

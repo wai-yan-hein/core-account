@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <Form version="1.3" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
+  <Events>
+    <EventHandler event="componentShown" listener="java.awt.event.ComponentListener" parameters="java.awt.event.ComponentEvent" handler="formComponentShown"/>
+  </Events>
   <AuxValues>
     <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
     <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="false"/>
@@ -69,7 +72,7 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="0" attributes="0">
+              <Group type="102" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="jSeparator3" max="32767" attributes="0"/>
@@ -79,17 +82,38 @@
                               <Component id="jLabel3" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Component id="jLabel4" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Component id="jLabel19" alignment="0" max="32767" attributes="0"/>
-                              <Component id="jLabel20" alignment="0" max="32767" attributes="0"/>
                               <Component id="jLabel22" alignment="0" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="txtCustomer" max="32767" attributes="0"/>
+                              <Component id="txtCustomer" pref="126" max="32767" attributes="0"/>
                               <Component id="txtSupplier" max="32767" attributes="0"/>
                               <Component id="txtLocation" max="32767" attributes="0"/>
                               <Component id="txtDep" max="32767" attributes="0"/>
-                              <Component id="txtCash" max="32767" attributes="0"/>
                               <Component id="txtStock" max="32767" attributes="0"/>
+                          </Group>
+                      </Group>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                              <Component id="jlablel" alignment="0" max="32767" attributes="0"/>
+                              <Component id="jlablee" alignment="0" max="32767" attributes="0"/>
+                              <Component id="lablel" alignment="0" max="32767" attributes="0"/>
+                              <Component id="jLabel29" alignment="0" max="32767" attributes="0"/>
+                              <Component id="jLabel30" alignment="0" max="32767" attributes="0"/>
+                              <Component id="jLabel31" alignment="0" max="32767" attributes="0"/>
+                              <Component id="jLabel32" alignment="0" max="32767" attributes="0"/>
+                              <Component id="jLabel33" alignment="0" max="32767" attributes="0"/>
+                          </Group>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="txtFixed" max="32767" attributes="0"/>
+                              <Component id="txtCurrent" max="32767" attributes="0"/>
+                              <Component id="txtLiability" max="32767" attributes="0"/>
+                              <Component id="txtCapital" max="32767" attributes="0"/>
+                              <Component id="txtIncome" max="32767" attributes="0"/>
+                              <Component id="txtOtherIncome" max="32767" attributes="0"/>
+                              <Component id="txtPurchase" max="32767" attributes="0"/>
+                              <Component id="txtExpense" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -125,13 +149,48 @@
                       <Component id="jLabel19" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="txtDep" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
+                  <Component id="jSeparator3" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="jLabel20" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="txtCash" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jlablel" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtFixed" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jSeparator3" min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jlablee" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtCurrent" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="lablel" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtLiability" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jLabel29" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtCapital" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jLabel30" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtIncome" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jLabel31" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtOtherIncome" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jLabel32" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtPurchase" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jLabel33" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtExpense" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
@@ -188,24 +247,108 @@
             </Property>
           </Properties>
         </Component>
-        <Component class="javax.swing.JLabel" name="jLabel20">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Cash"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JTextField" name="txtCash">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.textFont" type="code"/>
-            </Property>
-          </Properties>
-        </Component>
         <Component class="javax.swing.JLabel" name="jLabel22">
           <Properties>
             <Property name="text" type="java.lang.String" value="Stock"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="txtStock">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jlablel">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Fixed"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtFixed">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jlablee">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Current"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtCurrent">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtLiability">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="lablel">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Liability"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel29">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Capital"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtCapital">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtIncome">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel30">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Income"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel31">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Other Income"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtOtherIncome">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtPurchase">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel32">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Purchase"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel33">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Expense"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtExpense">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.textFont" type="code"/>
@@ -251,7 +394,7 @@
                       <Component id="chkDisableSale" max="32767" attributes="0"/>
                       <Component id="chkDisablePur" max="32767" attributes="0"/>
                       <Component id="chkDisableRI" max="32767" attributes="0"/>
-                      <Component id="chkDisableRO" max="32767" attributes="0"/>
+                      <Component id="chkDisableRO" pref="322" max="32767" attributes="0"/>
                       <Component id="chkDisableStockIO" max="32767" attributes="0"/>
                       <Component id="chkDepFilter" alignment="1" max="32767" attributes="0"/>
                       <Component id="chkDepOption" alignment="1" max="32767" attributes="0"/>
@@ -429,7 +572,7 @@
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="txtA5Report" max="32767" attributes="0"/>
+                              <Component id="txtA5Report" pref="129" max="32767" attributes="0"/>
                               <Component id="txtVouReport" max="32767" attributes="0"/>
                               <Component id="txtA4Report" max="32767" attributes="0"/>
                           </Group>
@@ -610,7 +753,12 @@
                       <Group type="102" alignment="0" attributes="0">
                           <Component id="jLabel9" min="-2" pref="78" max="-2" attributes="0"/>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                          <Component id="txtPurReport" max="32767" attributes="0"/>
+                          <Component id="txtPurReport" pref="126" max="32767" attributes="0"/>
+                      </Group>
+                      <Group type="102" attributes="0">
+                          <Component id="jLabel15" min="-2" pref="78" max="-2" attributes="0"/>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Component id="txtComP" pref="126" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -628,6 +776,11 @@
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="jLabel9" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="txtPurReport" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jLabel15" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtComP" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
@@ -648,6 +801,18 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="txtPurReport">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel15">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Comm %"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtComP">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.textFont" type="code"/>
@@ -733,28 +898,30 @@
                                   </Group>
                                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="txtCreditor" alignment="0" max="32767" attributes="0"/>
+                                      <Component id="txtCreditor" alignment="0" pref="126" max="32767" attributes="0"/>
                                       <Component id="txtDebtor" alignment="0" max="32767" attributes="0"/>
                                       <Component id="txtCus" alignment="0" max="32767" attributes="0"/>
                                       <Component id="txtSup" alignment="0" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
+                              <Component id="chkDisableDep" alignment="0" max="32767" attributes="0"/>
                               <Group type="102" alignment="0" attributes="0">
-                                  <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="jLabel15" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      <Component id="jLabel16" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                                      <Component id="jLabel20" max="32767" attributes="0"/>
                                       <Component id="jLabel17" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      <Component id="jLabel18" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Component id="jLabel23" alignment="0" max="32767" attributes="0"/>
+                                      <Component id="jLabel24" alignment="0" pref="90" max="32767" attributes="0"/>
+                                      <Component id="jLabel25" alignment="0" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="txtPl" max="32767" attributes="0"/>
-                                      <Component id="txtIE" max="32767" attributes="0"/>
                                       <Component id="txtInvGroup" max="32767" attributes="0"/>
-                                      <Component id="txtBS" max="32767" attributes="0"/>
+                                      <Component id="txtPlAcc" max="32767" attributes="0"/>
+                                      <Component id="txtREAcc" max="32767" attributes="0"/>
+                                      <Component id="txtCashGroup" max="32767" attributes="0"/>
+                                      <Component id="txtCash" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
-                              <Component id="chkDisableDep" alignment="0" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -789,25 +956,30 @@
                   <Component id="jSeparator5" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jLabel25" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtCashGroup" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="jLabel17" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="txtInvGroup" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="jLabel15" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="txtIE" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabel23" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtPlAcc" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="jLabel16" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="txtPl" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabel24" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtREAcc" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="jLabel18" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="txtBS" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabel20" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtCash" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="261" max="-2" attributes="0"/>
                   <Component id="jSeparator6" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="chkDisableDep" min="-2" max="-2" attributes="0"/>
@@ -867,30 +1039,6 @@
             <Property name="text" type="java.lang.String" value="Supplier Acc"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JLabel" name="jLabel15">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="IE Process"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JTextField" name="txtIE">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.textFont" type="code"/>
-            </Property>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JLabel" name="jLabel16">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="PL Process"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JTextField" name="txtPl">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.textFont" type="code"/>
-            </Property>
-          </Properties>
-        </Component>
         <Component class="javax.swing.JLabel" name="jLabel17">
           <Properties>
             <Property name="text" type="java.lang.String" value="Inv Group"/>
@@ -903,23 +1051,59 @@
             </Property>
           </Properties>
         </Component>
-        <Component class="javax.swing.JLabel" name="jLabel18">
+        <Component class="javax.swing.JSeparator" name="jSeparator6">
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="chkDisableDep">
           <Properties>
-            <Property name="text" type="java.lang.String" value="BS Process"/>
+            <Property name="text" type="java.lang.String" value="Disable Department"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JTextField" name="txtBS">
+        <Component class="javax.swing.JLabel" name="jLabel23">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="PL Acc"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtPlAcc">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.textFont" type="code"/>
             </Property>
           </Properties>
         </Component>
-        <Component class="javax.swing.JSeparator" name="jSeparator6">
-        </Component>
-        <Component class="javax.swing.JCheckBox" name="chkDisableDep">
+        <Component class="javax.swing.JLabel" name="jLabel24">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Disable Department"/>
+            <Property name="text" type="java.lang.String" value="RE Acc"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtREAcc">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel25">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Cash Group"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtCashGroup">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel20">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Cash"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtCash">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
           </Properties>
         </Component>
       </SubComponents>

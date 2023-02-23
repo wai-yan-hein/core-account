@@ -38,6 +38,7 @@ public class ReportFilter {
     private boolean closing;
     private List<String> listDepartment;
     private boolean summary;
+    private String batchNo;
 
     public ReportFilter(String compCode, Integer macId) {
         this.compCode = compCode;

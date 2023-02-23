@@ -44,7 +44,7 @@ import reactor.core.publisher.Mono;
  * @author Lenovo
  */
 @Slf4j
-public final class DespAutoCompleter implements KeyListener {
+public final class BatchNoAutoCompeter implements KeyListener {
 
     private final JTable table = new JTable();
     private JPopupMenu popup = new JPopupMenu();
@@ -70,10 +70,10 @@ public final class DespAutoCompleter implements KeyListener {
     }
 
     //private CashFilter cashFilter = Global.allCash;
-    public DespAutoCompleter() {
+    public BatchNoAutoCompeter() {
     }
 
-    public DespAutoCompleter(JTextComponent comp, WebClient client,
+    public BatchNoAutoCompeter(JTextComponent comp, WebClient client,
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
@@ -247,7 +247,7 @@ public final class DespAutoCompleter implements KeyListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            DespAutoCompleter completer = (DespAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            BatchNoAutoCompeter completer = (BatchNoAutoCompeter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 if (completer.popup.isVisible()) {
                     completer.selectNextPossibleValue();
@@ -264,7 +264,7 @@ public final class DespAutoCompleter implements KeyListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            DespAutoCompleter completer = (DespAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            BatchNoAutoCompeter completer = (BatchNoAutoCompeter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 if (completer.popup.isVisible()) {
                     completer.selectPreviousPossibleValue();
@@ -276,7 +276,7 @@ public final class DespAutoCompleter implements KeyListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            DespAutoCompleter completer = (DespAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            BatchNoAutoCompeter completer = (BatchNoAutoCompeter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 completer.popup.setVisible(false);
                 popupOpen = false;
@@ -355,7 +355,7 @@ public final class DespAutoCompleter implements KeyListener {
         if (!str.isEmpty()) {
             if (!containKey(e)) {
                 Mono<ResponseEntity<List<VDescription>>> result = webClient.get()
-                        .uri(builder -> builder.path("/account/get-description")
+                        .uri(builder -> builder.path("/account/get-batch-no")
                         .queryParam("compCode", Global.compCode)
                         .queryParam("str", str)
                         .build())

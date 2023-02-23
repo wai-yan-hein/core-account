@@ -5,7 +5,6 @@
  */
 package com.acc.editor;
 
-import com.acc.common.AccountRepo;
 import com.acc.common.TraderATableModel;
 import com.acc.model.TraderA;
 import com.acc.model.TraderAKey;
@@ -33,14 +32,17 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public final class TraderAAutoCompleter implements KeyListener {
 
     private final JTable table = new JTable();
@@ -54,7 +56,7 @@ public final class TraderAAutoCompleter implements KeyListener {
     private int y = 0;
     private boolean popupOpen = false;
     private SelectionObserver selectionObserver;
-    private AccountRepo accountRepo;
+    private WebClient webClient;
     private boolean filter;
 
     public void setSelectionObserver(SelectionObserver selectionObserver) {
@@ -64,11 +66,11 @@ public final class TraderAAutoCompleter implements KeyListener {
     public TraderAAutoCompleter() {
     }
 
-    public TraderAAutoCompleter(JTextComponent comp, AccountRepo accountRepo,
+    public TraderAAutoCompleter(JTextComponent comp, WebClient webClient,
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
-        this.accountRepo = accountRepo;
+        this.webClient = webClient;
         this.filter = filter;
         if (this.filter) {
             setTrader(new TraderA(new TraderAKey("-", Global.compCode), "All"));
@@ -352,15 +354,26 @@ public final class TraderAAutoCompleter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                List<TraderA> list = accountRepo.getTrader(str);
-                if (this.filter) {
-                    TraderA s = new TraderA(new TraderAKey("-", Global.compCode), "All");
-                    list.add(s);
-                }
-                traderTableModel.setListTrader(list);
-                if (!list.isEmpty()) {
-                    table.setRowSelectionInterval(0, 0);
-                }
+                Mono<ResponseEntity<List<TraderA>>> result = webClient.get()
+                        .uri(builder -> builder.path("/account/search-trader")
+                        .queryParam("compCode", Global.compCode)
+                        .queryParam("text", str)
+                        .build())
+                        .retrieve().toEntityList(TraderA.class);
+                result.subscribe((t) -> {
+                    List<TraderA> list = t.getBody();
+                    if (this.filter) {
+                        TraderA s = new TraderA(new TraderAKey("-", Global.compCode), "All");
+                        list.add(s);
+                    }
+                    traderTableModel.setListTrader(list);
+                    if (!list.isEmpty()) {
+                        table.setRowSelectionInterval(0, 0);
+                    }
+                }, (er) -> {
+                    log.error(er.getMessage());
+                });
+
             }
 
         }

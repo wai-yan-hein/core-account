@@ -5,7 +5,6 @@
  */
 package com.acc.editor;
 
-import com.acc.common.AccountRepo;
 import com.acc.common.COA1TableModel;
 import com.acc.common.COA2TableModel;
 import com.acc.common.COA3TableModel;
@@ -37,6 +36,9 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.text.JTextComponent;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 /**
  *
@@ -58,7 +60,7 @@ public final class COA3AutoCompleter implements KeyListener {
     private int y = 0;
     boolean popupOpen = false;
     private SelectionObserver selectionObserver;
-    private AccountRepo accountRepo;
+    private WebClient webClient;
     private boolean filter;
     private int level;
 
@@ -69,11 +71,11 @@ public final class COA3AutoCompleter implements KeyListener {
     public COA3AutoCompleter() {
     }
 
-    public COA3AutoCompleter(JTextComponent comp, AccountRepo accountRepo,
+    public COA3AutoCompleter(JTextComponent comp, WebClient webClient,
             AbstractCellEditor editor, boolean filter, int level) {
         this.textComp = comp;
         this.editor = editor;
-        this.accountRepo = accountRepo;
+        this.webClient = webClient;
         this.filter = filter;
         this.level = level;
         if (this.filter) {
@@ -367,42 +369,36 @@ public final class COA3AutoCompleter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                List<ChartOfAccount> list;
-                switch (this.level) {
-                    case 1 -> {
-                        list = accountRepo.getCOA(str, this.level);
-                        if (this.filter) {
-                            ChartOfAccount s = new ChartOfAccount(new COAKey("-", Global.compCode), "All");
-                            list.add(s);
+                Mono<ResponseEntity<List<ChartOfAccount>>> result = webClient.get()
+                        .uri(builder -> builder.path("/account/search-coa")
+                        .queryParam("str", str)
+                        .queryParam("level", this.level)
+                        .queryParam("compCode", Global.compCode)
+                        .build())
+                        .retrieve().toEntityList(ChartOfAccount.class);
+                result.subscribe((t) -> {
+                    List<ChartOfAccount> list = t.getBody();
+                    if (this.filter) {
+                        ChartOfAccount s = new ChartOfAccount(new COAKey("-", Global.compCode), "All");
+                        list.add(s);
+                    }
+                    switch (this.level) {
+                        case 1 -> {
+                            cOA1TableModel.setListCOA(list);
                         }
-                        cOA1TableModel.setListCOA(list);
-                        if (!list.isEmpty()) {
-                            table.setRowSelectionInterval(0, 0);
+                        case 2 -> {
+                            cOA2TableModel.setListCOA(list);
+                        }
+                        case 3 -> {
+                            cOATableModel.setListCOA(list);
                         }
                     }
-                    case 2 -> {
-                        list = accountRepo.getCOA(str, this.level);
-                        if (this.filter) {
-                            ChartOfAccount s = new ChartOfAccount(new COAKey("-", Global.compCode), "All");
-                            list.add(s);
-                        }
-                        cOA2TableModel.setListCOA(list);
-
+                    if (!list.isEmpty()) {
+                        table.setRowSelectionInterval(0, 0);
                     }
-                    case 3 -> {
-                        list = accountRepo.getCOA(str, this.level);
-                        if (this.filter) {
-                            ChartOfAccount s = new ChartOfAccount(new COAKey("-", Global.compCode), "All");
-                            list.add(s);
-                        }
-                        cOATableModel.setListCOA(list);
-                    }
-                    default ->
-                        throw new AssertionError();
-                }
-                if (!list.isEmpty()) {
-                    table.setRowSelectionInterval(0, 0);
-                }
+                }, (er) -> {
+                    log.error(er.getMessage());
+                });
             }
 
         }

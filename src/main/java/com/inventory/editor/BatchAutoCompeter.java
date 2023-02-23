@@ -55,6 +55,15 @@ public class BatchAutoCompeter implements KeyListener, SelectionObserver {
     private int y = 0;
     private SelectionObserver observer;
     private InventoryRepo inventoryRepo;
+    private boolean filter;
+
+    public boolean isFilter() {
+        return filter;
+    }
+
+    public void setFilter(boolean filter) {
+        this.filter = filter;
+    }
 
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
@@ -76,10 +85,14 @@ public class BatchAutoCompeter implements KeyListener, SelectionObserver {
     }
 
     public BatchAutoCompeter(JTextComponent comp, InventoryRepo inventoryRepo,
-            AbstractCellEditor editor) {
+            AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
         this.inventoryRepo = inventoryRepo;
+        this.filter = filter;
+        if (this.filter) {
+            setBatch(new GRN("All"));
+        }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);

@@ -5,7 +5,7 @@
  */
 package com.acc.common;
 
-import com.acc.model.VRef;
+import com.acc.model.VDescription;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -19,17 +19,17 @@ import org.slf4j.LoggerFactory;
 public class RefTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(RefTableModel.class);
-    private List<VRef> listAutoText = new ArrayList<>();
+    private List<VDescription> listAutoText = new ArrayList<>();
     private final String[] columnNames = {"Reference"};
 
     public RefTableModel() {
     }
 
-    public List<VRef> getListAutoText() {
+    public List<VDescription> getListAutoText() {
         return listAutoText;
     }
 
-    public void setListAutoText(List<VRef> listAutoText) {
+    public void setListAutoText(List<VDescription> listAutoText) {
         this.listAutoText = listAutoText;
         fireTableDataChanged();
     }
@@ -54,11 +54,11 @@ public class RefTableModel extends AbstractTableModel {
 
         try {
             if (!listAutoText.isEmpty()) {
-                VRef auto = listAutoText.get(row);
+                VDescription auto = listAutoText.get(row);
 
                 switch (column) {
                     case 0: //Code
-                        return auto == null ? null : auto.getReference();
+                        return auto == null ? null : auto.getDescription();
                     default:
                         return null;
                 }
@@ -88,7 +88,7 @@ public class RefTableModel extends AbstractTableModel {
         return columnNames.length;
     }
 
-    public VRef getRemark(int row) {
+    public VDescription getRemark(int row) {
         if (listAutoText == null) {
             return null;
         } else if (listAutoText.isEmpty()) {
