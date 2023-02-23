@@ -42,15 +42,6 @@ public class StockInOutTableModel extends AbstractTableModel {
     private JDateChooser vouDate;
     private JLabel lblRec;
     private boolean negative = false;
-    private boolean changePrice = true;
-
-    public boolean isChangePrice() {
-        return changePrice;
-    }
-
-    public void setChangePrice(boolean changePrice) {
-        this.changePrice = changePrice;
-    }
 
     public boolean isNegative() {
         return negative;
@@ -181,9 +172,6 @@ public class StockInOutTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        if (column == 7) {
-            return changePrice;
-        }
         return column != 8;
     }
 
@@ -211,7 +199,6 @@ public class StockInOutTableModel extends AbstractTableModel {
                             if (!disable) {
                                 float costPrice = genPattern(s, io);
                                 io.setCostPrice(costPrice);
-                                setChangePrice(false);
                             }
                             setColumnSelection(3);
                         }
@@ -329,7 +316,7 @@ public class StockInOutTableModel extends AbstractTableModel {
                     io.setLocName(p.getLocName());
                     io.setStockName(p.getStockName());
                     addStockIO(io);
-                    totalPrice += costPrice * Util1.getFloat(p.getQty());
+                    totalPrice += costPrice;
                 }
                 if (explode) {
                     iod.setOutQty(qty);
@@ -444,7 +431,6 @@ public class StockInOutTableModel extends AbstractTableModel {
     public void clear() {
         if (listStock != null) {
             listStock.clear();
-            setChangePrice(true);
             fireTableDataChanged();
         }
     }

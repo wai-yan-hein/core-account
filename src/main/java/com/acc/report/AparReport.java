@@ -15,11 +15,15 @@ import com.acc.editor.TraderAAutoCompleter;
 import com.acc.model.ReportFilter;
 import com.acc.model.TraderA;
 import com.acc.model.VApar;
+import com.common.FilterObject;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ReturnObject;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
@@ -31,9 +35,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -49,9 +55,11 @@ import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
 import net.coderazzi.filters.gui.AutoChoices;
 import net.coderazzi.filters.gui.TableFilterHeader;
+import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.engine.fill.ReportFiller;
 import net.sf.jasperreports.view.JasperViewer;
@@ -217,9 +225,6 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
                     }.getType());
                     aPARTableModel.setListAPAR(list);
                     calAPARTotalAmount();
-                    if (chkZero.isSelected()) {
-                        removeZero();
-                    }
                     isApPrCal = false;
                     progress.setIndeterminate(false);
                     long end = new GregorianCalendar().getTimeInMillis();
@@ -237,14 +242,6 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
 
         }
 
-    }
-
-    private void removeZero() {
-        List<VApar> listTBAL = aPARTableModel.getListAPAR();
-        if (!listTBAL.isEmpty()) {
-            listTBAL.removeIf((e) -> Util1.getDouble(e.getDrAmt()) + Util1.getDouble(e.getCrAmt()) == 0);
-            aPARTableModel.setListAPAR(listTBAL);
-        }
     }
 
     private void calAPARTotalAmount() {
@@ -275,7 +272,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency,
                 userRepo.getCurrency(), null, true);
         currencyAutoCompleter.setSelectionObserver(this);
-        traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accountApi, null, true);
+        traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accountRepo, null, true);
         traderAutoCompleter.setSelectionObserver(this);
         cOAAutoCompleter = new COAAutoCompleter(txtAccount, accountRepo.getTraderAccount(), null, true);
         cOAAutoCompleter.setSelectionObserver(this);
@@ -343,7 +340,6 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         lblCalTime = new javax.swing.JLabel();
-        chkZero = new javax.swing.JCheckBox();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -512,14 +508,6 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         lblCalTime.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         lblCalTime.setText("0");
 
-        chkZero.setSelected(true);
-        chkZero.setText("Zero");
-        chkZero.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkZeroActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -535,8 +523,6 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblCalTime, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(chkZero)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtFTotalDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -554,9 +540,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel6)
                             .addComponent(lblCalTime))
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtFTotalDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(chkZero))))
+                        .addComponent(txtFTotalDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtFOFB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -628,18 +612,8 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         // TODO add your handling code here:
     }//GEN-LAST:event_txtAccountActionPerformed
 
-    private void chkZeroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkZeroActionPerformed
-        // TODO add your handling code here:
-        if (chkZero.isSelected()) {
-            removeZero();
-        } else {
-            searchAPAR();
-        }
-    }//GEN-LAST:event_chkZeroActionPerformed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JCheckBox chkZero;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

@@ -11,7 +11,6 @@ import com.acc.entry.AllCash;
 import com.acc.entry.DrCrVoucher;
 import com.acc.entry.Journal;
 import com.acc.entry.JournalClosingStock;
-import com.acc.entry.TraderAdjustment;
 import com.acc.report.AparReport;
 import com.acc.report.FinancialReport;
 import com.acc.report.GLReport;
@@ -166,7 +165,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private COAOpening coaOpening;
     @Autowired
     private DrCrVoucher drcrVoucher;
-
 //user
     @Autowired
     private InventoryRepo inventoryRepo;
@@ -429,7 +427,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 systemProperty.setUserRepo(userRepo);
                 systemProperty.setInventoryRepo(inventoryRepo);
                 systemProperty.setAccountRepo(accounRepo);
-                systemProperty.setAccountApi(accountApi);
                 systemProperty.setName(menuName);
                 systemProperty.setObserver(this);
                 systemProperty.setProgress(progress);
@@ -441,8 +438,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 SystemProperty systemProperty = new SystemProperty();
                 systemProperty.setUserRepo(userRepo);
                 systemProperty.setInventoryRepo(inventoryRepo);
-                systemProperty.setAccountRepo(accounRepo);
-                systemProperty.setAccountApi(accountApi);
                 systemProperty.setName(menuName);
                 systemProperty.setObserver(this);
                 systemProperty.setProgress(progress);
@@ -596,18 +591,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 traderSetup.initMain();
                 return traderSetup;
             }
-            case "Trader Adjustment" -> {
-                TraderAdjustment adj = new TraderAdjustment();
-                adj.setName(menuName);
-                adj.setObserver(this);
-                adj.setProgress(progress);
-                adj.setTaskExecutor(taskExecutor);
-                adj.setAccountApi(accountApi);
-                adj.setAccounRepo(accounRepo);
-                adj.setUserRepo(userRepo);
-                adj.initMain();
-                return adj;
-            }
             default -> {
                 switch (cName) {
                     case "AllCash" -> {
@@ -636,6 +619,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                         db.initMain();
                         return db;
                     }
+
                 }
 
             }
@@ -682,7 +666,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void departmentAssign() {
-        DepartmentUser dep;
+        DepartmentUser dep = null;
         List<DepartmentUser> listDep = userRepo.getDeparment();
         if (Util1.getBoolean(ProUtil.getProperty("department.option"))) {
             if (listDep.size() > 1) {

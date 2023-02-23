@@ -5,6 +5,7 @@
  */
 package com.acc.editor;
 
+import com.acc.common.AccountRepo;
 import com.acc.common.DespTableModel;
 import com.acc.model.VDescription;
 import com.common.Global;
@@ -34,16 +35,11 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
  * @author Lenovo
  */
-@Slf4j
 public final class DespAutoCompleter implements KeyListener {
 
     private final JTable table = new JTable();
@@ -58,7 +54,7 @@ public final class DespAutoCompleter implements KeyListener {
     private int y = 0;
     boolean popupOpen = false;
     private SelectionObserver selectionObserver;
-    private WebClient webClient;
+    private AccountRepo accountRepo;
     private boolean filter;
 
     public SelectionObserver getSelectionObserver() {
@@ -73,12 +69,12 @@ public final class DespAutoCompleter implements KeyListener {
     public DespAutoCompleter() {
     }
 
-    public DespAutoCompleter(JTextComponent comp, WebClient client,
+    public DespAutoCompleter(JTextComponent comp, AccountRepo accountRepo,
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
+        this.accountRepo = accountRepo;
         this.filter = filter;
-        this.webClient = client;
         if (this.filter) {
             setAutoText(new VDescription("All"));
         }
@@ -354,22 +350,12 @@ public final class DespAutoCompleter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                Mono<ResponseEntity<List<VDescription>>> result = webClient.get()
-                        .uri(builder -> builder.path("/account/get-description")
-                        .queryParam("compCode", Global.compCode)
-                        .queryParam("str", str)
-                        .build())
-                        .retrieve().toEntityList(VDescription.class);
-                result.subscribe((t) -> {
-                    List<VDescription> list = t.getBody();
-                    if (this.filter) {
-                        VDescription s = new VDescription("All");
-                        list.add(s);
-                    }
-                    despModel.setListAutoText(list);
-                }, (err) -> {
-                    log.error(err.getMessage());
-                });
+                List<VDescription> list = accountRepo.getDescription(str);
+                if (this.filter) {
+                    VDescription s = new VDescription("All");
+                    list.add(s);
+                }
+                despModel.setListAutoText(list);
 
             }
 

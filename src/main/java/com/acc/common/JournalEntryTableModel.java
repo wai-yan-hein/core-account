@@ -34,12 +34,12 @@ public class JournalEntryTableModel extends AbstractTableModel {
     private List<Gl> listGV = new ArrayList();
     private final String[] columnNames = {"Dept:", "Descripiton", "Cus / Sup", "Account", "Currency", "Dr-Amt", "Cr-Amt"};
     private JTable parent;
-    private List<GlKey> delList = new ArrayList<>();
+    private List<String> delList = new ArrayList<>();
     JFormattedTextField ttlCrdAmt;
     JFormattedTextField ttlDrAmt;
     private JTextField txtRef;
     private AccountRepo accountRepo;
-    private boolean edit = false;
+    private boolean edit =false;
 
     public boolean isEdit() {
         return edit;
@@ -49,11 +49,11 @@ public class JournalEntryTableModel extends AbstractTableModel {
         this.edit = edit;
     }
 
-    public List<GlKey> getDelList() {
+    public List<String> getDelList() {
         return delList;
     }
 
-    public void setDelList(List<GlKey> delList) {
+    public void setDelList(List<String> delList) {
         this.delList = delList;
     }
 
@@ -231,7 +231,7 @@ public class JournalEntryTableModel extends AbstractTableModel {
                 if (Util1.isNullOrEmpty(gv.getDescription())) {
                     gv.setDescription(txtRef.getText());
                 }
-                edit = true;
+                edit =true;
                 log.info("edit.");
                 calTotalAmt();
                 fireTableRowsUpdated(row, row);
@@ -402,7 +402,7 @@ public class JournalEntryTableModel extends AbstractTableModel {
                 int status = JOptionPane.showConfirmDialog(parent,
                         "Are you sure to delete transaction.", "Delete Transaction", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (status == JOptionPane.YES_OPTION) {
-                    delList.add(vgl.getKey());
+                    delList.add(vgl.getKey().getGlCode());
                     listGV.remove(row);
                     fireTableRowsDeleted(row, row);
                     calTotalAmt();

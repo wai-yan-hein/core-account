@@ -26,7 +26,6 @@ import net.coderazzi.filters.gui.AutoChoices;
 import net.coderazzi.filters.gui.TableFilterHeader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
@@ -42,8 +41,6 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
     private TableFilterHeader filterHeader;
     @Autowired
     private AccountRepo accountRepo;
-    @Autowired
-    private WebClient accountApi;
     private JProgressBar progress;
     private SelectionObserver observer;
 
@@ -127,7 +124,7 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         tblCoaGroup.getColumnModel().getColumn(4).setPreferredWidth(1);// Active
         tblCoaGroup.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
         tblCoaGroup.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
-        tblCoaGroup.getColumnModel().getColumn(5).setCellEditor(new COA3CellEditor(accountApi, 1));
+        tblCoaGroup.getColumnModel().getColumn(5).setCellEditor(new COA3CellEditor(accountRepo, 1));
         tblCoaGroup.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCoaGroup.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
@@ -161,7 +158,7 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         tblCOAGroupChild.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
         tblCOAGroupChild.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
         tblCOAGroupChild.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
-        tblCOAGroupChild.getColumnModel().getColumn(5).setCellEditor(new COA3CellEditor(accountApi, 2));
+        tblCOAGroupChild.getColumnModel().getColumn(5).setCellEditor(new COA3CellEditor(accountRepo, 2));
         tblCOAGroupChild.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCOAGroupChild.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");

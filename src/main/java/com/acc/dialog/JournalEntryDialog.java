@@ -36,7 +36,6 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
@@ -47,16 +46,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
     private final JournalEntryTableModel journalTablModel = new JournalEntryTableModel();
     private String status;
     private AccountRepo accountRepo;
-    private WebClient accountApi;
     private String vouNo;
-
-    public WebClient getAccountApi() {
-        return accountApi;
-    }
-
-    public void setAccountApi(WebClient accountApi) {
-        this.accountApi = accountApi;
-    }
 
     public String getVouNo() {
         return vouNo;
@@ -162,8 +152,8 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         tblJournal.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblJournal.getColumnModel().getColumn(0).setCellEditor(new DepartmentCellEditor(accountRepo.getDepartment()));
         tblJournal.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
-        tblJournal.getColumnModel().getColumn(2).setCellEditor(new TraderCellEditor(accountApi));
-        tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountApi, 3));
+        tblJournal.getColumnModel().getColumn(2).setCellEditor(new TraderCellEditor(accountRepo));
+        tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountRepo, 3));
         tblJournal.getColumnModel().getColumn(4).setCellEditor(new CurrencyAEditor(accountRepo.getCurrency()));
         tblJournal.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
         tblJournal.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
@@ -215,7 +205,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
 
     public boolean isValidData() {
         for (Gl g : journalTablModel.getListGV()) {
-            g.setReference(txtRefrence.getText());
             g.setGlDate(txtVouDate.getDate());
             g.setMacId(Global.macId);
             if (lblStatus.getText().equals("EDIT")) {

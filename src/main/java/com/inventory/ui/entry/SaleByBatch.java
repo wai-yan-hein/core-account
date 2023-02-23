@@ -15,6 +15,7 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.inventory.editor.BatchAutoCompeter;
 import com.inventory.editor.BatchCellEditor;
 import com.inventory.editor.CurrencyAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
@@ -22,6 +23,7 @@ import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.SaleManAutoCompleter;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
+import com.inventory.editor.TraderCellEditor;
 import com.inventory.model.Location;
 import com.inventory.model.Order;
 import com.inventory.model.Region;
@@ -33,6 +35,7 @@ import com.inventory.model.Trader;
 import com.inventory.model.VSale;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.SaleByBatchTableModel;
+import com.inventory.ui.common.SaleTableModel;
 import com.inventory.ui.common.StockBalanceTableModel;
 import com.inventory.ui.entry.dialog.SaleHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
@@ -197,22 +200,21 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
         tblSale.getTableHeader().setFont(Global.tblHeaderFont);
         tblSale.setCellSelectionEnabled(true);
         tblSale.getColumnModel().getColumn(0).setPreferredWidth(50);//batch
-        tblSale.getColumnModel().getColumn(1).setPreferredWidth(150);//sup
-        tblSale.getColumnModel().getColumn(2).setPreferredWidth(50);//Code
-        tblSale.getColumnModel().getColumn(3).setPreferredWidth(450);//Name
-        tblSale.getColumnModel().getColumn(4).setPreferredWidth(60);//Rel
-        tblSale.getColumnModel().getColumn(5).setPreferredWidth(60);//Location
-        tblSale.getColumnModel().getColumn(6).setPreferredWidth(60);//qty
-        tblSale.getColumnModel().getColumn(7).setPreferredWidth(1);//unit
-        tblSale.getColumnModel().getColumn(8).setPreferredWidth(1);//price
-        tblSale.getColumnModel().getColumn(9).setPreferredWidth(40);//amt
+        tblSale.getColumnModel().getColumn(1).setPreferredWidth(50);//Code
+        tblSale.getColumnModel().getColumn(2).setPreferredWidth(450);//Name
+        tblSale.getColumnModel().getColumn(3).setPreferredWidth(60);//Rel
+        tblSale.getColumnModel().getColumn(4).setPreferredWidth(60);//Location
+        tblSale.getColumnModel().getColumn(5).setPreferredWidth(60);//qty
+        tblSale.getColumnModel().getColumn(6).setPreferredWidth(1);//unit
+        tblSale.getColumnModel().getColumn(7).setPreferredWidth(1);//price
+        tblSale.getColumnModel().getColumn(8).setPreferredWidth(40);//amt
         tblSale.getColumnModel().getColumn(0).setCellEditor(new BatchCellEditor(inventoryRepo));//
+        tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         tblSale.getColumnModel().getColumn(2).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblSale.getColumnModel().getColumn(3).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblSale.getColumnModel().getColumn(5).setCellEditor(new LocationCellEditor(listLocation));
-        tblSale.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//qty
-        tblSale.getColumnModel().getColumn(7).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
-        tblSale.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());//
+        tblSale.getColumnModel().getColumn(4).setCellEditor(new LocationCellEditor(listLocation));
+        tblSale.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());//qty
+        tblSale.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
+        tblSale.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());//
         tblSale.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblSale.setDefaultRenderer(Float.class, new DecimalFormatRender());
         tblSale.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)

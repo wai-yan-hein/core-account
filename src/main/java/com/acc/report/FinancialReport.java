@@ -141,11 +141,11 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
     private void initCombo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
         dateAutoCompleter.setSelectionObserver(this);
-        traderAutoCompleter = new TraderAAutoCompleter(txtTrader, accountApi, null, true);
+        traderAutoCompleter = new TraderAAutoCompleter(txtTrader, accountRepo, null, true);
         traderAutoCompleter.setSelectionObserver(this);
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, accountRepo.getDepartment(), null, true, true);
         departmentAutoCompleter.setObserver(this);
-        cOA3AutoCompleter = new COA3AutoCompleter(txtCOA, accountApi, null, true, 3);
+        cOA3AutoCompleter = new COA3AutoCompleter(txtCOA, accountRepo, null, true, 3);
         cOA3AutoCompleter.setSelectionObserver(this);
     }
 
@@ -168,22 +168,12 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                     filter.setToDate(Util1.toDateStr(enDate, "dd/MM/yyyy", "yyyy-MM-dd"));
                     filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
                     filter.setListDepartment(departmentAutoCompleter.getListOption());
-
-                    filter.setFixedAcc(ProUtil.getProperty(ProUtil.FIXED));
-                    filter.setCurrentAcc(ProUtil.getProperty(ProUtil.CURRENT));
-                    filter.setCapitalAcc(ProUtil.getProperty(ProUtil.CAPITAL));
-                    filter.setLiaAcc(ProUtil.getProperty(ProUtil.LIA));
-                    filter.setIncomeAcc(ProUtil.getProperty(ProUtil.INCOME));
-                    filter.setOtherIncomeAcc(ProUtil.getProperty(ProUtil.OTHER_INCOME));
-                    filter.setPurchaseAcc(ProUtil.getProperty(ProUtil.PURCHASE));
-                    filter.setExpenseAcc(ProUtil.getProperty(ProUtil.EXPENSE));
-                    filter.setPlAcc(ProUtil.getProperty(ProUtil.PL));
-                    filter.setReAcc(ProUtil.getProperty(ProUtil.RE));
-
+                    filter.setIncomeExpenseProcess(ProUtil.getIncomeExpenseProcess());
+                    filter.setPlProcess(ProUtil.getPLProcess());
+                    filter.setBsProcess(ProUtil.getBalanceSheetProcess());
                     filter.setInvGroup(ProUtil.getInvGroup());
                     filter.setCoaCode(traderAutoCompleter.getTrader().getAccount());
                     filter.setSrcAcc(cOA3AutoCompleter.getCOA().getKey().getCoaCode());
-                    filter.setCashGroup(ProUtil.getProperty("cash.group"));
                     log.info("Report Date : " + stDate + " - " + enDate);
                     Map<String, Object> param = new HashMap<>();
                     param.put("p_report_name", reportName);
@@ -194,7 +184,6 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                     param.put("p_comp_address", Global.companyAddress);
                     param.put("p_comp_phone", Global.companyPhone);
                     param.put("p_currency", Global.currency);
-                    param.put("p_department", txtDep.getText());
                     printReport(reportUrl, reportUrl, param);
                 }
                 isReport = false;

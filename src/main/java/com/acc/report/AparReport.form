@@ -260,8 +260,6 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="lblCalTime" min="-2" pref="59" max="-2" attributes="0"/>
                           <EmptySpace max="32767" attributes="0"/>
-                          <Component id="chkZero" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="-2" attributes="0"/>
                           <Component id="txtFTotalDrAmt" min="-2" pref="200" max="-2" attributes="0"/>
                       </Group>
                   </Group>
@@ -285,10 +283,7 @@
                               <Component id="jLabel6" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="lblCalTime" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="txtFTotalDrAmt" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="chkZero" alignment="3" min="-2" max="-2" attributes="0"/>
-                          </Group>
+                          <Component id="txtFTotalDrAmt" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -361,15 +356,6 @@
             </Property>
             <Property name="text" type="java.lang.String" value="0"/>
           </Properties>
-        </Component>
-        <Component class="javax.swing.JCheckBox" name="chkZero">
-          <Properties>
-            <Property name="selected" type="boolean" value="true"/>
-            <Property name="text" type="java.lang.String" value="Zero"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkZeroActionPerformed"/>
-          </Events>
         </Component>
       </SubComponents>
     </Container>

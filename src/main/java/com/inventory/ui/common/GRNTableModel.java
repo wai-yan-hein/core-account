@@ -8,6 +8,7 @@ package com.inventory.ui.common;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.GRNDetail;
 import com.inventory.model.GRNDetailKey;
@@ -134,7 +135,7 @@ public class GRNTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case 2 ->
+            case 3 ->
                 false;
             default ->
                 true;
@@ -309,7 +310,7 @@ public class GRNTableModel extends AbstractTableModel {
                     status = false;
                     parent.requestFocus();
                 }
-            }
+            } 
         }
         return status;
     }

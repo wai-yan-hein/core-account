@@ -253,7 +253,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private void initFilter() {
         listDepartment = accountRepo.getDepartment();
         listCurrency = accountRepo.getCurrency();
-        traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accountApi, null, true);
+        traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accountRepo, null, true);
         traderAutoCompleter.setSelectionObserver(this);
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDepartment, listDepartment, null, true, true);
         departmentAutoCompleter.setObserver(this);
@@ -263,9 +263,9 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         currencyAutoCompleter.setSelectionObserver(this);
         dateAutoCompleter.setSelectionObserver(this);
         coaAutoCompleter.setSelectionObserver(this);
-        despAutoCompleter = new DespAutoCompleter(txtDesp, accountApi, null, true);
+        despAutoCompleter = new DespAutoCompleter(txtDesp, accountRepo, null, true);
         despAutoCompleter.setSelectionObserver(this);
-        refAutoCompleter = new RefAutoCompleter(txtRefrence, accountApi, null, true);
+        refAutoCompleter = new RefAutoCompleter(txtRefrence, accountRepo, null, true);
         refAutoCompleter.setSelectionObserver(this);
         tranSourceAutoCompleter = new TranSourceAutoCompleter(txtOption, accountRepo.getTranSource(), null, true);
         tranSourceAutoCompleter.setSelectionObserver(this);
@@ -335,11 +335,11 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tblCash.getColumnModel().getColumn(8).setPreferredWidth(90);// Dr-Amt   
         tblCash.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
         tblCash.getColumnModel().getColumn(1).setCellEditor(new DepartmentCellEditor(listDepartment));
-        tblCash.getColumnModel().getColumn(2).setCellEditor(new DespEditor(accountApi));
-        tblCash.getColumnModel().getColumn(3).setCellEditor(new RefCellEditor(accountApi));
+        tblCash.getColumnModel().getColumn(2).setCellEditor(new DespEditor(accountRepo));
+        tblCash.getColumnModel().getColumn(3).setCellEditor(new RefCellEditor(accountRepo));
         tblCash.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
-        tblCash.getColumnModel().getColumn(5).setCellEditor(new TraderCellEditor(accountApi));
-        tblCash.getColumnModel().getColumn(6).setCellEditor(new COA3CellEditor(accountApi, 3));
+        tblCash.getColumnModel().getColumn(5).setCellEditor(new TraderCellEditor(accountRepo));
+        tblCash.getColumnModel().getColumn(6).setCellEditor(new COA3CellEditor(accountRepo, 3));
         tblCash.getColumnModel().getColumn(7).setCellEditor(new CurrencyAEditor(listCurrency));
         tblCash.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
         if (!single) {
@@ -705,7 +705,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         });
 
         jLabel3.setFont(Global.lableFont);
-        jLabel3.setText("Trader");
+        jLabel3.setText("Person");
 
         txtAccount.setFont(Global.textFont);
         txtAccount.setName("txtAccount"); // NOI18N

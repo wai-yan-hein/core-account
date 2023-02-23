@@ -37,20 +37,16 @@ public class Gl {
     private Integer splitId;
     private String intgUpdStatus; //For integration update status
     private String remark;
+    private String narration;
     private String refNo;
     private Integer macId;
     private Integer exchangeId;
-    private List<GlKey> delList;
+    private List<String> delList;
     private String deptUsrCode;
     private String traderName;
     private String srcAccName;
     private String accName;
     private boolean edit;
-    private double amount;
-    private String fromDes;
-    private String forDes;
-    private String narration;
-    private String batchNo;
 
     public Gl(String curCode, Double drAmt, Double crAmt) {
         this.curCode = curCode;

@@ -7,7 +7,6 @@ package com.inventory.ui.common;
 
 import com.common.Global;
 import com.common.ProUtil;
-import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.model.Location;
 import com.inventory.model.Pattern;
@@ -33,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PatternTableModel extends AbstractTableModel {
 
-    private final String[] columnNames = {"Stock Code", "Stock Name", "Location", "Qty", "Unit", "Price", "Amount", "Price Method"};
+    private final String[] columnNames = {"Stock Code", "Stock Name", "Location", "Qty", "Unit", "Price", "Price Method"};
     private List<Pattern> listPattern = new ArrayList<>();
     private JLabel lblRecord;
     private InventoryRepo inventoryRepo;
@@ -41,15 +40,6 @@ public class PatternTableModel extends AbstractTableModel {
     private JPanel panel;
     private JTable table;
     private Location location;
-    private SelectionObserver observer;
-
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
 
     public JLabel getLblRecord() {
         return lblRecord;
@@ -208,7 +198,7 @@ public class PatternTableModel extends AbstractTableModel {
                             JOptionPane.showMessageDialog(panel, String.format("Invalid %s", value));
                         }
                     }
-                    case 7 -> {
+                    case 6 -> {
                         if (value instanceof PriceOption op) {
                             p.setPriceTypeCode(op.getKey().getPriceType());
                             p.setPriceTypeName(op.getDescription());
@@ -224,11 +214,14 @@ public class PatternTableModel extends AbstractTableModel {
                 save(p, row);
                 fireTableRowsUpdated(row, row);
                 table.requestFocus();
-                observer.selected("CAL_PRICE", "CAL_PRICE");
             }
         } catch (HeadlessException e) {
             log.error(String.format("setValueAt : %s", e.getMessage()));
         }
+    }
+
+    private int uniqueId(int row) {
+        return row <= 0 ? 1 : listPattern.get(row - 1).getKey().getUniqueId() + 1;
     }
 
     private boolean isValidEntry(Pattern pd) {
@@ -266,7 +259,7 @@ public class PatternTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex
     ) {
-        return columnIndex != 6;
+        return true;
     }
 
     public List<Pattern> getListPattern() {

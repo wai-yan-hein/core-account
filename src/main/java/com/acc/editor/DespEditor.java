@@ -19,7 +19,6 @@ import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.TableCellEditor;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
@@ -29,7 +28,7 @@ public class DespEditor extends AbstractCellEditor implements TableCellEditor {
 
     private JComponent component = null;
     private DespAutoCompleter completer;
-    private WebClient webClient;
+    private AccountRepo accountRepo;
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusLost(FocusEvent e) {
@@ -43,8 +42,8 @@ public class DespEditor extends AbstractCellEditor implements TableCellEditor {
 
     };
 
-    public DespEditor(WebClient webClient) {
-        this.webClient = webClient;
+    public DespEditor(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
     }
 
     @Override
@@ -84,7 +83,7 @@ public class DespEditor extends AbstractCellEditor implements TableCellEditor {
             jtf.setText(value.toString());
             jtf.selectAll();
         }
-        completer = new DespAutoCompleter(jtf, webClient, this, false);
+        completer = new DespAutoCompleter(jtf, accountRepo, this, false);
         return component;
     }
 

@@ -30,15 +30,6 @@ public class GRN {
     private String remark;
     private List<GRNDetail> listDetail;
     private List<GRNDetailKey> listDel;
-
-    public GRN() {
-    }
-
-    public GRN(String batchNo) {
-        this.batchNo = batchNo;
-    }
     
-
-
 
 }

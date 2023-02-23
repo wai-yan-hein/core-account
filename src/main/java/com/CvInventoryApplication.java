@@ -71,7 +71,6 @@ public class CvInventoryApplication {
             if (tray != null) {
                 tray.openMF();
             }
-            log.error(e.getMessage());
             JOptionPane.showMessageDialog(new JFrame(), "Core Account is already running.", "Duplicate Program", JOptionPane.ERROR_MESSAGE);
             System.exit(0);
         }

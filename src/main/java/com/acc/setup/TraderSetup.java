@@ -8,6 +8,7 @@ package com.acc.setup;
 import com.acc.common.AccountRepo;
 import com.acc.common.TraderATableModel;
 import com.acc.editor.COA3AutoCompleter;
+import com.acc.model.ChartOfAccount;
 import com.acc.model.TraderA;
 import com.acc.model.TraderAKey;
 import com.common.Global;
@@ -35,7 +36,6 @@ import javax.swing.text.JTextComponent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
@@ -51,8 +51,6 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
     private COA3AutoCompleter cOAAutoCompleter;
     @Autowired
     private AccountRepo accountRepo;
-    @Autowired
-    private WebClient accountApi;
     private SelectionObserver observer;
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
@@ -89,7 +87,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
     }
 
     private void initCombo() {
-        cOAAutoCompleter = new COA3AutoCompleter(txtAccount, accountApi, null, false, 3);
+        cOAAutoCompleter = new COA3AutoCompleter(txtAccount, accountRepo, null, false, 3);
         cOAAutoCompleter.setCoa(null);
     }
 

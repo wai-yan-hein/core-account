@@ -162,7 +162,6 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     public void openJournalEntryDialog(String glVou, String status) {
         dialog.clear();
         dialog.setAccountRepo(accountRepo);
-        dialog.setAccountApi(accountApi);
         dialog.setVouNo(glVou);
         dialog.setStatus(status);
         dialog.initMain();
