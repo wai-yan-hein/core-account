@@ -29,6 +29,7 @@ import com.inventory.model.VPurchase;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.PurchaseTableModel;
 import com.inventory.ui.entry.dialog.BatchSearchDialog;
+import com.inventory.ui.entry.dialog.PurchaseAvgPriceDialog;
 import com.inventory.ui.entry.dialog.PurchaseHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
@@ -40,6 +41,8 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
@@ -95,7 +98,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     private JProgressBar progress;
     private PurHis ph = new PurHis();
     private List<Location> listLocation = new ArrayList<>();
-    private final List<StockUnit> listStockUnit = new ArrayList<>();
+    private List<StockUnit> listUnit = new ArrayList<>();
 
     public JProgressBar getProgress() {
         return progress;
@@ -131,7 +134,39 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblPur.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblPur.getActionMap().put(solve, new DeleteAction());
+        tblPur.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_DOWN_MASK), "avg-price");
+        tblPur.getActionMap().put("avg-price", new AvgPriceAction());
 
+    }
+
+    private class AvgPriceAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int row = tblPur.convertRowIndexToModel(tblPur.getSelectedRow());
+            PurHisDetail pd = purTableModel.getObject(row);
+            if (pd.getStockCode() != null) {
+                PurchaseAvgPriceDialog d = new PurchaseAvgPriceDialog(Global.parentForm);
+                d.setInventoryRepo(inventoryRepo);
+                d.setListUnit(listUnit);
+                d.setPd(pd);
+                d.initMain();
+                d.setLocationRelativeTo(null);
+                d.addKeyListener(new KeyAdapter() {
+                    @Override
+                    public void keyPressed(KeyEvent e) {
+                        if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                            d.dispose();
+                        }
+                    }
+                });
+                d.setVisible(true);
+                if (d.isConfirm()) {
+                    purTableModel.setValueAt(pd, row, 0);
+                }
+            }
+        }
     }
 
     private class DeleteAction extends AbstractAction {
@@ -165,6 +200,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     };
 
     private void initPurTable() {
+        listUnit = inventoryRepo.getStockUnit();
         tblPur.setModel(purTableModel);
         purTableModel.setLblRec(lblRec);
         purTableModel.setInventoryRepo(inventoryRepo);
@@ -187,7 +223,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         tblPur.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(listLocation));
         tblPur.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
-        tblPur.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
+        tblPur.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(listUnit));
         tblPur.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
         tblPur.setDefaultRenderer(Object.class, new DecimalFormatRender());
@@ -951,12 +987,10 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(lblStatus)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButton1)
                 .addContainerGap())
         );
@@ -966,12 +1000,12 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jButton1)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(lblRec)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 231, Short.MAX_VALUE)))
+                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jButton1)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -1262,11 +1296,11 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 .addGap(6, 6, 6)
                 .addComponent(panelPur, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 158, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 282, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents

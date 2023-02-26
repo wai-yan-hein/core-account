@@ -206,7 +206,6 @@ public class PurchaseTableModel extends AbstractTableModel {
                             record.setUserCode(s.getUserCode());
                             record.setRelName(s.getRelName());
                             record.setQty(1.0f);
-                            record.setAvgQty(1.0f);
                             record.setUnitCode(s.getPurUnitCode());
                             addNewRow();
                         }
@@ -225,7 +224,6 @@ public class PurchaseTableModel extends AbstractTableModel {
                     if (Util1.isNumber(value)) {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             record.setQty(Util1.getFloat(value));
-                            record.setAvgQty(record.getQty());
                             if (record.getUnitCode() != null) {
                                 if (ProUtil.isWeightOption()) {
                                     parent.setColumnSelectionInterval(5, 5);
@@ -257,6 +255,7 @@ public class PurchaseTableModel extends AbstractTableModel {
                     if (Util1.isNumber(value)) {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             record.setPrice(Util1.getFloat(value));
+                            record.setOrgPrice(record.getPrice());
                             parent.setColumnSelectionInterval(0, 0);
                             parent.setRowSelectionInterval(row + 1, row + 1);
                         } else {
@@ -337,9 +336,9 @@ public class PurchaseTableModel extends AbstractTableModel {
 
     private void calculateAmount(PurHisDetail pur) {
         float price = Util1.getFloat(pur.getPrice());
-        float avgQty = Util1.getFloat(pur.getAvgQty());
+        float qty = Util1.getFloat(pur.getQty());
         if (pur.getStockCode() != null) {
-            float amount = avgQty * price;
+            float amount = qty * price;
             pur.setPrice(price);
             pur.setAmount(Util1.getFloat(Math.round(amount)));
         }
@@ -385,7 +384,7 @@ public class PurchaseTableModel extends AbstractTableModel {
 
     public void delete(int row) {
         PurHisDetail sdh = listDetail.get(row);
-        if (sdh.getKey()!= null) {
+        if (sdh.getKey() != null) {
             deleteList.add(sdh.getKey().getPdCode());
         }
         listDetail.remove(row);
@@ -405,7 +404,8 @@ public class PurchaseTableModel extends AbstractTableModel {
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
         }
     }
-    public PurHisDetail getObject(int row){
+
+    public PurHisDetail getObject(int row) {
         return listDetail.get(row);
     }
 
@@ -414,5 +414,9 @@ public class PurchaseTableModel extends AbstractTableModel {
             listDetail.clear();
             fireTableDataChanged();
         }
+    }
+
+    public void updateRow(int row) {
+        fireTableRowsUpdated(row, row);
     }
 }

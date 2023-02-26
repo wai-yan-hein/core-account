@@ -231,8 +231,8 @@ public class WeightLossTableModel extends AbstractTableModel {
         float lossQty = Util1.getFloat(pd.getLossQty());
         float qty = Util1.getFloat(pd.getQty());
         if (unit != null && stockCode != null && lossUnit != null && qty > 0 && lossQty > 0) {
-            float tmp1 = inventoryRepo.getSmallQty(stockCode, unit) * qty;
-            float tmp2 = inventoryRepo.getSmallQty(stockCode, lossUnit) * lossQty;
+            float tmp1 = inventoryRepo.getSmallQty(stockCode, unit).getSmallQty() * qty;
+            float tmp2 = inventoryRepo.getSmallQty(stockCode, lossUnit).getSmallQty() * lossQty;
             float price = Util1.getFloat(pd.getPrice());
             float lossPrice = (tmp1 / tmp2) * price;
             pd.setLossPrice(lossPrice);

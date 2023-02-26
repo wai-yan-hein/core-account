@@ -78,6 +78,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private BrandAutoCompleter brandAutoCompleter;
     private UnitAutoCompleter purUnitCompleter;
     private UnitAutoCompleter saleUnitCompleter;
+    private UnitAutoCompleter wlUnitCompleter;
     private UnitRelationAutoCompleter relationAutoCompleter;
     private Stock stock = new Stock();
     private TableRowSorter<TableModel> sorter;
@@ -172,6 +173,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         saleUnitCompleter.setStockUnit(inventoryRepo.findUnit(stock.getSaleUnitCode(), deptId));
         typeAutoCompleter.setStockType(inventoryRepo.findGroup(stock.getTypeCode(), deptId));
         purUnitCompleter.setStockUnit(inventoryRepo.findUnit(stock.getPurUnitCode(), deptId));
+        wlUnitCompleter.setStockUnit(inventoryRepo.findUnit(stock.getLossUnit(), deptId));
         relationAutoCompleter.setRelation(inventoryRepo.findRelation(stock.getRelCode(), deptId));
         txtPurPrice.setText(Util1.getString(stock.getPurPrice()));
         txtSalePrice.setText(Util1.getString(stock.getSalePriceN()));
@@ -203,7 +205,8 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         saleUnitCompleter.setStockUnit(null);
         relationAutoCompleter = new UnitRelationAutoCompleter(txtRelation, listRelation, null, false, false);
         relationAutoCompleter.setRelation(null);
-
+        wlUnitCompleter = new UnitAutoCompleter(txtLossUnit, listStockUnit, null);
+        wlUnitCompleter.setStockUnit(null);
     }
 
     private boolean isValidEntry() {
@@ -251,6 +254,10 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             stock.setPurUnitCode(purUnitCompleter.getStockUnit().getKey().getUnitCode());
             stock.setSaleUnitCode(saleUnitCompleter.getStockUnit().getKey().getUnitCode());
             stock.setRelCode(relationAutoCompleter.getRelation().getKey().getRelCode());
+            StockUnit unit = wlUnitCompleter.getStockUnit();
+            if (unit != null) {
+                stock.setLossUnit(unit.getKey().getUnitCode());
+            }
             stock.setSalePriceN(Util1.getFloat(txtSalePrice.getText()));
             stock.setSalePriceA(Util1.getFloat(txtSalePriceA.getText()));
             stock.setSalePriceB(Util1.getFloat(txtSalePriceB.getText()));
@@ -296,6 +303,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         categoryAutoCompleter.setCategory(null);
         purUnitCompleter.setStockUnit(null);
         saleUnitCompleter.setStockUnit(null);
+        wlUnitCompleter.setStockUnit(null);
         typeAutoCompleter.setStockType(null);
         txtStockCode.setText(null);
         txtBarCode.setText(null);
@@ -410,6 +418,8 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         jLabel13 = new javax.swing.JLabel();
         txtPurUnit = new javax.swing.JTextField();
         btnUnit = new javax.swing.JButton();
+        jLabel20 = new javax.swing.JLabel();
+        txtLossUnit = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
         txtStockCode = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
@@ -680,14 +690,14 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtSalePriceB, javax.swing.GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE)
+                                    .addComponent(txtSalePriceB, javax.swing.GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE)
                                     .addComponent(txtSalePriceA))))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtSalePriceC, javax.swing.GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE))
+                                .addComponent(txtSalePriceC, javax.swing.GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE))
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                                     .addComponent(jLabel18, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
@@ -797,6 +807,18 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             }
         });
 
+        jLabel20.setFont(Global.lableFont);
+        jLabel20.setText("Weight Loss Unit");
+
+        txtLossUnit.setFont(Global.textFont);
+        txtLossUnit.setToolTipText("Purchase Price");
+        txtLossUnit.setName("txtPurUnit"); // NOI18N
+        txtLossUnit.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtLossUnitFocusGained(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -804,15 +826,17 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE)
-                    .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
+                    .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(txtPurUnit, javax.swing.GroupLayout.DEFAULT_SIZE, 508, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(txtPurPrice))
+                    .addComponent(txtPurPrice)
+                    .addComponent(txtLossUnit))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -823,6 +847,10 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                     .addComponent(jLabel10)
                     .addComponent(txtPurUnit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnUnit))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel20)
+                    .addComponent(txtLossUnit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtPurPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1014,10 +1042,10 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                         .addComponent(jLabel19)
                         .addGap(18, 18, 18)
                         .addComponent(lblRecord))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 606, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 601, Short.MAX_VALUE)
                     .addComponent(txtFilter))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 705, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -1199,6 +1227,10 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         relationSetup();
     }//GEN-LAST:event_btnAddRelationActionPerformed
 
+    private void txtLossUnitFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtLossUnitFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtLossUnitFocusGained
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddBrand;
@@ -1222,6 +1254,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -1240,6 +1273,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private javax.swing.JTextField txtBrand;
     private javax.swing.JTextField txtCat;
     private javax.swing.JTextField txtFilter;
+    private javax.swing.JTextField txtLossUnit;
     private javax.swing.JTextField txtPurPrice;
     private javax.swing.JTextField txtPurUnit;
     private javax.swing.JTextField txtRelation;

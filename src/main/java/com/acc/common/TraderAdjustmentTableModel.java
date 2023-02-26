@@ -266,8 +266,8 @@ public class TraderAdjustmentTableModel extends AbstractTableModel {
                     }
                 }
                 case 5 -> {
-                    if (value != null) {
-                        gl.setBatchNo(value.toString());
+                    if (value instanceof VDescription d) {
+                        gl.setBatchNo(d.getDescription());
                     }
                 }
                 case 6 -> {

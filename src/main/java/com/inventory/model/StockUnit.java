@@ -13,11 +13,11 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
-public class StockUnit implements java.io.Serializable {
+public class StockUnit {
 
     private StockUnitKey key;
     private String unitName;
-    
+
     private String updatedBy;
     private Date createdDate;
     private String createdBy;
@@ -31,4 +31,9 @@ public class StockUnit implements java.io.Serializable {
         this.key = key;
     }
 
-   }
+    @Override
+    public String toString() {
+        return key.getUnitCode();
+    }
+
+}

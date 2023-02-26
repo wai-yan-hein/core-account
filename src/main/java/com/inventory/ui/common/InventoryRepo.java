@@ -4,7 +4,6 @@
  */
 package com.inventory.ui.common;
 
-import com.acc.model.ReportFilter;
 import com.common.FilterObject;
 import com.inventory.model.CFont;
 import com.user.model.Currency;
@@ -61,7 +60,6 @@ import com.inventory.model.TransferHis;
 import com.inventory.model.TransferHisKey;
 import com.inventory.model.UnitRelation;
 import com.inventory.model.UnitRelationDetail;
-import com.inventory.model.VSale;
 import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
 import com.inventory.model.WeightLossHis;
@@ -875,15 +873,15 @@ public class InventoryRepo {
         return result.block(Duration.ofMinutes(min));
     }
 
-    public float getSmallQty(String stockCode, String unit) {
-        Mono<Float> result = inventoryApi.get()
+    public General getSmallQty(String stockCode, String unit) {
+        Mono<General> result = inventoryApi.get()
                 .uri(builder -> builder.path("/report/get-smallest_qty")
                 .queryParam("stockCode", stockCode)
                 .queryParam("unit", unit)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", Global.deptId)
                 .build())
-                .retrieve().bodyToMono(Float.class);
+                .retrieve().bodyToMono(General.class);
         return result.block(Duration.ofMinutes(min));
     }
 

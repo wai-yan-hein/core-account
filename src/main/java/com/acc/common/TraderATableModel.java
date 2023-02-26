@@ -70,25 +70,22 @@ public class TraderATableModel extends AbstractTableModel {
             return null;
         }
 
-        if (listTrader.isEmpty()) {
-            return null;
+        if (!listTrader.isEmpty()) {
+            try {
+                TraderA trader = listTrader.get(row);
+                return switch (column) {
+                    case 0 ->
+                        Util1.isNull(trader.getUserCode(), trader.getKey().getCode());
+                    case 1 ->
+                        trader.getTraderName();
+                    default ->
+                        null;
+                }; //Code
+                //Description
+            } catch (Exception ex) {
+                log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
+            }
         }
-
-        try {
-            TraderA trader = listTrader.get(row);
-            return switch (column) {
-                case 0 ->
-                    Util1.isNull(trader.getUserCode(), trader.getKey().getCode());
-                case 1 ->
-                    trader.getTraderName();
-                default ->
-                    null;
-            }; //Code
-            //Description
-        } catch (Exception ex) {
-            log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
-        }
-
         return null;
     }
 

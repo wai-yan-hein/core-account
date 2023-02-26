@@ -35,7 +35,6 @@ import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import javax.swing.DropMode;
@@ -58,8 +57,6 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -251,15 +248,22 @@ public class COAManagment extends javax.swing.JPanel implements
     private void deleteCOA() {
         try {
             if (selectedNode != null) {
-                ChartOfAccount coa = (ChartOfAccount) selectedNode.getUserObject();
-                if (coa != null) {
-                    String code = coa.getKey().getCoaCode();
-                    int status = deleteCOA(code);
-                    if (status == 10) {
-                        JOptionPane.showMessageDialog(Global.parentForm, "Can't delete this account is already used.");
-                    } else {
-                        treeModel.removeNodeFromParent(selectedNode);
-                        treeModel.reload(selectedNode);
+                if (selectedNode.getChildCount() > 0) {
+                    JOptionPane.showMessageDialog(this, "Can't delete group which have chart of account.");
+                    return;
+                }
+                int yn = JOptionPane.showConfirmDialog(this, "Are you sure to delete?", "Delete COA", JOptionPane.WARNING_MESSAGE);
+                if (yn == JOptionPane.YES_OPTION) {
+                    ChartOfAccount c = (ChartOfAccount) selectedNode.getUserObject();
+                    if (c != null) {
+                        String code = c.getKey().getCoaCode();
+                        int status = deleteCOA(code);
+                        if (status == 10) {
+                            JOptionPane.showMessageDialog(Global.parentForm, "Can't delete this account is already used.");
+                        } else {
+                            treeModel.removeNodeFromParent(selectedNode);
+                            treeModel.reload(selectedNode);
+                        }
                     }
                 }
             }

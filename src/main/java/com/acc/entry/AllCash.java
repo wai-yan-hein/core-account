@@ -108,7 +108,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private TranSourceAutoCompleter tranSourceAutoCompleter;
     private final CashInOutTableModel inOutTableModel = new CashInOutTableModel();
     private final CashOpeningTableModel opTableModel = new CashOpeningTableModel();
-    private final CurExchangeRateTableModel curExchangeRateTableModel = new CurExchangeRateTableModel();
     private SelectionObserver observer;
     private String sourceAccId;
     private final JPopupMenu popupmenu = new JPopupMenu();
@@ -361,6 +360,9 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tblCash.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.SHIFT_DOWN_MASK), "force-delete");
         tblCash.getActionMap().put("force-delete", forceDelete);
+        tblCash.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_DOWN_MASK), "copy-row");
+        tblCash.getActionMap().put("copy-row", copyRow);
     }
 
     private void initPopup() {
@@ -385,6 +387,56 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteVoucher(true);
+        }
+    };
+    private final Action copyRow = new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int row = tblCash.convertRowIndexToModel(tblCash.getSelectedRow());
+            int column = tblCash.getSelectedColumn();
+            if (row > 0) {
+                Gl copy = allCashTableModel.getVGl(row - 1);
+                Gl cur = allCashTableModel.getVGl(row);
+                switch (column) {
+                    case 0 -> {
+                        cur.setGlDate(copy.getGlDate());
+                    }
+                    case 1 -> {
+                        cur.setDeptCode(copy.getDeptCode());
+                        cur.setDeptUsrCode(copy.getDeptUsrCode());
+                    }
+                    case 2 -> {
+                        cur.setDescription(copy.getDescription());
+                    }
+                    case 3 -> {
+                        cur.setReference(copy.getReference());
+                    }
+                    case 4 -> {
+                        cur.setRefNo(copy.getRefNo());
+                    }
+                    case 5 -> {
+                        cur.setTraderCode(copy.getTraderCode());
+                        cur.setTraderName(copy.getTraderName());
+                        cur.setAccCode(copy.getAccCode());
+                        cur.setAccName(copy.getAccName());
+                    }
+                    case 6 -> {
+                        cur.setAccCode(copy.getAccCode());
+                        cur.setAccName(copy.getAccName());
+                    }
+                    case 7 -> {
+                        cur.setCurCode(copy.getCurCode());
+                    }
+                    case 8 -> {
+                        cur.setDrAmt(copy.getDrAmt());
+                    }
+                    case 9 -> {
+                        cur.setCrAmt(copy.getCrAmt());
+                    }
+                }
+                allCashTableModel.setValueAt(cur, row, column);
+            }
+
         }
     };
 

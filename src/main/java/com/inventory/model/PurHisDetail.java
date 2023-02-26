@@ -27,6 +27,7 @@ public class PurHisDetail implements Serializable {
     private Float qty;
     private String unitCode;
     private Float price;
+    private Float orgPrice;
     private Float amount;
     private String locCode;
     private String locName;

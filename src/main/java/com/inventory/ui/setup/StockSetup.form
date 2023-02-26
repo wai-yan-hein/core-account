@@ -27,11 +27,11 @@
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Component id="lblRecord" max="32767" attributes="0"/>
                   </Group>
-                  <Component id="jScrollPane1" pref="606" max="32767" attributes="0"/>
+                  <Component id="jScrollPane1" pref="601" max="32767" attributes="0"/>
                   <Component id="txtFilter" alignment="0" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jScrollPane2" max="32767" attributes="0"/>
+              <Component id="jScrollPane2" pref="705" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
@@ -473,7 +473,7 @@
                                       <Group type="102" alignment="0" attributes="0">
                                           <EmptySpace max="-2" attributes="0"/>
                                           <Group type="103" groupAlignment="0" attributes="0">
-                                              <Component id="txtSalePriceB" pref="235" max="32767" attributes="0"/>
+                                              <Component id="txtSalePriceB" pref="240" max="32767" attributes="0"/>
                                               <Component id="txtSalePriceA" max="32767" attributes="0"/>
                                           </Group>
                                       </Group>
@@ -483,7 +483,7 @@
                                       <Group type="102" attributes="0">
                                           <Component id="jLabel16" linkSize="12" min="-2" pref="80" max="-2" attributes="0"/>
                                           <EmptySpace max="-2" attributes="0"/>
-                                          <Component id="txtSalePriceC" pref="235" max="32767" attributes="0"/>
+                                          <Component id="txtSalePriceC" pref="240" max="32767" attributes="0"/>
                                       </Group>
                                       <Group type="102" alignment="0" attributes="0">
                                           <Group type="103" groupAlignment="1" max="-2" attributes="0">
@@ -752,10 +752,11 @@
                       <Group type="102" attributes="0">
                           <EmptySpace min="-2" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                              <Component id="jLabel13" pref="89" max="32767" attributes="0"/>
+                              <Component id="jLabel13" max="32767" attributes="0"/>
                               <Component id="jLabel10" max="32767" attributes="0"/>
+                              <Component id="jLabel20" max="32767" attributes="0"/>
                           </Group>
-                          <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" alignment="0" attributes="0">
                                   <Component id="txtPurUnit" pref="508" max="32767" attributes="0"/>
@@ -763,6 +764,7 @@
                                   <Component id="btnUnit" min="-2" pref="41" max="-2" attributes="0"/>
                               </Group>
                               <Component id="txtPurPrice" max="32767" attributes="0"/>
+                              <Component id="txtLossUnit" alignment="0" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace min="-2" max="-2" attributes="0"/>
                       </Group>
@@ -776,6 +778,11 @@
                               <Component id="jLabel10" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="txtPurUnit" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="btnUnit" alignment="3" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="jLabel20" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="txtLossUnit" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="32767" attributes="0"/>
                           <Group type="103" groupAlignment="3" attributes="0">
@@ -844,6 +851,26 @@
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnUnitActionPerformed"/>
+                  </Events>
+                </Component>
+                <Component class="javax.swing.JLabel" name="jLabel20">
+                  <Properties>
+                    <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                      <Connection code="Global.lableFont" type="code"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" value="Weight Loss Unit"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JTextField" name="txtLossUnit">
+                  <Properties>
+                    <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                      <Connection code="Global.textFont" type="code"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" value="Purchase Price"/>
+                    <Property name="name" type="java.lang.String" value="txtPurUnit" noResource="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtLossUnitFocusGained"/>
                   </Events>
                 </Component>
               </SubComponents>
