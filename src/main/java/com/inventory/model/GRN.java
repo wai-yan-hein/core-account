@@ -37,8 +37,5 @@ public class GRN {
     public GRN(String batchNo) {
         this.batchNo = batchNo;
     }
-    
-
-
 
 }

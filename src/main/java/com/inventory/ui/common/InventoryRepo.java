@@ -13,6 +13,7 @@ import com.common.ReturnObject;
 import com.common.Util1;
 import com.inventory.model.Category;
 import com.inventory.model.CategoryKey;
+import com.inventory.model.Expense;
 import com.inventory.model.GRN;
 import com.inventory.model.GRNKey;
 import com.inventory.model.General;
@@ -81,7 +82,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class InventoryRepo {
 
-    int min = 1;
+    int min = 0;
     private List<PriceOption> listPO = null;
     @Autowired
     private WebClient inventoryApi;
@@ -120,7 +121,7 @@ public class InventoryRepo {
                     .queryParam("option", option)
                     .build())
                     .retrieve().toEntityList(PriceOption.class);
-            listPO = result.block(Duration.ofMinutes(min)).getBody();
+            listPO = result.block().getBody();
         }
         return listPO;
     }
@@ -132,7 +133,7 @@ public class InventoryRepo {
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve().toEntityList(Category.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<SaleMan> getSaleMan() {
@@ -142,7 +143,7 @@ public class InventoryRepo {
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve().toEntityList(SaleMan.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public SaleMan findSaleMan(String code, Integer deptId) {
@@ -167,7 +168,7 @@ public class InventoryRepo {
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve().toEntityList(StockBrand.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<StockType> getStockType() {
@@ -177,7 +178,7 @@ public class InventoryRepo {
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve().toEntityList(StockType.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<StockUnit> getStockUnit() {
@@ -187,7 +188,7 @@ public class InventoryRepo {
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve().toEntityList(StockUnit.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<StockUnit> getUnit(String relCode, Integer deptId) {
@@ -198,7 +199,7 @@ public class InventoryRepo {
                 .queryParam("deptId", deptId)
                 .build())
                 .retrieve().toEntityList(StockUnit.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public Trader findTrader(String code, Integer deptId) {
@@ -229,7 +230,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), TraderGroupKey.class)
                 .retrieve()
                 .bodyToMono(TraderGroup.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public Region findRegion(String code) {
@@ -242,7 +243,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), RegionKey.class)
                 .retrieve()
                 .bodyToMono(Region.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public List<Trader> getCustomer() {
@@ -252,7 +253,7 @@ public class InventoryRepo {
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve().toEntityList(Trader.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<Trader> getSupplier() {
@@ -262,7 +263,7 @@ public class InventoryRepo {
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve().toEntityList(Trader.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<Trader> getTraderList(String text, String type) {
@@ -274,7 +275,7 @@ public class InventoryRepo {
                 .queryParam("type", type)
                 .build())
                 .retrieve().toEntityList(Trader.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<GRN> getBatchList(String batchNo) {
@@ -285,7 +286,16 @@ public class InventoryRepo {
                 .queryParam("batchNo", batchNo)
                 .build())
                 .retrieve().toEntityList(GRN.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
+    }
+
+    public List<Expense> getExpense() {
+        Mono<ResponseEntity<List<Expense>>> result = inventoryApi.get()
+                .uri(builder -> builder.path("/expense/get-expense")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().toEntityList(Expense.class);
+        return result.block().getBody();
     }
 
     public Trader findTraderRFID(String rfId) {
@@ -297,7 +307,7 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToMono(Trader.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public List<Region> getRegion() {
@@ -307,7 +317,7 @@ public class InventoryRepo {
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve().toEntityList(Region.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public Location findLocation(String locCode, Integer deptId) {
@@ -338,7 +348,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), StockBrandKey.class)
                 .retrieve()
                 .bodyToMono(StockBrand.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public VouStatus findVouStatus(String code, Integer deptId) {
@@ -351,7 +361,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), VouStatusKey.class)
                 .retrieve()
                 .bodyToMono(VouStatus.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public StockUnit findUnit(String unitCode, Integer deptId) {
@@ -364,7 +374,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), StockUnitKey.class)
                 .retrieve()
                 .bodyToMono(StockUnit.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public UnitRelation findRelation(String relCode, Integer deptId) {
@@ -377,7 +387,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), RelationKey.class)
                 .retrieve()
                 .bodyToMono(UnitRelation.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public Category findCategory(String catCode, Integer deptId) {
@@ -390,7 +400,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), CategoryKey.class)
                 .retrieve()
                 .bodyToMono(Category.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public Stock findStock(String stockCode) {
@@ -404,7 +414,7 @@ public class InventoryRepo {
                     .body(Mono.just(key), StockKey.class)
                     .retrieve()
                     .bodyToMono(Stock.class);
-            return result.block(Duration.ofMinutes(min));
+            return result.block();
         } catch (Exception e) {
             log.info("findStock : " + e.getMessage());
         }
@@ -421,7 +431,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), StockTypeKey.class)
                 .retrieve()
                 .bodyToMono(StockType.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public WeightLossHis findWeightLoss(String vouNo, Integer deptId) {
@@ -434,7 +444,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), StockTypeKey.class)
                 .retrieve()
                 .bodyToMono(WeightLossHis.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public ProcessHis findProcess(ProcessHisKey key) {
@@ -443,7 +453,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), ProcessHisKey.class)
                 .retrieve()
                 .bodyToMono(ProcessHis.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public Currency findCurrency(String curCode) {
@@ -452,7 +462,7 @@ public class InventoryRepo {
                 .queryParam("curCode", curCode)
                 .build())
                 .retrieve().toEntity(Currency.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<Location> getLocation() {
@@ -463,7 +473,7 @@ public class InventoryRepo {
                     .queryParam("deptId", ProUtil.getDepId())
                     .build())
                     .retrieve().toEntityList(Location.class);
-            return result.block(Duration.ofMinutes(min)).getBody();
+            return result.block().getBody();
         } catch (Exception e) {
             log.error("getLocation : " + e.getMessage());
         }
@@ -478,7 +488,7 @@ public class InventoryRepo {
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve().toEntityList(Stock.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<Stock> getStock(String str) {
@@ -489,7 +499,7 @@ public class InventoryRepo {
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve().toEntityList(Stock.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<Stock> getService() {
@@ -499,7 +509,7 @@ public class InventoryRepo {
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve().toEntityList(Stock.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<String> deleteStock(StockKey key) {
@@ -508,14 +518,14 @@ public class InventoryRepo {
                 .body(Mono.just(key), StockKey.class)
                 .retrieve()
                 .toEntityList(String.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<Currency> getCurrency() {
         Mono<ResponseEntity<List<Currency>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-currency").build())
                 .retrieve().toEntityList(Currency.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<VouStatus> getVoucherStatus() {
@@ -525,7 +535,7 @@ public class InventoryRepo {
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve().toEntityList(VouStatus.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<UnitRelation> getUnitRelation() {
@@ -535,7 +545,7 @@ public class InventoryRepo {
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve().toEntityList(UnitRelation.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public Trader saveTrader(Trader t) {
@@ -544,7 +554,7 @@ public class InventoryRepo {
                 .body(Mono.just(t), Trader.class)
                 .retrieve()
                 .bodyToMono(Trader.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public Stock saveStock(Stock s) {
@@ -553,7 +563,7 @@ public class InventoryRepo {
                 .body(Mono.just(s), Stock.class)
                 .retrieve()
                 .bodyToMono(Stock.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public Currency saveCurrency(Currency c) {
@@ -562,7 +572,7 @@ public class InventoryRepo {
                 .body(Mono.just(c), Currency.class)
                 .retrieve()
                 .bodyToMono(Currency.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public Location saveLocaiton(Location loc) {
@@ -571,7 +581,7 @@ public class InventoryRepo {
                 .body(Mono.just(loc), Location.class)
                 .retrieve()
                 .bodyToMono(Location.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public Region saveRegion(Region reg) {
@@ -580,7 +590,7 @@ public class InventoryRepo {
                 .body(Mono.just(reg), Region.class)
                 .retrieve()
                 .bodyToMono(Region.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public SaleMan saveSaleMan(SaleMan s) {
@@ -589,7 +599,7 @@ public class InventoryRepo {
                 .body(Mono.just(s), SaleMan.class)
                 .retrieve()
                 .bodyToMono(SaleMan.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public StockBrand saveBrand(StockBrand s) {
@@ -598,7 +608,16 @@ public class InventoryRepo {
                 .body(Mono.just(s), StockBrand.class)
                 .retrieve()
                 .bodyToMono(StockBrand.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
+    }
+
+    public Expense saveExpense(Expense s) {
+        Mono<Expense> result = inventoryApi.post()
+                .uri("/expense/save-expense")
+                .body(Mono.just(s), Expense.class)
+                .retrieve()
+                .bodyToMono(Expense.class);
+        return result.block();
     }
 
     public StockType saveStockType(StockType t) {
@@ -607,7 +626,7 @@ public class InventoryRepo {
                 .body(Mono.just(t), StockType.class)
                 .retrieve()
                 .bodyToMono(StockType.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public StockUnit saveStockUnit(StockUnit unit) {
@@ -616,7 +635,7 @@ public class InventoryRepo {
                 .body(Mono.just(unit), StockUnit.class)
                 .retrieve()
                 .bodyToMono(StockUnit.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public VouStatus saveVouStatus(VouStatus vou) {
@@ -625,7 +644,7 @@ public class InventoryRepo {
                 .body(Mono.just(vou), VouStatus.class)
                 .retrieve()
                 .bodyToMono(VouStatus.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public ProcessType saveProcessType(ProcessType vou) {
@@ -634,7 +653,7 @@ public class InventoryRepo {
                 .body(Mono.just(vou), ProcessType.class)
                 .retrieve()
                 .bodyToMono(ProcessType.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public Category saveCategory(Category category) {
@@ -643,7 +662,7 @@ public class InventoryRepo {
                 .body(Mono.just(category), Category.class)
                 .retrieve()
                 .bodyToMono(Category.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public Pattern savePattern(Pattern pattern) {
@@ -652,7 +671,7 @@ public class InventoryRepo {
                 .body(Mono.just(pattern), Pattern.class)
                 .retrieve()
                 .bodyToMono(Pattern.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public WeightLossHis saveWeightLoss(WeightLossHis loss) {
@@ -661,7 +680,7 @@ public class InventoryRepo {
                 .body(Mono.just(loss), WeightLossHis.class)
                 .retrieve()
                 .bodyToMono(WeightLossHis.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public void delete(Pattern p) {
@@ -670,7 +689,7 @@ public class InventoryRepo {
                 .body(Mono.just(p), Pattern.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        result.block(Duration.ofMinutes(min));
+        result.block();
     }
 
     public UnitRelation saveUnitRelation(UnitRelation rel) {
@@ -679,7 +698,7 @@ public class InventoryRepo {
                 .body(Mono.just(rel), UnitRelation.class)
                 .retrieve()
                 .bodyToMono(UnitRelation.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public Float getPurRecentPrice(String stockCode, String vouDate, String unit) {
@@ -765,7 +784,7 @@ public class InventoryRepo {
                 .queryParam("deptId", deptId)
                 .build())
                 .retrieve().toEntityList(UnitRelationDetail.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<ProcessType> getProcessType() {
@@ -774,7 +793,7 @@ public class InventoryRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve().toEntityList(ProcessType.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<CFont> getFont() {
@@ -783,7 +802,7 @@ public class InventoryRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve().toEntityList(CFont.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public StockInOut findStockIO(String vouNo, Integer deptId) {
@@ -796,7 +815,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), StockIOKey.class)
                 .retrieve()
                 .bodyToMono(StockInOut.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public TransferHis findTransfer(String vouNo, Integer deptId) {
@@ -809,7 +828,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), TransferHisKey.class)
                 .retrieve()
                 .bodyToMono(TransferHis.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public SaleHis findSale(String vouNo, Integer deptId) {
@@ -822,7 +841,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), SaleHisKey.class)
                 .retrieve()
                 .bodyToMono(SaleHis.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public OPHis findOpening(OPHisKey key) {
@@ -831,7 +850,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), OPHisKey.class)
                 .retrieve()
                 .bodyToMono(OPHis.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public PurHis findPurchase(String vouNo, Integer deptId) {
@@ -844,7 +863,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), PurHisKey.class)
                 .retrieve()
                 .bodyToMono(PurHis.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public RetInHis findReturnIn(String vouNo, Integer deptId) {
@@ -857,7 +876,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), RetInHisKey.class)
                 .retrieve()
                 .bodyToMono(RetInHis.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public RetOutHis findReturnOut(String vouNo, Integer deptId) {
@@ -870,7 +889,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), RetOutHisKey.class)
                 .retrieve()
                 .bodyToMono(RetOutHis.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public General getSmallQty(String stockCode, String unit) {
@@ -882,7 +901,7 @@ public class InventoryRepo {
                 .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().bodyToMono(General.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public ReorderLevel saveReorder(ReorderLevel rl) {
@@ -891,7 +910,7 @@ public class InventoryRepo {
                 .body(Mono.just(rl), ReorderLevel.class)
                 .retrieve()
                 .bodyToMono(ReorderLevel.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public List<String> deleteTrader(TraderKey key) {
@@ -900,7 +919,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), TraderKey.class)
                 .retrieve()
                 .toEntityList(String.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public TraderGroup saveTraderGroup(TraderGroup rl) {
@@ -909,7 +928,7 @@ public class InventoryRepo {
                 .body(Mono.just(rl), TraderGroup.class)
                 .retrieve()
                 .bodyToMono(TraderGroup.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public List<TraderGroup> getTraderGroup() {
@@ -919,7 +938,7 @@ public class InventoryRepo {
                 .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().toEntityList(TraderGroup.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<Pattern> getPattern(String stockCode, Integer deptId) {
@@ -930,7 +949,7 @@ public class InventoryRepo {
                 .queryParam("deptId", deptId)
                 .build())
                 .retrieve().toEntityList(Pattern.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public void delete(OPHisKey key) {
@@ -939,7 +958,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), OPHisKey.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        result.block(Duration.ofMinutes(min));
+        result.block();
     }
 
     public void delete(SaleHisKey key) {
@@ -948,7 +967,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), SaleHisKey.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        result.block(Duration.ofMinutes(min));
+        result.block();
     }
 
     public void restore(SaleHisKey key) {
@@ -957,7 +976,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), SaleHisKey.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        result.block(Duration.ofMinutes(min));
+        result.block();
     }
 
     public void restore(RetInHisKey key) {
@@ -966,7 +985,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), RetInHisKey.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        result.block(Duration.ofMinutes(min));
+        result.block();
     }
 
     public void restore(RetOutHisKey key) {
@@ -975,7 +994,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), RetOutHisKey.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        result.block(Duration.ofMinutes(min));
+        result.block();
     }
 
     public void delete(PurHisKey key) {
@@ -984,7 +1003,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), PurHisKey.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        result.block(Duration.ofMinutes(min));
+        result.block();
     }
 
     public void restore(PurHisKey key) {
@@ -993,7 +1012,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), PurHisKey.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        result.block(Duration.ofMinutes(min));
+        result.block();
     }
 
     public void delete(RetInHisKey key) {
@@ -1002,7 +1021,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), RetInHisKey.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        result.block(Duration.ofMinutes(min));
+        result.block();
     }
 
     public void delete(RetOutHisKey key) {
@@ -1011,7 +1030,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), RetOutHisKey.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        result.block(Duration.ofMinutes(min));
+        result.block();
     }
 
     public void delete(StockIOKey key) {
@@ -1020,7 +1039,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), StockIOKey.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        result.block(Duration.ofMinutes(min));
+        result.block();
     }
 
     public void restore(StockIOKey key) {
@@ -1029,7 +1048,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), StockIOKey.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        result.block(Duration.ofMinutes(min));
+        result.block();
     }
 
     public void delete(TransferHisKey key) {
@@ -1038,7 +1057,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), TransferHisKey.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        result.block(Duration.ofMinutes(min));
+        result.block();
     }
 
     public void restore(TransferHisKey key) {
@@ -1047,7 +1066,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), TransferHisKey.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        result.block(Duration.ofMinutes(min));
+        result.block();
     }
 
     public void delete(ProcessHisKey key) {
@@ -1056,7 +1075,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), StockIOKey.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        result.block(Duration.ofMinutes(min));
+        result.block();
     }
 
     public void delete(GRNKey key) {
@@ -1065,7 +1084,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), GRNKey.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        result.block(Duration.ofMinutes(min));
+        result.block();
     }
 
     public void delete(ProcessHisDetailKey key) {
@@ -1074,7 +1093,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), ProcessHisDetailKey.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        result.block(Duration.ofMinutes(min));
+        result.block();
     }
 
     public void restore(ProcessHisKey key) {
@@ -1083,7 +1102,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), StockIOKey.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        result.block(Duration.ofMinutes(min));
+        result.block();
     }
 
     public void delete(WeightLossHisKey key) {
@@ -1092,7 +1111,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), WeightLossHisKey.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        result.block(Duration.ofMinutes(min));
+        result.block();
     }
 
     public void restore(WeightLossHisKey key) {
@@ -1101,7 +1120,7 @@ public class InventoryRepo {
                 .body(Mono.just(key), WeightLossHisKey.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        result.block(Duration.ofMinutes(min));
+        result.block();
     }
 
     public ProcessHis saveProcess(ProcessHis his) {
@@ -1110,7 +1129,7 @@ public class InventoryRepo {
                 .body(Mono.just(his), ProcessHis.class)
                 .retrieve()
                 .bodyToMono(ProcessHis.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public ProcessHisDetail saveProcessDetail(ProcessHisDetail his) {
@@ -1119,7 +1138,7 @@ public class InventoryRepo {
                 .body(Mono.just(his), ProcessHisDetail.class)
                 .retrieve()
                 .bodyToMono(ProcessHisDetail.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public List<ProcessHisDetail> getProcessDetail(String vouNo, Integer deptId) {
@@ -1130,7 +1149,7 @@ public class InventoryRepo {
                 .queryParam("deptId", deptId)
                 .build())
                 .retrieve().toEntityList(ProcessHisDetail.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<ProcessHis> getProcess(FilterObject f) {
@@ -1154,7 +1173,7 @@ public class InventoryRepo {
                     .queryParam("deptId", Global.deptId)
                     .build())
                     .retrieve().bodyToMono(General.class);
-            return result.block(Duration.ofMinutes(min));
+            return result.block();
         } catch (Exception e) {
             log.error("getSaleVoucherCount : " + e.getMessage());
         }
@@ -1188,7 +1207,7 @@ public class InventoryRepo {
                 .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().toEntityList(SaleHisDetail.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
 }

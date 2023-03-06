@@ -23,7 +23,6 @@ public class PurHisDetail implements Serializable {
     private String brandName;
     private String catName;
     private String relName;
-    private Float avgQty;
     private Float qty;
     private String unitCode;
     private Float price;
@@ -32,4 +31,8 @@ public class PurHisDetail implements Serializable {
     private String locCode;
     private String locName;
     private Integer uniqueId;
+    private Float weight;
+    private Float stdQty;
+    private Float avgQty;
+    private String avgUnit;
 }

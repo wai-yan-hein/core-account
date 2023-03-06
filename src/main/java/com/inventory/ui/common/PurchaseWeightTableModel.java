@@ -6,12 +6,12 @@
 package com.inventory.ui.common;
 
 import com.common.Global;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.model.Location;
-import com.inventory.model.GRNDetail;
-import com.inventory.model.GRNDetailKey;
+import com.inventory.model.PurHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.toedter.calendar.JDateChooser;
@@ -28,33 +28,18 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class GRNTableModel extends AbstractTableModel {
+public class PurchaseWeightTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Description", "Relation", "Location", "Qty", "Unit"};
+    private String[] columnNames = {"Code", "Description", "Relation", "Location",
+        "Weight", "Std Qty", "Avg Qty", "Avg Unit", "Qty", "Unit", "Price", "Amount"};
     private JTable parent;
-    private List<GRNDetail> listDetail = new ArrayList();
+    private List<PurHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
-    private List<GRNDetailKey> listDel = new ArrayList();
+    private final List<String> deleteList = new ArrayList();
+    private LocationAutoCompleter locationAutoCompleter;
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
     private JLabel lblRec;
-    private Location location;
-
-    public List<GRNDetailKey> getListDel() {
-        return listDel;
-    }
-
-    public void setListDel(List<GRNDetailKey> listDel) {
-        this.listDel = listDel;
-    }
-
-    public Location getLocation() {
-        return location;
-    }
-
-    public void setLocation(Location location) {
-        this.location = location;
-    }
 
     public JLabel getLblRec() {
         return lblRec;
@@ -86,6 +71,14 @@ public class GRNTableModel extends AbstractTableModel {
 
     public void setParent(JTable parent) {
         this.parent = parent;
+    }
+
+    public LocationAutoCompleter getLocationAutoCompleter() {
+        return locationAutoCompleter;
+    }
+
+    public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
+        this.locationAutoCompleter = locationAutoCompleter;
     }
 
     public SelectionObserver getObserver() {
@@ -125,17 +118,17 @@ public class GRNTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 4 ->
-                Float.class;
-            default ->
+            case 0, 1, 2, 3 ->
                 String.class;
+            default ->
+                Float.class;
         };
     }
 
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case 2 ->
+            case 2, 11 ->
                 false;
             default ->
                 true;
@@ -146,7 +139,7 @@ public class GRNTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
         try {
             if (!listDetail.isEmpty()) {
-                GRNDetail record = listDetail.get(row);
+                PurHisDetail record = listDetail.get(row);
                 switch (column) {
                     case 0 -> {
                         //code
@@ -157,6 +150,11 @@ public class GRNTableModel extends AbstractTableModel {
                         String stockName = null;
                         if (record.getStockCode() != null) {
                             stockName = record.getStockName();
+                            if (ProUtil.isStockNameWithCategory()) {
+                                if (record.getCatName() != null) {
+                                    stockName = String.format("%s (%s)", stockName, record.getCatName());
+                                }
+                            }
                         }
                         return stockName;
                     }
@@ -168,12 +166,32 @@ public class GRNTableModel extends AbstractTableModel {
                         return record.getLocName();
                     }
                     case 4 -> {
-                        //qty
-                        return record.getQty();
+                        //weight
+                        return record.getWeight();
                     }
                     case 5 -> {
-                        //unit
-                        return record.getUnit();
+                        //std qty
+                        return record.getStdQty();
+                    }
+                    case 6 -> {
+                        //avg qty
+                        return record.getAvgQty();
+                    }
+                    case 7 -> {
+                        //avg unit
+                        return record.getAvgUnit();
+                    }
+                    case 8 -> {
+                        return record.getQty();
+                    }
+                    case 9 -> {
+                        return record.getUnitCode();
+                    }
+                    case 10 -> {
+                        return record.getPrice();
+                    }
+                    case 11 -> {
+                        return record.getAmount();
                     }
                     default -> {
                         return new Object();
@@ -189,7 +207,7 @@ public class GRNTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object value, int row, int column) {
         try {
-            GRNDetail record = listDetail.get(row);
+            PurHisDetail record = listDetail.get(row);
             switch (column) {
                 case 0, 1 -> {
                     //Code
@@ -200,11 +218,12 @@ public class GRNTableModel extends AbstractTableModel {
                             record.setUserCode(s.getUserCode());
                             record.setRelName(s.getRelName());
                             record.setQty(1.0f);
-                            record.setUnit(s.getPurUnitCode());
+                            record.setUnitCode(s.getPurUnitCode());
+                            record.setAvgUnit(s.getLossUnit());
                             addNewRow();
-                            parent.setColumnSelectionInterval(4, 4);
                         }
                     }
+                    parent.setColumnSelectionInterval(4, 4);
                 }
                 case 3 -> {
                     //Loc
@@ -214,36 +233,88 @@ public class GRNTableModel extends AbstractTableModel {
                     }
                 }
                 case 4 -> {
+                    //weight
+                    if (Util1.isNumber(value)) {
+                        record.setWeight(Util1.getFloat(value));
+                    }
+                }
+                case 5 -> {
+                    //std qty
+                    if (Util1.isNumber(value)) {
+                        record.setStdQty(Util1.getFloat(value));
+                    }
+                }
+                case 6 -> {
+                    //avg qty
+                    if (Util1.isNumber(value)) {
+                        record.setAvgQty(Util1.getFloat(value));
+                    }
+                }
+                case 7 -> {
+                    //avg qty
+                    if (value instanceof StockUnit u) {
+                        record.setAvgUnit(u.getKey().getUnitCode());
+                    }
+                }
+                case 8 -> {
                     //Qty
                     if (Util1.isNumber(value)) {
+                        record.setQty(Util1.getFloat(value));
+                        parent.setRowSelectionInterval(row, row);
+                    }
+                }
+                case 9 -> {
+                    //Unit
+                    if (value != null) {
+                        if (value instanceof StockUnit u) {
+                            record.setUnitCode(u.getKey().getUnitCode());
+                        }
+                    }
+                    parent.setColumnSelectionInterval(6, 6);
+                }
+                case 10 -> {
+                    //Pur Price
+                    if (Util1.isNumber(value)) {
                         if (Util1.isPositive(Util1.getFloat(value))) {
-                            record.setQty(Util1.getFloat(value));
+                            record.setPrice(Util1.getFloat(value));
+                            record.setOrgPrice(record.getPrice());
                             parent.setColumnSelectionInterval(0, 0);
                             parent.setRowSelectionInterval(row + 1, row + 1);
                         } else {
                             showMessageBox("Input value must be positive");
                             parent.setColumnSelectionInterval(column, column);
-                            parent.setRowSelectionInterval(row, row);
                         }
                     } else {
                         showMessageBox("Input value must be number.");
                         parent.setColumnSelectionInterval(column, column);
-                        parent.setRowSelectionInterval(row, row);
                     }
                 }
-                case 5 -> {
-                    //Unit
+                case 11 -> {
+                    //Amount
                     if (value != null) {
-                        if (value instanceof StockUnit u) {
-                            record.setUnit(u.getKey().getUnitCode());
-                        }
+                        record.setAmount(Util1.getFloat(value));
                     }
-                    parent.setColumnSelectionInterval(6, 6);
                 }
-
+            }
+            if (column != 10) {
+                if (Util1.getFloat(record.getPrice()) == 0) {
+                    if (record.getStockCode() != null && record.getUnitCode() != null) {
+                        record.setPrice(inventoryRepo.getPurRecentPrice(record.getStockCode(),
+                                Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnitCode()));
+                    }
+                }
+            }
+            calculateAmount(record);
+            if (record.getLocCode() == null) {
+                Location l = locationAutoCompleter.getLocation();
+                if (l != null) {
+                    record.setLocCode(l.getKey().getLocCode());
+                    record.setLocName(l.getLocName());
+                }
             }
             setRecord(listDetail.size() - 1);
             fireTableRowsUpdated(row, row);
+            observer.selected("CAL-TOTAL", "CAL-TOTAL");
             parent.requestFocusInWindow();
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
@@ -257,15 +328,7 @@ public class GRNTableModel extends AbstractTableModel {
     public void addNewRow() {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
-                GRNDetail pd = new GRNDetail();
-                GRNDetailKey key = new GRNDetailKey();
-                key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
-                pd.setKey(key);
-                if (location != null) {
-                    pd.setLocCode(location.getKey().getLocCode());
-                    pd.setLocName(location.getLocName());
-                }
+                PurHisDetail pd = new PurHisDetail();
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }
@@ -275,7 +338,7 @@ public class GRNTableModel extends AbstractTableModel {
     private boolean hasEmptyRow() {
         boolean status = false;
         if (listDetail.size() >= 1) {
-            GRNDetail get = listDetail.get(listDetail.size() - 1);
+            PurHisDetail get = listDetail.get(listDetail.size() - 1);
             if (get.getStockCode() == null) {
                 status = true;
             }
@@ -283,14 +346,25 @@ public class GRNTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<GRNDetail> getListDetail() {
+    public List<PurHisDetail> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<GRNDetail> listDetail) {
+    public void setListDetail(List<PurHisDetail> listDetail) {
         this.listDetail = listDetail;
         setRecord(listDetail.size());
         fireTableDataChanged();
+    }
+
+    private void calculateAmount(PurHisDetail pur) {
+        float price = Util1.getFloat(pur.getPrice());
+        float avgQty = Util1.getFloat(pur.getAvgQty());
+        float weight = Util1.getFloat(pur.getWeight());
+        if (pur.getStockCode() != null) {
+            float qty = avgQty * weight;
+            float amt = qty * price;
+            pur.setAmount(amt);
+        }
     }
 
     private void showMessageBox(String text) {
@@ -299,32 +373,42 @@ public class GRNTableModel extends AbstractTableModel {
 
     public boolean isValidEntry() {
         boolean status = true;
-        for (GRNDetail sdh : listDetail) {
+        for (PurHisDetail sdh : listDetail) {
             if (sdh.getStockCode() != null) {
-                if (sdh.getLocCode() == null) {
+                if (Util1.getFloat(sdh.getAmount()) <= 0) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
+                            "Invalid.", JOptionPane.ERROR_MESSAGE);
+                    status = false;
+                    parent.requestFocus();
+                    break;
+                } else if (sdh.getLocCode() == null) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Location.");
                     status = false;
                     parent.requestFocus();
-                } else if (sdh.getUnit() == null) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Unit.");
+                } else if (sdh.getUnitCode() == null) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Purchase Unit.");
                     status = false;
                     parent.requestFocus();
                 }
-            } 
+            }
         }
         return status;
     }
 
+    public List<String> getDelList() {
+        return deleteList;
+    }
+
     public void clearDelList() {
-        if (listDel != null) {
-            listDel.clear();
+        if (deleteList != null) {
+            deleteList.clear();
         }
     }
 
     public void delete(int row) {
-        GRNDetail sdh = listDetail.get(row);
+        PurHisDetail sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
-            listDel.add(sdh.getKey());
+            deleteList.add(sdh.getKey().getPdCode());
         }
         listDetail.remove(row);
         addNewRow();
@@ -337,22 +421,25 @@ public class GRNTableModel extends AbstractTableModel {
         parent.requestFocus();
     }
 
-    public void addObject(GRNDetail sd) {
+    public void addPurchase(PurHisDetail sd) {
         if (listDetail != null) {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
         }
     }
 
-    public GRNDetail getObject(int row) {
+    public PurHisDetail getObject(int row) {
         return listDetail.get(row);
     }
 
     public void clear() {
         if (listDetail != null) {
             listDetail.clear();
-            clearDelList();
             fireTableDataChanged();
         }
+    }
+
+    public void updateRow(int row) {
+        fireTableRowsUpdated(row, row);
     }
 }

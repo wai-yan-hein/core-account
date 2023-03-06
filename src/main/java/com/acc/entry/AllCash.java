@@ -434,7 +434,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                         cur.setCrAmt(copy.getCrAmt());
                     }
                 }
-                allCashTableModel.setValueAt(cur, row, column);
+                allCashTableModel.setVGl(row, cur);
+                tblCash.setColumnSelectionInterval(column + 1, column + 1);
+                tblCash.setRowSelectionInterval(row, row);
+                tblCash.requestFocus();
             }
 
         }

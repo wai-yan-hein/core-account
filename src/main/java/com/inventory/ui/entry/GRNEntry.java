@@ -224,22 +224,31 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             JOptionPane.showMessageDialog(Global.parentForm, "No Stock Records.");
             status = false;
         } else {
-            grn.setVouDate(txtDate.getDate());
-            grn.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
-            grn.setBatchNo(txtBatchNo.getText());
-            grn.setRemark(txtRemark.getText());
-            grn.setClosed(chkClose.isSelected());
-            grn.setMacId(Global.macId);
             if (lblStatus.getText().equals("NEW")) {
-                GRNKey key = new GRNKey();
-                key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
-                key.setVouNo(null);
-                grn.setKey(key);
-                grn.setCreatedDate(Util1.getTodayDate());
-                grn.setCreatedBy(Global.loginUser.getUserCode());
-            } else {
-                grn.setUpdatedBy(Global.loginUser.getUserCode());
+                String batchNo = txtBatchNo.getText();
+                if (!batchNo.isEmpty()) {
+                    if (!inventoryRepo.getBatchList(txtBatchNo.getText()).isEmpty()) {
+                        JOptionPane.showMessageDialog(Global.parentForm, String.format("Batch No %s already exists.", txtBatchNo.getText()));
+                        return false;
+                    }
+                }
+                grn.setVouDate(txtDate.getDate());
+                grn.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
+                grn.setBatchNo(txtBatchNo.getText());
+                grn.setRemark(txtRemark.getText());
+                grn.setClosed(chkClose.isSelected());
+                grn.setMacId(Global.macId);
+                if (lblStatus.getText().equals("NEW")) {
+                    GRNKey key = new GRNKey();
+                    key.setCompCode(Global.compCode);
+                    key.setDeptId(Global.deptId);
+                    key.setVouNo(null);
+                    grn.setKey(key);
+                    grn.setCreatedDate(Util1.getTodayDate());
+                    grn.setCreatedBy(Global.loginUser.getUserCode());
+                } else {
+                    grn.setUpdatedBy(Global.loginUser.getUserCode());
+                }
             }
         }
         return status;
@@ -307,7 +316,8 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                     .queryParam("compCode", Global.compCode)
                     .queryParam("deptId", deptId)
                     .build())
-                    .retrieve().toEntityList(GRNDetail.class);
+                    .retrieve().toEntityList(GRNDetail.class
+                    );
             result.subscribe((t) -> {
                 tableModel.setListDetail(t.getBody());
                 tableModel.addNewRow();
@@ -324,6 +334,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                     lblStatus.setText("EDIT");
                     lblStatus.setForeground(Color.blue);
                     disableForm(true);
+                    txtBatchNo.setEditable(g.getBatchNo().isEmpty());
                 }
                 txtVouNo.setText(vouNo);
                 txtRemark.setText(grn.getRemark());

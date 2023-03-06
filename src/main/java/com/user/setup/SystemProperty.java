@@ -639,7 +639,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         jLabel32.setText("Purchase");
 
-        jLabel33.setText("Expense");
+        jLabel33.setText("Expense \n");
 
         txtExpense.setFont(Global.textFont);
 

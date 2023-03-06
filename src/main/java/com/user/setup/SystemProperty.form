@@ -345,7 +345,7 @@
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel33">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Expense"/>
+            <Property name="text" type="java.lang.String" value="Expense &#xa;"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="txtExpense">

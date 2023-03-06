@@ -46,7 +46,7 @@ public class UserRepo {
                 .uri(builder -> builder.path("/user/get-currency")
                 .build())
                 .retrieve().toEntityList(Currency.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<CompanyInfo> getCompany() {
@@ -54,7 +54,7 @@ public class UserRepo {
                 .uri(builder -> builder.path("/user/get-company")
                 .build())
                 .retrieve().toEntityList(CompanyInfo.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<AppUser> getAppUser() {
@@ -63,7 +63,7 @@ public class UserRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve().toEntityList(AppUser.class);
-        List<AppUser> user = result.block(Duration.ofMinutes(min)).getBody();
+        List<AppUser> user = result.block().getBody();
         if (!user.isEmpty()) {
             for (AppUser app : user) {
                 Global.hmUser.put(app.getUserCode(), app.getUserShortName());
@@ -77,7 +77,7 @@ public class UserRepo {
                 .uri(builder -> builder.path("/user/get-mac-list")
                 .build())
                 .retrieve().toEntityList(MachineInfo.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<AppRole> getAppRole() {
@@ -86,7 +86,7 @@ public class UserRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve().toEntityList(AppRole.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public MachineInfo register(String macName) {
@@ -96,7 +96,7 @@ public class UserRepo {
                     .queryParam("macName", macName)
                     .build())
                     .retrieve().toEntity(MachineInfo.class);
-            return result.block(Duration.ofMinutes(min)).getBody();
+            return result.block().getBody();
         } catch (Exception e) {
             log.info("register : " + e.getMessage());
         }
@@ -109,7 +109,7 @@ public class UserRepo {
                 .body(Mono.just(mac), MachineInfo.class)
                 .retrieve()
                 .bodyToMono(MachineInfo.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public String updateProgram() {
@@ -118,7 +118,7 @@ public class UserRepo {
                 .queryParam("macId", Global.macId)
                 .build())
                 .retrieve().toEntity(String.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public CompanyInfo saveCompany(CompanyInfo app) {
@@ -127,7 +127,7 @@ public class UserRepo {
                 .body(Mono.just(app), CompanyInfo.class)
                 .retrieve()
                 .bodyToMono(CompanyInfo.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public Currency saveCurrency(Currency app) {
@@ -136,7 +136,7 @@ public class UserRepo {
                 .body(Mono.just(app), Currency.class)
                 .retrieve()
                 .bodyToMono(Currency.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public AppRole saveAppRole(AppRole app) {
@@ -145,7 +145,7 @@ public class UserRepo {
                 .body(Mono.just(app), AppRole.class)
                 .retrieve()
                 .bodyToMono(AppRole.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public PrivilegeCompany saveCompRole(PrivilegeCompany app) {
@@ -154,7 +154,7 @@ public class UserRepo {
                 .body(Mono.just(app), PrivilegeCompany.class)
                 .retrieve()
                 .bodyToMono(PrivilegeCompany.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public AppUser saveUser(AppUser app) {
@@ -163,7 +163,7 @@ public class UserRepo {
                 .body(Mono.just(app), AppUser.class)
                 .retrieve()
                 .bodyToMono(AppUser.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public Currency findCurrency(String curCode) {
@@ -172,7 +172,7 @@ public class UserRepo {
                 .queryParam("curCode", curCode)
                 .build())
                 .retrieve().toEntity(Currency.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public DepartmentUser findDepartment(Integer deptId) {
@@ -184,7 +184,7 @@ public class UserRepo {
                     .queryParam("deptId", deptId)
                     .build())
                     .retrieve().toEntity(DepartmentUser.class);
-            department = result.block(Duration.ofMinutes(min)).getBody();
+            department = result.block().getBody();
             return department;
         }
     }
@@ -195,7 +195,7 @@ public class UserRepo {
                 .body(Mono.just(d), DepartmentUser.class)
                 .retrieve()
                 .bodyToMono(DepartmentUser.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public Currency getDefaultCurrency() {
@@ -293,7 +293,7 @@ public class UserRepo {
                     .uri(builder -> builder.path("/user/get-department")
                     .build())
                     .retrieve().toEntityList(DepartmentUser.class);
-            listDept = result.block(Duration.ofMinutes(min)).getBody();
+            listDept = result.block().getBody();
             return listDept;
         }
         return listDept;
@@ -306,7 +306,7 @@ public class UserRepo {
                 .queryParam("menuClass", menuClass)
                 .build())
                 .retrieve().toEntityList(VRoleMenu.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
 }

@@ -5,7 +5,7 @@
  */
 package com.common.ui;
 
-import com.CvInventoryApplication;
+import com.CoreAccountApplication;
 import com.acc.common.AccountRepo;
 import com.acc.entry.AllCash;
 import com.acc.entry.DrCrVoucher;
@@ -36,6 +36,7 @@ import com.inventory.ui.entry.Manufacture;
 import com.user.model.VRoleCompany;
 import com.inventory.ui.entry.OtherSetup;
 import com.inventory.ui.entry.Purchase;
+import com.inventory.ui.entry.PurchaseByWeight;
 import com.inventory.ui.entry.RFID;
 import com.inventory.ui.entry.ReorderLevelEntry;
 import com.inventory.ui.entry.ReturnIn;
@@ -80,6 +81,8 @@ import com.user.setup.SystemProperty;
 import com.user.setup.AppUserSetup;
 import com.user.setup.CloudConfig;
 import com.user.setup.CompanySetup;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.time.Duration;
 import java.util.HashMap;
 import org.springframework.core.task.TaskExecutor;
@@ -110,6 +113,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private RFID rfid;
     @Autowired
     private Purchase purchase;
+    @Autowired
+    private PurchaseByWeight purchaseByWeight;
     @Autowired
     private ReturnIn retIn;
     @Autowired
@@ -202,6 +207,18 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     public ApplicationMainFrame() {
         initComponents();
         initKeyFoucsManager();
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                int confirmed = JOptionPane.showConfirmDialog(null,
+                        "Are you sure you want to exit?", "Exit Confirmation",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (confirmed == JOptionPane.YES_OPTION) {
+                    dispose();
+                    System.exit(0);
+                }
+            }
+        });
     }
 
     private void initKeyFoucsManager() {
@@ -356,6 +373,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 purchase.setProgress(progress);
                 purchase.initMain();
                 return purchase;
+            }
+            case "Purchase By Weight" -> {
+                purchaseByWeight.setName(menuName);
+                purchaseByWeight.setObserver(this);
+                purchaseByWeight.setProgress(progress);
+                purchaseByWeight.initMain();
+                return purchaseByWeight;
             }
             case "Return In" -> {
                 retIn.setName(menuName);
@@ -811,7 +835,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     private void logout() {
         dispose();
-        CvInventoryApplication.restart();
+        CoreAccountApplication.restart();
     }
 
     @Override
@@ -836,6 +860,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             }
             case "history" -> {
                 btnHistory.setEnabled(Util1.getBoolean(selectObj.toString()));
+            }
+            case "change-name" -> {
+                lblCompName.setText(Global.companyName);
             }
         }
     }
@@ -882,12 +909,17 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
         jMenu1.setText("jMenu1");
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Core Account  Cloud (V.2.0)");
         setAutoRequestFocus(false);
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
                 formComponentShown(evt);
+            }
+        });
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
             }
         });
 
@@ -1191,6 +1223,10 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         // TODO add your handling code here:
         System.exit(0);
     }//GEN-LAST:event_btnExitActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        // TODO add your handling code here:
+    }//GEN-LAST:event_formWindowClosing
 
     /**
      * @param args the command line arguments

@@ -8,9 +8,12 @@ import com.common.ui.LoginDialog;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontFormatException;
+import java.awt.Frame;
 import java.awt.Image;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -40,11 +43,11 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 @SpringBootApplication
 @Slf4j
-public class CvInventoryApplication {
+public class CoreAccountApplication {
 
     private static ConfigurableApplicationContext context;
     private static Tray tray;
-    private static final Image appIcon = new ImageIcon(CvInventoryApplication.class.getResource("/images/applogo.png")).getImage();
+    private static final Image appIcon = new ImageIcon(CoreAccountApplication.class.getResource("/images/applogo.png")).getImage();
     private static final SplashWindow SPLASH_WINDOW = new SplashWindow();
 
     public static void main(String[] args) throws IOException {
@@ -92,7 +95,7 @@ public class CvInventoryApplication {
         //UIManager.put("Table.gridColor", UIManager.getDefaults().getColor("Table.selectionBackground"));
         //UIManager.put("Table.gridColor", new Color(213, 235, 226));
         //FlatSolarizedLightIJTheme.setup();
-        SpringApplicationBuilder builder = new SpringApplicationBuilder(CvInventoryApplication.class);
+        SpringApplicationBuilder builder = new SpringApplicationBuilder(CoreAccountApplication.class);
         builder.headless(false);
         builder.web(WebApplicationType.NONE);
         builder.bannerMode(Banner.Mode.OFF);
@@ -101,7 +104,7 @@ public class CvInventoryApplication {
         tray.startup(appIcon);
         SPLASH_WINDOW.stopSplah();
         LoginDialog lg = context.getBean(LoginDialog.class);
-        URL imgUrl = CvInventoryApplication.class.getResource("/images/male_user_16px.png");
+        URL imgUrl = CoreAccountApplication.class.getResource("/images/male_user_16px.png");
         lg.setIconImage(new ImageIcon(imgUrl).getImage());
         lg.checkMachineRegister();
         lg.setLocationRelativeTo(null);

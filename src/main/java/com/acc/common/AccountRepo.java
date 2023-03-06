@@ -43,8 +43,6 @@ import reactor.core.publisher.Mono;
 @Component
 public class AccountRepo {
 
-    int min = 1;
-
     @Autowired
     private WebClient accountApi;
 
@@ -68,7 +66,7 @@ public class AccountRepo {
                     .body(Mono.just(key), DepartmentKey.class)
                     .retrieve()
                     .bodyToMono(Department.class);
-            return result.block(Duration.ofMinutes(min));
+            return result.block();
         } catch (Exception e) {
             log.error("findDepartment : " + e.getMessage());
         }
@@ -81,7 +79,7 @@ public class AccountRepo {
                 .queryParam("curCode", curCode)
                 .build())
                 .retrieve().toEntity(Currency.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<Department> getDepartment() {
@@ -179,7 +177,7 @@ public class AccountRepo {
                 .body(Mono.just(gl), Gl.class)
                 .retrieve()
                 .bodyToMono(Gl.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public ReturnObject saveGl(List<Gl> gl) {
@@ -188,7 +186,7 @@ public class AccountRepo {
                 .body(Mono.just(gl), List.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public boolean delete(DeleteObj obj) {
@@ -197,15 +195,16 @@ public class AccountRepo {
                 .body(Mono.just(obj), DeleteObj.class)
                 .retrieve()
                 .bodyToMono(Boolean.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
+
     public boolean delete(ExchangeKey obj) {
         Mono<Boolean> result = accountApi.post()
                 .uri("/account/delete-exchange")
                 .body(Mono.just(obj), DeleteObj.class)
                 .retrieve()
                 .bodyToMono(Boolean.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public boolean deleteVoucher(DeleteObj gl) {
@@ -214,7 +213,7 @@ public class AccountRepo {
                 .body(Mono.just(gl), DeleteObj.class)
                 .retrieve()
                 .bodyToMono(Boolean.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public boolean delete(StockOPKey key) {
@@ -223,7 +222,7 @@ public class AccountRepo {
                 .body(Mono.just(key), StockOPKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public ChartOfAccount saveCOA(ChartOfAccount coa) {
@@ -232,7 +231,7 @@ public class AccountRepo {
                 .body(Mono.just(coa), ChartOfAccount.class)
                 .retrieve()
                 .bodyToMono(ChartOfAccount.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public double getTraderBalance(String date, String traderCode, String compCode) {
@@ -243,7 +242,7 @@ public class AccountRepo {
                 .queryParam("compCode", compCode)
                 .build())
                 .retrieve().toEntity(Double.class);
-        return result.block(Duration.ofMinutes(min)).getBody();
+        return result.block().getBody();
     }
 
     public List<ChartOfAccount> getCOAChild(String coaCode) {
@@ -266,6 +265,16 @@ public class AccountRepo {
                 .uri(builder -> builder.path("/account/search-coa")
                 .queryParam("str", str)
                 .queryParam("level", level)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().toEntityList(ChartOfAccount.class);
+        return result.block().getBody();
+    }
+
+    public List<ChartOfAccount> getCOA3(String headCode) {
+        Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get()
+                .uri(builder -> builder.path("/account/get-coa3")
+                .queryParam("headCode", headCode)
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve().toEntityList(ChartOfAccount.class);
@@ -301,7 +310,7 @@ public class AccountRepo {
                     .uri("/account/find-coa")
                     .body(Mono.just(key), COAKey.class)
                     .retrieve().toEntity(ChartOfAccount.class);
-            return result.block(Duration.ofMinutes(min)).getBody();
+            return result.block().getBody();
         } catch (Exception e) {
             log.error("findCOA : " + e.getMessage());
         }
@@ -359,7 +368,7 @@ public class AccountRepo {
                 .body(Mono.just(t), TraderA.class)
                 .retrieve()
                 .bodyToMono(TraderA.class);
-        return result.block(Duration.ofMinutes(min));
+        return result.block();
     }
 
     public List<String> deleteTrader(TraderAKey key) {
