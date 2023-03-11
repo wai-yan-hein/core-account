@@ -1209,5 +1209,6 @@ public class InventoryRepo {
                 .retrieve().toEntityList(SaleHisDetail.class);
         return result.block().getBody();
     }
+    
 
 }

@@ -11,14 +11,12 @@ import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
-import com.inventory.model.GRN;
 import com.inventory.model.Location;
 import com.inventory.model.PriceOption;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
-import com.inventory.ui.setup.dialog.PriceOptionDialog;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,10 +32,10 @@ import org.slf4j.LoggerFactory;
  *
  * @author wai yan
  */
-public class SaleByBatchTableModel extends AbstractTableModel {
+public class SaleByWeightTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(SaleByBatchTableModel.class);
-    private String[] columnNames = {"Batch No", "Sup :", "Code", "Description", "Relation", "Location", "Qty", "Unit", "Price", "Amount"};
+    private static final Logger log = LoggerFactory.getLogger(SaleByWeightTableModel.class);
+    private String[] columnNames = {"Code", "Description", "Relation", "Location", "Weight", "Weight Unit", "Qty", "Unit", "Std-Weight", "Total Qty", "Price", "Amount"};
     private JTable parent;
     private List<SaleHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
@@ -166,17 +164,17 @@ public class SaleByBatchTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 6, 8, 9 ->
-                Float.class;
-            default ->
+            case 0, 1, 2, 3, 5 ->
                 String.class;
+            default ->
+                Float.class;
         };
     }
 
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 1, 4, 9 -> {
+            case 2, 9, 11 -> {
                 return false;
             }
         }
@@ -189,16 +187,10 @@ public class SaleByBatchTableModel extends AbstractTableModel {
             SaleHisDetail sd = listDetail.get(row);
             switch (column) {
                 case 0 -> {
-                    return sd.getBatchNo();
-                }
-                case 1 -> {
-                    return sd.getTraderName();
-                }
-                case 2 -> {
                     //code
                     return sd.getUserCode() == null ? sd.getStockCode() : sd.getUserCode();
                 }
-                case 3 -> {
+                case 1 -> {
                     String stockName = null;
                     if (sd.getStockCode() != null) {
                         stockName = sd.getStockName();
@@ -210,12 +202,18 @@ public class SaleByBatchTableModel extends AbstractTableModel {
                     }
                     return stockName;
                 }
-                case 4 -> {
+                case 2 -> {
                     return sd.getRelName();
                 }
-                case 5 -> {
+                case 3 -> {
                     //loc
                     return sd.getLocName();
+                }
+                case 4 -> {
+                    return sd.getWeight();
+                }
+                case 5 -> {
+                    return sd.getWeightUnit();
                 }
                 case 6 -> {
                     //qty
@@ -225,10 +223,16 @@ public class SaleByBatchTableModel extends AbstractTableModel {
                     return sd.getUnitCode();
                 }
                 case 8 -> {
+                    return sd.getStdWeight();
+                }
+                case 9 -> {
+                    return Util1.getFloat(sd.getWeight()) * Util1.getFloat(sd.getQty());
+                }
+                case 10 -> {
                     //price
                     return sd.getPrice();
                 }
-                case 9 -> {
+                case 11 -> {
                     //amount
                     return sd.getAmount();
                 }
@@ -248,16 +252,7 @@ public class SaleByBatchTableModel extends AbstractTableModel {
             SaleHisDetail sd = listDetail.get(row);
             if (value != null) {
                 switch (column) {
-                    case 0 -> {
-                        if (value instanceof GRN g) {
-                            log.info(g.getBatchNo());
-                            sd.setBatchNo(g.getBatchNo());
-                            sd.setTraderName(g.getTraderName());
-                            parent.setColumnSelectionInterval(1, 1);
-                        }
-                        //batch
-                    }
-                    case 2, 3 -> {
+                    case 0, 1 -> {
                         //Code
                         if (value instanceof Stock s) {
                             sbTableModel.calStockBalance(s.getKey().getStockCode());
@@ -266,23 +261,30 @@ public class SaleByBatchTableModel extends AbstractTableModel {
                             sd.setUserCode(s.getUserCode());
                             sd.setRelName(s.getRelName());
                             sd.setQty(1.0f);
+                            sd.setStdWeight(s.getWeight());
+                            sd.setWeightUnit(s.getWeightUnit());
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setPrice(getTraderPrice(s));
                             sd.setStock(s);
-                            if (ProUtil.isPricePopup()) {
-                                sd.setPrice(getPopupPrice(row, true));
-                            }
                             sd.setPrice(sd.getPrice() == 0 ? s.getSalePriceN() : sd.getPrice());
-                            parent.setColumnSelectionInterval(5, 5);
+                            parent.setColumnSelectionInterval(4, 4);
                             addNewRow();
                         }
                     }
-                    case 5 -> {
+                    case 3 -> {
                         //Loc
                         if (value instanceof Location l) {
                             sd.setLocCode(l.getKey().getLocCode());
                             sd.setLocName(l.getLocName());
 
+                        }
+                    }
+                    case 4 -> {
+                        sd.setWeight(Util1.getFloat(value));
+                    }
+                    case 5 -> {
+                        if (value instanceof StockUnit u) {
+                            sd.setWeightUnit(u.getKey().getUnitCode());
                         }
                     }
                     case 6 -> {
@@ -291,9 +293,9 @@ public class SaleByBatchTableModel extends AbstractTableModel {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 sd.setQty(Util1.getFloat(value));
                                 if (sd.getUnitCode() == null) {
-                                    parent.setColumnSelectionInterval(6, 6);
-                                } else {
                                     parent.setColumnSelectionInterval(7, 7);
+                                } else {
+                                    parent.setColumnSelectionInterval(9, 9);
                                 }
                             } else {
                                 showMessageBox("Input value must be positive");
@@ -311,8 +313,11 @@ public class SaleByBatchTableModel extends AbstractTableModel {
                         }
 
                     }
-
                     case 8 -> {
+                        sd.setStdWeight(Util1.getFloat(value));
+                    }
+
+                    case 10 -> {
                         //price
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
@@ -328,12 +333,22 @@ public class SaleByBatchTableModel extends AbstractTableModel {
                             parent.setColumnSelectionInterval(column, column);
                         }
                     }
-                    case 9 -> {
+                    case 11 -> {
                         //amt
-                        //sd.setAmount(Util1.getFloat(value));
+                        sd.setAmount(Util1.getFloat(value));
 
                     }
 
+                }
+                if (column != 10) {
+                    if (Util1.getFloat(sd.getPrice()) == 0) {
+                        if (ProUtil.isSaleLastPrice()) {
+                            if (sd.getStockCode() != null && sd.getUnitCode() != null) {
+                                sd.setPrice(inventoryRepo.getSaleRecentPrice(sd.getStockCode(),
+                                        Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), sd.getUnitCode()));
+                            }
+                        }
+                    }
                 }
                 change = true;
                 calculateAmount(sd);
@@ -397,12 +412,14 @@ public class SaleByBatchTableModel extends AbstractTableModel {
         addNewRow();
     }
 
-    private void calculateAmount(SaleHisDetail sale) {
-        if (sale.getStockCode() != null) {
-            float saleQty = Util1.getFloat(sale.getQty());
-            float stdSalePrice = Util1.getFloat(sale.getPrice());
-            float amount = saleQty * stdSalePrice;
-            sale.setAmount(Util1.getFloat(Math.round(amount)));
+    private void calculateAmount(SaleHisDetail s) {
+        float price = Util1.getFloat(s.getPrice());
+        float stdWt = Util1.getFloat(s.getStdWeight());
+        float wt = Util1.getFloat(s.getWeight());
+        float qty = Util1.getFloat(s.getQty());
+        if (s.getStockCode() != null) {
+            float amount = (qty * wt * price) / stdWt;
+            s.setAmount(amount);
         }
     }
 
@@ -490,17 +507,6 @@ public class SaleByBatchTableModel extends AbstractTableModel {
             }
         }
         return listPrice;
-    }
-
-    private float getPopupPrice(int row, boolean needToChoice) {
-        List<PriceOption> listPrice = getPriceOption(row);
-        PriceOptionDialog dialog = new PriceOptionDialog();
-        dialog.setListPrice(listPrice);
-        dialog.setNeedToChoice(needToChoice);
-        dialog.initData();
-        dialog.setLocationRelativeTo(null);
-        dialog.setVisible(true);
-        return dialog.getOption() == null ? 0.0f : dialog.getOption().getPrice();
     }
 
     public List<String> getDelList() {

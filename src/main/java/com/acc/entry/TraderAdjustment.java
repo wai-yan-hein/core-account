@@ -1145,13 +1145,14 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         filter.setListDepartment(departmentAutoCompleter.getListOption());
         filter.setTraderCode(traderCode);
         filter.setCoaCode(account);
-        List<TmpOpening> listTmp = accountRepo.getOpening(filter);
+        Mono<TmpOpening> result = accountRepo.getOpening(filter);
         hmOpening.clear();
-        if (!listTmp.isEmpty()) {
-            listTmp.forEach(op -> {
-                hmOpening.put(op.getKey().getCurCode(), new Gl(op.getKey().getCurCode(), op.getOpening(), op.getClosing()));
-            });
-        }
+        result.subscribe((t) -> {
+            hmOpening.put(t.getKey().getCurCode(), new Gl(t.getKey().getCurCode(), t.getOpening(), t.getClosing()));
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }, () -> {
+        });
     }
 
     @Override

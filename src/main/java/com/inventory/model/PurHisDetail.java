@@ -32,7 +32,7 @@ public class PurHisDetail implements Serializable {
     private String locName;
     private Integer uniqueId;
     private Float weight;
-    private Float stdQty;
+    private String weightUnit;
     private Float avgQty;
-    private String avgUnit;
+    private Float stdWeight;
 }

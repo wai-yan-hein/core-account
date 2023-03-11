@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -344,13 +345,13 @@ public class AccountRepo {
         return result.block();
     }
 
-    public List<TmpOpening> getOpening(ReportFilter filter) {
-        Mono<ResponseEntity<List<TmpOpening>>> result = accountApi.post()
+    public Mono<TmpOpening> getOpening(ReportFilter filter) {
+        Mono<TmpOpening> result = accountApi.post()
                 .uri("/account/get-coa-opening")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .toEntityList(TmpOpening.class);
-        return result.block().getBody();
+                .bodyToMono(TmpOpening.class);
+        return result;
     }
 
     public StockOP save(StockOP op) {

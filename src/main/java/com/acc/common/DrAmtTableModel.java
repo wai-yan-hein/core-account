@@ -20,6 +20,15 @@ public class DrAmtTableModel extends AbstractTableModel {
 
     private List<Gl> listVGl = new ArrayList();
     private String[] columnNames = {"Date", "Dep :", "Description", "Ref", "No :", "Dr-Amt"};
+    private double drAmt;
+
+    public double getDrAmt() {
+        return drAmt;
+    }
+
+    public void setDrAmt(double drAmt) {
+        this.drAmt = drAmt;
+    }
 
     @Override
     public String getColumnName(int column) {
@@ -123,7 +132,8 @@ public class DrAmtTableModel extends AbstractTableModel {
 
     public void addVGl(Gl apar) {
         listVGl.add(apar);
-        fireTableRowsInserted(listVGl.size() - 1, listVGl.size() - 1);
+        drAmt += Util1.getDouble(apar.getDrAmt());
+        //fireTableRowsInserted(listVGl.size() - 1, listVGl.size() - 1);
     }
 
     public void setVGl(int row, Gl apar) {
@@ -136,6 +146,7 @@ public class DrAmtTableModel extends AbstractTableModel {
     public void clear() {
         if (listVGl != null) {
             listVGl.clear();
+            drAmt = 0;
             fireTableDataChanged();
         }
     }

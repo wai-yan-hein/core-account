@@ -7,7 +7,6 @@ package com.inventory.ui.entry;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.PanelControl;
-import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationCellEditor;
@@ -30,7 +29,6 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.List;
 import java.util.Objects;
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
@@ -42,9 +40,8 @@ import javax.swing.ListSelectionModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 /**
  *
@@ -183,6 +180,8 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         tblGRN.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(inventoryRepo.getLocation()));
         tblGRN.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
         tblGRN.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
+        tblGRN.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//qty
+        tblGRN.getColumnModel().getColumn(7).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
         tblGRN.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblGRN.setDefaultRenderer(Float.class, new DecimalFormatRender());
         tblGRN.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -273,7 +272,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
     private void disableForm(boolean status) {
         txtDate.setEnabled(status);
         txtTrader.setEnabled(status);
-        txtBatchNo.setEnabled(status);
+        txtBatchNo.setEditable(status);
         chkClose.setEnabled(status);
         txtRemark.setEnabled(status);
         tblGRN.setEnabled(status);
@@ -306,20 +305,24 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
     public void setVoucher(GRN g) {
         if (g != null) {
             progress.setIndeterminate(true);
+            tableModel.clear();
             grn = g;
             Integer deptId = g.getKey().getDeptId();
             traderAutoCompleter.setTrader(inventoryRepo.findTrader(grn.getTraderCode(), deptId));
             String vouNo = grn.getKey().getVouNo();
-            Mono<ResponseEntity<List<GRNDetail>>> result = inventoryApi.get()
+            Flux<GRNDetail> result = inventoryApi.get()
                     .uri(builder -> builder.path("/grn/get-grn-detail")
                     .queryParam("vouNo", vouNo)
                     .queryParam("compCode", Global.compCode)
                     .queryParam("deptId", deptId)
                     .build())
-                    .retrieve().toEntityList(GRNDetail.class
-                    );
+                    .retrieve().bodyToFlux(GRNDetail.class);
             result.subscribe((t) -> {
-                tableModel.setListDetail(t.getBody());
+                tableModel.addObject(t);
+            }, (e) -> {
+                progress.setIndeterminate(false);
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            }, () -> {
                 tableModel.addNewRow();
                 if (grn.isClosed()) {
                     lblStatus.setText("This Batch is closed.");
@@ -343,9 +346,6 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                 chkClose.setSelected(grn.isClosed());
                 focusTable();
                 progress.setIndeterminate(false);
-            }, (e) -> {
-                progress.setIndeterminate(false);
-                JOptionPane.showMessageDialog(this, e.getMessage());
             });
         }
     }

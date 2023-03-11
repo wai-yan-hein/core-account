@@ -415,7 +415,6 @@ public class AllCashTableModel extends AbstractTableModel {
 
     public void addVGl(Gl vgi) {
         listVGl.add(vgi);
-        fireTableRowsInserted(listVGl.size() - 1, listVGl.size() - 1);
     }
 
     public void setVGl(int row, Gl vgi) {
@@ -478,6 +477,7 @@ public class AllCashTableModel extends AbstractTableModel {
     public void clear() {
         if (listVGl != null) {
             listVGl.clear();
+            fireTableDataChanged();
         }
     }
 }

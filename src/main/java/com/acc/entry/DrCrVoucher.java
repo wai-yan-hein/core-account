@@ -50,6 +50,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -231,12 +232,17 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
             filter.setCurCode(Global.currency);
             filter.setListDepartment(departmentAutoCompleter.getListOption());
             filter.setCoaCode(coa.getKey().getCoaCode());
-            List<TmpOpening> listTmp = accountRepo.getOpening(filter);
-            if (!listTmp.isEmpty()) {
-                txtOpening.setValue(listTmp.get(0).getOpening());
-            } else {
-                txtOpening.setValue(0);
-            }
+            Mono<TmpOpening> result = accountRepo.getOpening(filter);
+            result.subscribe((t) -> {
+                if (t.equals(new TmpOpening())) {
+                    txtOpening.setValue(0);
+                } else {
+                    txtOpening.setValue(t.getOpening());
+                }
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            }, () -> {
+            });
         }
     }
 

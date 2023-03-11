@@ -31,4 +31,7 @@ public class SaleHisDetail implements java.io.Serializable {
     private Stock stock;
     private String batchNo;
     private String traderName;
+    private Float weight;
+    private String weightUnit;
+    private Float stdWeight;
 }

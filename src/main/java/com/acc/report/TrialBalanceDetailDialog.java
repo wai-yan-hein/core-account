@@ -16,23 +16,15 @@ import com.acc.model.Gl;
 import com.acc.model.TmpOpening;
 import com.common.Global;
 import com.common.ProUtil;
-import com.common.ReturnObject;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,6 +42,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -158,6 +151,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
     /**
      * Creates new form TrialBalanceDetailDialog
+     *
      * @param frame
      */
     public TrialBalanceDetailDialog(JFrame frame) {
@@ -184,7 +178,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
     private void searchTriBalDetail() {
         progress.setIndeterminate(true);
-        calOpening();
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
         filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
         filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
@@ -192,29 +185,34 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         filter.setCurCode(curCode);
         filter.setListDepartment(departmentAutoCompleter.getListOption());
         filter.setTraderCode(traderCode);
-        Mono<ReturnObject> result = accountApi.post()
+        clear();
+        Flux<Gl> result = accountApi.post()
                 .uri("/account/search-gl")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
+                .bodyToFlux(Gl.class);
         result.subscribe((t) -> {
-            try {
-                String path = "temp/Ledger" + Global.macId;
-                Util1.extractZipToJson(t.getFile(), path);
-                Reader reader = Files.newBufferedReader(Paths.get(path.concat(".json")));
-                List<Gl> listVGl = gson.fromJson(reader, new TypeToken<ArrayList<Gl>>() {
-                }.getType());
-                calculateOpeningClosing(listVGl);
-                progress.setIndeterminate(false);
-            } catch (JsonIOException | JsonSyntaxException | IOException e) {
-                log.error("searchTriBalDetail : " + e.getMessage());
-                progress.setIndeterminate(false);
+            double drAmt = Util1.getDouble(t.getDrAmt());
+            double crAmt = Util1.getDouble(t.getCrAmt());
+            if (drAmt > 0) {
+                drAmtTableModel.addVGl(t);
             }
+            if (crAmt > 0) {
+                crAmtTableModel.addVGl(t);
+            }
+            txtDrCount.setValue(drAmtTableModel.getListVGl().size());
+            txtCrCount.setValue(crAmtTableModel.getListVGl().size());
+            txtDrAmt.setValue(drAmtTableModel.getDrAmt());
+            txtCrAmt.setValue(crAmtTableModel.getCrAmt());
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
             progress.setIndeterminate(false);
-
+        }, () -> {
+            drAmtTableModel.fireTableDataChanged();
+            crAmtTableModel.fireTableDataChanged();
+            progress.setIndeterminate(false);
         });
+        calOpening();
     }
 
     private void calOpening() {
@@ -228,46 +226,22 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         filter.setListDepartment(departmentAutoCompleter.getListOption());
         filter.setCoaCode(coaCode);
         filter.setTraderCode(traderCode);
-        List<TmpOpening> listTmp = accountRepo.getOpening(filter);
-        if (!listTmp.isEmpty()) {
-            txtOpening.setValue(listTmp.get(0).getOpening());
-        } else {
-            txtOpening.setValue(0);
-        }
-    }
-
-    private void calculateOpeningClosing(List<Gl> listVGl) {
-        drAmtTableModel.clear();
-        crAmtTableModel.clear();
-        double opAmt = Util1.getDouble(txtOpening.getValue());
-        double ttlDrAmt = 0.0;
-        double ttlCrAmt = 0.0;
-        if (!listVGl.isEmpty()) {
-            List<Gl> listDr = new ArrayList<>();
-            List<Gl> listCr = new ArrayList<>();
-            for (Gl vgl : listVGl) {
-                double drAmt = Util1.getDouble(vgl.getDrAmt());
-                double crAmt = Util1.getDouble(vgl.getCrAmt());
-                if (drAmt > 0) {
-                    ttlDrAmt += drAmt;
-                    listDr.add(vgl);
-                }
-                if (crAmt > 0) {
-                    ttlCrAmt += crAmt;
-                    listCr.add(vgl);
-                }
+        Mono<TmpOpening> result = accountRepo.getOpening(filter);
+        result.subscribe((t) -> {
+            if (t.equals(new TmpOpening())) {
+                txtOpening.setValue(0);
+            } else {
+                txtOpening.setValue(t.getOpening());
             }
-            drAmtTableModel.setListVGl(listDr);
-            crAmtTableModel.setListVGl(listCr);
-            txtDrCount.setValue(drAmtTableModel.getListVGl().size());
-            txtCrCount.setValue(crAmtTableModel.getListVGl().size());
-            txtCrAmt.setValue(ttlCrAmt);
-            txtDrAmt.setValue(ttlDrAmt);
-        }
-        txtOpening.setValue(opAmt);
-        double closingAmt = opAmt + ttlDrAmt - ttlCrAmt;
-        txtClosing.setValue(closingAmt);
-
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }, () -> {
+            double opAmt = Util1.getDouble(txtOpening.getValue());
+            double drAmt = Util1.getDouble(txtDrAmt.getValue());
+            double crAmt = Util1.getDouble(txtCrAmt.getValue());
+            double closingAmt = opAmt + drAmt - crAmt;
+            txtClosing.setValue(closingAmt);
+        });
     }
 
     public void initMain() {
@@ -300,6 +274,10 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         txtCrAmt.setValue(0);
         txtOpening.setValue(0);
         txtClosing.setValue(0);
+        drAmtTableModel.clear();
+        crAmtTableModel.clear();
+        txtDrCount.setValue(0);
+        txtCrCount.setValue(0);
     }
 
     private void tblCR() {

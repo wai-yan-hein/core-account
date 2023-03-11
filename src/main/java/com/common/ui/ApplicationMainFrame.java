@@ -72,6 +72,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import com.inventory.ui.entry.Reports;
 import com.inventory.ui.entry.SaleByBatch;
+import com.inventory.ui.entry.SaleByWeight;
 import com.inventory.ui.entry.Transfer;
 import com.inventory.ui.entry.WeightLossEntry;
 import com.inventory.ui.setup.OpeningSetup;
@@ -109,6 +110,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private Sale sale;
     @Autowired
     private SaleByBatch saleByBatch;
+    @Autowired
+    private SaleByWeight saleByWeight;
     @Autowired
     private RFID rfid;
     @Autowired
@@ -359,6 +362,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 saleByBatch.setProgress(progress);
                 saleByBatch.initMain();
                 return saleByBatch;
+            }
+            case "Sale By Weight" -> {
+                saleByWeight.setName(menuName);
+                saleByWeight.setObserver(this);
+                saleByWeight.setProgress(progress);
+                saleByWeight.initMain();
+                return saleByWeight;
             }
             case "RFID" -> {
                 rfid.setName(menuName);

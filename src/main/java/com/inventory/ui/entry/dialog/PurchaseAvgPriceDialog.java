@@ -95,7 +95,7 @@ public class PurchaseAvgPriceDialog extends javax.swing.JDialog {
             unitModel.setSelectedItem(inventoryRepo.findUnit(pd.getUnitCode(), Global.deptId));
             txtAvgQty.setValue(pd.getAvgQty());
             txtAvgPrice.setValue(Util1.getFloat(pd.getPrice()));
-            lossUnitModel.setSelectedItem(inventoryRepo.findUnit(s.getLossUnit(), Global.deptId));
+            lossUnitModel.setSelectedItem(inventoryRepo.findUnit(s.getWeightUnit(), Global.deptId));
             txtAvgQty.requestFocus();
         }
     }

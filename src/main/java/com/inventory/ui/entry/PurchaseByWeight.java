@@ -13,26 +13,34 @@ import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.inventory.editor.BatchAutoCompeter;
 import com.inventory.editor.CurrencyAutoCompleter;
+import com.inventory.editor.ExpenseEditor;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Expense;
 import com.inventory.model.GRN;
+import com.inventory.model.GRNDetail;
 import com.inventory.model.Location;
 import com.inventory.model.PurExpense;
 import com.inventory.model.PurExpenseKey;
 import com.inventory.model.PurHis;
 import com.inventory.model.PurHisDetail;
 import com.inventory.model.PurHisKey;
-import com.inventory.model.SaleHisDetail;
 import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
 import com.inventory.model.VPurchase;
 import com.inventory.ui.common.PurExpenseTableModel;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.PurchaseWeightTableModel;
+import com.inventory.ui.entry.dialog.BatchSearchDialog;
 import com.inventory.ui.entry.dialog.PurchaseAvgPriceDialog;
 import com.inventory.ui.entry.dialog.PurchaseHistoryDialog;
 import com.inventory.ui.setup.dialog.ExpenseSetupDialog;
@@ -50,8 +58,8 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -72,7 +80,6 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -90,6 +97,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     private List<PurHisDetail> listDetail = new ArrayList();
     private final PurchaseWeightTableModel purTableModel = new PurchaseWeightTableModel();
     private final PurchaseHistoryDialog vouSearchDialog = new PurchaseHistoryDialog(Global.parentForm);
+    private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     @Autowired
     private WebClient inventoryApi;
     @Autowired
@@ -101,6 +109,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     private CurrencyAutoCompleter currAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
     private LocationAutoCompleter locationAutoCompleter;
+    private BatchAutoCompeter batchAutoCompeter;
     private SelectionObserver observer;
     private JProgressBar progress;
     private PurHis ph = new PurHis();
@@ -206,7 +215,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         tblExpense.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblExpense.getColumnModel().getColumn(0).setPreferredWidth(100);
         tblExpense.getColumnModel().getColumn(1).setPreferredWidth(40);
-        tblExpense.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
+        tblExpense.getColumnModel().getColumn(0).setCellEditor(new ExpenseEditor(inventoryRepo.getExpense()));
         tblExpense.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
         txtExpense.setFormatterFactory(Util1.getDecimalFormat());
         txtExpense.setFont(Global.amtFont);
@@ -227,6 +236,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             p.setAmount(0.0f);
             expenseTableModel.addObject(p);
         }
+        expenseTableModel.addNewRow();
     }
 
     private void initDateListner() {
@@ -253,8 +263,8 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         purTableModel.setVouDate(txtPurDate);
         purTableModel.setParent(tblPur);
         purTableModel.setLocationAutoCompleter(locationAutoCompleter);
-        purTableModel.addNewRow();
         purTableModel.setObserver(this);
+        purTableModel.addNewRow();
         tblPur.getTableHeader().setFont(Global.tblHeaderFont);
         tblPur.setCellSelectionEnabled(true);
         tblPur.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
@@ -262,24 +272,22 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         tblPur.getColumnModel().getColumn(2).setPreferredWidth(80);//rel
         tblPur.getColumnModel().getColumn(3).setPreferredWidth(50);//Location
         tblPur.getColumnModel().getColumn(4).setPreferredWidth(30);//weight
-        tblPur.getColumnModel().getColumn(5).setPreferredWidth(30);//std qty
-        tblPur.getColumnModel().getColumn(6).setPreferredWidth(30);//avg qty
+        tblPur.getColumnModel().getColumn(5).setPreferredWidth(30);//unit
+        tblPur.getColumnModel().getColumn(6).setPreferredWidth(30);//std weight
         tblPur.getColumnModel().getColumn(7).setPreferredWidth(30);//qty
-        tblPur.getColumnModel().getColumn(8).setPreferredWidth(30);//qty
-        tblPur.getColumnModel().getColumn(9).setPreferredWidth(30);//unit
-        tblPur.getColumnModel().getColumn(10).setPreferredWidth(50);//price
-        tblPur.getColumnModel().getColumn(11).setPreferredWidth(70);//amount
+        tblPur.getColumnModel().getColumn(8).setPreferredWidth(30);//unit
+        tblPur.getColumnModel().getColumn(9).setPreferredWidth(50);//price
+        tblPur.getColumnModel().getColumn(10).setPreferredWidth(70);//amount
         tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         tblPur.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(listLocation));
         tblPur.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//weight
-        tblPur.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());//std qty
-        tblPur.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//avg qty
-        tblPur.getColumnModel().getColumn(7).setCellEditor(new StockUnitEditor(listUnit));//avg unit
-        tblPur.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());// qty
-        tblPur.getColumnModel().getColumn(9).setCellEditor(new StockUnitEditor(listUnit));
+        tblPur.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(listUnit));//unit
+        tblPur.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());// qty
+        tblPur.getColumnModel().getColumn(7).setCellEditor(new StockUnitEditor(listUnit));
+        tblPur.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());//std weight
+        tblPur.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());
-        tblPur.getColumnModel().getColumn(11).setCellEditor(new AutoClearEditor());
         tblPur.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblPur.setDefaultRenderer(Float.class, new DecimalFormatRender());
         tblPur.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -294,6 +302,8 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, inventoryRepo.getCurrency(), null, false);
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, listLocation, null, false, false);
         locationAutoCompleter.setObserver(this);
+        batchAutoCompeter = new BatchAutoCompeter(txtBatchNo, inventoryRepo, null, false);
+        batchAutoCompeter.setObserver(this);
     }
 
     private void initKeyListener() {
@@ -391,7 +401,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 if (t != null) {
                     clear();
                     if (print) {
-                        printVoucher(t.getKey().getVouNo());
+                        printVoucher(t);
                     }
                 }
             }
@@ -446,6 +456,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             ph.setBatchNo(txtBatchNo.getText());
             ph.setCommP(Util1.getFloat(txtComPercent.getValue()));
             ph.setCommAmt(Util1.getFloat(txtComAmt.getValue()));
+            ph.setExpense(Util1.getFloat(txtExpense.getValue()));
             if (lblStatus.getText().equals("NEW")) {
                 PurHisKey key = new PurHisKey();
                 key.setCompCode(Global.compCode);
@@ -510,7 +521,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         float ttlExp = 0.0f;
         List<PurExpense> list = expenseTableModel.getListDetail();
         for (PurExpense p : list) {
-            ttlExp += p.getAmount();
+            ttlExp += Util1.getFloat(p.getAmount());
         }
         txtExpense.setValue(ttlExp);
     }
@@ -612,6 +623,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             List<PurExpense> listExp = p1.block();
             List<PurHisDetail> listPur = p2.block();
             expenseTableModel.setListDetail(listExp);
+            expenseTableModel.addNewRow();
             purTableModel.setListDetail(listPur);
             purTableModel.addNewRow();
             if (ph.isVouLock()) {
@@ -648,6 +660,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             txtBatchNo.setText(ph.getBatchNo());
             txtComPercent.setValue(Util1.getFloat(ph.getCommP()));
             txtComAmt.setValue(Util1.getFloat(ph.getCommAmt()));
+            txtExpense.setValue(Util1.getFloat(ph.getExpense()));
             focusTable();
             progress.setIndeterminate(false);
         }
@@ -671,6 +684,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         txtReference.setEnabled(status);
         txtComAmt.setEnabled(status);
         txtComPercent.setEnabled(status);
+        txtBatchNo.setEnabled(status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
@@ -689,45 +703,69 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         purTableModel.setListDetail(listPurDetail);
     }
 
-    private void printVoucher(String vouNo) {
-        Mono<byte[]> result = inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-purchase-report")
+    private void printVoucher(PurHis p) {
+        Trader trader = inventoryRepo.findTrader(p.getTraderCode(), p.getKey().getDeptId());
+        String vouNo = p.getKey().getVouNo();
+        Flux<VPurchase> fr = inventoryApi.get()
+                .uri(builder -> builder.path("/report/get-purchase-weight-report")
                 .queryParam("vouNo", vouNo)
-                .queryParam("macId", Global.macId)
+                .queryParam("batchNo", p.getBatchNo())
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToMono(ByteArrayResource.class)
-                .map(ByteArrayResource::getByteArray);
-        result.subscribe((t) -> {
-            try {
-                if (t != null) {
-                    String key = "report.purchase.voucher";
-                    String reportName = ProUtil.getProperty(key);
-                    if (reportName != null) {
-                        String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
-                        Map<String, Object> param = new HashMap<>();
-                        param.put("p_print_date", Util1.getTodayDateTime());
-                        param.put("p_comp_name", Global.companyName);
-                        param.put("p_comp_address", Global.companyAddress);
-                        param.put("p_comp_phone", Global.companyPhone);
-                        param.put("p_logo_path", logoPath);
-                        String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
-                        ByteArrayInputStream jsonDataStream = new ByteArrayInputStream(t);
-                        JsonDataSource ds = new JsonDataSource(jsonDataStream);
-                        JasperPrint js = JasperFillManager.fillReport(reportPath, param, ds);
-                        JasperViewer.viewReport(js, false);
-                    } else {
-                        JOptionPane.showMessageDialog(this, "define report in " + key);
-                    }
+                .bodyToFlux(VPurchase.class);
+        Flux<PurExpense> sr = inventoryApi.get()
+                .uri(builder -> builder.path("/purExpense/get-pur-expense")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().bodyToFlux(PurExpense.class);
+        Mono<List<VPurchase>> p1 = fr.collectList();
+        Mono<List<PurExpense>> p2 = sr.collectList();
+        List<VPurchase> list = p1.block();
+        List<PurExpense> listEx = p2.block();
+        listEx.removeIf((t) -> Util1.getFloat(t.getAmount()) == 0);
+        if (list != null) {
+            String key = "report.purchase.voucher";
+            String reportName = ProUtil.getProperty(key);
+            if (reportName != null) {
+                try {
+                    String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
+                    Map<String, Object> param = new HashMap<>();
+                    param.put("p_print_date", Util1.getTodayDateTime());
+                    param.put("p_comp_name", Global.companyName);
+                    param.put("p_comp_address", Global.companyAddress);
+                    param.put("p_comp_phone", Global.companyPhone);
+                    param.put("p_logo_path", logoPath);
+                    param.put("p_trader_name", trader.getTraderName());
+                    param.put("p_remark", p.getRemark());
+                    param.put("p_vou_no", vouNo);
+                    param.put("p_vou_date", Util1.toDateStr(p.getVouDate(), "dd/MM/yyyy"));
+                    param.put("p_trader_name", trader.getTraderName());
+                    param.put("p_vou_total", p.getVouTotal());
+                    param.put("p_exp", Util1.getFloat(p.getExpense()) * -1);
+                    param.put("p_vou_paid", p.getPaid());
+                    param.put("p_vou_balance", p.getBalance());
+                    param.put("SUBREPORT_DIR", "report/");
+                    String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
+                    ObjectMapper mapper = new ObjectMapper();
+                    JsonNode n1 = mapper.readTree(gson.toJson(list));
+                    JsonDataSource d1 = new JsonDataSource(n1, null) {
+                    };
+                    ObjectMapper m2 = new ObjectMapper();
+                    JsonNode n2 = m2.readTree(gson.toJson(listEx));
+                    JsonDataSource d2 = new JsonDataSource(n2, null) {
+                    };
+                    param.put("p_sub_data", d2);
+                    JasperPrint main = JasperFillManager.fillReport(reportPath, param, d1);
+                    JasperViewer.viewReport(main, false);
+                } catch (JsonProcessingException | JRException e) {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
                 }
-            } catch (JRException ex) {
-                log.error("printVoucher : " + ex.getMessage());
-                JOptionPane.showMessageDialog(this, ex.getMessage());
+            } else {
+                JOptionPane.showMessageDialog(this, "define report in " + key);
             }
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
+        }
 
     }
 
@@ -751,33 +789,39 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     }
 
     private void setVoucherDetail(GRN g) {
-        List<SaleHisDetail> list = inventoryRepo.getSaleByBatch(g.getBatchNo());
-        if (!list.isEmpty()) {
-            List<PurHisDetail> listPur = new ArrayList<>();
-            for (SaleHisDetail sd : list) {
-                PurHisDetail pd = new PurHisDetail();
-                pd.setStockCode(sd.getStockCode());
-                pd.setUserCode(sd.getUserCode());
-                pd.setStockName(sd.getStockName());
-                pd.setRelName(sd.getRelName());
-                pd.setAvgQty(0.0f);
-                pd.setQty(sd.getQty());
-                pd.setUnitCode(sd.getUnitCode());
-                pd.setPrice(sd.getPrice());
-                pd.setAmount(sd.getAmount());
-                pd.setLocCode(sd.getLocCode());
-                pd.setLocName(sd.getLocName());
-                listPur.add(pd);
-            }
-            purTableModel.setListDetail(listPur);
+        purTableModel.clear();
+        traderAutoCompleter.setTrader(inventoryRepo.findTrader(g.getTraderCode(), g.getKey().getDeptId()));
+        txtRemark.setText(g.getRemark());
+        Flux<GRNDetail> result = inventoryApi.get()
+                .uri(builder -> builder.path("/grn/get-grn-detail")
+                .queryParam("vouNo", g.getKey().getVouNo())
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", g.getKey().getDeptId())
+                .build())
+                .retrieve().bodyToFlux(GRNDetail.class);
+        result.subscribe((t) -> {
+            PurHisDetail pd = new PurHisDetail();
+            pd.setStockCode(t.getStockCode());
+            pd.setUserCode(t.getUserCode());
+            pd.setStockName(t.getStockName());
+            pd.setRelName(t.getRelName());
+            pd.setWeight(t.getWeight());
+            pd.setQty(t.getQty());
+            pd.setStdWeight(t.getStdWeight());
+            pd.setWeightUnit(t.getWeightUnit());
+            pd.setUnitCode(t.getUnit());
+            pd.setLocCode(t.getLocCode());
+            pd.setLocName(t.getLocName());
+            purTableModel.addPurchase(pd);
+        }, (e) -> {
+            progress.setIndeterminate(false);
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }, () -> {
             purTableModel.addNewRow();
             calculateTotalAmount(false);
-            traderAutoCompleter.setTrader(inventoryRepo.findTrader(g.getTraderCode(), g.getKey().getDeptId()));
             txtBatchNo.setText(g.getBatchNo());
-            txtBatchNo.setEditable(false);
-        } else {
-            JOptionPane.showMessageDialog(this, "No sale records.");
-        }
+            txtBatchNo.setEnabled(false);
+        });
     }
 
     private void expenseDialog() {
@@ -787,6 +831,16 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         d.initMain();
         d.setLocationRelativeTo(null);
         d.setVisible(true);
+    }
+
+    private void batchDialog() {
+        BatchSearchDialog d = new BatchSearchDialog(Global.parentForm);
+        d.setInventoryRepo(inventoryRepo);
+        d.setObserver(this);
+        d.initMain();
+        d.setLocationRelativeTo(null);
+        d.setVisible(true);
+
     }
 
     /**
@@ -826,6 +880,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         txtExpense = new javax.swing.JFormattedTextField();
         jLabel1 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jLabel13 = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
@@ -952,7 +1007,6 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         jLabel10.setFont(Global.lableFont);
         jLabel10.setText("Batch No");
 
-        txtBatchNo.setEditable(false);
         txtBatchNo.setFont(Global.textFont);
         txtBatchNo.setDisabledTextColor(new java.awt.Color(0, 0, 0));
         txtBatchNo.setName("txtCurrency"); // NOI18N
@@ -1111,6 +1165,14 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 .addContainerGap())
         );
 
+        jButton2.setFont(Global.lableFont);
+        jButton2.setText("Batch");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -1121,6 +1183,8 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                     .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panelExpense, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -1129,11 +1193,14 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jButton2)
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(panelExpense, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(lblRec)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 201, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -1533,6 +1600,11 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         // TODO add your handling code here:
         expenseDialog();
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        batchDialog();
+    }//GEN-LAST:event_jButton2ActionPerformed
     private void tabToTable(KeyEvent e) {
         if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
             tblPur.requestFocus();
@@ -1731,6 +1803,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkPaid;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel13;

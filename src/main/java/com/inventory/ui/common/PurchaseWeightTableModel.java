@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PurchaseWeightTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Code", "Description", "Relation", "Location",
-        "Weight", "Std Qty", "Avg Qty", "Avg Unit", "Qty", "Unit", "Price", "Amount"};
+        "Weight", "Weight Unit", "Qty", "Unit", "Std-Weight", "Total Qty", "Price", "Amount"};
     private JTable parent;
     private List<PurHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
@@ -118,10 +118,10 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 0, 1, 2, 3 ->
-                String.class;
-            default ->
+            case 0, 1, 2, 3, 5, 7 ->
                 Float.class;
+            default ->
+                String.class;
         };
     }
 
@@ -170,31 +170,28 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                         return record.getWeight();
                     }
                     case 5 -> {
-                        //std qty
-                        return record.getStdQty();
+                        //unit
+                        return record.getWeightUnit();
                     }
                     case 6 -> {
-                        //avg qty
-                        return record.getAvgQty();
-                    }
-                    case 7 -> {
-                        //avg unit
-                        return record.getAvgUnit();
-                    }
-                    case 8 -> {
                         return record.getQty();
                     }
-                    case 9 -> {
+                    case 7 -> {
                         return record.getUnitCode();
+                    }
+                    case 8 -> {
+                        //std weight
+                        return record.getStdWeight();
+                    }
+                    //total
+                    case 9 -> {
+                        return Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight());
                     }
                     case 10 -> {
                         return record.getPrice();
                     }
                     case 11 -> {
                         return record.getAmount();
-                    }
-                    default -> {
-                        return new Object();
                     }
                 }
             }
@@ -219,7 +216,8 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                             record.setRelName(s.getRelName());
                             record.setQty(1.0f);
                             record.setUnitCode(s.getPurUnitCode());
-                            record.setAvgUnit(s.getLossUnit());
+                            record.setWeightUnit(s.getWeightUnit());
+                            record.setStdWeight(s.getWeight());
                             addNewRow();
                         }
                     }
@@ -239,38 +237,32 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                     }
                 }
                 case 5 -> {
-                    //std qty
-                    if (Util1.isNumber(value)) {
-                        record.setStdQty(Util1.getFloat(value));
+                    //weight unit
+                    if (value instanceof StockUnit u) {
+                        record.setWeightUnit(u.getKey().getUnitCode());
                     }
                 }
                 case 6 -> {
-                    //avg qty
-                    if (Util1.isNumber(value)) {
-                        record.setAvgQty(Util1.getFloat(value));
-                    }
-                }
-                case 7 -> {
-                    //avg qty
-                    if (value instanceof StockUnit u) {
-                        record.setAvgUnit(u.getKey().getUnitCode());
-                    }
-                }
-                case 8 -> {
                     //Qty
                     if (Util1.isNumber(value)) {
                         record.setQty(Util1.getFloat(value));
                         parent.setRowSelectionInterval(row, row);
                     }
                 }
-                case 9 -> {
+                case 7 -> {
                     //Unit
                     if (value != null) {
                         if (value instanceof StockUnit u) {
                             record.setUnitCode(u.getKey().getUnitCode());
                         }
                     }
-                    parent.setColumnSelectionInterval(6, 6);
+                    parent.setColumnSelectionInterval(8, 8);
+                }
+                case 8 -> {
+                    //std weight
+                    if (Util1.isNumber(value)) {
+                        record.setStdWeight(Util1.getFloat(value));
+                    }
                 }
                 case 10 -> {
                     //Pur Price
@@ -296,7 +288,7 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                     }
                 }
             }
-            if (column != 10) {
+            if (column != 9) {
                 if (Util1.getFloat(record.getPrice()) == 0) {
                     if (record.getStockCode() != null && record.getUnitCode() != null) {
                         record.setPrice(inventoryRepo.getPurRecentPrice(record.getStockCode(),
@@ -358,12 +350,12 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
 
     private void calculateAmount(PurHisDetail pur) {
         float price = Util1.getFloat(pur.getPrice());
-        float avgQty = Util1.getFloat(pur.getAvgQty());
-        float weight = Util1.getFloat(pur.getWeight());
+        float stdWt = Util1.getFloat(pur.getStdWeight());
+        float wt = Util1.getFloat(pur.getWeight());
+        float qty = Util1.getFloat(pur.getQty());
         if (pur.getStockCode() != null) {
-            float qty = avgQty * weight;
-            float amt = qty * price;
-            pur.setAmount(amt);
+            float amount = (qty * wt * price) / stdWt;
+            pur.setAmount(amount);
         }
     }
 
@@ -373,26 +365,44 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
 
     public boolean isValidEntry() {
         boolean status = true;
-        for (PurHisDetail sdh : listDetail) {
+        for (int i = 0; i < listDetail.size(); i++) {
+            PurHisDetail sdh = listDetail.get(i);
             if (sdh.getStockCode() != null) {
                 if (Util1.getFloat(sdh.getAmount()) <= 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
                             "Invalid.", JOptionPane.ERROR_MESSAGE);
-                    status = false;
-                    parent.requestFocus();
-                    break;
+                    focusTable(i);
+                    return false;
                 } else if (sdh.getLocCode() == null) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Location.");
-                    status = false;
-                    parent.requestFocus();
+                    focusTable(i);
+                    return false;
                 } else if (sdh.getUnitCode() == null) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Purchase Unit.");
-                    status = false;
-                    parent.requestFocus();
+                    focusTable(i);
+                    return false;
+                } else if (sdh.getStdWeight() == null) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Std Weight");
+                    focusTable(i);
+                    return false;
+                } else if (sdh.getWeight() == null) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Weight");
+                    focusTable(i);
+                    return false;
+                } else if (sdh.getWeightUnit() == null) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Weight Unit");
+                    focusTable(i);
+                    return false;
                 }
             }
         }
         return status;
+    }
+
+    private void focusTable(int row) {
+        parent.setRowSelectionInterval(row, row);
+        parent.setColumnSelectionInterval(0, 0);
+        parent.requestFocus();
     }
 
     public List<String> getDelList() {

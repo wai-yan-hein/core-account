@@ -8,13 +8,13 @@ package com.inventory.ui.common;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.GRNDetail;
 import com.inventory.model.GRNDetailKey;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.toedter.calendar.JDateChooser;
+import java.awt.HeadlessException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JLabel;
@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GRNTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Description", "Relation", "Location", "Qty", "Unit"};
+    private String[] columnNames = {"Code", "Description", "Relation", "Location", "Weight", "Weight Unit", "Qty", "Unit", "Total"};
     private JTable parent;
     private List<GRNDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
@@ -125,7 +125,7 @@ public class GRNTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 4 ->
+            case 4, 5, 6, 8 ->
                 Float.class;
             default ->
                 String.class;
@@ -135,7 +135,7 @@ public class GRNTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case 2 ->
+            case 2, 8 ->
                 false;
             default ->
                 true;
@@ -168,12 +168,22 @@ public class GRNTableModel extends AbstractTableModel {
                         return record.getLocName();
                     }
                     case 4 -> {
+                        return record.getWeight();
+                    }
+                    case 5 -> {
+                        return record.getWeightUnit();
+                    }
+                    case 6 -> {
                         //qty
                         return record.getQty();
                     }
-                    case 5 -> {
+                    case 7 -> {
                         //unit
                         return record.getUnit();
+                    }
+
+                    case 8 -> {
+                        return Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight());
                     }
                     default -> {
                         return new Object();
@@ -201,8 +211,14 @@ public class GRNTableModel extends AbstractTableModel {
                             record.setRelName(s.getRelName());
                             record.setQty(1.0f);
                             record.setUnit(s.getPurUnitCode());
+                            record.setWeightUnit(s.getWeightUnit());
+                            record.setStock(s);
                             addNewRow();
-                            parent.setColumnSelectionInterval(4, 4);
+                            if (record.getWeightUnit() != null) {
+                                parent.setColumnSelectionInterval(4, 4);
+                            } else {
+                                parent.setColumnSelectionInterval(6, 6);
+                            }
                         }
                     }
                 }
@@ -214,12 +230,23 @@ public class GRNTableModel extends AbstractTableModel {
                     }
                 }
                 case 4 -> {
+                    record.setWeight(Util1.getFloat(value));
+                    parent.setColumnSelectionInterval(6, 6);
+                }
+                case 5 -> {
+                    if (value instanceof StockUnit u) {
+                        record.setWeightUnit(u.getKey().getUnitCode());
+                        parent.setColumnSelectionInterval(0, 0);
+                        parent.setRowSelectionInterval(row + 1, row + 1);
+                    }
+                }
+                case 6 -> {
                     //Qty
                     if (Util1.isNumber(value)) {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             record.setQty(Util1.getFloat(value));
-                            parent.setColumnSelectionInterval(0, 0);
-                            parent.setRowSelectionInterval(row + 1, row + 1);
+                            parent.setColumnSelectionInterval(6, 6);
+                            parent.setRowSelectionInterval(row, row);
                         } else {
                             showMessageBox("Input value must be positive");
                             parent.setColumnSelectionInterval(column, column);
@@ -231,7 +258,7 @@ public class GRNTableModel extends AbstractTableModel {
                         parent.setRowSelectionInterval(row, row);
                     }
                 }
-                case 5 -> {
+                case 7 -> {
                     //Unit
                     if (value != null) {
                         if (value instanceof StockUnit u) {
@@ -245,7 +272,7 @@ public class GRNTableModel extends AbstractTableModel {
             setRecord(listDetail.size() - 1);
             fireTableRowsUpdated(row, row);
             parent.requestFocusInWindow();
-        } catch (Exception ex) {
+        } catch (HeadlessException ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
     }
@@ -310,7 +337,7 @@ public class GRNTableModel extends AbstractTableModel {
                     status = false;
                     parent.requestFocus();
                 }
-            } 
+            }
         }
         return status;
     }

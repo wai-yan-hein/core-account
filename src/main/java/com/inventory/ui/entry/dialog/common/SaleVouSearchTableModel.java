@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SaleVouSearchTableModel extends AbstractTableModel {
 
     private List<VSale> listSaleHis = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Created By", "Paid Amt", "V-Total"};
+    private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Ref No", "Created By", "Paid Amt", "V-Total"};
 
     private JTable parent;
 
@@ -60,7 +60,7 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         switch (column) {
-            case 6, 5 -> {
+            case 6, 7 -> {
                 return Float.class;
             }
         }
@@ -97,14 +97,17 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
                         return his.getRemark();
                     }
                     case 4 -> {
+                        return his.getRefNo();
+                    }
+                    case 5 -> {
                         //user
                         return Global.hmUser.get(his.getCreatedBy());
                     }
-                    case 5 -> {
+                    case 6 -> {
                         //paid
                         return his.getPaid();
                     }
-                    case 6 -> {
+                    case 7 -> {
                         return his.getVouTotal();
                     }
                 }
@@ -131,5 +134,15 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
             }
         }
         return null;
+    }
+
+    public void addObject(VSale t) {
+        listSaleHis.add(t);
+
+    }
+
+    public void clear() {
+        listSaleHis.clear();
+        fireTableDataChanged();
     }
 }

@@ -12,7 +12,7 @@ import lombok.Data;
  */
 @Data
 public class GRNDetail {
-
+    private Stock stock;
     private GRNDetailKey key;
     private String stockCode;
     private Float qty;
@@ -22,4 +22,7 @@ public class GRNDetail {
     private String stockName;
     private String relName;
     private String locName;
+    private Float weight;
+    private String weightUnit;
+    private Float stdWeight;
 }

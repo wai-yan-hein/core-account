@@ -26,7 +26,6 @@ import com.inventory.ui.entry.dialog.common.PurVouSearchTableModel;
 import java.awt.HeadlessException;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.time.Duration;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -34,8 +33,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -162,22 +161,28 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         filter.setReference(txtRef.getText());
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(departmentAutoCompleter.getDepartment().getDeptId());
-        //
-        Mono<ResponseEntity<List<VPurchase>>> result = inventoryApi
+        tableModel.clear();
+        Flux<VPurchase> result = inventoryApi
                 .post()
                 .uri("/pur/get-pur")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
-                .toEntityList(VPurchase.class);
-        List<VPurchase> listOP = result.block(Duration.ofMinutes(1)).getBody();
-        tableModel.setListDetail(listOP);
-        calAmount();
-        progess.setIndeterminate(false);
+                .bodyToFlux(VPurchase.class);
+        result.subscribe((t) -> {
+            tableModel.addObject(t);
+            txtTotalRecord.setValue(tableModel.getListDetail().size());
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+            progess.setIndeterminate(false);
+        }, () -> {
+            tableModel.fireTableDataChanged();
+            calAmount();
+            progess.setIndeterminate(false);
+        });
 
     }
 
     private void calAmount() {
-        int count = 0;
         float ttlAmt = 0.0f;
         float ttlPaid = 0.0f;
         List<VPurchase> listPur = tableModel.getListDetail();
@@ -186,13 +191,11 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
                 if (!p.isDeleted()) {
                     ttlAmt += p.getVouTotal();
                     ttlPaid += p.getPaid();
-                    count += 1;
                 }
             }
         }
         txtPaid.setValue(ttlPaid);
         txtTotalAmt.setValue(ttlAmt);
-        txtTotalRecord.setValue(count);
         tblVoucher.requestFocus();
     }
 
@@ -499,7 +502,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton1)))
-                .addContainerGap(10, Short.MAX_VALUE))
+                .addContainerGap(8, Short.MAX_VALUE))
         );
 
         tblVoucher.setFont(Global.textFont);
@@ -620,11 +623,11 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(progess, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(progess, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -639,6 +642,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
                 .addComponent(progess, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

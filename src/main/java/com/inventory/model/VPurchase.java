@@ -20,7 +20,7 @@ public class VPurchase {
     private boolean deleted;
     private Float discount;
     private String dueDate;
-    private Float purExpTotal;
+    private Float total;
     private Float paid;
     private String vouDate;
     private String remark;
@@ -33,6 +33,7 @@ public class VPurchase {
     private Float discountPrice;
     private Float taxPrice;
     private Float taxAmount;
+    private String intgUpdStatus;
     private Integer macId;
     private String compCode;
     private String vouNo;
@@ -57,5 +58,11 @@ public class VPurchase {
     private String compAddress;
     private String stockUserCode;
     private String stockName;
+    private String relName;
+    private String qtyStr;
     private Integer deptId;
+    private String groupName;
+    private Float weight;
+    private String weightUnit;
+    private Float totalQty;
 }

@@ -7,7 +7,10 @@ package com.inventory.ui.common;
 
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.inventory.model.Expense;
+import com.inventory.model.ExpenseKey;
 import com.inventory.model.PurExpense;
+import com.inventory.model.PurExpenseKey;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;
@@ -99,6 +102,17 @@ public class PurExpenseTableModel extends AbstractTableModel {
                 try {
                     PurExpense e = listDetail.get(row);
                     switch (column) {
+                        case 0 -> {
+                            if (value instanceof Expense ex) {
+                                PurExpenseKey key = new PurExpenseKey();
+                                key.setCompCode(ex.getKey().getCompCode());
+                                key.setExpenseCode(ex.getKey().getExpenseCode());
+                                e.setKey(key);
+                                e.setExpenseName(ex.getExpenseName());
+                                addNewRow();
+                                table.setColumnSelectionInterval(1, 1);
+                            }
+                        }
                         case 1 -> {
                             if (Util1.isNumber(value)) {
                                 e.setAmount(Util1.getFloat(value));
@@ -166,6 +180,29 @@ public class PurExpenseTableModel extends AbstractTableModel {
             return 0;
         } else {
             return listDetail.size();
+        }
+    }
+
+    private boolean hasEmptyRow() {
+        boolean status = false;
+        if (listDetail.size() >= 1) {
+            PurExpense get = listDetail.get(listDetail.size() - 1);
+            if (get.getKey().getExpenseCode() == null) {
+                status = true;
+            }
+        }
+        return status;
+    }
+
+    public void addNewRow() {
+        if (listDetail != null) {
+            if (!hasEmptyRow()) {
+                PurExpense pd = new PurExpense();
+                PurExpenseKey key = new PurExpenseKey();
+                pd.setKey(key);
+                listDetail.add(pd);
+                fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
+            }
         }
     }
 

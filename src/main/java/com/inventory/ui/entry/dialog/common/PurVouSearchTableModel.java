@@ -55,7 +55,7 @@ public class PurVouSearchTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         switch (column) {
-            case 6,5 -> {
+            case 6, 5 -> {
                 return Float.class;
             }
         }
@@ -118,5 +118,14 @@ public class PurVouSearchTableModel extends AbstractTableModel {
 
     public VPurchase getSelectVou(int row) {
         return listDetail.get(row);
+    }
+
+    public void addObject(VPurchase t) {
+        listDetail.add(t);
+    }
+
+    public void clear() {
+        listDetail.clear();
+        fireTableDataChanged();
     }
 }
