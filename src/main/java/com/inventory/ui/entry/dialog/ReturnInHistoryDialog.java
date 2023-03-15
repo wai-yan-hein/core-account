@@ -25,16 +25,14 @@ import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.RetInVouSearchTableModel;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.time.Duration;
-import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -97,7 +95,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         super(frame, true);
         initComponents();
         initKeyListener();
-        txtTotalAmt.setFormatterFactory(Util1.getDecimalFormat());
+        txtAmt.setFormatterFactory(Util1.getDecimalFormat());
         txtPaid.setFormatterFactory(Util1.getDecimalFormat());
     }
 
@@ -121,6 +119,9 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     }
 
     private void initTableVoucher() {
+        tableModel.setTxtAmt(txtAmt);
+        tableModel.setTxtPaid(txtPaid);
+        tableModel.setTxtRecord(txtRecord);
         tableModel.setParent(tblVoucher);
         tblVoucher.setModel(tableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
@@ -158,6 +159,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     }
 
     private void search() {
+        progress.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setCusCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
@@ -170,35 +172,22 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(departmentAutoCompleter.getDepartment().getDeptId());
         //
-        Mono<ResponseEntity<List<VReturnIn>>> result = inventoryApi
+        tableModel.clear();
+        Flux<VReturnIn> result = inventoryApi
                 .post()
                 .uri("/retin/get-retin")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
-                .toEntityList(VReturnIn.class);
-        List<VReturnIn> listOP = result.block(Duration.ofMinutes(1)).getBody();
-        tableModel.setListDetail(listOP);
-        calAmount();
-    }
-
-    private void calAmount() {
-        int count = 0;
-        float ttlAmt = 0.0f;
-        float paidAmt = 0.0f;
-        List<VReturnIn> listRI = tableModel.getListDetail();
-        if (!listRI.isEmpty()) {
-            for (VReturnIn r : listRI) {
-                if (!r.isDeleted()) {
-                    ttlAmt += r.getVouTotal();
-                    paidAmt += r.getPaid();
-                    count += 1;
-                }
-            }
-        }
-        txtPaid.setValue(paidAmt);
-        txtTotalAmt.setValue(ttlAmt);
-        txtTotalRecord.setValue(count);
-        tblVoucher.requestFocus();
+                .bodyToFlux(VReturnIn.class);
+        result.subscribe((t) -> {
+            tableModel.addObject(t);
+        }, (e) -> {
+            JOptionPane.showConfirmDialog(this, e.getMessage());
+            progress.setIndeterminate(false);
+        }, () -> {
+            tableModel.fireTableDataChanged();
+            progress.setIndeterminate(false);
+        });
     }
 
     private void select() {
@@ -263,11 +252,12 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         txtPaid = new javax.swing.JFormattedTextField();
         btnSelect = new javax.swing.JButton();
         lblTtlRecord = new javax.swing.JLabel();
-        txtTotalRecord = new javax.swing.JFormattedTextField();
+        txtRecord = new javax.swing.JFormattedTextField();
         lblTtlAmount1 = new javax.swing.JLabel();
         lblTtlAmount = new javax.swing.JLabel();
-        txtTotalAmt = new javax.swing.JFormattedTextField();
+        txtAmt = new javax.swing.JFormattedTextField();
         btnSearch = new javax.swing.JButton();
+        progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Return In Voucher Search");
@@ -516,9 +506,9 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         lblTtlRecord.setFont(Global.lableFont);
         lblTtlRecord.setText("Total Record :");
 
-        txtTotalRecord.setEditable(false);
-        txtTotalRecord.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtTotalRecord.setFont(Global.amtFont);
+        txtRecord.setEditable(false);
+        txtRecord.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtRecord.setFont(Global.amtFont);
 
         lblTtlAmount1.setFont(Global.lableFont);
         lblTtlAmount1.setText("Total Paid :");
@@ -526,10 +516,10 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         lblTtlAmount.setFont(Global.lableFont);
         lblTtlAmount.setText("Total Amount :");
 
-        txtTotalAmt.setEditable(false);
-        txtTotalAmt.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
-        txtTotalAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtTotalAmt.setFont(Global.amtFont);
+        txtAmt.setEditable(false);
+        txtAmt.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
+        txtAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtAmt.setFont(Global.amtFont);
 
         btnSearch.setFont(Global.lableFont);
         btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/search.png"))); // NOI18N
@@ -548,7 +538,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
                 .addContainerGap()
                 .addComponent(lblTtlRecord)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtTotalRecord)
+                .addComponent(txtRecord)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblTtlAmount1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -556,7 +546,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblTtlAmount)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtTotalAmt)
+                .addComponent(txtAmt)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnSearch)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -572,8 +562,8 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(lblTtlRecord)
                         .addComponent(lblTtlAmount)
-                        .addComponent(txtTotalRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(txtTotalAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(lblTtlAmount1)
                         .addComponent(txtPaid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(btnSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
@@ -584,23 +574,28 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jLabel1)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtFilter))
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane2)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtFilter))
+                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -704,18 +699,19 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     private javax.swing.JLabel lblTtlAmount;
     private javax.swing.JLabel lblTtlAmount1;
     private javax.swing.JLabel lblTtlRecord;
+    private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblVoucher;
+    private javax.swing.JFormattedTextField txtAmt;
     private javax.swing.JTextField txtCus;
     private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
     private javax.swing.JTextField txtLocation;
     private javax.swing.JFormattedTextField txtPaid;
+    private javax.swing.JFormattedTextField txtRecord;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtStock;
     private com.toedter.calendar.JDateChooser txtToDate;
-    private javax.swing.JFormattedTextField txtTotalAmt;
-    private javax.swing.JFormattedTextField txtTotalRecord;
     private javax.swing.JTextField txtUser;
     private javax.swing.JTextField txtVouNo;
     // End of variables declaration//GEN-END:variables

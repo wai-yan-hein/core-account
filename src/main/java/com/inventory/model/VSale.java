@@ -66,4 +66,5 @@ public class VSale {
     private String stockTypeName;
     private String refNo;
     private Integer deptId;
+    private String reference;
 }

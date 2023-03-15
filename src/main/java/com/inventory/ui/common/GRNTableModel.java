@@ -168,6 +168,9 @@ public class GRNTableModel extends AbstractTableModel {
                         return record.getLocName();
                     }
                     case 4 -> {
+                        if (Util1.getFloat(record.getWeight()) == 0) {
+                            return null;
+                        }
                         return record.getWeight();
                     }
                     case 5 -> {
@@ -183,7 +186,8 @@ public class GRNTableModel extends AbstractTableModel {
                     }
 
                     case 8 -> {
-                        return Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight());
+                        float ttl = Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight());
+                        return ttl == 0 ? null : ttl;
                     }
                     default -> {
                         return new Object();

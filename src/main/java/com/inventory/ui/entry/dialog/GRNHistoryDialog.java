@@ -35,6 +35,7 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 
 /**
  *
@@ -156,6 +157,8 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
     }
 
     private void search() {
+        tableModel.clear();
+        txtTotalRecord.setValue(0);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
@@ -167,9 +170,16 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
         filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
         filter.setDeleted(chkDel.isSelected());
         filter.setClose(chkClose.isSelected());
-        List<GRN> list = inventoryRepo.getGRNHistory(filter);
-        tableModel.setListDetail(list);
-        txtTotalRecord.setValue(list.size());
+        filter.setBatchNo(txtBatchNo.getText());
+        Flux<GRN> result = inventoryRepo.getGRNHistory(filter);
+        result.subscribe((t) -> {
+            tableModel.addObject(t);
+            txtTotalRecord.setValue(tableModel.getSize());
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }, () -> {
+            tableModel.fireTableDataChanged();
+        });
     }
 
     private void select() {
@@ -199,6 +209,7 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
         txtToDate.setDate(Util1.getTodayDate());
         txtVouNo.setText(null);
         txtRemark.setText(null);
+        txtBatchNo.setText(null);
         traderAutoCompleter.setTrader(new Trader("-", "All"));
         stockAutoCompleter.setStock(new Stock("-", "All"));
         appUserAutoCompleter.setAppUser(new AppUser("-", "All"));

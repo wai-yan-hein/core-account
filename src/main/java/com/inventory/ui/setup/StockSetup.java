@@ -55,6 +55,7 @@ import javax.swing.text.JTextComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 
 /**
  *
@@ -217,8 +218,19 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
     private void searchStock() {
         progress.setIndeterminate(true);
-        stockTableModel.setListStock(inventoryRepo.getStock(false));
-        progress.setIndeterminate(false);
+        Flux<Stock> result = inventoryRepo.getStock(false);
+        List<Stock> list = new ArrayList<>();
+        result.subscribe((t) -> {
+            list.add(t);
+            lblRecord.setText(list.size() + "");
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+            progress.setIndeterminate(false);
+        }, () -> {
+            stockTableModel.setListStock(list);
+            progress.setIndeterminate(false);
+        });
+
     }
 
     private void initCombo() {

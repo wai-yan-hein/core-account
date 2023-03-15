@@ -24,18 +24,23 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="1" attributes="0">
-              <EmptySpace min="-2" max="-2" attributes="0"/>
-              <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
+          <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jScrollPane2" alignment="0" max="32767" attributes="0"/>
-                  <Group type="102" alignment="1" attributes="0">
-                      <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                  <Component id="progress" max="32767" attributes="0"/>
+                  <Group type="102" attributes="0">
+                      <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="txtFilter" max="32767" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jScrollPane2" alignment="0" max="32767" attributes="0"/>
+                          <Group type="102" alignment="1" attributes="0">
+                              <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="txtFilter" max="32767" attributes="0"/>
+                          </Group>
+                          <Component id="jPanel2" max="32767" attributes="0"/>
+                      </Group>
                   </Group>
-                  <Component id="jPanel2" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -44,6 +49,8 @@
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="progress" min="-2" pref="2" max="-2" attributes="0"/>
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
@@ -441,7 +448,7 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="lblTtlRecord" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtTotalRecord" max="32767" attributes="0"/>
+                  <Component id="txtRecord" max="32767" attributes="0"/>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                   <Component id="lblTtlAmount1" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
@@ -449,7 +456,7 @@
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                   <Component id="lblTtlAmount" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtTotalAmt" max="32767" attributes="0"/>
+                  <Component id="txtAmt" max="32767" attributes="0"/>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                   <Component id="btnSearch" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -467,8 +474,8 @@
                       <Group type="103" alignment="0" groupAlignment="3" attributes="0">
                           <Component id="lblTtlRecord" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="lblTtlAmount" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="txtTotalRecord" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="txtTotalAmt" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="txtRecord" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="txtAmt" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="lblTtlAmount1" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="txtPaid" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
@@ -514,7 +521,7 @@
             <Property name="text" type="java.lang.String" value="Total Record :"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JFormattedTextField" name="txtTotalRecord">
+        <Component class="javax.swing.JFormattedTextField" name="txtRecord">
           <Properties>
             <Property name="editable" type="boolean" value="false"/>
             <Property name="horizontalAlignment" type="int" value="4"/>
@@ -539,7 +546,7 @@
             <Property name="text" type="java.lang.String" value="Total Amount :"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JFormattedTextField" name="txtTotalAmt">
+        <Component class="javax.swing.JFormattedTextField" name="txtAmt">
           <Properties>
             <Property name="editable" type="boolean" value="false"/>
             <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor">
@@ -567,5 +574,7 @@
         </Component>
       </SubComponents>
     </Container>
+    <Component class="javax.swing.JProgressBar" name="progress">
+    </Component>
   </SubComponents>
 </Form>

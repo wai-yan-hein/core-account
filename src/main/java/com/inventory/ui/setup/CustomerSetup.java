@@ -47,6 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
 /**
  *
@@ -141,9 +142,18 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private void searchCustomer() {
         progress.setIndeterminate(true);
-        customerTabelModel.setListCustomer(inventoryRepo.getCustomer());
-        lblRecord.setText(String.valueOf(customerTabelModel.getListCustomer().size() + ""));
-        progress.setIndeterminate(false);
+        List<Trader> list = new ArrayList<>();
+        Flux<Trader> result = inventoryRepo.getCustomer();
+        result.subscribe((t) -> {
+            list.add(t);
+            lblRecord.setText(String.valueOf(list.size()));
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+            progress.setIndeterminate(false);
+        }, () -> {
+            customerTabelModel.setListCustomer(list);
+            progress.setIndeterminate(false);
+        });
 
     }
 

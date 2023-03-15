@@ -191,6 +191,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtComP.setName("purchase.commission");
         chkPrint.setName("printer.print");
         chkDisableDep.setName("disable.department");
+        chkShowExpense.setName(ProUtil.P_SHOW_EXPENSE);
+        chkShowGRN.setName(ProUtil.P_SHOW_GRN);
 
         txtPlAcc.setName(ProUtil.PL);
         txtREAcc.setName(ProUtil.RE);
@@ -262,6 +264,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkDepOption.addActionListener(action);
         chkPriceOption.addActionListener(action);
         chkDisableDep.addActionListener(action);
+        chkShowExpense.addActionListener(action);
+        chkShowGRN.addActionListener(action);
         //txt
         txtA4Report.addActionListener(action);
         txtA5Report.addActionListener(action);
@@ -319,6 +323,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkDepOption.setSelected(Util1.getBoolean(hmProperty.get(chkDepOption.getName())));
         chkPriceOption.setSelected(Util1.getBoolean(hmProperty.get(chkPriceOption.getName())));
         chkDisableDep.setSelected(Util1.getBoolean(hmProperty.get(chkDisableDep.getName())));
+        chkShowExpense.setSelected(Util1.getBoolean(hmProperty.get(chkShowExpense.getName())));
+        chkShowGRN.setSelected(Util1.getBoolean(hmProperty.get(chkShowGRN.getName())));
     }
 
     private void initTextBox() {
@@ -557,6 +563,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtPurReport = new javax.swing.JTextField();
         jLabel15 = new javax.swing.JLabel();
         txtComP = new javax.swing.JTextField();
+        chkShowExpense = new javax.swing.JCheckBox();
+        chkShowGRN = new javax.swing.JCheckBox();
         panelMac = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
         txtMac = new javax.swing.JTextField();
@@ -976,6 +984,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         txtComP.setFont(Global.textFont);
 
+        chkShowExpense.setText("Expense Show");
+
+        chkShowGRN.setText("GRN Show");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -987,12 +999,14 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     .addComponent(jSeparator4)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtPurReport, javax.swing.GroupLayout.DEFAULT_SIZE, 128, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtPurReport, javax.swing.GroupLayout.DEFAULT_SIZE, 134, Short.MAX_VALUE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtComP, javax.swing.GroupLayout.DEFAULT_SIZE, 128, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtComP, javax.swing.GroupLayout.DEFAULT_SIZE, 134, Short.MAX_VALUE))
+                    .addComponent(chkShowExpense, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(chkShowGRN, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -1000,6 +1014,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(chkPurVouEdit)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkShowExpense)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkShowGRN)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1236,6 +1254,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JCheckBox chkSVou;
     private javax.swing.JCheckBox chkSWB;
     private javax.swing.JCheckBox chkSalePaid;
+    private javax.swing.JCheckBox chkShowExpense;
+    private javax.swing.JCheckBox chkShowGRN;
     private javax.swing.JCheckBox chkVouEdit;
     private javax.swing.JCheckBox chkWeight;
     private javax.swing.JLabel jLabel1;

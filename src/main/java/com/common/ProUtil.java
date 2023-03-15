@@ -32,6 +32,8 @@ public class ProUtil {
     public static final String DEBTOR_ACC = "debtor.account";
     public static final String CREDITOR_GROUP = "creditor.group";
     public static final String CREDITOR_ACC = "creditor.account";
+    public static final String P_SHOW_EXPENSE = "purchase.show.expense";
+    public static final String P_SHOW_GRN = "purchase.show.grn";
 
     public static String getFontPath() {
         return Global.hmRoleProperty.get("font.path");

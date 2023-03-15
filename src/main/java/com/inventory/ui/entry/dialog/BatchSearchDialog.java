@@ -23,6 +23,7 @@ import javax.swing.RowFilter;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
 
 /**
  *
@@ -72,10 +73,16 @@ public class BatchSearchDialog extends javax.swing.JDialog {
         filter.setDeleted(false);
         filter.setClose(false);
         filter.setOrderByBatch(true);
-        List<GRN> list = inventoryRepo.getGRNHistory(filter);
-        tableModel.setListDetail(list);
-        lblRecord.setText(list.size() + "");
-        txtFilter.requestFocus();
+        Flux<GRN> result = inventoryRepo.getGRNHistory(filter);
+        result.subscribe((t) -> {
+            tableModel.addObject(t);
+            lblRecord.setText(String.valueOf(tableModel.getSize()));
+        }, (e) -> {
+        }, () -> {
+            tableModel.fireTableDataChanged();
+            txtFilter.requestFocus();
+        });
+
     }
 
     private void initTable() {

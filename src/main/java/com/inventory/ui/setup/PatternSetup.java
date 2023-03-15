@@ -171,7 +171,6 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
     }
 
     private void searchStock() {
-        stockTableModel.setListStock(inventoryRepo.getStock(true));
         ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setBrandCode(brandAutoCompleter.getBrand().getKey().getBrandCode());
         filter.setCatCode(categoryAutoCompleter.getCategory().getKey().getCatCode());

@@ -115,7 +115,6 @@ public class GRNHistoryTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
-
     public GRN getSelectVou(int row) {
         if (listDetail != null) {
             if (!listDetail.isEmpty()) {
@@ -123,5 +122,18 @@ public class GRNHistoryTableModel extends AbstractTableModel {
             }
         }
         return null;
+    }
+
+    public void addObject(GRN t) {
+        listDetail.add(t);
+    }
+
+    public int getSize() {
+        return listDetail.size();
+    }
+
+    public void clear() {
+        listDetail.clear();
+        fireTableDataChanged();
     }
 }

@@ -36,7 +36,6 @@ import com.acc.model.Gl;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
-import static com.common.ProUtil.gson;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -51,14 +50,9 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -542,7 +536,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void searchCash() {
-        long start = new GregorianCalendar().getTimeInMillis();
         progress.setIndeterminate(true);
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
         filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
@@ -575,54 +568,14 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
             progress.setIndeterminate(false);
-
         }, () -> {
             refreshModel(filter.getFromDate());
-            long end = new GregorianCalendar().getTimeInMillis();
-            log.info(end - start + "");
-            calDebitCredit();
+            calOpeningClosing();
             requestFoucsTable();
             decorator.refreshButton(filter.getFromDate());
             progress.setIndeterminate(false);
         });
         log.info("search end");
-        calOpeningClosing();
-        /*Mono<ReturnObject> result = accountApi.post()
-        .uri("/account/search-gl")
-        .body(Mono.just(filter), ReportFilter.class)
-        .retrieve()
-        .bodyToMono(ReturnObject.class);
-        result.subscribe((t) -> {
-        Util1.extractZipToJson(t.getFile(), path);
-        try {
-        Reader reader = Files.newBufferedReader(Paths.get(path.concat(".json")));
-        List<Gl> listVGl = gson.fromJson(reader, new TypeToken<ArrayList<Gl>>() {
-        }.getType());
-        txtRecord.setValue(listVGl.size());
-        if (single) {
-        dayBookTableModel.setGlDate(filter.getFromDate());
-        dayBookTableModel.setListVGl(listVGl);
-        dayBookTableModel.addNewRow();
-        } else {
-        allCashTableModel.setGlDate(filter.getFromDate());
-        allCashTableModel.setListVGl(listVGl);
-        allCashTableModel.addNewRow();
-        }
-        long end = new GregorianCalendar().getTimeInMillis();
-        log.info(end - start + "");
-        calDebitCredit();
-        //getLatestCurrency();
-        requestFoucsTable();
-        decorator.refreshButton(filter.getFromDate());
-        progress.setIndeterminate(false);
-        } catch (IOException ex) {
-        log.error(ex.getMessage());
-        }
-        
-        }, (e) -> {
-        progress.setIndeterminate(false);
-        JOptionPane.showMessageDialog(this, e.getMessage());
-        });*/
     }
 
     private void clearModel() {
@@ -1262,7 +1215,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         } else {
             listVGl = allCashTableModel.getListVGl();
         }
-        //lblTotalCount.setText(listVGl.size() - 1 + "");
         Map<String, List<Gl>> hmGroup = listVGl.stream().collect(Collectors.groupingBy(w -> w.getCurCode()));
         hmGroup.forEach((t, u) -> {
             double drAmt = 0.0;
@@ -1304,6 +1256,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
         }, () -> {
+            calDebitCredit();
         });
     }
 

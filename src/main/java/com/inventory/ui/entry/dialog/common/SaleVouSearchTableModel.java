@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SaleVouSearchTableModel extends AbstractTableModel {
 
     private List<VSale> listSaleHis = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Ref No", "Created By", "Paid Amt", "V-Total"};
+    private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Ref:", "Created By", "Paid Amt", "V-Total"};
 
     private JTable parent;
 
@@ -97,7 +97,7 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
                         return his.getRemark();
                     }
                     case 4 -> {
-                        return his.getRefNo();
+                        return his.getReference();
                     }
                     case 5 -> {
                         //user

@@ -61,6 +61,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
     @Autowired
     private WebClient inventoryApi;
     private final GRNTableModel tableModel = new GRNTableModel();
+    private final GRNHistoryDialog dialog = new GRNHistoryDialog(Global.parentForm);
     private GRN grn = new GRN();
 
     public SelectionObserver getObserver() {
@@ -292,7 +293,6 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
     }
 
     private void historyGRN() {
-        GRNHistoryDialog dialog = new GRNHistoryDialog(Global.parentForm);
         dialog.setInventoryRepo(inventoryRepo);
         dialog.setUserRepo(userRepo);
         dialog.setObserver(this);

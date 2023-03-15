@@ -373,57 +373,57 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     }
 
     private void readFile(String path) {
-        HashMap<String, Stock> hm = new HashMap<>();
+        /*HashMap<String, Stock> hm = new HashMap<>();
         listStock = inventoryRepo.getStock(false);
         if (!listStock.isEmpty()) {
-            for (Stock s : listStock) {
-                hm.put(s.getUserCode().toLowerCase(), s);
-            }
+        for (Stock s : listStock) {
+        hm.put(s.getUserCode().toLowerCase(), s);
+        }
         }
         String line;
         String splitBy = ",";
         int lineCount = 0;
         List<OPHisDetail> listOP = new ArrayList<>();
         try {
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(path), "UTF8"))) {
-                while ((line = br.readLine()) != null) //returns a Boolean value
-                {
-                    OPHisDetail op = new OPHisDetail();
-                    String[] data = line.split(splitBy);    // use comma as separator
-                    String stockCode = null;
-                    String qty = null;
-                    String price = null;
-                    lineCount++;
-                    try {
-                        stockCode = data[0];
-                        qty = data[1].replace("\"", "");
-                        price = data[2].replace("\"", "");
-
-                    } catch (IndexOutOfBoundsException e) {
-                        //JOptionPane.showMessageDialog(Global.parentForm, "FORMAT ERROR IN LINE:" + lineCount + e.getMessage());
-                    }
-                    Stock s = hm.get(stockCode.toLowerCase());
-                    if (s != null) {
-                        op.setStockCode(s.getKey().getStockCode());
-                        op.setQty(Util1.getFloat(qty));
-                        op.setPrice(Util1.getFloat(price));
-                        op.setAmount(op.getQty() * op.getPrice());
-                        op.setUnitCode("pcs");
-                        if (op.getQty() != 0) {
-                            listOP.add(op);
-                        }
-                    } else {
-                        log.info(stockCode + "\n");
-                    }
-                }
-                openingTableModel.setListDetail(listOP);
-                calculatAmount();
-            }
-        } catch (IOException e) {
-            log.error("Read CSV File :" + e.getMessage());
-
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(
+        new FileInputStream(path), "UTF8"))) {
+        while ((line = br.readLine()) != null) //returns a Boolean value
+        {
+        OPHisDetail op = new OPHisDetail();
+        String[] data = line.split(splitBy);    // use comma as separator
+        String stockCode = null;
+        String qty = null;
+        String price = null;
+        lineCount++;
+        try {
+        stockCode = data[0];
+        qty = data[1].replace("\"", "");
+        price = data[2].replace("\"", "");
+        
+        } catch (IndexOutOfBoundsException e) {
+        //JOptionPane.showMessageDialog(Global.parentForm, "FORMAT ERROR IN LINE:" + lineCount + e.getMessage());
         }
+        Stock s = hm.get(stockCode.toLowerCase());
+        if (s != null) {
+        op.setStockCode(s.getKey().getStockCode());
+        op.setQty(Util1.getFloat(qty));
+        op.setPrice(Util1.getFloat(price));
+        op.setAmount(op.getQty() * op.getPrice());
+        op.setUnitCode("pcs");
+        if (op.getQty() != 0) {
+        listOP.add(op);
+        }
+        } else {
+        log.info(stockCode + "\n");
+        }
+        }
+        openingTableModel.setListDetail(listOP);
+        calculatAmount();
+        }
+        } catch (IOException e) {
+        log.error("Read CSV File :" + e.getMessage());
+        
+        }*/
     }
 
     /**

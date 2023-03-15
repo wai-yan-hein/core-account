@@ -107,4 +107,10 @@ public class GRNSearchTableModel extends AbstractTableModel {
         }
         return null;
     }
+    public void addObject(GRN g){
+        listDetail.add(g);
+    }
+    public int getSize(){
+        return listDetail.size();
+    }
 }

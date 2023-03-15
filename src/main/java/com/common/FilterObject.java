@@ -6,7 +6,6 @@
 package com.common;
 
 import lombok.Data;
-import lombok.NonNull;
 
 /**
  *

@@ -44,6 +44,7 @@ import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
 /**
  *
@@ -136,8 +137,20 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     }
 
     private void searchSupplier() {
-        supplierTabelModel.setListCustomer(inventoryRepo.getSupplier());
-        lblRecord.setText(String.valueOf(supplierTabelModel.getListCustomer().size()));
+        progress.setIndeterminate(true);
+        List<Trader> list = new ArrayList<>();
+        Flux<Trader> result = inventoryRepo.getSupplier();
+        result.subscribe((t) -> {
+            list.add(t);
+            lblRecord.setText(String.valueOf(list.size()));
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+            progress.setIndeterminate(false);
+        }, () -> {
+            supplierTabelModel.setListCustomer(list);
+            progress.setIndeterminate(false);
+        });
+
     }
 
     private void setCustomer(Trader sup) {

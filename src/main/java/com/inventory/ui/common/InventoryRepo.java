@@ -72,6 +72,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -246,24 +247,24 @@ public class InventoryRepo {
         return result.block();
     }
 
-    public List<Trader> getCustomer() {
-        Mono<ResponseEntity<List<Trader>>> result = inventoryApi.get()
+    public Flux<Trader> getCustomer() {
+        Flux<Trader> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-customer")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
-                .retrieve().toEntityList(Trader.class);
-        return result.block().getBody();
+                .retrieve().bodyToFlux(Trader.class);
+        return result;
     }
 
-    public List<Trader> getSupplier() {
-        Mono<ResponseEntity<List<Trader>>> result = inventoryApi.get()
+    public Flux<Trader> getSupplier() {
+        Flux<Trader> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-supplier")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
-                .retrieve().toEntityList(Trader.class);
-        return result.block().getBody();
+                .retrieve().bodyToFlux(Trader.class);
+        return result;
     }
 
     public List<Trader> getTraderList(String text, String type) {
@@ -480,15 +481,15 @@ public class InventoryRepo {
         return null;
     }
 
-    public List<Stock> getStock(boolean active) {
-        Mono<ResponseEntity<List<Stock>>> result = inventoryApi.get()
+    public Flux<Stock> getStock(boolean active) {
+        Flux<Stock> result = inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-stock")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("active", active)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
-                .retrieve().toEntityList(Stock.class);
-        return result.block().getBody();
+                .retrieve().bodyToFlux(Stock.class);
+        return result;
     }
 
     public List<Stock> getStock(String str) {
@@ -1189,14 +1190,14 @@ public class InventoryRepo {
         return result.block(Duration.ofMinutes(1));
     }
 
-    public List<GRN> getGRNHistory(FilterObject filter) {
-        Mono<ResponseEntity<List<GRN>>> result = inventoryApi
+    public Flux<GRN> getGRNHistory(FilterObject filter) {
+        Flux<GRN> result = inventoryApi
                 .post()
                 .uri("/grn/history")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
-                .toEntityList(GRN.class);
-        return result.block(Duration.ofMinutes(5)).getBody();
+                .bodyToFlux(GRN.class);
+        return result;
     }
 
     public List<SaleHisDetail> getSaleByBatch(String batchNo) {
@@ -1209,6 +1210,5 @@ public class InventoryRepo {
                 .retrieve().toEntityList(SaleHisDetail.class);
         return result.block().getBody();
     }
-    
 
 }

@@ -737,7 +737,6 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                     param.put("p_comp_address", Global.companyAddress);
                     param.put("p_comp_phone", Global.companyPhone);
                     param.put("p_logo_path", logoPath);
-                    param.put("p_trader_name", trader.getTraderName());
                     param.put("p_remark", p.getRemark());
                     param.put("p_vou_no", vouNo);
                     param.put("p_vou_date", Util1.toDateStr(p.getVouDate(), "dd/MM/yyyy"));
