@@ -9,6 +9,7 @@ import com.acc.common.AccountRepo;
 import com.acc.common.CurExchangeRateTableModel;
 import com.acc.common.DateAutoCompleter;
 import com.acc.dialog.ExchangeDialog;
+import com.acc.model.ReportFilter;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
@@ -21,6 +22,7 @@ import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
 /**
  *
@@ -87,14 +89,20 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
     private void searchExchange() {
         String fromDate = dateAutoCompleter.getStDate();
         String toDate = dateAutoCompleter.getEndDate();
-        List<CurExchange> listEx = accountRepo.searchExchange();
-        exchangeTableModel.setListEx(listEx);
-        double amt = 0.0;
-        for (CurExchange e : listEx) {
-            amt += e.getExRate();
-        }
-        txtAvg.setValue(amt / listEx.size());
-        txtRecord.setText("" + listEx.size());
+        ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
+        filter.setFromDate(fromDate);
+        filter.setToDate(toDate);
+        Flux<CurExchange> result = accountRepo.searchExchange(filter);
+        result.subscribe((t) -> {
+            exchangeTableModel.addEX(t);
+        }, (e) -> {
+        }, () -> {
+            List<CurExchange> list = exchangeTableModel.getListEx();
+            double amt = list.stream().mapToDouble(CurExchange::getExRate).sum();
+            txtAvg.setValue(amt / list.size());
+            txtRecord.setText("" + list.size());
+        });
+
     }
 
     private void selectExchange() {

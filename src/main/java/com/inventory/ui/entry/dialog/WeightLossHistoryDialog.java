@@ -136,12 +136,20 @@ public class WeightLossHistoryDialog extends javax.swing.JDialog implements KeyL
     }
 
     private void initCombo() {
-        List<Location> listLocation = inventoryRepo.getLocation();
-        appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
+        inventoryRepo.getLocation().subscribe((t) -> {
+            locationAutoCompleter = new LocationAutoCompleter(txtLoc, t, null, true, false);
+        });
+        userRepo.getAppUser().subscribe((t) -> {
+            appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
+        });
+        userRepo.getDeparment().subscribe((t) -> {
+            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true);
+            userRepo.findDepartment(Global.deptId).subscribe((tt) -> {
+                departmentAutoCompleter.setDepartment(tt);
+            });
+        });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
-        locationAutoCompleter = new LocationAutoCompleter(txtLoc, listLocation, null, true, false);
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, userRepo.getDeparment(), null, true);
-        departmentAutoCompleter.setDepartment(userRepo.findDepartment(Global.deptId));
+
     }
 
     private void initTableVoucher() {

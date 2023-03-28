@@ -38,7 +38,6 @@ public class RoleCompany extends javax.swing.JPanel {
     @Autowired
     private WebClient userApi;
     private final RoleCompanyTableModel tableModel = new RoleCompanyTableModel();
-    private List<CompanyInfo> listCompany;
     private JProgressBar progress;
 
     public JProgressBar getProgress() {
@@ -66,7 +65,6 @@ public class RoleCompany extends javax.swing.JPanel {
     }
 
     public void initTable() {
-        listCompany = userRepo.getCompany();
         tableModel.setUserRepo(userRepo);
         tblSystem.setModel(tableModel);
         tblSystem.getTableHeader().setFont(Global.tblHeaderFont);

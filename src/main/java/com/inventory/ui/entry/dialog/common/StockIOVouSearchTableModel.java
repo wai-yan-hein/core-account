@@ -110,4 +110,17 @@ public class StockIOVouSearchTableModel extends AbstractTableModel {
     public VStockIO getSelectVou(int row) {
         return listDetail.get(row);
     }
+
+    public void addObject(VStockIO t) {
+        listDetail.add(t);
+    }
+
+    public int getSize() {
+        return listDetail.size();
+    }
+
+    public void clear() {
+        listDetail.clear();
+        fireTableDataChanged();
+    }
 }

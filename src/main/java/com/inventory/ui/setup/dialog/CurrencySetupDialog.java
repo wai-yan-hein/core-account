@@ -79,7 +79,9 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
         });
         tblCurrency.setRowHeight(Global.tblRowHeight);
         tblCurrency.setDefaultRenderer(Object.class, new TableCellRender());
-        currencyTabelModel.setListCurrency(inventoryRepo.getCurrency());
+        inventoryRepo.getCurrency().subscribe((t) -> {
+            currencyTabelModel.setListCurrency(t);
+        });
     }
 
     private void saveCurrency() {

@@ -8,7 +8,7 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.common.model.Menu;
+import com.user.model.Menu;
 import com.inventory.ui.setup.dialog.common.MenuTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;

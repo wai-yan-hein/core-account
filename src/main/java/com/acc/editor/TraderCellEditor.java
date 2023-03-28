@@ -38,10 +38,14 @@ public class TraderCellEditor extends AbstractCellEditor implements TableCellEdi
 
         @Override
         public void focusGained(FocusEvent e) {
-            JTextField jtf = (JTextField) e.getSource();
-            String lastString = jtf.getText().substring(jtf.getText().length() - 1);
-            jtf.setText("");
-            jtf.setText(lastString);
+            try {
+                JTextField jtf = (JTextField) e.getSource();
+                String lastString = jtf.getText().substring(jtf.getText().length() - 1);
+                jtf.setText("");
+                jtf.setText(lastString);
+            } catch (Exception ex) {
+
+            }
         }
 
     };

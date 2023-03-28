@@ -10,6 +10,7 @@ import com.acc.common.JournalTableModel;
 import com.acc.dialog.JournalEntryDialog;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.model.DeleteObj;
+import com.acc.model.Department;
 import com.acc.model.Gl;
 import com.common.Global;
 import com.acc.model.ReportFilter;
@@ -23,6 +24,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -97,10 +99,12 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
                     obj.setGlVouNo(glVouNo);
                     obj.setCompCode(Global.compCode);
                     obj.setModifyBy(Global.loginUser.getUserCode());
-                    if (accountRepo.deleteVoucher(obj)) {
-                        tableModel.delete(selectRow);
-                        focusOnTable();
-                    }
+                    accountRepo.deleteVoucher(obj).subscribe((t) -> {
+                        if (t) {
+                            tableModel.delete(selectRow);
+                            focusOnTable();
+                        }
+                    });
                 }
             }
         }
@@ -137,12 +141,16 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         }
     };
 
+    private List<String> getListDep() {
+        return departmentAutoCompleter == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
+    }
+
     private void searchJournal() {
         progress.setIndeterminate(true);
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
         filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
         filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
-        filter.setListDepartment(departmentAutoCompleter.getListOption());
+        filter.setListDepartment(getListDep());
         filter.setDesp(txtDesp.getText());
         filter.setReference(txtRefrence.getText());
         filter.setGlVouNo(txtVouNo.getText());
@@ -175,8 +183,11 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     private void initCompleter() {
         dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
         dateAutoCompleter.setSelectionObserver(this);
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, accountRepo.getDepartment(), null, true, true);
-        departmentAutoCompleter.setObserver(this);
+        Mono<List<Department>> monoDep = accountRepo.getDepartment();
+        monoDep.subscribe((t) -> {
+            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true, true);
+            departmentAutoCompleter.setObserver(this);
+        });
     }
 
     private void initTable() {

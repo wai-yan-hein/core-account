@@ -12,25 +12,22 @@ import com.acc.model.Department;
 import com.acc.model.DepartmentKey;
 import com.acc.model.Gl;
 import com.acc.model.OpeningBalance;
+import com.acc.model.OpeningKey;
 import com.acc.model.ReportFilter;
 import com.acc.model.StockOP;
 import com.acc.model.TmpOpening;
 import com.acc.model.TraderA;
 import com.acc.model.TraderAKey;
-import com.acc.model.VDescription;
-import com.acc.model.VRef;
-import com.acc.report.StockOPKey;
+import com.acc.model.StockOPKey;
 import com.common.Global;
 import com.common.ReturnObject;
 import com.common.Util1;
 import com.user.model.CurExchange;
 import com.user.model.ExchangeKey;
-import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -47,302 +44,250 @@ public class AccountRepo {
     @Autowired
     private WebClient accountApi;
 
-    public Department getDefaultDepartment() {
+    public Mono<Department> getDefaultDepartment() {
         String deptCode = Global.hmRoleProperty.get("default.department");
         return findDepartment(Util1.isNull(deptCode, "-"));
     }
 
-    public ChartOfAccount getDefaultCash() {
+    public Mono<ChartOfAccount> getDefaultCash() {
         String coaCode = Global.hmRoleProperty.get("default.cash");
         return findCOA(Util1.isNull(coaCode, "-"));
     }
 
-    public Department findDepartment(String deptCode) {
-        try {
-            DepartmentKey key = new DepartmentKey();
-            key.setDeptCode(Util1.isNull(deptCode, "-"));
-            key.setCompCode(Global.compCode);
-            Mono<Department> result = accountApi.post()
-                    .uri("/account/find-department")
-                    .body(Mono.just(key), DepartmentKey.class)
-                    .retrieve()
-                    .bodyToMono(Department.class);
-            return result.block();
-        } catch (Exception e) {
-            log.error("findDepartment : " + e.getMessage());
-        }
-        return null;
+    public Mono<Department> findDepartment(String deptCode) {
+        DepartmentKey key = new DepartmentKey();
+        key.setDeptCode(Util1.isNull(deptCode, "-"));
+        key.setCompCode(Global.compCode);
+        return accountApi.post()
+                .uri("/account/find-department")
+                .body(Mono.just(key), DepartmentKey.class)
+                .retrieve()
+                .bodyToMono(Department.class);
     }
 
-    public Currency findCurrency(String curCode) {
-        Mono<ResponseEntity<Currency>> result = accountApi.get()
+    public Mono<Currency> findCurrency(String curCode) {
+        return accountApi.get()
                 .uri(builder -> builder.path("/account/find-currency")
                 .queryParam("curCode", curCode)
                 .build())
-                .retrieve().toEntity(Currency.class);
-        return result.block().getBody();
+                .exchangeToMono((r) -> {
+                    if (r.statusCode().is2xxSuccessful()) {
+                        return r.bodyToMono(Currency.class);
+                    }
+                    return null;
+                });
     }
 
-    public List<Department> getDepartment() {
-        try {
-            Mono<ResponseEntity<List<Department>>> result = accountApi.get()
-                    .uri(builder -> builder.path("/account/get-department")
-                    .queryParam("compCode", Global.compCode)
-                    .build())
-                    .retrieve()
-                    .toEntityList(Department.class);
-            return result.block().getBody();
-        } catch (Exception e) {
-            log.error("getDepartment : " + e.getMessage());
-        }
-        return new ArrayList<>();
+    public Mono<List<Department>> getDepartment() {
+        return accountApi.get()
+                .uri(builder -> builder.path("/account/get-department")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(Department.class).collectList();
     }
 
-    public List<TraderA> getTrader() {
-        Mono<ResponseEntity<List<TraderA>>> result = accountApi.get()
+    public Flux<TraderA> getTrader() {
+        return accountApi.get()
                 .uri(builder -> builder.path("/account/get-trader")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().toEntityList(TraderA.class);
-        return result.block().getBody();
+                .retrieve().bodyToFlux(TraderA.class);
     }
 
-    public List<TraderA> getTrader(String text) {
-        Mono<ResponseEntity<List<TraderA>>> result = accountApi.get()
+    public Flux<TraderA> getTrader(String text) {
+        return accountApi.get()
                 .uri(builder -> builder.path("/account/search-trader")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("text", text)
                 .build())
-                .retrieve().toEntityList(TraderA.class);
-        return result.block().getBody();
+                .retrieve().bodyToFlux(TraderA.class);
     }
 
-    public List<ChartOfAccount> getChartOfAccount() {
-        Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get()
+    public Flux<ChartOfAccount> getChartOfAccount() {
+        return accountApi.get()
                 .uri(builder -> builder.path("/account/get-coa")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().toEntityList(ChartOfAccount.class);
-        return result.block().getBody();
+                .retrieve().bodyToFlux(ChartOfAccount.class);
     }
 
-    public List<ChartOfAccount> getTraderAccount() {
-        Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get()
+    public Flux<ChartOfAccount> getTraderAccount() {
+        return accountApi.get()
                 .uri(builder -> builder.path("/account/get-trader-coa")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().toEntityList(ChartOfAccount.class);
-        return result.block().getBody();
+                .retrieve().bodyToFlux(ChartOfAccount.class);
     }
 
-    public List<Currency> getCurrency() {
-        Mono<ResponseEntity<List<Currency>>> result = accountApi.get()
+    public Mono<List<Currency>> getCurrency() {
+        return accountApi.get()
                 .uri(builder -> builder.path("/account/get-currency")
                 .build())
-                .retrieve().toEntityList(Currency.class);
-        return result.block().getBody();
+                .retrieve().bodyToFlux(Currency.class).collectList().cache();
     }
 
-    public List<VRef> getReference(String str) {
-        Mono<ResponseEntity<List<VRef>>> result = accountApi.get()
-                .uri(builder -> builder.path("/account/get-reference")
-                .queryParam("compCode", Global.compCode)
-                .queryParam("str", str)
-                .build())
-                .retrieve().toEntityList(VRef.class);
-        return result.block().getBody();
-    }
-
-    public List<VDescription> getDescription(String str) {
-        Mono<ResponseEntity<List<VDescription>>> result = accountApi.get()
-                .uri(builder -> builder.path("/account/get-description")
-                .queryParam("compCode", Global.compCode)
-                .queryParam("str", str)
-                .build())
-                .retrieve().toEntityList(VDescription.class);
-        return result.block().getBody();
-    }
-
-    public List<Gl> getTranSource() {
-        Mono<ResponseEntity<List<Gl>>> result = accountApi.get()
+    public Flux<Gl> getTranSource() {
+        return accountApi.get()
                 .uri(builder -> builder.path("/account/get-tran-source")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().toEntityList(Gl.class);
-        return result.block().getBody();
+                .retrieve().bodyToFlux(Gl.class);
     }
 
-    public Gl saveGl(Gl gl) {
-        Mono<Gl> result = accountApi.post()
+    public Mono<Gl> saveGl(Gl gl) {
+        return accountApi.post()
                 .uri("/account/save-gl")
                 .body(Mono.just(gl), Gl.class)
                 .retrieve()
                 .bodyToMono(Gl.class);
-        return result.block();
     }
 
-    public ReturnObject saveGl(List<Gl> gl) {
-        Mono<ReturnObject> result = accountApi.post()
+    public Mono<ReturnObject> saveGl(List<Gl> gl) {
+        return accountApi.post()
                 .uri("/account/save-gl-list")
                 .body(Mono.just(gl), List.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class);
-        return result.block();
     }
 
-    public boolean delete(DeleteObj obj) {
-        Mono<Boolean> result = accountApi.post()
+    public Mono<Boolean> delete(DeleteObj obj) {
+        return accountApi.post()
                 .uri("/account/delete-gl")
                 .body(Mono.just(obj), DeleteObj.class)
                 .retrieve()
                 .bodyToMono(Boolean.class);
-        return result.block();
     }
 
-    public boolean delete(ExchangeKey obj) {
-        Mono<Boolean> result = accountApi.post()
+    public Mono<Boolean> delete(OpeningKey key) {
+        return accountApi.post()
+                .uri("/account/delete-op")
+                .body(Mono.just(key), DeleteObj.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchangeToMono((r) -> {
+                    if (r.statusCode().is2xxSuccessful()) {
+                        return r.bodyToMono(Boolean.class);
+                    }
+                    return Mono.error(new RuntimeException("Failed to delete."));
+                });
+    }
+
+    public Mono<Boolean> delete(ExchangeKey obj) {
+        return accountApi.post()
                 .uri("/account/delete-exchange")
                 .body(Mono.just(obj), DeleteObj.class)
                 .retrieve()
                 .bodyToMono(Boolean.class);
-        return result.block();
     }
 
-    public boolean deleteVoucher(DeleteObj gl) {
-        Mono<Boolean> result = accountApi.post()
+    public Mono<Boolean> deleteVoucher(DeleteObj gl) {
+        return accountApi.post()
                 .uri("/account/delete-voucher")
                 .body(Mono.just(gl), DeleteObj.class)
                 .retrieve()
                 .bodyToMono(Boolean.class);
-        return result.block();
     }
 
-    public boolean delete(StockOPKey key) {
-        Mono<Boolean> result = accountApi.post()
+    public Mono<Boolean> delete(StockOPKey key) {
+        return accountApi.post()
                 .uri("/account/delete-stock-op")
                 .body(Mono.just(key), StockOPKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class);
-        return result.block();
     }
 
-    public ChartOfAccount saveCOA(ChartOfAccount coa) {
-        Mono<ChartOfAccount> result = accountApi.post()
+    public Mono<ChartOfAccount> saveCOA(ChartOfAccount coa) {
+        return accountApi.post()
                 .uri("/account/save-coa")
                 .body(Mono.just(coa), ChartOfAccount.class)
                 .retrieve()
                 .bodyToMono(ChartOfAccount.class);
-        return result.block();
     }
 
-    public double getTraderBalance(String date, String traderCode, String compCode) {
-        Mono<ResponseEntity<Double>> result = accountApi.get()
+    public Mono<Double> getTraderBalance(String date, String traderCode, String compCode) {
+        return accountApi.get()
                 .uri(builder -> builder.path("/account/report/get-trader-balance")
                 .queryParam("date", date)
                 .queryParam("traderCode", traderCode)
                 .queryParam("compCode", compCode)
                 .build())
-                .retrieve().toEntity(Double.class);
-        return result.block().getBody();
+                .retrieve().bodyToMono(Double.class);
     }
 
-    public List<ChartOfAccount> getCOAChild(String coaCode) {
-        try {
-            Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get()
-                    .uri(builder -> builder.path("/account/get-coa-child")
-                    .queryParam("coaCode", coaCode)
-                    .queryParam("compCode", Global.compCode)
-                    .build())
-                    .retrieve().toEntityList(ChartOfAccount.class);
-            return result.block().getBody();
-        } catch (Exception e) {
-            log.error("getCOAChild : " + e.getMessage());
-        }
-        return new ArrayList<>();
-    }
-
-    public List<ChartOfAccount> getCOA(String str, Integer level) {
-        Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get()
-                .uri(builder -> builder.path("/account/search-coa")
-                .queryParam("str", str)
-                .queryParam("level", level)
+    public Flux<ChartOfAccount> getCOAChild(String coaCode) {
+        return accountApi.get()
+                .uri(builder -> builder.path("/account/get-coa-child")
+                .queryParam("coaCode", coaCode)
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().toEntityList(ChartOfAccount.class);
-        return result.block().getBody();
+                .retrieve().bodyToFlux(ChartOfAccount.class);
     }
 
-    public List<ChartOfAccount> getCOA3(String headCode) {
-        Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get()
+    public Flux<ChartOfAccount> getCOA3(String headCode) {
+        return accountApi.get()
                 .uri(builder -> builder.path("/account/get-coa3")
                 .queryParam("headCode", headCode)
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().toEntityList(ChartOfAccount.class);
-        return result.block().getBody();
+                .retrieve().bodyToFlux(ChartOfAccount.class);
     }
 
-    public List<Gl> getJournal(String vouNo) {
-        Mono<ResponseEntity<List<Gl>>> result = accountApi.get()
+    public Flux<Gl> getJournal(String vouNo) {
+        return accountApi.get()
                 .uri(builder -> builder.path("/account/get-journal")
                 .queryParam("glVouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().toEntityList(Gl.class);
-        return result.block().getBody();
+                .retrieve().bodyToFlux(Gl.class);
     }
 
-    public List<Gl> getVoucher(String vouNo) {
-        Mono<ResponseEntity<List<Gl>>> result = accountApi.get()
+    public Flux<Gl> getVoucher(String vouNo) {
+        return accountApi.get()
                 .uri(builder -> builder.path("/account/get-voucher")
                 .queryParam("glVouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().toEntityList(Gl.class);
-        return result.block().getBody();
+                .retrieve().bodyToFlux(Gl.class);
     }
 
-    public ChartOfAccount findCOA(String coaCode) {
-        try {
-            COAKey key = new COAKey();
-            key.setCoaCode(coaCode);
-            key.setCompCode(Global.compCode);
-            Mono<ResponseEntity<ChartOfAccount>> result = accountApi.post()
-                    .uri("/account/find-coa")
-                    .body(Mono.just(key), COAKey.class)
-                    .retrieve().toEntity(ChartOfAccount.class);
-            return result.block().getBody();
-        } catch (Exception e) {
-            log.error("findCOA : " + e.getMessage());
-        }
-        return null;
+    public Mono<ChartOfAccount> findCOA(String coaCode) {
+        COAKey key = new COAKey();
+        key.setCoaCode(coaCode);
+        key.setCompCode(Global.compCode);
+        return accountApi.post()
+                .uri("/account/find-coa")
+                .body(Mono.just(key), COAKey.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchangeToMono((r) -> {
+                    if (r.statusCode().is2xxSuccessful()) {
+                        return r.bodyToMono(ChartOfAccount.class);
+                    }
+                    return Mono.error(new RuntimeException("Failed to retreive."));
+                });
     }
 
-    public Department saveDepartment(Department dep) {
-        Mono<Department> result = accountApi.post()
+    public Mono<Department> saveDepartment(Department dep) {
+        return accountApi.post()
                 .uri("/account/save-department")
                 .body(Mono.just(dep), Department.class)
                 .retrieve()
                 .bodyToMono(Department.class);
-        return result.block();
     }
 
-    public List<Department> getDepartmentTree() {
-        Mono<ResponseEntity<List<Department>>> result = accountApi.get()
+    public Flux<Department> getDepartmentTree() {
+        return accountApi.get()
                 .uri(builder -> builder.path("/account/get-department-tree")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().toEntityList(Department.class);
-        return result.block().getBody();
+                .retrieve().bodyToFlux(Department.class);
     }
 
-    public OpeningBalance saveCOAOpening(OpeningBalance opening) {
-        Mono<OpeningBalance> result = accountApi.post()
+    public Mono<OpeningBalance> saveCOAOpening(OpeningBalance opening) {
+        return accountApi.post()
                 .uri("/account/save-opening")
                 .body(Mono.just(opening), OpeningBalance.class)
                 .retrieve()
                 .bodyToMono(OpeningBalance.class);
-        return result.block();
     }
 
     public Mono<TmpOpening> getOpening(ReportFilter filter) {
@@ -354,30 +299,44 @@ public class AccountRepo {
         return result;
     }
 
-    public StockOP save(StockOP op) {
-        Mono<StockOP> result = accountApi.post()
+    public Mono<StockOP> save(StockOP op) {
+        return accountApi.post()
                 .uri("/account/save-stock-op")
                 .body(Mono.just(op), StockOP.class)
                 .retrieve()
                 .bodyToMono(StockOP.class);
-        return result.block();
     }
 
-    public TraderA saveTrader(TraderA t) {
-        Mono<TraderA> result = accountApi.post()
+    public Mono<TraderA> saveTrader(TraderA t) {
+        return accountApi.post()
                 .uri("/account/save-trader")
                 .body(Mono.just(t), TraderA.class)
                 .retrieve()
                 .bodyToMono(TraderA.class);
-        return result.block();
     }
 
     public List<String> deleteTrader(TraderAKey key) {
         return null;
     }
 
-    public List<CurExchange> searchExchange() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public Flux<CurExchange> searchExchange(ReportFilter filter) {
+        return accountApi.post()
+                .uri("/account/search-exchange")
+                .accept(MediaType.APPLICATION_JSON)
+                .body(Mono.just(filter), ReportFilter.class)
+                .exchangeToFlux((t) -> {
+                    if (t.statusCode().is2xxSuccessful()) {
+                        return t.bodyToFlux(CurExchange.class);
+                    }
+                    return null;
+                });
     }
 
+    public Flux<Gl> listenGl() {
+        return accountApi.get()
+                .uri(builder -> builder.path("/gl/receive")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().bodyToFlux(Gl.class);
+    }
 }

@@ -91,9 +91,16 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     private LocationAutoCompleter locationAutoCompleter;
     private SelectionObserver observer;
     private JProgressBar progress;
-    private List<Location> listLocation = new ArrayList<>();
-
+    private Mono<List<Location>> monoLoc;
     private RetOutHis ri = new RetOutHis();
+
+    public LocationAutoCompleter getLocationAutoCompleter() {
+        return locationAutoCompleter;
+    }
+
+    public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
+        this.locationAutoCompleter = locationAutoCompleter;
+    }
 
     public SelectionObserver getObserver() {
         return observer;
@@ -165,7 +172,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         roTableModel.setInventoryRepo(inventoryRepo);
         roTableModel.setVouDate(vouDate);
         roTableModel.setLblRec(lblRec);
-        roTableModel.setLocationAutoCompleter(locationAutoCompleter);
+        roTableModel.setReturnOut(this);
         roTableModel.addNewRow();
         roTableModel.setSelectionObserver(this);
         tblRet.getTableHeader().setFont(Global.tblHeaderFont);
@@ -180,9 +187,13 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         tblRet.getColumnModel().getColumn(7).setPreferredWidth(40);//amt
         tblRet.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblRet.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblRet.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(listLocation));
+        monoLoc.subscribe((t) -> {
+            tblRet.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
+        });
         tblRet.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
-        tblRet.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
+        inventoryRepo.getStockUnit().subscribe((t) -> {
+            tblRet.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));
+        });
         tblRet.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
         tblRet.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
         tblRet.setDefaultRenderer(Object.class, new DecimalFormatRender());
@@ -194,11 +205,23 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     }
 
     private void initCombo() {
-        listLocation = inventoryRepo.getLocation();
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "SUP");
-        currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, inventoryRepo.getCurrency(), null, false);
-        locationAutoCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, false, false);
-        locationAutoCompleter.setObserver(this);
+        traderAutoCompleter.setObserver(this);
+        monoLoc = inventoryRepo.getLocation();
+        monoLoc.subscribe((t) -> {
+            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
+            locationAutoCompleter.setObserver(this);
+            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
+                locationAutoCompleter.setLocation(tt);
+            });
+        });
+        inventoryRepo.getCurrency().subscribe((t) -> {
+            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
+            currAutoCompleter.setObserver(this);
+            userRepo.getDefaultCurrency().subscribe((tt) -> {
+                currAutoCompleter.setCurrency(tt);
+            });
+        });
     }
 
     private void initKeyListener() {
@@ -221,7 +244,6 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         txtVouTaxP.setValue(0.00);
         txtVouDiscP.setValue(0.00);
         txtGrandTotal.setValue(0.00);
-        txtLocation.setText(null);
     }
 
     private void initTextBoxFormat() {
@@ -237,9 +259,10 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
 
     private void assignDefaultValue() {
         vouDate.setDate(Util1.getTodayDate());
-        traderAutoCompleter.setTrader(inventoryRepo.getDefaultCustomer());
-        currAutoCompleter.setCurrency(userRepo.getDefaultCurrency());
-        locationAutoCompleter.setLocation(inventoryRepo.getDefaultLocation());
+        Mono<Trader> trader = inventoryRepo.findTrader(Global.hmRoleProperty.get("default.supplier"), Global.deptId);
+        trader.subscribe((t) -> {
+            traderAutoCompleter.setTrader(t);
+        });
         progress.setIndeterminate(false);
         txtCurrency.setEnabled(ProUtil.isMultiCur());
         txtVouNo.setText(null);
@@ -460,8 +483,13 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             progress.setIndeterminate(true);
             ri = ro;
             Integer deptId = ri.getKey().getDeptId();
-            locationAutoCompleter.setLocation(inventoryRepo.findLocation(ri.getLocCode(), deptId));
-            traderAutoCompleter.setTrader(inventoryRepo.findTrader(ri.getTraderCode(), deptId));
+            inventoryRepo.findLocation(ri.getLocCode(), deptId).subscribe((t) -> {
+                locationAutoCompleter.setLocation(t);
+            });
+            Mono<Trader> trader = inventoryRepo.findTrader(ri.getTraderCode(), deptId);
+            trader.subscribe((t) -> {
+                traderAutoCompleter.setTrader(t);
+            });
             currAutoCompleter.setCurrency(inventoryRepo.findCurrency(ri.getCurCode()));
             String vouNo = ri.getKey().getVouNo();
             Mono<ResponseEntity<List<RetOutHisDetail>>> result = inventoryApi.get()
@@ -1024,8 +1052,6 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         observer.selected("control", this);
-        focusTable();
-
     }//GEN-LAST:event_formComponentShown
 
     private void txtCusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCusActionPerformed

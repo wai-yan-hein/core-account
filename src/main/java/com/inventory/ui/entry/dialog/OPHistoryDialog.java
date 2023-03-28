@@ -15,7 +15,6 @@ import com.inventory.editor.AppUserAutoCompleter;
 import com.inventory.editor.DepartmentAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.model.OPHis;
-import com.inventory.model.VOpening;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.OPVouSearchTableModel;
 import java.awt.event.KeyEvent;
@@ -100,10 +99,16 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
     }
 
     private void initCombo() {
-        appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
+        userRepo.getAppUser().subscribe((t) -> {
+            appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
+        });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, userRepo.getDeparment(), null, true);
-        departmentAutoCompleter.setDepartment(userRepo.findDepartment(Global.deptId));
+        userRepo.getDeparment().subscribe((t) -> {
+            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true);
+            userRepo.findDepartment(Global.deptId).subscribe((tt) -> {
+                departmentAutoCompleter.setDepartment(tt);
+            });
+        });
 
     }
 
@@ -128,37 +133,46 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
         }
     }
 
+    private String getUserCode() {
+        return appUserAutoCompleter == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
+    }
+
+    private Integer getDepId() {
+        return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
+    }
+
     private void search() {
         progess.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
-        filter.setUserCode(appUserAutoCompleter.getAppUser().getUserCode());
+        filter.setUserCode(getUserCode());
         filter.setVouNo(txtVouNo.getText());
         filter.setRemark(txtRemark.getText());
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
-        filter.setDeptId(departmentAutoCompleter.getDepartment().getDeptId());
+        filter.setDeptId(getDepId());
         //
-        Mono<ResponseEntity<List<OPHis>>> result = inventoryApi
-                .post()
+        inventoryApi.post()
                 .uri("/setup/get-opening")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
-                .toEntityList(OPHis.class);
-        List<OPHis> listOP = result.block(Duration.ofMinutes(1)).getBody();
-        tableModel.setListDetail(listOP);
-        txtTotalRecord.setValue(listOP.size());
-        calAmt();
-        progess.setIndeterminate(false);
+                .bodyToFlux(OPHis.class)
+                .collectList()
+                .subscribe((t) -> {
+                    tableModel.setListDetail(t);
+                    calAmt();
+                    progess.setIndeterminate(false);
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                    progess.setIndeterminate(false);
+                });
+
     }
 
     private void calAmt() {
         List<OPHis> list = tableModel.getListDetail();
-        double ttlAmt = 0.0;
-        for (OPHis op : list) {
-            ttlAmt += Util1.getDouble(op.getOpAmt());
-        }
-        txtTotalAmt.setValue(ttlAmt);
+        txtTotalAmt.setValue(list.stream().mapToDouble(OPHis::getOpAmt).sum());
+        txtTotalRecord.setValue(list.size());
     }
 
     private void select() {

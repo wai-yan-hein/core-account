@@ -10,7 +10,6 @@ import com.acc.model.TraderA;
 import com.acc.model.VDescription;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
-import com.acc.model.VRef;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
@@ -221,8 +220,8 @@ public class DayBookTableModel extends AbstractTableModel {
                 }
                 case 3 -> {
                     if (value != null) {
-                        if (value instanceof VRef autoText) {
-                            gl.setReference(autoText.getReference());
+                        if (value instanceof VDescription autoText) {
+                            gl.setReference(autoText.getDescription());
                         } else {
                             gl.setReference(value.toString());
                         }
@@ -242,10 +241,11 @@ public class DayBookTableModel extends AbstractTableModel {
                             gl.setTraderName(t.getTraderName());
                             if (t.getAccount() != null) {
                                 gl.setAccCode(t.getAccount());
-                                ChartOfAccount coa = accountRepo.findCOA(t.getAccount());
-                                if (coa != null) {
-                                    gl.setAccName(coa.getCoaNameEng());
-                                }
+                                accountRepo.findCOA(t.getAccount()).subscribe((coa) -> {
+                                    if (coa != null) {
+                                        gl.setAccName(coa.getCoaNameEng());
+                                    }
+                                });
                                 if (ProUtil.isMultiCur()) {
                                     parent.setColumnSelectionInterval(7, 7);
                                 } else {
@@ -307,14 +307,16 @@ public class DayBookTableModel extends AbstractTableModel {
     private void save(Gl gl, int row, int column) {
         if (isValidEntry(gl, row, column)) {
             try {
-                gl = accountRepo.saveGl(gl);
-                if (gl != null) {
-                    listVGl.set(row, gl);
-                    addNewRow();
-                    parent.setRowSelectionInterval(row + 1, row + 1);
-                    parent.setColumnSelectionInterval(0, 0);
-                    observer.selected("CAL-TOTAL", "-");
-                }
+                accountRepo.saveGl(gl).subscribe((t) -> {
+                    if (t != null) {
+                        listVGl.set(row, t);
+                        addNewRow();
+                        parent.setRowSelectionInterval(row + 1, row + 1);
+                        parent.setColumnSelectionInterval(0, 0);
+                        observer.selected("CAL-TOTAL", "-");
+                    }
+                });
+
             } catch (JsonSyntaxException ex) {
                 JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
             }

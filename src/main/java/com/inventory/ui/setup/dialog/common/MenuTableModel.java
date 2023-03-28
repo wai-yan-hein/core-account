@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.setup.dialog.common;
 
-import com.common.model.Menu;
+import com.user.model.Menu;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;

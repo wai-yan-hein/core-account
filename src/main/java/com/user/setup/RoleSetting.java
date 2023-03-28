@@ -18,7 +18,6 @@ import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.user.dialog.RoleSetupDialog;
 import java.awt.event.KeyEvent;
 import java.util.List;
-import java.util.Objects;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
@@ -44,6 +43,8 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl, Sel
     private final UserRoleTableModel userRoleTableModel = new UserRoleTableModel();
     @Autowired
     private WebClient userApi;
+    @Autowired
+    private WebClient accountApi;
     @Autowired
     private UserRepo userRepo;
     @Autowired
@@ -110,6 +111,7 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl, Sel
         sysProperty.setUserRepo(userRepo);
         sysProperty.setInventoryRepo(inventoryRepo);
         sysProperty.setAccountRepo(accountRepo);
+        sysProperty.setAccountApi(accountApi);
         sysProperty.setProgress(progress);
         roleCompany.initTable();
         roleCompany.setProgress(progress);

@@ -30,6 +30,7 @@ public class GRN {
     private String remark;
     private List<GRNDetail> listDetail;
     private List<GRNDetailKey> listDel;
+    private String locCode;
 
     public GRN() {
     }

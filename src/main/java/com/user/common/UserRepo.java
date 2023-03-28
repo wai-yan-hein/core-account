@@ -5,7 +5,7 @@
 package com.user.common;
 
 import com.common.Global;
-import com.common.RoleProperty;
+import com.user.model.RoleProperty;
 import com.common.Util1;
 import com.inventory.model.AppRole;
 import com.inventory.model.AppUser;
@@ -17,7 +17,6 @@ import com.user.model.CompanyInfo;
 import com.user.model.Currency;
 import com.user.model.MachineProperty;
 import com.user.model.PrivilegeCompany;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -41,75 +40,58 @@ public class UserRepo {
     private DepartmentUser department;
     private List<DepartmentUser> listDept;
 
-    public List<Currency> getCurrency() {
-        Mono<ResponseEntity<List<Currency>>> result = userApi.get()
+    public Mono<List<Currency>> getCurrency() {
+        return userApi.get()
                 .uri(builder -> builder.path("/user/get-currency")
                 .build())
-                .retrieve().toEntityList(Currency.class);
-        return result.block().getBody();
+                .retrieve().bodyToFlux(Currency.class).collectList();
     }
 
-    public List<CompanyInfo> getCompany() {
-        Mono<ResponseEntity<List<CompanyInfo>>> result = userApi.get()
+    public Mono<List<CompanyInfo>> getCompany() {
+        return userApi.get()
                 .uri(builder -> builder.path("/user/get-company")
                 .build())
-                .retrieve().toEntityList(CompanyInfo.class);
-        return result.block().getBody();
+                .retrieve().bodyToFlux(CompanyInfo.class).collectList();
     }
 
-    public List<AppUser> getAppUser() {
-        Mono<ResponseEntity<List<AppUser>>> result = userApi.get()
+    public Mono<List<AppUser>> getAppUser() {
+        return userApi.get()
                 .uri(builder -> builder.path("/user/get-appuser")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().toEntityList(AppUser.class);
-        List<AppUser> user = result.block().getBody();
-        if (!user.isEmpty()) {
-            for (AppUser app : user) {
-                Global.hmUser.put(app.getUserCode(), app.getUserShortName());
-            }
-        }
-        return user;
+                .retrieve().bodyToFlux(AppUser.class).collectList();
     }
 
-    public List<MachineInfo> getMacList() {
-        Mono<ResponseEntity<List<MachineInfo>>> result = userApi.get()
+    public Mono<List<MachineInfo>> getMacList() {
+        return userApi.get()
                 .uri(builder -> builder.path("/user/get-mac-list")
                 .build())
-                .retrieve().toEntityList(MachineInfo.class);
-        return result.block().getBody();
+                .retrieve().bodyToFlux(MachineInfo.class).collectList();
     }
 
-    public List<AppRole> getAppRole() {
-        Mono<ResponseEntity<List<AppRole>>> result = userApi.get()
+    public Mono<List<AppRole>> getAppRole() {
+        return userApi.get()
                 .uri(builder -> builder.path("/user/get-role")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().toEntityList(AppRole.class);
-        return result.block().getBody();
+                .retrieve().bodyToFlux(AppRole.class).collectList();
     }
 
-    public MachineInfo register(String macName) {
-        try {
-            Mono<ResponseEntity<MachineInfo>> result = userApi.get()
-                    .uri(builder -> builder.path("/user/get-mac-info")
-                    .queryParam("macName", macName)
-                    .build())
-                    .retrieve().toEntity(MachineInfo.class);
-            return result.block().getBody();
-        } catch (Exception e) {
-            log.info("register : " + e.getMessage());
-        }
-        return null;
+    public Mono<MachineInfo> register(String macName) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/get-mac-info")
+                .queryParam("macName", macName)
+                .build())
+                .retrieve().bodyToMono(MachineInfo.class);
+
     }
 
-    public MachineInfo register(MachineInfo mac) {
-        Mono<MachineInfo> result = userApi.post()
+    public Mono<MachineInfo> register(MachineInfo mac) {
+        return userApi.post()
                 .uri("/user/save-mac")
                 .body(Mono.just(mac), MachineInfo.class)
                 .retrieve()
                 .bodyToMono(MachineInfo.class);
-        return result.block();
     }
 
     public String updateProgram() {
@@ -121,112 +103,96 @@ public class UserRepo {
         return result.block().getBody();
     }
 
-    public CompanyInfo saveCompany(CompanyInfo app) {
-        Mono<CompanyInfo> result = userApi.post()
+    public Mono<CompanyInfo> saveCompany(CompanyInfo app) {
+        return userApi.post()
                 .uri("/user/save-company")
                 .body(Mono.just(app), CompanyInfo.class)
                 .retrieve()
                 .bodyToMono(CompanyInfo.class);
-        return result.block();
     }
 
-    public Currency saveCurrency(Currency app) {
-        Mono<Currency> result = userApi.post()
+    public Mono<Currency> saveCurrency(Currency app) {
+        return userApi.post()
                 .uri("/user/save-currency")
                 .body(Mono.just(app), Currency.class)
                 .retrieve()
                 .bodyToMono(Currency.class);
-        return result.block();
     }
 
-    public AppRole saveAppRole(AppRole app) {
-        Mono<AppRole> result = userApi.post()
+    public Mono<AppRole> saveAppRole(AppRole app) {
+        return userApi.post()
                 .uri("/user/save-role")
                 .body(Mono.just(app), AppRole.class)
                 .retrieve()
                 .bodyToMono(AppRole.class);
-        return result.block();
     }
 
-    public PrivilegeCompany saveCompRole(PrivilegeCompany app) {
-        Mono<PrivilegeCompany> result = userApi.post()
+    public Mono<PrivilegeCompany> saveCompRole(PrivilegeCompany app) {
+        return userApi.post()
                 .uri("/user/save-privilege-company")
                 .body(Mono.just(app), PrivilegeCompany.class)
                 .retrieve()
                 .bodyToMono(PrivilegeCompany.class);
-        return result.block();
     }
 
-    public AppUser saveUser(AppUser app) {
-        Mono<AppUser> result = userApi.post()
+    public Mono<AppUser> saveUser(AppUser app) {
+        return userApi.post()
                 .uri("/user/save-user")
                 .body(Mono.just(app), AppUser.class)
                 .retrieve()
                 .bodyToMono(AppUser.class);
-        return result.block();
     }
 
-    public Currency findCurrency(String curCode) {
-        Mono<ResponseEntity<Currency>> result = userApi.get()
+    public Mono<Currency> findCurrency(String curCode) {
+        return userApi.get()
                 .uri(builder -> builder.path("/user/find-currency")
                 .queryParam("curCode", curCode)
                 .build())
-                .retrieve().toEntity(Currency.class);
-        return result.block().getBody();
+                .retrieve().bodyToMono(Currency.class);
     }
 
-    public DepartmentUser findDepartment(Integer deptId) {
-        if (department != null) {
-            return department;
-        } else {
-            Mono<ResponseEntity<DepartmentUser>> result = userApi.get()
-                    .uri(builder -> builder.path("/user/find-department")
-                    .queryParam("deptId", deptId)
-                    .build())
-                    .retrieve().toEntity(DepartmentUser.class);
-            department = result.block().getBody();
-            return department;
-        }
+    public Mono<DepartmentUser> findDepartment(Integer deptId) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/find-department")
+                .queryParam("deptId", deptId)
+                .build())
+                .retrieve().bodyToMono(DepartmentUser.class);
     }
 
-    public DepartmentUser saveDepartment(DepartmentUser d) {
-        Mono<DepartmentUser> result = userApi.post()
+    public Mono<DepartmentUser> saveDepartment(DepartmentUser d) {
+        return userApi.post()
                 .uri("/user/save-department")
                 .body(Mono.just(d), DepartmentUser.class)
                 .retrieve()
                 .bodyToMono(DepartmentUser.class);
-        return result.block();
     }
 
-    public Currency getDefaultCurrency() {
+    public Mono<Currency> getDefaultCurrency() {
         String curCode = Global.hmRoleProperty.get("default.currency");
         return findCurrency(Util1.isNull(curCode, "-"));
     }
 
-    public void setupProperty(String roleCode, String compCode, Integer macId) {
+    public void setupProperty() {
         Mono<HashMap> result = userApi.get()
                 .uri(builder -> builder.path("/user/get-property")
-                .queryParam("roleCode", roleCode)
-                .queryParam("compCode", compCode)
-                .queryParam("macId", macId)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("roleCode", Global.roleCode)
+                .queryParam("macId", Global.macId)
                 .build())
                 .retrieve().bodyToMono(HashMap.class);
-        Global.hmRoleProperty = result.block();
-        log.info("setupProperty.");
+        result.subscribe((t) -> {
+            Global.hmRoleProperty = t;
+            log.info("setupProperty.");
+        });
+
     }
 
-    public HashMap<String, String> getSystProperty() {
-        HashMap<String, String> hm = new HashMap<>();
-        Mono<ResponseEntity<List<SysProperty>>> result = userApi.get()
+    public Mono<List<SysProperty>> getSystProperty() {
+        return userApi.get()
                 .uri(builder -> builder.path("/user/get-system-property")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().toEntityList(SysProperty.class);
-        List<SysProperty> prop = result.block().getBody();
-        prop.forEach((t) -> {
-            hm.put(t.getKey().getPropKey(), t.getPropValue());
-        });
-        return hm;
+                .retrieve().bodyToFlux(SysProperty.class).collectList();
     }
 
     public HashMap<String, String> getRoleProperty(String roleCode) {
@@ -260,53 +226,44 @@ public class UserRepo {
         return hm;
     }
 
-    public SysProperty saveSys(SysProperty prop) {
-        Mono<SysProperty> result = userApi.post()
+    public Mono<SysProperty> saveSys(SysProperty prop) {
+        return userApi.post()
                 .uri("/user/save-system-property")
                 .body(Mono.just(prop), SysProperty.class)
                 .retrieve()
                 .bodyToMono(SysProperty.class);
-        return result.block();
     }
 
-    public RoleProperty saveRoleProperty(RoleProperty prop) {
-        Mono<RoleProperty> result = userApi.post()
+    public Mono<RoleProperty> saveRoleProperty(RoleProperty prop) {
+        return userApi.post()
                 .uri("/user/save-role-property")
                 .body(Mono.just(prop), RoleProperty.class)
                 .retrieve()
                 .bodyToMono(RoleProperty.class);
-        return result.block();
     }
 
-    public MachineProperty saveMacProp(MachineProperty prop) {
-        Mono<MachineProperty> result = userApi.post()
+    public Mono<MachineProperty> saveMacProp(MachineProperty prop) {
+        return userApi.post()
                 .uri("/user/save-mac-property")
                 .body(Mono.just(prop), MachineProperty.class)
                 .retrieve()
                 .bodyToMono(MachineProperty.class);
-        return result.block();
     }
 
-    public List<DepartmentUser> getDeparment() {
-        if (listDept == null) {
-            Mono<ResponseEntity<List<DepartmentUser>>> result = userApi.get()
-                    .uri(builder -> builder.path("/user/get-department")
-                    .build())
-                    .retrieve().toEntityList(DepartmentUser.class);
-            listDept = result.block().getBody();
-            return listDept;
-        }
-        return listDept;
+    public Mono<List<DepartmentUser>> getDeparment() {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/get-department")
+                .build())
+                .retrieve().bodyToFlux(DepartmentUser.class).collectList();
     }
 
-    public List<VRoleMenu> getReport(String menuClass) {
-        Mono<ResponseEntity<List<VRoleMenu>>> result = userApi.get()
+    public Mono<List<VRoleMenu>> getReport(String menuClass) {
+        return userApi.get()
                 .uri(builder -> builder.path("/user/get-report")
                 .queryParam("roleCode", Global.roleCode)
                 .queryParam("menuClass", menuClass)
                 .build())
-                .retrieve().toEntityList(VRoleMenu.class);
-        return result.block().getBody();
+                .retrieve().bodyToFlux(VRoleMenu.class).collectList();
     }
 
 }

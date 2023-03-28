@@ -86,9 +86,12 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
     }
 
     private void initCombo() {
-        List<ChartOfAccount> list = accountRepo.getCOA3(ProUtil.getProperty(ProUtil.INCOME));
-        coaComboModel = new COAComboBoxModel(list);
-        cboAccount.setModel(coaComboModel);
+        accountRepo.getCOA3(ProUtil.getProperty(ProUtil.INCOME))
+                .collectList()
+                .subscribe((t) -> {
+                    coaComboModel = new COAComboBoxModel(t);
+                    cboAccount.setModel(coaComboModel);
+                });
     }
 
     private void initKeyListener() {

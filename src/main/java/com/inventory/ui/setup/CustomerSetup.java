@@ -113,8 +113,14 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         listTraderGroup = inventoryRepo.getTraderGroup();
         traderGroupAutoCompleter = new TraderGroupAutoCompleter(txtGroup, listTraderGroup, null, false);
         traderGroupAutoCompleter.setGroup(null);
-        cOAAutoCompleter = new COAAutoCompleter(txtAccount, accountRepo.getCOAChild(ProUtil.getProperty("debtor.account")), null, false);
-        cOAAutoCompleter.setCoa(null);
+        accountRepo.getCOAChild(ProUtil.getProperty(ProUtil.DEBTOR_GROUP)).collectList().subscribe((t) -> {
+            cOAAutoCompleter = new COAAutoCompleter(txtAccount,
+                    t,
+                    null, false);
+        });
+        accountRepo.findCOA(ProUtil.getProperty(ProUtil.DEBTOR_ACC)).subscribe((t) -> {
+            cOAAutoCompleter.setCoa(t);
+        });
     }
 
     private void initTable() {
@@ -169,7 +175,6 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtRemark.setText(txtRemark.getText());
         txtCusPhone.setText(customer.getPhone());
         regionAutoCompleter.setRegion(inventoryRepo.findRegion(customer.getRegCode()));
-        cOAAutoCompleter.setCoa(accountRepo.findCOA(customer.getAccount()));
         txtCusAddress.setText(customer.getAddress());
         chkActive.setSelected(customer.isActive());
         txtCreditLimit.setText(Util1.getString(cus.getCreditLimit()));
@@ -179,6 +184,9 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtCusName.requestFocus();
         lblStatus.setText("EDIT");
         traderGroupAutoCompleter.setGroup(inventoryRepo.findTraderGroup(customer.getGroupCode(), customer.getKey().getDeptId()));
+        accountRepo.findCOA(customer.getAccount()).subscribe((t) -> {
+            cOAAutoCompleter.setCoa(t);
+        });
     }
 
     private boolean isValidEntry() {
@@ -215,6 +223,8 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
             ChartOfAccount coa = cOAAutoCompleter.getCOA();
             if (coa != null) {
                 customer.setAccount(coa.getKey().getCoaCode());
+            } else {
+                customer.setAccount(ProUtil.getProperty(ProUtil.DEBTOR_ACC));
             }
             if (lblStatus.getText().equals("NEW")) {
                 customer.setMacId(Global.macId);

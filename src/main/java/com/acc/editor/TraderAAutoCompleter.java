@@ -18,7 +18,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
 import javax.swing.Action;
@@ -34,9 +33,8 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.text.JTextComponent;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 /**
  *
@@ -354,24 +352,26 @@ public final class TraderAAutoCompleter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                Mono<ResponseEntity<List<TraderA>>> result = webClient.get()
+                traderTableModel.clear();
+                Flux<TraderA> result = webClient.get()
                         .uri(builder -> builder.path("/account/search-trader")
                         .queryParam("compCode", Global.compCode)
                         .queryParam("text", str)
                         .build())
-                        .retrieve().toEntityList(TraderA.class);
+                        .retrieve().bodyToFlux(TraderA.class);
                 result.subscribe((t) -> {
-                    List<TraderA> list = t.getBody();
-                    if (this.filter) {
-                        TraderA s = new TraderA(new TraderAKey("-", Global.compCode), "All");
-                        list.add(s);
-                    }
-                    traderTableModel.setListTrader(list);
-                    if (!list.isEmpty()) {
-                        table.setRowSelectionInterval(0, 0);
-                    }
+                    traderTableModel.addTrader(t);
                 }, (er) -> {
                     log.error(er.getMessage());
+                }, () -> {
+                    if (this.filter) {
+                        TraderA s = new TraderA(new TraderAKey("-", Global.compCode), "All");
+                        traderTableModel.addTrader(s);
+                    }
+                    traderTableModel.fireTableDataChanged();
+                    if (!traderTableModel.getListTrader().isEmpty()) {
+                        table.setRowSelectionInterval(0, 0);
+                    }
                 });
 
             }

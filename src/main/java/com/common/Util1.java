@@ -4,6 +4,8 @@
  */
 package com.common;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.myanmartools.TransliterateZ2U;
 import com.google.myanmartools.ZawgyiDetector;
 import java.awt.BorderLayout;
@@ -14,9 +16,12 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -47,6 +52,9 @@ public class Util1 {
      */
     public static final String DECIMAL_FORMAT = "###,##0.##;(###,##0.##)";
     private static final DecimalFormat df2 = new DecimalFormat("0");
+    public static final Gson gson = new GsonBuilder()
+            .setDateFormat(DateFormat.FULL, DateFormat.FULL)
+            .create();
 
     public static void print(String pName) {
 
@@ -488,6 +496,10 @@ public class Util1 {
         return value;
     }
 
+    public static String getString(Object obj) {
+        return obj == null ? null : obj.toString().strip();
+    }
+
     public static Float getFloat(Object number) {
         float value = 0.0f;
         try {
@@ -528,22 +540,6 @@ public class Util1 {
 
     public static Integer getIntegerOne(Object obj) {
         return Util1.isNull(obj) ? 1 : Integer.valueOf(obj.toString());
-    }
-
-    public static String getString(String str) {
-        String value = "";
-        if (str != null) {
-            value = str;
-        }
-        return value;
-    }
-
-    public static String getString(Object obj) {
-        String value = "";
-        if (obj != null) {
-            value = obj.toString();
-        }
-        return value;
     }
 
     public static String getStringValue(Object obj) {
@@ -786,6 +782,12 @@ public class Util1 {
             return z2U.convert(str);
         }
         return str;
+    }
+
+    public static void writeJsonFile(Object data, String exportPath) throws IOException {
+        try (Writer writer = new FileWriter(exportPath, StandardCharsets.UTF_8)) {
+            gson.toJson(data, writer);
+        }
     }
 
 }

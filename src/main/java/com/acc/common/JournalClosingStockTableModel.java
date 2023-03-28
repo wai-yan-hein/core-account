@@ -8,7 +8,7 @@ package com.acc.common;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.Department;
 import com.acc.model.StockOP;
-import com.acc.report.StockOPKey;
+import com.acc.model.StockOPKey;
 import com.common.Global;
 import com.common.Util1;
 import com.user.model.Currency;
@@ -224,11 +224,13 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
             } else {
                 op.setUpdatedBy(Global.loginUser.getUserCode());
             }
-            StockOP save = accountRepo.save(op);
-            if (save != null) {
-                listGV.set(row, save);
-                addNewRow();
-            }
+            accountRepo.save(op).subscribe((t) -> {
+                if (t != null) {
+                    listGV.set(row, t);
+                    addNewRow();
+                }
+            });
+
         }
     }
 

@@ -116,12 +116,20 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
     }
 
     private void initCombo() {
-        typeAutoCompleter = new StockTypeAutoCompleter(txtGroup, inventoryRepo.getStockType(), null, true, false);
+        inventoryRepo.getStockType().subscribe((t) -> {
+            typeAutoCompleter = new StockTypeAutoCompleter(txtGroup, t, null, true, false);
+        });
         typeAutoCompleter.setObserver(this);
-        categoryAutoCompleter = new CategoryAutoCompleter(txtCat, inventoryRepo.getCategory(), null, true, false);
-        categoryAutoCompleter.setObserver(this);
-        brandAutoCompleter = new BrandAutoCompleter(txtBrand, inventoryRepo.getStockBrand(), null, true, false);
-        brandAutoCompleter.setObserver(this);
+
+        inventoryRepo.getCategory().subscribe((t) -> {
+            categoryAutoCompleter = new CategoryAutoCompleter(txtCat, t, null, true, false);
+            categoryAutoCompleter.setObserver(this);
+        });
+        inventoryRepo.getStockBrand().subscribe((t) -> {
+            brandAutoCompleter = new BrandAutoCompleter(txtBrand, t, null, true, false);
+            brandAutoCompleter.setObserver(this);
+        });
+
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         stockAutoCompleter.setObserver(this);
     }
@@ -192,8 +200,9 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
     }
 
     private void initTablePD() {
-        List<StockUnit> lisetStockUnit = inventoryRepo.getStockUnit();
-        patternTableModel.setLocation(inventoryRepo.getDefaultLocation());
+        inventoryRepo.getDefaultLocation().subscribe((t) -> {
+            patternTableModel.setLocation(t);
+        });
         patternTableModel.setTable(tblPD);
         patternTableModel.setPanel(this);
         patternTableModel.setInventoryRepo(inventoryRepo);
@@ -206,9 +215,13 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         tblPD.setFont(Global.textFont);
         tblPD.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblPD.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblPD.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(inventoryRepo.getLocation()));
+        inventoryRepo.getLocation().subscribe((t) -> {
+            tblPD.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(t));
+        });
         tblPD.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
-        tblPD.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(lisetStockUnit));
+        inventoryRepo.getStockUnit().subscribe((t) -> {
+            tblPD.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));
+        });
         tblPD.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
         tblPD.getColumnModel().getColumn(6).setCellEditor(new PriceEditor(inventoryRepo.getPriceOption("Purchase")));
         tblPD.getColumnModel().getColumn(0).setPreferredWidth(50);

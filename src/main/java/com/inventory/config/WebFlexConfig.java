@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -35,6 +37,7 @@ public class WebFlexConfig {
                         .defaultCodecs()
                         .maxInMemorySize(100 * 1024 * 1024))
                         .build())
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .baseUrl(environment.getProperty("inventory.url"))
                 .build();
     }
@@ -48,6 +51,7 @@ public class WebFlexConfig {
                         .defaultCodecs()
                         .maxInMemorySize(100 * 1024 * 1024))
                         .build())
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .baseUrl(environment.getProperty("account.url"))
                 .build();
     }
@@ -61,6 +65,7 @@ public class WebFlexConfig {
                         .defaultCodecs()
                         .maxInMemorySize(100 * 1024 * 1024))
                         .build())
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .baseUrl(environment.getProperty("user.url"))
                 .build();
     }

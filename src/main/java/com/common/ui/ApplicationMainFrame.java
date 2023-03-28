@@ -82,10 +82,13 @@ import com.user.setup.SystemProperty;
 import com.user.setup.AppUserSetup;
 import com.user.setup.CloudConfig;
 import com.user.setup.CompanySetup;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.time.Duration;
 import java.util.HashMap;
+import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 import org.springframework.core.task.TaskExecutor;
 
 /**
@@ -210,6 +213,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     public ApplicationMainFrame() {
         initComponents();
         initKeyFoucsManager();
+        initPopup();
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -291,6 +295,25 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             tabMain.setTabComponentAt(tabMain.indexOfComponent(panel), setTitlePanel(tabMain, panel, menuName));
             tabMain.setSelectedComponent(panel);
         }
+    }
+
+    private void initPopup() {
+        tabMain.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    JPopupMenu popupmenu = new JPopupMenu("Edit");
+                    JMenuItem closeAll = new JMenuItem("Close All");
+                    closeAll.addActionListener((ActionEvent ee) -> {
+                        tabMain.removeAll();
+                    });
+                    popupmenu.add(closeAll);
+                    popupmenu.show(tabMain, e.getX(), e.getY());
+                }
+            }
+
+        });
+
     }
 
     private JPanel setTitlePanel(final JTabbedPane tabbedPane, final JPanel panel, String title) {
@@ -678,75 +701,81 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void companyUserRoleAssign() {
-        Mono<ResponseEntity<List<VRoleCompany>>> result = userApi.get()
+        userApi.get()
                 .uri(builder -> builder.path("/user/get-privilege-role-company")
                 .queryParam("roleCode", Global.loginUser.getRole().getRoleCode())
                 .build())
-                .retrieve().toEntityList(VRoleCompany.class);
-        List<VRoleCompany> listVUCA = result.block(Duration.ofMinutes(1)).getBody();
-        if (listVUCA.isEmpty()) {
-            JOptionPane.showMessageDialog(new JFrame(),
-                    "No company assign to the user",
-                    "Invalid Compay Access", JOptionPane.ERROR_MESSAGE);
-            System.exit(0);
-        } else if (listVUCA.size() > 1) {
-            CompanyDialog companyDialog = new CompanyDialog();
-            companyDialog.setListCompany(listVUCA);
-            companyDialog.initTable();
-            companyDialog.setLocationRelativeTo(null);
-            companyDialog.setVisible(true);
-        } else {
-            VRoleCompany vuca = listVUCA.get(0);
-            Global.roleCode = vuca.getRoleCode();
-            Global.compCode = vuca.getCompCode();
-            Global.companyName = vuca.getCompName();
-            Global.companyAddress = vuca.getCompAddress();
-            Global.companyPhone = vuca.getCompPhone();
-            Global.currency = vuca.getCurrency();
-            Global.startDate = Util1.toDateStr(vuca.getStartDate(), "dd/MM/yyyy");
-            Global.endate = Util1.toDateStr(vuca.getEndDate(), "dd/MM/yyyy");
-        }
+                .retrieve()
+                .bodyToFlux(VRoleCompany.class)
+                .collectList()
+                .subscribe((t) -> {
+                    if (t.isEmpty()) {
+                        JOptionPane.showMessageDialog(new JFrame(),
+                                "No company assign to the user",
+                                "Invalid Compay Access", JOptionPane.ERROR_MESSAGE);
+                        System.exit(0);
+                    } else if (t.size() > 1) {
+                        CompanyDialog companyDialog = new CompanyDialog();
+                        companyDialog.setListCompany(t);
+                        companyDialog.initTable();
+                        companyDialog.setLocationRelativeTo(null);
+                        companyDialog.setVisible(true);
+                    } else {
+                        VRoleCompany vuca = t.get(0);
+                        Global.roleCode = vuca.getRoleCode();
+                        Global.compCode = vuca.getCompCode();
+                        Global.companyName = vuca.getCompName();
+                        Global.companyAddress = vuca.getCompAddress();
+                        Global.companyPhone = vuca.getCompPhone();
+                        Global.currency = vuca.getCurrency();
+                        Global.startDate = Util1.toDateStr(vuca.getStartDate(), "dd/MM/yyyy");
+                        Global.endate = Util1.toDateStr(vuca.getEndDate(), "dd/MM/yyyy");
+                    }
+                    initMenu();
+                    userRepo.setupProperty();
+                });
+
     }
 
     public void initMain() {
         companyUserRoleAssign();
         initializeData();
         departmentAssign();
-        initMenu();
     }
 
     private void departmentAssign() {
-        DepartmentUser dep;
-        List<DepartmentUser> listDep = userRepo.getDeparment();
-        if (Util1.getBoolean(ProUtil.getProperty("department.option"))) {
-            if (listDep.size() > 1) {
-                DepartmentDialog dialog = new DepartmentDialog(listDep);
-                dialog.initMain();
-                dialog.setLocationRelativeTo(null);
-                dialog.setVisible(true);
-                dep = dialog.getDeparment();
+        userRepo.getDeparment().subscribe((t) -> {
+            DepartmentUser dep;
+            if (Util1.getBoolean(ProUtil.getProperty("department.option"))) {
+                if (t.size() > 1) {
+                    DepartmentDialog dialog = new DepartmentDialog(t);
+                    dialog.initMain();
+                    dialog.setLocationRelativeTo(null);
+                    dialog.setVisible(true);
+                    dep = dialog.getDeparment();
+                } else {
+                    dep = t.get(0);
+                }
             } else {
-                dep = listDep.get(0);
+                dep = t.get(0);
             }
-        } else {
-            dep = listDep.get(0);
-        }
-        lblDep.setText(dep.getDeptName());
-        Global.deptId = dep.getDeptId();
+            lblDep.setText(dep.getDeptName());
+            Global.deptId = dep.getDeptId();
+        });
+
     }
 
     public void initMenu() {
         menuBar.removeAll();
-        Mono<ResponseEntity<List<VRoleMenu>>> result = userApi.get()
-                .uri(builder -> builder.path("/user/get-privilege-role-menu-tree")
-                .queryParam("roleCode", Global.roleCode)
-                .build())
-                .retrieve().toEntityList(VRoleMenu.class);
-        result.subscribe((t) -> {
-            createMenu(t.getBody());
-        }, (e) -> {
-            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-        });
+        String url = "/user/get-privilege-role-menu-tree?roleCode=" + Global.roleCode + "&compCode=" + Global.compCode;
+        userApi.get().uri(url)
+                .retrieve().bodyToFlux(VRoleMenu.class)
+                .collectList()
+                .subscribe((t) -> {
+                    createMenu(t);
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+                });
     }
 
     private void createMenu(List<VRoleMenu> listVRM) {
@@ -840,7 +869,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         Global.parentForm = this;
         lblCompName.setText(Global.companyName);
         lblUserName.setText(Global.loginUser.getUserName());
-        userRepo.setupProperty(Global.roleCode, Global.compCode, Global.macId);
     }
 
     private void logout() {

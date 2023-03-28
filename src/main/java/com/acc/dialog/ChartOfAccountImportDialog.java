@@ -89,7 +89,7 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
                 hmZG.put(f.getIntCode(), f.getFontKey().getZwKeyCode());
             });
         }
-        List<ChartOfAccount> list = accountRepo.getChartOfAccount();
+        List<ChartOfAccount> list = accountRepo.getChartOfAccount().collectList().block();
         list.forEach((t) -> {
             hmCOA.put(t.getCoaCodeUsr(), t.getKey().getCoaCode());
         });

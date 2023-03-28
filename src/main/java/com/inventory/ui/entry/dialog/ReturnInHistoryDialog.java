@@ -21,10 +21,12 @@ import com.inventory.model.AppUser;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;
 import com.inventory.model.VReturnIn;
+import com.inventory.model.VReturnOut;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.RetInVouSearchTableModel;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
@@ -110,12 +112,21 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     }
 
     private void initCombo() {
-        traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "CUS");
-        appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
+        inventoryRepo.getLocation().subscribe((t) -> {
+            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, false);
+        });
+        userRepo.getAppUser().subscribe((t) -> {
+            appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
+        });
+        userRepo.getDeparment().subscribe((t) -> {
+            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true);
+            userRepo.findDepartment(Global.deptId).subscribe((tt) -> {
+                departmentAutoCompleter.setDepartment(tt);
+            });
+        });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
-        locationAutoCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, true, false);
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, userRepo.getDeparment(), null, true);
-        departmentAutoCompleter.setDepartment(userRepo.findDepartment(Global.deptId));
+        traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "CUS");
+
     }
 
     private void initTableVoucher() {
@@ -158,36 +169,56 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         }
     }
 
+    private String getUserCode() {
+        return appUserAutoCompleter == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
+    }
+
+    private String getLocCode() {
+        return locationAutoCompleter == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
+    }
+
+    private Integer getDepId() {
+        return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
+    }
+
     private void search() {
         progress.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setCusCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
-        filter.setUserCode(appUserAutoCompleter.getAppUser().getUserCode());
+        filter.setUserCode(getUserCode());
         filter.setVouNo(txtVouNo.getText());
         filter.setRemark(txtRemark.getText());
-        filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
+        filter.setLocCode(getLocCode());
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         filter.setDeleted(chkDel.isSelected());
-        filter.setDeptId(departmentAutoCompleter.getDepartment().getDeptId());
+        filter.setDeptId(getDepId());
         //
         tableModel.clear();
-        Flux<VReturnIn> result = inventoryApi
+        inventoryApi
                 .post()
                 .uri("/retin/get-retin")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
-                .bodyToFlux(VReturnIn.class);
-        result.subscribe((t) -> {
-            tableModel.addObject(t);
-        }, (e) -> {
-            JOptionPane.showConfirmDialog(this, e.getMessage());
-            progress.setIndeterminate(false);
-        }, () -> {
-            tableModel.fireTableDataChanged();
-            progress.setIndeterminate(false);
-        });
+                .bodyToFlux(VReturnIn.class)
+                .collectList()
+                .subscribe((t) -> {
+                    tableModel.setListDetail(t);
+                    calAmount();
+                    progress.setIndeterminate(false);
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                    progress.setIndeterminate(false);
+                });
+    }
+
+    private void calAmount() {
+        List<VReturnIn> list = tableModel.getListDetail();
+        txtPaid.setValue(list.stream().mapToDouble(VReturnIn::getPaid).sum());
+        txtAmt.setValue(list.stream().mapToDouble(VReturnIn::getVouTotal).sum());
+        txtRecord.setValue(list.size());
+        tblVoucher.requestFocus();
     }
 
     private void select() {

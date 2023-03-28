@@ -8,17 +8,14 @@ package com.inventory.ui.setup.dialog.common;
 
 import com.common.Global;
 import com.common.KeyPropagate;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
-import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.UIManager;
 import javax.swing.table.TableCellEditor;
 
 /**

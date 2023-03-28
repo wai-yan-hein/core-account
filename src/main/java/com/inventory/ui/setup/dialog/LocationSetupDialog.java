@@ -77,7 +77,9 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
     }
 
     private void searchCategory() {
-        locationTableModel.setListLocation(inventoryRepo.getLocation());
+        inventoryRepo.getLocation().subscribe((t) -> {
+            locationTableModel.setListLocation(t);
+        });
     }
 
     private void initTable() {

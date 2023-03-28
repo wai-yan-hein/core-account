@@ -17,6 +17,7 @@ import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
+import com.inventory.ui.entry.Sale;
 import com.inventory.ui.setup.dialog.PriceOptionDialog;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
@@ -41,15 +42,22 @@ public class SaleTableModel extends AbstractTableModel {
     private List<SaleHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
     private final List<String> deleteList = new ArrayList();
-    private LocationAutoCompleter locationAutoCompleter;
-    private TraderAutoCompleter traderAutoCompleter;
     private StockBalanceTableModel sbTableModel;
+    private Sale sale;
     private InventoryRepo inventoryRepo;
     private JLabel lblStockName;
     private JButton btnProgress;
     private JDateChooser vouDate;
     private boolean change = false;
     private JLabel lblRecord;
+
+    public Sale getSale() {
+        return sale;
+    }
+
+    public void setSale(Sale sale) {
+        this.sale = sale;
+    }
 
     public StockBalanceTableModel getSbTableModel() {
         return sbTableModel;
@@ -83,14 +91,6 @@ public class SaleTableModel extends AbstractTableModel {
         this.change = change;
     }
 
-    public TraderAutoCompleter getTraderAutoCompleter() {
-        return traderAutoCompleter;
-    }
-
-    public void setTraderAutoCompleter(TraderAutoCompleter traderAutoCompleter) {
-        this.traderAutoCompleter = traderAutoCompleter;
-    }
-
     public JDateChooser getVouDate() {
         return vouDate;
     }
@@ -121,14 +121,6 @@ public class SaleTableModel extends AbstractTableModel {
 
     public void setParent(JTable parent) {
         this.parent = parent;
-    }
-
-    public LocationAutoCompleter getLocationAutoCompleter() {
-        return locationAutoCompleter;
-    }
-
-    public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
-        this.locationAutoCompleter = locationAutoCompleter;
     }
 
     public SelectionObserver getSelectionObserver() {
@@ -178,7 +170,7 @@ public class SaleTableModel extends AbstractTableModel {
             case 6 -> {
                 return ProUtil.isSalePriceChange();
             }
-            case 2,7 -> {
+            case 2, 7 -> {
                 return false;
             }
         }
@@ -244,7 +236,7 @@ public class SaleTableModel extends AbstractTableModel {
             SaleHisDetail sd = listDetail.get(row);
             if (value != null) {
                 switch (column) {
-                    case 0,1 -> {
+                    case 0, 1 -> {
                         //Code
                         if (value instanceof Stock s) {
                             sbTableModel.calStockBalance(s.getKey().getStockCode());
@@ -333,16 +325,8 @@ public class SaleTableModel extends AbstractTableModel {
                     }
                 }
                 change = true;
+                assignLocation(sd);
                 calculateAmount(sd);
-                if (sd.getLocCode() == null) {
-                    Location l = locationAutoCompleter.getLocation();
-                    if (l != null) {
-                        sd.setLocCode(l.getKey().getLocCode());
-                        sd.setLocName(l.getLocName());
-
-                    }
-                }
-
                 fireTableRowsUpdated(row, row);
                 setRecord(listDetail.size() - 1);
                 selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
@@ -350,6 +334,19 @@ public class SaleTableModel extends AbstractTableModel {
             }
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
+        }
+    }
+
+    private void assignLocation(SaleHisDetail sd) {
+        if (sd.getLocCode() == null) {
+            LocationAutoCompleter completer = sale.getLocationAutoCompleter();
+            if (completer != null) {
+                Location l = completer.getLocation();
+                if (l != null) {
+                    sd.setLocCode(l.getKey().getLocCode());
+                    sd.setLocName(l.getLocName());
+                }
+            }
         }
     }
 
@@ -461,9 +458,6 @@ public class SaleTableModel extends AbstractTableModel {
 
     public List<PriceOption> getPriceOption(int row) {
         Stock s = listDetail.get(row).getStock();
-        if (s == null) {
-            s = inventoryRepo.findStock(listDetail.get(row).getStockCode());
-        }
         List<PriceOption> listPrice = inventoryRepo.getPriceOption("-");
         if (!listPrice.isEmpty()) {
             for (PriceOption op : listPrice) {
@@ -540,7 +534,11 @@ public class SaleTableModel extends AbstractTableModel {
     }
 
     private String getTraderType() {
-        Trader t = traderAutoCompleter.getTrader();
-        return t == null ? "N" : Util1.isNull(t.getPriceType(), "N");
+        TraderAutoCompleter completer = sale.getTraderAutoCompleter();
+        if (completer != null) {
+            Trader t = completer.getTrader();
+            return t == null ? "N" : Util1.isNull(t.getPriceType(), "N");
+        }
+        return "N";
     }
 }

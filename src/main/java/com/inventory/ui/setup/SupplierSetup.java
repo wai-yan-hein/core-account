@@ -107,8 +107,14 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         listTraderGroup = inventoryRepo.getTraderGroup();
         traderGroupAutoCompleter = new TraderGroupAutoCompleter(txtGroup, listTraderGroup, null, false);
         traderGroupAutoCompleter.setGroup(null);
-        cOAAutoCompleter = new COAAutoCompleter(txtAccount, accountRepo.getCOAChild(ProUtil.getProperty("creditor.account")), null, false);
-        cOAAutoCompleter.setCoa(null);
+        accountRepo.getCOAChild(ProUtil.getProperty(ProUtil.CREDITOR_GROUP)).collectList().subscribe((t) -> {
+            cOAAutoCompleter = new COAAutoCompleter(txtAccount,
+                    t,
+                    null, false);
+        });
+        accountRepo.findCOA(ProUtil.getProperty(ProUtil.CREDITOR_ACC)).subscribe((t) -> {
+            cOAAutoCompleter.setCoa(t);
+        });
     }
 
     private void initTable() {
@@ -161,7 +167,6 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtCusEmail.setText(supplier.getEmail());
         txtCusPhone.setText(supplier.getPhone());
         regionAutoCompleter.setRegion(inventoryRepo.findRegion(supplier.getRegCode()));
-        cOAAutoCompleter.setCoa(accountRepo.findCOA(supplier.getAccount()));
         txtCusAddress.setText(supplier.getAddress());
         chkActive.setSelected(supplier.isActive());
         chkCD.setSelected(supplier.isCashDown());
@@ -169,6 +174,10 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtCusName.requestFocus();
         lblStatus.setText("EDIT");
         traderGroupAutoCompleter.setGroup(inventoryRepo.findTraderGroup(supplier.getGroupCode(), supplier.getKey().getDeptId()));
+        accountRepo.findCOA(supplier.getAccount()).subscribe((t) -> {
+            cOAAutoCompleter.setCoa(t);
+        });
+
     }
 
     private boolean isValidEntry() {
@@ -190,6 +199,8 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
             ChartOfAccount coa = cOAAutoCompleter.getCOA();
             if (coa != null) {
                 supplier.setAccount(coa.getKey().getCoaCode());
+            } else {
+                supplier.setAccount(ProUtil.getProperty(ProUtil.CREDITOR_ACC));
             }
             supplier.setType("SUP");
             supplier.setCashDown(chkCD.isSelected());

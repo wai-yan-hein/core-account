@@ -6,6 +6,7 @@
 package com.acc.common;
 
 import com.acc.model.ChartOfAccount;
+import com.common.Util1;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -22,8 +23,7 @@ public class COATableModel extends AbstractTableModel {
     private List<ChartOfAccount> listCOA = new ArrayList<>();
     private final String[] columnNames = {"Code", "Name", "Group"};
 
-    public COATableModel(List<ChartOfAccount> listCOA) {
-        this.listCOA = listCOA;
+    public COATableModel() {
     }
 
     @Override
@@ -60,7 +60,7 @@ public class COATableModel extends AbstractTableModel {
                 case 1 ->
                     coa.getCoaNameEng();
                 case 2 ->
-                    coa.getGroupName();
+                    Util1.isNull(coa.getGroupName(), "Head");
                 default ->
                     null;
             }; //Code
@@ -107,4 +107,19 @@ public class COATableModel extends AbstractTableModel {
             return listCOA.size();
         }
     }
+
+    public void clear() {
+        listCOA.clear();
+        fireTableDataChanged();
+    }
+
+    public List<ChartOfAccount> getListCOA() {
+        return listCOA;
+    }
+
+    public void setListCOA(List<ChartOfAccount> listCOA) {
+        this.listCOA = listCOA;
+        fireTableDataChanged();
+    }
+
 }

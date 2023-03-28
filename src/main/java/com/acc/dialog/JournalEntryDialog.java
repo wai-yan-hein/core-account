@@ -15,7 +15,6 @@ import com.acc.model.Gl;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.ProUtil;
-import com.common.ReturnObject;
 import com.common.Util1;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
@@ -108,7 +107,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                 txt.selectAll();
             }
         }
-
     };
 
     private void keyMapping() {
@@ -160,11 +158,15 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         journalTablModel.setAccountRepo(accountRepo);
         tblJournal.getTableHeader().setFont(Global.lableFont);
         tblJournal.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblJournal.getColumnModel().getColumn(0).setCellEditor(new DepartmentCellEditor(accountRepo.getDepartment()));
+        accountRepo.getDepartment().subscribe((t) -> {
+            tblJournal.getColumnModel().getColumn(0).setCellEditor(new DepartmentCellEditor(t));
+        });
         tblJournal.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
         tblJournal.getColumnModel().getColumn(2).setCellEditor(new TraderCellEditor(accountApi));
         tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountApi, 3));
-        tblJournal.getColumnModel().getColumn(4).setCellEditor(new CurrencyAEditor(accountRepo.getCurrency()));
+        accountRepo.getCurrency().subscribe((t) -> {
+            tblJournal.getColumnModel().getColumn(4).setCellEditor(new CurrencyAEditor(t));
+        });
         tblJournal.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
         tblJournal.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
         tblJournal.getColumnModel().getColumn(0).setPreferredWidth(10);//dep
@@ -186,13 +188,15 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         lblStatus.setText(status);
         lblStatus.setForeground(status.equals("NEW") ? Color.GREEN : Color.BLUE);
         if (status.equals("EDIT")) {
-            List<Gl> listGl = accountRepo.getJournal(vouNo);
-            Date glDate = listGl.get(0).getGlDate();
-            String ref = listGl.get(0).getReference();
-            txtVouDate.setDate(glDate);
-            txtRefrence.setText(ref);
-            txtVouNo.setText(vouNo);
-            journalTablModel.setListGV(listGl);
+            accountRepo.getJournal(vouNo).collectList().subscribe((t) -> {
+                Date glDate = t.get(0).getGlDate();
+                String ref = t.get(0).getReference();
+                txtVouDate.setDate(glDate);
+                txtRefrence.setText(ref);
+                txtVouNo.setText(vouNo);
+                journalTablModel.setListGV(t);
+            });
+
         }
         journalTablModel.addEmptyRow();
         focusOnTable();
@@ -205,10 +209,12 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                 list.get(0).setEdit(journalTablModel.isEdit());
                 list.get(0).setDelList(journalTablModel.getDelList());
             }
-            ReturnObject ro = accountRepo.saveGl(list);
-            if (ro != null) {
-                clear();
-            }
+            accountRepo.saveGl(list).subscribe((t) -> {
+                if (t != null) {
+                    clear();
+                }
+            });
+
         }
         return true;
     }
@@ -692,5 +698,4 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
     private void printJournal() {
 
     }
-
 }

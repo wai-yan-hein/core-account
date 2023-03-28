@@ -552,7 +552,7 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="lblTtlRecord" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtTotalRecord" max="32767" attributes="0"/>
+                  <Component id="txtRecord" max="32767" attributes="0"/>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                   <Component id="lblTtlAmount1" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
@@ -578,7 +578,7 @@
                       <Component id="lblTtlAmount1" linkSize="9" alignment="0" min="-2" max="-2" attributes="0"/>
                       <Component id="lblTtlAmount" linkSize="9" alignment="0" min="-2" max="-2" attributes="0"/>
                       <Component id="lblTtlRecord" linkSize="9" alignment="0" max="32767" attributes="0"/>
-                      <Component id="txtTotalRecord" linkSize="9" alignment="0" max="32767" attributes="0"/>
+                      <Component id="txtRecord" linkSize="9" alignment="0" max="32767" attributes="0"/>
                       <Component id="btnSelect" linkSize="9" alignment="0" pref="0" max="32767" attributes="0"/>
                       <Component id="btnSearch" linkSize="9" alignment="0" pref="0" max="32767" attributes="0"/>
                       <Component id="txtTotalAmt" linkSize="9" alignment="0" max="32767" attributes="0"/>
@@ -651,7 +651,7 @@
             </Property>
           </Properties>
         </Component>
-        <Component class="javax.swing.JFormattedTextField" name="txtTotalRecord">
+        <Component class="javax.swing.JFormattedTextField" name="txtRecord">
           <Properties>
             <Property name="editable" type="boolean" value="false"/>
             <Property name="horizontalAlignment" type="int" value="4"/>

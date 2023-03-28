@@ -12,6 +12,7 @@ import com.common.KeyPropagate;
 import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
+import com.common.TableCellRender;
 import com.common.Util1;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -113,10 +114,19 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     private SelectionObserver observer;
     private JProgressBar progress;
     private PurHis ph = new PurHis();
-    private List<Location> listLocation = new ArrayList<>();
-    private List<StockUnit> listUnit = new ArrayList<>();
+    private Mono<List<Location>> monoLoc;
+    private Mono<List<StockUnit>> monoUnit;
+    private List<StockUnit> listUnit;
     private final PurExpenseTableModel expenseTableModel = new PurExpenseTableModel();
     private final GRNTableModel grnTableModel = new GRNTableModel();
+
+    public LocationAutoCompleter getLocationAutoCompleter() {
+        return locationAutoCompleter;
+    }
+
+    public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
+        this.locationAutoCompleter = locationAutoCompleter;
+    }
 
     public JProgressBar getProgress() {
         return progress;
@@ -201,6 +211,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         initPanelExpesne();
         initPanelGRN();
         assignDefaultValue();
+        txtCus.requestFocus();
     }
 
     private void initDateListner() {
@@ -263,13 +274,13 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     private void initPurTable() {
-        listUnit = inventoryRepo.getStockUnit();
+        monoUnit = inventoryRepo.getStockUnit();
         tblPur.setModel(purTableModel);
         purTableModel.setLblRec(lblRec);
         purTableModel.setInventoryRepo(inventoryRepo);
         purTableModel.setVouDate(txtPurDate);
         purTableModel.setParent(tblPur);
-        purTableModel.setLocationAutoCompleter(locationAutoCompleter);
+        purTableModel.setPurchase(this);
         purTableModel.addNewRow();
         purTableModel.setSelectionObserver(this);
         tblPur.getTableHeader().setFont(Global.tblHeaderFont);
@@ -284,9 +295,14 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         tblPur.getColumnModel().getColumn(7).setPreferredWidth(40);//amt
         tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblPur.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(listLocation));
+        monoLoc.subscribe((t) -> {
+            tblPur.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
+        });
         tblPur.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
-        tblPur.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(listUnit));
+        monoUnit.subscribe((t) -> {
+            listUnit = t;
+            tblPur.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));
+        });
         tblPur.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
         tblPur.setDefaultRenderer(Object.class, new DecimalFormatRender());
@@ -299,6 +315,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     private void initPanelGRN() {
         boolean status = Util1.getBoolean(ProUtil.getProperty(ProUtil.P_SHOW_GRN));
         if (status) {
+            grnTableModel.setEditable(false);
             tblGRN.setModel(grnTableModel);
             tblGRN.getTableHeader().setFont(Global.tblHeaderFont);
             tblGRN.setCellSelectionEnabled(true);
@@ -314,8 +331,8 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             tblGRN.getColumnModel().getColumn(6).setPreferredWidth(20);//qty
             tblGRN.getColumnModel().getColumn(7).setPreferredWidth(10);//unit 
             tblGRN.getColumnModel().getColumn(8).setPreferredWidth(10);//total   
-            tblGRN.setDefaultRenderer(Object.class, new DecimalFormatRender());
-            tblGRN.setDefaultRenderer(Float.class, new DecimalFormatRender());
+            tblGRN.setDefaultRenderer(Object.class, new TableCellRender());
+            tblGRN.setDefaultRenderer(Float.class, new TableCellRender());
             tblGRN.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                     .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
             tblGRN.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -325,12 +342,25 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     private void initCombo() {
-        listLocation = inventoryRepo.getLocation();
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "SUP");
         traderAutoCompleter.setObserver(this);
-        currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, inventoryRepo.getCurrency(), null, false);
-        locationAutoCompleter = new LocationAutoCompleter(txtLocation, listLocation, null, false, false);
-        locationAutoCompleter.setObserver(this);
+        monoLoc = inventoryRepo.getLocation();
+        inventoryRepo.getCurrency().subscribe((t) -> {
+            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
+            currAutoCompleter.setObserver(this);
+            userRepo.getDefaultCurrency().subscribe((tt) -> {
+                currAutoCompleter.setCurrency(tt);
+            });
+        });
+
+        monoLoc.subscribe((t) -> {
+            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
+            locationAutoCompleter.setObserver(this);
+            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
+                locationAutoCompleter.setLocation(tt);
+            });
+        });
+
     }
 
     private void initKeyListener() {
@@ -364,7 +394,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         txtGrandTotal.setValue(0.00);
         txtComPercent.setValue(0.00);
         txtComAmt.setValue(0.00);
-        txtLocation.setText(null);
     }
 
     private void initTextBoxFormat() {
@@ -382,9 +411,10 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
 
     private void assignDefaultValue() {
         txtPurDate.setDate(Util1.getTodayDate());
-        traderAutoCompleter.setTrader(inventoryRepo.getDefaultSupplier());
-        currAutoCompleter.setCurrency(userRepo.getDefaultCurrency());
-        locationAutoCompleter.setLocation(inventoryRepo.getDefaultLocation());
+        Mono<Trader> trader = inventoryRepo.findTrader(Global.hmRoleProperty.get("default.customer"), Global.deptId);
+        trader.subscribe((t) -> {
+            traderAutoCompleter.setTrader(t);
+        });
         txtDueDate.setDate(null);
         progress.setIndeterminate(false);
         txtCurrency.setEnabled(ProUtil.isMultiCur());
@@ -408,7 +438,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         lblStatus.setForeground(Color.GREEN);
         progress.setIndeterminate(false);
         getExpense();
-        focusTable();
+        txtCus.requestFocus();
     }
 
     public boolean savePur(boolean print) {
@@ -627,8 +657,13 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             ph = pur;
             Integer deptId = ph.getKey().getDeptId();
             currAutoCompleter.setCurrency(inventoryRepo.findCurrency(ph.getCurCode()));
-            locationAutoCompleter.setLocation(inventoryRepo.findLocation(ph.getLocCode(), deptId));
-            traderAutoCompleter.setTrader(inventoryRepo.findTrader(ph.getTraderCode(), deptId));
+            inventoryRepo.findLocation(ph.getLocCode(), deptId).subscribe((t) -> {
+                locationAutoCompleter.setLocation(t);
+            });
+            Mono<Trader> trader = inventoryRepo.findTrader(ph.getTraderCode(), ph.getKey().getDeptId());
+            trader.subscribe((t) -> {
+                traderAutoCompleter.setTrader(t);
+            });
             String vouNo = ph.getKey().getVouNo();
 
             Flux<PurHisDetail> f1 = inventoryApi.get()
@@ -698,24 +733,28 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 expenseTableModel.addNewRow();
                 progress.setIndeterminate(false);
             });
-            boolean status = Util1.getBoolean(ProUtil.getProperty(ProUtil.P_SHOW_GRN));
-            if (status) {
-                grnTableModel.clear();
-                String batchNo = ph.getBatchNo();
-                if (!batchNo.isEmpty()) {
-                    Flux<GRNDetail> result = inventoryApi.get()
-                            .uri(builder -> builder.path("/grn/get-grn-detail-batch")
-                            .queryParam("batchNo", batchNo)
-                            .queryParam("compCode", Global.compCode)
-                            .queryParam("deptId", deptId)
-                            .build())
-                            .retrieve().bodyToFlux(GRNDetail.class);
-                    result.subscribe((t) -> {
-                        grnTableModel.addObject(t);
-                    }, (e) -> {
-                        JOptionPane.showMessageDialog(this, e.getMessage());
-                    });
-                }
+            searchGRN(ph.getBatchNo(), deptId);
+
+        }
+    }
+
+    private void searchGRN(String batchNo, Integer deptId) {
+        boolean status = Util1.getBoolean(ProUtil.getProperty(ProUtil.P_SHOW_GRN));
+        if (status) {
+            grnTableModel.clear();
+            if (!batchNo.isEmpty()) {
+                Flux<GRNDetail> result = inventoryApi.get()
+                        .uri(builder -> builder.path("/grn/get-grn-detail-batch")
+                        .queryParam("batchNo", batchNo)
+                        .queryParam("compCode", Global.compCode)
+                        .queryParam("deptId", deptId)
+                        .build())
+                        .retrieve().bodyToFlux(GRNDetail.class);
+                result.subscribe((t) -> {
+                    grnTableModel.addObject(t);
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                });
             }
         }
     }
@@ -824,7 +863,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
 
     private void focusTable() {
         int rc = tblPur.getRowCount();
-        if (rc > 1) {
+        if (rc >= 1) {
             tblPur.setRowSelectionInterval(rc - 1, rc - 1);
             tblPur.setColumnSelectionInterval(0, 0);
             tblPur.requestFocus();
@@ -861,33 +900,38 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     private void setVoucherDetail(GRN g) {
-        List<SaleHisDetail> list = inventoryRepo.getSaleByBatch(g.getBatchNo());
-        if (!list.isEmpty()) {
-            List<PurHisDetail> listPur = new ArrayList<>();
-            for (SaleHisDetail sd : list) {
-                PurHisDetail pd = new PurHisDetail();
-                pd.setStockCode(sd.getStockCode());
-                pd.setUserCode(sd.getUserCode());
-                pd.setStockName(sd.getStockName());
-                pd.setRelName(sd.getRelName());
-                pd.setAvgQty(0.0f);
-                pd.setQty(sd.getQty());
-                pd.setUnitCode(sd.getUnitCode());
-                pd.setPrice(sd.getPrice());
-                pd.setAmount(sd.getAmount());
-                pd.setLocCode(sd.getLocCode());
-                pd.setLocName(sd.getLocName());
-                listPur.add(pd);
-            }
-            purTableModel.setListDetail(listPur);
+        purTableModel.clear();
+        String batchNo = g.getBatchNo();
+        Integer deptId = g.getKey().getDeptId();
+        boolean detail = Util1.getBoolean(ProUtil.getProperty(ProUtil.P_BATCH_DETAIL));
+        Flux<SaleHisDetail> result = inventoryRepo.getSaleByBatch(batchNo, detail);
+        result.subscribe((sd) -> {
+            PurHisDetail pd = new PurHisDetail();
+            pd.setStockCode(sd.getStockCode());
+            pd.setUserCode(sd.getUserCode());
+            pd.setStockName(sd.getStockName());
+            pd.setRelName(sd.getRelName());
+            pd.setAvgQty(0.0f);
+            pd.setQty(sd.getQty());
+            pd.setUnitCode(sd.getUnitCode());
+            pd.setPrice(sd.getPrice());
+            pd.setAmount(sd.getAmount());
+            pd.setLocCode(sd.getLocCode());
+            pd.setLocName(sd.getLocName());
+            purTableModel.addPurchase(pd);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }, () -> {
             purTableModel.addNewRow();
             calculateTotalAmount(false);
-            traderAutoCompleter.setTrader(inventoryRepo.findTrader(g.getTraderCode(), g.getKey().getDeptId()));
-            txtBatchNo.setText(g.getBatchNo());
+            Mono<Trader> trader = inventoryRepo.findTrader(g.getTraderCode(), g.getKey().getDeptId());
+            trader.subscribe((t) -> {
+                traderAutoCompleter.setTrader(t);
+            });
+            txtBatchNo.setText(batchNo);
             txtBatchNo.setEditable(false);
-        } else {
-            JOptionPane.showMessageDialog(this, "No sale records.");
-        }
+            searchGRN(batchNo, deptId);
+        });
     }
 
     /**
@@ -1587,8 +1631,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         observer.selected("control", this);
-        focusTable();
-
     }//GEN-LAST:event_formComponentShown
 
     private void txtCusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCusActionPerformed

@@ -5,9 +5,7 @@
  */
 package com.acc.editor;
 
-import com.acc.common.AccountRepo;
 import com.acc.model.VDescription;
-import com.acc.model.VRef;
 import com.common.Global;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;

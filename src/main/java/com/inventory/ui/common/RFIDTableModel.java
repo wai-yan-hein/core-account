@@ -67,8 +67,6 @@ public class RFIDTableModel extends AbstractTableModel {
         this.observer = observer;
     }
 
-    
-
     @Override
     public String getColumnName(int column) {
         return columnNames[column];
@@ -266,35 +264,7 @@ public class RFIDTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<PriceOption> getPriceOption(int row) {
-        Stock s = listDetail.get(row).getStock();
-        if (s == null) {
-            s = inventoryRepo.findStock(listDetail.get(row).getStockCode());
-        }
-        List<PriceOption> listPrice = inventoryRepo.getPriceOption("-");
-        if (!listPrice.isEmpty()) {
-            for (PriceOption op : listPrice) {
-                switch (Util1.isNull(op.getKey().getPriceType(), "N")) {
-                    case "A" ->
-                        op.setPrice(s.getSalePriceA());
-                    case "B" ->
-                        op.setPrice(s.getSalePriceB());
-                    case "C" ->
-                        op.setPrice(s.getSalePriceC());
-                    case "D" ->
-                        op.setPrice(s.getSalePriceD());
-                    case "E" ->
-                        op.setPrice(s.getSalePriceE());
-                    case "N" ->
-                        op.setPrice(s.getSalePriceN());
-                    default -> {
-                        break;
-                    }
-                }
-            }
-        }
-        return listPrice;
-    }
+   
 
     public List<String> getDelList() {
         return deleteList;
@@ -308,7 +278,7 @@ public class RFIDTableModel extends AbstractTableModel {
 
     public void delete(int row) {
         SaleHisDetail sdh = listDetail.get(row);
-        if (sdh.getKey()!= null) {
+        if (sdh.getKey() != null) {
             deleteList.add(sdh.getKey().getSdCode());
         }
         listDetail.remove(row);

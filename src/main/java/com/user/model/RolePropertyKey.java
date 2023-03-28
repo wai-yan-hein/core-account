@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.acc.model;
+package com.user.model;
 
 import lombok.Data;
 
@@ -12,15 +12,9 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
-public class VRef {
+public class RolePropertyKey {
 
-    private String reference;
-
-    public VRef() {
-    }
-
-    public VRef(String reference) {
-        this.reference = reference;
-    }
-
+    private String roleCode;
+    private String propKey;
+    private String compCode;
 }

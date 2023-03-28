@@ -5,8 +5,8 @@
 package com.user.common;
 
 import com.common.Global;
-import com.common.RoleProperty;
-import com.common.RolePropertyKey;
+import com.user.model.RoleProperty;
+import com.user.model.RolePropertyKey;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -123,7 +123,6 @@ public class RolePropertyTableModel extends AbstractTableModel {
     private void save(RoleProperty property) {
         if (isValidEntry(property)) {
             Global.hmRoleProperty.put(property.getKey().getPropKey(), property.getPropValue());
-            property.setCompCode(Global.compCode);
             Mono<RoleProperty> result = userApi.post()
                     .uri("/user/save-role-property")
                     .body(Mono.just(property), RoleProperty.class)
@@ -131,7 +130,6 @@ public class RolePropertyTableModel extends AbstractTableModel {
                     .bodyToMono(RoleProperty.class);
             result.block(Duration.ofMinutes(1));
             addNewRow();
-
         }
     }
 

@@ -26,7 +26,6 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
@@ -127,10 +126,14 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
     }
 
     private void initCombo() {
+        inventoryRepo.getLocation().subscribe((t) -> {
+            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, false);
+        });
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "CUS");
-        appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
+        userRepo.getAppUser().subscribe((t) -> {
+            appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
+        });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
-        locationAutoCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, true, false);
     }
 
     private void initTableVoucher() {
@@ -156,6 +159,14 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
         txtToDate.setDate(Util1.getTodayDate());
     }
 
+    private String getUserCode() {
+        return appUserAutoCompleter == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
+    }
+
+    private String getLocCode() {
+        return locationAutoCompleter == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
+    }
+
     private void search() {
         tableModel.clear();
         txtTotalRecord.setValue(0);
@@ -163,23 +174,21 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
-        filter.setUserCode(appUserAutoCompleter.getAppUser().getUserCode());
+        filter.setUserCode(getUserCode());
         filter.setVouNo(txtVouNo.getText());
         filter.setRemark(Util1.isNull(txtRemark.getText(), "-"));
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
-        filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
+        filter.setLocCode(getLocCode());
         filter.setDeleted(chkDel.isSelected());
         filter.setClose(chkClose.isSelected());
         filter.setBatchNo(txtBatchNo.getText());
-        Flux<GRN> result = inventoryRepo.getGRNHistory(filter);
-        result.subscribe((t) -> {
-            tableModel.addObject(t);
-            txtTotalRecord.setValue(tableModel.getSize());
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        }, () -> {
-            tableModel.fireTableDataChanged();
-        });
+        inventoryRepo.getGRNHistory(filter)
+                .collectList()
+                .subscribe((t) -> {
+                    tableModel.setListDetail(t);
+                    txtTotalRecord.setValue(t.size());
+                });
+
     }
 
     private void select() {

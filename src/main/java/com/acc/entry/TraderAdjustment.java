@@ -7,7 +7,6 @@ package com.acc.entry;
 
 import com.acc.common.AccountRepo;
 import com.acc.editor.COA3CellEditor;
-import com.acc.editor.COAAutoCompleter;
 import com.acc.editor.CurrencyAAutoCompleter;
 import com.acc.editor.CurrencyAEditor;
 import com.acc.editor.DepartmentAutoCompleter;
@@ -17,19 +16,15 @@ import com.acc.editor.DespEditor;
 import com.acc.editor.RefAutoCompleter;
 import com.acc.editor.RefCellEditor;
 import com.acc.editor.TraderAAutoCompleter;
-import com.acc.editor.TraderCellEditor;
-import com.acc.editor.TranSourceAutoCompleter;
-import com.acc.common.AllCashTableModel;
 import com.acc.common.CashInOutTableModel;
 import com.acc.common.CashOpeningTableModel;
-import com.acc.common.CurExchangeRateTableModel;
 import com.acc.common.DateAutoCompleter;
 import com.acc.common.DateTableDecorator;
-import com.acc.common.DayBookTableModel;
 import com.acc.common.OpeningCellRender;
 import com.acc.common.TraderAdjustmentTableModel;
 import com.acc.editor.BatchCellEditor;
 import com.acc.editor.BatchNoAutoCompeter;
+import com.acc.editor.COA3AutoCompleter;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.DeleteObj;
 import com.user.model.Currency;
@@ -41,12 +36,10 @@ import com.acc.model.TraderA;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
-import com.common.ReturnObject;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.user.common.UserRepo;
 import java.awt.Color;
@@ -57,13 +50,8 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -89,6 +77,7 @@ import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -104,7 +93,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
     private DateAutoCompleter dateAutoCompleter;
     private TraderAAutoCompleter traderAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
-    private COAAutoCompleter coaAutoCompleter;
+    private COA3AutoCompleter coaAutoCompleter;
     private CurrencyAAutoCompleter currencyAutoCompleter;
     private SelectionObserver selectionObserver;
     private DespAutoCompleter despAutoCompleter;
@@ -120,9 +109,8 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
     private JProgressBar progress;
     private AccountRepo accountRepo;
     private UserRepo userRepo;
-    private List<Department> listDepartment = new ArrayList<>();
-    private List<Currency> listCurrency = new ArrayList<>();
-    private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
+    private Mono<List<Department>> monoDep;
+    private Mono<List<Currency>> monoCur;
     private final String path = String.format("%s%s%s", "temp", File.separator, "Ledger" + Global.macId);
     private DateTableDecorator decorator;
     private TraderAdjustmentTableModel adjustmentTableModel = new TraderAdjustmentTableModel();
@@ -189,14 +177,18 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
     }
 
     private void initTableModel() {
+        accountRepo.getDefaultDepartment().subscribe((t) -> {
+            adjustmentTableModel.setDepartment(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((t) -> {
+            adjustmentTableModel.setCurrency(t);
+        });
         adjustmentTableModel.setTraderAAutoCompleter(traderAutoCompleter);
         tblCash.setModel(adjustmentTableModel);
         adjustmentTableModel.setParent(tblCash);
         adjustmentTableModel.setAccountRepo(accountRepo);
         adjustmentTableModel.setDateAutoCompleter(dateAutoCompleter);
         adjustmentTableModel.setObserver(this);
-        adjustmentTableModel.setDepartment(accountRepo.getDefaultDepartment());
-        adjustmentTableModel.setCurrency(userRepo.getDefaultCurrency());
         adjustmentTableModel.addNewRow();
     }
 
@@ -221,18 +213,23 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
     }
 
     private void initFilter() {
-        listDepartment = accountRepo.getDepartment();
-        listCurrency = accountRepo.getCurrency();
+        monoCur = accountRepo.getCurrency();
+        monoDep = accountRepo.getDepartment();
         traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accountApi, null, true);
         traderAutoCompleter.setSelectionObserver(this);
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDepartment, listDepartment, null, true, true);
-        departmentAutoCompleter.setObserver(this);
-        coaAutoCompleter = new COAAutoCompleter(txtAccount, accountRepo.getChartOfAccount(), null, true);
-        dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
-        currencyAutoCompleter = new CurrencyAAutoCompleter(txtCurrency, accountRepo.getCurrency(), null, true);
-        currencyAutoCompleter.setSelectionObserver(this);
-        dateAutoCompleter.setSelectionObserver(this);
+        monoDep.subscribe((t) -> {
+            departmentAutoCompleter = new DepartmentAutoCompleter(txtDepartment, t, null, true, true);
+            departmentAutoCompleter.setObserver(this);
+        });
+
+        monoCur.subscribe((t) -> {
+            currencyAutoCompleter = new CurrencyAAutoCompleter(txtCurrency, t, null, true);
+            currencyAutoCompleter.setSelectionObserver(this);
+        });
+        coaAutoCompleter = new COA3AutoCompleter(txtAccount, accountApi, null, true, 0);
         coaAutoCompleter.setSelectionObserver(this);
+        dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
+        dateAutoCompleter.setSelectionObserver(this);
         despAutoCompleter = new DespAutoCompleter(txtDesp, accountApi, null, true);
         despAutoCompleter.setSelectionObserver(this);
         refAutoCompleter = new RefAutoCompleter(txtRefrence, accountApi, null, true);
@@ -247,7 +244,6 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         initTableModel();
         initTableCB();
         createDateFilter();
-
     }
 
     private void requestFoucsTable() {
@@ -302,13 +298,17 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         tblCash.getColumnModel().getColumn(8).setPreferredWidth(90);// Dr-Amt   
         tblCash.getColumnModel().getColumn(9).setPreferredWidth(90);// Cr-Amt  
         tblCash.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
-        tblCash.getColumnModel().getColumn(1).setCellEditor(new DepartmentCellEditor(listDepartment));
+        monoDep.subscribe((t) -> {
+            tblCash.getColumnModel().getColumn(1).setCellEditor(new DepartmentCellEditor(t));
+        });
         tblCash.getColumnModel().getColumn(2).setCellEditor(new DespEditor(accountApi));
         tblCash.getColumnModel().getColumn(3).setCellEditor(new RefCellEditor(accountApi));
         tblCash.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
         tblCash.getColumnModel().getColumn(5).setCellEditor(new BatchCellEditor(accountApi));
         tblCash.getColumnModel().getColumn(6).setCellEditor(new COA3CellEditor(accountApi, 3));
-        tblCash.getColumnModel().getColumn(7).setCellEditor(new CurrencyAEditor(listCurrency));
+        monoCur.subscribe((t) -> {
+            tblCash.getColumnModel().getColumn(7).setCellEditor(new CurrencyAEditor(t));
+        });
         tblCash.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
         tblCash.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
         tblCash.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -384,9 +384,12 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
                 yes_no = JOptionPane.showConfirmDialog(Global.parentForm, "Are you sure to delete?",
                         "Delete", JOptionPane.YES_NO_OPTION);
                 if (yes_no == 0) {
-                    if (accountRepo.delete(obj)) {
-                        adjustmentTableModel.deleteVGl(selectRow);
-                    }
+                    accountRepo.delete(obj).subscribe((t) -> {
+                        if (t) {
+                            adjustmentTableModel.deleteVGl(selectRow);
+                        }
+                    });
+
                     calDebitCredit();
                 }
             }
@@ -448,7 +451,6 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
             return;
         }
         progress.setIndeterminate(true);
-        calOpeningClosing(traderCode, trader.getAccount());
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
         filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
         filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
@@ -469,32 +471,25 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         filter.setAcc(accCode);
         filter.setSrcAcc(trader.getAccount());
         filter.setSummary(chkSummary.isSelected());
-        Mono<ReturnObject> result = accountApi.post()
+        adjustmentTableModel.clear();
+        Flux<Gl> result = accountApi.post()
                 .uri("/account/search-gl")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
+                .bodyToFlux(Gl.class);
         result.subscribe((t) -> {
-            Util1.extractZipToJson(t.getFile(), path);
-            try {
-                Reader reader = Files.newBufferedReader(Paths.get(path.concat(".json")));
-                List<Gl> listVGl = gson.fromJson(reader, new TypeToken<ArrayList<Gl>>() {
-                }.getType());
-                txtRecord.setValue(listVGl.size());
-                adjustmentTableModel.setGlDate(filter.getFromDate());
-                adjustmentTableModel.setListVGl(listVGl);
-                adjustmentTableModel.addNewRow();
-                calDebitCredit();
-                requestFoucsTable();
-                decorator.refreshButton(filter.getFromDate());
-                progress.setIndeterminate(false);
-            } catch (IOException ex) {
-                log.error(ex.getMessage());
-            }
-
+            adjustmentTableModel.addVGl(t);
         }, (e) -> {
-            progress.setIndeterminate(false);
             JOptionPane.showMessageDialog(this, e.getMessage());
+            progress.setIndeterminate(false);
+        }, () -> {
+            adjustmentTableModel.setGlDate(filter.getFromDate());
+            adjustmentTableModel.fireTableDataChanged();
+            adjustmentTableModel.addNewRow();
+            decorator.refreshButton(filter.getFromDate());
+            progress.setIndeterminate(false);
+            calOpeningClosing(traderCode, trader.getAccount());
+            requestFoucsTable();
         });
     }
 
@@ -1152,6 +1147,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
         }, () -> {
+            calDebitCredit();
         });
     }
 

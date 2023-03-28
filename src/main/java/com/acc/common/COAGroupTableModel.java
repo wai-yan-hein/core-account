@@ -110,10 +110,12 @@ public class COAGroupTableModel extends AbstractTableModel {
 
     private String getParentName(String parentCode) {
         if (hmCOA.get(parentCode) == null) {
-            ChartOfAccount obj = accountRepo.findCOA(parentCode);
-            if (obj != null) {
-                hmCOA.put(parentCode, obj.getCoaNameEng());
-            }
+            accountRepo.findCOA(parentCode).subscribe((obj) -> {
+                if (obj != null) {
+                    hmCOA.put(parentCode, obj.getCoaNameEng());
+                }
+            });
+
         }
         return hmCOA.get(parentCode);
     }
@@ -166,13 +168,15 @@ public class COAGroupTableModel extends AbstractTableModel {
     private void save(ChartOfAccount coa, int row) {
         if (isValidCOA(coa)) {
             try {
-                ChartOfAccount save = accountRepo.saveCOA(coa);
-                if (save.getKey().getCoaCode() != null) {
-                    listCOA.set(row, save);
-                    addEmptyRow();
-                    parent.setRowSelectionInterval(row + 1, row + 1);
-                    parent.setColumnSelectionInterval(1, 1);
-                }
+                accountRepo.saveCOA(coa).subscribe((t) -> {
+                    if (t.getKey().getCoaCode() != null) {
+                        listCOA.set(row, t);
+                        addEmptyRow();
+                        parent.setRowSelectionInterval(row + 1, row + 1);
+                        parent.setColumnSelectionInterval(1, 1);
+                    }
+                });
+
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(parent, ex.getMessage());
             }

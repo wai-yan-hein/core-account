@@ -115,7 +115,14 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
 
     private void searchTrader() {
         progress.setIndeterminate(true);
-        traderATableModel.setListTrader(accountRepo.getTrader());
+        traderATableModel.clear();
+        accountRepo.getTrader().subscribe((t) -> {
+            traderATableModel.addTrader(t);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }, () -> {
+            traderATableModel.fireTableDataChanged();
+        });
         lblRecord.setText(String.valueOf(traderATableModel.getListTrader().size() + ""));
         progress.setIndeterminate(false);
 
@@ -128,11 +135,13 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         txtCusName.setText(trader.getTraderName());
         txtCusEmail.setText(trader.getEmail());
         txtCusPhone.setText(trader.getPhone());
-        cOAAutoCompleter.setCoa(accountRepo.findCOA(trader.getAccount()));
         txtCusAddress.setText(trader.getAddress());
         chkActive.setSelected(trader.isActive());
         txtCusName.requestFocus();
         lblStatus.setText("EDIT");
+        accountRepo.findCOA(trader.getAccount()).subscribe((coa) -> {
+            cOAAutoCompleter.setCoa(coa);
+        });
     }
 
     private boolean isValidEntry() {
@@ -171,15 +180,17 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
 
     private void saveTrader() {
         if (isValidEntry()) {
-            trader = accountRepo.saveTrader(trader);
-            if (!Util1.isNull(trader.getKey().getCode())) {
-                if (lblStatus.getText().equals("EDIT")) {
-                    traderATableModel.setTrader(selectRow, trader);
-                } else {
-                    traderATableModel.addTrader(trader);
+            accountRepo.saveTrader(trader).subscribe((t) -> {
+                if (!Util1.isNull(t.getKey().getCode())) {
+                    if (lblStatus.getText().equals("EDIT")) {
+                        traderATableModel.setTrader(selectRow, t);
+                    } else {
+                        traderATableModel.addTrader(t);
+                    }
+                    clear();
                 }
-                clear();
-            }
+            });
+
         }
     }
 

@@ -138,13 +138,14 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     }
 
     private void initCombo() {
-        List<Location> listLocaiton = inventoryRepo.getLocation();
-        fromLocaitonCompleter = new LocationAutoCompleter(txtFrom, listLocaiton, null, false, false);
-        toLocaitonCompleter = new LocationAutoCompleter(txtTo, listLocaiton, null, false, false);
+        inventoryRepo.getLocation().subscribe((t) -> {
+            fromLocaitonCompleter = new LocationAutoCompleter(txtFrom, t, null, false, false);
+            toLocaitonCompleter = new LocationAutoCompleter(txtTo, t, null, false, false);
+        });
+
     }
 
     private void initTable() {
-        listStockUnit = inventoryRepo.getStockUnit();
         tranTableModel.setVouDate(txtDate);
         tranTableModel.setLblRec(lblRec);
         tranTableModel.setInventoryRepo(inventoryRepo);
@@ -161,7 +162,9 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         tblTransfer.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblTransfer.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         tblTransfer.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
-        tblTransfer.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(listStockUnit));
+        inventoryRepo.getStockUnit().subscribe((t) -> {
+            tblTransfer.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));
+        });
         tblTransfer.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblTransfer.setDefaultRenderer(Float.class, new DecimalFormatRender());
         tblTransfer.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -248,7 +251,9 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         txtDate.setDate(Util1.getTodayDate());
         progress.setIndeterminate(false);
         txtVou.setText(null);
-        fromLocaitonCompleter.setLocation(inventoryRepo.getDefaultLocation());
+        inventoryRepo.getDefaultLocation().subscribe((t) -> {
+            fromLocaitonCompleter.setLocation(t);
+        });
         disableForm(true);
     }
 
@@ -310,8 +315,12 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         progress.setIndeterminate(true);
         io = s;
         Integer deptId = io.getKey().getDeptId();
-        fromLocaitonCompleter.setLocation(inventoryRepo.findLocation(io.getLocCodeFrom(), deptId));
-        toLocaitonCompleter.setLocation(inventoryRepo.findLocation(io.getLocCodeTo(), deptId));
+        inventoryRepo.findLocation(io.getLocCodeFrom(), deptId).subscribe((t) -> {
+            fromLocaitonCompleter.setLocation(t);
+        });
+        inventoryRepo.findLocation(io.getLocCodeTo(), deptId).subscribe((t) -> {
+            toLocaitonCompleter.setLocation(t);
+        });
         String vouNo = io.getKey().getVouNo();
         Mono<ResponseEntity<List<TransferHisDetail>>> result = inventoryApi.get()
                 .uri(builder -> builder.path("/transfer/get-transfer-detail")

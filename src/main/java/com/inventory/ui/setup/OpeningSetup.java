@@ -20,8 +20,6 @@ import com.inventory.model.Location;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisDetail;
 import com.inventory.model.OPHisKey;
-import com.inventory.model.Stock;
-import com.inventory.model.VOpening;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.OpeningTableModel;
 import com.inventory.ui.entry.dialog.OPHistoryDialog;
@@ -32,12 +30,6 @@ import java.awt.FileDialog;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -75,8 +67,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     private OPHis oPHis = new OPHis();
     private JProgressBar progress;
     private SelectionObserver observer;
-    private List<Location> listLocation = new ArrayList<>();
-    private List<Stock> listStock = new ArrayList<>();
+    private Mono<List<Location>> monoLoc;
 
     public JProgressBar getProgress() {
         return progress;
@@ -131,11 +122,20 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     }
 
     private void initCompleter() {
-        listLocation = inventoryRepo.getLocation();
-        locationAutoCompleter = new LocationAutoCompleter(txtLocation, listLocation, null, false, false);
-        locationAutoCompleter.setLocation(inventoryRepo.getDefaultLocation());
-        currencyAAutoCompleter = new CurrencyAutoCompleter(txtCurrency, userRepo.getCurrency(), null, false);
-        currencyAAutoCompleter.setCurrency(userRepo.getDefaultCurrency());
+        monoLoc = inventoryRepo.getLocation();
+        monoLoc.subscribe((t) -> {
+            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
+            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
+                locationAutoCompleter.setLocation(tt);
+            });
+        });
+        userRepo.getCurrency().subscribe((t) -> {
+            currencyAAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
+            userRepo.getDefaultCurrency().subscribe((tt) -> {
+                currencyAAutoCompleter.setCurrency(tt);
+            });
+        });
+
     }
 
     private void initTable() {
@@ -157,7 +157,9 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         tblOpening.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblOpening.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         tblOpening.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
-        tblOpening.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
+        inventoryRepo.getStockUnit().subscribe((t) -> {
+            tblOpening.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));
+        });
         tblOpening.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
         tblOpening.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
         tblOpening.setDefaultRenderer(Object.class, new DecimalFormatRender());
@@ -169,14 +171,18 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     private void clear() {
         txtOPDate.setDate(Util1.getTodayDate());
-        locationAutoCompleter.setLocation(inventoryRepo.getDefaultLocation());
+        inventoryRepo.getDefaultLocation().subscribe((t) -> {
+            locationAutoCompleter.setLocation(t);
+        });
         txtRemark.setText(null);
         openingTableModel.clear();
         openingTableModel.addNewRow();
         lblStatus.setText("NEW");
         oPHis = new OPHis();
         txtVouNo.setText(null);
-        currencyAAutoCompleter.setCurrency(userRepo.getDefaultCurrency());
+        userRepo.getDefaultCurrency().subscribe((t) -> {
+            currencyAAutoCompleter.setCurrency(t);
+        });
         calculatAmount();
     }
 
@@ -275,7 +281,9 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     private void setVoucher(OPHis op) {
         if (op != null) {
             oPHis = op;
-            locationAutoCompleter.setLocation(inventoryRepo.findLocation(oPHis.getLocCode(), oPHis.getKey().getDeptId()));
+            inventoryRepo.findLocation(oPHis.getLocCode(), oPHis.getKey().getDeptId()).subscribe((t) -> {
+                locationAutoCompleter.setLocation(t);
+            });
             currencyAAutoCompleter.setCurrency(inventoryRepo.findCurrency(oPHis.getCurCode()));
             progress.setIndeterminate(true);
             Mono<ResponseEntity<List<OPHisDetail>>> result = inventoryApi.get()

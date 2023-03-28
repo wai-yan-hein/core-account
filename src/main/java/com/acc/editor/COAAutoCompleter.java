@@ -47,7 +47,7 @@ public final class COAAutoCompleter implements KeyListener {
     private JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private COATableModel cOATableModel;
+    private COATableModel cOATableModel = new COATableModel();
     private ChartOfAccount coa;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
@@ -77,7 +77,7 @@ public final class COAAutoCompleter implements KeyListener {
             list.add(0, c);
             setCoa(c);
         }
-        cOATableModel = new COATableModel(list);
+        cOATableModel.setListCOA(list);
         table.setModel(cOATableModel);
         table.getTableHeader().setFont(Global.lableFont);
         table.setFont(Global.textFont); // NOI18N

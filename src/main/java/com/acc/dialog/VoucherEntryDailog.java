@@ -10,12 +10,11 @@ import com.acc.common.CrDrVoucherEntryTableModel;
 import com.acc.editor.COA3CellEditor;
 import com.acc.editor.DepartmentCellEditor;
 import com.acc.editor.TraderCellEditor;
-import com.acc.model.ChartOfAccount;
+import com.acc.model.Department;
 import com.acc.model.Gl;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.ProUtil;
-import com.common.ReturnObject;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.CurrencyEditor;
@@ -38,6 +37,7 @@ import javax.swing.table.TableRowSorter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 /**
  *
@@ -134,14 +134,16 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
 
     public void initMain() {
         initTable();
-        ChartOfAccount coa = accountRepo.getDefaultCash();
-        if (coa != null) {
-            srcAcc = coa.getKey().getCoaCode();
-            lblCash.setText(coa.getCoaNameEng());
-        } else {
-            lblCash.setText("Configure Cash Account.");
-            disableForm(false);
-        }
+        accountRepo.getDefaultCash().subscribe((coa) -> {
+            if (coa != null) {
+                srcAcc = coa.getKey().getCoaCode();
+                lblCash.setText(coa.getCoaNameEng());
+            } else {
+                lblCash.setText("Configure Cash Account.");
+                disableForm(false);
+            }
+        });
+
     }
 
     private void disableForm(boolean s) {
@@ -152,22 +154,28 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
     }
 
     private void initTable() {
+        accountRepo.getDefaultDepartment().subscribe((t) -> {
+            tableModel.setDepartment(t);
+        });
         txtVouDate.setDate(Util1.getTodayDate());
         tblJournal.setModel(tableModel);
         tblJournal.setCellSelectionEnabled(true);
         tableModel.setParent(tblJournal);
         tableModel.setAccountRepo(accountRepo);
-        tableModel.setDepartment(accountRepo.getDefaultDepartment());
         tableModel.setVouType(vouType);
         tableModel.setTtlAmt(txtAmt);
         tblJournal.getTableHeader().setFont(Global.lableFont);
         tblJournal.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-        tblJournal.getColumnModel().getColumn(0).setCellEditor(new DepartmentCellEditor(accountRepo.getDepartment()));
+        Mono<List<Department>> monoDep = accountRepo.getDepartment();
+        monoDep.subscribe((t) -> {
+            tblJournal.getColumnModel().getColumn(0).setCellEditor(new DepartmentCellEditor(t));
+        });
         tblJournal.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
         tblJournal.getColumnModel().getColumn(2).setCellEditor(new TraderCellEditor(accountApi));
         tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountApi, 3));
-        tblJournal.getColumnModel().getColumn(4).setCellEditor(new CurrencyEditor(accountRepo.getCurrency()));
+        accountRepo.getCurrency().subscribe((t) -> {
+            tblJournal.getColumnModel().getColumn(4).setCellEditor(new CurrencyEditor(t));
+        });
         tblJournal.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
         tblJournal.getColumnModel().getColumn(0).setPreferredWidth(10);//dep
         tblJournal.getColumnModel().getColumn(1).setPreferredWidth(240);//des
@@ -199,8 +207,9 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
                 txtNa.setText(vgl.getNarration());
                 tableModel.setListVGl(listVGl);
                 lblStatus.setText("EDIT");
-                ChartOfAccount coa = accountRepo.findCOA(vgl.getSrcAccCode());
-                lblCash.setText(coa == null ? null : coa.getCoaNameEng());
+                accountRepo.findCOA(vgl.getSrcAccCode()).subscribe((coa) -> {
+                    lblCash.setText(coa == null ? null : coa.getCoaNameEng());
+                });
                 tableModel.addEmptyRow();
                 tableModel.calAmount();
             }
@@ -214,19 +223,21 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
                 list.get(0).setEdit(tableModel.isEdit());
                 list.get(0).setDelList(tableModel.getDelList());
             }
-            ReturnObject ro = accountRepo.saveGl(list);
-            if (ro != null) {
-                if (print) {
-                    String tranSource = ro.getTranSource();
-                    String glVouNo = ro.getGlVouNo();
-                    Gl gl = new Gl();
-                    gl.setTranSource(tranSource);
-                    gl.setGlVouNo(glVouNo);
-                    this.dispose();
-                    observer.selected("print", gl);
+            accountRepo.saveGl(list).subscribe((t) -> {
+                if (t != null) {
+                    if (print) {
+                        String tranSource = t.getTranSource();
+                        String glVouNo = t.getGlVouNo();
+                        Gl gl = new Gl();
+                        gl.setTranSource(tranSource);
+                        gl.setGlVouNo(glVouNo);
+                        this.dispose();
+                        observer.selected("print", gl);
+                    }
+                    clear();
                 }
-                clear();
-            }
+            });
+
         }
         return true;
     }

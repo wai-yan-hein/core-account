@@ -9,12 +9,16 @@ import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.GRN;
 import com.inventory.model.GRNDetail;
 import com.inventory.model.GRNKey;
+import com.inventory.model.Location;
+import com.inventory.model.StockUnit;
+import com.inventory.model.Trader;
 import com.inventory.ui.common.GRNTableModel;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.GRNHistoryDialog;
@@ -29,6 +33,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.List;
 import java.util.Objects;
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
@@ -41,7 +46,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  *
@@ -60,9 +65,18 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
     private UserRepo userRepo;
     @Autowired
     private WebClient inventoryApi;
+    private LocationAutoCompleter locationAutoCompleter;
     private final GRNTableModel tableModel = new GRNTableModel();
     private final GRNHistoryDialog dialog = new GRNHistoryDialog(Global.parentForm);
     private GRN grn = new GRN();
+
+    public LocationAutoCompleter getLocationAutoCompleter() {
+        return locationAutoCompleter;
+    }
+
+    public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
+        this.locationAutoCompleter = locationAutoCompleter;
+    }
 
     public SelectionObserver getObserver() {
         return observer;
@@ -101,6 +115,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         txtTrader.addFocusListener(fa);
         txtBatchNo.addFocusListener(fa);
         txtRemark.addFocusListener(fa);
+        txtLocation.addFocusListener(fa);
     }
 
     private void initKeyListener() {
@@ -122,6 +137,13 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
     };
 
     private void initCombo() {
+        inventoryRepo.getLocation().subscribe((t) -> {
+            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
+            locationAutoCompleter.setObserver(this);
+            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
+                locationAutoCompleter.setLocation(tt);
+            });
+        });
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "-");
         traderAutoCompleter.setObserver(this);
     }
@@ -163,7 +185,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
     private void initTable() {
         tableModel.setLblRec(lblRec);
         tableModel.setParent(tblGRN);
-        tableModel.setLocation(inventoryRepo.getDefaultLocation());
+        tableModel.setGrn(this);
         tableModel.addNewRow();
         tblGRN.setModel(tableModel);
         tblGRN.getTableHeader().setFont(Global.tblHeaderFont);
@@ -178,11 +200,18 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         tblGRN.getColumnModel().getColumn(4).setPreferredWidth(1);//unit
         tblGRN.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblGRN.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblGRN.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(inventoryRepo.getLocation()));
+        inventoryRepo.getLocation().subscribe((t) -> {
+            tblGRN.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
+        });
         tblGRN.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
-        tblGRN.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
+        Mono<List<StockUnit>> monoUnit = inventoryRepo.getStockUnit();
+        monoUnit.subscribe((t) -> {
+            tblGRN.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));
+        });
         tblGRN.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//qty
-        tblGRN.getColumnModel().getColumn(7).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
+        monoUnit.subscribe((t) -> {
+            tblGRN.getColumnModel().getColumn(7).setCellEditor(new StockUnitEditor(t));
+        });
         tblGRN.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblGRN.setDefaultRenderer(Float.class, new DecimalFormatRender());
         tblGRN.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -220,10 +249,16 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                     "Choose Supplier.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtTrader.requestFocus();
+        } else if (Objects.isNull(locationAutoCompleter.getLocation())) {
+            JOptionPane.showMessageDialog(this, "Choose Location.",
+                    "Choose Location.", JOptionPane.ERROR_MESSAGE);
+            status = false;
+            txtLocation.requestFocus();
         } else if (tableModel.getListDetail().size() == 1) {
             JOptionPane.showMessageDialog(Global.parentForm, "No Stock Records.");
             status = false;
         } else {
+            grn.setMacId(Global.macId);
             if (lblStatus.getText().equals("NEW")) {
                 String batchNo = txtBatchNo.getText();
                 if (!batchNo.isEmpty()) {
@@ -234,10 +269,10 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                 }
                 grn.setVouDate(txtDate.getDate());
                 grn.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
+                grn.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
                 grn.setBatchNo(txtBatchNo.getText());
                 grn.setRemark(txtRemark.getText());
                 grn.setClosed(chkClose.isSelected());
-                grn.setMacId(Global.macId);
                 if (lblStatus.getText().equals("NEW")) {
                     GRNKey key = new GRNKey();
                     key.setCompCode(Global.compCode);
@@ -252,6 +287,18 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             }
         }
         return status;
+    }
+
+    private void setAllLocation() {
+        List<GRNDetail> listSaleDetail = tableModel.getListDetail();
+        Location loc = locationAutoCompleter.getLocation();
+        if (listSaleDetail != null) {
+            listSaleDetail.forEach(sd -> {
+                sd.setLocCode(loc.getKey().getLocCode());
+                sd.setLocName(loc.getLocName());
+            });
+        }
+        tableModel.setListDetail(listSaleDetail);
     }
 
     private void clear() {
@@ -308,45 +355,52 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             tableModel.clear();
             grn = g;
             Integer deptId = g.getKey().getDeptId();
-            traderAutoCompleter.setTrader(inventoryRepo.findTrader(grn.getTraderCode(), deptId));
+            Mono<Trader> trader = inventoryRepo.findTrader(grn.getTraderCode(), grn.getKey().getDeptId());
+            trader.subscribe((t) -> {
+                traderAutoCompleter.setTrader(t);
+            });
+            inventoryRepo.findLocation(grn.getLocCode(), deptId).subscribe((t) -> {
+                locationAutoCompleter.setLocation(t);
+            });
             String vouNo = grn.getKey().getVouNo();
-            Flux<GRNDetail> result = inventoryApi.get()
+            inventoryApi.get()
                     .uri(builder -> builder.path("/grn/get-grn-detail")
                     .queryParam("vouNo", vouNo)
                     .queryParam("compCode", Global.compCode)
                     .queryParam("deptId", deptId)
                     .build())
-                    .retrieve().bodyToFlux(GRNDetail.class);
-            result.subscribe((t) -> {
-                tableModel.addObject(t);
-            }, (e) -> {
-                progress.setIndeterminate(false);
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            }, () -> {
-                tableModel.addNewRow();
-                if (grn.isClosed()) {
-                    lblStatus.setText("This Batch is closed.");
-                    lblStatus.setForeground(Color.RED);
-                    disableForm(false);
-                } else if (grn.isDeleted()) {
-                    lblStatus.setText("DELETED");
-                    lblStatus.setForeground(Color.RED);
-                    disableForm(false);
-                    observer.selected("delete", true);
-                } else {
-                    lblStatus.setText("EDIT");
-                    lblStatus.setForeground(Color.blue);
-                    disableForm(true);
-                    txtBatchNo.setEditable(g.getBatchNo().isEmpty());
-                }
-                txtVouNo.setText(vouNo);
-                txtRemark.setText(grn.getRemark());
-                txtBatchNo.setText(grn.getBatchNo());
-                txtDate.setDate(grn.getVouDate());
-                chkClose.setSelected(grn.isClosed());
-                focusTable();
-                progress.setIndeterminate(false);
-            });
+                    .retrieve().bodyToFlux(GRNDetail.class)
+                    .collectList()
+                    .subscribe((t) -> {
+                        tableModel.setListDetail(t);
+                        tableModel.addNewRow();
+                        if (grn.isClosed()) {
+                            lblStatus.setText("This Batch is closed.");
+                            lblStatus.setForeground(Color.RED);
+                            disableForm(false);
+                        } else if (grn.isDeleted()) {
+                            lblStatus.setText("DELETED");
+                            lblStatus.setForeground(Color.RED);
+                            disableForm(false);
+                            observer.selected("delete", true);
+                        } else {
+                            lblStatus.setText("EDIT");
+                            lblStatus.setForeground(Color.blue);
+                            disableForm(true);
+                            txtBatchNo.setEditable(g.getBatchNo().isEmpty());
+                        }
+                        txtVouNo.setText(vouNo);
+                        txtRemark.setText(grn.getRemark());
+                        txtBatchNo.setText(grn.getBatchNo());
+                        txtDate.setDate(grn.getVouDate());
+                        chkClose.setSelected(grn.isClosed());
+                        focusTable();
+                        progress.setIndeterminate(false);
+                    }, (e) -> {
+                        progress.setIndeterminate(false);
+                        JOptionPane.showMessageDialog(this, e.getMessage());
+                    });
+
         }
     }
 
@@ -400,6 +454,8 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         lblStatus = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         txtRemark = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        txtLocation = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblGRN = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
@@ -469,6 +525,17 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             }
         });
 
+        jLabel6.setFont(Global.lableFont);
+        jLabel6.setText("Locaiton");
+
+        txtLocation.setFont(Global.textFont);
+        txtLocation.setName("txtRemark"); // NOI18N
+        txtLocation.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtLocationActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -482,7 +549,8 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                             .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(chkClose, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -492,7 +560,8 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                                     .addComponent(txtBatchNo, javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(txtDate, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 229, Short.MAX_VALUE)
                                     .addComponent(txtTrader)
-                                    .addComponent(txtRemark, javax.swing.GroupLayout.Alignment.LEADING))
+                                    .addComponent(txtRemark, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtLocation, javax.swing.GroupLayout.Alignment.LEADING))
                                 .addGap(1, 1, 1)))
                         .addContainerGap())
                     .addComponent(lblStatus, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
@@ -520,6 +589,10 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(txtRemark))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel6)
+                    .addComponent(txtLocation))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkClose)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -612,6 +685,10 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         // TODO add your handling code here:
     }//GEN-LAST:event_txtRemarkActionPerformed
 
+    private void txtLocationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtLocationActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtLocationActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkClose;
@@ -620,6 +697,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
@@ -628,6 +706,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
     private javax.swing.JTable tblGRN;
     private javax.swing.JTextField txtBatchNo;
     private com.toedter.calendar.JDateChooser txtDate;
+    private javax.swing.JTextField txtLocation;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtTrader;
     private javax.swing.JTextField txtVouNo;
@@ -639,7 +718,10 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             if (selectObj instanceof GRN g) {
                 setVoucher(g);
             }
+        } else if (source.equals("Location")) {
+            setAllLocation();
         }
+
     }
 
     @Override

@@ -10,14 +10,13 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
-import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.GRN;
 import com.inventory.model.Location;
 import com.inventory.model.PriceOption;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
-import com.inventory.model.Trader;
+import com.inventory.ui.entry.SaleByBatch;
 import com.inventory.ui.setup.dialog.PriceOptionDialog;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
@@ -42,8 +41,6 @@ public class SaleByBatchTableModel extends AbstractTableModel {
     private List<SaleHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
     private final List<String> deleteList = new ArrayList();
-    private LocationAutoCompleter locationAutoCompleter;
-    private TraderAutoCompleter traderAutoCompleter;
     private StockBalanceTableModel sbTableModel;
     private InventoryRepo inventoryRepo;
     private JLabel lblStockName;
@@ -51,6 +48,15 @@ public class SaleByBatchTableModel extends AbstractTableModel {
     private JDateChooser vouDate;
     private boolean change = false;
     private JLabel lblRecord;
+    private SaleByBatch sale;
+
+    public SaleByBatch getSale() {
+        return sale;
+    }
+
+    public void setSale(SaleByBatch sale) {
+        this.sale = sale;
+    }
 
     public StockBalanceTableModel getSbTableModel() {
         return sbTableModel;
@@ -84,14 +90,6 @@ public class SaleByBatchTableModel extends AbstractTableModel {
         this.change = change;
     }
 
-    public TraderAutoCompleter getTraderAutoCompleter() {
-        return traderAutoCompleter;
-    }
-
-    public void setTraderAutoCompleter(TraderAutoCompleter traderAutoCompleter) {
-        this.traderAutoCompleter = traderAutoCompleter;
-    }
-
     public JDateChooser getVouDate() {
         return vouDate;
     }
@@ -122,14 +120,6 @@ public class SaleByBatchTableModel extends AbstractTableModel {
 
     public void setParent(JTable parent) {
         this.parent = parent;
-    }
-
-    public LocationAutoCompleter getLocationAutoCompleter() {
-        return locationAutoCompleter;
-    }
-
-    public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
-        this.locationAutoCompleter = locationAutoCompleter;
     }
 
     public SelectionObserver getSelectionObserver() {
@@ -267,7 +257,6 @@ public class SaleByBatchTableModel extends AbstractTableModel {
                             sd.setRelName(s.getRelName());
                             sd.setQty(1.0f);
                             sd.setUnitCode(s.getSaleUnitCode());
-                            sd.setPrice(getTraderPrice(s));
                             sd.setStock(s);
                             if (ProUtil.isPricePopup()) {
                                 sd.setPrice(getPopupPrice(row, true));
@@ -336,16 +325,8 @@ public class SaleByBatchTableModel extends AbstractTableModel {
 
                 }
                 change = true;
+                assignLocation(sd);
                 calculateAmount(sd);
-                if (sd.getLocCode() == null) {
-                    Location l = locationAutoCompleter.getLocation();
-                    if (l != null) {
-                        sd.setLocCode(l.getKey().getLocCode());
-                        sd.setLocName(l.getLocName());
-
-                    }
-                }
-
                 fireTableRowsUpdated(row, row);
                 setRecord(listDetail.size() - 1);
                 selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
@@ -353,6 +334,19 @@ public class SaleByBatchTableModel extends AbstractTableModel {
             }
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
+        }
+    }
+
+    private void assignLocation(SaleHisDetail sd) {
+        if (sd.getLocCode() == null) {
+            LocationAutoCompleter completer = sale.getLocationAutoCompleter();
+            if (completer != null) {
+                Location l = completer.getLocation();
+                if (l != null) {
+                    sd.setLocCode(l.getKey().getLocCode());
+                    sd.setLocName(l.getLocName());
+                }
+            }
         }
     }
 
@@ -436,37 +430,8 @@ public class SaleByBatchTableModel extends AbstractTableModel {
         return status;
     }
 
-    private float getTraderPrice(Stock s) {
-        float price = 0.0f;
-        String priceType = getTraderType();
-        switch (priceType) {
-            case "N" -> {
-                price = s.getSalePriceN();
-            }
-            case "A" -> {
-                price = s.getSalePriceA();
-            }
-            case "B" -> {
-                price = s.getSalePriceB();
-            }
-            case "C" -> {
-                price = s.getSalePriceC();
-            }
-            case "D" -> {
-                price = s.getSalePriceD();
-            }
-            case "E" -> {
-                price = s.getSalePriceE();
-            }
-        }
-        return price;
-    }
-
     public List<PriceOption> getPriceOption(int row) {
         Stock s = listDetail.get(row).getStock();
-        if (s == null) {
-            s = inventoryRepo.findStock(listDetail.get(row).getStockCode());
-        }
         List<PriceOption> listPrice = inventoryRepo.getPriceOption("-");
         if (!listPrice.isEmpty()) {
             for (PriceOption op : listPrice) {
@@ -540,10 +505,5 @@ public class SaleByBatchTableModel extends AbstractTableModel {
         if (listDetail != null) {
             listDetail.clear();
         }
-    }
-
-    private String getTraderType() {
-        Trader t = traderAutoCompleter.getTrader();
-        return t == null ? "N" : Util1.isNull(t.getPriceType(), "N");
     }
 }

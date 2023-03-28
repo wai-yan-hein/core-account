@@ -51,13 +51,16 @@ public class CurrencyAutoCompleter implements KeyListener, SelectionObserver {
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
-    private SelectionObserver selectionObserver;
+    private SelectionObserver observer;
 
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
+    public SelectionObserver getObserver() {
+        return observer;
     }
 
-    //private CashFilter cashFilter = Global.allCash;
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
+    }
+
     public CurrencyAutoCompleter() {
     }
 
@@ -156,8 +159,8 @@ public class CurrencyAutoCompleter implements KeyListener, SelectionObserver {
                     table.getSelectedRow()));
             textComp.setText(currency.getCurrencyName());
             if (editor == null) {
-                if (selectionObserver != null) {
-                    selectionObserver.selected("Currency", currency.getCurCode());
+                if (observer != null) {
+                    observer.selected("Currency", currency.getCurCode());
                 }
             }
         }

@@ -86,18 +86,20 @@ public class PurchaseAvgPriceDialog extends javax.swing.JDialog {
     }
 
     private void initData() {
-        Stock s = inventoryRepo.findStock(pd.getStockCode());
-        if (s != null) {
-            txtRelName.setText(pd.getRelName());
-            txtQty.setValue(pd.getQty());
-            float orgPrice = Util1.getFloat(pd.getOrgPrice());
-            txtPrice.setValue(orgPrice > 0 ? orgPrice : pd.getPrice());
-            unitModel.setSelectedItem(inventoryRepo.findUnit(pd.getUnitCode(), Global.deptId));
-            txtAvgQty.setValue(pd.getAvgQty());
-            txtAvgPrice.setValue(Util1.getFloat(pd.getPrice()));
-            lossUnitModel.setSelectedItem(inventoryRepo.findUnit(s.getWeightUnit(), Global.deptId));
-            txtAvgQty.requestFocus();
-        }
+        inventoryRepo.findStock(pd.getStockCode()).subscribe((s) -> {
+            if (s != null) {
+                txtRelName.setText(pd.getRelName());
+                txtQty.setValue(pd.getQty());
+                float orgPrice = Util1.getFloat(pd.getOrgPrice());
+                txtPrice.setValue(orgPrice > 0 ? orgPrice : pd.getPrice());
+                unitModel.setSelectedItem(inventoryRepo.findUnit(pd.getUnitCode(), Global.deptId));
+                txtAvgQty.setValue(pd.getAvgQty());
+                txtAvgPrice.setValue(Util1.getFloat(pd.getPrice()));
+                lossUnitModel.setSelectedItem(inventoryRepo.findUnit(s.getWeightUnit(), Global.deptId));
+                txtAvgQty.requestFocus();
+            }
+        });
+
     }
 
     private void initTextBox() {

@@ -136,7 +136,7 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
                     return opening.getSrcAccName();
                 }
                 case 2 -> {
-                    return opening.getTradeUsrCode() == null ? opening.getTraderCode() : opening.getTradeUsrCode();
+                    return opening.getTraderUsrCode() == null ? opening.getTraderCode() : opening.getTraderUsrCode();
                 }
                 case 3 -> {
                     return opening.getTraderName();
@@ -185,12 +185,13 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
                             opening.setTraderName(trader.getTraderName());
                             String coaCode = trader.getAccount();
                             if (coaCode != null) {
-                                ChartOfAccount coa = accountRepo.findCOA(coaCode);
-                                if (coa != null) {
-                                    opening.setSourceAccId(coaCode);
-                                    opening.setSrcAccName(coa.getCoaNameEng());
-                                    opening.setCoaUsrCode(coa.getCoaCodeUsr());
-                                }
+                                accountRepo.findCOA(coaCode).subscribe((coa) -> {
+                                    if (coa != null) {
+                                        opening.setSourceAccId(coaCode);
+                                        opening.setSrcAccName(coa.getCoaNameEng());
+                                        opening.setCoaUsrCode(coa.getCoaCodeUsr());
+                                    }
+                                });
                             }
                             parent.setRowSelectionInterval(rowIndex, rowIndex);
                             parent.setColumnSelectionInterval(4, 4);
@@ -269,20 +270,22 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
         if (opening.getKey().getOpId() == null) {
             opening.setCreatedDate(Util1.getTodayDate());
         }
-        OpeningBalance op = accountRepo.saveCOAOpening(opening);
-        if (op != null) {
-            opening.setKey(op.getKey());
-            listOpening.set(row, opening);
-            addNewRow();
-            double amt = Util1.getDouble(opening.getDrAmt()) + Util1.getDouble(opening.getCrAmt());
-            if (amt == 0) {
-                parent.setColumnSelectionInterval(6, 6);
-            } else {
-                parent.setRowSelectionInterval(row + 1, row + 1);
-                parent.setColumnSelectionInterval(0, 0);
+        accountRepo.saveCOAOpening(opening).subscribe((t) -> {
+            if (t != null) {
+                opening.setKey(t.getKey());
+                listOpening.set(row, opening);
+                addNewRow();
+                double amt = Util1.getDouble(opening.getDrAmt()) + Util1.getDouble(opening.getCrAmt());
+                if (amt == 0) {
+                    parent.setColumnSelectionInterval(6, 6);
+                } else {
+                    parent.setRowSelectionInterval(row + 1, row + 1);
+                    parent.setColumnSelectionInterval(0, 0);
+                }
+                selectionObserver.selected("CAL-TOTAL", "-");
             }
-            selectionObserver.selected("CAL-TOTAL", "-");
-        }
+        });
+
     }
 
     public void addNewRow() {
@@ -337,16 +340,15 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
         return listOpening.get(rowIndex);
     }
 
-    public void deleteOpening(int rowIndex) {
+    public void deleteOpening(int row) {
         if (!listOpening.isEmpty()) {
-            listOpening.remove(rowIndex);
-            fireTableRowsDeleted(0, listOpening.size());
+            listOpening.remove(row);
+            fireTableRowsDeleted(row, row);
         }
     }
 
     public void addOpening(OpeningBalance opening) {
         listOpening.add(opening);
-        fireTableRowsInserted(listOpening.size() - 1, listOpening.size() - 1);
     }
 
     public void setOpening(int rowIndex, OpeningBalance opening) {

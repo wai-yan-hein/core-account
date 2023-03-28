@@ -75,13 +75,15 @@ public class OtherSetup extends javax.swing.JPanel {
     }
 
     private void saleManSetup() {
-        smDialog.setIconImage(icon);
-        smDialog.setInventoryRepo(inventoryRepo);
-        smDialog.setListSaleMan(inventoryRepo.getSaleMan());
-        smDialog.initMain();
-        smDialog.setSize(Global.width / 2, Global.height / 2);
-        smDialog.setLocationRelativeTo(null);
-        smDialog.setVisible(true);
+        inventoryRepo.getSaleMan().collectList().subscribe((t) -> {
+            smDialog.setIconImage(icon);
+            smDialog.setInventoryRepo(inventoryRepo);
+            smDialog.setListSaleMan(t);
+            smDialog.initMain();
+            smDialog.setSize(Global.width / 2, Global.height / 2);
+            smDialog.setLocationRelativeTo(null);
+            smDialog.setVisible(true);
+        });
     }
 
     private void vouStatusSetup() {
@@ -96,14 +98,17 @@ public class OtherSetup extends javax.swing.JPanel {
     }
 
     private void relationSetup() {
-        relationSetupDialog = new RelationSetupDialog();
-        relationSetupDialog.setIconImage(icon);
-        relationSetupDialog.setInventoryRepo(inventoryRepo);
-        relationSetupDialog.setListUnitRelation(inventoryRepo.getUnitRelation());
-        relationSetupDialog.initMain();
-        relationSetupDialog.setSize(Global.width / 2, Global.height / 2);
-        relationSetupDialog.setLocationRelativeTo(null);
-        relationSetupDialog.setVisible(true);
+        inventoryRepo.getUnitRelation().subscribe((t) -> {
+            relationSetupDialog = new RelationSetupDialog();
+            relationSetupDialog.setIconImage(icon);
+            relationSetupDialog.setInventoryRepo(inventoryRepo);
+            relationSetupDialog.setListUnitRelation(t);
+            relationSetupDialog.initMain();
+            relationSetupDialog.setSize(Global.width / 2, Global.height / 2);
+            relationSetupDialog.setLocationRelativeTo(null);
+            relationSetupDialog.setVisible(true);
+        });
+
     }
 
     private void processType() {

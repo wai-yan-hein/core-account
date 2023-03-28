@@ -20,7 +20,7 @@ import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.TreeTransferHandler;
 import com.common.Util1;
-import com.common.model.Menu;
+import com.user.model.Menu;
 import com.inventory.editor.MenuAutoCompleter;
 import com.inventory.model.CFont;
 import com.inventory.ui.common.InventoryRepo;
@@ -227,15 +227,17 @@ public class COAManagment extends javax.swing.JPanel implements
                 coa.setCredit(chkCredit.isSelected());
                 coa.setCurCode(Util1.isNull(txtCurrency.getText(), null));
                 coa.setMacId(Global.macId);
-                ChartOfAccount coaSave = accountRepo.saveCOA(coa);
-                if (coaSave != null) {
-                    if (lblStatus.getText().equals("EDIT")) {
-                        selectedNode.setUserObject(coaSave);
-                        treeModel.reload(selectedNode);
-                        setEnabledControl(false);
-                        clear();
+                accountRepo.saveCOA(coa).subscribe((t) -> {
+                    if (t != null) {
+                        if (lblStatus.getText().equals("EDIT")) {
+                            selectedNode.setUserObject(t);
+                            treeModel.reload(selectedNode);
+                            setEnabledControl(false);
+                            clear();
+                        }
                     }
-                }
+                });
+
             } catch (HeadlessException ex) {
                 JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
             }
@@ -314,38 +316,35 @@ public class COAManagment extends javax.swing.JPanel implements
     }
 
     private void createTreeNode(DefaultMutableTreeNode treeRoot) {
-        Mono<ResponseEntity<List<ChartOfAccount>>> result = accountApi.get()
+        accountApi.get()
                 .uri(builder -> builder.path("/account/get-coa-tree")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().toEntityList(ChartOfAccount.class);
-        result.subscribe((t) -> {
-            List<ChartOfAccount> chart = t.getBody();
-            if (!chart.isEmpty()) {
-                chart.forEach((menu) -> {
-                    if (menu.getChild() != null) {
-                        if (!menu.getChild().isEmpty()) {
-                            DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
-                            treeRoot.add(parent);
-                            addChildMenu(parent, menu.getChild());
-                        } else {  //No Child
-                            DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
+                .retrieve().bodyToFlux(ChartOfAccount.class)
+                .collectList().subscribe((t) -> {
+                    if (!t.isEmpty()) {
+                        t.forEach((menu) -> {
+                            if (menu.getChild() != null) {
+                                if (!menu.getChild().isEmpty()) {
+                                    DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
+                                    treeRoot.add(parent);
+                                    addChildMenu(parent, menu.getChild());
+                                } else {  //No Child
+                                    DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
 
-                            treeRoot.add(parent);
-                        }
-                    } else {  //No Child
-                        DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
-                        treeRoot.add(parent);
+                                    treeRoot.add(parent);
+                                }
+                            } else {  //No Child
+                                DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
+                                treeRoot.add(parent);
+                            }
+
+                        });
+                        treeModel.setRoot(treeRoot);
+                        treeModel.reload(treeRoot);
+                        progress.setIndeterminate(false);
                     }
-
                 });
-                treeModel.setRoot(treeRoot);
-                treeModel.reload(treeRoot);
-                progress.setIndeterminate(false);
-            }
-        }, (e) -> {
-            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-        });
 
     }
 
@@ -428,7 +427,7 @@ public class COAManagment extends javax.swing.JPanel implements
             Menu menu = new Menu();
             menu.setMenuName(coa.getCoaNameEng());
             menu.setMenuClass(completer.getMenu().getMenuClass());
-            menu.setParentMenuCode(completer.getMenu().getMenuCode());
+            menu.setParentMenuCode(completer.getMenu().getKey().getMenuCode());
             menu.setAccount(coa.getKey().getCoaCode());
             menu.setMenuType("Menu");
             try {
@@ -477,7 +476,7 @@ public class COAManagment extends javax.swing.JPanel implements
         }
         String line;
         int lineCount = 0;
-        try ( FileInputStream fis = new FileInputStream(path);  InputStreamReader isr = new InputStreamReader(fis);  BufferedReader reader = new BufferedReader(isr)) {
+        try (FileInputStream fis = new FileInputStream(path); InputStreamReader isr = new InputStreamReader(fis); BufferedReader reader = new BufferedReader(isr)) {
             while ((line = reader.readLine()) != null) {
                 String[] data = line.split(",");
                 String userCode = data[0];
@@ -854,7 +853,7 @@ public class COAManagment extends javax.swing.JPanel implements
             panel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 222, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 244, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -956,13 +955,16 @@ public class COAManagment extends javax.swing.JPanel implements
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 570, Short.MAX_VALUE)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 558, Short.MAX_VALUE)
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 371, Short.MAX_VALUE)
-                .addGap(0, 0, 0))
+                .addContainerGap()
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         tabMain.addTab("Standard COA", jPanel3);
@@ -971,9 +973,10 @@ public class COAManagment extends javax.swing.JPanel implements
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(tabMain))
+                .addComponent(tabMain, javax.swing.GroupLayout.DEFAULT_SIZE, 564, Short.MAX_VALUE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

@@ -51,6 +51,7 @@ public class Gl {
     private String forDes;
     private String narration;
     private String batchNo;
+    private String vouDate;
 
     public Gl(String curCode, Double drAmt, Double crAmt) {
         this.curCode = curCode;

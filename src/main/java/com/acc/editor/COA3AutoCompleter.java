@@ -8,6 +8,7 @@ package com.acc.editor;
 import com.acc.common.COA1TableModel;
 import com.acc.common.COA2TableModel;
 import com.acc.common.COA3TableModel;
+import com.acc.common.COATableModel;
 import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
@@ -20,6 +21,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
@@ -36,9 +38,8 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.text.JTextComponent;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 /**
  *
@@ -51,7 +52,8 @@ public final class COA3AutoCompleter implements KeyListener {
     private JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private final COA3TableModel cOATableModel = new COA3TableModel();
+    private final COATableModel cOATableModel = new COATableModel();
+    private final COA3TableModel cOA3TableModel = new COA3TableModel();
     private final COA2TableModel cOA2TableModel = new COA2TableModel();
     private final COA1TableModel cOA1TableModel = new COA1TableModel();
     private ChartOfAccount coa;
@@ -82,6 +84,9 @@ public final class COA3AutoCompleter implements KeyListener {
             setCoa(new ChartOfAccount(new COAKey("-", Global.compCode), "All"));
         }
         switch (this.level) {
+            case 0 -> {
+                table.setModel(cOATableModel);
+            }
             case 1 -> {
                 table.setModel(cOA1TableModel);
             }
@@ -89,7 +94,7 @@ public final class COA3AutoCompleter implements KeyListener {
                 table.setModel(cOA2TableModel);
             }
             case 3 -> {
-                table.setModel(cOATableModel);
+                table.setModel(cOA3TableModel);
                 table.getColumnModel().getColumn(2).setPreferredWidth(120);//Name
                 table.getColumnModel().getColumn(3).setPreferredWidth(120);//Name
             }
@@ -168,6 +173,9 @@ public final class COA3AutoCompleter implements KeyListener {
     public void mouseSelect() {
         if (table.getSelectedRow() != -1) {
             switch (this.level) {
+                case 0 ->
+                    coa = cOATableModel.getCOA(table.convertRowIndexToModel(
+                            table.getSelectedRow()));
                 case 1 ->
                     coa = cOA1TableModel.getCOA(table.convertRowIndexToModel(
                             table.getSelectedRow()));
@@ -175,10 +183,9 @@ public final class COA3AutoCompleter implements KeyListener {
                     coa = cOA2TableModel.getCOA(table.convertRowIndexToModel(
                             table.getSelectedRow()));
                 case 3 ->
-                    coa = cOATableModel.getCOA(table.convertRowIndexToModel(
+                    coa = cOA3TableModel.getCOA(table.convertRowIndexToModel(
                             table.getSelectedRow()));
-                default ->
-                    throw new AssertionError();
+
             }
 
             ((JTextField) textComp).setText(coa.getCoaNameEng());
@@ -369,38 +376,62 @@ public final class COA3AutoCompleter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                Mono<ResponseEntity<List<ChartOfAccount>>> result = webClient.get()
+                clear(level);
+                List<ChartOfAccount> list = new ArrayList<>();
+                Flux<ChartOfAccount> result = webClient.get()
                         .uri(builder -> builder.path("/account/search-coa")
                         .queryParam("str", str)
                         .queryParam("level", this.level)
                         .queryParam("compCode", Global.compCode)
                         .build())
-                        .retrieve().toEntityList(ChartOfAccount.class);
+                        .retrieve().bodyToFlux(ChartOfAccount.class);
                 result.subscribe((t) -> {
-                    List<ChartOfAccount> list = t.getBody();
+                    list.add(t);
+                }, (er) -> {
+                    log.error(er.getMessage());
+                }, () -> {
                     if (this.filter) {
                         ChartOfAccount s = new ChartOfAccount(new COAKey("-", Global.compCode), "All");
                         list.add(s);
                     }
-                    switch (this.level) {
-                        case 1 -> {
-                            cOA1TableModel.setListCOA(list);
-                        }
-                        case 2 -> {
-                            cOA2TableModel.setListCOA(list);
-                        }
-                        case 3 -> {
-                            cOATableModel.setListCOA(list);
-                        }
-                    }
+                    setData(list);
                     if (!list.isEmpty()) {
                         table.setRowSelectionInterval(0, 0);
                     }
-                }, (er) -> {
-                    log.error(er.getMessage());
                 });
             }
 
+        }
+    }
+
+    private void clear(int level) {
+        switch (level) {
+            case 0 ->
+                cOATableModel.clear();
+            case 1 ->
+                cOA1TableModel.clear();
+            case 2 ->
+                cOA2TableModel.clear();
+            case 3 ->
+                cOA3TableModel.clear();
+
+        }
+    }
+
+    private void setData(List<ChartOfAccount> list) {
+        switch (this.level) {
+            case 0 -> {
+                cOATableModel.setListCOA(list);
+            }
+            case 1 -> {
+                cOA1TableModel.setListCOA(list);
+            }
+            case 2 -> {
+                cOA2TableModel.setListCOA(list);
+            }
+            case 3 -> {
+                cOA3TableModel.setListCOA(list);
+            }
         }
     }
 

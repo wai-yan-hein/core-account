@@ -762,6 +762,7 @@
                       </Group>
                       <Component id="chkShowExpense" alignment="1" max="32767" attributes="0"/>
                       <Component id="chkShowGRN" alignment="1" max="32767" attributes="0"/>
+                      <Component id="chkPurByBatchDetail" alignment="1" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -776,6 +777,8 @@
                   <Component id="chkShowExpense" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="chkShowGRN" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="chkPurByBatchDetail" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="jSeparator4" min="-2" pref="10" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
@@ -833,6 +836,11 @@
         <Component class="javax.swing.JCheckBox" name="chkShowGRN">
           <Properties>
             <Property name="text" type="java.lang.String" value="GRN Show"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="chkPurByBatchDetail">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="By Batch Detail"/>
           </Properties>
         </Component>
       </SubComponents>

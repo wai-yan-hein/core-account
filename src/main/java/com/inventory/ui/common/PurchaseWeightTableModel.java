@@ -14,6 +14,8 @@ import com.inventory.model.Location;
 import com.inventory.model.PurHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
+import com.inventory.ui.entry.Purchase;
+import com.inventory.ui.entry.PurchaseByWeight;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,10 +38,18 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
     private List<PurHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
     private final List<String> deleteList = new ArrayList();
-    private LocationAutoCompleter locationAutoCompleter;
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
     private JLabel lblRec;
+    private PurchaseByWeight purchase;
+
+    public PurchaseByWeight getPurchase() {
+        return purchase;
+    }
+
+    public void setPurchase(PurchaseByWeight purchase) {
+        this.purchase = purchase;
+    }
 
     public JLabel getLblRec() {
         return lblRec;
@@ -71,14 +81,6 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
 
     public void setParent(JTable parent) {
         this.parent = parent;
-    }
-
-    public LocationAutoCompleter getLocationAutoCompleter() {
-        return locationAutoCompleter;
-    }
-
-    public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
-        this.locationAutoCompleter = locationAutoCompleter;
     }
 
     public SelectionObserver getObserver() {
@@ -296,20 +298,27 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                     }
                 }
             }
+            assignLocation(record);
             calculateAmount(record);
-            if (record.getLocCode() == null) {
-                Location l = locationAutoCompleter.getLocation();
-                if (l != null) {
-                    record.setLocCode(l.getKey().getLocCode());
-                    record.setLocName(l.getLocName());
-                }
-            }
             setRecord(listDetail.size() - 1);
             fireTableRowsUpdated(row, row);
             observer.selected("CAL-TOTAL", "CAL-TOTAL");
             parent.requestFocusInWindow();
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
+        }
+    }
+
+    private void assignLocation(PurHisDetail sd) {
+        if (sd.getLocCode() == null) {
+            LocationAutoCompleter completer = purchase.getLocationAutoCompleter();
+            if (completer != null) {
+                Location l = completer.getLocation();
+                if (l != null) {
+                    sd.setLocCode(l.getKey().getLocCode());
+                    sd.setLocName(l.getLocName());
+                }
+            }
         }
     }
 

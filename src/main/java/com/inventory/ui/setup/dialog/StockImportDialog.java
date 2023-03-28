@@ -114,7 +114,7 @@ public class StockImportDialog extends javax.swing.JDialog {
             });
         }
         HashMap<String, StockType> hm = new HashMap<>();
-        List<StockType> listST = inventoryRepo.getStockType();
+        List<StockType> listST = inventoryRepo.getStockType().block();
         if (!listST.isEmpty()) {
             for (StockType st : listST) {
                 hm.put(st.getUserCode(), st);
@@ -201,7 +201,7 @@ public class StockImportDialog extends javax.swing.JDialog {
 
     private String getGroupCode(String str) {
         if (hmGroup.isEmpty()) {
-            List<StockType> list = inventoryRepo.getStockType();
+            List<StockType> list = inventoryRepo.getStockType().block();
             list.forEach((t) -> {
                 hmGroup.put(t.getUserCode(), t.getKey().getStockTypeCode());
             });

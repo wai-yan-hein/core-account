@@ -21,6 +21,7 @@ import com.inventory.model.AppUser;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;
 import com.inventory.model.VPurchase;
+import com.inventory.model.VReturnOut;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.PurVouSearchTableModel;
 import java.awt.HeadlessException;
@@ -112,12 +113,20 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
     }
 
     private void initCombo() {
+        inventoryRepo.getLocation().subscribe((t) -> {
+            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, false);
+        });
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "SUP");
-        appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
+        userRepo.getAppUser().subscribe((t) -> {
+            appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
+        });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
-        locationAutoCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, true, false);
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, userRepo.getDeparment(), null, true);
-        departmentAutoCompleter.setDepartment(userRepo.findDepartment(Global.deptId));
+        userRepo.getDeparment().subscribe((t) -> {
+            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true);
+            userRepo.findDepartment(Global.deptId).subscribe((tt) -> {
+                departmentAutoCompleter.setDepartment(tt);
+            });
+        });
     }
 
     private void initTableVoucher() {
@@ -147,55 +156,56 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         }
     }
 
+    private String getUserCode() {
+        return appUserAutoCompleter == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
+    }
+
+    private String getLocCode() {
+        return locationAutoCompleter == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
+    }
+
+    private Integer getDepId() {
+        return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
+    }
+
     private void search() {
         progess.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setCusCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
-        filter.setUserCode(appUserAutoCompleter.getAppUser().getUserCode());
+        filter.setUserCode(getUserCode());
         filter.setVouNo(txtVouNo.getText());
         filter.setRemark(txtRemark.getText());
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
-        filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
+        filter.setLocCode(getLocCode());
         filter.setReference(txtRef.getText());
         filter.setDeleted(chkDel.isSelected());
-        filter.setDeptId(departmentAutoCompleter.getDepartment().getDeptId());
+        filter.setDeptId(getDepId());
         tableModel.clear();
-        Flux<VPurchase> result = inventoryApi
+        inventoryApi
                 .post()
                 .uri("/pur/get-pur")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
-                .bodyToFlux(VPurchase.class);
-        result.subscribe((t) -> {
-            tableModel.addObject(t);
-            txtTotalRecord.setValue(tableModel.getListDetail().size());
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-            progess.setIndeterminate(false);
-        }, () -> {
-            tableModel.fireTableDataChanged();
-            calAmount();
-            progess.setIndeterminate(false);
-        });
+                .bodyToFlux(VPurchase.class)
+                .collectList()
+                .subscribe((t) -> {
+                    tableModel.setListDetail(t);
+                    calAmount();
+                    progess.setIndeterminate(false);
+                }, (e) -> {
+                    progess.setIndeterminate(false);
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                });
 
     }
 
     private void calAmount() {
-        float ttlAmt = 0.0f;
-        float ttlPaid = 0.0f;
-        List<VPurchase> listPur = tableModel.getListDetail();
-        if (!listPur.isEmpty()) {
-            for (VPurchase p : listPur) {
-                if (!p.isDeleted()) {
-                    ttlAmt += p.getVouTotal();
-                    ttlPaid += p.getPaid();
-                }
-            }
-        }
-        txtPaid.setValue(ttlPaid);
-        txtTotalAmt.setValue(ttlAmt);
+        List<VPurchase> list = tableModel.getListDetail();
+        txtPaid.setValue(list.stream().mapToDouble(VPurchase::getPaid).sum());
+        txtTotalAmt.setValue(list.stream().mapToDouble(VPurchase::getVouTotal).sum());
+        txtTotalRecord.setValue(list.size());
         tblVoucher.requestFocus();
     }
 

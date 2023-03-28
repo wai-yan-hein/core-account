@@ -117,8 +117,10 @@ public class CloudConfig extends javax.swing.JPanel {
     }
 
     private void search() {
-        tableModel.setListDepartment(userRepo.getDeparment());
-        tableModel.addNewRow();
+        userRepo.getDeparment().subscribe((t) -> {
+            tableModel.setListDepartment(t);
+            tableModel.addNewRow();
+        });
         txtSvrQ.setText(Global.hmRoleProperty.get(txtSvrQ.getName()));
         txtAccSvrQ.setText(Global.hmRoleProperty.get(txtAccSvrQ.getName()));
         txtMQUrl.setText(Global.hmRoleProperty.get(txtMQUrl.getName()));

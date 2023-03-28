@@ -10,7 +10,7 @@ import com.acc.common.DateAutoCompleter;
 import com.acc.common.DateTableDecorator;
 import com.acc.common.GLListingTableModel;
 import com.acc.common.GLTableCellRender;
-import com.acc.editor.COAAutoCompleter;
+import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.ReportFilter;
@@ -18,14 +18,10 @@ import com.acc.model.VTriBalance;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
-import com.common.ReturnObject;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
 import com.inventory.editor.CurrencyAutoCompleter;
 import com.user.common.UserRepo;
 import java.awt.event.KeyEvent;
@@ -35,9 +31,6 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.Reader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -45,6 +38,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
@@ -91,7 +85,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
      */
     private final GLListingTableModel glListingTableModel = new GLListingTableModel();
 
-    private COAAutoCompleter cOAAutoCompleter;
+    private COA3AutoCompleter cOAAutoCompleter;
     private SelectionObserver observer;
     private DepartmentAutoCompleter departmentAutoCompleter;
     private CurrencyAutoCompleter currencyAutoCompleter;
@@ -211,6 +205,14 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         filterHeader.setVisible(false);
     }
 
+    private String getCurCode() {
+        return currencyAutoCompleter == null ? "-" : currencyAutoCompleter.getCurrency().getCurCode();
+    }
+
+    private List<String> getListDep() {
+        return departmentAutoCompleter == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
+    }
+
     private void searchGLListing() {
         if (!isGLCal) {
             long start = new GregorianCalendar().getTimeInMillis();
@@ -232,42 +234,34 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             filter.setFromDate(stDate);
             filter.setToDate(endDate);
             filter.setOpeningDate(opDate);
-            filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
             filter.setClosing(chkClosing.isSelected());
-            filter.setListDepartment(departmentAutoCompleter.getListOption());
+            filter.setCurCode(getCurCode());
+            filter.setListDepartment(getListDep());
             decorator.refreshButton(filter.getFromDate());
-            Mono<ReturnObject> result = accountApi.post()
+            accountApi.post()
                     .uri("/report/get-tri-balance")
                     .body(Mono.just(filter), ReportFiller.class)
                     .retrieve()
-                    .bodyToMono(ReturnObject.class);
-            result.subscribe((t) -> {
-                try {
-                    String path = "temp/TRI" + Global.macId;
-                    Util1.extractZipToJson(t.getFile(), path);
-                    Reader reader = Files.newBufferedReader(Paths.get(path.concat(".json")));
-                    List<VTriBalance> list = gson.fromJson(reader, new TypeToken<ArrayList<VTriBalance>>() {
-                    }.getType());
-                    glListingTableModel.setListTBAL(list);
-                    calGLTotlaAmount();
-                    if (chkActive.isSelected()) {
-                        removeZero();
-                    }
-                    isGLCal = false;
-                    progress.setIndeterminate(false);
-                    long end = new GregorianCalendar().getTimeInMillis();
-                    long pt = end - start;
-                    lblCalTime.setText(pt / 1000 + " s");
-                    tblGL.requestFocus();
-                } catch (JsonIOException | JsonSyntaxException | IOException e) {
-                    log.error("searchGLListing : " + e.getMessage());
-                }
-            }, (e) -> {
-                tblGL.requestFocus();
-                JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-                isGLCal = false;
-                progress.setIndeterminate(false);
-            });
+                    .bodyToFlux(VTriBalance.class)
+                    .collectList()
+                    .subscribe((t) -> {
+                        glListingTableModel.setListTBAL(t);
+                        calGLTotlaAmount();
+                        if (chkActive.isSelected()) {
+                            removeZero();
+                        }
+                        isGLCal = false;
+                        progress.setIndeterminate(false);
+                        long end = new GregorianCalendar().getTimeInMillis();
+                        long pt = end - start;
+                        lblCalTime.setText(pt / 1000 + " s");
+                        tblGL.requestFocus();
+                    }, (e) -> {
+                        tblGL.requestFocus();
+                        JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+                        isGLCal = false;
+                        progress.setIndeterminate(false);
+                    });
 
         }
 
@@ -314,19 +308,25 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     private void initCombo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
         dateAutoCompleter.setSelectionObserver(this);
-        cOAAutoCompleter = new COAAutoCompleter(txtCOA, accountRepo.getChartOfAccount(), null, true);
+        cOAAutoCompleter = new COA3AutoCompleter(txtCOA, accountApi, null, true, 0);
         cOAAutoCompleter.setSelectionObserver(this);
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep,
-                accountRepo.getDepartment(), null, true, true);
-        departmentAutoCompleter.setObserver(this);
-        currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency,
-                userRepo.getCurrency(), null, true);
-        currencyAutoCompleter.setSelectionObserver(this);
+        accountRepo.getDepartment().subscribe((t) -> {
+            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t,
+                    null, true, true);
+            departmentAutoCompleter.setObserver(this);
+        });
+        userRepo.getCurrency().subscribe((t) -> {
+            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t,
+                    null, true);
+            currencyAutoCompleter.setObserver(this);
+        });
     }
 
     private void printGLListing() {
         try {
             progress.setIndeterminate(true);
+            String path = "temp/Tri" + Global.macId + ".json";
+            Util1.writeJsonFile(glListingTableModel.getListTBAL(), path);
             Map<String, Object> p = new HashMap();
             p.put("p_report_name", "Trial Balance");
             p.put("p_date", String.format("Between %s and %s", dateAutoCompleter.getStDate(), dateAutoCompleter.getEndDate()));
@@ -337,9 +337,6 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             p.put("p_currency", currencyAutoCompleter.getCurrency().getCurCode());
             p.put("p_department", txtDep.getText());
             Util1.initJasperContext();
-            /*            ObjectMapper mapper = new ObjectMapper();
-            JsonNode node = mapper.readTree(gson.toJson(glListingTableModel.getListTBAL()));*/
-            String path = "temp/TRI" + Global.macId + ".json";
             JsonDataSource ds = new JsonDataSource(new File(path)) {
             };
             JasperPrint js = JasperFillManager.fillReport(Global.accountRP + "TriBalance.jasper", p, ds);
@@ -349,6 +346,8 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             progress.setIndeterminate(false);
             JOptionPane.showMessageDialog(Global.parentForm, "Report", ex.getMessage(), JOptionPane.ERROR_MESSAGE);
             log.error("printGLListing : " + ex.getMessage());
+        } catch (IOException ex) {
+            java.util.logging.Logger.getLogger(GLReport.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }

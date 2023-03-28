@@ -116,11 +116,19 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
     }
 
     private void initCombo() {
-        List<Location> listLocation = inventoryRepo.getLocation();
-        appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
+        inventoryRepo.getLocation().subscribe((t) -> {
+            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, false);
+        });
+        userRepo.getAppUser().subscribe((t) -> {
+            appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
+        });
+        userRepo.getDeparment().subscribe((t) -> {
+            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true);
+            userRepo.findDepartment(Global.deptId).subscribe((tt) -> {
+                departmentAutoCompleter.setDepartment(tt);
+            });
+        });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
-        locationAutoCompleter = new LocationAutoCompleter(txtLocation, listLocation, null, true, false);
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, userRepo.getDeparment(), null, true);
     }
 
     private void initTableVoucher() {
@@ -149,44 +157,54 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         }
     }
 
+    private String getUserCode() {
+        return appUserAutoCompleter == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
+    }
+
+    private String getLocCode() {
+        return locationAutoCompleter == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
+    }
+
+    private Integer getDepId() {
+        return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
+    }
+
     private void search() {
         progess.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
-        filter.setUserCode(appUserAutoCompleter.getAppUser().getUserCode());
+        filter.setUserCode(getUserCode());
         filter.setVouNo(txtVouNo.getText());
         filter.setRemark(Util1.isNull(txtRemark.getText(), "-"));
         filter.setRefNo(Util1.isNull(txtRefNo.getText(), "-"));
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
-        filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
+        filter.setLocCode(getLocCode());
         filter.setDeleted(chkDel.isSelected());
-        filter.setDeptId(departmentAutoCompleter.getDepartment().getDeptId());
+        filter.setDeptId(getDepId());
 
         //
-        Mono<ResponseEntity<List<VTransfer>>> result = inventoryApi
+        inventoryApi
                 .post()
                 .uri("/transfer/get-transfer")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
-                .toEntityList(VTransfer.class);
-        List<VTransfer> listOP = result.block(Duration.ofMinutes(1)).getBody();
-        tableModel.setListDetail(listOP);
-        progess.setIndeterminate(false);
-        calAmount();
+                .bodyToFlux(VTransfer.class)
+                .collectList()
+                .subscribe((t) -> {
+                    tableModel.setListDetail(t);
+                    calAmount();
+                    progess.setIndeterminate(false);
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                    progess.setIndeterminate(false);
+                });
+
     }
 
     private void calAmount() {
-        int count = 0;
-        List<VTransfer> listIO = tableModel.getListDetail();
-        if (!listIO.isEmpty()) {
-            for (VTransfer ro : listIO) {
-                if (!ro.isDeleted()) {
-                    count += 1;
-                }
-            }
-        }
-        txtTotalRecord.setValue(count);
+        List<VTransfer> list = tableModel.getListDetail();
+        txtTotalRecord.setValue(list.size());
         tblVoucher.requestFocus();
     }
 

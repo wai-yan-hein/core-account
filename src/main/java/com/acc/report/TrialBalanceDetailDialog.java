@@ -19,17 +19,17 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
@@ -68,8 +68,8 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private DateAutoCompleter dateAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
     private CurrencyAAutoCompleter currencyAAutoCompleter;
-    private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     private boolean status = false;
+    private List<Gl> list;
 
     public List<String> getDepartment() {
         return department;
@@ -163,10 +163,19 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private void initCombo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
         dateAutoCompleter.setSelectionObserver(this);
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, accountRepo.getDepartment(), null, true, true);
-        departmentAutoCompleter.setObserver(this);
-        currencyAAutoCompleter = new CurrencyAAutoCompleter(txtCur, accountRepo.getCurrency(), null, false);
+        accountRepo.getDepartment().subscribe((t) -> {
+            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true, true);
+            departmentAutoCompleter.setObserver(this);
+            departmentAutoCompleter.setListOption(department);
 
+        });
+        accountRepo.getCurrency().subscribe((t) -> {
+            currencyAAutoCompleter = new CurrencyAAutoCompleter(txtCur, t, null, false);
+            currencyAAutoCompleter.setSelectionObserver(this);
+            accountRepo.findCurrency(curCode).subscribe((tt) -> {
+                currencyAAutoCompleter.setCurrency(tt);
+            });
+        });
     }
 
     private void initFormat() {
@@ -176,22 +185,28 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         txtCrAmt.setFormatterFactory(Util1.getDecimalFormat());
     }
 
+    private List<String> getListDep() {
+        return departmentAutoCompleter == null ? department : departmentAutoCompleter.getListOption();
+    }
+
     private void searchTriBalDetail() {
+        clear();
         progress.setIndeterminate(true);
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
         filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
         filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
         filter.setSrcAcc(coaCode);
-        filter.setCurCode(curCode);
-        filter.setListDepartment(departmentAutoCompleter.getListOption());
+        filter.setCurCode(getCurrency());
+        filter.setListDepartment(getListDep());
         filter.setTraderCode(traderCode);
-        clear();
+        list = new ArrayList<>();
         Flux<Gl> result = accountApi.post()
                 .uri("/account/search-gl")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(Gl.class);
         result.subscribe((t) -> {
+            list.add(t);
             double drAmt = Util1.getDouble(t.getDrAmt());
             double crAmt = Util1.getDouble(t.getCrAmt());
             if (drAmt > 0) {
@@ -210,9 +225,16 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         }, () -> {
             drAmtTableModel.fireTableDataChanged();
             crAmtTableModel.fireTableDataChanged();
+            calOpening();
             progress.setIndeterminate(false);
         });
-        calOpening();
+    }
+
+    private String getCurrency() {
+        if (currencyAAutoCompleter == null) {
+            return Global.currency;
+        }
+        return currencyAAutoCompleter.getCurrency() == null ? curCode : currencyAAutoCompleter.getCurrency().getCurCode();
     }
 
     private void calOpening() {
@@ -222,8 +244,8 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
         filter.setOpeningDate(opDate);
         filter.setFromDate(clDate);
-        filter.setCurCode(currencyAAutoCompleter.getCurrency().getCurCode());
-        filter.setListDepartment(departmentAutoCompleter.getListOption());
+        filter.setCurCode(getCurrency());
+        filter.setListDepartment(getListDep());
         filter.setCoaCode(coaCode);
         filter.setTraderCode(traderCode);
         Mono<TmpOpening> result = accountRepo.getOpening(filter);
@@ -245,19 +267,14 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     }
 
     public void initMain() {
-        if (!status) {
-            setIconImage(Global.parentForm.getIconImage());
-            initTable();
-            initCombo();
-            status = true;
-        }
+        setIconImage(Global.parentForm.getIconImage());
+        initTable();
+        initCombo();
         initData();
         searchTriBalDetail();
     }
 
     private void initData() {
-        departmentAutoCompleter.setListOption(department);
-        currencyAAutoCompleter.setCurrency(accountRepo.findCurrency(curCode));
         dateAutoCompleter.setStDate(stDate);
         dateAutoCompleter.setEndDate(endDate);
         txtDate.setText(String.format("%s to %s", stDate, endDate));
@@ -317,12 +334,14 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     }
 
     public void printVoucher() {
+        setVisible(false);
         String currency = currencyAAutoCompleter.getCurrency().getCurCode();
         String fromDate = dateAutoCompleter.getStDate();
         String toDate = dateAutoCompleter.getEndDate();
         if (!currency.equals("-") || !ProUtil.isMultiCur()) {
             try {
-                String path = "temp/Ledger" + Global.macId;
+                String path = "temp/Ledger" + Global.macId + ".json";
+                Util1.writeJsonFile(list, path);
                 Map<String, Object> p = new HashMap();
                 p.put("p_report_name", lblName.getText());
                 p.put("p_date", String.format("Between %s and %s", fromDate, toDate));
@@ -336,13 +355,15 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
                 p.put("p_opening", opening);
                 p.put("p_closing", closing);
                 String filePath = String.format(Global.accountRP + "IndividualLedger.jasper");
-                InputStream input = new FileInputStream(new File(path.concat(".json")));
+                InputStream input = new FileInputStream(new File(path));
                 JsonDataSource ds = new JsonDataSource(input);
                 JasperPrint js = JasperFillManager.fillReport(filePath, p, ds);
                 JasperViewer.viewReport(js, false);
             } catch (JRException | FileNotFoundException ex) {
                 JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
                 log.error("printVoucher : " + ex.getMessage());
+            } catch (IOException ex) {
+                Logger.getLogger(TrialBalanceDetailDialog.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
             JOptionPane.showMessageDialog(this, "Select Currency.");

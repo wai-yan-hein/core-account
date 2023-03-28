@@ -40,7 +40,6 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -138,12 +137,23 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     }
 
     private void initCombo() {
+        userRepo.getAppUser().subscribe((t) -> {
+            appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
+        });
+        inventoryRepo.getSaleMan().collectList().subscribe((t) -> {
+            saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, t, null, true, false);
+        });
+        inventoryRepo.getLocation().subscribe((t) -> {
+            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, false);
+        });
+        userRepo.getDeparment().subscribe((t) -> {
+            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true);
+            userRepo.findDepartment(Global.deptId).subscribe((tt) -> {
+                departmentAutoCompleter.setDepartment(tt);
+            });
+        });
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "CUS");
-        appUserAutoCompleter = new AppUserAutoCompleter(txtUser, userRepo.getAppUser(), null, true);
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
-        saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, inventoryRepo.getSaleMan(), null, true, false);
-        locationAutoCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, true, false);
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, userRepo.getDeparment(), null, true);
         batchAutoCompeter = new BatchAutoCompeter(txtBatchNo, inventoryRepo, null, true);
     }
 
@@ -172,58 +182,66 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         txtToDate.setDate(Util1.getTodayDate());
     }
 
+    private String getUserCode() {
+        return appUserAutoCompleter == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
+    }
+
+    private String getSaleMancode() {
+        return saleManAutoCompleter == null ? "-"
+                : saleManAutoCompleter.getSaleMan().getKey().getSaleManCode();
+    }
+
+    private String getLocCode() {
+        return locationAutoCompleter == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
+    }
+
+    private Integer getDepId() {
+        return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
+    }
+
     private void search() {
         progress.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setCusCode(traderAutoCompleter.getTrader().getKey().getCode());
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
-        filter.setUserCode(appUserAutoCompleter.getAppUser().getUserCode());
+        filter.setUserCode(getUserCode());
+        filter.setSaleManCode(getSaleMancode());
+        filter.setLocCode(getLocCode());
+        filter.setDeptId(getDepId());
         filter.setVouNo(txtVouNo.getText());
         filter.setRemark(Util1.isNull(txtRemark.getText(), "-"));
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
-        filter.setSaleManCode(saleManAutoCompleter.getSaleMan().getKey().getSaleManCode());
-        filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
         filter.setReference(txtRef.getText());
         filter.setDeleted(chkDel.isSelected());
-        filter.setDeptId(departmentAutoCompleter.getDepartment().getDeptId());
         String batchNo = batchAutoCompeter.getBatch().getBatchNo();
         filter.setBatchNo(batchNo.equals("All") ? "-" : batchNo);
         filter.setNullBatch(chkBatch.isSelected());
         saleVouTableModel.clear();
-        txtTotalRecord.setValue(0);
+        txtRecord.setValue(0);
         //
-        Flux<VSale> result = inventoryApi
-                .post()
+        inventoryApi.post()
                 .uri("/sale/get-sale")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
-                .bodyToFlux(VSale.class);
-        result.subscribe((t) -> {
-            saleVouTableModel.addObject(t);
-            txtTotalRecord.setValue(saleVouTableModel.getListSaleHis().size());
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-            progress.setIndeterminate(false);
-        }, () -> {
-            saleVouTableModel.fireTableDataChanged();
-            calAmount();
-            progress.setIndeterminate(false);
-        });
+                .bodyToFlux(VSale.class)
+                .collectList()
+                .subscribe((t) -> {
+                    saleVouTableModel.setListSaleHis(t);
+                    calAmount();
+                    progress.setIndeterminate(false);
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                    progress.setIndeterminate(false);
+                });
+
     }
 
     private void calAmount() {
-        float ttlAmt = 0.0f;
-        float paidAmt = 0.0f;
-        List<VSale> listSale = saleVouTableModel.getListSaleHis();
-        if (!listSale.isEmpty()) {
-            for (VSale sh : listSale) {
-                ttlAmt += sh.getVouTotal();
-                paidAmt += sh.getPaid();
-            }
-        }
-        txtPaid.setValue(paidAmt);
-        txtTotalAmt.setValue(ttlAmt);
+        List<VSale> list = saleVouTableModel.getListSaleHis();
+        txtPaid.setValue(list.stream().mapToDouble(VSale::getPaid).sum());
+        txtTotalAmt.setValue(list.stream().mapToDouble(VSale::getVouTotal).sum());
+        txtRecord.setValue(list.size());
         tblVoucher.requestFocus();
     }
 
@@ -312,7 +330,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         btnSearch = new javax.swing.JButton();
         lblTtlRecord = new javax.swing.JLabel();
         txtTotalAmt = new javax.swing.JFormattedTextField();
-        txtTotalRecord = new javax.swing.JFormattedTextField();
+        txtRecord = new javax.swing.JFormattedTextField();
         lblTtlAmount = new javax.swing.JLabel();
         progress = new javax.swing.JProgressBar();
 
@@ -646,9 +664,9 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         txtTotalAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtTotalAmt.setFont(Global.amtFont);
 
-        txtTotalRecord.setEditable(false);
-        txtTotalRecord.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtTotalRecord.setFont(Global.amtFont);
+        txtRecord.setEditable(false);
+        txtRecord.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtRecord.setFont(Global.amtFont);
 
         lblTtlAmount.setFont(Global.lableFont);
         lblTtlAmount.setText("Total Amount :");
@@ -661,7 +679,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                 .addContainerGap()
                 .addComponent(lblTtlRecord)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtTotalRecord)
+                .addComponent(txtRecord)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblTtlAmount1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -685,14 +703,14 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                     .addComponent(lblTtlAmount1)
                     .addComponent(lblTtlAmount)
                     .addComponent(lblTtlRecord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtTotalRecord)
+                    .addComponent(txtRecord)
                     .addComponent(btnSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(txtTotalAmt))
                 .addContainerGap())
         );
 
-        jPanel2Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {btnSearch, btnSelect, lblTtlAmount, lblTtlAmount1, lblTtlRecord, txtPaid, txtTotalAmt, txtTotalRecord});
+        jPanel2Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {btnSearch, btnSelect, lblTtlAmount, lblTtlAmount1, lblTtlRecord, txtPaid, txtRecord, txtTotalAmt});
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -855,13 +873,13 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private com.toedter.calendar.JDateChooser txtFromDate;
     private javax.swing.JTextField txtLocation;
     private javax.swing.JFormattedTextField txtPaid;
+    private javax.swing.JFormattedTextField txtRecord;
     private javax.swing.JTextField txtRef;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtSaleMan;
     private javax.swing.JTextField txtStock;
     private com.toedter.calendar.JDateChooser txtToDate;
     private javax.swing.JFormattedTextField txtTotalAmt;
-    private javax.swing.JFormattedTextField txtTotalRecord;
     private javax.swing.JTextField txtUser;
     private javax.swing.JTextField txtVouNo;
     // End of variables declaration//GEN-END:variables

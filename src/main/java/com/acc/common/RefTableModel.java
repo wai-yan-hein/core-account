@@ -105,4 +105,13 @@ public class RefTableModel extends AbstractTableModel {
             return listAutoText.size();
         }
     }
+
+    public void addObject(VDescription t) {
+        listAutoText.add(t);
+    }
+
+    public void clear() {
+        listAutoText.clear();
+        fireTableDataChanged();
+    }
 }

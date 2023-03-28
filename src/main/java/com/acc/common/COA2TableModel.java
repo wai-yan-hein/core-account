@@ -108,4 +108,9 @@ public class COA2TableModel extends AbstractTableModel {
             return listCOA.size();
         }
     }
+
+    public void clear() {
+        listCOA.clear();
+        fireTableDataChanged();
+    }
 }

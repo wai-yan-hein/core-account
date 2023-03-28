@@ -67,7 +67,7 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
     private LocationAutoCompleter locationAutoCompleter;
     private JProgressBar progress;
     private SelectionObserver observer;
-    private List<StockUnit> listStockUnit = new ArrayList<>();
+    private Mono<List<StockUnit>> monoUnit;
     private TableRowSorter<TableModel> sorter;
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
@@ -153,20 +153,29 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
     };
 
     private void initCombo() {
-        typeAutoCompleter = new StockTypeAutoCompleter(txtGroup, inventoryRepo.getStockType(), null, true, false);
-        typeAutoCompleter.setObserver(this);
-        categoryAutoCompleter = new CategoryAutoCompleter(txtCat, inventoryRepo.getCategory(), null, true, false);
-        categoryAutoCompleter.setObserver(this);
-        brandAutoCompleter = new BrandAutoCompleter(txtBrand, inventoryRepo.getStockBrand(), null, true, false);
-        brandAutoCompleter.setObserver(this);
+        inventoryRepo.getLocation().subscribe((t) -> {
+            locationAutoCompleter = new LocationAutoCompleter(txtLoc, t, null, true, true);
+            locationAutoCompleter.setObserver(this);
+        });
+        inventoryRepo.getStockType().subscribe((t) -> {
+            typeAutoCompleter = new StockTypeAutoCompleter(txtGroup, t, null, true, false);
+            typeAutoCompleter.setObserver(this);
+        });
+        inventoryRepo.getCategory().subscribe((t) -> {
+            categoryAutoCompleter = new CategoryAutoCompleter(txtCat, t, null, true, false);
+            categoryAutoCompleter.setObserver(this);
+        });
+        inventoryRepo.getStockBrand().subscribe((t) -> {
+            brandAutoCompleter = new BrandAutoCompleter(txtBrand, t, null, true, false);
+            brandAutoCompleter.setObserver(this);
+        });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         stockAutoCompleter.setObserver(this);
-        locationAutoCompleter = new LocationAutoCompleter(txtLoc, inventoryRepo.getLocation(), null, true, true);
-        locationAutoCompleter.setObserver(this);
+
     }
 
     private void initTable() {
-        listStockUnit = inventoryRepo.getStockUnit();
+        monoUnit = inventoryRepo.getStockUnit();
         reorderTableModel.setTable(tblOrder);
         reorderTableModel.setInventoryRepo(inventoryRepo);
         tblOrder.setModel(reorderTableModel);
@@ -178,9 +187,13 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
         tblOrder.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblOrder.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         tblOrder.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
-        tblOrder.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(listStockUnit));
+        monoUnit.subscribe((t) -> {
+            tblOrder.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));
+        });
         tblOrder.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
-        tblOrder.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(listStockUnit));
+        monoUnit.subscribe((t) -> {
+            tblOrder.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(t));
+        });
         tblOrder.getColumnModel().getColumn(0).setPreferredWidth(30);
         tblOrder.getColumnModel().getColumn(1).setPreferredWidth(200);
         tblOrder.getColumnModel().getColumn(2).setPreferredWidth(100);

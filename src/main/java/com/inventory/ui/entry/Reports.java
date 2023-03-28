@@ -162,16 +162,33 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     }
 
     private void initCombo() {
+        inventoryRepo.getLocation().subscribe((t) -> {
+            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, true);
+        });
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, true, "-");
-        saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, inventoryRepo.getSaleMan(), null, true, false);
-        locationAutoCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, true, true);
-        stockTypeAutoCompleter = new StockTypeAutoCompleter(txtStockType, inventoryRepo.getStockType(), null, true, false);
-        categoryAutoCompleter = new CategoryAutoCompleter(txtCategory, inventoryRepo.getCategory(), null, true, false);
-        brandAutoCompleter = new BrandAutoCompleter(txtBrand, inventoryRepo.getStockBrand(), null, true, false);
+        inventoryRepo.getSaleMan().collectList().subscribe((t) -> {
+            saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, t, null, true, false);
+        });
+
+        inventoryRepo.getStockType().subscribe((t) -> {
+            stockTypeAutoCompleter = new StockTypeAutoCompleter(txtStockType, t, null, true, false);
+        });
+        inventoryRepo.getCategory().subscribe((t) -> {
+            categoryAutoCompleter = new CategoryAutoCompleter(txtCategory, t, null, true, false);
+        });
+        inventoryRepo.getStockBrand().subscribe((t) -> {
+            brandAutoCompleter = new BrandAutoCompleter(txtBrand, t, null, true, false);
+        });
         regionAutoCompleter = new RegionAutoCompleter(txtRegion, inventoryRepo.getRegion(), null, true, false);
-        currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, inventoryRepo.getCurrency(), null, false);
+        inventoryRepo.getCurrency().subscribe((t) -> {
+            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
+            currencyAutoCompleter.setObserver(this);
+            userRepo.getDefaultCurrency().subscribe((tt) -> {
+                currencyAutoCompleter.setCurrency(tt);
+            });
+        });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
-        currencyAutoCompleter.setCurrency(userRepo.getDefaultCurrency());
+
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, inventoryRepo, null, true);
         dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
         dateAutoCompleter.setSelectionObserver(this);
@@ -271,11 +288,16 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                         jc.setProperty("net.sf.jasperreports.default.pdf.encoding", "Identity-H");
                         jc.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
                         jc.setProperty("net.sf.jasperreports.viewer.zoom", "1");
+                        jc.setProperty("net.sf.jasperreports.export.xlsx.detect.cell.type", "true");
+                        jc.setProperty("net.sf.jasperreports.export.xlsx.white.page.background", "false");
+                        jc.setProperty("net.sf.jasperreports.export.xlsx.auto.fit.page.width", "true");
+                        jc.setProperty("net.sf.jasperreports.export.xlsx.ignore.graphics", "false");
                         InputStream input = new ByteArrayInputStream(t.getFile());
                         JsonDataSource ds = new JsonDataSource(input);
                         JasperPrint js = JasperFillManager.fillReport(filePath, param, ds);
                         JRViewer viwer = new JRViewer(js);
                         JFrame frame = new JFrame("Core Value Report");
+                        frame.setIconImage(Global.parentForm.getIconImage());
                         frame.getContentPane().add(viwer);
                         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
                         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

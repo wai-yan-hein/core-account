@@ -18,6 +18,7 @@ public class VApar {
     private String compCode;
     private String curCode;
     private String coaCode;
+    private String coaName;
     private String userCode;
     private String traderName;
     private Double drAmt;

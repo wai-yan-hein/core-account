@@ -14,6 +14,7 @@ import com.inventory.model.Location;
 import com.inventory.model.RetInHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
+import com.inventory.ui.entry.ReturnIn;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,10 +37,18 @@ public class ReturnInTableModel extends AbstractTableModel {
     private List<RetInHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
     private final List<String> deleteList = new ArrayList();
-    private LocationAutoCompleter locationAutoCompleter;
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
     private JLabel lblRec;
+    private ReturnIn returnIn;
+
+    public ReturnIn getReturnIn() {
+        return returnIn;
+    }
+
+    public void setReturnIn(ReturnIn returnIn) {
+        this.returnIn = returnIn;
+    }
 
     public JLabel getLblRec() {
         return lblRec;
@@ -71,14 +80,6 @@ public class ReturnInTableModel extends AbstractTableModel {
 
     public void setParent(JTable parent) {
         this.parent = parent;
-    }
-
-    public LocationAutoCompleter getLocationAutoCompleter() {
-        return locationAutoCompleter;
-    }
-
-    public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
-        this.locationAutoCompleter = locationAutoCompleter;
     }
 
     public SelectionObserver getSelectionObserver() {
@@ -115,7 +116,7 @@ public class ReturnInTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 4,5,7,8 ->
+            case 4, 5, 7, 8 ->
                 Float.class;
             default ->
                 String.class;
@@ -198,7 +199,7 @@ public class ReturnInTableModel extends AbstractTableModel {
             if (value != null) {
                 RetInHisDetail record = listDetail.get(row);
                 switch (column) {
-                    case 0,1 -> {
+                    case 0, 1 -> {
                         //Code
                         if (value instanceof Stock s) {
                             record.setStockCode(s.getKey().getStockCode());
@@ -288,14 +289,8 @@ public class ReturnInTableModel extends AbstractTableModel {
                         }
                     }
                 }
+                assignLocation(record);
                 calculateAmount(record);
-                if (record.getLocCode() == null) {
-                    Location l = locationAutoCompleter.getLocation();
-                    if (l != null) {
-                        record.setLocCode(l.getKey().getLocCode());
-                        record.setLocName(l.getLocName());
-                    }
-                }
                 setRecord(listDetail.size() - 1);
                 fireTableRowsUpdated(row, row);
                 selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
@@ -303,6 +298,19 @@ public class ReturnInTableModel extends AbstractTableModel {
             }
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
+        }
+    }
+
+    private void assignLocation(RetInHisDetail sd) {
+        if (sd.getLocCode() == null) {
+            LocationAutoCompleter completer = returnIn.getLocationAutoCompleter();
+            if (completer != null) {
+                Location l = completer.getLocation();
+                if (l != null) {
+                    sd.setLocCode(l.getKey().getLocCode());
+                    sd.setLocName(l.getLocName());
+                }
+            }
         }
     }
 

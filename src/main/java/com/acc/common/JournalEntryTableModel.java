@@ -17,7 +17,6 @@ import com.user.model.Currency;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFormattedTextField;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -156,7 +155,7 @@ public class JournalEntryTableModel extends AbstractTableModel {
                         }
                     }
                     case 1 -> {
-                        gv.setDescription(value.toString());
+                        gv.setDescription(Util1.getString(value));
                         parent.setColumnSelectionInterval(2, 2);
                     }
                     case 2 -> {
@@ -165,12 +164,15 @@ public class JournalEntryTableModel extends AbstractTableModel {
                             gv.setTraderName(trader.getTraderName());
                             String account = trader.getAccount();
                             if (account != null) {
-                                ChartOfAccount coa = accountRepo.findCOA(account);
-                                if (coa != null) {
-                                    gv.setSrcAccCode(account);
-                                    gv.setSrcAccName(coa.getCoaNameEng());
-                                    parent.setColumnSelectionInterval(5, 5);
-                                }
+                                accountRepo.findCOA(account).subscribe((coa) -> {
+                                    if (coa != null) {
+                                        gv.setSrcAccCode(account);
+                                        gv.setSrcAccName(coa.getCoaNameEng());
+                                        parent.setColumnSelectionInterval(5, 5);
+                                        addEmptyRow();
+                                    }
+                                });
+
                             } else {
                                 parent.setColumnSelectionInterval(2, 2);
                             }
@@ -195,34 +197,14 @@ public class JournalEntryTableModel extends AbstractTableModel {
                     case 5 -> {
                         gv.setDrAmt(Util1.getDouble(value));
                         gv.setCrAmt(0.0);
-                        try {
-                            Gl get = listGV.get(row + 1);
-                            if (!Util1.isNull(get.getDeptCode())) {
-                                parent.setColumnSelectionInterval(1, 1);
-                            } else {
-                                parent.setColumnSelectionInterval(0, 0);
-                            }
-                            parent.setRowSelectionInterval(row + 1, row + 1);
-                        } catch (Exception e) {
-                            parent.setColumnSelectionInterval(0, 0);
-                            parent.setRowSelectionInterval(row + 1, row + 1);
-                        }
+                        parent.setColumnSelectionInterval(0, 0);
+                        parent.setRowSelectionInterval(row + 1, row + 1);
                     }
                     case 6 -> {
                         gv.setCrAmt(Util1.getDouble(value));
                         gv.setDrAmt(0.0);
-                        try {
-                            Gl get = listGV.get(row + 1);
-                            if (!Util1.isNull(get.getDeptCode())) {
-                                parent.setColumnSelectionInterval(1, 1);
-                            } else {
-                                parent.setColumnSelectionInterval(0, 0);
-                            }
-                            parent.setRowSelectionInterval(row + 1, row + 1);
-                        } catch (Exception e) {
-                            parent.setColumnSelectionInterval(0, 0);
-                            parent.setRowSelectionInterval(row + 1, row + 1);
-                        }
+                        parent.setColumnSelectionInterval(0, 0);
+                        parent.setRowSelectionInterval(row + 1, row + 1);
                     }
                 }
                 if (isValidEntry(gv, row, column)) {
@@ -403,13 +385,14 @@ public class JournalEntryTableModel extends AbstractTableModel {
                         "Are you sure to delete transaction.", "Delete Transaction", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (status == JOptionPane.YES_OPTION) {
                     delList.add(vgl.getKey());
-                    listGV.remove(row);
-                    fireTableRowsDeleted(row, row);
-                    calTotalAmt();
-                    parent.setRowSelectionInterval(row, row);
-                    parent.requestFocus();
                 }
             }
+            listGV.remove(row);
+            fireTableRowsDeleted(row, row);
+            calTotalAmt();
+            addEmptyRow();
+            parent.setRowSelectionInterval(row, row);
+            parent.requestFocus();
         }
     }
 

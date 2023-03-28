@@ -14,6 +14,7 @@ import com.inventory.model.Location;
 import com.inventory.model.RetOutHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
+import com.inventory.ui.entry.ReturnOut;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
     private List<RetOutHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
     private final List<String> deleteList = new ArrayList();
-    private LocationAutoCompleter locationAutoCompleter;
+    private ReturnOut returnOut;
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
     private JLabel lblRec;
@@ -73,12 +74,12 @@ public class ReturnOutTableModel extends AbstractTableModel {
         this.parent = parent;
     }
 
-    public LocationAutoCompleter getLocationAutoCompleter() {
-        return locationAutoCompleter;
+    public ReturnOut getReturnOut() {
+        return returnOut;
     }
 
-    public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
-        this.locationAutoCompleter = locationAutoCompleter;
+    public void setReturnOut(ReturnOut returnOut) {
+        this.returnOut = returnOut;
     }
 
     public SelectionObserver getSelectionObserver() {
@@ -118,7 +119,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 4,6,7 ->
+            case 4, 6, 7 ->
                 Float.class;
             default ->
                 String.class;
@@ -128,7 +129,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case 2,7 ->
+            case 2, 7 ->
                 false;
             default ->
                 true;
@@ -197,7 +198,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
         try {
             RetOutHisDetail record = listDetail.get(row);
             switch (column) {
-                case 0,1 -> {
+                case 0, 1 -> {
                     //Code
                     if (value != null) {
                         if (value instanceof Stock s) {
@@ -271,14 +272,8 @@ public class ReturnOutTableModel extends AbstractTableModel {
                     }
                 }
             }
+            assignLocation(record);
             calculateAmount(record);
-            if (record.getLocCode() == null) {
-                Location l = locationAutoCompleter.getLocation();
-                if (l != null) {
-                    record.setLocCode(l.getKey().getLocCode());
-                    record.setLocName(l.getLocName());
-                }
-            }
             setRecord(listDetail.size() - 1);
             fireTableRowsUpdated(row, row);
             selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
@@ -286,6 +281,19 @@ public class ReturnOutTableModel extends AbstractTableModel {
             //   fireTableCellUpdated(row, 8);
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
+        }
+    }
+
+    private void assignLocation(RetOutHisDetail sd) {
+        if (sd.getLocCode() == null) {
+            LocationAutoCompleter completer = returnOut.getLocationAutoCompleter();
+            if (completer != null) {
+                Location l = completer.getLocation();
+                if (l != null) {
+                    sd.setLocCode(l.getKey().getLocCode());
+                    sd.setLocName(l.getLocName());
+                }
+            }
         }
     }
 

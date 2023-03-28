@@ -58,7 +58,9 @@ public class RoleSetupDialog extends javax.swing.JDialog {
         tblRole.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblRole.setRowHeight(Global.tblRowHeight);
         tblRole.setDefaultRenderer(Object.class, new TableCellRender());
-        userRoleTableModel.setListRole(userRepo.getAppRole());
+        userRepo.getAppRole().subscribe((t) -> {
+            userRoleTableModel.setListRole(t);
+        });
     }
 
     private void createRole() {

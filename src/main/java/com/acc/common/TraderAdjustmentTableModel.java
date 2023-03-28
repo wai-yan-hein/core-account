@@ -322,14 +322,16 @@ public class TraderAdjustmentTableModel extends AbstractTableModel {
     private void save(Gl gl, int row, int column) {
         if (isValidEntry(gl, row, column)) {
             try {
-                gl = accountRepo.saveGl(gl);
-                if (gl != null) {
-                    listVGl.set(row, gl);
-                    addNewRow();
-                    parent.setRowSelectionInterval(row + 1, row + 1);
-                    parent.setColumnSelectionInterval(0, 0);
-                    observer.selected("CAL-TOTAL", "-");
-                }
+                accountRepo.saveGl(gl).subscribe((t) -> {
+                    if (t != null) {
+                        listVGl.set(row, t);
+                        addNewRow();
+                        parent.setRowSelectionInterval(row + 1, row + 1);
+                        parent.setColumnSelectionInterval(0, 0);
+                        observer.selected("CAL-TOTAL", "-");
+                    }
+                });
+
             } catch (JsonSyntaxException ex) {
                 JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
                 log.error("Save Gl :" + ex.getMessage());
@@ -413,7 +415,6 @@ public class TraderAdjustmentTableModel extends AbstractTableModel {
 
     public void addVGl(Gl vgi) {
         listVGl.add(vgi);
-        fireTableRowsInserted(listVGl.size() - 1, listVGl.size() - 1);
     }
 
     public void setVGl(int row, Gl vgi) {

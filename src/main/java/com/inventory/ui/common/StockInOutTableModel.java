@@ -149,7 +149,8 @@ public class StockInOutTableModel extends AbstractTableModel {
                     return Util1.getFloat(io.getCostPrice()) == 0 ? null : Util1.getFloat(io.getCostPrice());
                 }
                 case 8 -> {
-                    return Util1.getFloat(io.getCostPrice()) * (Util1.getFloat(io.getInQty()) + Util1.getFloat(io.getOutQty()));
+                    float amt = Util1.getFloat(io.getCostPrice()) * (Util1.getFloat(io.getInQty()) + Util1.getFloat(io.getOutQty()));
+                    return amt == 0 ? null : amt;
                 }
 
             }
@@ -190,11 +191,11 @@ public class StockInOutTableModel extends AbstractTableModel {
                             io.setCostPrice(0.0f);
                             io.setInUnitCode(s.getPurUnitCode());
                             io.setOutUnitCode(s.getPurUnitCode());
-                            Location l = inventoryRepo.getDefaultLocation();
-                            if (l != null) {
+                            inventoryRepo.getDefaultLocation().subscribe((l) -> {
                                 io.setLocCode(l.getKey().getLocCode());
                                 io.setLocName(l.getLocName());
-                            }
+                            });
+
                             boolean disable = Util1.getBoolean(ProUtil.getProperty("disable.pattern.stockio"));
                             if (!disable) {
                                 float costPrice = genPattern(s, io);

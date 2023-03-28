@@ -42,7 +42,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyListener;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -51,6 +50,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -73,8 +73,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     private StockInOut io = new StockInOut();
     private SelectionObserver observer;
     private JProgressBar progress;
-    private List<StockUnit> listStockUnit = new ArrayList<>();
-    private List<Location> listLocation = new ArrayList<>();
+    private Mono<List<Location>> monoLoc;
 
     public SelectionObserver getObserver() {
         return observer;
@@ -113,7 +112,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblStock.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblStock.getActionMap().put(solve, new DeleteAction());
-
     }
 
     private class DeleteAction extends AbstractAction {
@@ -152,8 +150,8 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     }
 
     private void initTable() {
-        listLocation = inventoryRepo.getLocation();
-        listStockUnit = inventoryRepo.getStockUnit();
+        monoLoc = inventoryRepo.getLocation();
+        Mono<List<StockUnit>> monoUnit = inventoryRepo.getStockUnit();
         outTableModel.setVouDate(txtDate);
         outTableModel.setInventoryRepo(inventoryRepo);
         outTableModel.setLblRec(lblRec);
@@ -173,11 +171,17 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         tblStock.getColumnModel().getColumn(8).setPreferredWidth(50);
         tblStock.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblStock.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblStock.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(listLocation));
+        monoLoc.subscribe((t) -> {
+            tblStock.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(t));
+        });
         tblStock.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
-        tblStock.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(listStockUnit));
+        monoUnit.subscribe((t) -> {
+            tblStock.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));
+        });
         tblStock.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
-        tblStock.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(listStockUnit));
+        monoUnit.subscribe((t) -> {
+            tblStock.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(t));
+        });
         tblStock.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
         tblStock.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblStock.setDefaultRenderer(Float.class, new DecimalFormatRender());
@@ -337,20 +341,28 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     }
 
     private void setVoucher(StockInOut s) {
+        outTableModel.clear();
+        txtCost.setValue(0);
+        txtInQty.setValue(0);
+        txtOutQty.setValue(0);
         if (s != null) {
             progress.setIndeterminate(true);
             io = s;
             vouStatusAutoCompleter.setVoucher(inventoryRepo.findVouStatus(io.getVouStatusCode(), io.getKey().getDeptId()));
             String vouNo = io.getKey().getVouNo();
-            Mono<ResponseEntity<List<StockInOutDetail>>> result = inventoryApi.get()
+            Flux<StockInOutDetail> result = inventoryApi.get()
                     .uri(builder -> builder.path("/stockio/get-stockio-detail")
                     .queryParam("vouNo", vouNo)
                     .queryParam("compCode", Global.compCode)
                     .queryParam("deptId", io.getKey().getDeptId())
                     .build())
-                    .retrieve().toEntityList(StockInOutDetail.class);
+                    .retrieve().bodyToFlux(StockInOutDetail.class);
             result.subscribe((t) -> {
-                outTableModel.setListStock(t.getBody());
+                outTableModel.addObject(t);
+            }, (e) -> {
+                progress.setIndeterminate(false);
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            }, () -> {
                 outTableModel.addNewRow();
                 txtVou.setText(vouNo);
                 txtDate.setDate(Util1.toDateFormat(io.getVouDate(), "dd/MM/yyyy"));
@@ -366,14 +378,8 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                     disableForm(true);
                 }
                 calTotalAmt();
-                int row = tblStock.getRowCount();
-                tblStock.setColumnSelectionInterval(0, 0);
-                tblStock.setRowSelectionInterval(row - 1, row - 1);
-                tblStock.requestFocus();
+                focusOnTable();
                 progress.setIndeterminate(false);
-            }, (e) -> {
-                progress.setIndeterminate(false);
-                JOptionPane.showMessageDialog(this, e.getMessage());
             });
         }
     }
@@ -564,8 +570,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel4)
                         .addComponent(txtDesp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -576,8 +581,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel6)
                         .addComponent(txtVou, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel3)))
-                .addContainerGap(7, Short.MAX_VALUE))
+                        .addComponent(jLabel3))
+                    .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         txtOutQty.setEditable(false);
@@ -652,7 +658,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 413, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 393, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)

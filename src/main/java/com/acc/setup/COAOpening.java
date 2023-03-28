@@ -6,6 +6,7 @@ package com.acc.setup;
 
 import com.acc.common.AccountRepo;
 import com.acc.common.OpeningBalanceTableModel;
+import com.acc.editor.COA3AutoCompleter;
 import com.acc.model.OpeningBalance;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.ReportFilter;
@@ -14,9 +15,9 @@ import com.acc.editor.TraderCellEditor;
 import com.acc.editor.DepartmentCellEditor;
 import com.acc.editor.CurrencyAEditor;
 import com.acc.editor.DepartmentAutoCompleter;
-import com.acc.editor.COAAutoCompleter;
 import com.acc.editor.TraderAAutoCompleter;
 import com.acc.editor.CurrencyAAutoCompleter;
+import com.acc.model.OpeningKey;
 import com.common.SelectionObserver;
 import com.common.PanelControl;
 import com.common.Global;
@@ -52,7 +53,6 @@ import net.coderazzi.filters.gui.AutoChoices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.http.ResponseEntity;
 
 import net.coderazzi.filters.gui.TableFilterHeader;
 import net.sf.jasperreports.engine.JRException;
@@ -60,6 +60,7 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -79,7 +80,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
 
     private DepartmentAutoCompleter departmenttAutoCompleter;
     private CurrencyAAutoCompleter currencyAutoCompleter;
-    private COAAutoCompleter coaAutoCompleter;
+    private COA3AutoCompleter coaAutoCompleter;
     private TraderAAutoCompleter tradeAutoCompleter;
 
     private SelectionObserver observer;
@@ -92,6 +93,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     public COAOpening() {
         initComponents();
         initFocusListener();
+        actionMapping();
     }
 
     public JProgressBar getProgress() {
@@ -110,18 +112,39 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         this.observer = observer;
     }
 
-    public void actionMapping() {
-        String solve = "delete";
-        KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
-        tblOpening.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
-        tblOpening.getActionMap().put(solve, new DeleteAction());
+    private void actionMapping() {
+        tblOpening.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "delete");
+        tblOpening.getActionMap().put("delete", new DeleteAction());
     }
 
     public class DeleteAction extends AbstractAction {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            // deleteTran();
+            deleteTran();
+        }
+    }
+
+    private void deleteTran() {
+        int row = tblOpening.convertRowIndexToModel(tblOpening.getSelectedRow());
+        if (row >= 0) {
+            OpeningBalance b = openingTableModel.getOpening(row);
+            OpeningKey key = b.getKey();
+            if (key != null) {
+                int yn = JOptionPane.showConfirmDialog(this, "Are you sure to delete?");
+                if (yn == JOptionPane.YES_OPTION) {
+                    accountRepo.delete(key).subscribe((sucess) -> {
+                        if (sucess) {
+                            openingTableModel.deleteOpening(row);
+                        }
+                    }, (e) -> {
+                        JOptionPane.showMessageDialog(this, e.getMessage());
+                    });
+                }
+            } else {
+                openingTableModel.deleteOpening(row);
+            }
         }
     }
 
@@ -134,11 +157,15 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
 
     // initialize data for combo box
     private void initComboBox() {
-        departmenttAutoCompleter = new DepartmentAutoCompleter(txtDept, accountRepo.getDepartment(), null, true, true);
-        departmenttAutoCompleter.setObserver(this);
-        currencyAutoCompleter = new CurrencyAAutoCompleter(txtCurrency, accountRepo.getCurrency(), null, true);
-        currencyAutoCompleter.setSelectionObserver(this);
-        coaAutoCompleter = new COAAutoCompleter(txtCOA, accountRepo.getChartOfAccount(), null, true);
+        accountRepo.getDepartment().subscribe((t) -> {
+            departmenttAutoCompleter = new DepartmentAutoCompleter(txtDept, t, null, true, true);
+            departmenttAutoCompleter.setObserver(this);
+        });
+        accountRepo.getCurrency().subscribe((t) -> {
+            currencyAutoCompleter = new CurrencyAAutoCompleter(txtCurrency, t, null, true);
+            currencyAutoCompleter.setSelectionObserver(this);
+        });
+        coaAutoCompleter = new COA3AutoCompleter(txtCOA, accountApi, null, true, 0);
         coaAutoCompleter.setSelectionObserver(this);
     }
 
@@ -193,8 +220,12 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         tblOpening.getColumnModel().getColumn(1).setCellEditor(new COA3CellEditor(accountApi, 3));
         tblOpening.getColumnModel().getColumn(2).setCellEditor(new TraderCellEditor(accountApi));
         tblOpening.getColumnModel().getColumn(3).setCellEditor(new TraderCellEditor(accountApi));
-        tblOpening.getColumnModel().getColumn(4).setCellEditor(new DepartmentCellEditor(accountRepo.getDepartment()));
-        tblOpening.getColumnModel().getColumn(5).setCellEditor(new CurrencyAEditor(accountRepo.getCurrency()));
+        accountRepo.getDepartment().subscribe((t) -> {
+            tblOpening.getColumnModel().getColumn(4).setCellEditor(new DepartmentCellEditor(t));
+        });
+        accountRepo.getCurrency().subscribe((t) -> {
+            tblOpening.getColumnModel().getColumn(5).setCellEditor(new CurrencyAEditor(t));
+        });
         tblOpening.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
         tblOpening.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
         tblOpening.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -230,16 +261,19 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         } else {
             filter.setTraderType("-");
         }
-
-        Mono<ResponseEntity<List<OpeningBalance>>> result = accountApi.post()
+        openingTableModel.clear();
+        Flux<OpeningBalance> result = accountApi.post()
                 .uri("/account/get-opening")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .toEntityList(OpeningBalance.class);
+                .bodyToFlux(OpeningBalance.class);
         result.subscribe((t) -> {
-            List<OpeningBalance> listop = t.getBody();
-            openingTableModel.setListOpening(listop);
-            btnGenerateZero.setEnabled(listop.isEmpty());
+            openingTableModel.addOpening(t);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }, () -> {
+            openingTableModel.fireTableDataChanged();
+            btnGenerateZero.setEnabled(openingTableModel.getListOpening().isEmpty());
             openingTableModel.addNewRow();
             calTotalAmt();
             focusOnTable();
@@ -353,6 +387,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
 
     @Override
     public void filter() {
+        filterHeader.setVisible(!filterHeader.isVisible());
     }
 
     @Override

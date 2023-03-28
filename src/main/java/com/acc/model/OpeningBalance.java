@@ -28,7 +28,7 @@ public class OpeningBalance {
     private String traderName;
     private String tranSource;
     private String deptUsrCode;
-    private String tradeUsrCode;
+    private String traderUsrCode;
     private String traderType;
     private String coaUsrCode;
     private String coaParent;

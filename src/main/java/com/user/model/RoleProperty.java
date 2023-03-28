@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.common;
+package com.user.model;
 
 import java.io.Serializable;
 import lombok.Data;
@@ -13,12 +13,11 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
-public class RoleProperty implements Serializable {
+public class RoleProperty {
 
     private RolePropertyKey key;
     private String propValue;
     private String remark;
-    private String compCode;
 
     public RoleProperty() {
     }

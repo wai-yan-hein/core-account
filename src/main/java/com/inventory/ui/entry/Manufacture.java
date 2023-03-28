@@ -120,14 +120,19 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
     }
 
     private void initCompleter() {
-        List<Location> listLocation = inventoryRepo.getLocation();
-        locationAutoCompleter = new LocationAutoCompleter(txtLocation, listLocation, null, false, false);
-        locationAutoCompleter.setObserver(this);
-        locationAutoCompleter.setLocation(inventoryRepo.getDefaultLocation());
+        inventoryRepo.getLocation().subscribe((t) -> {
+            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
+            locationAutoCompleter.setObserver(this);
+            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
+                locationAutoCompleter.setLocation(tt);
+            });
+        });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, false);
         stockAutoCompleter.setObserver(this);
-        unitAutoCompleter = new UnitAutoCompleter(txtUnit, inventoryRepo.getStockUnit(), null);
-        unitAutoCompleter.setObserver(this);
+        inventoryRepo.getStockUnit().subscribe((t) -> {
+            unitAutoCompleter = new UnitAutoCompleter(txtUnit, t, null);
+            unitAutoCompleter.setObserver(this);
+        });
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtPt, inventoryRepo, null, false);
         vouStatusAutoCompleter.setObserver(this);
 
@@ -196,9 +201,13 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         tblProcessDetail.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());//date
         tblProcessDetail.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));//code
         tblProcessDetail.getColumnModel().getColumn(2).setCellEditor(new StockCellEditor(inventoryRepo));//name
-        tblProcessDetail.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(inventoryRepo.getLocation()));//location
+        inventoryRepo.getLocation().subscribe((t) -> {
+            tblProcessDetail.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));//location
+        });
         tblProcessDetail.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
-        tblProcessDetail.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));//unit
+        inventoryRepo.getStockUnit().subscribe((t) -> {
+            tblProcessDetail.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));//unit
+        });
         tblProcessDetail.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//price
         //
         tblProcessDetail.getColumnModel().getColumn(4).setCellRenderer(new DecimalFormatRender());//qty
@@ -248,8 +257,12 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         chkFinish.setSelected(ph.isFinished());
         unitAutoCompleter.setStockUnit(inventoryRepo.findUnit(ph.getUnit(), deptId));
         vouStatusAutoCompleter.setVoucher(inventoryRepo.findVouStatus(p.getPtCode(), deptId));
-        stockAutoCompleter.setStock(inventoryRepo.findStock(ph.getStockCode()));
-        locationAutoCompleter.setLocation(inventoryRepo.findLocation(ph.getLocCode(), deptId));
+        inventoryRepo.findStock(ph.getStockCode()).subscribe((t) -> {
+            stockAutoCompleter.setStock(t);
+        });
+        inventoryRepo.findLocation(ph.getLocCode(), deptId).subscribe((t) -> {
+            locationAutoCompleter.setLocation(t);
+        });
         if (p.isDeleted()) {
             enableProcess(false);
             lblStatus.setText("DELETED");
@@ -927,7 +940,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         if (str.equals("STOCK")) {
             Stock s = stockAutoCompleter.getStock();
             if (s != null) {
-                unitAutoCompleter.setStockUnit(inventoryRepo.findUnit(s.getPurUnitCode(),s.getKey().getDeptId()));
+                unitAutoCompleter.setStockUnit(inventoryRepo.findUnit(s.getPurUnitCode(), s.getKey().getDeptId()));
                 getPattern();
             }
         } else if (str.equals("Selected")) {

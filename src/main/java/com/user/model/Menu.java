@@ -2,9 +2,8 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.common.model;
+package com.user.model;
 
-import java.util.Date;
 import java.util.List;
 import lombok.Data;
 
@@ -15,7 +14,7 @@ import lombok.Data;
 @Data
 public class Menu {
 
-    private String menuCode;
+    private MenuKey key;
     private String userCode;
     private String menuClass;
     private String menuName;

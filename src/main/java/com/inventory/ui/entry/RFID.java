@@ -115,12 +115,13 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }
 
     private void checkValidation() {
-        Location l = inventoryRepo.getDefaultLocation();
-        if (l == null) {
-            JOptionPane.showMessageDialog(this, "Config Default Location.");
-        } else {
-            locCode = l.getKey().getLocCode();
-        }
+        inventoryRepo.getDefaultLocation().subscribe((l) -> {
+            if (l == null) {
+                JOptionPane.showMessageDialog(this, "Config Default Location.");
+            } else {
+                locCode = l.getKey().getLocCode();
+            }
+        });
         chkPrint.setSelected(Util1.getBoolean(ProUtil.getProperty("printer.print")));
     }
 
@@ -214,7 +215,10 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     private void assignDefaultValue() {
         txtSaleDate.setDate(Util1.getTodayDate());
-        traderAutoCompleter.setTrader(inventoryRepo.getDefaultCustomer());
+        Mono<Trader> trader = inventoryRepo.findTrader(Global.hmRoleProperty.get("default.customer"), Global.deptId);
+        trader.subscribe((t) -> {
+            traderAutoCompleter.setTrader(t);
+        });
         progress.setIndeterminate(false);
         txtVouNo.setText(null);
         txtRFID.setText(null);
@@ -366,7 +370,10 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             progress.setIndeterminate(true);
             saleHis = sh;
             Integer deptId = sh.getKey().getDeptId();
-            traderAutoCompleter.setTrader(inventoryRepo.findTrader(saleHis.getTraderCode(), deptId));
+            Mono<Trader> trader = inventoryRepo.findTrader(saleHis.getTraderCode(), deptId);
+            trader.subscribe((t) -> {
+                traderAutoCompleter.setTrader(t);
+            });
             String vouNo = sh.getKey().getVouNo();
             Mono<ResponseEntity<List<SaleHisDetail>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/sale/get-sale-detail")
@@ -433,27 +440,29 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         if (t == null) {
             JOptionPane.showMessageDialog(this, "Customer Not Found.", "Message", JOptionPane.WARNING_MESSAGE);
         } else {
-            Stock s = inventoryRepo.getDefaultStock();
-            if (s != null) {
-                tableModel.clear();
-                SaleHisDetail sd = new SaleHisDetail();
-                sd.setUserCode(sd.getUserCode());
-                sd.setStockCode(s.getKey().getStockCode());
-                sd.setStockName(s.getStockName());
-                sd.setQty(1.0f);
-                sd.setUnitCode(s.getSaleUnitCode());
-                sd.setPrice(s.getSalePriceN());
-                sd.setAmount(Util1.getFloat(sd.getQty()) * Util1.getFloat(sd.getPrice()));
-                sd.setLocCode(locCode);
-                tableModel.addSale(sd);
-                calculateTotalAmount();
-                if (chkPrint.isSelected()) {
-                    saveSale(true);
-                } else {
-                    tableModel.addNewRow();
-                    focusTable();
+            inventoryRepo.getDefaultStock().subscribe((s) -> {
+                if (s != null) {
+                    tableModel.clear();
+                    SaleHisDetail sd = new SaleHisDetail();
+                    sd.setUserCode(sd.getUserCode());
+                    sd.setStockCode(s.getKey().getStockCode());
+                    sd.setStockName(s.getStockName());
+                    sd.setQty(1.0f);
+                    sd.setUnitCode(s.getSaleUnitCode());
+                    sd.setPrice(s.getSalePriceN());
+                    sd.setAmount(Util1.getFloat(sd.getQty()) * Util1.getFloat(sd.getPrice()));
+                    sd.setLocCode(locCode);
+                    tableModel.addSale(sd);
+                    calculateTotalAmount();
+                    if (chkPrint.isSelected()) {
+                        saveSale(true);
+                    } else {
+                        tableModel.addNewRow();
+                        focusTable();
+                    }
                 }
-            }
+            });
+
         }
     }
 

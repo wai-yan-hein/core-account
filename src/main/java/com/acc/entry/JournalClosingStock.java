@@ -19,7 +19,6 @@ import com.common.Global;
 import com.acc.model.ReportFilter;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
-import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.user.model.Currency;
@@ -60,8 +59,8 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
     private AccountRepo accountRepo;
     @Autowired
     private WebClient accountApi;
-    private List<Department> listDep;
-    private List<Currency> listCurrency;
+    private Mono<List<Currency>> monoCur;
+    private Mono<List<Department>> monoDep;
 
     public JProgressBar getProgress() {
         return progress;
@@ -130,10 +129,13 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
                 yes_no = JOptionPane.showConfirmDialog(Global.parentForm, "Are you sure to delete?",
                         "Delete", JOptionPane.YES_NO_OPTION);
                 if (yes_no == 0) {
-                    if (accountRepo.delete(op.getKey())) {
-                        tableModel.delete(selectRow);
-                        focusOnTable();
-                    }
+                    accountRepo.delete(op.getKey()).subscribe((t) -> {
+                        if (t) {
+                            tableModel.delete(selectRow);
+                            focusOnTable();
+                        }
+                    });
+
                 }
             }
         }
@@ -174,20 +176,26 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
     }
 
     private void initCompleter() {
-        listDep = accountRepo.getDepartment();
-        listCurrency = accountRepo.getCurrency();
+        monoDep = accountRepo.getDepartment();
+        monoCur = accountRepo.getCurrency();
+        monoDep.subscribe((t) -> {
+            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true, false);
+            departmentAutoCompleter.setObserver(this);
+        });
         dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
         dateAutoCompleter.setSelectionObserver(this);
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, listDep, null, true, false);
-        departmentAutoCompleter.setObserver(this);
-        currencyAAutoCompleter = new CurrencyAAutoCompleter(txtCur, listCurrency, null, true);
-        currencyAAutoCompleter.setSelectionObserver(this);
+        monoCur.subscribe((t) -> {
+            currencyAAutoCompleter = new CurrencyAAutoCompleter(txtCur, t, null, true);
+            currencyAAutoCompleter.setSelectionObserver(this);
+        });
 
     }
 
     private void initTable() {
         tableModel.setParent(tblJournal);
-        tableModel.setDepartment(accountRepo.getDefaultDepartment());
+        accountRepo.getDefaultDepartment().subscribe((t) -> {
+            tableModel.setDepartment(t);
+        });
         tableModel.setAccountRepo(accountRepo);
         tblJournal.setModel(tableModel);
         tblJournal.getTableHeader().setFont(Global.tblHeaderFont);
@@ -204,10 +212,14 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         tblJournal.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblJournal.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
-        tblJournal.getColumnModel().getColumn(1).setCellEditor(new DepartmentCellEditor(listDep));
+        monoDep.subscribe((t) -> {
+            tblJournal.getColumnModel().getColumn(1).setCellEditor(new DepartmentCellEditor(t));
+        });
         tblJournal.getColumnModel().getColumn(2).setCellEditor(new COA3CellEditor(accountApi, 3));
         tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountApi, 3));
-        tblJournal.getColumnModel().getColumn(4).setCellEditor(new CurrencyAEditor(listCurrency));
+        monoCur.subscribe((t) -> {
+            tblJournal.getColumnModel().getColumn(4).setCellEditor(new CurrencyAEditor(t));
+        });
         tblJournal.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
 
     }

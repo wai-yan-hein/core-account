@@ -13,15 +13,14 @@ import com.acc.model.Department;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
-import com.common.RoleProperty;
-import com.common.RolePropertyKey;
+import com.user.model.RoleProperty;
+import com.user.model.RolePropertyKey;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
-import com.inventory.model.MachineInfo;
 import com.inventory.model.Stock;
 import com.user.model.SysProperty;
 import com.inventory.model.Trader;
@@ -40,10 +39,12 @@ import java.util.List;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
 import javax.swing.JCheckBox;
+import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 /**
  *
@@ -179,6 +180,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     public SystemProperty() {
         initComponents();
         initAction();
+        initKey();
+    }
+
+    private void initKey() {
         txtDep.setName("default.department");
         chkDepFilter.setName("department.filter");
         chkDepOption.setName("department.option");
@@ -193,7 +198,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkDisableDep.setName("disable.department");
         chkShowExpense.setName(ProUtil.P_SHOW_EXPENSE);
         chkShowGRN.setName(ProUtil.P_SHOW_GRN);
-
+        chkPurByBatchDetail.setName(ProUtil.P_BATCH_DETAIL);
         txtPlAcc.setName(ProUtil.PL);
         txtREAcc.setName(ProUtil.RE);
         txtFixed.setName(ProUtil.FIXED);
@@ -212,8 +217,12 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
     private void initProperty() {
         switch (properyType) {
-            case "System" ->
-                hmProperty = userRepo.getSystProperty();
+            case "System" -> {
+                hmProperty = new HashMap<>();
+                userRepo.getSystProperty().block().forEach((t) -> {
+                    hmProperty.put(t.getKey().getPropKey(), t.getPropValue());
+                });
+            }
             case "Role" ->
                 hmProperty = userRepo.getRoleProperty(roleCode);
             case "Machine" ->
@@ -224,9 +233,11 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private void initMac() {
         if (properyType.equals("Machine")) {
             panelMac.setVisible(true);
-            List<MachineInfo> listMac = userRepo.getMacList();
-            macAutoCompleter = new MacAutoCompleter(txtMac, listMac, null, false);
-            macAutoCompleter.setObserver(this);
+            userRepo.getMacList().subscribe((t) -> {
+                macAutoCompleter = new MacAutoCompleter(txtMac, t, null, false);
+                macAutoCompleter.setObserver(this);
+            });
+
         } else {
             panelMac.setVisible(false);
         }
@@ -235,8 +246,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     public void initMain() {
         initMac();
         initProperty();
-        initTextBox();
         initCheckBox();
+        initTextBox();
         initCombo();
     }
 
@@ -266,6 +277,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkDisableDep.addActionListener(action);
         chkShowExpense.addActionListener(action);
         chkShowGRN.addActionListener(action);
+        chkPurByBatchDetail.addActionListener(action);
         //txt
         txtA4Report.addActionListener(action);
         txtA5Report.addActionListener(action);
@@ -325,6 +337,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkDisableDep.setSelected(Util1.getBoolean(hmProperty.get(chkDisableDep.getName())));
         chkShowExpense.setSelected(Util1.getBoolean(hmProperty.get(chkShowExpense.getName())));
         chkShowGRN.setSelected(Util1.getBoolean(hmProperty.get(chkShowGRN.getName())));
+        chkPurByBatchDetail.setSelected(Util1.getBoolean(hmProperty.get(chkPurByBatchDetail.getName())));
     }
 
     private void initTextBox() {
@@ -348,82 +361,333 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         printerAutoCompleter.setText(hmProperty.get("printer.name"));
         cusCompleter = new TraderAutoCompleter(txtCustomer, inventoryRepo, null, false, "CUS");
         cusCompleter.setObserver(this);
-        cusCompleter.setTrader(inventoryRepo.getDefaultCustomer());
+        Mono<Trader> cus = inventoryRepo.findTrader(hmProperty.get("default.customer"), Global.deptId);
+        cus.hasElement().subscribe((element) -> {
+            if (element) {
+                cus.subscribe((t) -> {
+                    cusCompleter.setTrader(t);
+                }, (e) -> {
+                    log.error(e.getMessage());
+                });
+            } else {
+                cusCompleter.setTrader(null);
+            }
+        });
+
         supCompleter = new TraderAutoCompleter(txtSupplier, inventoryRepo, null, false, "SUP");
         supCompleter.setObserver(this);
-        supCompleter.setTrader(inventoryRepo.getDefaultSupplier());
-        locCompleter = new LocationAutoCompleter(txtLocation, inventoryRepo.getLocation(), null, false, false);
-        locCompleter.setObserver(this);
-        locCompleter.setLocation(inventoryRepo.getDefaultLocation());
+        Mono<Trader> sup = inventoryRepo.findTrader(hmProperty.get("default.supplier"), Global.deptId);
+        sup.hasElement().subscribe((element) -> {
+            if (element) {
+                sup.subscribe((t) -> {
+                    supCompleter.setTrader(t);
+                }, (e) -> {
+                    log.error(e.getMessage());
+                });
+            } else {
+                supCompleter.setTrader(null);
+            }
+        });
+        inventoryRepo.getLocation().subscribe((t) -> {
+            locCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
+            locCompleter.setObserver(this);
+            Mono<Location> loc = inventoryRepo.getDefaultLocation();
+            loc.hasElement().subscribe((element) -> {
+                if (element) {
+                    loc.subscribe((tt) -> {
+                        locCompleter.setLocation(tt);
+                    });
+                } else {
+                    locCompleter.setLocation(null);
+                }
+            });
+        }, (e) -> {
+            log.error(e.getMessage());
+        });
+
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, false);
         stockAutoCompleter.setObserver(this);
-        stockAutoCompleter.setStock(inventoryRepo.getDefaultStock());
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, accountRepo.getDepartment(), null, false, false);
-        departmentAutoCompleter.setObserver(this);
-        departmentAutoCompleter.setDepartment(accountRepo.getDefaultDepartment());
+        Mono<Stock> stock = inventoryRepo.getDefaultStock();
+        stock.hasElement().subscribe((element) -> {
+            if (element) {
+                stock.subscribe((t) -> {
+                    stockAutoCompleter.setStock(t);
+                }, (e) -> {
+                    log.error(e.getMessage());
+                });
+            } else {
+                stockAutoCompleter.setStock(null);
+            }
+        });
+
+        accountRepo.getDepartment().subscribe((t) -> {
+            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, false, false);
+            departmentAutoCompleter.setObserver(this);
+            Mono<Department> dep = accountRepo.findDepartment(hmProperty.get(txtDep.getName()));
+            dep.hasElement().subscribe((element) -> {
+                if (element) {
+                    dep.subscribe((tt) -> {
+                        departmentAutoCompleter.setDepartment(tt);
+                    });
+                } else {
+                    departmentAutoCompleter.setDepartment(null);
+                }
+            });
+        }, (e) -> {
+            log.error(e.getMessage());
+        });
+
         cashAutoCompleter = new COA3AutoCompleter(txtCash, accountApi, null, false, 3);
         cashAutoCompleter.setSelectionObserver(this);
-        cashAutoCompleter.setCoa(accountRepo.getDefaultCash());
+        Mono<ChartOfAccount> cash = accountRepo.getDefaultCash();
+        cash.hasElement().subscribe((element) -> {
+            if (element) {
+                cash.subscribe((coa) -> {
+                    cashAutoCompleter.setCoa(coa);
+                }, (e) -> {
+                    log.error(e.getMessage());
+                });
+            } else {
+                cashAutoCompleter.setCoa(null);
+            }
+        });
         plAutoCompleter = new COA3AutoCompleter(txtPlAcc, accountApi, null, false, 3);
         plAutoCompleter.setSelectionObserver(this);
-        plAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtPlAcc.getName())));
+        Mono<ChartOfAccount> pl = accountRepo.findCOA(hmProperty.get(txtPlAcc.getName()));
+        pl.hasElement().subscribe((element) -> {
+            if (element) {
+                pl.subscribe((t) -> {
+                    plAutoCompleter.setCoa(t);
+                }, (e) -> {
+                    log.error(e.getMessage());
+                });
+            } else {
+                plAutoCompleter.setCoa(null);
+            }
+        });
         reAutoCompleter = new COA3AutoCompleter(txtREAcc, accountApi, null, false, 3);
         reAutoCompleter.setSelectionObserver(this);
-        reAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtREAcc.getName())));
+        Mono<ChartOfAccount> re = accountRepo.findCOA(hmProperty.get(txtREAcc.getName()));
+        re.hasElement().subscribe((element) -> {
+            if (element) {
+                re.subscribe((t) -> {
+                    reAutoCompleter.setCoa(t);
+                }, (e) -> {
+                    log.error(e.getMessage());
+                });
+            } else {
+                reAutoCompleter.setCoa(null);
+            }
+        });
+
         inventoryAutoCompleter = new COA3AutoCompleter(txtInvGroup, accountApi, null, false, 2);
         inventoryAutoCompleter.setSelectionObserver(this);
-        inventoryAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtInvGroup.getName())));
+        Mono<ChartOfAccount> inv = accountRepo.findCOA(hmProperty.get(txtInvGroup.getName()));
+        inv.hasElement().subscribe((element) -> {
+            if (element) {
+                inv.subscribe((t) -> {
+                    inventoryAutoCompleter.setCoa(t);
+                }, (e) -> {
+                    log.error(e.getMessage());
+                });
+            } else {
+                inventoryAutoCompleter.setCoa(null);
+            }
+        });
         cashGroupAutoCompleter = new COA3AutoCompleter(txtCashGroup, accountApi, null, false, 2);
         cashGroupAutoCompleter.setSelectionObserver(this);
-        cashGroupAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtCashGroup.getName())));
+        Mono<ChartOfAccount> cg = accountRepo.findCOA(hmProperty.get(txtCashGroup.getName()));
+        cg.hasElement().subscribe((element) -> {
+            if (element) {
+                cg.subscribe((t) -> {
+                    cashGroupAutoCompleter.setCoa(t);
+                }, (e) -> {
+                    log.error(e.getMessage());
+                });
+
+            } else {
+                cashGroupAutoCompleter.setCoa(null);
+            }
+        });
 
         fixedAutoCompleter = new COA3AutoCompleter(txtFixed, accountApi, null, false, 1);
         fixedAutoCompleter.setSelectionObserver(this);
-        fixedAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtFixed.getName())));
-
+        Mono<ChartOfAccount> fix = accountRepo.findCOA(hmProperty.get(txtFixed.getName()));
+        fix.hasElement().subscribe((element) -> {
+            if (element) {
+                fix.subscribe((t) -> {
+                    fixedAutoCompleter.setCoa(t);
+                }, (e) -> {
+                    log.error(e.getMessage());
+                });
+            } else {
+                fixedAutoCompleter.setCoa(null);
+            }
+        });
         currentAutoCompleter = new COA3AutoCompleter(txtCurrent, accountApi, null, false, 1);
         currentAutoCompleter.setSelectionObserver(this);
-        currentAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtCurrent.getName())));
+        Mono<ChartOfAccount> cur = accountRepo.findCOA(hmProperty.get(txtCurrent.getName()));
+        cur.hasElement().subscribe((elemnt) -> {
+            if (elemnt) {
+                cur.subscribe((t) -> {
+                    currentAutoCompleter.setCoa(t);
+                }, (e) -> {
+                    log.error(e.getMessage());
+                });
+            } else {
+                currentAutoCompleter.setCoa(null);
+            }
+        });
 
         liaAutoCompleter = new COA3AutoCompleter(txtLiability, accountApi, null, false, 1);
         liaAutoCompleter.setSelectionObserver(this);
-        liaAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtLiability.getName())));
+        Mono<ChartOfAccount> lia = accountRepo.findCOA(hmProperty.get(txtLiability.getName()));
+        lia.hasElement().subscribe((element) -> {
+            if (element) {
+                lia.subscribe((t) -> {
+                    liaAutoCompleter.setCoa(t);
+                }, (e) -> {
+                    log.error(e.getMessage());
+                });
+            } else {
+                liaAutoCompleter.setCoa(null);
+            }
+        });
 
         capitalAutoCompleter = new COA3AutoCompleter(txtCapital, accountApi, null, false, 1);
         capitalAutoCompleter.setSelectionObserver(this);
-        capitalAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtCapital.getName())));
+        Mono<ChartOfAccount> cp = accountRepo.findCOA(hmProperty.get(txtCapital.getName()));
+        cp.hasElement().subscribe((element) -> {
+            if (element) {
+                cp.subscribe((t) -> {
+                    capitalAutoCompleter.setCoa(t);
+                }, (e) -> {
+                    log.error(e.getMessage());
+                });
+            } else {
+                capitalAutoCompleter.setCoa(null);
+            }
+        });
 
         incomeAutoCompleter = new COA3AutoCompleter(txtIncome, accountApi, null, false, 1);
         incomeAutoCompleter.setSelectionObserver(this);
-        incomeAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtIncome.getName())));
+        Mono<ChartOfAccount> income = accountRepo.findCOA(hmProperty.get(txtIncome.getName()));
+        income.hasElement().subscribe((element) -> {
+            if (element) {
+                income.subscribe((t) -> {
+                    incomeAutoCompleter.setCoa(t);
+                }, (e) -> {
+                    log.error(e.getMessage());
+                });
+            } else {
+                incomeAutoCompleter.setCoa(null);
+            }
+        });
 
         otherIncomeAutoCompleter = new COA3AutoCompleter(txtOtherIncome, accountApi, null, false, 1);
         otherIncomeAutoCompleter.setSelectionObserver(this);
-        otherIncomeAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtOtherIncome.getName())));
+        Mono<ChartOfAccount> oi = accountRepo.findCOA(hmProperty.get(txtOtherIncome.getName()));
+        oi.hasElement().subscribe((element) -> {
+            if (element) {
+                oi.subscribe((t) -> {
+                    otherIncomeAutoCompleter.setCoa(t);
+                }, (e) -> {
+                    log.error(e.getMessage());
+                });
+            } else {
+                otherIncomeAutoCompleter.setCoa(null);
+            }
+        });
 
         purchaseAutoCompleter = new COA3AutoCompleter(txtPurchase, accountApi, null, false, 1);
         purchaseAutoCompleter.setSelectionObserver(this);
-        purchaseAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtPurchase.getName())));
+        Mono<ChartOfAccount> p = accountRepo.findCOA(hmProperty.get(txtPurchase.getName()));
+        p.hasElement().subscribe((element) -> {
+            if (element) {
+                p.subscribe((t) -> {
+                    purchaseAutoCompleter.setCoa(t);
+                }, (e) -> {
+                    log.error(e.getMessage());
+                });
+            } else {
+                purchaseAutoCompleter.setCoa(null);
+            }
+        });
 
         expenseAutoCompleter = new COA3AutoCompleter(txtExpense, accountApi, null, false, 1);
         expenseAutoCompleter.setSelectionObserver(this);
-        expenseAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtExpense.getName())));
+        Mono<ChartOfAccount> ex = accountRepo.findCOA(hmProperty.get(txtExpense.getName()));
+        ex.hasElement().subscribe((eleemnt) -> {
+            if (eleemnt) {
+                ex.subscribe((t) -> {
+                    expenseAutoCompleter.setCoa(t);
+                }, (e) -> {
+                    log.error(e.getMessage());
+                });
+            } else {
+                expenseAutoCompleter.setCoa(null);
+            }
+        });
 
         debtorGroupAutoCompleter = new COA3AutoCompleter(txtDebtor, accountApi, null, false, 2);
         debtorGroupAutoCompleter.setSelectionObserver(this);
-        debtorGroupAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtDebtor.getName())));
+        Mono<ChartOfAccount> dbg = accountRepo.findCOA(hmProperty.get(txtDebtor.getName()));
+        dbg.hasElement().subscribe((element) -> {
+            if (element) {
+                dbg.subscribe((t) -> {
+                    debtorGroupAutoCompleter.setCoa(t);
+                }, (e) -> {
+                    log.error(e.getMessage());
+                });
+            } else {
+                debtorGroupAutoCompleter.setCoa(null);
+            }
+        });
 
         debtorAccAutoCompleter = new COA3AutoCompleter(txtCus, accountApi, null, false, 3);
         debtorAccAutoCompleter.setSelectionObserver(this);
-        debtorAccAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtCus.getName())));
+        Mono<ChartOfAccount> db = accountRepo.findCOA(hmProperty.get(txtCus.getName()));
+        db.hasElement().subscribe((element) -> {
+            if (element) {
+                db.subscribe((t) -> {
+                    debtorAccAutoCompleter.setCoa(t);
+                }, (e) -> {
+                    log.error(e.getMessage());
+                });
+            } else {
+                debtorAccAutoCompleter.setCoa(null);
+            }
+        });
 
         creditorGroupAutoCompleter = new COA3AutoCompleter(txtCreditor, accountApi, null, false, 2);
         creditorGroupAutoCompleter.setSelectionObserver(this);
-        creditorGroupAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtCreditor.getName())));
+        Mono<ChartOfAccount> crg = accountRepo.findCOA(hmProperty.get(txtCreditor.getName()));
+        crg.hasElement().subscribe((element) -> {
+            if (element) {
+                crg.subscribe((t) -> {
+                    creditorGroupAutoCompleter.setCoa(t);
+                }, (e) -> {
+                    log.error(e.getMessage());
+                });
+            } else {
+                creditorGroupAutoCompleter.setCoa(null);
+            }
+        });
 
         creditorAccAutoCompleter = new COA3AutoCompleter(txtSup, accountApi, null, false, 3);
         creditorAccAutoCompleter.setSelectionObserver(this);
-        creditorAccAutoCompleter.setCoa(accountRepo.findCOA(hmProperty.get(txtSup.getName())));
+        Mono<ChartOfAccount> cr = accountRepo.findCOA(hmProperty.get(txtSup.getName()));
+        cr.hasElement().subscribe((element) -> {
+            if (element) {
+                cr.subscribe((t) -> {
+                    creditorAccAutoCompleter.setCoa(t);
+                }, (e) -> {
+                    log.error(e.getMessage());
+                });
+            } else {
+                creditorAccAutoCompleter.setCoa(null);
+            }
+        });
     }
 
     private void save(String key, String value) {
@@ -444,9 +708,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         pKey.setCompCode(Global.compCode);
         p.setKey(pKey);
         p.setPropValue(value);
-        userRepo.saveSys(p);
-        Global.hmRoleProperty.put(key, value);
-        log.info("save.");
+        userRepo.saveSys(p).subscribe((t) -> {
+            hmProperty.put(key, value);
+            log.info("save.");
+        });
     }
 
     private void saveRoleProp(String key, String value) {
@@ -454,11 +719,14 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         RolePropertyKey pKey = new RolePropertyKey();
         pKey.setPropKey(key);
         pKey.setRoleCode(roleCode);
+        pKey.setCompCode(Global.compCode);
         p.setKey(pKey);
         p.setPropValue(value);
-        p.setCompCode(Global.compCode);
-        userRepo.saveRoleProperty(p);
-        Global.hmRoleProperty.put(key, value);
+        userRepo.saveRoleProperty(p).subscribe((t) -> {
+            hmProperty.put(key, value);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        });
     }
 
     private void saveMacProp(String key, String value) {
@@ -468,8 +736,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         mKey.setPropKey(key);
         p.setKey(mKey);
         p.setPropValue(value);
-        userRepo.saveMacProp(p);
-        Global.hmRoleProperty.put(key, value);
+        userRepo.saveMacProp(p).subscribe((t) -> {
+            hmProperty.put(key, value);
+        });
     }
 
     private List<String> getPrinter() {
@@ -565,6 +834,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtComP = new javax.swing.JTextField();
         chkShowExpense = new javax.swing.JCheckBox();
         chkShowGRN = new javax.swing.JCheckBox();
+        chkPurByBatchDetail = new javax.swing.JCheckBox();
         panelMac = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
         txtMac = new javax.swing.JTextField();
@@ -988,6 +1258,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         chkShowGRN.setText("GRN Show");
 
+        chkPurByBatchDetail.setText("By Batch Detail");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -1006,7 +1278,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtComP, javax.swing.GroupLayout.DEFAULT_SIZE, 134, Short.MAX_VALUE))
                     .addComponent(chkShowExpense, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkShowGRN, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(chkShowGRN, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(chkPurByBatchDetail, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -1018,6 +1291,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addComponent(chkShowExpense)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkShowGRN)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkPurByBatchDetail)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1228,7 +1503,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         // TODO add your handling code here:
-        observer.selected("control", this);
+        if (observer != null) {
+            observer.selected("control", this);
+        }
     }//GEN-LAST:event_formComponentShown
 
 
@@ -1247,6 +1524,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JCheckBox chkPriceOption;
     private javax.swing.JCheckBox chkPricePopup;
     private javax.swing.JCheckBox chkPrint;
+    private javax.swing.JCheckBox chkPurByBatchDetail;
     private javax.swing.JCheckBox chkPurVouEdit;
     private javax.swing.JCheckBox chkSA4;
     private javax.swing.JCheckBox chkSA5;

@@ -81,7 +81,6 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
         this.delList = delList;
     }
 
-
     public void setVouType(String vouType) {
         this.vouType = vouType;
     }
@@ -166,10 +165,11 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
                                 gl.setTraderName(t.getTraderName());
                                 if (t.getAccount() != null) {
                                     gl.setAccCode(t.getAccount());
-                                    ChartOfAccount coa = accountRepo.findCOA(t.getAccount());
-                                    if (coa != null) {
-                                        gl.setAccName(coa.getCoaNameEng());
-                                    }
+                                    accountRepo.findCOA(t.getAccount()).subscribe((coa) -> {
+                                        if (coa != null) {
+                                            gl.setAccName(coa.getCoaNameEng());
+                                        }
+                                    });
                                     if (ProUtil.isMultiCur()) {
                                         parent.setColumnSelectionInterval(4, 4);
                                     } else {

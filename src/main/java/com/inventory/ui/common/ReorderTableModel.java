@@ -125,7 +125,7 @@ public class ReorderTableModel extends AbstractTableModel {
             if (!Objects.isNull(value)) {
                 ReorderLevel p = listReorder.get(row);
                 switch (column) {
-                    case 0,1 -> {
+                    case 0, 1 -> {
                         if (value instanceof Stock s) {
                             p.getKey().setStockCode(s.getKey().getStockCode());
                             p.setStockName(s.getStockName());
@@ -137,7 +137,7 @@ public class ReorderTableModel extends AbstractTableModel {
                     case 3 -> {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             p.setMinQty(Util1.getFloat(value));
-                            p.setMinUnitCode(getPurUnit(p.getKey().getStockCode(),p.getKey().getDeptId()));
+                            p.setMinUnitCode(getPurUnit(p.getKey().getStockCode()));
                             table.setColumnSelectionInterval(3, 3);
                         } else {
                             JOptionPane.showMessageDialog(table, "Invalid Amount.");
@@ -152,7 +152,7 @@ public class ReorderTableModel extends AbstractTableModel {
                     case 5 -> {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             p.setMaxQty(Util1.getFloat(value));
-                            p.setMaxUnitCode(getPurUnit(p.getKey().getStockCode(), p.getKey().getDeptId()));
+                            p.setMaxUnitCode(getPurUnit(p.getKey().getStockCode()));
                             table.setColumnSelectionInterval(5, 5);
                         } else {
                             JOptionPane.showMessageDialog(table, "Invalid Amount.");
@@ -166,9 +166,9 @@ public class ReorderTableModel extends AbstractTableModel {
                     }
                 }
                 switch (column) {
-                    case 3,4 ->
+                    case 3, 4 ->
                         p.setMinSmallQty(p.getMinQty() * getSmallQty(p.getKey().getStockCode(), p.getMinUnitCode()));
-                    case 5,6 ->
+                    case 5, 6 ->
                         p.setMaxSmallQty(p.getMaxQty() * getSmallQty(p.getKey().getStockCode(), p.getMinUnitCode()));
 
                 }
@@ -183,8 +183,8 @@ public class ReorderTableModel extends AbstractTableModel {
         }
     }
 
-    private String getPurUnit(String stockCode, Integer deptId) {
-        return inventoryRepo.findStock(stockCode).getPurUnitCode();
+    private String getPurUnit(String stockCode) {
+        return inventoryRepo.findStock(stockCode).block().getPurUnitCode();
     }
 
     private float getSmallQty(String stockCode, String unit) {

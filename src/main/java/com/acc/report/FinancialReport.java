@@ -134,8 +134,11 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
     }
 
     private void getReport() {
-        tableModel.setListReport(userRepo.getReport("Account"));
-        lblRecord.setText(String.valueOf(tableModel.getListReport().size()));
+        userRepo.getReport("Account").subscribe((t) -> {
+            tableModel.setListReport(t);
+            lblRecord.setText(String.valueOf(tableModel.getListReport().size()));
+        });
+
     }
 
     private void initCombo() {
@@ -143,8 +146,10 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         dateAutoCompleter.setSelectionObserver(this);
         traderAutoCompleter = new TraderAAutoCompleter(txtTrader, accountApi, null, true);
         traderAutoCompleter.setSelectionObserver(this);
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, accountRepo.getDepartment(), null, true, true);
-        departmentAutoCompleter.setObserver(this);
+        accountRepo.getDepartment().subscribe((t) -> {
+            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true, true);
+            departmentAutoCompleter.setObserver(this);
+        });
         cOA3AutoCompleter = new COA3AutoCompleter(txtCOA, accountApi, null, true, 3);
         cOA3AutoCompleter.setSelectionObserver(this);
     }

@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class APARTableModel extends AbstractTableModel {
 
     private List<VApar> listAPAR = new ArrayList();
-    private String[] columnNames = {"Code", "Trader Name", "Currency", "Dr-Amt", "Cr-Amt"};
+    private String[] columnNames = {"Code", "Trader Name", "Account", "Currency", "Dr-Amt", "Cr-Amt"};
 
     @Override
     public String getColumnName(int column) {
@@ -34,8 +34,6 @@ public class APARTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 3 ->
-                Double.class;
             case 4 ->
                 Double.class;
             case 5 ->
@@ -61,10 +59,12 @@ public class APARTableModel extends AbstractTableModel {
                 case 1 ->
                     apar.getTraderName();
                 case 2 ->
-                    apar.getCurCode();
+                    apar.getCoaName();
                 case 3 ->
-                    Util1.getDouble(apar.getDrAmt()) == 0 ? null : apar.getDrAmt();
+                    apar.getCurCode();
                 case 4 ->
+                    Util1.getDouble(apar.getDrAmt()) == 0 ? null : apar.getDrAmt();
+                case 5 ->
                     Util1.getDouble(apar.getCrAmt()) == 0 ? null : apar.getCrAmt();
                 default ->
                     null;
@@ -125,7 +125,6 @@ public class APARTableModel extends AbstractTableModel {
 
     public void addAPAR(VApar apar) {
         listAPAR.add(apar);
-        fireTableRowsInserted(listAPAR.size() - 1, listAPAR.size() - 1);
     }
 
     public void setAPAR(int row, VApar apar) {

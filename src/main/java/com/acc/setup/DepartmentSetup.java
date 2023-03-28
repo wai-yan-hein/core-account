@@ -115,9 +115,8 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
     }
 
     private void createTreeNode(DefaultMutableTreeNode treeRoot) {
-        List<Department> departments = accountRepo.getDepartment();
-        if (!departments.isEmpty()) {
-            departments.forEach((menu) -> {
+        accountRepo.getDepartment().subscribe((t) -> {
+            t.forEach((menu) -> {
                 if (menu.getChild() != null) {
                     if (!menu.getChild().isEmpty()) {
                         DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
@@ -125,20 +124,20 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
                         addChildMenu(parent, menu.getChild());
                     } else {  //No Child
                         DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
-
                         treeRoot.add(parent);
                     }
                 } else {  //No Child
                     DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
                     treeRoot.add(parent);
                 }
-
             });
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }, () -> {
             treeModel.setRoot(treeRoot);
             treeModel.reload(treeRoot);
             progress.setIndeterminate(false);
-        }
-
+        });
     }
 
     private void addChildMenu(DefaultMutableTreeNode parent, List<Department> departments) {
@@ -230,13 +229,15 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
         dep.setActive(chkActive.isSelected());
         dep.setMacId(Global.macId);
         if (isValidDepartment(dep)) {
-            Department deparment = accountRepo.saveDepartment(dep);
-            if (deparment != null) {
-                selectedNode.setUserObject(deparment);
-                treeModel.reload(selectedNode);
-                setEnabledControl(false);
-                clear();
-            }
+            accountRepo.saveDepartment(dep).subscribe((t) -> {
+                if (t != null) {
+                    selectedNode.setUserObject(t);
+                    treeModel.reload(selectedNode);
+                    setEnabledControl(false);
+                    clear();
+                }
+            });
+
         }
     }
 

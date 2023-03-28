@@ -13,6 +13,7 @@ import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.StockCellEditor;
+import com.inventory.model.StockUnit;
 import com.inventory.model.WeightLossDetail;
 import com.inventory.model.WeightLossHis;
 import com.inventory.model.WeightLossHisKey;
@@ -94,9 +95,12 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
     }
 
     private void initTable() {
+        Mono<List<StockUnit>> monoUnit = inventoryRepo.getStockUnit();
+        inventoryRepo.getDefaultLocation().subscribe((t) -> {
+            tableModel.setLocation(t);
+        });
         tableModel.setVouDate(txtDate);
         tableModel.setInventoryRepo(inventoryRepo);
-        tableModel.setLocation(inventoryRepo.getDefaultLocation());
         tableModel.setLblRecord(lblRecord);
         tableModel.addNewRow();
         tableModel.setTable(tblWeight);
@@ -118,12 +122,18 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
         tblWeight.getColumnModel().getColumn(9).setPreferredWidth(10);
         tblWeight.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblWeight.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblWeight.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(inventoryRepo.getLocation()));
+        inventoryRepo.getLocation().subscribe((t) -> {
+            tblWeight.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
+        });
         tblWeight.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
-        tblWeight.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
+        monoUnit.subscribe((t) -> {
+            tblWeight.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));
+        });
         tblWeight.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
         tblWeight.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
-        tblWeight.getColumnModel().getColumn(8).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));
+        monoUnit.subscribe((t) -> {
+            tblWeight.getColumnModel().getColumn(8).setCellEditor(new StockUnitEditor(t));
+        });
         tblWeight.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
         tblWeight.getColumnModel().getColumn(4).setCellRenderer(new DecimalFormatRender());
         tblWeight.getColumnModel().getColumn(6).setCellRenderer(new DecimalFormatRender());

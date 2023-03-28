@@ -17,7 +17,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
 import javax.swing.Action;
@@ -36,9 +35,8 @@ import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 /**
  *
@@ -357,21 +355,22 @@ public final class RefAutoCompleter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                Mono<ResponseEntity<List<VDescription>>> result = webClient.get()
+                refModel.clear();
+                Flux<VDescription> result = webClient.get()
                         .uri(builder -> builder.path("/account/get-reference")
                         .queryParam("compCode", Global.compCode)
                         .queryParam("str", str)
                         .build())
-                        .retrieve().toEntityList(VDescription.class);
+                        .retrieve().bodyToFlux(VDescription.class);
                 result.subscribe((t) -> {
-                    List<VDescription> list = t.getBody();
-                    if (this.filter) {
-                        VDescription s = new VDescription("All");
-                        list.add(s);
-                    }
-                    refModel.setListAutoText(list);
+                    refModel.addObject(t);
                 }, (er) -> {
                     log.error(er.getMessage());
+                }, () -> {
+                    if (this.filter) {
+                        refModel.addObject(new VDescription("All"));
+                    }
+                    refModel.fireTableDataChanged();
                 });
             }
 

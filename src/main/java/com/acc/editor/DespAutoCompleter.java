@@ -37,6 +37,7 @@ import javax.swing.text.JTextComponent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -354,23 +355,23 @@ public final class DespAutoCompleter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                Mono<ResponseEntity<List<VDescription>>> result = webClient.get()
+                despModel.clear();
+                Flux<VDescription> result = webClient.get()
                         .uri(builder -> builder.path("/account/get-description")
                         .queryParam("compCode", Global.compCode)
                         .queryParam("str", str)
                         .build())
-                        .retrieve().toEntityList(VDescription.class);
+                        .retrieve().bodyToFlux(VDescription.class);
                 result.subscribe((t) -> {
-                    List<VDescription> list = t.getBody();
-                    if (this.filter) {
-                        VDescription s = new VDescription("All");
-                        list.add(s);
-                    }
-                    despModel.setListAutoText(list);
+                    despModel.addObject(t);
                 }, (err) -> {
                     log.error(err.getMessage());
+                }, () -> {
+                    if (this.filter) {
+                        despModel.addObject(new VDescription("All"));
+                    }
+                    despModel.fireTableDataChanged();
                 });
-
             }
 
         }

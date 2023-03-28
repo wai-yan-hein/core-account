@@ -55,8 +55,10 @@ public class DespTableModel extends AbstractTableModel {
             if (!listAutoText.isEmpty()) {
                 VDescription auto = listAutoText.get(row);
                 switch (column) {
-                    case 0: //Code
+                    case 0 -> {
+                        //Code
                         return auto == null ? null : auto.getDescription();
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -100,5 +102,14 @@ public class DespTableModel extends AbstractTableModel {
         } else {
             return listAutoText.size();
         }
+    }
+
+    public void addObject(VDescription d) {
+        listAutoText.add(d);
+    }
+
+    public void clear() {
+        listAutoText.clear();
+        fireTableDataChanged();
     }
 }

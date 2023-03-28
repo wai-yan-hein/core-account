@@ -8,11 +8,13 @@ package com.inventory.ui.common;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.GRNDetail;
 import com.inventory.model.GRNDetailKey;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
+import com.inventory.ui.entry.GRNEntry;
 import com.toedter.calendar.JDateChooser;
 import java.awt.HeadlessException;
 import java.util.ArrayList;
@@ -38,7 +40,24 @@ public class GRNTableModel extends AbstractTableModel {
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
     private JLabel lblRec;
-    private Location location;
+    private boolean editable = true;
+    private GRNEntry grn;
+
+    public GRNEntry getGrn() {
+        return grn;
+    }
+
+    public void setGrn(GRNEntry grn) {
+        this.grn = grn;
+    }
+
+    public boolean isEditable() {
+        return editable;
+    }
+
+    public void setEditable(boolean editable) {
+        this.editable = editable;
+    }
 
     public List<GRNDetailKey> getListDel() {
         return listDel;
@@ -46,14 +65,6 @@ public class GRNTableModel extends AbstractTableModel {
 
     public void setListDel(List<GRNDetailKey> listDel) {
         this.listDel = listDel;
-    }
-
-    public Location getLocation() {
-        return location;
-    }
-
-    public void setLocation(Location location) {
-        this.location = location;
     }
 
     public JLabel getLblRec() {
@@ -134,12 +145,15 @@ public class GRNTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return switch (column) {
-            case 2, 8 ->
-                false;
-            default ->
-                true;
-        };
+        if (editable) {
+            return switch (column) {
+                case 2, 8 ->
+                    false;
+                default ->
+                    true;
+            };
+        }
+        return false;
     }
 
     @Override
@@ -273,11 +287,25 @@ public class GRNTableModel extends AbstractTableModel {
                 }
 
             }
+            assignLocation(record);
             setRecord(listDetail.size() - 1);
             fireTableRowsUpdated(row, row);
             parent.requestFocusInWindow();
         } catch (HeadlessException ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
+        }
+    }
+
+    private void assignLocation(GRNDetail sd) {
+        if (sd.getLocCode() == null) {
+            LocationAutoCompleter completer = grn.getLocationAutoCompleter();
+            if (completer != null) {
+                Location l = completer.getLocation();
+                if (l != null) {
+                    sd.setLocCode(l.getKey().getLocCode());
+                    sd.setLocName(l.getLocName());
+                }
+            }
         }
     }
 
@@ -293,10 +321,6 @@ public class GRNTableModel extends AbstractTableModel {
                 key.setCompCode(Global.compCode);
                 key.setDeptId(Global.deptId);
                 pd.setKey(key);
-                if (location != null) {
-                    pd.setLocCode(location.getKey().getLocCode());
-                    pd.setLocName(location.getLocName());
-                }
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }

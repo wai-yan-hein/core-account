@@ -128,8 +128,9 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
         tblRelD.setDefaultRenderer(Float.class, new UnitFormatRender());
         tblRel.setRowHeight(Global.tblRowHeight);
         tblRelD.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
-        List<StockUnit> list = inventoryRepo.getStockUnit();
-        tblRelD.getColumnModel().getColumn(1).setCellEditor(new StockUnitEditor(list));
+        inventoryRepo.getStockUnit().subscribe((t) -> {
+            tblRelD.getColumnModel().getColumn(1).setCellEditor(new StockUnitEditor(t));
+        });
         relationDetailTableModel.addEmptyRow();
         tblRelD.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");

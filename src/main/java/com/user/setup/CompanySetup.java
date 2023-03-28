@@ -93,11 +93,15 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
     }
 
     private void searchCompany() {
-        tableModel.setListCompany(userRepo.getCompany());
+        userRepo.getCompany().subscribe((t) -> {
+            tableModel.setListCompany(t);
+        });
     }
 
     private void initCombo() {
-        currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, userRepo.getCurrency(), null, false);
+        userRepo.getCurrency().subscribe((t) -> {
+            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
+        });
     }
 
     private void setCompanyInfo(CompanyInfo cInfo) {
@@ -120,14 +124,16 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         if (isValidEntry()) {
             try {
                 String status = lblStatus.getText();
-                CompanyInfo saveCom = userRepo.saveCompany(companyInfo);
-                if (status.equals("NEW")) {
-                    tableModel.addCompany(saveCom);
-                } else {
-                    tableModel.setCompany(selectRow, saveCom);
-                }
-                updateCompany(saveCom);
-                clear();
+                userRepo.saveCompany(companyInfo).subscribe((t) -> {
+                    if (status.equals("NEW")) {
+                        tableModel.addCompany(t);
+                    } else {
+                        tableModel.setCompany(selectRow, t);
+                    }
+                    updateCompany(t);
+                    clear();
+                });
+
             } catch (HeadlessException e) {
                 log.error("Save Company :" + e.getMessage());
                 JOptionPane.showMessageDialog(Global.parentForm, "Could'nt saved.");

@@ -77,9 +77,8 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
     }
 
     public void checkMachineRegister() {
-        try {
-            Global.machineName = Util1.getComputerName();
-            MachineInfo mac = userRepo.register(Global.machineName);
+        Global.machineName = Util1.getComputerName();
+        userRepo.register(Global.machineName).subscribe((mac) -> {
             if (mac == null) {
                 JOptionPane.showMessageDialog(this, "Core User Api is not running.", "Machine", JOptionPane.ERROR_MESSAGE);
                 System.exit(1);
@@ -132,11 +131,10 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
                 }
                 Global.macId = macId;
             }
-        } catch (HeadlessException ex) {
-            log.error("getMachineInfo Error : {}", ex.getMessage());
-            JOptionPane.showMessageDialog(this, "Database not found.", "System Error", JOptionPane.ERROR_MESSAGE);
-            System.exit(1);
-        }
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, "User Api is not running.", "Connection", JOptionPane.ERROR_MESSAGE);
+            System.exit(0);
+        });
     }
 
     private void formEnable(boolean status) {
@@ -153,12 +151,13 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
         machine.setMachineIp(ipAddress);
         machine.setMachineName(machineName);
         machine.setProUpdate(true);
-        MachineInfo mac = userRepo.register(machine);
-        if (mac.getMacId() != null) {
-            Global.macId = mac.getMacId();
-        } else {
-            System.exit(0);
-        }
+        userRepo.register(machine).subscribe((t) -> {
+            if (t.getMacId() != null) {
+                Global.macId = t.getMacId();
+            } else {
+                System.exit(0);
+            }
+        });
 
     }
 

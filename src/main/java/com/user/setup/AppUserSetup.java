@@ -66,8 +66,10 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
     }
 
     private void initCombo() {
-        roleAutoCompleter = new RoleAutoCompleter(txtRole, userRepo.getAppRole(), null, false);
-        roleAutoCompleter.setAppRole(null);
+        userRepo.getAppRole().subscribe((t) -> {
+            roleAutoCompleter = new RoleAutoCompleter(txtRole, t, null, false);
+            roleAutoCompleter.setAppRole(null);
+        });
     }
 
     public void initMain() {
@@ -90,7 +92,9 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
     }
 
     private void searchUser() {
-        userTableModel.setListUser(userRepo.getAppUser());
+        userRepo.getAppUser().subscribe((t) -> {
+            userTableModel.setListUser(t);
+        });
     }
 
     private void setUser(AppUser user) {
@@ -107,13 +111,15 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
 
     private void saveUser() {
         if (isValidEntry()) {
-            appUser = userRepo.saveUser(appUser);
-            if (lblStatus.getText().equals("NEW")) {
-                userTableModel.addUser(appUser);
-            } else {
-                userTableModel.setUser(selectRow, appUser);
-            }
-            clear();
+            userRepo.saveUser(appUser).subscribe((t) -> {
+                if (lblStatus.getText().equals("NEW")) {
+                    userTableModel.addUser(t);
+                } else {
+                    userTableModel.setUser(selectRow, t);
+                }
+                clear();
+            });
+
         }
     }
 

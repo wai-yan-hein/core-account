@@ -108,8 +108,10 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
     }
 
     private void searchHead() {
-        coaHeadTableModel.setListCoaHead(accountRepo.getCOAChild("#"));
-        tblCoaHead.requestFocus();
+        accountRepo.getCOAChild("#").collectList().subscribe((t) -> {
+            coaHeadTableModel.setListCoaHead(t);
+            tblCoaHead.requestFocus();
+        });
     }
 
     private void tblCOAGroup() {
@@ -177,11 +179,14 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         ChartOfAccount c = coaHeadTableModel.getChartOfAccount(row);
         String coaCode = c.getKey().getCoaCode();
         if (coaCode != null) {
-            coaGroupTableModel.setCoaHeadCode(c.getKey().getCoaCode());
-            coaGroupTableModel.setListCOA(accountRepo.getCOAChild(coaCode));
-            coaGroupTableModel.addEmptyRow();
-            lblCoaGroup.setText(c.getCoaNameEng());
-            reqCoaGroup();
+            accountRepo.getCOAChild(coaCode).collectList().subscribe((t) -> {
+                coaGroupTableModel.setCoaHeadCode(c.getKey().getCoaCode());
+                coaGroupTableModel.setListCOA(t);
+                coaGroupTableModel.addEmptyRow();
+                lblCoaGroup.setText(c.getCoaNameEng());
+                reqCoaGroup();
+            });
+
         }
     }
 
@@ -203,11 +208,14 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         ChartOfAccount c = coaGroupTableModel.getChartOfAccount(row);
         String coaCode = c.getKey().getCoaCode();
         if (coaCode != null) {
-            cOAGroupChildTableModel.setCoaGroupCode(c.getKey().getCoaCode());
-            cOAGroupChildTableModel.setListCOA(accountRepo.getCOAChild(coaCode));
-            cOAGroupChildTableModel.addEmptyRow();
-            lblCoaChild.setText(c.getCoaNameEng());
-            reqCOAGroupChild();
+            accountRepo.getCOAChild(coaCode).collectList().subscribe((t) -> {
+                cOAGroupChildTableModel.setCoaGroupCode(c.getKey().getCoaCode());
+                cOAGroupChildTableModel.setListCOA(t);
+                cOAGroupChildTableModel.addEmptyRow();
+                lblCoaChild.setText(c.getCoaNameEng());
+                reqCOAGroupChild();
+            });
+
         }
     }
 

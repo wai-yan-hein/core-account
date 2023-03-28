@@ -16,11 +16,10 @@ import com.common.TableCellRender;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.DespAutoCompleter;
 import com.acc.editor.RefAutoCompleter;
-import com.acc.model.ChartOfAccount;
 import com.acc.model.DeleteObj;
+import com.acc.model.Department;
 import com.acc.model.ReportFilter;
 import com.acc.model.TmpOpening;
-import com.common.ProUtil;
 import static com.common.ProUtil.gson;
 import com.common.Util1;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,6 +32,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +50,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -145,8 +144,9 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
                     if (tblVoucher.getSelectedRow() >= 0) {
                         selectRow = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
                         Gl gl = voucherTableModel.getVGl(selectRow);
-                        List<Gl> list = accountRepo.getVoucher(gl.getGlVouNo());
-                        openVoucherDialog(gl.getTranSource(), list);
+                        accountRepo.getVoucher(gl.getGlVouNo()).collectList().subscribe((t) -> {
+                            openVoucherDialog(gl.getTranSource(), t);
+                        });
                     }
                 }
             }
@@ -157,8 +157,11 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     private void initCombo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
         dateAutoCompleter.setSelectionObserver(this);
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDept, accountRepo.getDepartment(), null, true, true);
-        departmentAutoCompleter.setObserver(this);
+        Mono<List<Department>> monoDep = accountRepo.getDepartment();
+        monoDep.subscribe((t) -> {
+            departmentAutoCompleter = new DepartmentAutoCompleter(txtDept, t, null, true, true);
+            departmentAutoCompleter.setObserver(this);
+        });
         despAutoCompleter = new DespAutoCompleter(txtDesp, accountApi, null, true);
         despAutoCompleter.setSelectionObserver(this);
         refAutoCompleter = new RefAutoCompleter(txtRef, accountApi, null, true);
@@ -180,6 +183,10 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         txtVouNo.addKeyListener(this);
     }
 
+    private List<String> getListDep() {
+        return departmentAutoCompleter == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
+    }
+
     private void search() {
         if (progress != null) {
             progress.setIndeterminate(true);
@@ -187,7 +194,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
             ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
             filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
             filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
-            filter.setListDepartment(departmentAutoCompleter.getListOption());
+            filter.setListDepartment(getListDep());
             filter.setDesp(txtDesp.getText());
             filter.setGlVouNo(txtVouNo.getText());
             filter.setReference(txtRef.getText());
@@ -221,29 +228,31 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     }
 
     private void calOpening() {
-        ChartOfAccount coa = accountRepo.getDefaultCash();
-        if (coa != null) {
-            String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat);
-            String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
-            String clDate = Util1.toDateStrMYSQL(stDate, "dd/MM/yyyy");
-            ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
-            filter.setOpeningDate(opDate);
-            filter.setFromDate(clDate);
-            filter.setCurCode(Global.currency);
-            filter.setListDepartment(departmentAutoCompleter.getListOption());
-            filter.setCoaCode(coa.getKey().getCoaCode());
-            Mono<TmpOpening> result = accountRepo.getOpening(filter);
-            result.subscribe((t) -> {
-                if (t.equals(new TmpOpening())) {
-                    txtOpening.setValue(0);
-                } else {
-                    txtOpening.setValue(t.getOpening());
-                }
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            }, () -> {
-            });
-        }
+        accountRepo.getDefaultCash().subscribe((coa) -> {
+            if (coa != null) {
+                String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat);
+                String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
+                String clDate = Util1.toDateStrMYSQL(stDate, "dd/MM/yyyy");
+                ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
+                filter.setOpeningDate(opDate);
+                filter.setFromDate(clDate);
+                filter.setCurCode(Global.currency);
+                filter.setListDepartment(departmentAutoCompleter.getListOption());
+                filter.setCoaCode(coa.getKey().getCoaCode());
+                Mono<TmpOpening> result = accountRepo.getOpening(filter);
+                result.subscribe((t) -> {
+                    if (t.equals(new TmpOpening())) {
+                        txtOpening.setValue(0);
+                    } else {
+                        txtOpening.setValue(t.getOpening());
+                    }
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                }, () -> {
+                });
+            }
+        });
+
     }
 
     public void openVoucherDialog(String type, List<Gl> listVGl) {
@@ -274,10 +283,13 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
                     obj.setGlVouNo(glVouNo);
                     obj.setCompCode(Global.compCode);
                     obj.setModifyBy(Global.loginUser.getUserCode());
-                    if (accountRepo.deleteVoucher(obj)) {
-                        voucherTableModel.remove(selectRow);
-                        focusOnTable();
-                    }
+                    accountRepo.deleteVoucher(obj).subscribe((t) -> {
+                        if (t) {
+                            voucherTableModel.remove(selectRow);
+                            focusOnTable();
+                        }
+                    });
+
                 }
             }
         }
@@ -308,7 +320,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
             p.put("p_comp_phone", Global.companyPhone);
             p.put("p_vou_type", gl.getTranSource());
             Util1.initJasperContext();
-            List<Gl> list = accountRepo.getVoucher(glVouNo);
+            List<Gl> list = accountRepo.getVoucher(glVouNo).collectList().block();
             ObjectMapper mapper = new ObjectMapper();
             JsonNode node = mapper.readTree(gson.toJson(list));
             JsonDataSource ds = new JsonDataSource(node, null) {

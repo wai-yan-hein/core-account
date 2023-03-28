@@ -125,7 +125,6 @@ public class TraderATableModel extends AbstractTableModel {
 
     public void addTrader(TraderA t) {
         listTrader.add(t);
-        fireTableRowsInserted(listTrader.size() - 1, listTrader.size() - 1);
     }
 
     public void deleteTrader(int row) {
@@ -139,5 +138,10 @@ public class TraderATableModel extends AbstractTableModel {
         } else {
             return listTrader.size();
         }
+    }
+
+    public void clear() {
+        listTrader.clear();
+        fireTableDataChanged();
     }
 }

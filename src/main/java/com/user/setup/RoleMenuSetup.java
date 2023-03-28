@@ -60,23 +60,22 @@ public class RoleMenuSetup extends javax.swing.JPanel implements KeyListener, Se
     }
 
     public void createMenuTree(String roleCode) {
-        Mono<ResponseEntity<List<VRoleMenu>>> result = userApi.get()
+        userApi.get()
                 .uri(builder -> builder.path("/user/get-role-menu-tree")
+                .queryParam("compCode", Global.compCode)
                 .queryParam("roleCode", roleCode)
                 .build())
-                .retrieve().toEntityList(VRoleMenu.class);
-        result.subscribe((t) -> {
-            List<VRoleMenu> listVRM = t.getBody();
-            VRoleMenu vRoleMenu = new VRoleMenu("Best-System", "System", true, listVRM);
-            MyAbstractTreeTableModel treeTableModel = new MyDataModel(vRoleMenu, userApi, this);
-            MyTreeTable treeTable = new MyTreeTable(treeTableModel);
-            scrollPane.getViewport().add(treeTable);
-
-        }, (e) -> {
-            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-        });
-        log.info("init menu end.");
-
+                .retrieve()
+                .bodyToFlux(VRoleMenu.class)
+                .collectList()
+                .subscribe((t) -> {
+                    VRoleMenu vRoleMenu = new VRoleMenu("Best-System", "System", true, t);
+                    MyAbstractTreeTableModel treeTableModel = new MyDataModel(vRoleMenu, userApi, this);
+                    MyTreeTable treeTable = new MyTreeTable(treeTableModel);
+                    scrollPane.getViewport().add(treeTable);
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+                });
     }
 
     @SuppressWarnings("unchecked")

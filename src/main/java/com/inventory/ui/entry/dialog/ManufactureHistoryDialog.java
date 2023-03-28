@@ -120,14 +120,21 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
     }
 
     private void initCompleter() {
-        locationAutoCompleter = new LocationAutoCompleter(txtLoc, inventoryRepo.getLocation(), null, true, false);
-        locationAutoCompleter.setObserver(this);
+        inventoryRepo.getLocation().subscribe((t) -> {
+            locationAutoCompleter = new LocationAutoCompleter(txtLoc, t, null, true, false);
+            locationAutoCompleter.setObserver(this);
+        });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         stockAutoCompleter.setObserver(this);
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtPT, inventoryRepo, null, true);
         vouStatusAutoCompleter.setObserver(this);
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, userRepo.getDeparment(), null, true);
-        departmentAutoCompleter.setDepartment(userRepo.findDepartment(Global.deptId));
+        userRepo.getDeparment().subscribe((t) -> {
+            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true);
+            userRepo.findDepartment(Global.deptId).subscribe((tt) -> {
+                departmentAutoCompleter.setDepartment(tt);
+            });
+        });
+
     }
 
     private void initDate() {
@@ -163,6 +170,14 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         }
     }
 
+    private String getLocCode() {
+        return locationAutoCompleter == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
+    }
+
+    private Integer getDepId() {
+        return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
+    }
+
     private void searchProcess() {
         FilterObject f = new FilterObject(Global.compCode, Global.deptId);
         f.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
@@ -172,10 +187,10 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         f.setVouNo(txtVouNo.getText());
         f.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         f.setVouStatus(vouStatusAutoCompleter.getVouStatus().getKey().getCode());
-        f.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
+        f.setLocCode(getLocCode());
         f.setFinished(chkFinish.isSelected());
         f.setDeleted(chkDel.isSelected());
-        f.setDeptId(departmentAutoCompleter.getDepartment().getDeptId());
+        f.setDeptId(getDepId());
         processHisTableModel.setListDetail(inventoryRepo.getProcess(f));
     }
 
@@ -483,6 +498,5 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
 
     @Override
     public void selected(Object source, Object selectObj) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

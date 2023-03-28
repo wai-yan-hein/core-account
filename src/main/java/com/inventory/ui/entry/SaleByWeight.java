@@ -28,6 +28,7 @@ import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.SaleHisKey;
 import com.inventory.model.SaleMan;
+import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
 import com.inventory.model.VSale;
 import com.inventory.ui.common.InventoryRepo;
@@ -102,9 +103,17 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
     private Region region;
     private String orderCode;
     private JProgressBar progress;
-    private List<Location> listLocation = new ArrayList<>();
+    private Mono<List<Location>> monoLoc;
     private double prvBal = 0;
     private double balance = 0;
+
+    public LocationAutoCompleter getLocationAutoCompleter() {
+        return locationAutoCompleter;
+    }
+
+    public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
+        this.locationAutoCompleter = locationAutoCompleter;
+    }
 
     public JProgressBar getProgress() {
         return progress;
@@ -181,14 +190,14 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         initSaleTable();
         assignDefaultValue();
         txtSaleDate.setDate(Util1.getTodayDate());
+        txtCus.requestFocus();
     }
 
     private void initSaleTable() {
         tblSale.setModel(saleTableModel);
         saleTableModel.setLblRecord(lblRec);
         saleTableModel.setParent(tblSale);
-        saleTableModel.setLocationAutoCompleter(locationAutoCompleter);
-        saleTableModel.setTraderAutoCompleter(traderAutoCompleter);
+        saleTableModel.setSale(this);
         saleTableModel.addNewRow();
         saleTableModel.setSelectionObserver(this);
         saleTableModel.setVouDate(txtSaleDate);
@@ -210,11 +219,18 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         tblSale.getColumnModel().getColumn(11).setPreferredWidth(60);//amt
         tblSale.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
-        tblSale.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(listLocation));
+        monoLoc.subscribe((t) -> {
+            tblSale.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
+        });
+        Mono<List<StockUnit>> monoUnit = inventoryRepo.getStockUnit();
         tblSale.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//weight
-        tblSale.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));//unit
+        monoUnit.subscribe((t) -> {
+            tblSale.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));//unit
+        });
         tblSale.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//qty
-        tblSale.getColumnModel().getColumn(7).setCellEditor(new StockUnitEditor(inventoryRepo.getStockUnit()));//unit
+        monoUnit.subscribe((t) -> {
+            tblSale.getColumnModel().getColumn(7).setCellEditor(new StockUnitEditor(t));//unit
+        });
         tblSale.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());//wt
         tblSale.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());//
         tblSale.setDefaultRenderer(Object.class, new DecimalFormatRender());
@@ -225,13 +241,26 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void initCombo() {
-        listLocation = inventoryRepo.getLocation();
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
-        currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, inventoryRepo.getCurrency(), null, false);
-        saleManCompleter = new SaleManAutoCompleter(txtSaleman, inventoryRepo.getSaleMan(), null, false, false);
-        locationAutoCompleter = new LocationAutoCompleter(txtLocation, listLocation, null, false, false);
-        locationAutoCompleter.setObserver(this);
+        monoLoc = inventoryRepo.getLocation();
+        inventoryRepo.getSaleMan().collectList().subscribe((t) -> {
+            saleManCompleter = new SaleManAutoCompleter(txtSaleman, t, null, false, false);
+        });
+        monoLoc.subscribe((t) -> {
+            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
+            locationAutoCompleter.setObserver(this);
+            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
+                locationAutoCompleter.setLocation(tt);
+            });
+        });
+        inventoryRepo.getCurrency().subscribe((t) -> {
+            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
+            currAutoCompleter.setObserver(this);
+            userRepo.getDefaultCurrency().subscribe((tt) -> {
+                currAutoCompleter.setCurrency(tt);
+            });
+        });
     }
 
     private void initKeyListener() {
@@ -291,10 +320,19 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void assignDefaultValue() {
-        currAutoCompleter.setCurrency(userRepo.getDefaultCurrency());
-        saleManCompleter.setSaleMan(inventoryRepo.getDefaultSaleMan());
-        locationAutoCompleter.setLocation(inventoryRepo.getDefaultLocation());
-        traderAutoCompleter.setTrader(inventoryRepo.getDefaultCustomer());
+        userRepo.getDefaultCurrency().subscribe((t) -> {
+            currAutoCompleter.setCurrency(t);
+        });
+        inventoryRepo.getDefaultSaleMan().subscribe((t) -> {
+            saleManCompleter.setSaleMan(t);
+        });
+        inventoryRepo.getDefaultLocation().subscribe((t) -> {
+            locationAutoCompleter.setLocation(t);
+        });
+        Mono<Trader> trader = inventoryRepo.findTrader(Global.hmRoleProperty.get("default.customer"), Global.deptId);
+        trader.subscribe((t) -> {
+            traderAutoCompleter.setTrader(t);
+        });
         txtDueDate.setDate(null);
         progress.setIndeterminate(false);
         txtCurrency.setEnabled(ProUtil.isMultiCur());
@@ -303,6 +341,9 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         chkVou.setSelected(true);
         chkA4.setSelected(Util1.getBoolean(ProUtil.getProperty("check.sale.A4")));
         chkA5.setSelected(Util1.getBoolean(ProUtil.getProperty("check.sale.A5")));
+        if (!lblStatus.getText().equals("NEW")) {
+            txtSaleDate.setDate(Util1.getTodayDate());
+        }
     }
 
     private void clear() {
@@ -314,15 +355,13 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         initTextBoxValue();
         assignDefaultValue();
         saleHis = new SaleHis();
-        if (!lblStatus.getText().equals("NEW")) {
-            txtSaleDate.setDate(Util1.getTodayDate());
-        }
+
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.GREEN);
         progress.setIndeterminate(false);
         txtRemark.setText(null);
         txtReference.setText(null);
-        focusTable();
+        txtCus.requestFocus();
     }
 
     public void saveSale(boolean print) {
@@ -331,7 +370,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                 if (Util1.getBoolean(ProUtil.getProperty("trader.balance"))) {
                     String date = Util1.toDateStr(txtSaleDate.getDate(), "yyyy-MM-dd");
                     String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
-                    balance = accountRepo.getTraderBalance(date, traderCode, Global.compCode);
+                    balance = accountRepo.getTraderBalance(date, traderCode, Global.compCode).block();
                     if (balance != 0) {
                         prvBal = balance - Util1.getDouble(txtVouBalance.getValue());
                     }
@@ -536,10 +575,17 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             progress.setIndeterminate(true);
             saleHis = sh;
             Integer deptId = sh.getKey().getDeptId();
-            locationAutoCompleter.setLocation(inventoryRepo.findLocation(saleHis.getLocCode(), deptId));
-            traderAutoCompleter.setTrader(inventoryRepo.findTrader(saleHis.getTraderCode(), deptId));
+            inventoryRepo.findLocation(saleHis.getLocCode(), deptId).subscribe((t) -> {
+                locationAutoCompleter.setLocation(t);
+            });
+            Mono<Trader> trader = inventoryRepo.findTrader(saleHis.getTraderCode(), deptId);
+            trader.subscribe((t) -> {
+                traderAutoCompleter.setTrader(t);
+            });
             currAutoCompleter.setCurrency(inventoryRepo.findCurrency(saleHis.getCurCode()));
-            saleManCompleter.setSaleMan(inventoryRepo.findSaleMan(saleHis.getSaleManCode(), deptId));
+            inventoryRepo.findSaleMan(saleHis.getSaleManCode(), deptId).subscribe((t) -> {
+                saleManCompleter.setSaleMan(t);
+            });
             String vouNo = sh.getKey().getVouNo();
             Mono<ResponseEntity<List<SaleHisDetail>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/sale/get-sale-detail")
@@ -704,7 +750,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
 
     private void focusTable() {
         int rc = tblSale.getRowCount();
-        if (rc > 1) {
+        if (rc >= 1) {
             tblSale.setRowSelectionInterval(rc - 1, rc - 1);
             tblSale.setColumnSelectionInterval(0, 0);
             tblSale.requestFocus();
@@ -1394,7 +1440,6 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         observer.selected("control", this);
-        focusTable();
     }//GEN-LAST:event_formComponentShown
 
     private void txtCusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCusActionPerformed
@@ -1516,14 +1561,6 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
     private void txtSaleDateFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSaleDateFocusGained
         // TODO add your handling code here:
     }//GEN-LAST:event_txtSaleDateFocusGained
-    private void tabToTable(KeyEvent e) {
-        if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            tblSale.requestFocus();
-            if (tblSale.getRowCount() > 1) {
-                tblSale.setRowSelectionInterval(0, 0);
-            }
-        }
-    }
 
     @Override
     public void keyEvent(KeyEvent e) {
@@ -1587,39 +1624,31 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                 if (e.getKeyCode() == KeyEvent.VK_LEFT) {
                     txtRemark.requestFocus();
                 }
-                tabToTable(e);
             }
             case "txtCus" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtLocation.requestFocus();
                 }
-                tabToTable(e);
             }
             case "txtLocation" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtSaleman.requestFocus();
                 }
-                tabToTable(e);
             }
             case "txtSaleman" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    tblSale.requestFocus();
+                    focusTable();
                 }
-                tabToTable(e);
             }
             case "txtVouStatus" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtCus.requestFocus();
                 }
-                tabToTable(e);
             }
             case "txtRemark" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    tblSale.setRowSelectionInterval(0, 0);
-                    tblSale.setColumnSelectionInterval(0, 0);
-                    tblSale.requestFocus();
+                    focusTable();
                 }
-                tabToTable(e);
             }
             case "txtSaleDate" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -1629,7 +1658,6 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                     }
                     txtCus.requestFocus();
                 }
-                tabToTable(e);
             }
             case "txtDueDate" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -1639,14 +1667,11 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                     }
                     txtReference.requestFocus();
                 }
-                tabToTable(e);
             }
             case "txtCurrency" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtRemark.requestFocus();
                 }
-
-                tabToTable(e);
             }
             case "txtVouTaxP" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -1654,14 +1679,14 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                         txtTax.setValue(0);
                     }
                     calculateTotalAmount(false);
-                    tblSale.requestFocus();
+                    focusTable();
                 }
             }
             case "txtTax" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtVouTaxP.setValue(0);
                     calculateTotalAmount(false);
-                    tblSale.requestFocus();
+                    focusTable();
                 }
             }
             case "txtVouDiscount" -> {
@@ -1670,7 +1695,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                         txtVouDiscP.setValue(0);
                     }
                     calculateTotalAmount(false);
-                    tblSale.requestFocus();
+                    focusTable();
                 }
             }
             case "txtVouDiscP" -> {
@@ -1679,13 +1704,13 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                         txtVouDiscount.setValue(0);
                     }
                     calculateTotalAmount(false);
-                    tblSale.requestFocus();
+                    focusTable();
                 }
             }
             case "txtVouPaid" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     calculateTotalAmount(true);
-                    tblSale.requestFocus();
+                    focusTable();
                 }
             }
         }
