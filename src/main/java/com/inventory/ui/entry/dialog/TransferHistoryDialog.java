@@ -24,7 +24,6 @@ import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.TransferVouSearchTableModel;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.time.Duration;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -32,7 +31,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -57,7 +55,6 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
-    private boolean status = false;
 
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
@@ -106,13 +103,9 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
     }
 
     public void initMain() {
-        if (!status) {
-            initTableVoucher();
-            setTodayDate();
-            initCombo();
-            status = true;
-        }
-        search();
+        initTableVoucher();
+        setTodayDate();
+        initCombo();
     }
 
     private void initCombo() {
@@ -169,7 +162,7 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
 
-    private void search() {
+    public void search() {
         progess.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));

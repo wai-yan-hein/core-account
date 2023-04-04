@@ -60,7 +60,6 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -94,6 +93,13 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         initComponents();
         initFocusListener();
         actionMapping();
+    }
+
+    private void batchLock(boolean lock) {
+        tblOpening.setEnabled(lock);
+        btnGenerateZero.setEnabled(lock);
+        observer.selected("save", lock);
+        observer.selected("delete", lock);
     }
 
     public JProgressBar getProgress() {
@@ -149,6 +155,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     }
 
     public void initMain() {
+        batchLock(!Global.batchLock);
         txtDate.setDate(Util1.toDate(Global.startDate, "dd/MM/yyyy"));
         initComboBox();
         initTable();
@@ -243,13 +250,21 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         return tblOpening.getModel().isCellEditable(row, column);
     }
 
+    private String getCurCode() {
+        return currencyAutoCompleter == null ? Global.currency : currencyAutoCompleter.getCurrency().getCurCode();
+    }
+
+    private String getDepCode() {
+        return departmenttAutoCompleter == null ? "-" : departmenttAutoCompleter.getDepartment().getKey().getDeptCode();
+    }
+
     // search openig balance with filtered data for table
     private void searchOpening() {
         progress.setIndeterminate(true);
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
         filter.setOpeningDate(Util1.toDateStr(txtDate.getDate(), "yyyy-MM-dd"));
-        filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
-        filter.setDeptCode(departmenttAutoCompleter.getDepartment().getKey().getDeptCode());
+        filter.setCurCode(getCurCode());
+        filter.setDeptCode(getDepCode());
         ChartOfAccount coa = coaAutoCompleter.getCOA();
         filter.setCoaLv1(Util1.getInteger(coa.getCoaLevel()) == 1 ? coa.getKey().getCoaCode() : "-");
         filter.setCoaLv2(Util1.getInteger(coa.getCoaLevel()) == 2 ? coa.getKey().getCoaCode() : "-");
@@ -262,23 +277,23 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
             filter.setTraderType("-");
         }
         openingTableModel.clear();
-        Flux<OpeningBalance> result = accountApi.post()
+        accountApi.post()
                 .uri("/account/get-opening")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToFlux(OpeningBalance.class);
-        result.subscribe((t) -> {
-            openingTableModel.addOpening(t);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        }, () -> {
-            openingTableModel.fireTableDataChanged();
-            btnGenerateZero.setEnabled(openingTableModel.getListOpening().isEmpty());
-            openingTableModel.addNewRow();
-            calTotalAmt();
-            focusOnTable();
-            progress.setIndeterminate(false);
-        });
+                .bodyToFlux(OpeningBalance.class)
+                .collectList()
+                .subscribe((t) -> {
+                    openingTableModel.setListOpening(t);
+                    openingTableModel.addNewRow();
+                    btnGenerateZero.setEnabled(openingTableModel.getListOpening().isEmpty());
+                    calTotalAmt();
+                    focusOnTable();
+                    progress.setIndeterminate(false);
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                });
+
     }
 
     private void focusOnTable() {
@@ -316,8 +331,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         Mono<ReturnObject> result = accountApi
                 .post()
                 .uri("/report/get-report")
-                .body(Mono.just(filter), FilterObject.class
-                )
+                .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class
                 );

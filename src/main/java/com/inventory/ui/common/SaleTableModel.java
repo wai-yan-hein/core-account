@@ -318,8 +318,10 @@ public class SaleTableModel extends AbstractTableModel {
                     if (Util1.getFloat(sd.getPrice()) == 0) {
                         if (ProUtil.isSaleLastPrice()) {
                             if (sd.getStockCode() != null && sd.getUnitCode() != null) {
-                                sd.setPrice(inventoryRepo.getSaleRecentPrice(sd.getStockCode(),
-                                        Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), sd.getUnitCode()));
+                                inventoryRepo.getSaleRecentPrice(sd.getStockCode(),
+                                        Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), sd.getUnitCode()).subscribe((t) -> {
+                                    sd.setPrice(t.getAmount());
+                                });
                             }
                         }
                     }

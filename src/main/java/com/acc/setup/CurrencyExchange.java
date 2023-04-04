@@ -65,7 +65,7 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
     }
 
     public void initMain() {
-        dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
+        dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
         initTable();
     }
@@ -92,17 +92,15 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
         filter.setFromDate(fromDate);
         filter.setToDate(toDate);
-        Flux<CurExchange> result = accountRepo.searchExchange(filter);
-        result.subscribe((t) -> {
-            exchangeTableModel.addEX(t);
-        }, (e) -> {
-        }, () -> {
-            List<CurExchange> list = exchangeTableModel.getListEx();
-            double amt = list.stream().mapToDouble(CurExchange::getExRate).sum();
-            txtAvg.setValue(amt / list.size());
-            txtRecord.setText("" + list.size());
+        accountRepo.searchExchange(filter).subscribe((t) -> {
+            exchangeTableModel.setListEx(t);
+            double amt = t.stream()
+                    .filter((ex) -> ex.getExRate() != null)
+                    .mapToDouble(CurExchange::getExRate)
+                    .sum();
+            txtAvg.setValue(amt / t.size());
+            txtRecord.setText("" + t.size());
         });
-
     }
 
     private void selectExchange() {

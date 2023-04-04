@@ -20,7 +20,6 @@ import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.StockTypeAutoCompleter;
 import com.inventory.model.Pattern;
 import com.inventory.model.Stock;
-import com.inventory.model.StockUnit;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.PatternTableModel;
 import com.inventory.ui.common.StockCompleterTableModel;
@@ -241,13 +240,14 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
             Stock s = stockTableModel.getStock(row);
             String stockCode = s.getKey().getStockCode();
             Integer deptId = s.getKey().getDeptId();
-            List<Pattern> list = inventoryRepo.getPattern(stockCode, deptId);
             lblStockName.setText(s.getStockName());
             chkEx.setSelected(s.isExplode());
-            lblRec.setText("Records : " + list.size());
-            patternTableModel.setListPattern(list);
-            patternTableModel.setStockCode(stockCode);
-            focusOnPD();
+            inventoryRepo.getPattern(stockCode, deptId).subscribe((t) -> {
+                lblRec.setText("Records : " + t.size());
+                patternTableModel.setListPattern(t);
+                patternTableModel.setStockCode(stockCode);
+                focusOnPD();
+            });
 
         }
     }

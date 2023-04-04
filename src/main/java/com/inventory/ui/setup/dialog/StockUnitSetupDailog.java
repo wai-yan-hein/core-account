@@ -118,13 +118,15 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
 
     private void save() {
         if (isValidEntry()) {
-            stockUnit = inventoryRepo.saveStockUnit(stockUnit);
-            if (lblStatus.getText().equals("EDIT")) {
-                listStockUnit.set(selectRow, stockUnit);
-            } else {
-                listStockUnit.add(stockUnit);
-            }
-            clear();
+            inventoryRepo.saveStockUnit(stockUnit).subscribe((t) -> {
+                if (lblStatus.getText().equals("EDIT")) {
+                    listStockUnit.set(selectRow, t);
+                } else {
+                    listStockUnit.add(t);
+                }
+                clear();
+            });
+
         }
     }
 

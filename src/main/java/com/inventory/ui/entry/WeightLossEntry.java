@@ -489,7 +489,9 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
         if (source != null) {
             if (source.equals("WL-HISTORY")) {
                 if (selectObj instanceof WeightLossHisKey key) {
-                    setVoucher(inventoryRepo.findWeightLoss(key.getVouNo(), key.getDeptId()));
+                    inventoryRepo.findWeightLoss(key.getVouNo(), key.getDeptId()).subscribe((t) -> {
+                        setVoucher(t);
+                    });
                 }
             }
         }

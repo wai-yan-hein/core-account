@@ -19,7 +19,7 @@ public class CustomerTabelModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(CustomerTabelModel.class);
     private List<Trader> listCustomer = new ArrayList();
-    private String[] columnNames = {"Code", "Name", "Active"};
+    private String[] columnNames = {"No.", "Code", "Name", "Active"};
 
     @Override
     public String getColumnName(int column) {
@@ -34,10 +34,10 @@ public class CustomerTabelModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 0 -> String.class;
-            case 1 -> String.class;
-            case 2 -> Boolean.class;
-            default -> Object.class;
+            case 3 ->
+                Boolean.class;
+            default ->
+                String.class;
         };
     }
 
@@ -48,10 +48,16 @@ public class CustomerTabelModel extends AbstractTableModel {
             Trader customer = listCustomer.get(row);
 
             return switch (column) {
-                case 0 -> customer.getUserCode();
-                case 1 -> customer.getTraderName();
-                case 2 -> customer.isActive();
-                default -> null;
+                case 0 ->
+                    String.valueOf(row + 1 + ". ");
+                case 1 ->
+                    customer.getUserCode();
+                case 2 ->
+                    customer.getTraderName();
+                case 3 ->
+                    customer.isActive();
+                default ->
+                    null;
             }; //Id
             //Name
         } catch (Exception ex) {

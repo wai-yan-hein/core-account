@@ -16,7 +16,6 @@ import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.editor.UnitAutoCompleter;
 import com.inventory.editor.VouStatusAutoCompleter;
-import com.inventory.model.Location;
 import com.inventory.model.Pattern;
 import com.inventory.model.ProcessHis;
 import com.inventory.model.ProcessHisDetail;
@@ -36,7 +35,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Date;
-import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
@@ -255,8 +253,12 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         txtPrice.setValue(ph.getPrice());
         txtAmt.setValue(ph.getQty() * ph.getPrice());
         chkFinish.setSelected(ph.isFinished());
-        unitAutoCompleter.setStockUnit(inventoryRepo.findUnit(ph.getUnit(), deptId));
-        vouStatusAutoCompleter.setVoucher(inventoryRepo.findVouStatus(p.getPtCode(), deptId));
+        inventoryRepo.findUnit(ph.getUnit(), deptId).subscribe((t) -> {
+            unitAutoCompleter.setStockUnit(t);
+        });
+        inventoryRepo.findVouStatus(p.getPtCode(), deptId).subscribe((t) -> {
+            vouStatusAutoCompleter.setVoucher(t);
+        });
         inventoryRepo.findStock(ph.getStockCode()).subscribe((t) -> {
             stockAutoCompleter.setStock(t);
         });
@@ -272,10 +274,13 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             lblStatus.setText("EDIT");
             lblStatus.setForeground(Color.blue);
         }
-        processHisDetailTableModel.setListDetail(inventoryRepo.getProcessDetail(ph.getKey().getVouNo(), ph.getKey().getDeptId()));
-        processHisDetailTableModel.addNewRow();
-        lblRecord.setText("Records : " + String.valueOf(processHisDetailTableModel.getListDetail().size() - 1));
-        focusOnTable();
+        inventoryRepo.getProcessDetail(ph.getKey().getVouNo(), ph.getKey().getDeptId()).subscribe((t) -> {
+            processHisDetailTableModel.setListDetail(t);
+            processHisDetailTableModel.addNewRow();
+            lblRecord.setText("Records : " + String.valueOf(processHisDetailTableModel.getListDetail().size() - 1));
+            focusOnTable();
+        });
+
     }
 
     private void enableProcess(boolean status) {
@@ -292,14 +297,17 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
     }
 
     private void vouStatusSetup() {
-        VouStatusSetupDialog vsDialog = new VouStatusSetupDialog();
-        vsDialog.setIconImage(icon);
-        vsDialog.setInventoryRepo(inventoryRepo);
-        vsDialog.setListVou(inventoryRepo.getVoucherStatus());
-        vsDialog.initMain();
-        vsDialog.setSize(Global.width / 2, Global.height / 2);
-        vsDialog.setLocationRelativeTo(null);
-        vsDialog.setVisible(true);
+        inventoryRepo.getVoucherStatus().subscribe((t) -> {
+            VouStatusSetupDialog vsDialog = new VouStatusSetupDialog();
+            vsDialog.setIconImage(icon);
+            vsDialog.setInventoryRepo(inventoryRepo);
+            vsDialog.setListVou(t);
+            vsDialog.initMain();
+            vsDialog.setSize(Global.width / 2, Global.height / 2);
+            vsDialog.setLocationRelativeTo(null);
+            vsDialog.setVisible(true);
+        });
+
     }
 
     private void saveProcess() {
@@ -310,8 +318,14 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
                         String.format("Production end date is %s", Util1.toDateStr(ph.getEndDate(), "dd/MM/yyyy")),
                         "Warning", JOptionPane.WARNING_MESSAGE);
                 if (s == JOptionPane.YES_OPTION) {
-                    ph = inventoryRepo.saveProcess(ph);
-                    clear();
+                    progress.setIndeterminate(true);
+                    inventoryRepo.saveProcess(ph).subscribe((t) -> {
+                        progress.setIndeterminate(false);
+                        clear();
+                    }, (e) -> {
+                        JOptionPane.showMessageDialog(this, e.getMessage());
+                        progress.setIndeterminate(false);
+                    });
                 } else {
                     txtEndDate.requestFocusInWindow();
                 }
@@ -438,56 +452,58 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
 
     private void generatePattern(String code, Integer deptId) {
         Date vouDate = txtStartDate.getDate();
-        List<Pattern> patterns = inventoryRepo.getPattern(code, deptId);
-        if (!patterns.isEmpty()) {
-            String input = JOptionPane.showInputDialog("Enter Qty.");
-            float qty = Util1.getFloat(input);
-            if (qty > 0) {
-                txtQty.setValue(qty);
-                for (Pattern p : patterns) {
-                    String stockCode = p.getKey().getStockCode();
-                    ProcessHisDetail his = new ProcessHisDetail();
-                    ProcessHisDetailKey key = new ProcessHisDetailKey();
-                    key.setCompCode(p.getKey().getCompCode());
-                    key.setDeptId(p.getKey().getDeptId());
-                    key.setLocCode(p.getLocCode());
-                    key.setStockCode(stockCode);
-                    his.setKey(key);
-                    his.setStockName(p.getStockName());
-                    his.setStockUsrCode(p.getUserCode());
-                    his.setLocName(p.getLocName());
-                    his.setQty(p.getQty() * qty);
-                    his.setUnit(p.getUnitCode());
-                    his.setVouDate(vouDate);
-                    String type = p.getPriceTypeCode();
-                    String date = Util1.toDateStr(vouDate, "yyyy-MM-dd");
-                    if (type != null) {
-                        switch (type) {
-                            case "PUR-R" -> {
-                                his.setPrice(inventoryRepo.getPurRecentPrice(stockCode, date, his.getUnit()));
-                            }
-                            case "PUR-A" -> {
-                                his.setPrice(inventoryRepo.getPurAvgPrice(stockCode, date, his.getUnit()));
-                            }
-                            case "PRO-R" -> {
-                                his.setPrice(inventoryRepo.getProductionRecentPrice(stockCode, date, his.getUnit()));
-                            }
-                            case "WL-R" -> {
-                                his.setPrice(inventoryRepo.getWeightLossRecentPrice(stockCode, date, his.getUnit()));
+        inventoryRepo.getPattern(code, deptId).subscribe((t) -> {
+            if (!t.isEmpty()) {
+                String input = JOptionPane.showInputDialog("Enter Qty.");
+                float qty = Util1.getFloat(input);
+                if (qty > 0) {
+                    txtQty.setValue(qty);
+                    for (Pattern p : t) {
+                        String stockCode = p.getKey().getStockCode();
+                        ProcessHisDetail his = new ProcessHisDetail();
+                        ProcessHisDetailKey key = new ProcessHisDetailKey();
+                        key.setCompCode(p.getKey().getCompCode());
+                        key.setDeptId(p.getKey().getDeptId());
+                        key.setLocCode(p.getLocCode());
+                        key.setStockCode(stockCode);
+                        his.setKey(key);
+                        his.setStockName(p.getStockName());
+                        his.setStockUsrCode(p.getUserCode());
+                        his.setLocName(p.getLocName());
+                        his.setQty(p.getQty() * qty);
+                        his.setUnit(p.getUnitCode());
+                        his.setVouDate(vouDate);
+                        String type = p.getPriceTypeCode();
+                        String date = Util1.toDateStr(vouDate, "yyyy-MM-dd");
+                        if (type != null) {
+                            switch (type) {
+                                case "PUR-R" -> {
+                                    his.setPrice(inventoryRepo.getPurRecentPrice(stockCode, date, his.getUnit()).block().getAmount());
+                                }
+                                case "PUR-A" -> {
+                                    his.setPrice(inventoryRepo.getPurAvgPrice(stockCode, date, his.getUnit()).block().getAmount());
+                                }
+                                case "PRO-R" -> {
+                                    his.setPrice(inventoryRepo.getProductionRecentPrice(stockCode, date, his.getUnit()).block().getAmount());
+                                }
+                                case "WL-R" -> {
+                                    his.setPrice(inventoryRepo.getWeightLossRecentPrice(stockCode, date, his.getUnit()).block().getAmount());
+                                }
                             }
                         }
+                        processHisDetailTableModel.addObject(his);
                     }
-                    processHisDetailTableModel.addObject(his);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Invalid Qty");
                 }
+                processHisDetailTableModel.addNewRow();
+                processHisDetailTableModel.calPrice();
+                focusOnTable();
             } else {
-                JOptionPane.showMessageDialog(this, "Invalid Qty");
+                JOptionPane.showMessageDialog(this, "No pattern.");
             }
-            processHisDetailTableModel.addNewRow();
-            processHisDetailTableModel.calPrice();
-            focusOnTable();
-        } else {
-            JOptionPane.showMessageDialog(this, "No pattern.");
-        }
+        });
+
     }
 
     /**
@@ -940,12 +956,16 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         if (str.equals("STOCK")) {
             Stock s = stockAutoCompleter.getStock();
             if (s != null) {
-                unitAutoCompleter.setStockUnit(inventoryRepo.findUnit(s.getPurUnitCode(), s.getKey().getDeptId()));
+                inventoryRepo.findUnit(s.getPurUnitCode(), s.getKey().getDeptId()).subscribe((t) -> {
+                    unitAutoCompleter.setStockUnit(t);
+                });
                 getPattern();
             }
         } else if (str.equals("Selected")) {
             if (selectObj instanceof ProcessHisKey key) {
-                setProcess(inventoryRepo.findProcess(key));
+                inventoryRepo.findProcess(key).subscribe((t) -> {
+                    setProcess(t);
+                });
             }
         }
     }

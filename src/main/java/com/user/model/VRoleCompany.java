@@ -14,6 +14,7 @@ import lombok.Data;
  */
 @Data
 public class VRoleCompany implements java.io.Serializable {
+
     private String compCode;
     private String roleCode;
     private String compName;
@@ -22,4 +23,6 @@ public class VRoleCompany implements java.io.Serializable {
     private Date startDate;
     private Date endDate;
     private String currency;
+    private boolean batchLock;
+    private Date yearEndDate;
 }

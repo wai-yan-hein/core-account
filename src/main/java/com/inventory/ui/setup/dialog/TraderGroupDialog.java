@@ -60,7 +60,6 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
         this.inventoryRepo = inventoryRepo;
     }
 
- 
     /**
      * Creates new form ItemTypeSetupDialog
      */
@@ -121,13 +120,15 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
 
     private void save() {
         if (isValidEntry()) {
-            group = inventoryRepo.saveTraderGroup(group);
-            if (lblStatus.getText().equals("EDIT")) {
-                listGroup.set(selectRow, group);
-            } else {
-                listGroup.add(group);
-            }
-            clear();
+            inventoryRepo.saveTraderGroup(group).subscribe((t) -> {
+                if (lblStatus.getText().equals("EDIT")) {
+                    listGroup.set(selectRow, t);
+                } else {
+                    listGroup.add(t);
+                }
+                clear();
+            });
+
         }
     }
 

@@ -21,7 +21,7 @@ public class StockTableModel extends AbstractTableModel {
 
     static Logger log = LoggerFactory.getLogger(StockTableModel.class.getName());
     private List<Stock> listStock = new ArrayList();
-    private String[] columnNames = {"Code", "Description", "Active", "Calulate Stock"};
+    private String[] columnNames = {"No", "Code", "Description", "Active", "Calulate Stock"};
     private InventoryRepo inventoryRepo;
 
     public StockTableModel() {
@@ -47,7 +47,7 @@ public class StockTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 2,3 -> {
+            case 3, 4 -> {
                 return true;
             }
 
@@ -58,7 +58,7 @@ public class StockTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         switch (column) {
-            case 2,3 -> {
+            case 3, 4 -> {
                 return Boolean.class;
             }
             default -> {
@@ -83,12 +83,14 @@ public class StockTableModel extends AbstractTableModel {
 
             return switch (column) {
                 case 0 ->
-                    med.getUserCode();
+                    String.valueOf(row + 1 + ". ");
                 case 1 ->
-                    med.getStockName();
+                    med.getUserCode();
                 case 2 ->
-                    med.isActive();
+                    med.getStockName();
                 case 3 ->
+                    med.isActive();
+                case 4 ->
                     med.isCalculate();
                 default ->
                     null;

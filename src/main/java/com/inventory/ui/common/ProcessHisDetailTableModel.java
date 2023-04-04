@@ -151,7 +151,7 @@ public class ProcessHisDetailTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         switch (column) {
-            case 4,6,7 -> {
+            case 4, 6, 7 -> {
                 return Float.class;
             }
         }
@@ -199,7 +199,7 @@ public class ProcessHisDetailTableModel extends AbstractTableModel {
                 switch (column) {
                     case 0 ->
                         p.setVouDate(Util1.formatDate(value));
-                    case 1,2 -> {
+                    case 1, 2 -> {
                         if (value instanceof Stock s) {
                             p.setStockUsrCode(s.getUserCode());
                             p.setStockName(s.getStockName());
@@ -237,14 +237,20 @@ public class ProcessHisDetailTableModel extends AbstractTableModel {
                     if (Util1.getFloat(p.getPrice()) == 0) {
                         if (p.getKey().getStockCode() != null && p.getUnit() != null) {
                             if (rdoRecent.isSelected()) {
-                                p.setPrice(inventoryRepo.getPurRecentPrice(p.getKey().getStockCode(),
-                                        Util1.toDateStr(p.getVouDate(), "yyyy-MM-dd"), p.getUnit()));
+                                inventoryRepo.getPurRecentPrice(p.getKey().getStockCode(),
+                                        Util1.toDateStr(p.getVouDate(), "yyyy-MM-dd"), p.getUnit()).subscribe((t) -> {
+                                    p.setPrice(t.getAmount());
+                                });
                             } else if (rdoAvg.isSelected()) {
-                                p.setPrice(inventoryRepo.getPurAvgPrice(p.getKey().getStockCode(),
-                                        Util1.toDateStr(p.getVouDate(), "yyyy-MM-dd"), p.getUnit()));
+                                inventoryRepo.getPurAvgPrice(p.getKey().getStockCode(),
+                                        Util1.toDateStr(p.getVouDate(), "yyyy-MM-dd"), p.getUnit()).subscribe((t) -> {
+                                    p.setPrice(t.getAmount());
+                                });
                             } else if (rdoProRecent.isSelected()) {
-                                p.setPrice(inventoryRepo.getProductionRecentPrice(p.getKey().getStockCode(),
-                                        Util1.toDateStr(p.getVouDate(), "yyyy-MM-dd"), p.getUnit()));
+                                inventoryRepo.getProductionRecentPrice(p.getKey().getStockCode(),
+                                        Util1.toDateStr(p.getVouDate(), "yyyy-MM-dd"), p.getUnit()).subscribe((t) -> {
+                                    p.setPrice(t.getAmount());
+                                });
                             }
                         }
                     }

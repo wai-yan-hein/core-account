@@ -23,7 +23,6 @@ import com.inventory.editor.StockCellEditor;
 import com.inventory.model.Location;
 import com.inventory.model.TransferHis;
 import com.inventory.model.TransferHisDetail;
-import com.inventory.model.StockUnit;
 import com.inventory.model.TransferHisKey;
 import com.inventory.model.VTransfer;
 import com.inventory.ui.common.InventoryRepo;
@@ -38,7 +37,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyListener;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -58,7 +56,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
 
     private static final Logger log = LoggerFactory.getLogger(Transfer.class);
     private final TransferTableModel tranTableModel = new TransferTableModel();
-    private final TransferHistoryDialog historyDialog = new TransferHistoryDialog(Global.parentForm);
+    private TransferHistoryDialog dialog;
     @Autowired
     private WebClient inventoryApi;
     @Autowired
@@ -70,7 +68,6 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private TransferHis io = new TransferHis();
     private SelectionObserver observer;
     private JProgressBar progress;
-    private List<StockUnit> listStockUnit = new ArrayList<>();
 
     public SelectionObserver getObserver() {
         return observer;
@@ -222,16 +219,15 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                 progress.setIndeterminate(true);
                 io.setListTD(tranTableModel.getListTransfer());
                 io.setDelList(tranTableModel.getDeleteList());
-                Mono<TransferHis> result = inventoryApi.post()
+                inventoryApi.post()
                         .uri("/transfer/save-transfer")
                         .body(Mono.just(io), TransferHis.class)
                         .retrieve()
-                        .bodyToMono(TransferHis.class);
-                TransferHis t = result.block();
-                if (t != null) {
-                    clear();
-                    focusOnTable();
-                }
+                        .bodyToMono(TransferHis.class)
+                        .subscribe((t) -> {
+                            clear();
+                            focusOnTable();
+                        });
             }
         } catch (HeadlessException ex) {
             log.error("saveVoucher :" + ex.getMessage());
@@ -608,19 +604,19 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
 
     @Override
     public void history() {
-        try {
-            historyDialog.setInventoryRepo(inventoryRepo);
-            historyDialog.setUserRepo(userRepo);
-            historyDialog.setIconImage(new ImageIcon(getClass().getResource("/images/search.png")).getImage());
-            historyDialog.setWebClient(inventoryApi);
-            historyDialog.setObserver(this);
-            historyDialog.initMain();
-            historyDialog.setSize(Global.width - 100, Global.height - 100);
-            historyDialog.setLocationRelativeTo(null);
-            historyDialog.setVisible(true);
-        } catch (Exception e) {
-            log.info(e.getLocalizedMessage());
+        if (dialog == null) {
+            dialog = new TransferHistoryDialog(Global.parentForm);
+            dialog.setInventoryRepo(inventoryRepo);
+            dialog.setUserRepo(userRepo);
+            dialog.setIconImage(new ImageIcon(getClass().getResource("/images/search.png")).getImage());
+            dialog.setWebClient(inventoryApi);
+            dialog.setObserver(this);
+            dialog.initMain();
+            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setLocationRelativeTo(null);
         }
+        dialog.search();
+        dialog.setVisible(true);
     }
 
     @Override
@@ -639,7 +635,9 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     public void selected(Object source, Object selectObj) {
         if (source.toString().equals("TR-HISTORY")) {
             if (selectObj instanceof VTransfer v) {
-                setVoucher(inventoryRepo.findTransfer(v.getVouNo(), v.getDeptId()));
+                inventoryRepo.findTransfer(v.getVouNo(), v.getDeptId()).subscribe((t) -> {
+                    setVoucher(t);
+                });
             }
         }
 

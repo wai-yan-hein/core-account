@@ -79,7 +79,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
     private List<RetOutHisDetail> listDetail = new ArrayList();
     private final ReturnOutTableModel roTableModel = new ReturnOutTableModel();
-    private final RetOutHistoryDialog vouSearchDialog = new RetOutHistoryDialog(Global.parentForm);
+    private RetOutHistoryDialog dialog;
     @Autowired
     private WebClient inventoryApi;
     @Autowired
@@ -467,15 +467,20 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     }
 
     public void historyRetIn() {
-        vouSearchDialog.setUserRepo(userRepo);
-        vouSearchDialog.setInventoryApi(inventoryApi);
-        vouSearchDialog.setInventoryRepo(inventoryRepo);
-        vouSearchDialog.setIconImage(searchIcon);
-        vouSearchDialog.setObserver(this);
-        vouSearchDialog.initMain();
-        vouSearchDialog.setSize(Global.width - 100, Global.height - 100);
-        vouSearchDialog.setLocationRelativeTo(null);
-        vouSearchDialog.setVisible(true);
+        if (dialog == null) {
+            dialog = new RetOutHistoryDialog(Global.parentForm);
+            dialog.setUserRepo(userRepo);
+            dialog.setInventoryApi(inventoryApi);
+            dialog.setInventoryRepo(inventoryRepo);
+            dialog.setIconImage(searchIcon);
+            dialog.setObserver(this);
+            dialog.initMain();
+            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setLocationRelativeTo(null);
+        }
+        dialog.search();
+        dialog.setVisible(true);
+
     }
 
     public void setVoucher(RetOutHis ro) {
@@ -490,7 +495,9 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             trader.subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);
             });
-            currAutoCompleter.setCurrency(inventoryRepo.findCurrency(ri.getCurCode()));
+            inventoryRepo.findCurrency(ri.getCurCode()).subscribe((t) -> {
+                currAutoCompleter.setCurrency(t);
+            });
             String vouNo = ri.getKey().getVouNo();
             Mono<ResponseEntity<List<RetOutHisDetail>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/retout/get-retout-detail")
@@ -1171,8 +1178,9 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             }
             case "RO-HISTORY" -> {
                 if (selectObj instanceof VReturnOut v) {
-                    RetOutHis s = inventoryRepo.findReturnOut(v.getVouNo(), v.getDeptId());
-                    setVoucher(s);
+                    inventoryRepo.findReturnOut(v.getVouNo(), v.getDeptId()).subscribe((t) -> {
+                        setVoucher(t);
+                    });
                 }
 
             }

@@ -7,6 +7,7 @@ package com.inventory.ui.common;
 
 import com.common.Global;
 import com.common.Util1;
+import com.inventory.model.General;
 import com.inventory.model.Location;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
@@ -17,6 +18,7 @@ import java.awt.HeadlessException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -147,7 +149,7 @@ public class WeightLossTableModel extends AbstractTableModel {
             if (!Objects.isNull(value)) {
                 WeightLossDetail p = listDetail.get(row);
                 switch (column) {
-                    case 0,1 -> {
+                    case 0, 1 -> {
                         if (value instanceof Stock s) {
                             p.setStockCode(s.getKey().getStockCode());
                             p.setStockUserCode(s.getUserCode());
@@ -208,8 +210,7 @@ public class WeightLossTableModel extends AbstractTableModel {
                 if (column != 6) {
                     if (Util1.getFloat(p.getPrice()) == 0) {
                         if (p.getStockCode() != null && p.getUnit() != null) {
-                            p.setPrice(inventoryRepo.getPurRecentPrice(p.getStockCode(),
-                                    Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), p.getUnit()));
+                            p.setPrice(inventoryRepo.getPurRecentPrice(p.getStockCode(), Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), p.getUnit()).block().getAmount());
                         }
                     }
                 }
@@ -231,8 +232,8 @@ public class WeightLossTableModel extends AbstractTableModel {
         float lossQty = Util1.getFloat(pd.getLossQty());
         float qty = Util1.getFloat(pd.getQty());
         if (unit != null && stockCode != null && lossUnit != null && qty > 0 && lossQty > 0) {
-            float tmp1 = inventoryRepo.getSmallQty(stockCode, unit).getSmallQty() * qty;
-            float tmp2 = inventoryRepo.getSmallQty(stockCode, lossUnit).getSmallQty() * lossQty;
+            float tmp1 = inventoryRepo.getSmallQty(stockCode, unit).block().getSmallQty() * qty;
+            float tmp2 = inventoryRepo.getSmallQty(stockCode, lossUnit).block().getSmallQty() * lossQty;
             float price = Util1.getFloat(pd.getPrice());
             float lossPrice = (tmp1 / tmp2) * price;
             pd.setLossPrice(lossPrice);
@@ -260,7 +261,7 @@ public class WeightLossTableModel extends AbstractTableModel {
     @Override
     public Class<?> getColumnClass(int columnIndex) {
         return switch (columnIndex) {
-            case 4,6,7,9 ->
+            case 4, 6, 7, 9 ->
                 Float.class;
             default ->
                 String.class;

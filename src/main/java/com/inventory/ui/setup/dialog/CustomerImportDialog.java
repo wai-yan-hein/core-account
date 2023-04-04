@@ -138,7 +138,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
     }
 
     private void readFile(String path) {
-        List<CFont> listFont = inventoryRepo.getFont();
+        List<CFont> listFont = new ArrayList<>();
         if (listFont != null) {
             listFont.forEach(f -> {
                 hmZG.put(f.getIntCode(), f.getFontKey().getZwKeyCode());

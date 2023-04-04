@@ -10,13 +10,11 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
-import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.PriceOption;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
-import com.inventory.model.Trader;
 import com.inventory.ui.entry.SaleByWeight;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
@@ -335,8 +333,10 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                     if (Util1.getFloat(sd.getPrice()) == 0) {
                         if (ProUtil.isSaleLastPrice()) {
                             if (sd.getStockCode() != null && sd.getUnitCode() != null) {
-                                sd.setPrice(inventoryRepo.getSaleRecentPrice(sd.getStockCode(),
-                                        Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), sd.getUnitCode()));
+                                inventoryRepo.getSaleRecentPrice(sd.getStockCode(),
+                                        Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), sd.getUnitCode()).subscribe((t) -> {
+                                    sd.setPrice(t.getAmount());
+                                });
                             }
                         }
                     }

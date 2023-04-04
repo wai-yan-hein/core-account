@@ -67,7 +67,6 @@ public class COAUnusedDailog extends javax.swing.JDialog {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve().toEntityList(ChartOfAccount.class);
-
         result.subscribe((t) -> {
             if (!t.getBody().isEmpty()) {
                 t.getBody().forEach(coa -> {

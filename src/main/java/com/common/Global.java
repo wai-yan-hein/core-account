@@ -5,14 +5,13 @@
  */
 package com.common;
 
-import com.acc.model.DateModel;
 import com.inventory.model.AppUser;
 import java.awt.Color;
 import java.awt.Font;
 import java.net.ServerSocket;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 
 /**
@@ -22,7 +21,6 @@ import javax.swing.JFrame;
 public class Global {
 
     public static final Color BG_COLOR = new Color(240, 242, 250);
-    public static ServerSocket sock;
     public static Font lableFont = new java.awt.Font("Arial", 1, 13);
     public static Font amtFont = new java.awt.Font("Arial Nova Light", 1, 14);
     public static Font textFont = new java.awt.Font("Zawgyi-One", 0, 13);
@@ -33,7 +31,7 @@ public class Global {
     public static Font tblHeaderFont = new java.awt.Font("Arial Nova Light", 1, 14);
     public static Color selectionColor;
     public static String uuid;
-    public static boolean synceFinish = true;
+    public static boolean batchLock = false;
     public static AppUser loginUser;
     public static String roleCode;
     public static String compCode;
@@ -49,8 +47,8 @@ public class Global {
     public static int width;
     public static int height;
     public static String dateFormat = "dd/MM/yyyy";
-    public static List<DateModel> listDate;
     public static JFrame parentForm;
+    public static JDialog dialog;
     public static String startDate;
     public static String endate;
     public static String companyName;

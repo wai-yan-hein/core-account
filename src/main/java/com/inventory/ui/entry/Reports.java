@@ -148,6 +148,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         Mono<ResponseEntity<List<VRoleMenu>>> result = userApi.get()
                 .uri(builder -> builder.path("/user/get-report")
                 .queryParam("roleCode", Global.roleCode)
+                .queryParam("compCode", Global.compCode)
                 .queryParam("menuClass", "Inventory")
                 .build())
                 .retrieve().toEntityList(VRoleMenu.class);
@@ -179,7 +180,9 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         inventoryRepo.getStockBrand().subscribe((t) -> {
             brandAutoCompleter = new BrandAutoCompleter(txtBrand, t, null, true, false);
         });
-        regionAutoCompleter = new RegionAutoCompleter(txtRegion, inventoryRepo.getRegion(), null, true, false);
+        inventoryRepo.getRegion().subscribe((t) -> {
+            regionAutoCompleter = new RegionAutoCompleter(txtRegion, t, null, true, false);
+        });
         inventoryRepo.getCurrency().subscribe((t) -> {
             currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
             currencyAutoCompleter.setObserver(this);
@@ -190,7 +193,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
 
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, inventoryRepo, null, true);
-        dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
+        dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
         batchAutoCompeter = new BatchAutoCompeter(txtBatchNo, inventoryRepo, null, true);
         batchAutoCompeter.setObserver(this);

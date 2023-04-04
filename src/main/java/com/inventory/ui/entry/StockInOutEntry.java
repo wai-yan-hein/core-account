@@ -62,7 +62,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     private static final Logger log = LoggerFactory.getLogger(StockInOutEntry.class);
     private final StockInOutTableModel outTableModel = new StockInOutTableModel();
-    private final StockIOHistoryDialog historyDialog = new StockIOHistoryDialog(Global.parentForm);
+    private StockIOHistoryDialog dialog;
     @Autowired
     private WebClient inventoryApi;
     @Autowired
@@ -241,16 +241,16 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 progress.setIndeterminate(true);
                 io.setListSH(outTableModel.getListStock());
                 io.setListDel(outTableModel.getDeleteList());
-                Mono<StockInOut> result = inventoryApi.post()
+                inventoryApi.post()
                         .uri("/stockio/save-stockio")
                         .body(Mono.just(io), StockInOut.class)
                         .retrieve()
-                        .bodyToMono(StockInOut.class);
-                StockInOut t = result.block();
-                if (t != null) {
-                    clear();
-                    focusOnTable();
-                }
+                        .bodyToMono(StockInOut.class)
+                        .subscribe((t) -> {
+                            clear();
+                            focusOnTable();
+                        });
+
             }
         } catch (HeadlessException ex) {
             log.error("saveVoucher :" + ex.getMessage());
@@ -348,7 +348,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         if (s != null) {
             progress.setIndeterminate(true);
             io = s;
-            vouStatusAutoCompleter.setVoucher(inventoryRepo.findVouStatus(io.getVouStatusCode(), io.getKey().getDeptId()));
+            inventoryRepo.findVouStatus(io.getVouStatusCode(), io.getKey().getDeptId()).subscribe((t) -> {
+                vouStatusAutoCompleter.setVoucher(t);
+            });
             String vouNo = io.getKey().getVouNo();
             Flux<StockInOutDetail> result = inventoryApi.get()
                     .uri(builder -> builder.path("/stockio/get-stockio-detail")
@@ -733,19 +735,19 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     @Override
     public void history() {
-        try {
-            historyDialog.setInventoryRepo(inventoryRepo);
-            historyDialog.setUserRepo(userRepo);
-            historyDialog.setIconImage(new ImageIcon(getClass().getResource("/images/search.png")).getImage());
-            historyDialog.setWebClient(inventoryApi);
-            historyDialog.setObserver(this);
-            historyDialog.initMain();
-            historyDialog.setSize(Global.width - 100, Global.height - 100);
-            historyDialog.setLocationRelativeTo(null);
-            historyDialog.setVisible(true);
-        } catch (Exception e) {
-            log.info(e.getLocalizedMessage());
+        if (dialog == null) {
+            dialog = new StockIOHistoryDialog(Global.parentForm);
+            dialog.setInventoryRepo(inventoryRepo);
+            dialog.setUserRepo(userRepo);
+            dialog.setIconImage(new ImageIcon(getClass().getResource("/images/search.png")).getImage());
+            dialog.setWebClient(inventoryApi);
+            dialog.setObserver(this);
+            dialog.initMain();
+            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setLocationRelativeTo(null);
         }
+        dialog.search();
+        dialog.setVisible(true);
     }
 
     @Override
@@ -764,7 +766,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     public void selected(Object source, Object selectObj) {
         if (source.toString().equals("IO-HISTORY")) {
             if (selectObj instanceof VStockIO v) {
-                setVoucher(inventoryRepo.findStockIO(v.getVouNo(), v.getDeptId()));
+                inventoryRepo.findStockIO(v.getVouNo(), v.getDeptId()).subscribe((t) -> {
+                    setVoucher(t);
+                });
             }
         }
         if (source.toString().equals("CAL-TOTAL")) {
@@ -772,8 +776,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         }
         if (source.toString().equals("OP-HISTORY")) {
             if (selectObj instanceof OPHis v) {
-                OPHis op = inventoryRepo.findOpening(v.getKey());
-                importOP(op);
+                inventoryRepo.findOpening(v.getKey()).subscribe((t) -> {
+                    importOP(t);
+                });
             }
         }
 

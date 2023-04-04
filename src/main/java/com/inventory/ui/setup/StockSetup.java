@@ -20,9 +20,7 @@ import com.inventory.model.Category;
 import com.inventory.model.Stock;
 import com.inventory.model.StockBrand;
 import com.inventory.model.StockKey;
-import com.inventory.model.StockType;
 import com.inventory.model.StockUnit;
-import com.inventory.model.UnitRelation;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.common.StockTableModel;
 import com.inventory.ui.setup.dialog.CategorySetupDialog;
@@ -127,7 +125,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         initCombo();
         initTable();
         searchStock();
-        clear();
     }
 
     private void initFocusListener() {
@@ -160,10 +157,11 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         stockTableModel.setInventoryRepo(inventoryRepo);
         tblStock.setModel(stockTableModel);
         tblStock.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblStock.getColumnModel().getColumn(0).setPreferredWidth(10);
-        tblStock.getColumnModel().getColumn(1).setPreferredWidth(300);
-        tblStock.getColumnModel().getColumn(2).setPreferredWidth(10);
-        tblStock.getColumnModel().getColumn(3).setPreferredWidth(50);
+        tblStock.getColumnModel().getColumn(0).setPreferredWidth(1);
+        tblStock.getColumnModel().getColumn(1).setPreferredWidth(10);
+        tblStock.getColumnModel().getColumn(2).setPreferredWidth(300);
+        tblStock.getColumnModel().getColumn(3).setPreferredWidth(10);
+        tblStock.getColumnModel().getColumn(4).setPreferredWidth(50);
         tblStock.getTableHeader().setFont(Global.tblHeaderFont);
         tblStock.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblStock.setDefaultRenderer(Object.class, new TableCellRender());
@@ -189,13 +187,27 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         chkActive.setSelected(stock.isActive());
         chkEx.setSelected(stock.isExplode());
         Integer deptId = stock.getKey().getDeptId();
-        brandAutoCompleter.setBrand(inventoryRepo.findBrand(stock.getBrandCode(), deptId));
-        categoryAutoCompleter.setCategory(inventoryRepo.findCategory(stock.getCatCode(), deptId));
-        saleUnitCompleter.setStockUnit(inventoryRepo.findUnit(stock.getSaleUnitCode(), deptId));
-        typeAutoCompleter.setStockType(inventoryRepo.findGroup(stock.getTypeCode(), deptId));
-        purUnitCompleter.setStockUnit(inventoryRepo.findUnit(stock.getPurUnitCode(), deptId));
-        wlUnitCompleter.setStockUnit(inventoryRepo.findUnit(stock.getWeightUnit(), deptId));
-        relationAutoCompleter.setRelation(inventoryRepo.findRelation(stock.getRelCode(), deptId));
+        inventoryRepo.findBrand(stock.getBrandCode(), deptId).subscribe((t) -> {
+            brandAutoCompleter.setBrand(t);
+        });
+        inventoryRepo.findCategory(stock.getCatCode(), deptId).subscribe((t) -> {
+            categoryAutoCompleter.setCategory(t);
+        });
+        inventoryRepo.findUnit(stock.getSaleUnitCode(), deptId).subscribe((t) -> {
+            saleUnitCompleter.setStockUnit(t);
+        });
+        inventoryRepo.findGroup(stock.getTypeCode(), deptId).subscribe((t) -> {
+            typeAutoCompleter.setStockType(t);
+        });
+        inventoryRepo.findUnit(stock.getPurUnitCode(), deptId).subscribe((t) -> {
+            purUnitCompleter.setStockUnit(t);
+        });
+        inventoryRepo.findUnit(stock.getWeightUnit(), deptId).subscribe((t) -> {
+            wlUnitCompleter.setStockUnit(t);
+        });
+        inventoryRepo.findRelation(stock.getRelCode(), deptId).subscribe((t) -> {
+            relationAutoCompleter.setRelation(t);
+        });
         txtWt.setText(Util1.getString(stock.getWeight()));
         txtSalePrice.setText(Util1.getString(stock.getSalePriceN()));
         txtSalePriceA.setText(Util1.getString(stock.getSalePriceA()));
@@ -334,15 +346,22 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
     private void saveStock() {
         if (isValidEntry()) {
-            stock = inventoryRepo.saveStock(stock);
-            if (stock.getKey().getStockCode() != null) {
-                if (lblStatus.getText().equals("NEW")) {
-                    stockTableModel.addStock(stock);
-                } else {
-                    stockTableModel.setStock(selectRow, stock);
+            progress.setIndeterminate(true);
+            inventoryRepo.saveStock(stock).subscribe((t) -> {
+                if (t.getKey().getStockCode() != null) {
+                    if (lblStatus.getText().equals("NEW")) {
+                        stockTableModel.addStock(t);
+                    } else {
+                        stockTableModel.setStock(selectRow, t);
+                    }
+                    progress.setIndeterminate(false);
+                    clear();
                 }
-                clear();
-            }
+            }, (e) -> {
+                progress.setIndeterminate(false);
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            });
+
         }
     }
 
@@ -1561,15 +1580,12 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     @Override
     public void delete() {
         if (stock.getKey() != null) {
-            List<String> str = inventoryRepo
-                    .deleteStock(stock.getKey());
-            if (str.isEmpty()) {
+            inventoryRepo.deleteStock(stock.getKey()).subscribe((t) -> {
                 stockTableModel.deleteStock(selectRow);
                 clear();
                 JOptionPane.showMessageDialog(this, "Deleted.");
-            } else {
-                JOptionPane.showMessageDialog(this, str);
-            }
+            });
+
         }
     }
 

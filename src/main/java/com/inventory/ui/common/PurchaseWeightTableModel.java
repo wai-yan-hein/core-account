@@ -14,7 +14,6 @@ import com.inventory.model.Location;
 import com.inventory.model.PurHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
-import com.inventory.ui.entry.Purchase;
 import com.inventory.ui.entry.PurchaseByWeight;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
@@ -293,8 +292,10 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
             if (column != 9) {
                 if (Util1.getFloat(record.getPrice()) == 0) {
                     if (record.getStockCode() != null && record.getUnitCode() != null) {
-                        record.setPrice(inventoryRepo.getPurRecentPrice(record.getStockCode(),
-                                Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnitCode()));
+                        inventoryRepo.getPurRecentPrice(record.getStockCode(),
+                                Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnitCode()).subscribe((t) -> {
+                            record.setPrice(t.getAmount());
+                        });
                     }
                 }
             }

@@ -67,7 +67,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
     private WebClient inventoryApi;
     private LocationAutoCompleter locationAutoCompleter;
     private final GRNTableModel tableModel = new GRNTableModel();
-    private final GRNHistoryDialog dialog = new GRNHistoryDialog(Global.parentForm);
+    private GRNHistoryDialog dialog;
     private GRN grn = new GRN();
 
     public LocationAutoCompleter getLocationAutoCompleter() {
@@ -227,10 +227,14 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                 progress.setIndeterminate(true);
                 grn.setListDetail(tableModel.getListDetail());
                 grn.setListDel(tableModel.getListDel());
-                grn = inventoryRepo.saveGRN(grn);
-                if (grn != null) {
+                inventoryRepo.saveGRN(grn).subscribe((t) -> {
+                    progress.setIndeterminate(false);
                     clear();
-                }
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                    progress.setIndeterminate(false);
+                });
+
             }
         } catch (HeadlessException ex) {
             log.error("savePur :" + ex.getMessage());
@@ -262,7 +266,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             if (lblStatus.getText().equals("NEW")) {
                 String batchNo = txtBatchNo.getText();
                 if (!batchNo.isEmpty()) {
-                    if (!inventoryRepo.getBatchList(txtBatchNo.getText()).isEmpty()) {
+                    if (!inventoryRepo.getBatchList(txtBatchNo.getText()).block().isEmpty()) {
                         JOptionPane.showMessageDialog(Global.parentForm, String.format("Batch No %s already exists.", txtBatchNo.getText()));
                         return false;
                     }
@@ -340,12 +344,16 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
     }
 
     private void historyGRN() {
-        dialog.setInventoryRepo(inventoryRepo);
-        dialog.setUserRepo(userRepo);
-        dialog.setObserver(this);
-        dialog.initMain();
-        dialog.setSize(Global.width - 100, Global.height - 100);
-        dialog.setLocationRelativeTo(null);
+        if (dialog == null) {
+            dialog = new GRNHistoryDialog(Global.parentForm);
+            dialog.setInventoryRepo(inventoryRepo);
+            dialog.setUserRepo(userRepo);
+            dialog.setObserver(this);
+            dialog.initMain();
+            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setLocationRelativeTo(null);
+        }
+        dialog.search();
         dialog.setVisible(true);
     }
 
@@ -359,9 +367,17 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             trader.subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);
             });
-            inventoryRepo.findLocation(grn.getLocCode(), deptId).subscribe((t) -> {
-                locationAutoCompleter.setLocation(t);
+            Mono<Location> loc = inventoryRepo.findLocation(grn.getLocCode(), deptId);
+            loc.hasElement().subscribe((element) -> {
+                if (element) {
+                    loc.subscribe((t) -> {
+                        locationAutoCompleter.setLocation(t);
+                    });
+                } else {
+                    locationAutoCompleter.setLocation(null);
+                }
             });
+
             String vouNo = grn.getKey().getVouNo();
             inventoryApi.get()
                     .uri(builder -> builder.path("/grn/get-grn-detail")

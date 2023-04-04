@@ -77,7 +77,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
     private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
     private List<RetInHisDetail> listDetail = new ArrayList();
     private final ReturnInTableModel retInTableModel = new ReturnInTableModel();
-    private final ReturnInHistoryDialog vouSearchDialog = new ReturnInHistoryDialog(Global.parentForm);
+    private ReturnInHistoryDialog dialog;
     @Autowired
     private WebClient inventoryApi;
     @Autowired
@@ -437,15 +437,19 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     public void historyRetIn() {
-        vouSearchDialog.setUserRepo(userRepo);
-        vouSearchDialog.setInventoryApi(inventoryApi);
-        vouSearchDialog.setInventoryRepo(inventoryRepo);
-        vouSearchDialog.setIconImage(searchIcon);
-        vouSearchDialog.setObserver(this);
-        vouSearchDialog.initMain();
-        vouSearchDialog.setSize(Global.width - 100, Global.height - 100);
-        vouSearchDialog.setLocationRelativeTo(null);
-        vouSearchDialog.setVisible(true);
+        if (dialog == null) {
+            dialog = new ReturnInHistoryDialog(Global.parentForm);
+            dialog.setUserRepo(userRepo);
+            dialog.setInventoryApi(inventoryApi);
+            dialog.setInventoryRepo(inventoryRepo);
+            dialog.setIconImage(searchIcon);
+            dialog.setObserver(this);
+            dialog.initMain();
+            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setLocationRelativeTo(null);
+        }
+        dialog.search();
+        dialog.setVisible(true);
     }
 
     public void setVoucher(RetInHis retin) {
@@ -460,7 +464,9 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             trader.subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);
             });
-            currAutoCompleter.setCurrency(inventoryRepo.findCurrency(ri.getCurCode()));
+            inventoryRepo.findCurrency(ri.getCurCode()).subscribe((t) -> {
+                currAutoCompleter.setCurrency(t);
+            });
             String vouNo = ri.getKey().getVouNo();
             Mono<ResponseEntity<List<RetInHisDetail>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/retin/get-retin-detail")
@@ -1181,8 +1187,9 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             }
             case "RI-HISTORY" -> {
                 if (selectObj instanceof VReturnIn v) {
-                    RetInHis s = inventoryRepo.findReturnIn(v.getVouNo(), v.getDeptId());
-                    setVoucher(s);
+                    inventoryRepo.findReturnIn(v.getVouNo(), v.getDeptId()).subscribe((t) -> {
+                        setVoucher(t);
+                    });
                 }
             }
         }

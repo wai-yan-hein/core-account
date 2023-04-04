@@ -113,13 +113,15 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
 
     private void save() {
         if (isValidEntry()) {
-            location = inventoryRepo.saveLocaiton(location);
-            if (lblStatus.getText().equals("EDIT")) {
-                locationTableModel.setLocation(location, selectRow);
-            } else {
-                locationTableModel.addLocation(location);
-            }
-            clear();
+            inventoryRepo.saveLocaiton(location).subscribe((t) -> {
+                if (lblStatus.getText().equals("EDIT")) {
+                    locationTableModel.setLocation(t, selectRow);
+                } else {
+                    locationTableModel.addLocation(t);
+                }
+                clear();
+            });
+
         }
     }
 

@@ -338,15 +338,16 @@ public class TraderAutoCompleter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                List<Trader> list = inventoryRepo.getTraderList(str, traderType);
-                if (this.filter) {
-                    Trader s = new Trader("-", "All");
-                    list.add(s);
-                }
-                traderTableModel.setListTrader(list);
-                if (!list.isEmpty()) {
-                    table.setRowSelectionInterval(0, 0);
-                }
+                inventoryRepo.getTraderList(str, traderType).subscribe((t) -> {
+                    if (this.filter) {
+                        Trader s = new Trader("-", "All");
+                        t.add(s);
+                    }
+                    traderTableModel.setListTrader(t);
+                    if (!t.isEmpty()) {
+                        table.setRowSelectionInterval(0, 0);
+                    }
+                });
             }
         }
     }

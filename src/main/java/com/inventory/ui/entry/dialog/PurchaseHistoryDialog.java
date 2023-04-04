@@ -21,7 +21,6 @@ import com.inventory.model.AppUser;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;
 import com.inventory.model.VPurchase;
-import com.inventory.model.VReturnOut;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.PurVouSearchTableModel;
 import java.awt.HeadlessException;
@@ -35,7 +34,6 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -60,7 +58,15 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
     private SelectionObserver observer;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
-    private boolean status = false;
+    private VPurchase purchase;
+
+    public VPurchase getPurchase() {
+        return purchase;
+    }
+
+    public void setPurchase(VPurchase purchase) {
+        this.purchase = purchase;
+    }
 
     public WebClient getInventoryApi() {
         return inventoryApi;
@@ -103,13 +109,9 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
     }
 
     public void initMain() {
-        if (!status) {
-            initCombo();
-            initTableVoucher();
-            setTodayDate();
-            status = true;
-        }
-        search();
+        initCombo();
+        initTableVoucher();
+        setTodayDate();
     }
 
     private void initCombo() {
@@ -168,7 +170,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
 
-    private void search() {
+    public void search() {
         progess.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setCusCode(traderAutoCompleter.getTrader().getKey().getCode());
@@ -183,8 +185,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(getDepId());
         tableModel.clear();
-        inventoryApi
-                .post()
+        inventoryApi.post()
                 .uri("/pur/get-pur")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
@@ -223,8 +224,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         try {
             int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
             if (row >= 0) {
-                VPurchase his = tableModel.getSelectVou(row);
-                observer.selected("PUR-HISTORY", his);
+                setPurchase(tableModel.getSelectVou(row));
                 setVisible(false);
             } else {
                 JOptionPane.showMessageDialog(this, "Please select the voucher.",

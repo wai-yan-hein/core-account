@@ -19,6 +19,7 @@ import com.acc.setup.COAManagment;
 
 import com.acc.setup.COAOpening;
 import com.acc.setup.COASetup;
+import com.acc.setup.COATemplateSetup;
 import com.acc.setup.DepartmentSetup;
 import com.acc.setup.TraderSetup;
 import com.common.Global;
@@ -66,10 +67,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 import com.inventory.ui.entry.Reports;
 import com.inventory.ui.entry.SaleByBatch;
 import com.inventory.ui.entry.SaleByWeight;
@@ -77,6 +76,7 @@ import com.inventory.ui.entry.Transfer;
 import com.inventory.ui.entry.WeightLossEntry;
 import com.inventory.ui.setup.OpeningSetup;
 import com.inventory.ui.setup.PatternSetup;
+import com.user.dialog.CompanyOptionDialog;
 import com.user.dialog.DepartmentDialog;
 import com.user.setup.SystemProperty;
 import com.user.setup.AppUserSetup;
@@ -87,6 +87,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import org.springframework.core.task.TaskExecutor;
@@ -95,7 +97,6 @@ import org.springframework.core.task.TaskExecutor;
  *
  * @author Lenovo
  */
-@Component
 @Slf4j
 public class ApplicationMainFrame extends javax.swing.JFrame implements SelectionObserver {
 
@@ -157,6 +158,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     @Autowired
     private COASetup cOASetup;
     @Autowired
+    private COATemplateSetup coaTemplateSetup;
+    @Autowired
     private GLReport gLReport;
     @Autowired
     private AparReport aparReport;
@@ -209,6 +212,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     /**
      * Creates new form ApplicationMainFrame
+     *
+     * @return
      */
     public ApplicationMainFrame() {
         initComponents();
@@ -618,6 +623,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 cOASetup.initMain();
                 return cOASetup;
             }
+            case "COA Template" -> {
+                coaTemplateSetup.setName(menuName);
+                coaTemplateSetup.setObserver(this);
+                coaTemplateSetup.setProgress(progress);
+                coaTemplateSetup.initMain();
+                return coaTemplateSetup;
+            }
             case "Opening Balance" -> {
                 coaOpening.setName(menuName);
                 coaOpening.setObservaer(this);
@@ -703,7 +715,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private void companyUserRoleAssign() {
         userApi.get()
                 .uri(builder -> builder.path("/user/get-privilege-role-company")
-                .queryParam("roleCode", Global.loginUser.getRole().getRoleCode())
+                .queryParam("roleCode", Global.loginUser.getRoleCode())
                 .build())
                 .retrieve()
                 .bodyToFlux(VRoleCompany.class)
@@ -715,32 +727,55 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                                 "Invalid Compay Access", JOptionPane.ERROR_MESSAGE);
                         System.exit(0);
                     } else if (t.size() > 1) {
-                        CompanyDialog companyDialog = new CompanyDialog();
-                        companyDialog.setListCompany(t);
-                        companyDialog.initTable();
-                        companyDialog.setLocationRelativeTo(null);
-                        companyDialog.setVisible(true);
+                        CompanyOptionDialog d = new CompanyOptionDialog(Global.parentForm);
+                        d.setListCompany(t);
+                        d.initMain();
+                        d.setLocationRelativeTo(null);
+                        d.setVisible(true);
+                        if (d.getCompanyInfo() == null) {
+                            int confirmed = JOptionPane.showConfirmDialog(null,
+                                    "Are you sure you want to exit?", "Exit Confirmation",
+                                    JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                            if (confirmed == JOptionPane.YES_OPTION) {
+                                dispose();
+                                System.exit(0);
+                            }
+                        }
+                        assignCompany(d.getCompanyInfo());
                     } else {
-                        VRoleCompany vuca = t.get(0);
-                        Global.roleCode = vuca.getRoleCode();
-                        Global.compCode = vuca.getCompCode();
-                        Global.companyName = vuca.getCompName();
-                        Global.companyAddress = vuca.getCompAddress();
-                        Global.companyPhone = vuca.getCompPhone();
-                        Global.currency = vuca.getCurrency();
-                        Global.startDate = Util1.toDateStr(vuca.getStartDate(), "dd/MM/yyyy");
-                        Global.endate = Util1.toDateStr(vuca.getEndDate(), "dd/MM/yyyy");
+                        assignCompany(t.get(0));
                     }
+                    departmentAssign();
                     initMenu();
+                    lblCompName.setText(Global.companyName);
+                    lblUserName.setText(Global.loginUser.getUserName());
                     userRepo.setupProperty();
                 });
 
     }
 
+    private void assignCompany(VRoleCompany vuca) {
+        Global.roleCode = vuca.getRoleCode();
+        Global.compCode = vuca.getCompCode();
+        Global.companyName = vuca.getCompName();
+        Global.companyAddress = vuca.getCompAddress();
+        Global.companyPhone = vuca.getCompPhone();
+        Global.currency = vuca.getCurrency();
+        Global.startDate = Util1.toDateStr(vuca.getStartDate(), "dd/MM/yyyy");
+        Global.endate = Util1.toDateStr(vuca.getEndDate(), "dd/MM/yyyy");
+        Global.batchLock = vuca.isBatchLock();
+        if (Global.batchLock) {
+            lblLock.setText("Batch Lock.");
+            lblLock.setForeground(Color.red);
+        } else {
+            lblLock.setText(null);
+        }
+    }
+
     public void initMain() {
+        Global.parentForm = this;
+        scheduleExit();
         companyUserRoleAssign();
-        initializeData();
-        departmentAssign();
     }
 
     private void departmentAssign() {
@@ -865,15 +900,34 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         });
     }
 
-    private void initializeData() {
-        Global.parentForm = this;
-        lblCompName.setText(Global.companyName);
-        lblUserName.setText(Global.loginUser.getUserName());
-    }
-
     private void logout() {
         dispose();
         CoreAccountApplication.restart();
+    }
+
+    private void scheduleExit() {
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Timer timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        log.info("exit");
+                        System.exit(0);
+                    }
+                }, Duration.ofSeconds(30).toMillis()); // 60,000 milliseconds = 1 minute
+                int confirmed = JOptionPane.showConfirmDialog(null,
+                        "Do you want to exit the program due to inactivity? Program will exit within 30 second.", "Exit Confirmation",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (confirmed == JOptionPane.YES_OPTION) {
+                    System.exit(0);
+                } else {
+                    timer.cancel();
+                }
+            }
+        }, Duration.ofMinutes(30).toMillis(), Duration.ofMinutes(30).toMillis());
     }
 
     @Override
@@ -943,6 +997,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jPanel2 = new javax.swing.JPanel();
         lblCompName = new javax.swing.JLabel();
         lblPanelName = new javax.swing.JLabel();
+        lblLock = new javax.swing.JLabel();
         menuBar = new javax.swing.JMenuBar();
 
         jMenu1.setText("jMenu1");
@@ -1092,8 +1147,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         jToolBar1.add(btnExit);
         jToolBar1.add(jSeparator9);
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
-
         lblUserName.setFont(Global.lableFont);
         lblUserName.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblUserName.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/male_user_16px.png"))); // NOI18N
@@ -1113,7 +1166,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblUserName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblUserName, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)
                     .addComponent(lblDep, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -1123,10 +1176,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(lblUserName)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblDep))
+                .addComponent(lblDep)
+                .addContainerGap())
         );
-
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         lblCompName.setFont(Global.companyFont);
         lblCompName.setForeground(Global.selectionColor);
@@ -1138,15 +1190,22 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         lblPanelName.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         lblPanelName.setText("-");
 
+        lblLock.setFont(Global.companyFont);
+        lblLock.setForeground(Global.selectionColor);
+        lblLock.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        lblLock.setText("-");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblPanelName, javax.swing.GroupLayout.DEFAULT_SIZE, 49, Short.MAX_VALUE)
+                .addComponent(lblPanelName, javax.swing.GroupLayout.DEFAULT_SIZE, 32, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, 108, Short.MAX_VALUE)
+                .addComponent(lblLock, javax.swing.GroupLayout.DEFAULT_SIZE, 32, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, 91, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -1155,7 +1214,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lblPanelName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblLock, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -1185,17 +1245,15 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 0, 0)
                 .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tabMain, javax.swing.GroupLayout.DEFAULT_SIZE, 392, Short.MAX_VALUE)
+                .addComponent(tabMain, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1295,6 +1353,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JLabel lblCompName;
     private javax.swing.JLabel lblDep;
+    private javax.swing.JLabel lblLock;
     private javax.swing.JLabel lblPanelName;
     private javax.swing.JLabel lblUserName;
     private javax.swing.JMenuBar menuBar;

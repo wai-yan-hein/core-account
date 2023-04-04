@@ -5,6 +5,11 @@
  */
 package com.inventory.config;
 
+import com.common.Util1;
+import java.net.MalformedURLException;
+import java.net.URL;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +35,19 @@ public class WebFlexConfig {
 
     @Bean
     public WebClient inventoryApi() {
-        log.info("inventoryApi : " + environment.getProperty("inventory.url"));
+        String url = environment.getProperty("inventory.url");
+        String hostName = environment.getProperty("host.name");
+        if (hostName != null) {
+            int port = Util1.getInteger(environment.getProperty("inventory.port"));
+            String protocol = "http";
+            String path = "/"; // or whatever path you want to use
+            try {
+                url = new URL(protocol, Util1.getServerIp(hostName), port, path).toString();
+            } catch (MalformedURLException ex) {
+                JOptionPane.showMessageDialog(new JFrame(), ex.getMessage());
+                System.exit(0);
+            }
+        }
         return WebClient.builder()
                 .exchangeStrategies(ExchangeStrategies.builder()
                         .codecs(configurer -> configurer
@@ -38,13 +55,25 @@ public class WebFlexConfig {
                         .maxInMemorySize(100 * 1024 * 1024))
                         .build())
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .baseUrl(environment.getProperty("inventory.url"))
+                .baseUrl(url)
                 .build();
     }
 
     @Bean
     public WebClient accountApi() {
-        log.info("account : " + environment.getProperty("account.url"));
+        String url = environment.getProperty("account.url");
+        String hostName = environment.getProperty("host.name");
+        if (hostName != null) {
+            int port = Util1.getInteger(environment.getProperty("account.port"));
+            String protocol = "http";
+            String path = "/"; // or whatever path you want to use
+            try {
+                url = new URL(protocol, Util1.getServerIp(hostName), port, path).toString();
+            } catch (MalformedURLException ex) {
+                JOptionPane.showMessageDialog(new JFrame(), ex.getMessage());
+                System.exit(0);
+            }
+        }
         return WebClient.builder()
                 .exchangeStrategies(ExchangeStrategies.builder()
                         .codecs(configurer -> configurer
@@ -52,13 +81,25 @@ public class WebFlexConfig {
                         .maxInMemorySize(100 * 1024 * 1024))
                         .build())
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .baseUrl(environment.getProperty("account.url"))
+                .baseUrl(url)
                 .build();
     }
 
     @Bean
     public WebClient userApi() {
-        log.info("user api : " + environment.getProperty("user.url"));
+        String url = environment.getProperty("user.url");
+        String hostName = environment.getProperty("host.name");
+        if (hostName != null) {
+            int port = Util1.getInteger(environment.getProperty("user.port"));
+            String protocol = "http";
+            String path = "/"; // or whatever path you want to use
+            try {
+                url = new URL(protocol, Util1.getServerIp(hostName), port, path).toString();
+            } catch (MalformedURLException ex) {
+                JOptionPane.showMessageDialog(new JFrame(), ex.getMessage());
+                System.exit(0);
+            }
+        }
         return WebClient.builder()
                 .exchangeStrategies(ExchangeStrategies.builder()
                         .codecs(configurer -> configurer
@@ -66,7 +107,7 @@ public class WebFlexConfig {
                         .maxInMemorySize(100 * 1024 * 1024))
                         .build())
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .baseUrl(environment.getProperty("user.url"))
+                .baseUrl(url)
                 .build();
     }
 }

@@ -54,7 +54,6 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -84,8 +83,9 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
 
     private List<SaleHisDetail> listDetail = new ArrayList();
     private final SaleByBatchTableModel saleTableModel = new SaleByBatchTableModel();
-    private final SaleHistoryDialog vouSearchDialog = new SaleHistoryDialog(Global.parentForm);
     private final StockBalanceTableModel stockBalanceTableModel = new StockBalanceTableModel();
+    private SaleHistoryDialog dialog;
+
     @Autowired
     private WebClient inventoryApi;
     @Autowired
@@ -252,6 +252,9 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
         });
         inventoryRepo.getSaleMan().collectList().subscribe((t) -> {
             saleManCompleter = new SaleManAutoCompleter(txtSaleman, t, null, false, false);
+            inventoryRepo.getDefaultSaleMan().subscribe((s) -> {
+                saleManCompleter.setSaleMan(s);
+            });
         });
 
     }
@@ -313,15 +316,6 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
     }
 
     private void assignDefaultValue() {
-        userRepo.getDefaultCurrency().subscribe((t) -> {
-            currAutoCompleter.setCurrency(t);
-        });
-        inventoryRepo.getDefaultSaleMan().subscribe((t) -> {
-            saleManCompleter.setSaleMan(t);
-        });
-        inventoryRepo.getDefaultLocation().subscribe((t) -> {
-            locationAutoCompleter.setLocation(t);
-        });
         Mono<Trader> trader = inventoryRepo.findTrader(Global.hmRoleProperty.get("default.customer"), Global.deptId);
         trader.subscribe((t) -> {
             traderAutoCompleter.setTrader(t);
@@ -371,20 +365,14 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
                 saleHis.setListSH(saleTableModel.getListDetail());
                 saleHis.setListDel(saleTableModel.getDelList());
                 saleHis.setBackup(saleTableModel.isChange());
-                Mono<SaleHis> result = inventoryApi.post()
-                        .uri("/sale/save-sale")
-                        .body(Mono.just(saleHis), SaleHis.class)
-                        .retrieve()
-                        .bodyToMono(SaleHis.class);
-                SaleHis t = result.block();
-                if (t != null) {
+                inventoryRepo.save(saleHis).subscribe((t) -> {
+                    progress.setIndeterminate(false);
+                    clear();
                     if (print) {
                         String reportName = getReportName();
                         printVoucher(t.getKey().getVouNo(), reportName, chkVou.isSelected());
-                    } else {
-                        clear();
                     }
-                }
+                });
             }
         } catch (HeadlessException ex) {
             log.error("Save Sale :" + ex.getMessage());
@@ -551,15 +539,18 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
     }
 
     public void historySale() {
-        vouSearchDialog.setInventoryApi(inventoryApi);
-        vouSearchDialog.setInventoryRepo(inventoryRepo);
-        vouSearchDialog.setUserRepo(userRepo);
-        vouSearchDialog.setIconImage(new ImageIcon(getClass().getResource("/images/search.png")).getImage());
-        vouSearchDialog.setObserver(this);
-        vouSearchDialog.initMain();
-        vouSearchDialog.setSize(Global.width - 100, Global.height - 100);
-        vouSearchDialog.setLocationRelativeTo(null);
-        vouSearchDialog.setVisible(true);
+        if (dialog == null) {
+            dialog = new SaleHistoryDialog(Global.parentForm);
+            dialog.setInventoryApi(inventoryApi);
+            dialog.setInventoryRepo(inventoryRepo);
+            dialog.setUserRepo(userRepo);
+            dialog.setObserver(this);
+            dialog.initMain();
+            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setLocationRelativeTo(null);
+        }
+        dialog.search();
+        dialog.setVisible(true);
     }
 
     public void setSaleVoucher(SaleHis sh) {
@@ -574,7 +565,9 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
             trader.subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);
             });
-            currAutoCompleter.setCurrency(inventoryRepo.findCurrency(saleHis.getCurCode()));
+            inventoryRepo.findCurrency(saleHis.getCurCode()).subscribe((t) -> {
+                currAutoCompleter.setCurrency(t);
+            });
             inventoryRepo.findSaleMan(saleHis.getSaleManCode(), deptId).subscribe((t) -> {
                 saleManCompleter.setSaleMan(t);
             });
@@ -1582,8 +1575,9 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
             }
             case "SALE-HISTORY" -> {
                 if (selectObj instanceof VSale s) {
-                    SaleHis sh = inventoryRepo.findSale(s.getVouNo(), s.getDeptId());
-                    setSaleVoucher(sh);
+                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId()).subscribe((t) -> {
+                        setSaleVoucher(t);
+                    });
                 }
             }
             case "Select" -> {

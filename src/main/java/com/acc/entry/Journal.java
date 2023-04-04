@@ -181,7 +181,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     }
 
     private void initCompleter() {
-        dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
+        dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
         Mono<List<Department>> monoDep = accountRepo.getDepartment();
         monoDep.subscribe((t) -> {

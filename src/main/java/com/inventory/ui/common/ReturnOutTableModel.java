@@ -267,8 +267,10 @@ public class ReturnOutTableModel extends AbstractTableModel {
             if (column != 6) {
                 if (Util1.getFloat(record.getPrice()) == 0) {
                     if (record.getStockCode() != null && record.getUnitCode() != null) {
-                        record.setPrice(inventoryRepo.getPurRecentPrice(record.getStockCode(),
-                                Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnitCode()));
+                        inventoryRepo.getPurRecentPrice(record.getStockCode(),
+                                Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnitCode()).subscribe((t) -> {
+                            record.setPrice(t.getAmount());
+                        });
                     }
                 }
             }

@@ -14,7 +14,7 @@ import javax.swing.table.AbstractTableModel;
 
 /**
  *
- * @author MyoGyi
+ * @author Lenovo
  */
 public class VoucherTableModel extends AbstractTableModel {
 

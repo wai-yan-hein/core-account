@@ -66,9 +66,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private SelectionObserver observer;
     private JProgressBar progress;
-    private List<Region> listRegion = new ArrayList<>();
     private TableRowSorter<TableModel> sorter;
-    private List<TraderGroup> listTraderGroup = new ArrayList<>();
 
     public SelectionObserver getObserver() {
         return observer;
@@ -101,29 +99,34 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     }
 
     private void initCombo() {
-        listRegion = inventoryRepo.getRegion();
-        regionAutoCompleter = new RegionAutoCompleter(txtRegion, listRegion, null, false, false);
-        regionAutoCompleter.setRegion(null);
-        listTraderGroup = inventoryRepo.getTraderGroup();
-        traderGroupAutoCompleter = new TraderGroupAutoCompleter(txtGroup, listTraderGroup, null, false);
-        traderGroupAutoCompleter.setGroup(null);
-        accountRepo.getCOAChild(ProUtil.getProperty(ProUtil.CREDITOR_GROUP)).collectList().subscribe((t) -> {
-            cOAAutoCompleter = new COAAutoCompleter(txtAccount,
-                    t,
-                    null, false);
+        inventoryRepo.getRegion().subscribe((t) -> {
+            regionAutoCompleter = new RegionAutoCompleter(txtRegion, t, null, false, false);
+            regionAutoCompleter.setRegion(null);
         });
-        accountRepo.findCOA(ProUtil.getProperty(ProUtil.CREDITOR_ACC)).subscribe((t) -> {
-            cOAAutoCompleter.setCoa(t);
+        inventoryRepo.getTraderGroup().subscribe((t) -> {
+            traderGroupAutoCompleter = new TraderGroupAutoCompleter(txtGroup, t, null, false);
+            traderGroupAutoCompleter.setGroup(null);
         });
+
+        accountRepo.getCOAChild(ProUtil.getProperty(ProUtil.CREDITOR_GROUP))
+                .collectList()
+                .subscribe((t) -> {
+                    cOAAutoCompleter = new COAAutoCompleter(txtAccount, t, null, false);
+                    accountRepo.findCOA(ProUtil.getProperty(ProUtil.CREDITOR_ACC)).subscribe((tt) -> {
+                        cOAAutoCompleter.setCoa(tt);
+                    });
+                });
+
     }
 
     private void initTable() {
         tblCustomer.setModel(supplierTabelModel);
         tblCustomer.getTableHeader().setFont(Global.textFont);
         tblCustomer.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblCustomer.getColumnModel().getColumn(0).setPreferredWidth(40);// Code
-        tblCustomer.getColumnModel().getColumn(1).setPreferredWidth(320);// Name
-        tblCustomer.getColumnModel().getColumn(2).setPreferredWidth(40);// Active 
+        tblCustomer.getColumnModel().getColumn(0).setPreferredWidth(1);// Code
+        tblCustomer.getColumnModel().getColumn(1).setPreferredWidth(40);// Code
+        tblCustomer.getColumnModel().getColumn(2).setPreferredWidth(320);// Name
+        tblCustomer.getColumnModel().getColumn(3).setPreferredWidth(40);// Active 
         tblCustomer.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblCustomer.setDefaultRenderer(Object.class, new TableCellRender());
         tblCustomer.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -166,14 +169,18 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtCusName.setText(supplier.getTraderName());
         txtCusEmail.setText(supplier.getEmail());
         txtCusPhone.setText(supplier.getPhone());
-        regionAutoCompleter.setRegion(inventoryRepo.findRegion(supplier.getRegCode()));
         txtCusAddress.setText(supplier.getAddress());
         chkActive.setSelected(supplier.isActive());
         chkCD.setSelected(supplier.isCashDown());
         chkMulti.setSelected(supplier.isMulti());
         txtCusName.requestFocus();
         lblStatus.setText("EDIT");
-        traderGroupAutoCompleter.setGroup(inventoryRepo.findTraderGroup(supplier.getGroupCode(), supplier.getKey().getDeptId()));
+        inventoryRepo.findRegion(supplier.getRegCode()).subscribe((t) -> {
+            regionAutoCompleter.setRegion(t);
+        });
+        inventoryRepo.findTraderGroup(supplier.getGroupCode(), supplier.getKey().getDeptId()).subscribe((t) -> {
+            traderGroupAutoCompleter.setGroup(t);
+        });
         accountRepo.findCOA(supplier.getAccount()).subscribe((t) -> {
             cOAAutoCompleter.setCoa(t);
         });
@@ -229,15 +236,22 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private void saveCustomer() {
         if (isValidEntry()) {
-            supplier = inventoryRepo.saveTrader(supplier);
-            if (supplier.getKey().getCode() != null) {
-                if (lblStatus.getText().equals("EDIT")) {
-                    supplierTabelModel.setCustomer(selectRow, supplier);
-                } else {
-                    supplierTabelModel.addCustomer(supplier);
+            progress.setIndeterminate(true);
+            inventoryRepo.saveTrader(supplier).subscribe((t) -> {
+                if (t.getKey().getCode() != null) {
+                    if (lblStatus.getText().equals("EDIT")) {
+                        supplierTabelModel.setCustomer(selectRow, t);
+                    } else {
+                        supplierTabelModel.addCustomer(t);
+                    }
+                    progress.setIndeterminate(false);
+                    clear();
                 }
-                clear();
-            }
+            }, (e) -> {
+                progress.setIndeterminate(false);
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            });
+
         }
     }
 
@@ -647,13 +661,15 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-        RegionSetup regionSetup = new RegionSetup(Global.parentForm);
-        regionSetup.setListRegion(listRegion);
-        regionSetup.setInventoryRepo(inventoryRepo);
-        regionSetup.initMain();
-        regionSetup.setSize(Global.width / 2, Global.height / 2);
-        regionSetup.setLocationRelativeTo(null);
-        regionSetup.setVisible(true);
+        inventoryRepo.getRegion().subscribe((t) -> {
+            RegionSetup regionSetup = new RegionSetup(Global.parentForm);
+            regionSetup.setListRegion(t);
+            regionSetup.setInventoryRepo(inventoryRepo);
+            regionSetup.initMain();
+            regionSetup.setSize(Global.width / 2, Global.height / 2);
+            regionSetup.setLocationRelativeTo(null);
+            regionSetup.setVisible(true);
+        });
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
@@ -673,13 +689,15 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private void btnGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGroupActionPerformed
         // TODO add your handling code here:
-        TraderGroupDialog dialog = new TraderGroupDialog();
-        dialog.setListGroup(listTraderGroup);
-        dialog.setInventoryRepo(inventoryRepo);
-        dialog.initMain();
-        dialog.setSize(Global.width / 2, Global.height / 2);
-        dialog.setLocationRelativeTo(null);
-        dialog.setVisible(true);
+        inventoryRepo.getTraderGroup().subscribe((t) -> {
+            TraderGroupDialog dialog = new TraderGroupDialog();
+            dialog.setListGroup(t);
+            dialog.setInventoryRepo(inventoryRepo);
+            dialog.initMain();
+            dialog.setSize(Global.width / 2, Global.height / 2);
+            dialog.setLocationRelativeTo(null);
+            dialog.setVisible(true);
+        });
     }//GEN-LAST:event_btnGroupActionPerformed
 
 
@@ -908,14 +926,16 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     public void delete() {
         if (selectRow >= 0) {
             Trader t = supplierTabelModel.getCustomer(selectRow);
-            List<String> str = inventoryRepo.deleteTrader(t.getKey());
-            if (str.isEmpty()) {
-                supplierTabelModel.deleteCustomer(selectRow);
-                clear();
-                JOptionPane.showMessageDialog(this, "Deleted.");
-            } else {
-                JOptionPane.showMessageDialog(this, str);
-            }
+            inventoryRepo.deleteTrader(t.getKey()).subscribe((str) -> {
+                if (str.isEmpty()) {
+                    supplierTabelModel.deleteCustomer(selectRow);
+                    clear();
+                    JOptionPane.showMessageDialog(this, "Deleted.");
+                } else {
+                    JOptionPane.showMessageDialog(this, str);
+                }
+            });
+
         }
     }
 

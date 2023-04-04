@@ -190,7 +190,7 @@ public class ReorderTableModel extends AbstractTableModel {
     private float getSmallQty(String stockCode, String unit) {
         float qty = 0.0f;
         if (!Objects.isNull(stockCode) && !Objects.isNull(unit)) {
-            qty = inventoryRepo.getSmallQty(stockCode, unit).getSmallQty();
+            qty = inventoryRepo.getSmallQty(stockCode, unit).block().getSmallQty();
         }
         return qty;
     }

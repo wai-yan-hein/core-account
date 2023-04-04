@@ -123,10 +123,14 @@ public class PurAvgPriceDialog extends javax.swing.JDialog {
         Integer deptId = pd.getKey().getDeptId();
         txtQty.setValue(pd.getQty());
         txtPrice.setValue(pd.getPrice());
-        unitAutoCompleter.setStockUnit(inventoryRepo.findUnit(pd.getUnitCode(), deptId));
+        inventoryRepo.findUnit(pd.getUnitCode(), deptId).subscribe((t) -> {
+            unitAutoCompleter.setStockUnit(t);
+        });
         txtAvgQty.setValue(pd.getQty());
         txtAvgPrice.setValue(pd.getPrice());
-        avgunitAutoCompleter.setStockUnit(inventoryRepo.findUnit(pd.getUnitCode(), deptId));
+        inventoryRepo.findUnit(pd.getUnitCode(), deptId).subscribe((t) -> {
+            avgunitAutoCompleter.setStockUnit(t);
+        });
         txtStockName.setText(pd.getStockName());
     }
 

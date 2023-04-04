@@ -14,5 +14,6 @@ import lombok.Data;
 public class PrivilegeCompany {
 
     private PCKey key;
+    private String compName;
     private boolean allow;
 }

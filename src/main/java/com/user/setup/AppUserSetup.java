@@ -105,7 +105,9 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
         txtEmail.setText(appUser.getEmail());
         txtPassword.setText(appUser.getPassword());
         chkAtive.setSelected(Util1.getBoolean(appUser.isActive()));
-        roleAutoCompleter.setAppRole(appUser.getRole());
+        userRepo.finRole(user.getRoleCode()).subscribe((t) -> {
+            roleAutoCompleter.setAppRole(t);
+        });
         lblStatus.setText("EDIT");
     }
 
@@ -148,7 +150,7 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
             appUser.setEmail(txtEmail.getText());
             appUser.setPassword(String.valueOf(txtPassword.getPassword()));
             appUser.setActive(chkAtive.isSelected());
-            appUser.setRole(roleAutoCompleter.getAppRole());
+            appUser.setRoleCode(roleAutoCompleter.getAppRole().getRoleCode());
             status = true;
         }
         return status;

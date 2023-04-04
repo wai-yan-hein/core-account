@@ -142,7 +142,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
     }
 
     private void initCombo() {
-        dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
+        dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
         traderAutoCompleter = new TraderAAutoCompleter(txtTrader, accountApi, null, true);
         traderAutoCompleter.setSelectionObserver(this);
@@ -173,7 +173,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                     filter.setToDate(Util1.toDateStr(enDate, "dd/MM/yyyy", "yyyy-MM-dd"));
                     filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
                     filter.setListDepartment(departmentAutoCompleter.getListOption());
-
+                    filter.setCurCode(Global.currency);
                     filter.setFixedAcc(ProUtil.getProperty(ProUtil.FIXED));
                     filter.setCurrentAcc(ProUtil.getProperty(ProUtil.CURRENT));
                     filter.setCapitalAcc(ProUtil.getProperty(ProUtil.CAPITAL));

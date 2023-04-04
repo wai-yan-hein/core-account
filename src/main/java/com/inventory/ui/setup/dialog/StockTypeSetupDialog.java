@@ -129,13 +129,15 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
 
     private void save() {
         if (isValidEntry()) {
-            stockType = inventoryRepo.saveStockType(stockType);
-            if (lblStatus.getText().equals("EDIT")) {
-                listStockType.set(selectRow, stockType);
-            } else {
-                listStockType.add(stockType);
-            }
-            clear();
+            inventoryRepo.saveStockType(stockType).subscribe((t) -> {
+                if (lblStatus.getText().equals("EDIT")) {
+                    listStockType.set(selectRow, t);
+                } else {
+                    listStockType.add(t);
+                }
+                clear();
+            });
+
         }
     }
 
@@ -220,7 +222,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
                     t.setCreatedDate(Util1.getTodayDate());
                     t.setCreatedBy(Global.loginUser.getUserCode());
                     t.setMacId(Global.macId);
-                    stockType = inventoryRepo.saveStockType(t);
+                    stockType = inventoryRepo.saveStockType(t).block();
                     stockTypeTableModel.addStockType(stockType);
                     lblLog.setText("Sucess.");
                 }

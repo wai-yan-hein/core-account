@@ -84,7 +84,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     private List<SaleHisDetail> listDetail = new ArrayList();
     private final SaleTableModel saleTableModel = new SaleTableModel();
-    private final SaleHistoryDialog vouSearchDialog = new SaleHistoryDialog(Global.parentForm);
+    private SaleHistoryDialog dialog;
     private final StockBalanceTableModel stockBalanceTableModel = new StockBalanceTableModel();
     @Autowired
     private WebClient inventoryApi;
@@ -384,38 +384,28 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }
 
     public void saveSale(boolean print) {
-        try {
-            if (isValidEntry() && saleTableModel.isValidEntry()) {
-                if (Util1.getBoolean(ProUtil.getProperty("trader.balance"))) {
-                    String date = Util1.toDateStr(txtSaleDate.getDate(), "yyyy-MM-dd");
-                    String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
-                    balance = accountRepo.getTraderBalance(date, traderCode, Global.compCode).block();
-                    if (balance != 0) {
-                        prvBal = balance - Util1.getDouble(txtVouBalance.getValue());
-                    }
-                }
-                progress.setIndeterminate(true);
-                saleHis.setListSH(saleTableModel.getListDetail());
-                saleHis.setListDel(saleTableModel.getDelList());
-                saleHis.setBackup(saleTableModel.isChange());
-                Mono<SaleHis> result = inventoryApi.post()
-                        .uri("/sale/save-sale")
-                        .body(Mono.just(saleHis), SaleHis.class)
-                        .retrieve()
-                        .bodyToMono(SaleHis.class);
-                SaleHis t = result.block();
-                if (t != null) {
-                    if (print) {
-                        String reportName = getReportName();
-                        printVoucher(t.getKey().getVouNo(), reportName, chkVou.isSelected());
-                    } else {
-                        clear();
-                    }
+        if (isValidEntry() && saleTableModel.isValidEntry()) {
+            if (Util1.getBoolean(ProUtil.getProperty("trader.balance"))) {
+                String date = Util1.toDateStr(txtSaleDate.getDate(), "yyyy-MM-dd");
+                String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
+                balance = accountRepo.getTraderBalance(date, traderCode, Global.compCode).block();
+                if (balance != 0) {
+                    prvBal = balance - Util1.getDouble(txtVouBalance.getValue());
                 }
             }
-        } catch (HeadlessException ex) {
-            log.error("Save Sale :" + ex.getMessage());
-            JOptionPane.showMessageDialog(this, "Could'nt saved.");
+            saleHis.setListSH(saleTableModel.getListDetail());
+            saleHis.setListDel(saleTableModel.getDelList());
+            saleHis.setBackup(saleTableModel.isChange());
+            progress.setIndeterminate(true);
+            inventoryRepo.save(saleHis).subscribe((t) -> {
+                progress.setIndeterminate(false);
+                clear();
+                if (print) {
+                    String reportName = getReportName();
+                    printVoucher(t.getKey().getVouNo(), reportName, chkVou.isSelected());
+                }
+            });
+
         }
     }
 
@@ -578,15 +568,18 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }
 
     public void historySale() {
-        vouSearchDialog.setInventoryApi(inventoryApi);
-        vouSearchDialog.setInventoryRepo(inventoryRepo);
-        vouSearchDialog.setUserRepo(userRepo);
-        vouSearchDialog.setIconImage(new ImageIcon(getClass().getResource("/images/search.png")).getImage());
-        vouSearchDialog.setObserver(this);
-        vouSearchDialog.initMain();
-        vouSearchDialog.setSize(Global.width - 100, Global.height - 100);
-        vouSearchDialog.setLocationRelativeTo(null);
-        vouSearchDialog.setVisible(true);
+        if (dialog == null) {
+            dialog = new SaleHistoryDialog(Global.parentForm);
+            dialog.setInventoryApi(inventoryApi);
+            dialog.setInventoryRepo(inventoryRepo);
+            dialog.setUserRepo(userRepo);
+            dialog.setObserver(this);
+            dialog.initMain();
+            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setLocationRelativeTo(null);
+        }
+        dialog.search();
+        dialog.setVisible(true);
     }
 
     public void setSaleVoucher(SaleHis sh) {
@@ -601,7 +594,9 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             trader.subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);
             });
-            currAutoCompleter.setCurrency(inventoryRepo.findCurrency(saleHis.getCurCode()));
+            inventoryRepo.findCurrency(saleHis.getCurCode()).subscribe((t) -> {
+                currAutoCompleter.setCurrency(t);
+            });
             inventoryRepo.findSaleMan(saleHis.getSaleManCode(), deptId).subscribe((t) -> {
                 saleManCompleter.setSaleMan(t);
             });
@@ -1609,8 +1604,9 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
             case "SALE-HISTORY" -> {
                 if (selectObj instanceof VSale s) {
-                    SaleHis sh = inventoryRepo.findSale(s.getVouNo(), s.getDeptId());
-                    setSaleVoucher(sh);
+                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId()).subscribe((t) -> {
+                        setSaleVoucher(t);
+                    });
                 }
             }
             case "Select" -> {

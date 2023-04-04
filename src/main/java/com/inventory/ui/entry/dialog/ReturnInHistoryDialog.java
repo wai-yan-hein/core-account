@@ -59,7 +59,6 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     private StartWithRowFilter tblFilter;
     private TableRowSorter<TableModel> sorter;
     private LocationAutoCompleter locationAutoCompleter;
-    private boolean status = false;
 
     public WebClient getInventoryApi() {
         return inventoryApi;
@@ -102,13 +101,9 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     }
 
     public void initMain() {
-        if (!status) {
-            initCombo();
-            initTableVoucher();
-            setTodayDate();
-            status = true;
-        }
-        search();
+        initCombo();
+        initTableVoucher();
+        setTodayDate();
     }
 
     private void initCombo() {
@@ -181,7 +176,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
 
-    private void search() {
+    public void search() {
         progress.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setCusCode(traderAutoCompleter.getTrader().getKey().getCode());

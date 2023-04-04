@@ -4,7 +4,9 @@
  */
 package com.user.common;
 
+import com.acc.model.BusinessType;
 import com.common.Global;
+import com.common.ReturnObject;
 import com.user.model.RoleProperty;
 import com.common.Util1;
 import com.inventory.model.AppRole;
@@ -16,7 +18,9 @@ import com.user.model.SysProperty;
 import com.user.model.CompanyInfo;
 import com.user.model.Currency;
 import com.user.model.MachineProperty;
+import com.user.model.Menu;
 import com.user.model.PrivilegeCompany;
+import com.user.model.YearEnd;
 import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -34,11 +38,8 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class UserRepo {
 
-    int min = 1;
     @Autowired
     private WebClient userApi;
-    private DepartmentUser department;
-    private List<DepartmentUser> listDept;
 
     public Mono<List<Currency>> getCurrency() {
         return userApi.get()
@@ -47,11 +48,14 @@ public class UserRepo {
                 .retrieve().bodyToFlux(Currency.class).collectList();
     }
 
-    public Mono<List<CompanyInfo>> getCompany() {
+    public Mono<List<CompanyInfo>> getCompany(boolean active) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-company")
+                .queryParam("active", active)
                 .build())
-                .retrieve().bodyToFlux(CompanyInfo.class).collectList();
+                .retrieve()
+                .bodyToFlux(CompanyInfo.class)
+                .collectList();
     }
 
     public Mono<List<AppUser>> getAppUser() {
@@ -77,12 +81,19 @@ public class UserRepo {
                 .retrieve().bodyToFlux(AppRole.class).collectList();
     }
 
-    public Mono<MachineInfo> register(String macName) {
-        return userApi.get()
-                .uri(builder -> builder.path("/user/get-mac-info")
-                .queryParam("macName", macName)
-                .build())
-                .retrieve().bodyToMono(MachineInfo.class);
+    public MachineInfo register(String macName) {
+        try {
+            return userApi.get()
+                    .uri(builder -> builder.path("/user/get-mac-info")
+                    .queryParam("macName", macName)
+                    .build())
+                    .retrieve()
+                    .bodyToMono(MachineInfo.class)
+                    .block();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
+        }
 
     }
 
@@ -151,12 +162,22 @@ public class UserRepo {
                 .retrieve().bodyToMono(Currency.class);
     }
 
+    public Mono<AppRole> finRole(String roleCode) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/find-currency")
+                .queryParam("roleCode", roleCode)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().bodyToMono(AppRole.class);
+    }
+
     public Mono<DepartmentUser> findDepartment(Integer deptId) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/find-department")
                 .queryParam("deptId", deptId)
                 .build())
-                .retrieve().bodyToMono(DepartmentUser.class);
+                .retrieve()
+                .bodyToMono(DepartmentUser.class);
     }
 
     public Mono<DepartmentUser> saveDepartment(DepartmentUser d) {
@@ -262,8 +283,78 @@ public class UserRepo {
                 .uri(builder -> builder.path("/user/get-report")
                 .queryParam("roleCode", Global.roleCode)
                 .queryParam("menuClass", menuClass)
+                .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve().bodyToFlux(VRoleMenu.class).collectList();
     }
 
+    public Mono<List<BusinessType>> getBusinessType() {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getBusinessType")
+                .build())
+                .retrieve()
+                .bodyToFlux(BusinessType.class)
+                .collectList();
+    }
+
+    public Mono<BusinessType> save(BusinessType type) {
+        return userApi.post()
+                .uri("/user/saveBusinessType")
+                .body(Mono.just(type), BusinessType.class)
+                .retrieve()
+                .bodyToMono(BusinessType.class);
+    }
+
+    public Mono<BusinessType> find(Integer id) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/findBusinessType")
+                .queryParam("id", id)
+                .build())
+                .retrieve()
+                .bodyToMono(BusinessType.class);
+    }
+
+    public Mono<YearEnd> yearEnd(YearEnd end) {
+        return userApi.post()
+                .uri("/user/yearEnd")
+                .body(Mono.just(end), YearEnd.class)
+                .retrieve()
+                .bodyToMono(YearEnd.class);
+    }
+
+    public Mono<Menu> save(Menu menu) {
+        return userApi.post()
+                .uri("/user/save-menu")
+                .body(Mono.just(menu), Menu.class)
+                .retrieve()
+                .bodyToMono(Menu.class);
+    }
+
+    public Mono<List<Menu>> getMenuTree() {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/get-menu-tree")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(Menu.class)
+                .collectList();
+    }
+
+    public Mono<Boolean> delete(Menu menu) {
+        return userApi.post()
+                .uri("/user/delete-menu")
+                .body(Mono.just(menu), Menu.class)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+    }
+
+    public Mono<List<Menu>> getMenuParent() {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/get-menu-parent")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(Menu.class)
+                .collectList();
+    }
 }

@@ -68,7 +68,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private DateAutoCompleter dateAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
     private CurrencyAAutoCompleter currencyAAutoCompleter;
-    private boolean status = false;
     private List<Gl> list;
 
     public List<String> getDepartment() {
@@ -161,7 +160,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     }
 
     private void initCombo() {
-        dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
+        dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
         accountRepo.getDepartment().subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true, true);
@@ -189,7 +188,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         return departmentAutoCompleter == null ? department : departmentAutoCompleter.getListOption();
     }
 
-    private void searchTriBalDetail() {
+    public void searchTriBalDetail() {
         clear();
         progress.setIndeterminate(true);
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
@@ -267,14 +266,11 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     }
 
     public void initMain() {
-        setIconImage(Global.parentForm.getIconImage());
         initTable();
         initCombo();
-        initData();
-        searchTriBalDetail();
     }
 
-    private void initData() {
+    public void initData() {
         dateAutoCompleter.setStDate(stDate);
         dateAutoCompleter.setEndDate(endDate);
         txtDate.setText(String.format("%s to %s", stDate, endDate));

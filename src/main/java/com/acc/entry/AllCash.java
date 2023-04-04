@@ -57,7 +57,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -78,8 +77,8 @@ import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 /**
  *
@@ -96,7 +95,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private DepartmentAutoCompleter departmentAutoCompleter;
     private COA3AutoCompleter coaAutoCompleter;
     private CurrencyAAutoCompleter currencyAutoCompleter;
-    private SelectionObserver selectionObserver;
     private DespAutoCompleter despAutoCompleter;
     private RefAutoCompleter refAutoCompleter;
     private TranSourceAutoCompleter tranSourceAutoCompleter;
@@ -107,7 +105,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private final JPopupMenu popupmenu = new JPopupMenu();
     private final JLabel lblMessage = new JLabel();
     private TableFilterHeader filterHeader;
-    private final HashMap<String, Gl> hmOpening = new HashMap<>();
+    private double opening;
     private JProgressBar progress;
     private AccountRepo accountRepo;
     private UserRepo userRepo;
@@ -115,8 +113,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private Mono<List<Currency>> monoCur;
     private DateTableDecorator decorator;
     private final boolean single;
-    private AllCashTableModel allCashTableModel;
-    private DayBookTableModel dayBookTableModel;
+    private final AllCashTableModel allCashTableModel = new AllCashTableModel();
+    private final DayBookTableModel dayBookTableModel = new DayBookTableModel();
 
     public UserRepo getUserRepo() {
         return userRepo;
@@ -190,14 +188,25 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         actionMapping();
     }
 
+    private void batchLock(boolean lock) {
+        tblCash.setEnabled(lock);
+        observer.selected("save", lock);
+        observer.selected("delete", lock);
+    }
+
     private void initTableModel() {
         if (single) {
+            tblCash.setModel(dayBookTableModel);
+            dayBookTableModel.setParent(tblCash);
+            dayBookTableModel.setAccountRepo(accountRepo);
+            dayBookTableModel.setDateAutoCompleter(dateAutoCompleter);
+            dayBookTableModel.setObserver(this);
+            dayBookTableModel.setSourceAccId(sourceAccId);
             accountRepo.findCOA(sourceAccId).subscribe((coa) -> {
                 if (coa == null) {
                     JOptionPane.showMessageDialog(this, "mapping coa does not exists.");
                     return;
                 }
-                dayBookTableModel = new DayBookTableModel(coa.isCredit());
                 accountRepo.getDefaultDepartment().subscribe((t) -> {
                     dayBookTableModel.setDepartment(t);
                 }, (e) -> {
@@ -208,16 +217,17 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 }, (e) -> {
                     log.error(e.getMessage());
                 });
-                dayBookTableModel.setParent(tblCash);
-                dayBookTableModel.setAccountRepo(accountRepo);
-                dayBookTableModel.setDateAutoCompleter(dateAutoCompleter);
-                dayBookTableModel.setObserver(this);
-                dayBookTableModel.setSourceAccId(sourceAccId);
+                dayBookTableModel.setCredit(coa.isCredit());
                 dayBookTableModel.addNewRow();
-                tblCash.setModel(dayBookTableModel);
             });
         } else {
-            allCashTableModel = new AllCashTableModel();
+            allCashTableModel.setParent(tblCash);
+            allCashTableModel.setAccountRepo(accountRepo);
+            allCashTableModel.setDateAutoCompleter(dateAutoCompleter);
+            allCashTableModel.setObserver(this);
+            allCashTableModel.setSourceAccId(sourceAccId);
+            allCashTableModel.addNewRow();
+            tblCash.setModel(allCashTableModel);
             accountRepo.getDefaultDepartment().subscribe((t) -> {
                 allCashTableModel.setDepartment(t);
             }, (e) -> {
@@ -228,13 +238,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             }, (e) -> {
                 log.error(e.getMessage());
             });
-            allCashTableModel.setParent(tblCash);
-            allCashTableModel.setAccountRepo(accountRepo);
-            allCashTableModel.setDateAutoCompleter(dateAutoCompleter);
-            allCashTableModel.setObserver(this);
-            allCashTableModel.setSourceAccId(sourceAccId);
-            allCashTableModel.addNewRow();
-            tblCash.setModel(allCashTableModel);
+
         }
     }
 
@@ -283,7 +287,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         }, (e) -> {
             log.error(e.getMessage());
         });
-        dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
+        dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
         despAutoCompleter = new DespAutoCompleter(txtDesp, accountApi, null, true);
         despAutoCompleter.setSelectionObserver(this);
@@ -297,14 +301,15 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     public void initMain() {
+        batchLock(!Global.batchLock);
         initFilter();
         initTableModel();
         initTableCB();
         createDateFilter();
         searchCash();
-        accountRepo.listenGl().subscribe((t) -> {
-            log.info(t.toString());
-        });
+        /*accountRepo.listenGl().subscribe((t) -> {
+        log.info(t.toString());
+        });*/
     }
 
     private void requestFoucsTable() {
@@ -592,6 +597,47 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     private void searchCash() {
         progress.setIndeterminate(true);
+        clearModel();
+        Mono<TmpOpening> monoOp = accountRepo.getOpening(getOPFilter());
+        ReportFilter filter = getFilter();
+        Mono<List<Gl>> monoGl = getGl(filter);
+        Mono<Tuple2<TmpOpening, List<Gl>>> monoZip = monoOp.zipWith(monoGl);
+        monoZip.hasElement().subscribe((element) -> {
+            if (element) {
+                monoZip.subscribe((t) -> {
+                    TmpOpening op = t.getT1();
+                    opening = op == null ? 0 : op.getOpening();
+                    List<Gl> list = t.getT2();
+                    setData(list, filter.getFromDate());
+                    calDebitCredit();
+                    requestFoucsTable();
+                    decorator.refreshButton(filter.getFromDate());
+                    progress.setIndeterminate(false);
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                    progress.setIndeterminate(false);
+                });
+            } else {
+                setData(new ArrayList<>(), filter.getFromDate());
+                calDebitCredit();
+                requestFoucsTable();
+                decorator.refreshButton(filter.getFromDate());
+                progress.setIndeterminate(false);
+            }
+        });
+
+    }
+
+    private Mono<List<Gl>> getGl(ReportFilter filter) {
+        return accountApi.post()
+                .uri("/account/search-gl")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToFlux(Gl.class)
+                .collectList();
+    }
+
+    private ReportFilter getFilter() {
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
         filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
         filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
@@ -611,24 +657,47 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         filter.setCoaLv2(coaLv2);
         filter.setAcc(accCode);
         filter.setSummary(chkSummary.isSelected());
-        clearModel();
-        Flux<Gl> result = accountApi.post()
-                .uri("/account/search-gl")
-                .body(Mono.just(filter), ReportFilter.class)
-                .retrieve()
-                .bodyToFlux(Gl.class);
-        result.subscribe((t) -> {
-            addObject(t);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-            progress.setIndeterminate(false);
-        }, () -> {
-            refreshModel(filter.getFromDate());
-            calOpeningClosing();
-            requestFoucsTable();
-            decorator.refreshButton(filter.getFromDate());
-            progress.setIndeterminate(false);
-        });
+        return filter;
+    }
+
+    private ReportFilter getOPFilter() {
+        String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat);
+        String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
+        String clDate = Util1.toDateStrMYSQL(stDate, "dd/MM/yyyy");
+        ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
+        filter.setOpeningDate(opDate);
+        filter.setFromDate(clDate);
+        filter.setCurCode(getCurCode());
+        filter.setListDepartment(getListDep());
+        filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
+        filter.setCoaCode(sourceAccId);
+        return filter;
+    }
+
+    private List<Gl> getData() {
+        return single ? dayBookTableModel.getListVGl() : allCashTableModel.getListVGl();
+    }
+
+    private void calDebitCredit() {
+        opTableModel.clear();
+        inOutTableModel.clear();
+        List<Gl> listVGl = getData();
+        double drAmt = listVGl.stream()
+                .filter(gl -> gl.getDrAmt() != null)
+                .mapToDouble(Gl::getDrAmt)
+                .sum();
+        double crAmt = listVGl.stream()
+                .filter(gl -> gl.getCrAmt() != null)
+                .mapToDouble(Gl::getCrAmt)
+                .sum();
+        double closing = opening + drAmt - crAmt;
+        Gl vgl = new Gl();
+        vgl.setCurCode(getCurCode());
+        vgl.setDrAmt(opening);
+        vgl.setCrAmt(closing);
+        opTableModel.addVGl(vgl);
+        inOutTableModel.addVGl(new Gl(getCurCode(), drAmt, crAmt));
+        txtRecord.setValue(listVGl.size());
     }
 
     private void clearModel() {
@@ -637,54 +706,21 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         } else {
             allCashTableModel.clear();
         }
+        txtRecord.setValue(0);
     }
 
-    private void refreshModel(String fromDate) {
+    private void setData(List<Gl> list, String fromDate) {
         if (single) {
+            dayBookTableModel.setListVGl(list);
             dayBookTableModel.setGlDate(fromDate);
-            dayBookTableModel.fireTableDataChanged();
             dayBookTableModel.addNewRow();
         } else {
+            allCashTableModel.setListVGl(list);
             allCashTableModel.setGlDate(fromDate);
-            allCashTableModel.fireTableDataChanged();
             allCashTableModel.addNewRow();
         }
     }
 
-    private void addObject(Gl t) {
-        if (single) {
-            dayBookTableModel.addVGl(t);
-            txtRecord.setValue(dayBookTableModel.getListSize());
-        } else {
-            allCashTableModel.addVGl(t);
-            txtRecord.setValue(allCashTableModel.getListSize());
-        }
-    }
-
-    /*  private void getLatestCurrency() {
-    if (ProUtil.isMultiCur()) {
-    initCurrency();
-    } else {
-    tblCurrency.setVisible(false);
-    jScrollPane4.setBorder(null);
-    }
-    }
-    
-    private void initCurrency() {
-    tblCurrency.setModel(curExchangeRateTableModel);
-    tblCurrency.getTableHeader().setFont(Global.tblHeaderFont);
-    tblCurrency.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    tblCurrency.setFont(Global.shortCutFont);
-    tblCurrency.setCellSelectionEnabled(true);
-    tblCurrency.setDefaultRenderer(Object.class, new TableCellRender());
-    tblCurrency.setDefaultRenderer(Double.class, new TableCellRender());
-    //curExchangeRateTableModel.setListEx(exchangeService.getLatestExchange(Global.compCode, Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd")));
-    }*/
-    /**
-     * This method is called from within the constructor to initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is always
-     * regenerated by the Form Editor.
-     */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -1071,15 +1107,15 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tblScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)
+                .addComponent(tblScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 486, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 131, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(panelDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -1168,7 +1204,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     private void txtDespActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtDespActionPerformed
         // TODO add your handling code here:
-        selectionObserver.selected("Description", Util1.isNull(txtDesp.getText(), "-"));
     }//GEN-LAST:event_txtDespActionPerformed
 
     private void txtRefrenceFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtRefrenceFocusGained
@@ -1182,7 +1217,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     private void txtRefrenceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtRefrenceActionPerformed
         // TODO add your handling code here:
-        selectionObserver.selected("Ref", Util1.isNull(txtRefrence.getText(), "-"));
     }//GEN-LAST:event_txtRefrenceActionPerformed
 
     private void txtCurrencyFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCurrencyFocusGained
@@ -1254,60 +1288,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JFormattedTextField txtRecord;
     private javax.swing.JTextField txtRefrence;
     // End of variables declaration//GEN-END:variables
-
-    private void calDebitCredit() {
-        opTableModel.clear();
-        inOutTableModel.clear();
-        List<Gl> listVGl;
-        if (single) {
-            listVGl = dayBookTableModel.getListVGl();
-        } else {
-            listVGl = allCashTableModel.getListVGl();
-        }
-        Map<String, List<Gl>> hmGroup = listVGl.stream().collect(Collectors.groupingBy(w -> w.getCurCode()));
-        hmGroup.forEach((t, u) -> {
-            double drAmt = 0.0;
-            double crAmt = 0.0;
-            for (Gl gl : u) {
-                drAmt += Util1.getDouble(gl.getDrAmt());
-                crAmt += Util1.getDouble(gl.getCrAmt());
-            }
-            double closing;
-            Gl vgl = hmOpening.get(t);
-            if (vgl != null) {
-                closing = Util1.getDouble(vgl.getDrAmt()) + drAmt - crAmt;
-                vgl.setCrAmt(closing);
-            } else {
-                closing = drAmt - crAmt;
-                vgl = new Gl(t, 0.0, closing);
-            }
-            opTableModel.addVGl(vgl);
-            inOutTableModel.addVGl(new Gl(t, drAmt, crAmt));
-        });
-    }
-
-    private void calOpeningClosing() {
-        log.info("cal opening");
-        String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat);
-        String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
-        String clDate = Util1.toDateStrMYSQL(stDate, "dd/MM/yyyy");
-        ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
-        filter.setOpeningDate(opDate);
-        filter.setFromDate(clDate);
-        filter.setCurCode(getCurCode());
-        filter.setListDepartment(getListDep());
-        filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
-        filter.setCoaCode(sourceAccId);
-        Mono<TmpOpening> result = accountRepo.getOpening(filter);
-        hmOpening.clear();
-        result.subscribe((t) -> {
-            hmOpening.put(t.getKey().getCurCode(), new Gl(t.getKey().getCurCode(), t.getOpening(), t.getClosing()));
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        }, () -> {
-            calDebitCredit();
-        });
-    }
 
     @Override
     public void selected(Object source, Object selectObj) {

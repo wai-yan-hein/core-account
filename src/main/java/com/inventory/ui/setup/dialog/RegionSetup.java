@@ -123,13 +123,15 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
 
     private void save() {
         if (isValidEntry()) {
-            region = inventoryRepo.saveRegion(region);
-            if (lblStatus.getText().equals("EDIT")) {
-                listRegion.set(selectRow, region);
-            } else {
-                listRegion.add(region);
-            }
-            clear();
+            inventoryRepo.saveRegion(region).subscribe((t) -> {
+                if (lblStatus.getText().equals("EDIT")) {
+                    listRegion.set(selectRow, t);
+                } else {
+                    listRegion.add(t);
+                }
+                clear();
+            });
+
         }
     }
 

@@ -63,16 +63,18 @@ public class VouStatusAutoCompleter implements KeyListener, SelectionObserver {
     private FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusGained(FocusEvent e) {
-            List<VouStatus> list = inventoryRepo.getVoucherStatus();
-            if (filter) {
-                VouStatus loc = new VouStatus("-", "All");
-                list.add(0, loc);
-                setVoucher(loc);
-            }
-            vouStatusTableModel.setListVou(list);
-            if (!list.isEmpty()) {
-                table.setRowSelectionInterval(0, 0);
-            }
+            inventoryRepo.getVoucherStatus().subscribe((t) -> {
+                if (filter) {
+                    VouStatus loc = new VouStatus("-", "All");
+                    t.add(0, loc);
+                    setVoucher(loc);
+                }
+                vouStatusTableModel.setListVou(t);
+                if (!t.isEmpty()) {
+                    table.setRowSelectionInterval(0, 0);
+                }
+            });
+
         }
 
     };

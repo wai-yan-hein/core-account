@@ -38,8 +38,6 @@ import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.user.common.UserRepo;
 import java.awt.Color;
@@ -51,7 +49,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.text.DateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -176,6 +173,12 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         actionMapping();
     }
 
+    private void batchLock(boolean lock) {
+        tblCash.setEnabled(lock);
+        observer.selected("save", lock);
+        observer.selected("delete", lock);
+    }
+
     private void initTableModel() {
         accountRepo.getDefaultDepartment().subscribe((t) -> {
             adjustmentTableModel.setDepartment(t);
@@ -228,7 +231,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         });
         coaAutoCompleter = new COA3AutoCompleter(txtAccount, accountApi, null, true, 0);
         coaAutoCompleter.setSelectionObserver(this);
-        dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
+        dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
         despAutoCompleter = new DespAutoCompleter(txtDesp, accountApi, null, true);
         despAutoCompleter.setSelectionObserver(this);
@@ -240,6 +243,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
     }
 
     public void initMain() {
+        batchLock(!Global.batchLock);
         initFilter();
         initTableModel();
         initTableCB();

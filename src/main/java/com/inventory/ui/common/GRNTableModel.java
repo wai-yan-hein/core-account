@@ -310,7 +310,9 @@ public class GRNTableModel extends AbstractTableModel {
     }
 
     private void setRecord(int size) {
-        lblRec.setText("Records : " + size);
+        if (lblRec != null) {
+            lblRec.setText("Records : " + size);
+        }
     }
 
     public void addNewRow() {

@@ -44,8 +44,16 @@ public class DayBookTableModel extends AbstractTableModel {
     private AccountRepo accountRepo;
     private boolean credit;
 
-    public DayBookTableModel(boolean credit) {
+    public boolean isCredit() {
+        return credit;
+    }
+
+    public void setCredit(boolean credit) {
         this.credit = credit;
+    }
+    
+
+    public DayBookTableModel() {
     }
 
     public AccountRepo getAccountRepo() {

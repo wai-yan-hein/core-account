@@ -47,13 +47,16 @@ public class OtherSetup extends javax.swing.JPanel {
     }
 
     private void regionSetup() {
-        regionSetup = new RegionSetup(Global.parentForm);
-        regionSetup.setInventoryRepo(inventoryRepo);
-        regionSetup.setListRegion(inventoryRepo.getRegion());
-        regionSetup.initMain();
-        regionSetup.setSize(Global.width / 2, Global.height / 2);
-        regionSetup.setLocationRelativeTo(null);
-        regionSetup.setVisible(true);
+        inventoryRepo.getRegion().subscribe((t) -> {
+            regionSetup = new RegionSetup(Global.parentForm);
+            regionSetup.setInventoryRepo(inventoryRepo);
+            regionSetup.setListRegion(t);
+            regionSetup.initMain();
+            regionSetup.setSize(Global.width / 2, Global.height / 2);
+            regionSetup.setLocationRelativeTo(null);
+            regionSetup.setVisible(true);
+        });
+
     }
 
     private void locationSetup() {
@@ -87,14 +90,17 @@ public class OtherSetup extends javax.swing.JPanel {
     }
 
     private void vouStatusSetup() {
-        vsDialog = new VouStatusSetupDialog();
-        vsDialog.setIconImage(icon);
-        vsDialog.setInventoryRepo(inventoryRepo);
-        vsDialog.setListVou(inventoryRepo.getVoucherStatus());
-        vsDialog.initMain();
-        vsDialog.setSize(Global.width / 2, Global.height / 2);
-        vsDialog.setLocationRelativeTo(null);
-        vsDialog.setVisible(true);
+        inventoryRepo.getVoucherStatus().subscribe((t) -> {
+            vsDialog = new VouStatusSetupDialog();
+            vsDialog.setIconImage(icon);
+            vsDialog.setInventoryRepo(inventoryRepo);
+            vsDialog.setListVou(t);
+            vsDialog.initMain();
+            vsDialog.setSize(Global.width / 2, Global.height / 2);
+            vsDialog.setLocationRelativeTo(null);
+            vsDialog.setVisible(true);
+        });
+
     }
 
     private void relationSetup() {
@@ -112,14 +118,17 @@ public class OtherSetup extends javax.swing.JPanel {
     }
 
     private void processType() {
-        processTypeDialog = new ProcessTypeSetupDialog();
-        processTypeDialog.setInventoryRepo(inventoryRepo);
-        processTypeDialog.setListType(inventoryRepo.getProcessType());
-        processTypeDialog.setIconImage(icon);
-        processTypeDialog.initMain();
-        processTypeDialog.setSize(Global.width / 2, Global.height / 2);
-        processTypeDialog.setLocationRelativeTo(null);
-        processTypeDialog.setVisible(true);
+        inventoryRepo.getProcessType().subscribe((t) -> {
+            processTypeDialog = new ProcessTypeSetupDialog();
+            processTypeDialog.setInventoryRepo(inventoryRepo);
+            processTypeDialog.setListType(t);
+            processTypeDialog.setIconImage(icon);
+            processTypeDialog.initMain();
+            processTypeDialog.setSize(Global.width / 2, Global.height / 2);
+            processTypeDialog.setLocationRelativeTo(null);
+            processTypeDialog.setVisible(true);
+        });
+
     }
 
     /**

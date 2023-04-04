@@ -196,30 +196,28 @@ public class InventoryRepo {
                 .bodyToMono(Trader.class);
     }
 
-    public TraderGroup findTraderGroup(String code, Integer deptId) {
+    public Mono<TraderGroup> findTraderGroup(String code, Integer deptId) {
         TraderGroupKey key = new TraderGroupKey();
         key.setGroupCode(Util1.isNull(code, "-"));
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
-        Mono<TraderGroup> result = inventoryApi.post()
+        return inventoryApi.post()
                 .uri("/setup/find-trader-group")
                 .body(Mono.just(key), TraderGroupKey.class)
                 .retrieve()
                 .bodyToMono(TraderGroup.class);
-        return result.block();
     }
 
-    public Region findRegion(String code) {
+    public Mono<Region> findRegion(String code) {
         RegionKey key = new RegionKey();
         key.setRegCode(Util1.isNull(code, "-"));
         key.setCompCode(Global.compCode);
         key.setDeptId(Global.deptId);
-        Mono<Region> result = inventoryApi.post()
+        return inventoryApi.post()
                 .uri("/setup/find-region")
                 .body(Mono.just(key), RegionKey.class)
                 .retrieve()
                 .bodyToMono(Region.class);
-        return result.block();
     }
 
     public Flux<Trader> getCustomer() {
@@ -242,40 +240,41 @@ public class InventoryRepo {
         return result;
     }
 
-    public List<Trader> getTraderList(String text, String type) {
-        Mono<ResponseEntity<List<Trader>>> result = inventoryApi.get()
+    public Mono<List<Trader>> getTraderList(String text, String type) {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-trader-list")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .queryParam("text", text)
                 .queryParam("type", type)
                 .build())
-                .retrieve().toEntityList(Trader.class);
-        return result.block().getBody();
+                .retrieve()
+                .bodyToFlux(Trader.class)
+                .collectList();
     }
 
-    public List<GRN> getBatchList(String batchNo) {
-        Mono<ResponseEntity<List<GRN>>> result = inventoryApi.get()
+    public Mono<List<GRN>> getBatchList(String batchNo) {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/grn/get-batch-list")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .queryParam("batchNo", batchNo)
                 .build())
-                .retrieve().toEntityList(GRN.class);
-        return result.block().getBody();
+                .retrieve().bodyToFlux(GRN.class)
+                .collectList();
     }
 
-    public List<Expense> getExpense() {
-        Mono<ResponseEntity<List<Expense>>> result = inventoryApi.get()
+    public Mono<List<Expense>> getExpense() {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/expense/get-expense")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().toEntityList(Expense.class);
-        return result.block().getBody();
+                .retrieve().bodyToFlux(Expense.class)
+                .collectList();
     }
 
-    public Trader findTraderRFID(String rfId) {
-        Mono<Trader> result = inventoryApi.get()
+    public Mono<Trader> findTraderRFID(String rfId) {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/find-trader-rfid")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
@@ -283,17 +282,17 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToMono(Trader.class);
-        return result.block();
     }
 
-    public List<Region> getRegion() {
-        Mono<ResponseEntity<List<Region>>> result = inventoryApi.get()
+    public Mono<List<Region>> getRegion() {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-region")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
-                .retrieve().toEntityList(Region.class);
-        return result.block().getBody();
+                .retrieve()
+                .bodyToFlux(Region.class)
+                .collectList();
     }
 
     public Mono<Location> findLocation(String locCode, Integer deptId) {
@@ -308,69 +307,64 @@ public class InventoryRepo {
                 .bodyToMono(Location.class).cache();
     }
 
-    public StockBrand findBrand(String brandCode, Integer deptId) {
+    public Mono<StockBrand> findBrand(String brandCode, Integer deptId) {
         StockBrandKey key = new StockBrandKey();
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setBrandCode(brandCode);
-        Mono<StockBrand> result = inventoryApi.post()
+        return inventoryApi.post()
                 .uri("/setup/find-brand")
                 .body(Mono.just(key), StockBrandKey.class)
                 .retrieve()
                 .bodyToMono(StockBrand.class);
-        return result.block();
     }
 
-    public VouStatus findVouStatus(String code, Integer deptId) {
+    public Mono<VouStatus> findVouStatus(String code, Integer deptId) {
         VouStatusKey key = new VouStatusKey();
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setCode(code);
-        Mono<VouStatus> result = inventoryApi.post()
+        return inventoryApi.post()
                 .uri("/setup/find-voucher-status")
                 .body(Mono.just(key), VouStatusKey.class)
                 .retrieve()
                 .bodyToMono(VouStatus.class);
-        return result.block();
     }
 
-    public StockUnit findUnit(String unitCode, Integer deptId) {
+    public Mono<StockUnit> findUnit(String unitCode, Integer deptId) {
         StockUnitKey key = new StockUnitKey();
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setUnitCode(unitCode);
-        Mono<StockUnit> result = inventoryApi.post()
+        return inventoryApi.post()
                 .uri("/setup/find-unit")
                 .body(Mono.just(key), StockUnitKey.class)
                 .retrieve()
                 .bodyToMono(StockUnit.class);
-        return result.block();
     }
 
-    public UnitRelation findRelation(String relCode, Integer deptId) {
+    public Mono<UnitRelation> findRelation(String relCode, Integer deptId) {
         RelationKey key = new RelationKey();
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setRelCode(relCode);
-        Mono<UnitRelation> result = inventoryApi.post()
+        return inventoryApi.post()
                 .uri("/setup/find-unit-relation")
                 .body(Mono.just(key), RelationKey.class)
                 .retrieve()
                 .bodyToMono(UnitRelation.class);
-        return result.block();
     }
 
-    public Category findCategory(String catCode, Integer deptId) {
+    public Mono<Category> findCategory(String catCode, Integer deptId) {
         CategoryKey key = new CategoryKey();
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setCatCode(catCode);
-        Mono<Category> result = inventoryApi.post()
+        return inventoryApi.post()
                 .uri("/setup/find-category")
                 .body(Mono.just(key), CategoryKey.class)
                 .retrieve()
                 .bodyToMono(Category.class);
-        return result.block();
     }
 
     public Mono<Stock> findStock(String stockCode) {
@@ -389,48 +383,45 @@ public class InventoryRepo {
                 });
     }
 
-    public StockType findGroup(String typeCode, Integer deptId) {
+    public Mono<StockType> findGroup(String typeCode, Integer deptId) {
         StockTypeKey key = new StockTypeKey();
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setStockTypeCode(typeCode);
-        Mono<StockType> result = inventoryApi.post()
+        return inventoryApi.post()
                 .uri("/setup/find-type")
                 .body(Mono.just(key), StockTypeKey.class)
                 .retrieve()
                 .bodyToMono(StockType.class);
-        return result.block();
     }
 
-    public WeightLossHis findWeightLoss(String vouNo, Integer deptId) {
+    public Mono<WeightLossHis> findWeightLoss(String vouNo, Integer deptId) {
         WeightLossHisKey key = new WeightLossHisKey();
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setVouNo(vouNo);
-        Mono<WeightLossHis> result = inventoryApi.post()
+        return inventoryApi.post()
                 .uri("/weight/find-weight-loss")
                 .body(Mono.just(key), StockTypeKey.class)
                 .retrieve()
                 .bodyToMono(WeightLossHis.class);
-        return result.block();
     }
 
-    public ProcessHis findProcess(ProcessHisKey key) {
-        Mono<ProcessHis> result = inventoryApi.post()
+    public Mono<ProcessHis> findProcess(ProcessHisKey key) {
+        return inventoryApi.post()
                 .uri("/process/find-process")
                 .body(Mono.just(key), ProcessHisKey.class)
                 .retrieve()
                 .bodyToMono(ProcessHis.class);
-        return result.block();
     }
 
-    public Currency findCurrency(String curCode) {
-        Mono<ResponseEntity<Currency>> result = inventoryApi.get()
+    public Mono<Currency> findCurrency(String curCode) {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/find-currency")
                 .queryParam("curCode", curCode)
                 .build())
-                .retrieve().toEntity(Currency.class);
-        return result.block().getBody();
+                .retrieve()
+                .bodyToMono(Currency.class);
     }
 
     public Mono<List<Location>> getLocation() {
@@ -453,34 +444,36 @@ public class InventoryRepo {
         return result;
     }
 
-    public List<Stock> getStock(String str) {
-        Mono<ResponseEntity<List<Stock>>> result = inventoryApi.get()
+    public Mono<List<Stock>> getStock(String str) {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-stock-list")
                 .queryParam("text", str)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
-                .retrieve().toEntityList(Stock.class);
-        return result.block().getBody();
+                .retrieve()
+                .bodyToFlux(Stock.class)
+                .collectList();
     }
 
-    public List<Stock> getService() {
-        Mono<ResponseEntity<List<Stock>>> result = inventoryApi.get()
+    public Mono<List<Stock>> getService() {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-service")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
-                .retrieve().toEntityList(Stock.class);
-        return result.block().getBody();
+                .retrieve()
+                .bodyToFlux(Stock.class)
+                .collectList();
     }
 
-    public List<String> deleteStock(StockKey key) {
-        Mono<ResponseEntity<List<String>>> result = inventoryApi.post()
+    public Mono<List<String>> deleteStock(StockKey key) {
+        return inventoryApi.post()
                 .uri("/setup/delete-stock")
                 .body(Mono.just(key), StockKey.class)
                 .retrieve()
-                .toEntityList(String.class);
-        return result.block().getBody();
+                .bodyToFlux(String.class)
+                .collectList();
     }
 
     public Mono<List<Currency>> getCurrency() {
@@ -492,14 +485,15 @@ public class InventoryRepo {
 
     }
 
-    public List<VouStatus> getVoucherStatus() {
-        Mono<ResponseEntity<List<VouStatus>>> result = inventoryApi.get()
+    public Mono<List<VouStatus>> getVoucherStatus() {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-voucher-status")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
-                .retrieve().toEntityList(VouStatus.class);
-        return result.block().getBody();
+                .retrieve()
+                .bodyToFlux(VouStatus.class)
+                .collectList();
     }
 
     public Mono<List<UnitRelation>> getUnitRelation() {
@@ -511,161 +505,144 @@ public class InventoryRepo {
                 .retrieve().bodyToFlux(UnitRelation.class).collectList();
     }
 
-    public Trader saveTrader(Trader t) {
-        Mono<Trader> result = inventoryApi.post()
+    public Mono<Trader> saveTrader(Trader t) {
+        return inventoryApi.post()
                 .uri("/setup/save-trader")
                 .body(Mono.just(t), Trader.class)
                 .retrieve()
                 .bodyToMono(Trader.class);
-        return result.block();
     }
 
-    public Stock saveStock(Stock s) {
-        Mono<Stock> result = inventoryApi.post()
+    public Mono<Stock> saveStock(Stock s) {
+        return inventoryApi.post()
                 .uri("/setup/save-stock")
                 .body(Mono.just(s), Stock.class)
                 .retrieve()
                 .bodyToMono(Stock.class);
-        return result.block();
     }
 
-    public Currency saveCurrency(Currency c) {
-        Mono<Currency> result = inventoryApi.post()
+    public Mono<Currency> saveCurrency(Currency c) {
+        return inventoryApi.post()
                 .uri("/setup/save-currency")
                 .body(Mono.just(c), Currency.class)
                 .retrieve()
                 .bodyToMono(Currency.class);
-        return result.block();
     }
 
-    public Location saveLocaiton(Location loc) {
-        Mono<Location> result = inventoryApi.post()
+    public Mono<Location> saveLocaiton(Location loc) {
+        return inventoryApi.post()
                 .uri("/setup/save-location")
                 .body(Mono.just(loc), Location.class)
                 .retrieve()
                 .bodyToMono(Location.class);
-        return result.block();
     }
 
-    public Region saveRegion(Region reg) {
-        Mono<Region> result = inventoryApi.post()
+    public Mono<Region> saveRegion(Region reg) {
+        return inventoryApi.post()
                 .uri("/setup/save-region")
                 .body(Mono.just(reg), Region.class)
                 .retrieve()
                 .bodyToMono(Region.class);
-        return result.block();
     }
 
-    public SaleMan saveSaleMan(SaleMan s) {
-        Mono<SaleMan> result = inventoryApi.post()
+    public Mono<SaleMan> saveSaleMan(SaleMan s) {
+        return inventoryApi.post()
                 .uri("/setup/save-saleman")
                 .body(Mono.just(s), SaleMan.class)
                 .retrieve()
                 .bodyToMono(SaleMan.class);
-        return result.block();
     }
 
-    public StockBrand saveBrand(StockBrand s) {
-        Mono<StockBrand> result = inventoryApi.post()
+    public Mono<StockBrand> saveBrand(StockBrand s) {
+        return inventoryApi.post()
                 .uri("/setup/save-brand")
                 .body(Mono.just(s), StockBrand.class)
                 .retrieve()
                 .bodyToMono(StockBrand.class);
-        return result.block();
     }
 
-    public Expense saveExpense(Expense s) {
-        Mono<Expense> result = inventoryApi.post()
+    public Mono<Expense> saveExpense(Expense s) {
+        return inventoryApi.post()
                 .uri("/expense/save-expense")
                 .body(Mono.just(s), Expense.class)
                 .retrieve()
                 .bodyToMono(Expense.class);
-        return result.block();
     }
 
-    public StockType saveStockType(StockType t) {
-        Mono<StockType> result = inventoryApi.post()
+    public Mono<StockType> saveStockType(StockType t) {
+        return inventoryApi.post()
                 .uri("/setup/save-type")
                 .body(Mono.just(t), StockType.class)
                 .retrieve()
                 .bodyToMono(StockType.class);
-        return result.block();
     }
 
-    public StockUnit saveStockUnit(StockUnit unit) {
-        Mono<StockUnit> result = inventoryApi.post()
+    public Mono<StockUnit> saveStockUnit(StockUnit unit) {
+        return inventoryApi.post()
                 .uri("/setup/save-unit")
                 .body(Mono.just(unit), StockUnit.class)
                 .retrieve()
                 .bodyToMono(StockUnit.class);
-        return result.block();
     }
 
-    public VouStatus saveVouStatus(VouStatus vou) {
-        Mono<VouStatus> result = inventoryApi.post()
+    public Mono<VouStatus> saveVouStatus(VouStatus vou) {
+        return inventoryApi.post()
                 .uri("/setup/save-voucher-status")
                 .body(Mono.just(vou), VouStatus.class)
                 .retrieve()
                 .bodyToMono(VouStatus.class);
-        return result.block();
     }
 
-    public ProcessType saveProcessType(ProcessType vou) {
-        Mono<ProcessType> result = inventoryApi.post()
+    public Mono<ProcessType> saveProcessType(ProcessType vou) {
+        return inventoryApi.post()
                 .uri("/setup/save-process-type")
                 .body(Mono.just(vou), ProcessType.class)
                 .retrieve()
                 .bodyToMono(ProcessType.class);
-        return result.block();
     }
 
-    public Category saveCategory(Category category) {
-        Mono<Category> result = inventoryApi.post()
+    public Mono<Category> saveCategory(Category category) {
+        return inventoryApi.post()
                 .uri("/setup/save-category")
                 .body(Mono.just(category), Category.class)
                 .retrieve()
                 .bodyToMono(Category.class);
-        return result.block();
     }
 
-    public Pattern savePattern(Pattern pattern) {
-        Mono<Pattern> result = inventoryApi.post()
+    public Mono<Pattern> savePattern(Pattern pattern) {
+        return inventoryApi.post()
                 .uri("/setup/save-pattern")
                 .body(Mono.just(pattern), Pattern.class)
                 .retrieve()
                 .bodyToMono(Pattern.class);
-        return result.block();
     }
 
-    public WeightLossHis saveWeightLoss(WeightLossHis loss) {
-        Mono<WeightLossHis> result = inventoryApi.post()
+    public Mono<WeightLossHis> saveWeightLoss(WeightLossHis loss) {
+        return inventoryApi.post()
                 .uri("/weight/save-weight-loss")
                 .body(Mono.just(loss), WeightLossHis.class)
                 .retrieve()
                 .bodyToMono(WeightLossHis.class);
-        return result.block();
     }
 
-    public void delete(Pattern p) {
-        Mono<ReturnObject> result = inventoryApi.post()
+    public Mono<Boolean> delete(Pattern p) {
+        return inventoryApi.post()
                 .uri("/setup/delete-pattern")
                 .body(Mono.just(p), Pattern.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
+                .bodyToMono(Boolean.class);
     }
 
-    public UnitRelation saveUnitRelation(UnitRelation rel) {
-        Mono<UnitRelation> result = inventoryApi.post()
+    public Mono<UnitRelation> saveUnitRelation(UnitRelation rel) {
+        return inventoryApi.post()
                 .uri("/setup/save-unit-relation")
                 .body(Mono.just(rel), UnitRelation.class)
                 .retrieve()
                 .bodyToMono(UnitRelation.class);
-        return result.block();
     }
 
-    public Float getPurRecentPrice(String stockCode, String vouDate, String unit) {
-        Mono<General> result = inventoryApi.get()
+    public Mono<General> getPurRecentPrice(String stockCode, String vouDate, String unit) {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/report/get-purchase-recent-price")
                 .queryParam("stockCode", stockCode)
                 .queryParam("vouDate", vouDate)
@@ -674,11 +651,10 @@ public class InventoryRepo {
                 .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().bodyToMono(General.class);
-        return Util1.getFloat(result.block().getAmount());
     }
 
-    public Float getWeightLossRecentPrice(String stockCode, String vouDate, String unit) {
-        Mono<General> result = inventoryApi.get()
+    public Mono<General> getWeightLossRecentPrice(String stockCode, String vouDate, String unit) {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/report/get-weight-loss-recent-price")
                 .queryParam("stockCode", stockCode)
                 .queryParam("vouDate", vouDate)
@@ -687,11 +663,10 @@ public class InventoryRepo {
                 .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().bodyToMono(General.class);
-        return Util1.getFloat(result.block().getAmount());
     }
 
-    public Float getPurAvgPrice(String stockCode, String vouDate, String unit) {
-        Mono<General> result = inventoryApi.get()
+    public Mono<General> getPurAvgPrice(String stockCode, String vouDate, String unit) {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/report/get-purchase-avg-price")
                 .queryParam("stockCode", stockCode)
                 .queryParam("vouDate", vouDate)
@@ -700,11 +675,10 @@ public class InventoryRepo {
                 .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().bodyToMono(General.class);
-        return Util1.getFloat(result.block().getAmount());
     }
 
-    public Float getProductionRecentPrice(String stockCode, String vouDate, String unit) {
-        Mono<General> result = inventoryApi.get()
+    public Mono<General> getProductionRecentPrice(String stockCode, String vouDate, String unit) {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/report/get-production-recent-price")
                 .queryParam("stockCode", stockCode)
                 .queryParam("vouDate", vouDate)
@@ -713,11 +687,10 @@ public class InventoryRepo {
                 .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().bodyToMono(General.class);
-        return Util1.getFloat(result.block().getAmount());
     }
 
-    public Float getSaleRecentPrice(String stockCode, String vouDate, String unit) {
-        Mono<General> result = inventoryApi.get()
+    public Mono<General> getSaleRecentPrice(String stockCode, String vouDate, String unit) {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/report/get-sale-recent-price")
                 .queryParam("stockCode", stockCode)
                 .queryParam("vouDate", vouDate)
@@ -725,138 +698,132 @@ public class InventoryRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve().bodyToMono(General.class);
-        return Util1.getFloat(result.block().getAmount());
     }
 
-    public Float getStockIORecentPrice(String stockCode, String vouDate, String unit) {
-        Mono<General> result = inventoryApi.get()
+    public Mono<General> getStockIORecentPrice(String stockCode, String vouDate, String unit) {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/report/get-stock-io-recent-price")
                 .queryParam("stockCode", stockCode)
                 .queryParam("vouDate", vouDate)
                 .queryParam("unit", unit)
                 .build())
                 .retrieve().bodyToMono(General.class);
-        return Util1.getFloat(result.block().getAmount());
     }
 
-    public List<UnitRelationDetail> getRelationDetail(String code, Integer deptId) {
-        Mono<ResponseEntity<List<UnitRelationDetail>>> result = inventoryApi.get()
+    public Mono<List<UnitRelationDetail>> getRelationDetail(String code, Integer deptId) {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-unit-relation-detail")
                 .queryParam("code", code)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", deptId)
                 .build())
-                .retrieve().toEntityList(UnitRelationDetail.class);
-        return result.block().getBody();
+                .retrieve()
+                .bodyToFlux(UnitRelationDetail.class)
+                .collectList();
     }
 
-    public List<ProcessType> getProcessType() {
-        Mono<ResponseEntity<List<ProcessType>>> result = inventoryApi.get()
+    public Mono<List<ProcessType>> getProcessType() {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-process-type")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().toEntityList(ProcessType.class);
-        return result.block().getBody();
+                .retrieve()
+                .bodyToFlux(ProcessType.class)
+                .collectList();
     }
 
-    public List<CFont> getFont() {
-        Mono<ResponseEntity<List<CFont>>> result = inventoryApi.get()
+    public Mono<List<CFont>> getFont() {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-font")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().toEntityList(CFont.class);
-        return result.block().getBody();
+                .retrieve()
+                .bodyToFlux(CFont.class)
+                .collectList();
     }
 
-    public StockInOut findStockIO(String vouNo, Integer deptId) {
+    public Mono<StockInOut> findStockIO(String vouNo, Integer deptId) {
         StockIOKey key = new StockIOKey();
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setVouNo(vouNo);
-        Mono<StockInOut> result = inventoryApi.post()
+        return inventoryApi.post()
                 .uri("/stockio/find-stockio")
                 .body(Mono.just(key), StockIOKey.class)
                 .retrieve()
                 .bodyToMono(StockInOut.class);
-        return result.block();
     }
 
-    public TransferHis findTransfer(String vouNo, Integer deptId) {
+    public Mono<TransferHis> findTransfer(String vouNo, Integer deptId) {
         TransferHisKey key = new TransferHisKey();
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setVouNo(vouNo);
-        Mono<TransferHis> result = inventoryApi.post()
+        return inventoryApi.post()
                 .uri("/transfer/find-transfer")
                 .body(Mono.just(key), TransferHisKey.class)
                 .retrieve()
                 .bodyToMono(TransferHis.class);
-        return result.block();
     }
 
-    public SaleHis findSale(String vouNo, Integer deptId) {
+    public Mono<SaleHis> findSale(String vouNo, Integer deptId) {
         SaleHisKey key = new SaleHisKey();
         key.setVouNo(vouNo);
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
-        Mono<SaleHis> result = inventoryApi.post()
+        return inventoryApi.post()
                 .uri("/sale/find-sale")
                 .body(Mono.just(key), SaleHisKey.class)
                 .retrieve()
                 .bodyToMono(SaleHis.class);
-        return result.block();
     }
 
-    public OPHis findOpening(OPHisKey key) {
-        Mono<OPHis> result = inventoryApi.post()
+    public Mono<OPHis> findOpening(OPHisKey key) {
+        return inventoryApi.post()
                 .uri("/setup/find-opening")
                 .body(Mono.just(key), OPHisKey.class)
                 .retrieve()
                 .bodyToMono(OPHis.class);
-        return result.block();
     }
 
-    public PurHis findPurchase(String vouNo, Integer deptId) {
+    public Mono<PurHis> findPurchase(String vouNo, Integer deptId) {
         PurHisKey key = new PurHisKey();
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setVouNo(vouNo);
-        Mono<PurHis> result = inventoryApi.post()
+        return inventoryApi.post()
                 .uri("/pur/find-pur")
                 .body(Mono.just(key), PurHisKey.class)
                 .retrieve()
                 .bodyToMono(PurHis.class);
-        return result.block();
     }
 
-    public RetInHis findReturnIn(String vouNo, Integer deptId) {
+    public Mono<RetInHis> findReturnIn(String vouNo, Integer deptId) {
         RetInHisKey key = new RetInHisKey();
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setVouNo(vouNo);
-        Mono<RetInHis> result = inventoryApi.post()
+        return inventoryApi.post()
                 .uri("/retin/find-retin")
                 .body(Mono.just(key), RetInHisKey.class)
                 .retrieve()
                 .bodyToMono(RetInHis.class);
-        return result.block();
     }
 
-    public RetOutHis findReturnOut(String vouNo, Integer deptId) {
+    public Mono<RetOutHis> findReturnOut(String vouNo, Integer deptId) {
         RetOutHisKey key = new RetOutHisKey();
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setVouNo(vouNo);
-        Mono<RetOutHis> result = inventoryApi.post()
+        return inventoryApi.post()
                 .uri("/retout/find-retout")
                 .body(Mono.just(key), RetOutHisKey.class)
                 .retrieve()
                 .bodyToMono(RetOutHis.class);
-        return result.block();
     }
 
-    public General getSmallQty(String stockCode, String unit) {
-        Mono<General> result = inventoryApi.get()
+    public Mono<General> getSmallQty(String stockCode, String unit) {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/report/get-smallest_qty")
                 .queryParam("stockCode", stockCode)
                 .queryParam("unit", unit)
@@ -864,292 +831,262 @@ public class InventoryRepo {
                 .queryParam("deptId", Global.deptId)
                 .build())
                 .retrieve().bodyToMono(General.class);
-        return result.block();
     }
 
-    public ReorderLevel saveReorder(ReorderLevel rl) {
-        Mono<ReorderLevel> result = inventoryApi.post()
+    public Mono<ReorderLevel> saveReorder(ReorderLevel rl) {
+        return inventoryApi.post()
                 .uri("/setup/save-reorder")
                 .body(Mono.just(rl), ReorderLevel.class)
                 .retrieve()
                 .bodyToMono(ReorderLevel.class);
-        return result.block();
     }
 
-    public List<String> deleteTrader(TraderKey key) {
-        Mono<ResponseEntity<List<String>>> result = inventoryApi.post()
+    public Mono<List<String>> deleteTrader(TraderKey key) {
+        return inventoryApi.post()
                 .uri("/setup/delete-trader")
                 .body(Mono.just(key), TraderKey.class)
                 .retrieve()
-                .toEntityList(String.class);
-        return result.block().getBody();
+                .bodyToFlux(String.class)
+                .collectList();
     }
 
-    public TraderGroup saveTraderGroup(TraderGroup rl) {
-        Mono<TraderGroup> result = inventoryApi.post()
+    public Mono<TraderGroup> saveTraderGroup(TraderGroup rl) {
+        return inventoryApi.post()
                 .uri("/setup/save-trader-group")
                 .body(Mono.just(rl), TraderGroup.class)
                 .retrieve()
                 .bodyToMono(TraderGroup.class);
-        return result.block();
     }
 
-    public List<TraderGroup> getTraderGroup() {
-        Mono<ResponseEntity<List<TraderGroup>>> result = inventoryApi.get()
+    public Mono<List<TraderGroup>> getTraderGroup() {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-trader-group")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", Global.deptId)
                 .build())
-                .retrieve().toEntityList(TraderGroup.class);
-        return result.block().getBody();
+                .retrieve()
+                .bodyToFlux(TraderGroup.class)
+                .collectList();
     }
 
-    public List<Pattern> getPattern(String stockCode, Integer deptId) {
-        Mono<ResponseEntity<List<Pattern>>> result = inventoryApi.get()
+    public Mono<List<Pattern>> getPattern(String stockCode, Integer deptId) {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-pattern")
                 .queryParam("stockCode", stockCode)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", deptId)
                 .build())
-                .retrieve().toEntityList(Pattern.class);
-        return result.block().getBody();
+                .retrieve()
+                .bodyToFlux(Pattern.class)
+                .collectList();
     }
 
-    public void delete(OPHisKey key) {
-        Mono<ReturnObject> result = inventoryApi.post()
+    public Mono<Boolean> delete(OPHisKey key) {
+        return inventoryApi.post()
                 .uri("/setup/delete-opening")
                 .body(Mono.just(key), OPHisKey.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
+                .bodyToMono(Boolean.class);
     }
 
-    public void delete(SaleHisKey key) {
-        Mono<ReturnObject> result = inventoryApi.post()
+    public Mono<Boolean> delete(SaleHisKey key) {
+        return inventoryApi.post()
                 .uri("/sale/delete-sale")
                 .body(Mono.just(key), SaleHisKey.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
+                .bodyToMono(Boolean.class);
     }
 
-    public void restore(SaleHisKey key) {
-        Mono<ReturnObject> result = inventoryApi.post()
+    public Mono<Boolean> restore(SaleHisKey key) {
+        return inventoryApi.post()
                 .uri("/sale/restore-sale")
                 .body(Mono.just(key), SaleHisKey.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
+                .bodyToMono(Boolean.class);
     }
 
-    public void restore(RetInHisKey key) {
-        Mono<ReturnObject> result = inventoryApi.post()
+    public Mono<Boolean> restore(RetInHisKey key) {
+        return inventoryApi.post()
                 .uri("/retin/restore-retin")
                 .body(Mono.just(key), RetInHisKey.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
+                .bodyToMono(Boolean.class);
     }
 
-    public void restore(RetOutHisKey key) {
-        Mono<ReturnObject> result = inventoryApi.post()
+    public Mono<Boolean> restore(RetOutHisKey key) {
+        return inventoryApi.post()
                 .uri("/retout/restore-retout")
                 .body(Mono.just(key), RetOutHisKey.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
+                .bodyToMono(Boolean.class);
     }
 
-    public void delete(PurHisKey key) {
-        Mono<ReturnObject> result = inventoryApi.post()
+    public Mono<Boolean> delete(PurHisKey key) {
+        return inventoryApi.post()
                 .uri("/pur/delete-pur")
                 .body(Mono.just(key), PurHisKey.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
+                .bodyToMono(Boolean.class);
     }
 
-    public void restore(PurHisKey key) {
-        Mono<ReturnObject> result = inventoryApi.post()
+    public Mono<Boolean> restore(PurHisKey key) {
+        return inventoryApi.post()
                 .uri("/pur/restore-pur")
                 .body(Mono.just(key), PurHisKey.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
+                .bodyToMono(Boolean.class);
     }
 
-    public void delete(RetInHisKey key) {
-        Mono<ReturnObject> result = inventoryApi.post()
+    public Mono<Boolean> delete(RetInHisKey key) {
+        return inventoryApi.post()
                 .uri("/retin/delete-retin")
                 .body(Mono.just(key), RetInHisKey.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
+                .bodyToMono(Boolean.class);
     }
 
-    public void delete(RetOutHisKey key) {
-        Mono<ReturnObject> result = inventoryApi.post()
+    public Mono<Boolean> delete(RetOutHisKey key) {
+        return inventoryApi.post()
                 .uri("/retout/delete-retout")
                 .body(Mono.just(key), RetOutHisKey.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
+                .bodyToMono(Boolean.class);
     }
 
-    public void delete(StockIOKey key) {
-        Mono<ReturnObject> result = inventoryApi.post()
+    public Mono<Boolean> delete(StockIOKey key) {
+        return inventoryApi.post()
                 .uri("/stockio/delete-stockio")
                 .body(Mono.just(key), StockIOKey.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
+                .bodyToMono(Boolean.class);
     }
 
-    public void restore(StockIOKey key) {
-        Mono<ReturnObject> result = inventoryApi.post()
+    public Mono<Boolean> restore(StockIOKey key) {
+        return inventoryApi.post()
                 .uri("/stockio/restore-stockio")
                 .body(Mono.just(key), StockIOKey.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
+                .bodyToMono(Boolean.class);
     }
 
-    public void delete(TransferHisKey key) {
-        Mono<ReturnObject> result = inventoryApi.post()
+    public Mono<Boolean> delete(TransferHisKey key) {
+        return inventoryApi.post()
                 .uri("/transfer/delete-transfer")
                 .body(Mono.just(key), TransferHisKey.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
+                .bodyToMono(Boolean.class);
     }
 
-    public void restore(TransferHisKey key) {
-        Mono<ReturnObject> result = inventoryApi.post()
+    public Mono<Boolean> restore(TransferHisKey key) {
+        return inventoryApi.post()
                 .uri("/transfer/restore-transfer")
                 .body(Mono.just(key), TransferHisKey.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
+                .bodyToMono(Boolean.class);
     }
 
-    public void delete(ProcessHisKey key) {
-        Mono<ReturnObject> result = inventoryApi.post()
+    public Mono<Boolean> delete(ProcessHisKey key) {
+        return inventoryApi.post()
                 .uri("/process/delete-process")
                 .body(Mono.just(key), StockIOKey.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
+                .bodyToMono(Boolean.class);
     }
 
-    public void delete(GRNKey key) {
-        Mono<ReturnObject> result = inventoryApi.post()
+    public Mono<Boolean> delete(GRNKey key) {
+        return inventoryApi.post()
                 .uri("/grn/delete-grn")
                 .body(Mono.just(key), GRNKey.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
+                .bodyToMono(Boolean.class);
     }
 
-    public void delete(ProcessHisDetailKey key) {
-        Mono<ReturnObject> result = inventoryApi.post()
+    public Mono<Boolean> delete(ProcessHisDetailKey key) {
+        return inventoryApi.post()
                 .uri("/process/delete-process-detail")
                 .body(Mono.just(key), ProcessHisDetailKey.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
+                .bodyToMono(Boolean.class);
     }
 
-    public void restore(ProcessHisKey key) {
-        Mono<ReturnObject> result = inventoryApi.post()
+    public Mono<Boolean> restore(ProcessHisKey key) {
+        return inventoryApi.post()
                 .uri("/process/restore-process")
                 .body(Mono.just(key), StockIOKey.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
+                .bodyToMono(Boolean.class);
     }
 
-    public void delete(WeightLossHisKey key) {
-        Mono<ReturnObject> result = inventoryApi.post()
+    public Mono<Boolean> delete(WeightLossHisKey key) {
+        return inventoryApi.post()
                 .uri("/weight/delete-weight-loss")
                 .body(Mono.just(key), WeightLossHisKey.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
+                .bodyToMono(Boolean.class);
     }
 
-    public void restore(WeightLossHisKey key) {
-        Mono<ReturnObject> result = inventoryApi.post()
+    public Mono<Boolean> restore(WeightLossHisKey key) {
+        return inventoryApi.post()
                 .uri("/weight/restore-weight-loss")
                 .body(Mono.just(key), WeightLossHisKey.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
+                .bodyToMono(Boolean.class);
     }
 
-    public ProcessHis saveProcess(ProcessHis his) {
-        Mono<ProcessHis> result = inventoryApi.post()
+    public Mono<ProcessHis> saveProcess(ProcessHis his) {
+        return inventoryApi.post()
                 .uri("/process/save-process")
                 .body(Mono.just(his), ProcessHis.class)
                 .retrieve()
                 .bodyToMono(ProcessHis.class);
-        return result.block();
     }
 
-    public ProcessHisDetail saveProcessDetail(ProcessHisDetail his) {
-        Mono<ProcessHisDetail> result = inventoryApi.post()
+    public Mono<ProcessHisDetail> saveProcessDetail(ProcessHisDetail his) {
+        return inventoryApi.post()
                 .uri("/process/save-process-detail")
                 .body(Mono.just(his), ProcessHisDetail.class)
                 .retrieve()
                 .bodyToMono(ProcessHisDetail.class);
-        return result.block();
     }
 
-    public List<ProcessHisDetail> getProcessDetail(String vouNo, Integer deptId) {
-        Mono<ResponseEntity<List<ProcessHisDetail>>> result = inventoryApi.get()
+    public Mono<List<ProcessHisDetail>> getProcessDetail(String vouNo, Integer deptId) {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/process/get-process-detail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", deptId)
                 .build())
-                .retrieve().toEntityList(ProcessHisDetail.class);
-        return result.block().getBody();
+                .retrieve()
+                .bodyToFlux(ProcessHisDetail.class)
+                .collectList();
     }
 
-    public List<ProcessHis> getProcess(FilterObject f) {
-        Mono<ResponseEntity<List<ProcessHis>>> result = inventoryApi
+    public Mono<List<ProcessHis>> getProcess(FilterObject f) {
+        return inventoryApi
                 .post()
                 .uri("/process/get-process")
-                .body(Mono.just(f), FilterObject.class
-                )
+                .body(Mono.just(f), FilterObject.class)
                 .retrieve()
-                .toEntityList(ProcessHis.class
-                );
-        return result.block(Duration.ofMinutes(1)).getBody();
+                .bodyToFlux(ProcessHis.class)
+                .collectList();
     }
 
-    public General getSaleVoucherInfo(String vouDate) {
-        try {
-            Mono<General> result = inventoryApi.get()
-                    .uri(builder -> builder.path("/sale/get-sale-voucher-info")
-                    .queryParam("vouDate", vouDate)
-                    .queryParam("compCode", Global.compCode)
-                    .queryParam("deptId", Global.deptId)
-                    .build())
-                    .retrieve().bodyToMono(General.class);
-            return result.block();
-        } catch (Exception e) {
-            log.error("getSaleVoucherCount : " + e.getMessage());
-        }
-        return new General();
+    public Mono<General> getSaleVoucherInfo(String vouDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/sale/get-sale-voucher-info")
+                .queryParam("vouDate", vouDate)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
+                .build())
+                .retrieve().bodyToMono(General.class);
     }
 
-    public GRN saveGRN(GRN grn) {
-        Mono<GRN> result = inventoryApi.post()
+    public Mono<GRN> saveGRN(GRN grn) {
+        return inventoryApi.post()
                 .uri("/grn")
                 .body(Mono.just(grn), GRN.class)
                 .retrieve()
                 .bodyToMono(GRN.class);
-        return result.block(Duration.ofMinutes(1));
     }
 
     public Flux<GRN> getGRNHistory(FilterObject filter) {
@@ -1172,6 +1109,22 @@ public class InventoryRepo {
                 .build())
                 .retrieve().bodyToFlux(SaleHisDetail.class);
         return result;
+    }
+
+    public Mono<PurHis> save(PurHis ph) {
+        return inventoryApi.post()
+                .uri("/pur/save-pur")
+                .body(Mono.just(ph), PurHis.class)
+                .retrieve()
+                .bodyToMono(PurHis.class);
+    }
+
+    public Mono<SaleHis> save(SaleHis sh) {
+        return inventoryApi.post()
+                .uri("/sale/save-sale")
+                .body(Mono.just(sh), SaleHis.class)
+                .retrieve()
+                .bodyToMono(SaleHis.class);
     }
 
 }

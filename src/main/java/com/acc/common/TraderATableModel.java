@@ -22,7 +22,7 @@ public class TraderATableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(TraderATableModel.class);
     private List<TraderA> listTrader = new ArrayList<>();
-    private final String[] columnNames = {"Code", "Name"};
+    private final String[] columnNames = {"No.", "Code", "Name"};
     private JTable table;
 
     public JTable getTable() {
@@ -75,8 +75,10 @@ public class TraderATableModel extends AbstractTableModel {
                 TraderA trader = listTrader.get(row);
                 return switch (column) {
                     case 0 ->
-                        Util1.isNull(trader.getUserCode(), trader.getKey().getCode());
+                        String.valueOf(row + 1 + ". ");
                     case 1 ->
+                        Util1.isNull(trader.getUserCode(), trader.getKey().getCode());
+                    case 2 ->
                         trader.getTraderName();
                     default ->
                         null;

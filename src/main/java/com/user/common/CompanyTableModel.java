@@ -18,25 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CompanyTableModel extends AbstractTableModel {
 
     private List<CompanyInfo> listCompany = new ArrayList();
-    private final String[] columnNames = {"Company Code", "Company Name"};
-    private String roleCode;
-    private UserRepo userRepo;
-
-    public UserRepo getUserRepo() {
-        return userRepo;
-    }
-
-    public void setUserRepo(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
-
-    public String getRoleCode() {
-        return roleCode;
-    }
-
-    public void setRoleCode(String roleCode) {
-        this.roleCode = roleCode;
-    }
+    private final String[] columnNames = {"Code", "Company Name"};
 
     @Override
     public String getColumnName(int column) {
@@ -59,7 +41,7 @@ public class CompanyTableModel extends AbstractTableModel {
             CompanyInfo p = listCompany.get(row);
             switch (column) {
                 case 0 -> {
-                    return p.getCompCode();
+                    return p.getUserCode();
                 }
                 case 1 -> {
                     return p.getCompName();

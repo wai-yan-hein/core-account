@@ -321,15 +321,16 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                List<Stock> list = inventoryRepo.getStock(str);
-                if (this.filter) {
-                    Stock s = new Stock("-", "All");
-                    list.add(s);
-                }
-                tableModel.setListStock(list);
-                if (!list.isEmpty()) {
-                    table.setRowSelectionInterval(0, 0);
-                }
+                inventoryRepo.getStock(str).subscribe((t) -> {
+                    if (this.filter) {
+                        Stock s = new Stock("-", "All");
+                        t.add(s);
+                    }
+                    tableModel.setListStock(t);
+                    if (!t.isEmpty()) {
+                        table.setRowSelectionInterval(0, 0);
+                    }
+                });
             }
 
         }

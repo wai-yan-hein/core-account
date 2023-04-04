@@ -98,7 +98,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
     private List<PurHisDetail> listDetail = new ArrayList();
     private final PurchaseTableModel purTableModel = new PurchaseTableModel();
-    private final PurchaseHistoryDialog vouSearchDialog = new PurchaseHistoryDialog(Global.parentForm);
+    private PurchaseHistoryDialog dialog;
     private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     @Autowired
     private WebClient inventoryApi;
@@ -246,7 +246,9 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             tblExpense.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             tblExpense.getColumnModel().getColumn(0).setPreferredWidth(100);
             tblExpense.getColumnModel().getColumn(1).setPreferredWidth(40);
-            tblExpense.getColumnModel().getColumn(0).setCellEditor(new ExpenseEditor(inventoryRepo.getExpense()));
+            inventoryRepo.getExpense().subscribe((t) -> {
+                tblExpense.getColumnModel().getColumn(0).setCellEditor(new ExpenseEditor(t));
+            });
             tblExpense.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
             txtExpense.setFormatterFactory(Util1.getDecimalFormat());
             txtExpense.setFont(Global.amtFont);
@@ -259,18 +261,20 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
 
     private void getExpense() {
         expenseTableModel.clear();
-        List<Expense> list = inventoryRepo.getExpense();
-        for (Expense e : list) {
-            PurExpense p = new PurExpense();
-            PurExpenseKey key = new PurExpenseKey();
-            key.setExpenseCode(e.getKey().getExpenseCode());
-            key.setCompCode(e.getKey().getCompCode());
-            p.setKey(key);
-            p.setExpenseName(e.getExpenseName());
-            p.setAmount(0.0f);
-            expenseTableModel.addObject(p);
-        }
-        expenseTableModel.addNewRow();
+        inventoryRepo.getExpense().subscribe((t) -> {
+            for (Expense e : t) {
+                PurExpense p = new PurExpense();
+                PurExpenseKey key = new PurExpenseKey();
+                key.setExpenseCode(e.getKey().getExpenseCode());
+                key.setCompCode(e.getKey().getCompCode());
+                p.setKey(key);
+                p.setExpenseName(e.getExpenseName());
+                p.setAmount(0.0f);
+                expenseTableModel.addObject(p);
+            }
+            expenseTableModel.addNewRow();
+        });
+
     }
 
     private void initPurTable() {
@@ -320,7 +324,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             tblGRN.getTableHeader().setFont(Global.tblHeaderFont);
             tblGRN.setCellSelectionEnabled(true);
             tblGRN.setRowHeight(Global.tblRowHeight);
-            tblGRN.setShowGrid(true);
             tblGRN.setFont(Global.textFont);
             tblGRN.getColumnModel().getColumn(0).setPreferredWidth(30);//Code
             tblGRN.getColumnModel().getColumn(1).setPreferredWidth(200);//Name
@@ -381,6 +384,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         txtVouPaid.addKeyListener(this);
         txtComAmt.addKeyListener(this);
         txtComPercent.addKeyListener(this);
+        txtDefaultCom.addKeyListener(this);
     }
 
     private void initTextBoxValue() {
@@ -394,6 +398,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         txtGrandTotal.setValue(0.00);
         txtComPercent.setValue(0.00);
         txtComAmt.setValue(0.00);
+        txtQty.setText("0");
     }
 
     private void initTextBoxFormat() {
@@ -407,6 +412,11 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         txtTax.setFormatterFactory(Util1.getDecimalFormat());
         txtComPercent.setFormatterFactory(Util1.getDecimalFormat());
         txtComAmt.setFormatterFactory(Util1.getDecimalFormat());
+        txtQty.setHorizontalAlignment(JTextField.RIGHT);
+        txtQty.setFont(Global.textFont);
+        txtDefaultCom.setFormatterFactory(Util1.getDecimalFormat());
+        txtDefaultCom.setHorizontalAlignment(JTextField.RIGHT);
+        txtDefaultCom.setFont(Global.textFont);
     }
 
     private void assignDefaultValue() {
@@ -416,12 +426,14 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             traderAutoCompleter.setTrader(t);
         });
         txtDueDate.setDate(null);
-        progress.setIndeterminate(false);
         txtCurrency.setEnabled(ProUtil.isMultiCur());
         txtVouNo.setText(null);
         txtRemark.setText(null);
         txtReference.setText(null);
         txtBatchNo.setText(null);
+        txtComPercent.setValue(Util1.getFloat(ProUtil.getProperty("purchase.commission")));
+        float commAmt = Util1.getFloat(ProUtil.getProperty(ProUtil.P_COM_AMT));
+        txtDefaultCom.setValue(commAmt);
     }
 
     private void clear() {
@@ -432,39 +444,30 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         grnTableModel.clear();
         initTextBoxValue();
         assignDefaultValue();
-        txtComPercent.setValue(Util1.getFloat(ProUtil.getProperty("purchase.commission")));
         ph = new PurHis();
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.GREEN);
-        progress.setIndeterminate(false);
         getExpense();
         txtCus.requestFocus();
     }
 
-    public boolean savePur(boolean print) {
-        boolean status = false;
-        try {
-            if (isValidEntry() && purTableModel.isValidEntry()) {
-                progress.setIndeterminate(true);
-                ph.setListPD(purTableModel.getListDetail());
-                ph.setListDel(purTableModel.getDelList());
-                ph.setListExpense(expenseTableModel.getListDetail());
-                Mono<PurHis> result = inventoryApi.post()
-                        .uri("/pur/save-pur")
-                        .body(Mono.just(ph), PurHis.class)
-                        .retrieve()
-                        .bodyToMono(PurHis.class);
-                PurHis obj = result.block();
-                if (print) {
-                    printVoucher(obj);
-                }
+    public void savePur(boolean print) {
+        if (isValidEntry() && purTableModel.isValidEntry()) {
+            progress.setIndeterminate(true);
+            ph.setListPD(purTableModel.getListDetail());
+            ph.setListDel(purTableModel.getDelList());
+            ph.setListExpense(expenseTableModel.getListDetail());
+            inventoryRepo.save(ph).subscribe((t) -> {
                 clear();
-            }
-        } catch (HeadlessException ex) {
-            log.error("savePur :" + ex.getMessage());
-            JOptionPane.showMessageDialog(this, "Could not saved.");
+                progress.setIndeterminate(false);
+                if (print) {
+                    printVoucher(t);
+                }
+            }, (e) -> {
+                progress.setIndeterminate(false);
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            });
         }
-        return status;
     }
 
     private boolean isValidEntry() {
@@ -581,14 +584,26 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         txtExpense.setValue(ttlExp);
     }
 
+    private void calQty(List<PurHisDetail> list) {
+        Flux.fromIterable(list)
+                .map(v -> Util1.getFloat(v.getQty()))
+                .reduce(0.0f, Float::sum)
+                .subscribe((t) -> {
+                    log.info("cal qty");
+                    txtQty.setText(String.valueOf(t));
+                    // txtQty.setValue(t);
+                });
+
+    }
+
     private void calculateTotalAmount(boolean partial) {
         calExpense();
+        List<PurHisDetail> list = purTableModel.getListDetail();
+        calQty(list);
+        calComission();
         float totalVouBalance;
-        float totalAmount = 0.0f;
-        listDetail = purTableModel.getListDetail();
-        totalAmount = listDetail.stream().map(sdh -> Util1.getFloat(sdh.getAmount())).reduce(totalAmount, (accumulator, _item) -> accumulator + _item);
+        float totalAmount = Util1.getFloat(list.stream().mapToDouble(sd -> Util1.getFloat(sd.getAmount())).sum());
         txtVouTotal.setValue(totalAmount);
-
         //cal discAmt
         float discp = Util1.getFloat(txtVouDiscP.getValue());
         if (discp > 0) {
@@ -638,104 +653,129 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     public void historyPur() {
-        vouSearchDialog.setInventoryApi(inventoryApi);
-        vouSearchDialog.setInventoryRepo(inventoryRepo);
-        vouSearchDialog.setUserRepo(userRepo);
-        vouSearchDialog.setIconImage(searchIcon);
-        vouSearchDialog.setObserver(this);
-        vouSearchDialog.initMain();
-        vouSearchDialog.setSize(Global.width - 100, Global.height - 100);
-        vouSearchDialog.setLocationRelativeTo(null);
-        vouSearchDialog.setVisible(true);
+        if (dialog == null) {
+            dialog = new PurchaseHistoryDialog(Global.parentForm);
+            dialog.setInventoryApi(inventoryApi);
+            dialog.setInventoryRepo(inventoryRepo);
+            dialog.setUserRepo(userRepo);
+            dialog.setIconImage(searchIcon);
+            dialog.setObserver(this);
+            dialog.initMain();
+            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setLocationRelativeTo(null);
+        }
+        dialog.search();
+        dialog.setVisible(true);
+        VPurchase v = dialog.getPurchase();
+        if (v != null) {
+            inventoryRepo.findPurchase(v.getVouNo(), v.getDeptId()).subscribe((t) -> {
+                setVoucher(t);
+            });
+        }
     }
 
     public void setVoucher(PurHis pur) {
         if (pur != null) {
-            purTableModel.clear();
-            expenseTableModel.clear();
-            progress.setIndeterminate(true);
-            ph = pur;
-            Integer deptId = ph.getKey().getDeptId();
-            currAutoCompleter.setCurrency(inventoryRepo.findCurrency(ph.getCurCode()));
-            inventoryRepo.findLocation(ph.getLocCode(), deptId).subscribe((t) -> {
-                locationAutoCompleter.setLocation(t);
-            });
-            Mono<Trader> trader = inventoryRepo.findTrader(ph.getTraderCode(), ph.getKey().getDeptId());
-            trader.subscribe((t) -> {
-                traderAutoCompleter.setTrader(t);
-            });
-            String vouNo = ph.getKey().getVouNo();
-
-            Flux<PurHisDetail> f1 = inventoryApi.get()
-                    .uri(builder -> builder.path("/pur/get-pur-detail")
-                    .queryParam("vouNo", vouNo)
-                    .queryParam("compCode", Global.compCode)
-                    .queryParam("deptId", ph.getKey().getDeptId())
-                    .build())
-                    .retrieve().bodyToFlux(PurHisDetail.class);
-            f1.subscribe((t) -> {
-                purTableModel.addPurchase(t);
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-                progress.setIndeterminate(false);
-            }, () -> {
-                purTableModel.addNewRow();
-                progress.setIndeterminate(false);
-                if (ph.isVouLock()) {
-                    lblStatus.setText("Voucher is locked.");
-                    lblStatus.setForeground(Color.RED);
-                    disableForm(false);
-                } else if (!ProUtil.isPurchaseEdit()) {
-                    lblStatus.setText("No Permission.");
-                    lblStatus.setForeground(Color.RED);
-                    disableForm(false);
-                } else if (Util1.getBoolean(ph.getDeleted())) {
-                    lblStatus.setText("DELETED");
-                    lblStatus.setForeground(Color.RED);
-                    disableForm(false);
-                } else {
-                    lblStatus.setText("EDIT");
-                    lblStatus.setForeground(Color.blue);
-                    disableForm(true);
-                }
-                txtVouNo.setText(ph.getKey().getVouNo());
-                txtDueDate.setDate(ph.getDueDate());
-                txtRemark.setText(ph.getRemark());
-                txtPurDate.setDate(ph.getVouDate());
-                txtVouTotal.setValue(Util1.getFloat(ph.getVouTotal()));
-                txtVouDiscP.setValue(Util1.getFloat(ph.getDiscP()));
-                txtVouDiscount.setValue(Util1.getFloat(ph.getDiscount()));
-                txtVouTaxP.setValue(Util1.getFloat(ph.getTaxP()));
-                txtTax.setValue(Util1.getFloat(ph.getTaxAmt()));
-                txtVouPaid.setValue(Util1.getFloat(ph.getPaid()));
-                txtVouBalance.setValue(Util1.getFloat(ph.getBalance()));
-                txtGrandTotal.setValue(Util1.getFloat(txtGrandTotal.getValue()));
-                chkPaid.setSelected(Util1.getFloat(ph.getPaid()) > 0);
-                txtReference.setText(ph.getReference());
-                txtBatchNo.setText(ph.getBatchNo());
-                txtComPercent.setValue(Util1.getFloat(ph.getCommP()));
-                txtComAmt.setValue(Util1.getFloat(ph.getCommAmt()));
-                txtExpense.setValue(Util1.getFloat(ph.getExpense()));
-                focusTable();
-            });
-            Flux<PurExpense> f2 = inventoryApi.get()
-                    .uri(builder -> builder.path("/purExpense/get-pur-expense")
-                    .queryParam("vouNo", vouNo)
-                    .queryParam("compCode", Global.compCode)
-                    .build())
-                    .retrieve().bodyToFlux(PurExpense.class);
-            f2.subscribe((t) -> {
-                expenseTableModel.addObject(t);
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-                progress.setIndeterminate(false);
-            }, () -> {
-                expenseTableModel.addNewRow();
-                progress.setIndeterminate(false);
-            });
-            searchGRN(ph.getBatchNo(), deptId);
+            try {
+                purTableModel.clear();
+                expenseTableModel.clear();
+                progress.setIndeterminate(true);
+                ph = pur;
+                Integer deptId = ph.getKey().getDeptId();
+                inventoryRepo.findCurrency(ph.getCurCode()).subscribe((t) -> {
+                    currAutoCompleter.setCurrency(t);
+                });
+                inventoryRepo.findLocation(ph.getLocCode(), deptId).subscribe((t) -> {
+                    locationAutoCompleter.setLocation(t);
+                });
+                Mono<Trader> trader = inventoryRepo.findTrader(ph.getTraderCode(), ph.getKey().getDeptId());
+                trader.subscribe((t) -> {
+                    traderAutoCompleter.setTrader(t);
+                });
+                String vouNo = ph.getKey().getVouNo();
+                inventoryApi.get()
+                        .uri(builder -> builder.path("/pur/get-pur-detail")
+                        .queryParam("vouNo", vouNo)
+                        .queryParam("compCode", Global.compCode)
+                        .queryParam("deptId", ph.getKey().getDeptId())
+                        .build())
+                        .retrieve()
+                        .bodyToFlux(PurHisDetail.class)
+                        .collectList()
+                        .subscribe((t) -> {
+                            purTableModel.setListDetail(t);
+                            log.info("set list.");
+                            purTableModel.addNewRow();
+                            if (ph.isVouLock()) {
+                                lblStatus.setText("Voucher is locked.");
+                                lblStatus.setForeground(Color.RED);
+                                disableForm(false);
+                            } else if (!ProUtil.isPurchaseEdit()) {
+                                lblStatus.setText("No Permission.");
+                                lblStatus.setForeground(Color.RED);
+                                disableForm(false);
+                            } else if (Util1.getBoolean(ph.getDeleted())) {
+                                lblStatus.setText("DELETED");
+                                lblStatus.setForeground(Color.RED);
+                                disableForm(false);
+                            } else {
+                                lblStatus.setText("EDIT");
+                                lblStatus.setForeground(Color.blue);
+                                disableForm(true);
+                            }
+                            txtVouNo.setText(ph.getKey().getVouNo());
+                            txtDueDate.setDate(ph.getDueDate());
+                            txtRemark.setText(ph.getRemark());
+                            txtPurDate.setDate(ph.getVouDate());
+                            txtVouTotal.setValue(Util1.getFloat(ph.getVouTotal()));
+                            txtVouDiscP.setValue(Util1.getFloat(ph.getDiscP()));
+                            txtVouDiscount.setValue(Util1.getFloat(ph.getDiscount()));
+                            txtVouTaxP.setValue(Util1.getFloat(ph.getTaxP()));
+                            txtTax.setValue(Util1.getFloat(ph.getTaxAmt()));
+                            txtVouPaid.setValue(Util1.getFloat(ph.getPaid()));
+                            txtVouBalance.setValue(Util1.getFloat(ph.getBalance()));
+                            txtGrandTotal.setValue(Util1.getFloat(txtGrandTotal.getValue()));
+                            chkPaid.setSelected(Util1.getFloat(ph.getPaid()) > 0);
+                            txtReference.setText(ph.getReference());
+                            txtBatchNo.setText(ph.getBatchNo());
+                            txtComPercent.setValue(Util1.getFloat(ph.getCommP()));
+                            txtComAmt.setValue(Util1.getFloat(ph.getCommAmt()));
+                            txtExpense.setValue(Util1.getFloat(ph.getExpense()));
+                            calQty(t);
+                            focusTable();
+                            progress.setIndeterminate(false);
+                        }, (e) -> {
+                            JOptionPane.showMessageDialog(this, e.getMessage());
+                            progress.setIndeterminate(false);
+                        }, () -> {
+                        });
+                searchExpense(vouNo);
+                searchGRN(ph.getBatchNo(), deptId);
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
 
         }
+    }
+
+    private void searchExpense(String vouNo) {
+        expProgress.setIndeterminate(true);
+        inventoryApi.get()
+                .uri(builder -> builder.path("/purExpense/get-pur-expense")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(PurExpense.class)
+                .collectList()
+                .subscribe((t) -> {
+                    expenseTableModel.setListDetail(t);
+                    expenseTableModel.addNewRow();
+                    expProgress.setIndeterminate(false);
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                    expProgress.setIndeterminate(false);
+                });
     }
 
     private void searchGRN(String batchNo, Integer deptId) {
@@ -743,18 +783,23 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         if (status) {
             grnTableModel.clear();
             if (!batchNo.isEmpty()) {
-                Flux<GRNDetail> result = inventoryApi.get()
+                grnProgress.setIndeterminate(true);
+                inventoryApi.get()
                         .uri(builder -> builder.path("/grn/get-grn-detail-batch")
                         .queryParam("batchNo", batchNo)
                         .queryParam("compCode", Global.compCode)
                         .queryParam("deptId", deptId)
                         .build())
-                        .retrieve().bodyToFlux(GRNDetail.class);
-                result.subscribe((t) -> {
-                    grnTableModel.addObject(t);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                });
+                        .retrieve()
+                        .bodyToFlux(GRNDetail.class)
+                        .collectList()
+                        .subscribe((t) -> {
+                            grnTableModel.setListDetail(t);
+                            grnProgress.setIndeterminate(false);
+                        }, (e) -> {
+                            grnProgress.setIndeterminate(false);
+                            JOptionPane.showMessageDialog(this, e.getMessage());
+                        });
             }
         }
     }
@@ -934,6 +979,12 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         });
     }
 
+    private void calComission() {
+        float qty = Util1.getFloat(txtQty.getText());
+        float price = Util1.getFloat(txtDefaultCom.getValue());
+        txtComAmt.setValue(qty * price);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -972,9 +1023,11 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         txtExpense = new javax.swing.JFormattedTextField();
         jLabel1 = new javax.swing.JLabel();
         jButton2 = new javax.swing.JButton();
+        expProgress = new javax.swing.JProgressBar();
         panelGRN = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         tblGRN = new javax.swing.JTable();
+        grnProgress = new javax.swing.JProgressBar();
         jPanel3 = new javax.swing.JPanel();
         jLabel13 = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
@@ -1001,6 +1054,8 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         txtComAmt = new javax.swing.JFormattedTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblPur = new javax.swing.JTable();
+        txtDefaultCom = new javax.swing.JFormattedTextField();
+        txtQty = new javax.swing.JTextField();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -1124,7 +1179,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                             .addComponent(jLabel4))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtPurDate, javax.swing.GroupLayout.DEFAULT_SIZE, 275, Short.MAX_VALUE)
+                            .addComponent(txtPurDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(txtVouNo)))
                     .addGroup(panelPurLayout.createSequentialGroup()
                         .addComponent(jLabel2)
@@ -1138,7 +1193,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                     .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 234, Short.MAX_VALUE)
+                    .addComponent(txtRemark)
                     .addComponent(txtLocation)
                     .addComponent(txtCurrency))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1148,7 +1203,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                     .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, 274, Short.MAX_VALUE)
+                    .addComponent(txtDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(txtReference)
                     .addComponent(txtBatchNo))
                 .addContainerGap())
@@ -1244,11 +1299,12 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         panelExpense.setLayout(panelExpenseLayout);
         panelExpenseLayout.setHorizontalGroup(
             panelExpenseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelExpenseLayout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelExpenseLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(panelExpenseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addGroup(panelExpenseLayout.createSequentialGroup()
+                .addGroup(panelExpenseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(expProgress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, panelExpenseLayout.createSequentialGroup()
                         .addComponent(jButton2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel1)
@@ -1259,7 +1315,10 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         panelExpenseLayout.setVerticalGroup(
             panelExpenseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelExpenseLayout.createSequentialGroup()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 157, Short.MAX_VALUE)
+                .addContainerGap()
+                .addComponent(expProgress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelExpenseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtExpense, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1289,14 +1348,17 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             panelGRNLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelGRNLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addGroup(panelGRNLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(grnProgress, javax.swing.GroupLayout.DEFAULT_SIZE, 251, Short.MAX_VALUE)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addContainerGap())
         );
         panelGRNLayout.setVerticalGroup(
             panelGRNLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelGRNLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelGRNLayout.createSequentialGroup()
+                .addComponent(grnProgress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -1599,6 +1661,12 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         });
         jScrollPane1.setViewportView(tblPur);
 
+        txtDefaultCom.setName("txtDefaultCom"); // NOI18N
+
+        txtQty.setEditable(false);
+        txtQty.setFont(Global.lableFont);
+        txtQty.setToolTipText("");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -1609,6 +1677,10 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                     .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtDefaultCom, javax.swing.GroupLayout.DEFAULT_SIZE, 119, Short.MAX_VALUE)
+                            .addComponent(txtQty))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(panelPur, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -1624,7 +1696,11 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(txtQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtDefaultCom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -1764,12 +1840,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             case "Location" ->
                 setAllLocation();
             case "ORDER" -> {
-            }
-            case "PUR-HISTORY" -> {
-                if (selectObj instanceof VPurchase v) {
-                    PurHis pur = inventoryRepo.findPurchase(v.getVouNo(), v.getDeptId());
-                    setVoucher(pur);
-                }
             }
             case "Select" -> {
                 calculateTotalAmount(false);
@@ -1924,11 +1994,18 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                     tblPur.requestFocus();
                 }
             }
+            case "txtDefaultCom" -> {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    calComission();
+                }
+            }
         }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkPaid;
+    private javax.swing.JProgressBar expProgress;
+    private javax.swing.JProgressBar grnProgress;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
@@ -1971,11 +2048,13 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     private javax.swing.JFormattedTextField txtComPercent;
     private javax.swing.JTextField txtCurrency;
     private javax.swing.JTextField txtCus;
+    private javax.swing.JFormattedTextField txtDefaultCom;
     private com.toedter.calendar.JDateChooser txtDueDate;
     private javax.swing.JFormattedTextField txtExpense;
     private javax.swing.JFormattedTextField txtGrandTotal;
     private javax.swing.JTextField txtLocation;
     private com.toedter.calendar.JDateChooser txtPurDate;
+    private javax.swing.JTextField txtQty;
     private javax.swing.JTextField txtReference;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JFormattedTextField txtTax;

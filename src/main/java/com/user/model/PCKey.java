@@ -14,5 +14,5 @@ import lombok.Data;
 public class PCKey {
 
     private String roleCode;
-    private CompanyInfo companyInfo;
+    private String compCode;
 }

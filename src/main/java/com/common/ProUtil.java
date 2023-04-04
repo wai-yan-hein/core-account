@@ -35,6 +35,7 @@ public class ProUtil {
     public static final String P_SHOW_EXPENSE = "purchase.show.expense";
     public static final String P_SHOW_GRN = "purchase.show.grn";
     public static final String P_BATCH_DETAIL = "purchase.batch.detail";
+    public static final String P_COM_AMT = "purchase.commission.amount";
 
     public static String getFontPath() {
         return Global.hmRoleProperty.get("font.path");

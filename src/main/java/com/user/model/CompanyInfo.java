@@ -23,5 +23,17 @@ public class CompanyInfo {
     private Date startDate;
     private Date endDate;
     private boolean active;
-    private Currency currency;
+    private String curCode;
+    private String createdBy;
+    private Date createdDate;
+    private Integer busId;
+    private boolean batchLock;
+    private Date yearEndDate;
+
+    @Override
+    public String toString() {
+        return compName;
+    }
+    
+
 }

@@ -377,28 +377,25 @@ public final class COA3AutoCompleter implements KeyListener {
         if (!str.isEmpty()) {
             if (!containKey(e)) {
                 clear(level);
-                List<ChartOfAccount> list = new ArrayList<>();
-                Flux<ChartOfAccount> result = webClient.get()
+                webClient.get()
                         .uri(builder -> builder.path("/account/search-coa")
                         .queryParam("str", str)
                         .queryParam("level", this.level)
                         .queryParam("compCode", Global.compCode)
                         .build())
-                        .retrieve().bodyToFlux(ChartOfAccount.class);
-                result.subscribe((t) -> {
-                    list.add(t);
-                }, (er) -> {
-                    log.error(er.getMessage());
-                }, () -> {
-                    if (this.filter) {
-                        ChartOfAccount s = new ChartOfAccount(new COAKey("-", Global.compCode), "All");
-                        list.add(s);
-                    }
-                    setData(list);
-                    if (!list.isEmpty()) {
-                        table.setRowSelectionInterval(0, 0);
-                    }
-                });
+                        .retrieve()
+                        .bodyToFlux(ChartOfAccount.class)
+                        .collectList()
+                        .subscribe((t) -> {
+                            if (this.filter) {
+                                ChartOfAccount s = new ChartOfAccount(new COAKey("-", Global.compCode), "All");
+                                t.add(s);
+                            }
+                            setData(t);
+                            if (!t.isEmpty()) {
+                                table.setRowSelectionInterval(0, 0);
+                            }
+                        });
             }
 
         }

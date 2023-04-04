@@ -76,6 +76,6 @@ public class Tray {
     }
 
     public void showMessage(String message) {
-        trayIcon.displayMessage("Core Value Notification.", message, MessageType.INFO);
+        trayIcon.displayMessage("Core Value Software Solution.", message, MessageType.INFO);
     }
 }

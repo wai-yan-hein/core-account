@@ -20,7 +20,7 @@ public class AppUser implements java.io.Serializable {
     private String email;
     private String password;
     private boolean active;
-    private AppRole role;
+    private String roleCode;
 
     public AppUser(String userCode, String userName) {
         this.userCode = userCode;

@@ -181,6 +181,7 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
                 case 2, 3 -> {
                     if (value != null) {
                         if (value instanceof TraderA trader) {
+                            opening.setUserCode(trader.getUserCode());
                             opening.setTraderCode(trader.getKey().getCode());
                             opening.setTraderName(trader.getTraderName());
                             String coaCode = trader.getAccount();

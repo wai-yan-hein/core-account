@@ -87,7 +87,14 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         actionMapping();
     }
 
+    private void batchLock(boolean lock) {
+        tblJournal.setEnabled(lock);
+        observer.selected("save", lock);
+        observer.selected("delete", lock);
+    }
+
     public void initMain() {
+        batchLock(!Global.batchLock);
         initCompleter();
         initTable();
         searchJournal();
@@ -182,7 +189,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true, false);
             departmentAutoCompleter.setObserver(this);
         });
-        dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
+        dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
         monoCur.subscribe((t) -> {
             currencyAAutoCompleter = new CurrencyAAutoCompleter(txtCur, t, null, true);

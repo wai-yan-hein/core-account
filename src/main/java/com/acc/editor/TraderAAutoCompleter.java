@@ -353,26 +353,26 @@ public final class TraderAAutoCompleter implements KeyListener {
         if (!str.isEmpty()) {
             if (!containKey(e)) {
                 traderTableModel.clear();
-                Flux<TraderA> result = webClient.get()
+                webClient.get()
                         .uri(builder -> builder.path("/account/search-trader")
                         .queryParam("compCode", Global.compCode)
                         .queryParam("text", str)
                         .build())
-                        .retrieve().bodyToFlux(TraderA.class);
-                result.subscribe((t) -> {
-                    traderTableModel.addTrader(t);
-                }, (er) -> {
-                    log.error(er.getMessage());
-                }, () -> {
-                    if (this.filter) {
-                        TraderA s = new TraderA(new TraderAKey("-", Global.compCode), "All");
-                        traderTableModel.addTrader(s);
-                    }
-                    traderTableModel.fireTableDataChanged();
-                    if (!traderTableModel.getListTrader().isEmpty()) {
-                        table.setRowSelectionInterval(0, 0);
-                    }
-                });
+                        .retrieve()
+                        .bodyToFlux(TraderA.class)
+                        .collectList()
+                        .subscribe((t) -> {
+                            if (filter) {
+                                TraderA s = new TraderA(new TraderAKey("-", Global.compCode), "All");
+                                t.add(s);
+                            }
+                            traderTableModel.setListTrader(t);
+                            if (!t.isEmpty()) {
+                                table.setRowSelectionInterval(0, 0);
+                            }
+                        }, (er) -> {
+                            log.error(er.getMessage());
+                        });
 
             }
 

@@ -122,13 +122,15 @@ public class ProcessTypeSetupDialog extends javax.swing.JDialog implements KeyLi
 
     private void save() {
         if (isValidEntry()) {
-            vou = inventoryRepo.saveProcessType(vou);
-            if (lblStatus.getText().equals("EDIT")) {
-                listType.set(selectRow, vou);
-            } else {
-                listType.add(vou);
-            }
-            clear();
+            inventoryRepo.saveProcessType(vou).subscribe((t) -> {
+                if (lblStatus.getText().equals("EDIT")) {
+                    listType.set(selectRow, t);
+                } else {
+                    listType.add(t);
+                }
+                clear();
+            });
+
         }
     }
 

@@ -34,7 +34,6 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 
 /**
  *
@@ -69,7 +68,6 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
     private UserRepo userRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
-    private boolean status = false;
     private LocationAutoCompleter locationAutoCompleter;
 
     public WebClient getInventoryApi() {
@@ -112,13 +110,9 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
     }
 
     public void initMain() {
-        if (!status) {
-            initCombo();
-            initTableVoucher();
-            setTodayDate();
-            status = true;
-        }
-        search();
+        initCombo();
+        initTableVoucher();
+        setTodayDate();
     }
 
     private void initFocous() {
@@ -167,7 +161,7 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
         return locationAutoCompleter == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
     }
 
-    private void search() {
+    public void search() {
         tableModel.clear();
         txtTotalRecord.setValue(0);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);

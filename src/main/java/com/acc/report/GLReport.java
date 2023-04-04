@@ -77,7 +77,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     private UserRepo userRepo;
     @Autowired
     private WebClient accountApi;
-    private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
+    private TrialBalanceDetailDialog dialog;
     private DateTableDecorator decorator;
 
     /**
@@ -268,9 +268,14 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void openTBDDialog(String coaCode, String curCode, String coaName) {
-        TrialBalanceDetailDialog dialog = new TrialBalanceDetailDialog(Global.parentForm);
-        dialog.setAccountRepo(accountRepo);
-        dialog.setAccountApi(accountApi);
+        if (dialog == null) {
+            dialog = new TrialBalanceDetailDialog(Global.parentForm);
+            dialog.setAccountRepo(accountRepo);
+            dialog.setAccountApi(accountApi);
+            dialog.initMain();
+            dialog.setSize(Global.width - 50, Global.height - 50);
+            dialog.setLocationRelativeTo(null);
+        }
         dialog.setCoaCode(coaCode);
         dialog.setStDate(dateAutoCompleter.getStDate());
         dialog.setEndDate(dateAutoCompleter.getEndDate());
@@ -278,9 +283,8 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         dialog.setDesp(coaName);
         dialog.setTraderCode(null);
         dialog.setDepartment(departmentAutoCompleter.getListOption());
-        dialog.initMain();
-        dialog.setSize(Global.width - 50, Global.height - 50);
-        dialog.setLocationRelativeTo(null);
+        dialog.initData();
+        dialog.searchTriBalDetail();
         dialog.setVisible(true);
     }
 
@@ -306,7 +310,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void initCombo() {
-        dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
+        dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
         cOAAutoCompleter = new COA3AutoCompleter(txtCOA, accountApi, null, true, 0);
         cOAAutoCompleter.setSelectionObserver(this);

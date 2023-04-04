@@ -60,7 +60,6 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
-    private boolean status = false;
 
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
@@ -109,13 +108,9 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     }
 
     public void initMain() {
-        if (!status) {
-            initTableVoucher();
-            setTodayDate();
-            initCombo();
-            status = true;
-        }
-        search();
+        initTableVoucher();
+        setTodayDate();
+        initCombo();
     }
 
     private void initCombo() {
@@ -172,7 +167,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
 
-    private void search() {
+    public void search() {
         progess.setIndeterminate(true);
         txtTotalRecord.setValue(0);
         tableModel.clear();

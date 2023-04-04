@@ -66,7 +66,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private UserRepo userRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
-    private boolean status = false;
     private LocationAutoCompleter locationAutoCompleter;
 
     public WebClient getInventoryApi() {
@@ -106,18 +105,18 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         initComponents();
         initKeyListener();
         initFocous();
+        initFormatFactory();
+    }
+
+    private void initFormatFactory() {
         txtTotalAmt.setFormatterFactory(Util1.getDecimalFormat());
         txtPaid.setFormatterFactory(Util1.getDecimalFormat());
     }
 
     public void initMain() {
-        if (!status) {
-            initCombo();
-            initTableVoucher();
-            setTodayDate();
-            status = true;
-        }
-        search();
+        initCombo();
+        initTableVoucher();
+        setTodayDate();
     }
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
@@ -199,7 +198,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
 
-    private void search() {
+    public void search() {
         progress.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setCusCode(traderAutoCompleter.getTrader().getKey().getCode());

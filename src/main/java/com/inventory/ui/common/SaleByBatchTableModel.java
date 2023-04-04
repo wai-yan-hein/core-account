@@ -261,7 +261,7 @@ public class SaleByBatchTableModel extends AbstractTableModel {
                             if (ProUtil.isPricePopup()) {
                                 sd.setPrice(getPopupPrice(row, true));
                             }
-                            sd.setPrice(sd.getPrice() == 0 ? s.getSalePriceN() : sd.getPrice());
+                            sd.setPrice(Util1.getFloat(sd.getPrice()) == 0 ? s.getSalePriceN() : sd.getPrice());
                             parent.setColumnSelectionInterval(5, 5);
                             addNewRow();
                         }

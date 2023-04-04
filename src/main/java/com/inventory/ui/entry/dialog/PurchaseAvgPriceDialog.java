@@ -7,7 +7,6 @@ package com.inventory.ui.entry.dialog;
 import com.common.Global;
 import com.common.Util1;
 import com.inventory.model.PurHisDetail;
-import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.UnitComboBoxModel;
@@ -117,7 +116,7 @@ public class PurchaseAvgPriceDialog extends javax.swing.JDialog {
     private void calPrice() {
         if (lossUnitModel.getSelectedItem() instanceof StockUnit unit) {
             String unitCode = unit.getKey().getUnitCode();
-            float qty = inventoryRepo.getSmallQty(pd.getStockCode(), unitCode).getQty();
+            float qty = inventoryRepo.getSmallQty(pd.getStockCode(), unitCode).block().getQty();
             float avgQty = Util1.getFloat(txtAvgQty.getValue());
             float price = Util1.getFloat(txtPrice.getValue());
             float avgPrice = avgQty / qty * price;

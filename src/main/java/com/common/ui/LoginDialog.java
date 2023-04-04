@@ -5,26 +5,21 @@
  */
 package com.common.ui;
 
+import com.ConnectionDialog;
 import com.common.Global;
 import com.user.common.UserRepo;
 import com.common.Util1;
 import com.inventory.model.AppUser;
 import com.inventory.model.MachineInfo;
-import java.awt.Color;
 import java.awt.HeadlessException;
 import java.awt.event.FocusAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.channels.FileChannel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
@@ -40,8 +35,6 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class LoginDialog extends javax.swing.JDialog implements KeyListener {
 
-    @Value("${src.path}")
-    private String srcPath;
     private boolean login = false;
     private int loginAttempt = 0;
     @Autowired
@@ -71,76 +64,42 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
     public LoginDialog() {
         super(new javax.swing.JFrame(), true);
         initComponents();
-        //Init
         initKeyListener();
         initFocusListener();
     }
 
     public void checkMachineRegister() {
+        Global.dialog = this;
         Global.machineName = Util1.getComputerName();
-        userRepo.register(Global.machineName).subscribe((mac) -> {
-            if (mac == null) {
-                JOptionPane.showMessageDialog(this, "Core User Api is not running.", "Machine", JOptionPane.ERROR_MESSAGE);
+        ConnectionDialog d = new ConnectionDialog();
+        taskExecutor.execute(() -> {
+            d.setLocationRelativeTo(null);
+            d.setVisible(true);
+        });
+        MachineInfo info = userRepo.register(Global.machineName);
+        d.setVisible(false);
+        if (info == null) {
+            JOptionPane.showMessageDialog(this, "Core User Api is not running.", "Connection Error", JOptionPane.ERROR_MESSAGE);
+            System.exit(0);
+        }
+        int macId = info.getMacId();
+        if (macId == 0) {
+            SecurityDialog dialog = new SecurityDialog();
+            dialog.setLocationRelativeTo(null);
+            dialog.setVisible(true);
+            String inputKey = dialog.getKey();
+            String toDayKey = Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd");
+            toDayKey = toDayKey.replaceAll("-", "");
+            if (inputKey.equals(toDayKey)) {
+                register();
+            } else {
+                JOptionPane.showMessageDialog(Global.parentForm, "Invalid Security Key.");
                 System.exit(1);
             }
-            int macId = mac.getMacId();
-            if (macId == 0) {
-                SecurityDialog dialog = new SecurityDialog();
-                dialog.setLocationRelativeTo(null);
-                dialog.setVisible(true);
-                String inputKey = dialog.getKey();
-                String toDayKey = Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd");
-                toDayKey = toDayKey.replaceAll("-", "");
-                if (inputKey.equals(toDayKey)) {
-                    register();
-                } else {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Security Key.");
-                    System.exit(1);
-                }
-            } else {
-                if (!mac.isProUpdate()) {
-                    formEnable(false);
-                    lblStatus.setForeground(Color.blue);
-                    lblStatus.setText("Please wait program is updating...");
-                    taskExecutor.execute(() -> {
-                        String replacStr = srcPath.replaceAll("\"", "//");
-                        log.info(replacStr);
-                        try {
-                            String distPath = "core-inventory.jar";
-                            FileChannel src = new FileInputStream(
-                                    replacStr)
-                                    .getChannel();
-                            FileChannel dest
-                                    = new FileOutputStream(
-                                            distPath)
-                                            .getChannel();
-                            dest.transferFrom(src, 0, src.size());
-                            lblStatus.setForeground(Color.BLACK);
-                            lblStatus.setText("Program is updated. Exit program and open.");
-                            mac.setProUpdate(true);
-                            userRepo.register(mac);
-                        } catch (IOException ex) {
-                            formEnable(true);
-                            lblStatus.setForeground(Color.red);
-                            lblStatus.setText(String.format("Program updating error :%s", ex.getMessage()));
-                        }
-                    });
-                    //JOptionPane.showMessageDialog(new JFrame(), "Program is updating... Please Wait..", "Update Alert", JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    lblStatus.setText("Latest version.");
-                }
-                Global.macId = macId;
-            }
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, "User Api is not running.", "Connection", JOptionPane.ERROR_MESSAGE);
-            System.exit(0);
-        });
-    }
-
-    private void formEnable(boolean status) {
-        btnLogin.setEnabled(status);
-        txtLoginName.setEnabled(status);
-        txtPassword.setEnabled(status);
+        } else {
+            lblStatus.setText("Latest version.");
+            Global.macId = macId;
+        }
 
     }
 
@@ -410,6 +369,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
 
     private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
         // TODO add your handling code here:
+        Global.dialog = null;
         //System.exit(0);
     }//GEN-LAST:event_formWindowClosed
 

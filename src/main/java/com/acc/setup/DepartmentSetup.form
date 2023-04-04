@@ -190,7 +190,7 @@
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
       <SubComponents>
-        <Component class="javax.swing.JTree" name="treeDept">
+        <Component class="javax.swing.JTree" name="treeDep">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.textFont" type="code"/>
@@ -198,7 +198,7 @@
             <Property name="model" type="javax.swing.tree.TreeModel" editor="org.netbeans.modules.form.editors2.TreeModelEditor">
               <TreeModel code="Department&#xa;"/>
             </Property>
-            <Property name="name" type="java.lang.String" value="treeDept" noResource="true"/>
+            <Property name="name" type="java.lang.String" value="treeDep" noResource="true"/>
           </Properties>
         </Component>
       </SubComponents>

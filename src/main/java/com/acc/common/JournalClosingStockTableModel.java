@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  *
- * @author MyoGyi
+ * @author Lenovo
  */
 @Slf4j
 public class JournalClosingStockTableModel extends AbstractTableModel {

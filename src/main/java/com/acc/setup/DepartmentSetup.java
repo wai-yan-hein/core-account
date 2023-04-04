@@ -12,14 +12,11 @@ import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.text.DateFormat;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -34,6 +31,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
@@ -55,7 +53,6 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
     private final String parentRootName = "Department";
     private SelectionObserver observer;
     private JProgressBar progress;
-    private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
 
     public JProgressBar getProgress() {
         return progress;
@@ -98,12 +95,21 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
         initPopup();
     }
 
+    private void batchLock(boolean lock) {
+        txtName.setEnabled(lock);
+        txtUserCode.setEnabled(lock);
+        txtSystemCode.setEnabled(lock);
+        observer.selected("save", lock);
+        observer.selected("delete", lock);
+    }
+
     public void initMain() {
+        batchLock(!Global.batchLock);
         initTree();
     }
 
     private void initTree() {
-        treeModel = (DefaultTreeModel) treeDept.getModel();
+        treeModel = (DefaultTreeModel) treeDep.getModel();
         treeModel.setRoot(null);
         treeRoot = new DefaultMutableTreeNode(parentRootName);
         progress.setIndeterminate(true);
@@ -199,9 +205,9 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
         chkActive.addKeyListener(this);
 
         txtUserCode.requestFocus();
-        treeDept.addMouseListener(this);
-        treeDept.addTreeSelectionListener(this);
-        treeDept.addKeyListener(this);
+        treeDep.addMouseListener(this);
+        treeDep.addTreeSelectionListener(this);
+        treeDep.addKeyListener(this);
 
     }
 
@@ -211,10 +217,13 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
         key.setCompCode(Global.compCode);
         dep.setKey(key);
         dep.setDeptName("New Department");
-        child = new DefaultMutableTreeNode(dep);
-        selectedNode.add(child);
-        treeModel.insertNodeInto(child, selectedNode, selectedNode.getChildCount() - 1);
-        treeDept.setSelectionRow(selectedNode.getChildCount());
+        DefaultTreeModel model = (DefaultTreeModel) treeDep.getModel();
+        DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(dep);
+        DefaultMutableTreeNode selectNode = (DefaultMutableTreeNode) treeDep.getLastSelectedPathComponent();
+        model.insertNodeInto(newNode, selectNode, selectNode.getChildCount());
+        TreePath path = new TreePath(newNode.getPath());
+        treeDep.expandPath(new TreePath(selectNode.getPath()));
+        treeDep.setSelectionPath(path);
         txtUserCode.requestFocus();
     }
 
@@ -232,7 +241,10 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
             accountRepo.saveDepartment(dep).subscribe((t) -> {
                 if (t != null) {
                     selectedNode.setUserObject(t);
-                    treeModel.reload(selectedNode);
+                    TreePath path = treeDep.getSelectionPath();
+                    DefaultTreeModel model = (DefaultTreeModel) treeDep.getModel();
+                    model.nodeChanged(selectedNode);
+                    treeDep.setSelectionPath(path);
                     setEnabledControl(false);
                     clear();
                 }
@@ -280,7 +292,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
         chkActive = new javax.swing.JCheckBox();
         labelStatus = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        treeDept = new javax.swing.JTree();
+        treeDep = new javax.swing.JTree();
 
         jLabel4.setText("jLabel4");
 
@@ -368,11 +380,11 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        treeDept.setFont(Global.textFont);
+        treeDep.setFont(Global.textFont);
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("Department");
-        treeDept.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
-        treeDept.setName("treeDept"); // NOI18N
-        jScrollPane2.setViewportView(treeDept);
+        treeDep.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
+        treeDep.setName("treeDep"); // NOI18N
+        jScrollPane2.setViewportView(treeDep);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -418,7 +430,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel labelStatus;
-    private javax.swing.JTree treeDept;
+    private javax.swing.JTree treeDep;
     private javax.swing.JTextField txtName;
     private javax.swing.JTextField txtSystemCode;
     private javax.swing.JTextField txtUserCode;
@@ -426,7 +438,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
 
     @Override
     public void valueChanged(TreeSelectionEvent e) {
-        selectedNode = (DefaultMutableTreeNode) treeDept.getLastSelectedPathComponent();
+        selectedNode = (DefaultMutableTreeNode) treeDep.getLastSelectedPathComponent();
         if (selectedNode != null) {
             if (!selectedNode.getUserObject().toString().equals(parentRootName)) {
                 Department dep = (Department) selectedNode.getUserObject();
@@ -554,7 +566,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
 
     private void tabToTree(KeyEvent e) {
         if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            treeDept.requestFocus();
+            treeDep.requestFocus();
         }
     }
 

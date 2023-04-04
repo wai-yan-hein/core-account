@@ -5,7 +5,10 @@
 package com.acc.common;
 
 import com.acc.model.COAKey;
+import com.acc.model.COATemplate;
+import com.acc.model.COATemplateKey;
 import com.acc.model.ChartOfAccount;
+import com.acc.model.DateModel;
 import com.acc.model.DeleteObj;
 import com.user.model.Currency;
 import com.acc.model.Department;
@@ -24,6 +27,7 @@ import com.common.ReturnObject;
 import com.common.Util1;
 import com.user.model.CurExchange;
 import com.user.model.ExchangeKey;
+import com.user.model.YearEnd;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,12 +74,8 @@ public class AccountRepo {
                 .uri(builder -> builder.path("/account/find-currency")
                 .queryParam("curCode", curCode)
                 .build())
-                .exchangeToMono((r) -> {
-                    if (r.statusCode().is2xxSuccessful()) {
-                        return r.bodyToMono(Currency.class);
-                    }
-                    return null;
-                });
+                .retrieve()
+                .bodyToMono(Currency.class);
     }
 
     public Mono<List<Department>> getDepartment() {
@@ -151,6 +151,14 @@ public class AccountRepo {
                 .bodyToMono(ReturnObject.class);
     }
 
+    public Mono<Boolean> delete(COATemplateKey obj) {
+        return accountApi.post()
+                .uri("/account/delete-coa-template")
+                .body(Mono.just(obj), COATemplateKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+    }
+
     public Mono<Boolean> delete(DeleteObj obj) {
         return accountApi.post()
                 .uri("/account/delete-gl")
@@ -164,12 +172,16 @@ public class AccountRepo {
                 .uri("/account/delete-op")
                 .body(Mono.just(key), DeleteObj.class)
                 .accept(MediaType.APPLICATION_JSON)
-                .exchangeToMono((r) -> {
-                    if (r.statusCode().is2xxSuccessful()) {
-                        return r.bodyToMono(Boolean.class);
-                    }
-                    return Mono.error(new RuntimeException("Failed to delete."));
-                });
+                .retrieve()
+                .bodyToMono(Boolean.class);
+    }
+
+    public Mono<Boolean> delete(COAKey key) {
+        return accountApi.post()
+                .uri("/account/delete-coa")
+                .body(Mono.just(key), COAKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class);
     }
 
     public Mono<Boolean> delete(ExchangeKey obj) {
@@ -196,6 +208,14 @@ public class AccountRepo {
                 .bodyToMono(Boolean.class);
     }
 
+    public Mono<COATemplate> save(COATemplate coa) {
+        return accountApi.post()
+                .uri("/template/saveCOA")
+                .body(Mono.just(coa), COATemplate.class)
+                .retrieve()
+                .bodyToMono(COATemplate.class);
+    }
+
     public Mono<ChartOfAccount> saveCOA(ChartOfAccount coa) {
         return accountApi.post()
                 .uri("/account/save-coa")
@@ -212,6 +232,15 @@ public class AccountRepo {
                 .queryParam("compCode", compCode)
                 .build())
                 .retrieve().bodyToMono(Double.class);
+    }
+
+    public Flux<COATemplate> getCOAChildTemplate(String coaCode, Integer busId) {
+        return accountApi.get()
+                .uri(builder -> builder.path("/template/getCOAChild")
+                .queryParam("coaCode", coaCode)
+                .queryParam("busId", busId)
+                .build())
+                .retrieve().bodyToFlux(COATemplate.class);
     }
 
     public Flux<ChartOfAccount> getCOAChild(String coaCode) {
@@ -258,12 +287,8 @@ public class AccountRepo {
                 .uri("/account/find-coa")
                 .body(Mono.just(key), COAKey.class)
                 .accept(MediaType.APPLICATION_JSON)
-                .exchangeToMono((r) -> {
-                    if (r.statusCode().is2xxSuccessful()) {
-                        return r.bodyToMono(ChartOfAccount.class);
-                    }
-                    return Mono.error(new RuntimeException("Failed to retreive."));
-                });
+                .retrieve()
+                .bodyToMono(ChartOfAccount.class);
     }
 
     public Mono<Department> saveDepartment(Department dep) {
@@ -319,17 +344,14 @@ public class AccountRepo {
         return null;
     }
 
-    public Flux<CurExchange> searchExchange(ReportFilter filter) {
+    public Mono<List<CurExchange>> searchExchange(ReportFilter filter) {
         return accountApi.post()
                 .uri("/account/search-exchange")
                 .accept(MediaType.APPLICATION_JSON)
                 .body(Mono.just(filter), ReportFilter.class)
-                .exchangeToFlux((t) -> {
-                    if (t.statusCode().is2xxSuccessful()) {
-                        return t.bodyToFlux(CurExchange.class);
-                    }
-                    return null;
-                });
+                .retrieve()
+                .bodyToFlux(CurExchange.class)
+                .collectList();
     }
 
     public Flux<Gl> listenGl() {
@@ -339,4 +361,23 @@ public class AccountRepo {
                 .build())
                 .retrieve().bodyToFlux(Gl.class);
     }
+
+    public Mono<YearEnd> yearEnd(YearEnd t) {
+        return accountApi.post()
+                .uri("/account/yearEnd")
+                .accept(MediaType.APPLICATION_JSON)
+                .body(Mono.just(t), YearEnd.class)
+                .retrieve()
+                .bodyToMono(YearEnd.class);
+    }
+
+    public Flux<DateModel> getDate() {
+        return accountApi.get()
+                .uri(builder -> builder.path("/account/getDate")
+                .queryParam("startDate", Global.startDate)
+                .queryParam("endDate", Global.endate)
+                .build())
+                .retrieve().bodyToFlux(DateModel.class);
+    }
+
 }

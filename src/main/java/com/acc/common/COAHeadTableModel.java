@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author MyoGyi
+ * @author Lenovo
  */
 public class COAHeadTableModel extends AbstractTableModel {
 

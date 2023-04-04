@@ -284,7 +284,9 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
             inventoryRepo.findLocation(oPHis.getLocCode(), oPHis.getKey().getDeptId()).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
-            currencyAAutoCompleter.setCurrency(inventoryRepo.findCurrency(oPHis.getCurCode()));
+            inventoryRepo.findCurrency(oPHis.getCurCode()).subscribe((t) -> {
+                currencyAAutoCompleter.setCurrency(t);
+            });
             progress.setIndeterminate(true);
             Mono<ResponseEntity<List<OPHisDetail>>> result = inventoryApi.get()
                     .uri(builder -> builder.path("/setup/get-opening-detail")
@@ -758,8 +760,9 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     public void selected(Object source, Object selectObj) {
         if (source.toString().equals("OP-HISTORY")) {
             if (selectObj instanceof OPHis v) {
-                OPHis op = inventoryRepo.findOpening(v.getKey());
-                setVoucher(op);
+                inventoryRepo.findOpening(v.getKey()).subscribe((t) -> {
+                    setVoucher(t);
+                });
             }
         }
         if (source.toString().equals("CAL-TOTAL")) {

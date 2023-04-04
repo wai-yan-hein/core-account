@@ -7,20 +7,16 @@ package com.user.setup;
 
 import com.common.Global;
 import com.common.PanelControl;
-import com.common.ReturnObject;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.user.common.UserRepo;
 import com.user.model.Menu;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.user.model.MenuKey;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.text.DateFormat;
 import java.util.List;
-import java.util.Objects;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -30,13 +26,10 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -46,14 +39,11 @@ import reactor.core.publisher.Mono;
 public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListener, PanelControl {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(MenuSetup.class);
-    Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     private DefaultMutableTreeNode treeRoot;
     DefaultTreeModel treeModel;
     DefaultMutableTreeNode selectedNode;
     @Autowired
-    private WebClient userApi;
-    @Autowired
-    private TaskExecutor taskExecutor;
+    private UserRepo userRepo;
 
     private SelectionObserver observer;
     private final String parentRootName = "Root Menu";
@@ -108,28 +98,21 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
     private void deleteMenu() {
         if (selectedNode.getUserObject() != null) {
             Menu menu = (Menu) selectedNode.getUserObject();
-            Mono<ReturnObject> result = userApi.post()
-                    .uri("/user/delete-menu")
-                    .body(Mono.just(menu), Menu.class)
-                    .retrieve()
-                    .bodyToMono(ReturnObject.class
-                    );
-            ReturnObject block = result.block();
-            JOptionPane.showMessageDialog(this, block.getMessage());
-            treeModel.removeNodeFromParent(selectedNode);
+            userRepo.delete(menu).subscribe((t) -> {
+                if (t) {
+                    treeModel.removeNodeFromParent(selectedNode);
+                }
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            });
         } else {
             JOptionPane.showMessageDialog(this, "Select Menu.");
         }
     }
 
     private void getMenu() {
-        userApi.get()
-                .uri(builder -> builder.path("/user/get-menu-tree")
-                .queryParam("compCode", Global.compCode)
-                .build())
-                .retrieve()
-                .bodyToFlux(Menu.class)
-                .collectList()
+        progress.setIndeterminate(true);
+        userRepo.getMenuTree()
                 .subscribe((menus) -> {
                     if (!menus.isEmpty()) {
                         menus.forEach((menu) -> {
@@ -150,6 +133,10 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
                         });
                     }
                     treeModel.setRoot(treeRoot);
+                    progress.setIndeterminate(false);
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                    progress.setIndeterminate(false);
                 });
 
     }
@@ -189,12 +176,8 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         treeModel = (DefaultTreeModel) treeCOA.getModel();
         treeModel.setRoot(null);
         treeRoot = new DefaultMutableTreeNode(parentRootName);
-        progress.setIndeterminate(true);
-        taskExecutor.execute(() -> {
-            getMenu();
-            treeModel.setRoot(treeRoot);
-            progress.setIndeterminate(false);
-        });
+        getMenu();
+
     }
 
     private void initPopup() {
@@ -214,6 +197,9 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
     private void newMenu(String type) {
         if (selectedNode.getUserObject() instanceof Menu obj) {
             Menu menu = new Menu();
+            MenuKey key = new MenuKey();
+            key.setCompCode(Global.compCode);
+            menu.setKey(key);
             menu.setMenuClass(obj.getMenuClass());
             switch (type) {
                 case "Menu" -> {
@@ -226,13 +212,14 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
                     menu.setMenuType("Report");
                 }
             }
-            DefaultMutableTreeNode child = new DefaultMutableTreeNode(menu);
-            selectedNode.add(child);
-            treeModel.insertNodeInto(child, selectedNode, selectedNode.getChildCount() - 1);
-            int count = selectedNode.getChildCount();
-            log.info(String.valueOf(count));
-            treeCOA.setSelectionInterval(count, count);
-            treeCOA.requestFocus();
+            DefaultTreeModel model = (DefaultTreeModel) treeCOA.getModel();
+            DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(menu);
+            DefaultMutableTreeNode selectNode = (DefaultMutableTreeNode) treeCOA.getLastSelectedPathComponent();
+            model.insertNodeInto(newNode, selectNode, selectNode.getChildCount());
+            TreePath path = new TreePath(newNode.getPath());
+            treeCOA.expandPath(new TreePath(selectNode.getPath()));
+            treeCOA.setSelectionPath(path);
+            txtMenuName.requestFocus();
         }
 
     }
@@ -264,21 +251,16 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
             if (txtOrder.getValue() != null) {
                 menu.setOrderBy(Util1.getInteger(txtOrder.getText()));
             }
-            saveMenu(menu).subscribe((t) -> {
+            userRepo.save(menu).subscribe((t) -> {
                 selectedNode.setUserObject(t);
-                treeModel.reload(selectedNode);
+                TreePath path = treeCOA.getSelectionPath();
+                DefaultTreeModel model = (DefaultTreeModel) treeCOA.getModel();
+                model.nodeChanged(selectedNode);
+                treeCOA.setSelectionPath(path);
                 clear();
                 observer.selected("menu", "menu");
             });
         }
-    }
-
-    private Mono<Menu> saveMenu(Menu menu) {
-        return userApi.post()
-                .uri("/user/save-menu")
-                .body(Mono.just(menu), Menu.class)
-                .retrieve()
-                .bodyToMono(Menu.class);
     }
 
     private void setMenu(Menu menu) {
@@ -300,7 +282,6 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         txtClass.setText(null);
         txtMenuMM.setText(null);
         enableControl(false);
-
     }
 
     private void enableControl(boolean status) {
@@ -580,12 +561,14 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
     public void valueChanged(TreeSelectionEvent e) {
         selectedNode = (DefaultMutableTreeNode) treeCOA.getLastSelectedPathComponent();
         if (selectedNode != null) {
-            if (!selectedNode.getUserObject().toString().equals(parentRootName)) {
-                if (selectedNode.getUserObject() instanceof Menu menu) {
-                    setMenu(menu);
+            if (selectedNode.getUserObject() != null) {
+                if (!selectedNode.getUserObject().toString().equals(parentRootName)) {
+                    if (selectedNode.getUserObject() instanceof Menu menu) {
+                        setMenu(menu);
+                    }
+                } else {
+                    clear();
                 }
-            } else {
-                clear();
             }
         }
     }

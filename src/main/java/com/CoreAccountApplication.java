@@ -8,19 +8,15 @@ import com.common.ui.LoginDialog;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontFormatException;
-import java.awt.Frame;
 import java.awt.Image;
-import java.awt.SystemTray;
-import java.awt.TrayIcon;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.ServerSocket;
+import java.io.OutputStream;
+import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,53 +44,16 @@ public class CoreAccountApplication {
     private static ConfigurableApplicationContext context;
     private static Tray tray;
     private static final Image appIcon = new ImageIcon(CoreAccountApplication.class.getResource("/images/applogo.png")).getImage();
-    private static final SplashWindow SPLASH_WINDOW = new SplashWindow();
+    private static final String APP_NAME = "Core Account";
 
-    public static void main(String[] args) throws IOException {
-        SPLASH_WINDOW.run();
-        Properties loadProperty = loadProperty();
-        initFont(Util1.getInteger(loadProperty.getProperty("font.size")));
-        SystemTray systemTray = SystemTray.getSystemTray();
-        TrayIcon[] icons = systemTray.getTrayIcons();
-        log.info("icon" + icons.length);
-        try {
-            UIManager.setLookAndFeel(new FlatLightLaf());
-        } catch (UnsupportedLookAndFeelException ex) {
-            System.err.println("Failed to initialize LaF");
-        }
-        try {
-            int port = 100;
-            Object programId = loadProperty.get("program.id");
-            if (programId != null) {
-                port = Integer.parseInt(programId.toString());
-            }
-            log.info("progarm id : " + port);
-            Global.sock = new ServerSocket(port);
-        } catch (IOException e) {
-            if (tray != null) {
-                tray.openMF();
-            }
-            JOptionPane.showMessageDialog(new JFrame(), "Core Account is already running.", "Duplicate Program", JOptionPane.ERROR_MESSAGE);
-            System.exit(0);
-        }
-        Global.selectionColor = UIManager.getDefaults().getColor("Table.selectionBackground");
-        System.setProperty("flatlaf.useWindowDecorations", "true");
-        System.setProperty("flatlaf.menuBarEmbedded", "false");
-        System.setProperty("flatlaf.animation", "true");
-        System.setProperty("flatlaf.uiScale.enabled", "true");
-        UIManager.put("Button.arc", 10);
-        UIManager.put("Table.arc", 10);
-        UIManager.put("Component.arc", 10);
-        UIManager.put("ProgressBar.arc", 10);
-        UIManager.put("TextComponent.arc", 10);
-        //UIManager.put("TabbedPane.showTabSeparators", true);
-        UIManager.put("TableHeader.background", Global.selectionColor);
-        UIManager.put("TableHeader.foreground", Color.white);
-        //UIManager.put("TableHeader.separatorColor", Color.black);
-        //UIManager.put("TableHeader.bottomSeparatorColor", Color.black);
-        //UIManager.put("Table.gridColor", UIManager.getDefaults().getColor("Table.selectionBackground"));
-        //UIManager.put("Table.gridColor", new Color(213, 235, 226));
-        //FlatSolarizedLightIJTheme.setup();
+    public static void main(String[] args) {
+        applayTheme();
+        loadProperty();
+        //splash
+        Splash splash = new Splash();
+        splash.setLocationRelativeTo(null);
+        splash.setVisible(true);
+        //create context
         SpringApplicationBuilder builder = new SpringApplicationBuilder(CoreAccountApplication.class);
         builder.headless(false);
         builder.web(WebApplicationType.NONE);
@@ -102,7 +61,7 @@ public class CoreAccountApplication {
         context = builder.run(args);
         tray = context.getBean(Tray.class);
         tray.startup(appIcon);
-        SPLASH_WINDOW.stopSplah();
+        splash.dispose();
         LoginDialog lg = context.getBean(LoginDialog.class);
         URL imgUrl = CoreAccountApplication.class.getResource("/images/male_user_16px.png");
         lg.setIconImage(new ImageIcon(imgUrl).getImage());
@@ -113,6 +72,7 @@ public class CoreAccountApplication {
             if (Global.macId != null) {
                 ApplicationMainFrame appMain = context.getBean(ApplicationMainFrame.class);
                 java.awt.EventQueue.invokeLater(() -> {
+                    appMain.setName(APP_NAME);
                     appMain.setIconImage(appIcon);
                     appMain.setExtendedState(JFrame.MAXIMIZED_BOTH);
                     appMain.initMain();
@@ -125,7 +85,6 @@ public class CoreAccountApplication {
             }
         } else {
             log.info("exit");
-            Global.sock.close();
             System.exit(0);
         }
     }
@@ -133,14 +92,9 @@ public class CoreAccountApplication {
     public static void restart() {
         ApplicationArguments args = context.getBean(ApplicationArguments.class);
         Thread thread = new Thread(() -> {
-            try {
-                context.close();
-                tray.removeTray();
-                Global.sock.close();
-                main(args.getSourceArgs());
-            } catch (IOException e) {
-                log.error("restart :" + e.getMessage());
-            }
+            context.close();
+            tray.removeTray();
+            main(args.getSourceArgs());
         });
         thread.setDaemon(true);
         thread.start();
@@ -170,16 +124,69 @@ public class CoreAccountApplication {
         }
     }
 
-    private static Properties loadProperty() {
-        Properties p = null;
+    private static void loadProperty() {
         try {
             FileReader reader = new FileReader("config" + File.separator + "application.properties");
-            p = new Properties();
+            Properties p = new Properties();
             p.load(reader);
+            initFont(Util1.getInteger(p.getProperty("font.size")));
+            int port = getPort(p.get("program.id"));
+            checkRun(port);
+            ServerThread t = new ServerThread(port);
+            t.start();
         } catch (IOException e) {
             log.error("loadProperty : " + e.getMessage());
             JOptionPane.showMessageDialog(Global.parentForm, "Property file not found.");
         }
-        return p;
     }
+
+    private static void checkRun(int port) {
+        try {
+            try (Socket client = new Socket("localhost", port); OutputStream out = client.getOutputStream()) {
+                out.write("focus\n".getBytes());
+                out.flush();
+            }
+            System.exit(0);
+        } catch (IOException e) {
+            // Server is not running, so we can start a new instance of the program
+            System.out.println("Starting new instance of program...");
+        }
+    }
+
+    private static int getPort(Object obj) {
+        if (obj != null) {
+            return Integer.parseInt(obj.toString());
+        }
+        return 100;
+    }
+
+    private static void applayTheme() {
+        try {
+            log.info("theme start.");
+            UIManager.setLookAndFeel(new FlatLightLaf());
+            Global.selectionColor = UIManager.getDefaults().getColor("Table.selectionBackground");
+            System.setProperty("flatlaf.useWindowDecorations", "true");
+            System.setProperty("flatlaf.menuBarEmbedded", "true");
+            System.setProperty("flatlaf.animation", "true");
+            System.setProperty("flatlaf.uiScale.enabled", "true");
+            UIManager.put("Button.arc", 10);
+            UIManager.put("Table.arc", 10);
+            UIManager.put("Component.arc", 10);
+            UIManager.put("ProgressBar.arc", 10);
+            UIManager.put("TextComponent.arc", 10);
+            UIManager.put("TabbedPane.showTabSeparators", true);
+            UIManager.put("TableHeader.background", Global.selectionColor);
+            UIManager.put("TableHeader.foreground", Color.white);
+            log.info("theme end.");
+            //UIManager.put("TableHeader.separatorColor", Color.black);
+            //UIManager.put("TableHeader.bottomSeparatorColor", Color.black);
+            //UIManager.put("Table.gridColor", UIManager.getDefaults().getColor("Table.selectionBackground"));
+            //UIManager.put("Table.gridColor", new Color(213, 235, 226));
+            //FlatSolarizedLightIJTheme.setup();
+        } catch (UnsupportedLookAndFeelException ex) {
+            System.err.println("Failed to initialize LaF");
+        }
+
+    }
+
 }

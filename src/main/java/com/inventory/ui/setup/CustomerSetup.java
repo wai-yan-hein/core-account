@@ -71,8 +71,6 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     private RegionAutoCompleter regionAutoCompleter;
     private SelectionObserver observer;
     private JProgressBar progress;
-    private List<Region> listRegion = new ArrayList<>();
-    private List<TraderGroup> listTraderGroup = new ArrayList<>();
     private TableRowSorter<TableModel> sorter;
 
     public JProgressBar getProgress() {
@@ -107,12 +105,16 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     }
 
     private void initCombo() {
-        listRegion = inventoryRepo.getRegion();
-        regionAutoCompleter = new RegionAutoCompleter(txtRegion, listRegion, null, false, false);
-        regionAutoCompleter.setRegion(null);
-        listTraderGroup = inventoryRepo.getTraderGroup();
-        traderGroupAutoCompleter = new TraderGroupAutoCompleter(txtGroup, listTraderGroup, null, false);
-        traderGroupAutoCompleter.setGroup(null);
+        inventoryRepo.getRegion().subscribe((t) -> {
+            regionAutoCompleter = new RegionAutoCompleter(txtRegion, t, null, false, false);
+            regionAutoCompleter.setRegion(null);
+        });
+
+        inventoryRepo.getTraderGroup().subscribe((t) -> {
+            traderGroupAutoCompleter = new TraderGroupAutoCompleter(txtGroup, t, null, false);
+            traderGroupAutoCompleter.setGroup(null);
+        });
+
         accountRepo.getCOAChild(ProUtil.getProperty(ProUtil.DEBTOR_GROUP)).collectList().subscribe((t) -> {
             cOAAutoCompleter = new COAAutoCompleter(txtAccount,
                     t,
@@ -128,9 +130,10 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         tblCustomer.setModel(customerTabelModel);
         tblCustomer.getTableHeader().setFont(Global.textFont);
         tblCustomer.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblCustomer.getColumnModel().getColumn(0).setPreferredWidth(40);// Code
-        tblCustomer.getColumnModel().getColumn(1).setPreferredWidth(320);// Name
-        tblCustomer.getColumnModel().getColumn(2).setPreferredWidth(40);// Active   
+        tblCustomer.getColumnModel().getColumn(0).setPreferredWidth(1);// Code
+        tblCustomer.getColumnModel().getColumn(1).setPreferredWidth(40);// Code
+        tblCustomer.getColumnModel().getColumn(2).setPreferredWidth(320);// Name
+        tblCustomer.getColumnModel().getColumn(3).setPreferredWidth(40);// Active   
         tblCustomer.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblCustomer.setDefaultRenderer(Object.class, new TableCellRender());
         tblCustomer.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
@@ -174,7 +177,6 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtRFID.setText(customer.getRfId());
         txtRemark.setText(txtRemark.getText());
         txtCusPhone.setText(customer.getPhone());
-        regionAutoCompleter.setRegion(inventoryRepo.findRegion(customer.getRegCode()));
         txtCusAddress.setText(customer.getAddress());
         chkActive.setSelected(customer.isActive());
         txtCreditLimit.setText(Util1.getString(cus.getCreditLimit()));
@@ -183,7 +185,12 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtPrice.setText(customer.getPriceType());
         txtCusName.requestFocus();
         lblStatus.setText("EDIT");
-        traderGroupAutoCompleter.setGroup(inventoryRepo.findTraderGroup(customer.getGroupCode(), customer.getKey().getDeptId()));
+        inventoryRepo.findRegion(customer.getRegCode()).subscribe((t) -> {
+            regionAutoCompleter.setRegion(t);
+        });
+        inventoryRepo.findTraderGroup(customer.getGroupCode(), customer.getKey().getDeptId()).subscribe((t) -> {
+            traderGroupAutoCompleter.setGroup(t);
+        });
         accountRepo.findCOA(customer.getAccount()).subscribe((t) -> {
             cOAAutoCompleter.setCoa(t);
         });
@@ -244,15 +251,22 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private void saveCustomer() {
         if (isValidEntry()) {
-            customer = inventoryRepo.saveTrader(customer);
-            if (!Util1.isNull(customer.getKey().getCode())) {
-                if (lblStatus.getText().equals("EDIT")) {
-                    customerTabelModel.setCustomer(selectRow, customer);
-                } else {
-                    customerTabelModel.addCustomer(customer);
+            progress.setIndeterminate(true);
+            inventoryRepo.saveTrader(customer).subscribe((t) -> {
+                if (!Util1.isNull(customer.getKey().getCode())) {
+                    if (lblStatus.getText().equals("EDIT")) {
+                        customerTabelModel.setCustomer(selectRow, customer);
+                    } else {
+                        customerTabelModel.addCustomer(customer);
+                    }
+                    progress.setIndeterminate(false);
+                    clear();
                 }
-                clear();
-            }
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
+                progress.setIndeterminate(false);
+            });
+
         }
     }
 
@@ -779,13 +793,15 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-        RegionSetup regionSetup = new RegionSetup(Global.parentForm);
-        regionSetup.setListRegion(listRegion);
-        regionSetup.setInventoryRepo(inventoryRepo);
-        regionSetup.initMain();
-        regionSetup.setSize(Global.width / 2, Global.height / 2);
-        regionSetup.setLocationRelativeTo(null);
-        regionSetup.setVisible(true);
+        inventoryRepo.getRegion().subscribe((t) -> {
+            RegionSetup regionSetup = new RegionSetup(Global.parentForm);
+            regionSetup.setListRegion(t);
+            regionSetup.setInventoryRepo(inventoryRepo);
+            regionSetup.initMain();
+            regionSetup.setSize(Global.width / 2, Global.height / 2);
+            regionSetup.setLocationRelativeTo(null);
+            regionSetup.setVisible(true);
+        });
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void txtCusAddressKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCusAddressKeyReleased
@@ -817,13 +833,15 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private void btnGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGroupActionPerformed
         // TODO add your handling code here:
-        TraderGroupDialog dialog = new TraderGroupDialog();
-        dialog.setListGroup(listTraderGroup);
-        dialog.setInventoryRepo(inventoryRepo);
-        dialog.initMain();
-        dialog.setSize(Global.width / 2, Global.height / 2);
-        dialog.setLocationRelativeTo(null);
-        dialog.setVisible(true);
+        inventoryRepo.getTraderGroup().subscribe((t) -> {
+            TraderGroupDialog dialog = new TraderGroupDialog();
+            dialog.setListGroup(t);
+            dialog.setInventoryRepo(inventoryRepo);
+            dialog.initMain();
+            dialog.setSize(Global.width / 2, Global.height / 2);
+            dialog.setLocationRelativeTo(null);
+            dialog.setVisible(true);
+        });
     }//GEN-LAST:event_btnGroupActionPerformed
 
     private void txtPriceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPriceActionPerformed
@@ -1120,14 +1138,16 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     public void delete() {
         if (selectRow >= 0) {
             Trader t = customerTabelModel.getCustomer(selectRow);
-            List<String> str = inventoryRepo.deleteTrader(t.getKey());
-            if (str.isEmpty()) {
-                customerTabelModel.deleteCustomer(selectRow);
-                clear();
-                JOptionPane.showMessageDialog(this, "Deleted.");
-            } else {
-                JOptionPane.showMessageDialog(this, str);
-            }
+            inventoryRepo.deleteTrader(t.getKey()).subscribe((str) -> {
+                if (str.isEmpty()) {
+                    customerTabelModel.deleteCustomer(selectRow);
+                    clear();
+                    JOptionPane.showMessageDialog(this, "Deleted.");
+                } else {
+                    JOptionPane.showMessageDialog(this, str);
+                }
+            });
+
         }
     }
 

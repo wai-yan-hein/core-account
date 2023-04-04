@@ -16,8 +16,11 @@ import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import javax.swing.AbstractAction;
+import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
@@ -30,7 +33,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
- * @author MyoGyi
+ * @author Lenovo
  */
 @Component
 public class COASetup extends javax.swing.JPanel implements KeyListener, PanelControl {
@@ -68,11 +71,10 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
      */
     public COASetup() {
         initComponents();
-        //ActionMapping();
-
     }
 
     public void initMain() {
+        batchLock(!Global.batchLock);
         initKeyListener();
         initTable();
     }
@@ -81,6 +83,13 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         tblCOAHead();
         tblCOAGroup();
         tblCOA();
+    }
+
+    private void batchLock(boolean lock) {
+        coaGroupTableModel.setEdit(lock);
+        cOAGroupChildTableModel.setEdit(lock);
+        observer.selected("save", lock);
+        observer.selected("delete", lock);
     }
 
     private void tblCOAHead() {
@@ -171,7 +180,35 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         filterHeader.setPosition(TableFilterHeader.Position.TOP);
         filterHeader.setFont(Global.textFont);
         filterHeader.setVisible(false);
+        String solve = "delete";
+        KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
+        tblCOAGroupChild.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
+        tblCOAGroupChild.getActionMap().put(solve, new DeleteAction());
+    }
 
+    private class DeleteAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            deleteLv3();
+        }
+    }
+
+    private void deleteLv3() {
+        int row = tblCOAGroupChild.convertRowIndexToModel(tblCOAGroupChild.getSelectedRow());
+        if (row >= 0) {
+            ChartOfAccount coa = cOAGroupChildTableModel.getChartOfAccount(row);
+            if (coa != null) {
+                int yn = JOptionPane.showConfirmDialog(this, "Are you sure to delete?", "Delete COA", JOptionPane.WARNING_MESSAGE);
+                if (yn == JOptionPane.YES_OPTION) {
+                    accountRepo.delete(coa.getKey()).subscribe((t) -> {
+                        if (t) {
+                            cOAGroupChildTableModel.delete(row);
+                        }
+                    });
+                }
+            }
+        }
     }
 
     private void getCOAGroup(int row) {
@@ -186,7 +223,6 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
                 lblCoaGroup.setText(c.getCoaNameEng());
                 reqCoaGroup();
             });
-
         }
     }
 

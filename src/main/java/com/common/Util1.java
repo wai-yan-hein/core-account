@@ -19,6 +19,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
@@ -190,11 +191,7 @@ public class Util1 {
         String date = null;
 
         try {
-            /*if (strDate.contains("-")) {
-                date = strDate;
-            } else {*/
             date = formatter.format(toDate(strDate, inFormat));
-            //}
         } catch (Exception ex) {
             try {
                 date = formatter.format(toDate(strDate, outFormat));
@@ -656,6 +653,16 @@ public class Util1 {
         return iPAddress;
     }
 
+    public static String getServerIp(String hostName) {
+        try {
+            InetAddress address = InetAddress.getByName(hostName);
+            return address.getHostAddress();
+        } catch (UnknownHostException e) {
+            System.out.println("Unable to resolve hostname: " + hostName);
+        }
+        return "127.0.0.1";
+    }
+
     public static String toFormatPattern(Double value) {
         DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance();
         df.applyPattern(DECIMAL_FORMAT);
@@ -788,6 +795,22 @@ public class Util1 {
         try (Writer writer = new FileWriter(exportPath, StandardCharsets.UTF_8)) {
             gson.toJson(data, writer);
         }
+    }
+
+    public static void exit() {
+        try {
+            String processName = ManagementFactory.getRuntimeMXBean().getName();
+            long pid = Long.parseLong(processName.split("@")[0]);
+            // Create a process instance for the "kill" command
+            ProcessBuilder builder = new ProcessBuilder("taskkill", "/PID", Long.toString(pid));
+            Process process = builder.start();
+            int exitCode = process.waitFor();
+            System.out.println("Process exited with code " + exitCode);
+            // Wait for the "kill" command to finish executing
+        } catch (IOException | InterruptedException | NumberFormatException e) {
+            log.error(e.getMessage());
+        }
+
     }
 
 }

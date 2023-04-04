@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author MyoGyi
+ * @author Lenovo
  */
 public class COAGroupTableModel extends AbstractTableModel {
 
@@ -35,6 +35,15 @@ public class COAGroupTableModel extends AbstractTableModel {
     private JLabel paretnDesp;
     private AccountRepo accountRepo;
     private HashMap<String, String> hmCOA = new HashMap<>();
+    private boolean edit;
+
+    public boolean isEdit() {
+        return edit;
+    }
+
+    public void setEdit(boolean edit) {
+        this.edit = edit;
+    }
 
     public AccountRepo getAccountRepo() {
         return accountRepo;
@@ -196,12 +205,15 @@ public class COAGroupTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return switch (column) {
-            case 0, 1 ->
-                false;
-            default ->
-                true;
-        };
+        if (edit) {
+            return switch (column) {
+                case 0, 1 ->
+                    false;
+                default ->
+                    true;
+            };
+        }
+        return edit;
     }
 
     public ChartOfAccount getChartOfAccount(int row) {

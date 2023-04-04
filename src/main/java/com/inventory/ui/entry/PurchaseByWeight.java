@@ -95,7 +95,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
     private List<PurHisDetail> listDetail = new ArrayList();
     private final PurchaseWeightTableModel purTableModel = new PurchaseWeightTableModel();
-    private final PurchaseHistoryDialog vouSearchDialog = new PurchaseHistoryDialog(Global.parentForm);
+    private PurchaseHistoryDialog dialog;
     private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     @Autowired
     private WebClient inventoryApi;
@@ -224,7 +224,9 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         tblExpense.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblExpense.getColumnModel().getColumn(0).setPreferredWidth(100);
         tblExpense.getColumnModel().getColumn(1).setPreferredWidth(40);
-        tblExpense.getColumnModel().getColumn(0).setCellEditor(new ExpenseEditor(inventoryRepo.getExpense()));
+        inventoryRepo.getExpense().subscribe((t) -> {
+            tblExpense.getColumnModel().getColumn(0).setCellEditor(new ExpenseEditor(t));
+        });
         tblExpense.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
         txtExpense.setFormatterFactory(Util1.getDecimalFormat());
         txtExpense.setFont(Global.amtFont);
@@ -234,18 +236,20 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
 
     private void getExpense() {
         expenseTableModel.clear();
-        List<Expense> list = inventoryRepo.getExpense();
-        for (Expense e : list) {
-            PurExpense p = new PurExpense();
-            PurExpenseKey key = new PurExpenseKey();
-            key.setExpenseCode(e.getKey().getExpenseCode());
-            key.setCompCode(e.getKey().getCompCode());
-            p.setKey(key);
-            p.setExpenseName(e.getExpenseName());
-            p.setAmount(0.0f);
-            expenseTableModel.addObject(p);
-        }
-        expenseTableModel.addNewRow();
+        inventoryRepo.getExpense().subscribe((t) -> {
+            for (Expense e : t) {
+                PurExpense p = new PurExpense();
+                PurExpenseKey key = new PurExpenseKey();
+                key.setExpenseCode(e.getKey().getExpenseCode());
+                key.setCompCode(e.getKey().getCompCode());
+                p.setKey(key);
+                p.setExpenseName(e.getExpenseName());
+                p.setAmount(0.0f);
+                expenseTableModel.addObject(p);
+            }
+            expenseTableModel.addNewRow();
+        });
+
     }
 
     private void initDateListner() {
@@ -406,32 +410,23 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         txtCus.requestFocus();
     }
 
-    public boolean savePur(boolean print) {
-        boolean status = false;
-        try {
-            if (isValidEntry() && purTableModel.isValidEntry()) {
-                progress.setIndeterminate(true);
-                ph.setListPD(purTableModel.getListDetail());
-                ph.setListExpense(expenseTableModel.getListDetail());
-                ph.setListDel(purTableModel.getDelList());
-                Mono<PurHis> result = inventoryApi.post()
-                        .uri("/pur/save-pur")
-                        .body(Mono.just(ph), PurHis.class)
-                        .retrieve()
-                        .bodyToMono(PurHis.class);
-                PurHis t = result.block();
-                if (t != null) {
-                    clear();
-                    if (print) {
-                        printVoucher(t);
-                    }
+    public void savePur(boolean print) {
+        if (isValidEntry() && purTableModel.isValidEntry()) {
+            progress.setIndeterminate(true);
+            ph.setListPD(purTableModel.getListDetail());
+            ph.setListExpense(expenseTableModel.getListDetail());
+            ph.setListDel(purTableModel.getDelList());
+            inventoryRepo.save(ph).subscribe((t) -> {
+                clear();
+                progress.setIndeterminate(false);
+                if (print) {
+                    printVoucher(t);
                 }
-            }
-        } catch (HeadlessException ex) {
-            log.error("savePur :" + ex.getMessage());
-            JOptionPane.showMessageDialog(this, "Could not saved.");
+            }, (e) -> {
+                progress.setIndeterminate(false);
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            });
         }
-        return status;
     }
 
     private boolean isValidEntry() {
@@ -605,15 +600,19 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     }
 
     public void historyPur() {
-        vouSearchDialog.setInventoryApi(inventoryApi);
-        vouSearchDialog.setInventoryRepo(inventoryRepo);
-        vouSearchDialog.setUserRepo(userRepo);
-        vouSearchDialog.setIconImage(searchIcon);
-        vouSearchDialog.setObserver(this);
-        vouSearchDialog.initMain();
-        vouSearchDialog.setSize(Global.width - 100, Global.height - 100);
-        vouSearchDialog.setLocationRelativeTo(null);
-        vouSearchDialog.setVisible(true);
+        if (dialog == null) {
+            dialog = new PurchaseHistoryDialog(Global.parentForm);
+            dialog.setInventoryApi(inventoryApi);
+            dialog.setInventoryRepo(inventoryRepo);
+            dialog.setUserRepo(userRepo);
+            dialog.setIconImage(searchIcon);
+            dialog.setObserver(this);
+            dialog.initMain();
+            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setLocationRelativeTo(null);
+        }
+        dialog.search();
+        dialog.setVisible(true);
     }
 
     public void setVoucher(PurHis pur) {
@@ -621,7 +620,9 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             progress.setIndeterminate(true);
             ph = pur;
             Integer deptId = ph.getKey().getDeptId();
-            currAutoCompleter.setCurrency(inventoryRepo.findCurrency(ph.getCurCode()));
+            inventoryRepo.findCurrency(ph.getCurCode()).subscribe((t) -> {
+                currAutoCompleter.setCurrency(t);
+            });
             inventoryRepo.findLocation(ph.getLocCode(), deptId).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
@@ -1666,8 +1667,9 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             }
             case "PUR-HISTORY" -> {
                 if (selectObj instanceof VPurchase v) {
-                    PurHis pur = inventoryRepo.findPurchase(v.getVouNo(), v.getDeptId());
-                    setVoucher(pur);
+                    inventoryRepo.findPurchase(v.getVouNo(), v.getDeptId()).subscribe((t) -> {
+                        setVoucher(t);
+                    });
                 }
             }
             case "Select" -> {

@@ -62,7 +62,6 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
     private StartWithRowFilter tblFilter;
     private TableRowSorter<TableModel> sorter;
     private LocationAutoCompleter locationAutoCompleter;
-    private boolean status = false;
 
     public WebClient getInventoryApi() {
         return inventoryApi;
@@ -105,13 +104,9 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
     }
 
     public void initMain() {
-        if (!status) {
-            initCombo();
-            initTableVoucher();
-            setTodayDate();
-            status = true;
-        }
-        search();
+        initCombo();
+        initTableVoucher();
+        setTodayDate();
     }
 
     private void initCombo() {
@@ -179,7 +174,7 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
 
-    private void search() {
+    public void search() {
         progress.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setCusCode(traderAutoCompleter.getTrader().getKey().getCode());

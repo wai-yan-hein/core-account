@@ -88,12 +88,9 @@ public class DateAutoCompleter implements KeyListener, SelectionObserver {
     public DateAutoCompleter() {
     }
 
-    public DateAutoCompleter(JTextComponent comp, List<DateModel> list) {
-        if (list == null) {
-            list = generateDate();
-            Global.listDate = list;
-        }
+    public DateAutoCompleter(JTextComponent comp) {
         this.textComp = comp;
+        List<DateModel> list = generateDate();
         this.textComp.setText("Today");
         stDate = Util1.toDateStr(Util1.getTodayDate(), Global.dateFormat);
         endDate = stDate;
@@ -469,7 +466,6 @@ public class DateAutoCompleter implements KeyListener, SelectionObserver {
     }
 
     private String getMonthShortName(Month month) {
-
         String strMonth = month.toString();
         if (strMonth.length() >= 4) {
             strMonth = strMonth.substring(0, 3);

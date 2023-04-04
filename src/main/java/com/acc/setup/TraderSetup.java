@@ -81,8 +81,21 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         initKeyListener();
     }
 
+    private void batchLock(boolean lock) {
+        txtSysCode.setEnabled(lock);
+        txtCusCode.setEnabled(lock);
+        txtCusName.setEnabled(lock);
+        txtCusEmail.setEnabled(lock);
+        txtCusPhone.setEnabled(lock);
+        txtCusAddress.setEnabled(lock);
+        txtAccount.setEnabled(lock);
+        chkActive.setEnabled(lock);
+        observer.selected("save", lock);
+        observer.selected("delete", lock);
+    }
+
     public void initMain() {
-        progress.setIndeterminate(true);
+        batchLock(!Global.batchLock);
         initCombo();
         initTable();
         searchTrader();
@@ -96,8 +109,9 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
     private void initTable() {
         tblCustomer.setModel(traderATableModel);
         tblCustomer.getTableHeader().setFont(Global.textFont);
-        tblCustomer.getColumnModel().getColumn(0).setPreferredWidth(40);// Code
-        tblCustomer.getColumnModel().getColumn(1).setPreferredWidth(320);// Name
+        tblCustomer.getColumnModel().getColumn(0).setPreferredWidth(1);// Code
+        tblCustomer.getColumnModel().getColumn(1).setPreferredWidth(10);// Code
+        tblCustomer.getColumnModel().getColumn(2).setPreferredWidth(400);// Name
         tblCustomer.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblCustomer.setDefaultRenderer(Object.class, new TableCellRender());
         tblCustomer.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
@@ -116,15 +130,16 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
     private void searchTrader() {
         progress.setIndeterminate(true);
         traderATableModel.clear();
-        accountRepo.getTrader().subscribe((t) -> {
-            traderATableModel.addTrader(t);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        }, () -> {
-            traderATableModel.fireTableDataChanged();
-        });
-        lblRecord.setText(String.valueOf(traderATableModel.getListTrader().size() + ""));
-        progress.setIndeterminate(false);
+        accountRepo.getTrader()
+                .collectList()
+                .subscribe((t) -> {
+                    traderATableModel.setListTrader(t);
+                    lblRecord.setText(String.valueOf(traderATableModel.getListTrader().size() + ""));
+                    progress.setIndeterminate(false);
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                    progress.setIndeterminate(false);
+                });
 
     }
 
@@ -438,8 +453,10 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         });
         jScrollPane2.setViewportView(tblCustomer);
 
+        jLabel6.setFont(Global.lableFont);
         jLabel6.setText("Record :");
 
+        lblRecord.setFont(Global.lableFont);
         lblRecord.setText("0");
 
         txtFilter.setFont(Global.textFont);

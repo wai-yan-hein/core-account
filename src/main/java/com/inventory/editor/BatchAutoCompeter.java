@@ -339,11 +339,13 @@ public class BatchAutoCompeter implements KeyListener, SelectionObserver {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                List<GRN> list = inventoryRepo.getBatchList(str);
-                tableModel.setListTrader(list);
-                if (!list.isEmpty()) {
-                    table.setRowSelectionInterval(0, 0);
-                }
+                inventoryRepo.getBatchList(str).subscribe((t) -> {
+                    tableModel.setListTrader(t);
+                    if (!t.isEmpty()) {
+                        table.setRowSelectionInterval(0, 0);
+                    }
+                });
+
             }
         }
     }

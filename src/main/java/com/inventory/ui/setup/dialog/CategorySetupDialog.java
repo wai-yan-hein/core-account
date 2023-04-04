@@ -118,13 +118,15 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
 
     private void save() {
         if (isValidEntry()) {
-            category = inventoryRepo.saveCategory(category);
-            if (lblStatus.getText().equals("EDIT")) {
-                listCategory.set(selectRow, category);
-            } else {
-                listCategory.add(category);
-            }
-            clear();
+            inventoryRepo.saveCategory(category).subscribe((t) -> {
+                if (lblStatus.getText().equals("EDIT")) {
+                    listCategory.set(selectRow, t);
+                } else {
+                    listCategory.add(t);
+                }
+                clear();
+            });
+
         }
     }
 

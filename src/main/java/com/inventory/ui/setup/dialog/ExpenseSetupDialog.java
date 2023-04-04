@@ -102,7 +102,9 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
     }
 
     private void searchCategory() {
-        expenseTableModel.setListDetail(inventoryRepo.getExpense());
+        inventoryRepo.getExpense().subscribe((t) -> {
+            expenseTableModel.setListDetail(t);
+        });
     }
 
     private void initTable() {
@@ -148,13 +150,15 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
 
     private void save() {
         if (isValidEntry()) {
-            exp = inventoryRepo.saveExpense(exp);
-            if (lblStatus.getText().equals("EDIT")) {
-                expenseTableModel.setObject(exp, selectRow);
-            } else {
-                expenseTableModel.addObject(exp);
-            }
-            clear();
+            inventoryRepo.saveExpense(exp).subscribe((t) -> {
+                if (lblStatus.getText().equals("EDIT")) {
+                    expenseTableModel.setObject(exp, selectRow);
+                } else {
+                    expenseTableModel.addObject(exp);
+                }
+                clear();
+            });
+
         }
     }
 

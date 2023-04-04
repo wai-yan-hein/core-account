@@ -191,7 +191,9 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         f.setFinished(chkFinish.isSelected());
         f.setDeleted(chkDel.isSelected());
         f.setDeptId(getDepId());
-        processHisTableModel.setListDetail(inventoryRepo.getProcess(f));
+        inventoryRepo.getProcess(f).subscribe((t) -> {
+            processHisTableModel.setListDetail(t);
+        });
     }
 
     /**

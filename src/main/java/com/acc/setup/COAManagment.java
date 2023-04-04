@@ -15,7 +15,6 @@ import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
-import com.common.ReturnObject;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.TreeTransferHandler;
@@ -25,6 +24,8 @@ import com.inventory.editor.MenuAutoCompleter;
 import com.inventory.model.CFont;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.common.UserRepo;
+import com.user.model.MenuKey;
 import java.awt.FileDialog;
 import java.awt.HeadlessException;
 import java.awt.event.ActionListener;
@@ -35,6 +36,7 @@ import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.swing.DropMode;
@@ -57,6 +59,7 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,7 +92,7 @@ public class COAManagment extends javax.swing.JPanel implements
     @Autowired
     private WebClient accountApi;
     @Autowired
-    private WebClient userApi;
+    private UserRepo userRepo;
     @Autowired
     private AccountRepo accountRepo;
     @Autowired
@@ -147,20 +150,31 @@ public class COAManagment extends javax.swing.JPanel implements
     }
 
     public void initMain() {
+        batchLock(!Global.batchLock);
         multiCurrency();
         initTree();
         initCombo();
     }
 
+    private void batchLock(boolean lock) {
+        txtSysCode.setEnabled(lock);
+        txtUsrCode.setEnabled(lock);
+        txtName.setEnabled(lock);
+        chkActive.setEnabled(lock);
+        chkCredit.setEnabled(lock);
+        chkDefault.setEnabled(lock);
+        btnCreate.setEnabled(lock);
+        txtMenu.setEnabled(lock);
+        observer.selected("save", lock);
+        observer.selected("delete", lock);
+    }
+
     private void initCombo() {
-        Mono<ResponseEntity<List<Menu>>> result = userApi.get()
-                .uri(builder -> builder.path("/user/get-menu-parent")
-                .build())
-                .retrieve().toEntityList(Menu.class);
-        result.subscribe((t) -> {
-            completer = new MenuAutoCompleter(txtMenu, t.getBody(), null);
+        userRepo.getMenuParent().subscribe((t) -> {
+            completer = new MenuAutoCompleter(txtMenu, t, null);
             completer.setObserver(observer);
         }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
         });
     }
 
@@ -184,12 +198,14 @@ public class COAManagment extends javax.swing.JPanel implements
         coa = new ChartOfAccount();
         coa.setKey(new COAKey());
         coa.setCoaNameEng("New Chart of Account");
-        DefaultMutableTreeNode child = new DefaultMutableTreeNode(coa);
-        if (selectedNode != null) {
-            selectedNode.add(child);
-            treeModel.insertNodeInto(child, selectedNode, selectedNode.getChildCount() - 1);
-            treeCOA.setSelectionInterval(selectedNode.getChildCount(), selectedNode.getChildCount());
-        }
+        DefaultTreeModel model = (DefaultTreeModel) treeCOA.getModel();
+        DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(coa);
+        DefaultMutableTreeNode selectNode = (DefaultMutableTreeNode) treeCOA.getLastSelectedPathComponent();
+        model.insertNodeInto(newNode, selectNode, selectNode.getChildCount());
+        TreePath path = new TreePath(newNode.getPath());
+        treeCOA.expandPath(new TreePath(selectNode.getPath()));
+        treeCOA.setSelectionPath(path);
+        txtUsrCode.requestFocus();
         isNew = true;
     }
 
@@ -231,7 +247,10 @@ public class COAManagment extends javax.swing.JPanel implements
                     if (t != null) {
                         if (lblStatus.getText().equals("EDIT")) {
                             selectedNode.setUserObject(t);
-                            treeModel.reload(selectedNode);
+                            TreePath path = treeCOA.getSelectionPath();
+                            DefaultTreeModel model = (DefaultTreeModel) treeCOA.getModel();
+                            model.nodeChanged(selectedNode);
+                            treeCOA.setSelectionPath(path);
                             setEnabledControl(false);
                             clear();
                         }
@@ -258,14 +277,15 @@ public class COAManagment extends javax.swing.JPanel implements
                 if (yn == JOptionPane.YES_OPTION) {
                     ChartOfAccount c = (ChartOfAccount) selectedNode.getUserObject();
                     if (c != null) {
-                        String code = c.getKey().getCoaCode();
-                        int status = deleteCOA(code);
-                        if (status == 10) {
-                            JOptionPane.showMessageDialog(Global.parentForm, "Can't delete this account is already used.");
-                        } else {
-                            treeModel.removeNodeFromParent(selectedNode);
-                            treeModel.reload(selectedNode);
-                        }
+                        accountRepo.delete(c.getKey()).subscribe((t) -> {
+                            if (t) {
+                                treeModel.removeNodeFromParent(selectedNode);
+                                treeModel.reload(selectedNode);
+                            } else {
+                                JOptionPane.showMessageDialog(Global.parentForm, "Can't delete this account is already used.");
+                            }
+                        });
+
                     }
                 }
             }
@@ -273,10 +293,6 @@ public class COAManagment extends javax.swing.JPanel implements
             log.error("Delete ChartOfAccount :" + e.getMessage());
             JOptionPane.showMessageDialog(Global.parentForm, e.getMessage(), "Delete ChartOfAccount", JOptionPane.ERROR_MESSAGE);
         }
-    }
-
-    private int deleteCOA(String coaCode) {
-        return 1;
     }
 
     private void initPopup() {
@@ -423,31 +439,39 @@ public class COAManagment extends javax.swing.JPanel implements
 
     private void saveMenu() {
         if (completer.getMenu() != null) {
-            ChartOfAccount coa = (ChartOfAccount) selectedNode.getUserObject();
-            Menu menu = new Menu();
-            menu.setMenuName(coa.getCoaNameEng());
-            menu.setMenuClass(completer.getMenu().getMenuClass());
-            menu.setParentMenuCode(completer.getMenu().getKey().getMenuCode());
-            menu.setAccount(coa.getKey().getCoaCode());
-            menu.setMenuType("Menu");
-            try {
-                saveMenu(menu);
-            } catch (HeadlessException e) {
-                JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-                log.info("Save Menu :" + e.getMessage());
+            if (selectedNode.getUserObject() instanceof ChartOfAccount c) {
+                Menu menu = new Menu();
+                MenuKey key = new MenuKey();
+                key.setCompCode(Global.compCode);
+                menu.setKey(key);
+                menu.setMenuName(c.getCoaNameEng());
+                menu.setMenuClass(completer.getMenu().getMenuClass());
+                menu.setParentMenuCode(completer.getMenu().getKey().getMenuCode());
+                menu.setAccount(c.getKey().getCoaCode());
+                menu.setMenuType("Menu");
+                try {
+                    saveMenu(menu);
+                } catch (HeadlessException e) {
+                    JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+                    log.info("Save Menu :" + e.getMessage());
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Please select account.");
             }
         }
     }
 
     private void saveMenu(Menu menu) {
-        Mono<ReturnObject> result = userApi.post()
-                .uri("/user/save-menu")
-                .body(Mono.just(menu), Menu.class)
-                .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
-        clear();
-        observer.selected("menu", "menu");
+        progress.setIndeterminate(true);
+        userRepo.save(menu).subscribe((t) -> {
+            clear();
+            observer.selected("menu", "menu");
+            progress.setIndeterminate(false);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+            progress.setIndeterminate(false);
+        });
+
     }
 
     private void importCOA() {
@@ -468,7 +492,7 @@ public class COAManagment extends javax.swing.JPanel implements
     }
 
     private void readFile(String path, String parentCode) {
-        List<CFont> listFont = inventoryRepo.getFont();
+        List<CFont> listFont = new ArrayList<>();
         if (listFont != null) {
             listFont.forEach(f -> {
                 hmIntToZw.put(f.getIntCode(), f.getFontKey().getZwKeyCode());

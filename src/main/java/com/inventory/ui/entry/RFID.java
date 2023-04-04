@@ -16,11 +16,9 @@ import com.common.Util1;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.General;
-import com.inventory.model.Location;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.SaleHisKey;
-import com.inventory.model.Stock;
 import com.inventory.model.Trader;
 import com.inventory.model.VSale;
 import com.inventory.ui.common.InventoryRepo;
@@ -43,7 +41,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractAction;
-import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -72,7 +69,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     private List<SaleHisDetail> listDetail = new ArrayList();
     private final RFIDTableModel tableModel = new RFIDTableModel();
-    private final SaleHistoryDialog vouSearchDialog = new SaleHistoryDialog(Global.parentForm);
+    private SaleHistoryDialog dialog;
     @Autowired
     private WebClient inventoryApi;
     @Autowired
@@ -242,9 +239,11 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }
 
     private void setSaleInfo() {
-        General g = inventoryRepo.getSaleVoucherInfo(Util1.toDateStr(txtSaleDate.getDate(), "yyyy-MM-dd"));
-        txtVouCount.setValue(Util1.getInteger(g.getQty()));
-        txtVouAmt.setValue(Util1.getFloat(g.getAmount()));
+        inventoryRepo.getSaleVoucherInfo(Util1.toDateStr(txtSaleDate.getDate(), "yyyy-MM-dd")).subscribe((t) -> {
+            txtVouCount.setValue(Util1.getInteger(t.getQty()));
+            txtVouAmt.setValue(Util1.getFloat(t.getAmount()));
+        });
+
     }
 
     public void saveSale(boolean print) {
@@ -252,16 +251,14 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             if (isValidEntry() && tableModel.isValidEntry()) {
                 saleHis.setListSH(tableModel.getListDetail());
                 saleHis.setListDel(tableModel.getDelList());
-                Mono<SaleHis> result = inventoryApi.post()
-                        .uri("/sale/save-sale")
-                        .body(Mono.just(saleHis), SaleHis.class)
-                        .retrieve()
-                        .bodyToMono(SaleHis.class);
-                SaleHis t = result.block();
-                if (chkPrint.isSelected() || print) {
-                    printVoucher(t.getKey().getVouNo());
-                }
-                clear();
+                inventoryRepo.save(saleHis).subscribe((t) -> {
+                    progress.setIndeterminate(false);
+                    clear();
+                    if (chkPrint.isSelected() || print) {
+                        printVoucher(t.getKey().getVouNo());
+                    }
+
+                });
 
             }
         } catch (HeadlessException ex) {
@@ -354,15 +351,18 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }
 
     public void historySale() {
-        vouSearchDialog.setInventoryApi(inventoryApi);
-        vouSearchDialog.setInventoryRepo(inventoryRepo);
-        vouSearchDialog.setUserRepo(userRepo);
-        vouSearchDialog.setIconImage(new ImageIcon(getClass().getResource("/images/search.png")).getImage());
-        vouSearchDialog.setObserver(this);
-        vouSearchDialog.initMain();
-        vouSearchDialog.setSize(Global.width - 100, Global.height - 100);
-        vouSearchDialog.setLocationRelativeTo(null);
-        vouSearchDialog.setVisible(true);
+        if (dialog == null) {
+            dialog = new SaleHistoryDialog(Global.parentForm);
+            dialog.setInventoryApi(inventoryApi);
+            dialog.setInventoryRepo(inventoryRepo);
+            dialog.setUserRepo(userRepo);
+            dialog.setObserver(this);
+            dialog.initMain();
+            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setLocationRelativeTo(null);
+        }
+        dialog.search();
+        dialog.setVisible(true);
     }
 
     public void setSaleVoucher(SaleHis sh) {
@@ -429,14 +429,15 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private void findTrader() {
         String rfId = txtRFID.getText();
         if (!rfId.isEmpty()) {
-            Trader t = inventoryRepo.findTraderRFID(rfId);
-            traderAutoCompleter.setTrader(t);
-            generateTransaction();
+            inventoryRepo.findTraderRFID(rfId).subscribe((t) -> {
+                traderAutoCompleter.setTrader(t);
+                generateTransaction(t);
+            });
+
         }
     }
 
-    private void generateTransaction() {
-        Trader t = traderAutoCompleter.getTrader();
+    private void generateTransaction(Trader t) {
         if (t == null) {
             JOptionPane.showMessageDialog(this, "Customer Not Found.", "Message", JOptionPane.WARNING_MESSAGE);
         } else {
@@ -846,12 +847,14 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 calculateTotalAmount();
             case "SALE-HISTORY" -> {
                 if (selectObj instanceof VSale s) {
-                    SaleHis sh = inventoryRepo.findSale(s.getVouNo(), s.getDeptId());
-                    setSaleVoucher(sh);
+                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId()).subscribe((t) -> {
+                        setSaleVoucher(t);
+                    });
                 }
             }
             case "CUS" -> {
-                generateTransaction();
+                Trader t = traderAutoCompleter.getTrader();
+                generateTransaction(t);
                 focusTable();
             }
         }

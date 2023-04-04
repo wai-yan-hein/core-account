@@ -19,8 +19,6 @@ import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.inventory.editor.CurrencyAutoCompleter;
 import com.user.common.UserRepo;
 import java.awt.event.KeyEvent;
@@ -30,7 +28,6 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -85,6 +82,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     private boolean isApPrCal = false;
     private SelectionObserver observer;
     private JProgressBar progress;
+    private TrialBalanceDetailDialog dialog;
 
     public JProgressBar getProgress() {
         return progress;
@@ -161,9 +159,14 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void openTBDDialog(String coaCode, String curCode, String traderCode, String traderName) {
-        TrialBalanceDetailDialog dialog = new TrialBalanceDetailDialog(Global.parentForm);
-        dialog.setAccountApi(accountApi);
-        dialog.setAccountRepo(accountRepo);
+        if (dialog == null) {
+            dialog = new TrialBalanceDetailDialog(Global.parentForm);
+            dialog.setAccountRepo(accountRepo);
+            dialog.setAccountApi(accountApi);
+            dialog.initMain();
+            dialog.setSize(Global.width - 50, Global.height - 50);
+            dialog.setLocationRelativeTo(null);
+        }
         dialog.setCoaCode(coaCode);
         dialog.setStDate(dateAutoCompleter.getStDate());
         dialog.setEndDate(dateAutoCompleter.getEndDate());
@@ -171,9 +174,8 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         dialog.setDesp(traderName);
         dialog.setTraderCode(traderCode);
         dialog.setDepartment(departmentAutoCompleter.getListOption());
-        dialog.initMain();
-        dialog.setSize(Global.width - 50, Global.height - 50);
-        dialog.setLocationRelativeTo(null);
+        dialog.initData();
+        dialog.searchTriBalDetail();
         dialog.setVisible(true);
     }
 
@@ -233,7 +235,6 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
                 tblAPAR.requestFocus();
             });
         }
-
     }
 
     private void removeZero() {
@@ -264,7 +265,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void initCombo() {
-        dateAutoCompleter = new DateAutoCompleter(txtDate, Global.listDate);
+        dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
         accountRepo.getDepartment().subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDep,

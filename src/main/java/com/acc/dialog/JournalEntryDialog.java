@@ -94,6 +94,15 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         keyMapping();
     }
 
+    private void batchLock(boolean lock) {
+        tblJournal.setEnabled(lock);
+        btnSave.setEnabled(lock);
+        txtVouDate.setEnabled(lock);
+        txtRefrence.setEnabled(lock);
+        btnConversion.setEnabled(lock);
+        btnNew.setEnabled(lock);
+    }
+
     private void initFocusListener() {
         txtVouDate.getDateEditor().getUiComponent().addFocusListener(fa);
         txtRefrence.addFocusListener(fa);
@@ -141,7 +150,8 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
     };
 
     public void initMain() {
-        btnCurrency.setVisible(ProUtil.isMultiCur());
+        batchLock(!Global.batchLock);
+        btnConversion.setVisible(ProUtil.isMultiCur());
         initTable();
         searchJournalByVouId();
         txtVouDate.requestFocusInWindow();
@@ -314,9 +324,9 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         txtFCrdAmt = new javax.swing.JFormattedTextField();
         txtFDrAmt = new javax.swing.JFormattedTextField();
         lblStatus = new javax.swing.JLabel();
-        btnCurrency = new javax.swing.JButton();
+        btnConversion = new javax.swing.JButton();
         btnSave = new javax.swing.JButton();
-        btnPrint1 = new javax.swing.JButton();
+        btnNew = new javax.swing.JButton();
 
         jLabel3.setText("jLabel3");
 
@@ -460,11 +470,11 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         lblStatus.setFont(Global.menuFont);
         lblStatus.setText("NEW");
 
-        btnCurrency.setFont(Global.lableFont);
-        btnCurrency.setText("Currency Conversion");
-        btnCurrency.addActionListener(new java.awt.event.ActionListener() {
+        btnConversion.setFont(Global.lableFont);
+        btnConversion.setText("Currency Conversion");
+        btnConversion.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCurrencyActionPerformed(evt);
+                btnConversionActionPerformed(evt);
             }
         });
 
@@ -477,12 +487,12 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
             }
         });
 
-        btnPrint1.setFont(Global.lableFont);
-        btnPrint1.setText("New");
-        btnPrint1.setName("btnSave"); // NOI18N
-        btnPrint1.addActionListener(new java.awt.event.ActionListener() {
+        btnNew.setFont(Global.lableFont);
+        btnNew.setText("New");
+        btnNew.setName("btnSave"); // NOI18N
+        btnNew.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnPrint1ActionPerformed(evt);
+                btnNewActionPerformed(evt);
             }
         });
 
@@ -494,11 +504,11 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                 .addContainerGap()
                 .addComponent(lblStatus)
                 .addGap(18, 18, 18)
-                .addComponent(btnCurrency)
+                .addComponent(btnConversion)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnSave)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnPrint1)
+                .addComponent(btnNew)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtFDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -509,17 +519,16 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtFCrdAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtFDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lblStatus))
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(btnPrint1)
-                                .addComponent(btnSave, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGap(4, 4, 4)))
-                    .addComponent(btnCurrency))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(txtFCrdAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtFDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lblStatus))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnNew)
+                            .addComponent(btnSave, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(4, 4, 4))
+                    .addComponent(btnConversion))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -580,10 +589,10 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
 
     }//GEN-LAST:event_tblJournalKeyReleased
 
-    private void btnCurrencyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCurrencyActionPerformed
+    private void btnConversionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConversionActionPerformed
         // TODO add your handling code here:
 
-    }//GEN-LAST:event_btnCurrencyActionPerformed
+    }//GEN-LAST:event_btnConversionActionPerformed
 
     private void txtVouDateFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtVouDateFocusLost
         // TODO add your handling code here:
@@ -594,17 +603,17 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         // TODO add your handling code here:
     }//GEN-LAST:event_txtVouDatePropertyChange
 
-    private void btnPrint1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrint1ActionPerformed
+    private void btnNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewActionPerformed
         // TODO add your handling code here:
         clear();
-    }//GEN-LAST:event_btnPrint1ActionPerformed
+    }//GEN-LAST:event_btnNewActionPerformed
 
     /**
      * @param args the command line arguments
      */
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnCurrency;
-    private javax.swing.JButton btnPrint1;
+    private javax.swing.JButton btnConversion;
+    private javax.swing.JButton btnNew;
     private javax.swing.JButton btnSave;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

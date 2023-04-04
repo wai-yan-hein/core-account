@@ -9,7 +9,6 @@ import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.user.model.DepartmentUser;
 import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
 import com.inventory.ui.common.InventoryRepo;
@@ -123,13 +122,15 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
 
     private void save() {
         if (isValidEntry()) {
-            vou = inventoryRepo.saveVouStatus(vou);
-            if (lblStatus.getText().equals("EDIT")) {
-                listVou.set(selectRow, vou);
-            } else {
-                listVou.add(vou);
-            }
-            clear();
+            inventoryRepo.saveVouStatus(vou).subscribe((t) -> {
+                if (lblStatus.getText().equals("EDIT")) {
+                    listVou.set(selectRow, t);
+                } else {
+                    listVou.add(t);
+                }
+                clear();
+            });
+
         }
     }
 

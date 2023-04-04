@@ -11,7 +11,6 @@ import com.common.TableCellRender;
 import com.common.UnitFormatRender;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.model.RelationKey;
-import com.inventory.model.StockUnit;
 import com.inventory.model.UnitRelationDetail;
 import com.inventory.model.UnitRelation;
 import com.inventory.ui.common.InventoryRepo;
@@ -108,11 +107,15 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
                     String relCode = rel.getKey().getRelCode();
                     Integer deptId = rel.getKey().getDeptId();
                     if (relCode != null) {
-                        relationDetailTableModel.setListRelation(inventoryRepo.getRelationDetail(relCode, deptId));
-                        relationDetailTableModel.setRelation(rel);
                         lblName.setText(rel.getRelName());
                         lblStatus.setText("EDIT");
                         lblStatus.setForeground(Color.blue);
+                        inventoryRepo.getRelationDetail(relCode, deptId).subscribe((t) -> {
+                            relationDetailTableModel.setListRelation(t);
+                            relationDetailTableModel.setRelation(rel);
+
+                        });
+
                     }
 
                 }
@@ -153,14 +156,16 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
             rel.setDetailList(listD);
         }
         if (!listD.isEmpty()) {
-            rel = inventoryRepo.saveUnitRelation(rel);
-            if (lblStatus.getText().equals("NEW")) {
-                listUnitRelation.add(rel);
-            } else {
-                listUnitRelation.set(selectRow, rel);
-            }
-            relationTableModel.setListRelation(listUnitRelation);
-            clear();
+            inventoryRepo.saveUnitRelation(rel).subscribe((t) -> {
+                if (lblStatus.getText().equals("NEW")) {
+                    listUnitRelation.add(t);
+                } else {
+                    listUnitRelation.set(selectRow, t);
+                }
+                relationTableModel.setListRelation(listUnitRelation);
+                clear();
+            });
+
         }
     }
 

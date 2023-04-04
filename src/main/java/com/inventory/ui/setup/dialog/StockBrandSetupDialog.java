@@ -118,13 +118,15 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
 
     private void save() {
         if (isValidEntry()) {
-            brand = inventoryRepo.saveBrand(brand);
-            if (lblStatus.getText().equals("EDIT")) {
-                listStockBrand.set(selectRow, brand);
-            } else {
-                listStockBrand.add(brand);
-            }
-            clear();
+            inventoryRepo.saveBrand(brand).subscribe((t) -> {
+                if (lblStatus.getText().equals("EDIT")) {
+                    listStockBrand.set(selectRow, t);
+                } else {
+                    listStockBrand.add(t);
+                }
+                clear();
+            });
+
         }
     }
 
