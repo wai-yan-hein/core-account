@@ -449,32 +449,6 @@ public class SaleByWeightTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<PriceOption> getPriceOption(int row) {
-        Stock s = listDetail.get(row).getStock();
-        List<PriceOption> listPrice = inventoryRepo.getPriceOption("-");
-        if (!listPrice.isEmpty()) {
-            for (PriceOption op : listPrice) {
-                switch (Util1.isNull(op.getKey().getPriceType(), "N")) {
-                    case "A" ->
-                        op.setPrice(s.getSalePriceA());
-                    case "B" ->
-                        op.setPrice(s.getSalePriceB());
-                    case "C" ->
-                        op.setPrice(s.getSalePriceC());
-                    case "D" ->
-                        op.setPrice(s.getSalePriceD());
-                    case "E" ->
-                        op.setPrice(s.getSalePriceE());
-                    case "N" ->
-                        op.setPrice(s.getSalePriceN());
-                    default -> {
-                        break;
-                    }
-                }
-            }
-        }
-        return listPrice;
-    }
 
     public List<String> getDelList() {
         return deleteList;

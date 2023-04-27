@@ -30,6 +30,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
@@ -184,8 +185,8 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
             tblJournal.getColumnModel().getColumn(0).setCellEditor(new DepartmentCellEditor(t));
         });
         tblJournal.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
-        tblJournal.getColumnModel().getColumn(2).setCellEditor(new TraderCellEditor(accountApi));
-        tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountApi, 3));
+        tblJournal.getColumnModel().getColumn(2).setCellEditor(new TraderCellEditor(accountRepo));
+        tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountRepo, 3));
         accountRepo.getCurrency().subscribe((t) -> {
             tblJournal.getColumnModel().getColumn(4).setCellEditor(new CurrencyEditor(t));
         });
@@ -194,7 +195,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         tblJournal.getColumnModel().getColumn(1).setPreferredWidth(240);//des
         tblJournal.getColumnModel().getColumn(2).setPreferredWidth(240);//cus
         tblJournal.getColumnModel().getColumn(3).setPreferredWidth(240);//acc
-        tblJournal.getColumnModel().getColumn(4).setPreferredWidth(60);//currency
+        tblJournal.getColumnModel().getColumn(4).setPreferredWidth(20);//currency
         tblJournal.getColumnModel().getColumn(5).setPreferredWidth(60);//dr
 
         tblJournal.setDefaultRenderer(Double.class, new DecimalFormatRender());
@@ -287,27 +288,12 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
     }
 
     private void initKeyListener() {
-        txtVouDate.getDateEditor().getUiComponent().setName("txtDate");
-        txtVouDate.getDateEditor().getUiComponent().addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (e.getSource() instanceof JTextFieldDateEditor txt) {
-                        String date = ((JTextFieldDateEditor) txt).getText();
-                        if (date.length() == 8 || date.length() == 6) {
-                            txtVouDate.setDate(Util1.formatDate(date));
-                        }
-                        if (txtVouDate.getDate() != null) {
-                            if (!ProUtil.isValidDate(txtVouDate.getDate())) {
-                                txtVouDate.setDate(Util1.getTodayDate());
-                            }
-                        }
-                        txtRefrence.requestFocus();
-                    }
-                }
-            }
-
-        });
+        txtVouDate.getDateEditor().getUiComponent().setName("txtVouDate");
+        txtVouDate.getDateEditor().getUiComponent().addKeyListener(this);
+        txtFor.addKeyListener(this);
+        txtFrom.addKeyListener(this);
+        txtNa.addKeyListener(this);
+        txtRefrence.addKeyListener(this);
 
     }
 
@@ -330,6 +316,15 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         if (tblJournal.getSelectedRow() >= 0) {
             int selectRow = tblJournal.convertRowIndexToModel(tblJournal.getSelectedRow());
             tableModel.removeJournal(selectRow);
+        }
+    }
+
+    private void focusTable() {
+        int row = tblJournal.getRowCount();
+        if (row > 0) {
+            tblJournal.setColumnSelectionInterval(0, 0);
+            tblJournal.setRowSelectionInterval(row - 1, row - 1);
+            tblJournal.requestFocus();
         }
     }
 
@@ -433,7 +428,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         jLabel5.setText("Narration");
 
         txtNa.setFont(Global.textFont);
-        txtNa.setName("txtRefrence"); // NOI18N
+        txtNa.setName("txtNa"); // NOI18N
         txtNa.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtNaActionPerformed(evt);
@@ -444,7 +439,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         lable1.setText("From");
 
         txtFrom.setFont(Global.textFont);
-        txtFrom.setName("txtRefrence"); // NOI18N
+        txtFrom.setName("txtFrom"); // NOI18N
         txtFrom.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtFromActionPerformed(evt);
@@ -455,7 +450,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         jLabel7.setText("For");
 
         txtFor.setFont(Global.textFont);
-        txtFor.setName("txtRefrence"); // NOI18N
+        txtFor.setName("txtFor"); // NOI18N
         txtFor.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtForActionPerformed(evt);
@@ -478,36 +473,41 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(txtVouNo, javax.swing.GroupLayout.DEFAULT_SIZE, 326, Short.MAX_VALUE)
-                        .addGap(7, 7, 7))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(txtVouDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtRefrence, javax.swing.GroupLayout.DEFAULT_SIZE, 283, Short.MAX_VALUE)
-                    .addComponent(txtNa))
+                    .addComponent(txtVouNo)
+                    .addComponent(txtVouDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(lable1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFor, javax.swing.GroupLayout.DEFAULT_SIZE, 283, Short.MAX_VALUE)
+                    .addComponent(txtFor)
                     .addComponent(txtFrom))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel5))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtRefrence)
+                    .addComponent(txtNa))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblCash, javax.swing.GroupLayout.PREFERRED_SIZE, 258, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(txtRefrence, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel4))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel5)
+                            .addComponent(txtNa, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(lblCash, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -515,18 +515,13 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
                                 .addGap(2, 2, 2)
                                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(txtFrom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(txtRefrence, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(jLabel4)
-                                        .addComponent(lable1))))
-                            .addComponent(txtVouDate, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                    .addComponent(lable1)))
+                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtVouDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel5)
-                            .addComponent(txtNa, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtFor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel7))))
                 .addGap(10, 10, 10))
@@ -651,7 +646,6 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
 
     private void txtRefrenceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtRefrenceActionPerformed
         // TODO add your handling code here:
-        txtNa.requestFocus();
     }//GEN-LAST:event_txtRefrenceActionPerformed
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
@@ -704,12 +698,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
 
     private void txtNaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNaActionPerformed
         // TODO add your handling code here:
-        int row = tblJournal.getRowCount();
-        if (row > 0) {
-            tblJournal.setColumnSelectionInterval(0, 0);
-            tblJournal.setRowSelectionInterval(row - 1, row - 1);
-            tblJournal.requestFocus();
-        }
+
     }//GEN-LAST:event_txtNaActionPerformed
 
     private void btnSave2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSave2ActionPerformed
@@ -764,6 +753,55 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
 
     @Override
     public void keyReleased(KeyEvent e) {
+        Object sourceObj = e.getSource();
+        String ctrlName = "-";
+        if (sourceObj instanceof JTextField jTextField) {
+            ctrlName = jTextField.getName();
+        } else if (sourceObj instanceof JTextFieldDateEditor jTextFieldDateEditor) {
+            ctrlName = jTextFieldDateEditor.getName();
+        }
+        switch (ctrlName) {
+            case "txtVouDate" -> {
+                if (isEnter(e)) {
+                    if (e.getSource() instanceof JTextFieldDateEditor txt) {
+                        String date = ((JTextFieldDateEditor) txt).getText();
+                        if (date.length() == 8 || date.length() == 6) {
+                            txtVouDate.setDate(Util1.formatDate(date));
+                        }
+                        if (txtVouDate.getDate() != null) {
+                            if (!ProUtil.isValidDate(txtVouDate.getDate())) {
+                                txtVouDate.setDate(Util1.getTodayDate());
+                            }
+                        }
+                        txtFrom.requestFocus();
+                    }
+                }
+            }
+            case "txtFrom" -> {
+                if (isEnter(e)) {
+                    txtFor.requestFocus();
+                }
+            }
+            case "txtFor" -> {
+                if (isEnter(e)) {
+                    txtRefrence.requestFocus();
+                }
+            }
+            case "txtRefrence" -> {
+                if (isEnter(e)) {
+                    txtNa.requestFocus();
+                }
+            }
+            case "txtNa" -> {
+                if (isEnter(e)) {
+                    focusTable();
+                }
+            }
+        }
+    }
+
+    private boolean isEnter(KeyEvent e) {
+        return e.getKeyCode() == KeyEvent.VK_ENTER;
     }
 
 }

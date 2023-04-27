@@ -117,8 +117,8 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
     private void initCombo() {
         inventoryRepo.getStockType().subscribe((t) -> {
             typeAutoCompleter = new StockTypeAutoCompleter(txtGroup, t, null, true, false);
+            typeAutoCompleter.setObserver(this);
         });
-        typeAutoCompleter.setObserver(this);
 
         inventoryRepo.getCategory().subscribe((t) -> {
             categoryAutoCompleter = new CategoryAutoCompleter(txtCat, t, null, true, false);
@@ -222,7 +222,9 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
             tblPD.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));
         });
         tblPD.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
-        tblPD.getColumnModel().getColumn(6).setCellEditor(new PriceEditor(inventoryRepo.getPriceOption("Purchase")));
+        inventoryRepo.getPriceOption("Purchase").subscribe((t) -> {
+            tblPD.getColumnModel().getColumn(6).setCellEditor(new PriceEditor(t));
+        });
         tblPD.getColumnModel().getColumn(0).setPreferredWidth(50);
         tblPD.getColumnModel().getColumn(1).setPreferredWidth(150);
         tblPD.getColumnModel().getColumn(2).setPreferredWidth(100);

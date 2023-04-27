@@ -18,53 +18,36 @@ import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
-import com.user.common.UserRepo;
-import com.user.dialog.BusinessTypeSetupDialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.AbstractAction;
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import lombok.extern.slf4j.Slf4j;
 import net.coderazzi.filters.gui.AutoChoices;
 import net.coderazzi.filters.gui.TableFilterHeader;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
  * @author Lenovo
  */
-@Component
+@Slf4j
 public class COATemplateSetup extends javax.swing.JPanel implements KeyListener, PanelControl {
 
     private int selectRow = -1;
     private final COATemplateHeadTableModel coaHeadTableModel = new COATemplateHeadTableModel();
     private final COATemplateGroupTableModel coaGroupTableModel = new COATemplateGroupTableModel();
     private final COATemplateTableModel coaTemplateTableModel = new COATemplateTableModel();
-    private BusinessTypeSetupDialog dialog;
     private TableFilterHeader filterHeader;
-    @Autowired
     private AccountRepo accountRepo;
-    @Autowired
-    private UserRepo userRepo;
-    @Autowired
-    private WebClient accountApi;
     private JProgressBar progress;
     private SelectionObserver observer;
-    private BusinessTypeComboBoxModel businessTypeComboBoxModel;
-
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
-    public void setProgress(JProgressBar progress) {
-        this.progress = progress;
-    }
+    private JComboBox<BusinessType> cboBusType;
 
     public SelectionObserver getObserver() {
         return observer;
@@ -72,6 +55,30 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
+    }
+
+    public AccountRepo getAccountRepo() {
+        return accountRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
+    public JComboBox<BusinessType> getCboBusType() {
+        return cboBusType;
+    }
+
+    public void setCboBusType(JComboBox<BusinessType> cboBusType) {
+        this.cboBusType = cboBusType;
+    }
+
+    public JProgressBar getProgress() {
+        return progress;
+    }
+
+    public void setProgress(JProgressBar progress) {
+        this.progress = progress;
     }
 
     /**
@@ -87,19 +94,10 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
     }
 
     private void initTable() {
-        initCombo();
         tblCOAHead();
         tblCOAGroup();
         tblCOA();
-    }
-
-    private void initCombo() {
-        cboBusType.setFont(Global.textFont);
-        userRepo.getBusinessType().subscribe((t) -> {
-            businessTypeComboBoxModel = new BusinessTypeComboBoxModel(t);
-            cboBusType.setModel(businessTypeComboBoxModel);
-            cboBusType.setSelectedIndex(t.size() - 1);
-        });
+        searchCOA();
     }
 
     private void tblCOAHead() {
@@ -125,7 +123,7 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
         filterHeader.setVisible(false);
     }
 
-    private void searchHead() {
+    private void searchCOA() {
         coaGroupTableModel.clear();
         coaTemplateTableModel.clear();
         BusinessType type = (BusinessType) cboBusType.getSelectedItem();
@@ -136,6 +134,8 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
                     .subscribe((t) -> {
                         coaHeadTableModel.setList(t);
                         tblCoaHead.requestFocus();
+                    }, (e) -> {
+                        log.error(e.getMessage());
                     });
         }
     }
@@ -154,7 +154,7 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
         tblCoaGroup.getColumnModel().getColumn(3).setPreferredWidth(1);// Active
         tblCoaGroup.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
         tblCoaGroup.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
-        tblCoaGroup.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountApi, 1));
+        tblCoaGroup.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountRepo, 1));
         tblCoaGroup.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCoaGroup.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
@@ -186,7 +186,7 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
         tblCOAGroupChild.getColumnModel().getColumn(3).setPreferredWidth(1);// Active
         tblCOAGroupChild.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
         tblCOAGroupChild.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
-        tblCOAGroupChild.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountApi, 2));
+        tblCOAGroupChild.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountRepo, 2));
         tblCOAGroupChild.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCOAGroupChild.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
@@ -301,19 +301,6 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
         lblCoaGroup.setText("...");
     }
 
-    private void select() {
-        if (dialog == null) {
-            dialog = new BusinessTypeSetupDialog(Global.parentForm);
-            dialog.setIconImage(Global.parentForm.getIconImage());
-            dialog.setUserRepo(userRepo);
-            dialog.setAccountRepo(accountRepo);
-            dialog.setLocationRelativeTo(null);
-        }
-        dialog.search();
-        dialog.setVisible(true);
-        initCombo();
-    }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -336,9 +323,6 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
         jSeparator2 = new javax.swing.JSeparator();
         jSeparator3 = new javax.swing.JSeparator();
         jSeparator4 = new javax.swing.JSeparator();
-        cboBusType = new javax.swing.JComboBox<>();
-        jButton1 = new javax.swing.JButton();
-        jLabel2 = new javax.swing.JLabel();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -433,23 +417,6 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
 
         jSeparator3.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
-        cboBusType.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cboBusTypeActionPerformed(evt);
-            }
-        });
-
-        jButton1.setFont(Global.lableFont);
-        jButton1.setText("+");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-
-        jLabel2.setFont(Global.lableFont);
-        jLabel2.setText("Business Type");
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -458,14 +425,8 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jSeparator4, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cboBusType, 0, 36, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1)))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 144, Short.MAX_VALUE)
+                    .addComponent(jSeparator4, javax.swing.GroupLayout.Alignment.LEADING))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -485,23 +446,17 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jSeparator3)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(cboBusType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jButton1)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 423, Short.MAX_VALUE))
+                        .addComponent(jScrollPane1))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(lblCoaGroup)
                         .addGap(7, 7, 7)
                         .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 179, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblCoaChild, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -525,7 +480,7 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         // TODO add your handling code here:
-
+        observer.selected("control", this);
     }//GEN-LAST:event_formComponentShown
 
     private void tblCOAGroupChildKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblCOAGroupChildKeyReleased
@@ -545,22 +500,9 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
         // TODO add your handling code here:
     }//GEN-LAST:event_tblCoaHeadMouseClicked
 
-    private void cboBusTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboBusTypeActionPerformed
-        // TODO add your handling code here:
-        searchHead();
-    }//GEN-LAST:event_cboBusTypeActionPerformed
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-        select();
-    }//GEN-LAST:event_jButton1ActionPerformed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<BusinessType> cboBusType;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
@@ -618,7 +560,6 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
 
     @Override
     public void refresh() {
-        searchHead();
     }
 
     @Override

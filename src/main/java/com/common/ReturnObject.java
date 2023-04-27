@@ -41,4 +41,5 @@ public class ReturnObject {
     private double clAmt;
     private String glVouNo;
     private String tranSource;
+    private String opDate;
 }

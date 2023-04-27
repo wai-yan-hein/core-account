@@ -403,17 +403,20 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             int s = JOptionPane.showConfirmDialog(this, "Are you sure to delete?", "Process Delete.", JOptionPane.ERROR_MESSAGE);
             if (s == JOptionPane.YES_OPTION) {
                 ph.setDeleted(true);
-                inventoryRepo.delete(ph.getKey());
-                clear();
+                inventoryRepo.delete(ph.getKey()).subscribe((t) -> {
+                    clear();
+                });
             }
         } else {
             int s = JOptionPane.showConfirmDialog(this, "Are you sure to restore?", "Process Restore.", JOptionPane.WARNING_MESSAGE);
             if (s == JOptionPane.YES_OPTION) {
                 ph.setDeleted(false);
-                inventoryRepo.restore(ph.getKey());
-                lblStatus.setText("EDIT");
-                lblStatus.setForeground(Color.blue);
-                enableProcess(true);
+                inventoryRepo.restore(ph.getKey()).subscribe((t) -> {
+                    lblStatus.setText("EDIT");
+                    lblStatus.setForeground(Color.blue);
+                    enableProcess(true);
+                });
+
             }
         }
     }

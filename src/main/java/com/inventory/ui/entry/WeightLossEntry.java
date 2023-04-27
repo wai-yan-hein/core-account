@@ -187,17 +187,20 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
         if (lblStatus.getText().equals("EDIT")) {
             int status = JOptionPane.showConfirmDialog(this, "Are you sure to delete?", "Delete Voucher", JOptionPane.ERROR_MESSAGE, JOptionPane.NO_OPTION);
             if (status == JOptionPane.YES_OPTION) {
-                inventoryRepo.delete(his.getKey());
-                clear();
+                inventoryRepo.delete(his.getKey()).subscribe((t) -> {
+                    clear();
+                });
             }
         } else {
             int status = JOptionPane.showConfirmDialog(this, "Are you sure to restore?", "Delete Voucher", JOptionPane.WARNING_MESSAGE, JOptionPane.NO_OPTION);
             if (status == JOptionPane.YES_OPTION) {
-                inventoryRepo.restore(his.getKey());
-                lblStatus.setText("EDIT");
-                lblStatus.setForeground(Color.blue);
-                enableControl(true);
-                focusTable();
+                inventoryRepo.restore(his.getKey()).subscribe((t) -> {
+                    lblStatus.setText("EDIT");
+                    lblStatus.setForeground(Color.blue);
+                    enableControl(true);
+                    focusTable();
+                });
+
             }
         }
     }

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.acc.report;
+package com.acc.dialog;
 
 import com.acc.common.AccountRepo;
 import com.acc.common.CrAmtTableModel;
@@ -11,6 +11,8 @@ import com.acc.common.DateAutoCompleter;
 import com.acc.common.DrAmtTableModel;
 import com.acc.editor.CurrencyAAutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
+import com.acc.editor.DespAutoCompleter;
+import com.acc.editor.RefAutoCompleter;
 import com.acc.model.ReportFilter;
 import com.acc.model.Gl;
 import com.acc.model.TmpOpening;
@@ -19,6 +21,8 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -32,6 +36,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -68,6 +73,8 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private DateAutoCompleter dateAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
     private CurrencyAAutoCompleter currencyAAutoCompleter;
+    private DespAutoCompleter despAutoCompleter;
+    private RefAutoCompleter refAutoCompleter;
     private List<Gl> list;
 
     public List<String> getDepartment() {
@@ -157,11 +164,32 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         super(frame, true);
         initComponents();
         initFormat();
+        initKeyListener();
+
     }
+
+    private void initKeyListener() {
+        txtDesp.addFocusListener(fa);
+        txtReference.addFocusListener(fa);
+        txtDate.addFocusListener(fa);
+        txtDep.addFocusListener(fa);
+    }
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            if (e.getSource() instanceof JTextField txt) {
+                txt.selectAll();
+            }
+        }
+    };
 
     private void initCombo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
+        despAutoCompleter = new DespAutoCompleter(txtDesp, accountRepo, null, true);
+        despAutoCompleter.setObserver(this);
+        refAutoCompleter = new RefAutoCompleter(txtReference, accountRepo, null, true);
+        refAutoCompleter.setObserver(this);
         accountRepo.getDepartment().subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true, true);
             departmentAutoCompleter.setObserver(this);
@@ -198,6 +226,10 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         filter.setCurCode(getCurrency());
         filter.setListDepartment(getListDep());
         filter.setTraderCode(traderCode);
+        filter.setDesp(despAutoCompleter.getAutoText().getDescription().equals("All") ? "-"
+                : despAutoCompleter.getAutoText().getDescription());
+        filter.setReference(refAutoCompleter.getAutoText().getDescription().equals("All") ? "-"
+                : refAutoCompleter.getAutoText().getDescription());
         list = new ArrayList<>();
         Flux<Gl> result = accountApi.post()
                 .uri("/account/search-gl")
@@ -405,6 +437,10 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         txtDep = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
         txtCur = new javax.swing.JTextField();
+        txtDesp = new javax.swing.JTextField();
+        jLabel11 = new javax.swing.JLabel();
+        jLabel12 = new javax.swing.JLabel();
+        txtReference = new javax.swing.JTextField();
         progress = new javax.swing.JProgressBar();
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -668,6 +704,16 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         txtCur.setDisabledTextColor(new java.awt.Color(0, 0, 0));
         txtCur.setEnabled(false);
 
+        txtDesp.setFont(Global.textFont);
+
+        jLabel11.setFont(Global.lableFont);
+        jLabel11.setText("Description");
+
+        jLabel12.setFont(Global.lableFont);
+        jLabel12.setText("Reference");
+
+        txtReference.setFont(Global.textFont);
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -681,6 +727,14 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
                 .addComponent(jLabel9)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtDep)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel11)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtDesp)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel12)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtReference)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel10)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -700,7 +754,11 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
                     .addComponent(jLabel9)
                     .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel10)
-                    .addComponent(txtCur, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtCur, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtDesp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel11)
+                    .addComponent(jLabel12)
+                    .addComponent(txtReference, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -773,6 +831,8 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -797,9 +857,11 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private javax.swing.JTextField txtCur;
     private javax.swing.JTextField txtDate;
     private javax.swing.JTextField txtDep;
+    private javax.swing.JTextField txtDesp;
     private javax.swing.JFormattedTextField txtDrAmt;
     private javax.swing.JFormattedTextField txtDrCount;
     private javax.swing.JFormattedTextField txtOpening;
+    private javax.swing.JTextField txtReference;
     // End of variables declaration//GEN-END:variables
 
     @Override

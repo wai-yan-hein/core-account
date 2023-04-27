@@ -5,6 +5,7 @@
  */
 package com.acc.editor;
 
+import com.acc.common.AccountRepo;
 import com.acc.common.TraderATableModel;
 import com.acc.model.TraderA;
 import com.acc.model.TraderAKey;
@@ -53,22 +54,26 @@ public final class TraderAAutoCompleter implements KeyListener {
     private int x = 0;
     private int y = 0;
     private boolean popupOpen = false;
-    private SelectionObserver selectionObserver;
-    private WebClient webClient;
+    private SelectionObserver observer;
+    private AccountRepo accountRepo;
     private boolean filter;
 
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
+    public SelectionObserver getObserver() {
+        return observer;
+    }
+
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
     }
 
     public TraderAAutoCompleter() {
     }
 
-    public TraderAAutoCompleter(JTextComponent comp, WebClient webClient,
+    public TraderAAutoCompleter(JTextComponent comp, AccountRepo accountRepo,
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
-        this.webClient = webClient;
+        this.accountRepo = accountRepo;
         this.filter = filter;
         if (this.filter) {
             setTrader(new TraderA(new TraderAKey("-", Global.compCode), "All"));
@@ -157,8 +162,8 @@ public final class TraderAAutoCompleter implements KeyListener {
                     table.getSelectedRow()));
             ((JTextField) textComp).setText(trader.getTraderName());
             if (editor == null) {
-                if (selectionObserver != null) {
-                    selectionObserver.selected("Selected", trader);
+                if (observer != null) {
+                    observer.selected("Selected", trader);
                 }
             }
         }
@@ -353,26 +358,18 @@ public final class TraderAAutoCompleter implements KeyListener {
         if (!str.isEmpty()) {
             if (!containKey(e)) {
                 traderTableModel.clear();
-                webClient.get()
-                        .uri(builder -> builder.path("/account/search-trader")
-                        .queryParam("compCode", Global.compCode)
-                        .queryParam("text", str)
-                        .build())
-                        .retrieve()
-                        .bodyToFlux(TraderA.class)
-                        .collectList()
-                        .subscribe((t) -> {
-                            if (filter) {
-                                TraderA s = new TraderA(new TraderAKey("-", Global.compCode), "All");
-                                t.add(s);
-                            }
-                            traderTableModel.setListTrader(t);
-                            if (!t.isEmpty()) {
-                                table.setRowSelectionInterval(0, 0);
-                            }
-                        }, (er) -> {
-                            log.error(er.getMessage());
-                        });
+                accountRepo.searchTrader(str).subscribe((t) -> {
+                    if (filter) {
+                        TraderA s = new TraderA(new TraderAKey("-", Global.compCode), "All");
+                        t.add(s);
+                    }
+                    traderTableModel.setListTrader(t);
+                    if (!t.isEmpty()) {
+                        table.setRowSelectionInterval(0, 0);
+                    }
+                }, (er) -> {
+                    log.error(er.getMessage());
+                });
 
             }
 

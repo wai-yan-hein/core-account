@@ -263,6 +263,12 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             status = false;
         } else {
             grn.setMacId(Global.macId);
+            grn.setVouDate(txtDate.getDate());
+            grn.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
+            grn.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
+            grn.setBatchNo(txtBatchNo.getText());
+            grn.setRemark(txtRemark.getText());
+            grn.setClosed(chkClose.isSelected());
             if (lblStatus.getText().equals("NEW")) {
                 String batchNo = txtBatchNo.getText();
                 if (!batchNo.isEmpty()) {
@@ -271,23 +277,15 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                         return false;
                     }
                 }
-                grn.setVouDate(txtDate.getDate());
-                grn.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
-                grn.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
-                grn.setBatchNo(txtBatchNo.getText());
-                grn.setRemark(txtRemark.getText());
-                grn.setClosed(chkClose.isSelected());
-                if (lblStatus.getText().equals("NEW")) {
-                    GRNKey key = new GRNKey();
-                    key.setCompCode(Global.compCode);
-                    key.setDeptId(Global.deptId);
-                    key.setVouNo(null);
-                    grn.setKey(key);
-                    grn.setCreatedDate(Util1.getTodayDate());
-                    grn.setCreatedBy(Global.loginUser.getUserCode());
-                } else {
-                    grn.setUpdatedBy(Global.loginUser.getUserCode());
-                }
+                GRNKey key = new GRNKey();
+                key.setCompCode(Global.compCode);
+                key.setDeptId(Global.deptId);
+                key.setVouNo(null);
+                grn.setKey(key);
+                grn.setCreatedDate(Util1.getTodayDate());
+                grn.setCreatedBy(Global.loginUser.getUserCode());
+            } else {
+                grn.setUpdatedBy(Global.loginUser.getUserCode());
             }
         }
         return status;
@@ -427,22 +425,11 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                 int yes_no = JOptionPane.showConfirmDialog(this,
                         "Are you sure to delete?", "Save Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
-                    inventoryRepo.delete(grn.getKey());
-                    clear();
+                    inventoryRepo.delete(grn.getKey()).subscribe((t) -> {
+                        clear();
+                    });
                 }
             }
-            /*  case "DELETED" -> {
-            int yes_no = JOptionPane.showConfirmDialog(this,
-            "Are you sure to restore?", "Purchase Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-            if (yes_no == 0) {
-            saleHis.setDeleted(false);
-            inventoryRepo.restore(saleHis.getKey());
-            lblStatus.setText("EDIT");
-            lblStatus.setForeground(Color.blue);
-            disableForm(true);
-            
-            }
-            }*/
             default ->
                 JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }

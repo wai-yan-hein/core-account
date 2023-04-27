@@ -6,7 +6,6 @@
 package com.inventory.tree;
 
 import com.common.Global;
-import com.common.ReturnObject;
 import com.common.SelectionObserver;
 import com.user.model.PrivilegeMenu;
 import com.user.model.PMKey;
@@ -120,29 +119,29 @@ public class MyDataModel extends MyAbstractTreeTableModel {
     }
 
     private void savePrivilege(VRoleMenu roleMenu, boolean allow) {
-        try {
-            if (roleMenu.getMenuCode() != null) {
-                PMKey key = new PMKey();
-                key.setMenuCode(roleMenu.getMenuCode());
-                key.setRoleCode(roleMenu.getRoleCode());
-                PrivilegeMenu privilege = new PrivilegeMenu();
-                privilege.setKey(key);
-                privilege.setAllow(allow);
-                Mono<ReturnObject> result = userApi.post()
-                        .uri("/user/save-privilege-menu")
-                        .body(Mono.just(privilege), PrivilegeMenu.class)
-                        .retrieve()
-                        .bodyToMono(ReturnObject.class);
-                result.block();
-                if (observer != null) {
-                    observer.selected("Menu-Change", "-");
-                }
+        if (roleMenu.getMenuCode() != null) {
+            PMKey key = new PMKey();
+            key.setMenuCode(roleMenu.getMenuCode());
+            key.setRoleCode(roleMenu.getRoleCode());
+            key.setCompCode(roleMenu.getCompCode());
+            PrivilegeMenu privilege = new PrivilegeMenu();
+            privilege.setKey(key);
+            privilege.setAllow(allow);
+            userApi.post()
+                    .uri("/user/save-privilege-menu")
+                    .body(Mono.just(privilege), PrivilegeMenu.class)
+                    .retrieve()
+                    .bodyToMono(PrivilegeMenu.class)
+                    .subscribe((t) -> {
+                        if (observer != null) {
+                            observer.selected("Menu-Change", "-");
+                        }
+                    }, (e) -> {
+                        JOptionPane.showMessageDialog(Global.parentForm, e.getMessage(), "Permission Allow.", JOptionPane.ERROR_MESSAGE);
+                    });
 
-            }
-        } catch (Exception e) {
-            log.error("Save Priviliges  :" + e.getMessage());
-            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage(), "Permission Allow.", JOptionPane.ERROR_MESSAGE);
         }
+
     }
 
 }

@@ -51,7 +51,6 @@ import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.common.UserRepo;
 import java.awt.Color;
-import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
@@ -96,7 +95,6 @@ import reactor.core.publisher.Mono;
 public class Purchase extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
 
     private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
-    private List<PurHisDetail> listDetail = new ArrayList();
     private final PurchaseTableModel purTableModel = new PurchaseTableModel();
     private PurchaseHistoryDialog dialog;
     private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
@@ -539,8 +537,9 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 int yes_no = JOptionPane.showConfirmDialog(this,
                         "Are you sure to delete?", "Purchase Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
-                    inventoryRepo.delete(ph.getKey());
-                    clear();
+                    inventoryRepo.delete(ph.getKey()).subscribe((t) -> {
+                        clear();
+                    });
                 }
             }
             case "DELETED" -> {
@@ -548,10 +547,11 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                         "Are you sure to restore?", "Save Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
                     ph.setDeleted(false);
-                    inventoryRepo.restore(ph.getKey());
-                    lblStatus.setText("EDIT");
-                    lblStatus.setForeground(Color.blue);
-                    disableForm(true);
+                    inventoryRepo.restore(ph.getKey()).subscribe((t) -> {
+                        lblStatus.setText("EDIT");
+                        lblStatus.setForeground(Color.blue);
+                        disableForm(true);
+                    });
                 }
             }
             default ->
@@ -666,12 +666,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         }
         dialog.search();
         dialog.setVisible(true);
-        VPurchase v = dialog.getPurchase();
-        if (v != null) {
-            inventoryRepo.findPurchase(v.getVouNo(), v.getDeptId()).subscribe((t) -> {
-                setVoucher(t);
-            });
-        }
     }
 
     public void setVoucher(PurHis pur) {
@@ -858,6 +852,9 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 .retrieve().bodyToFlux(PurExpense.class);
         Mono<List<VPurchase>> p1 = fr.collectList();
         Mono<List<PurExpense>> p2 = sr.collectList();
+        p1.zipWith(p2).hasElement().subscribe((t) -> {
+            log.info("" + t);
+        });
         p1.zipWith(p2).subscribe((t) -> {
             List<VPurchase> list = t.getT1();
             List<PurExpense> listEx = t.getT2();
@@ -902,6 +899,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 }
             }
         }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
         }, () -> {
         });
     }
@@ -1848,6 +1846,13 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 if (selectObj instanceof GRN g) {
                     //get sale
                     setVoucherDetail(g);
+                }
+            }
+            case "PUR-HISTORY" -> {
+                if (selectObj instanceof VPurchase v) {
+                    inventoryRepo.findPurchase(v.getVouNo(), v.getDeptId()).subscribe((t) -> {
+                        setVoucher(t);
+                    });
                 }
             }
         }

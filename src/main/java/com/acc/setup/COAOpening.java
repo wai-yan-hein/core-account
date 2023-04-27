@@ -172,7 +172,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
             currencyAutoCompleter = new CurrencyAAutoCompleter(txtCurrency, t, null, true);
             currencyAutoCompleter.setSelectionObserver(this);
         });
-        coaAutoCompleter = new COA3AutoCompleter(txtCOA, accountApi, null, true, 0);
+        coaAutoCompleter = new COA3AutoCompleter(txtCOA, accountRepo, null, true, 0);
         coaAutoCompleter.setSelectionObserver(this);
     }
 
@@ -223,10 +223,10 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         tblOpening.getColumnModel().getColumn(7).setPreferredWidth(20);
         tblOpening.getColumnModel().getColumn(6).setCellRenderer(new DecimalFormatRender());
         tblOpening.getColumnModel().getColumn(7).setCellRenderer(new DecimalFormatRender());
-        tblOpening.getColumnModel().getColumn(0).setCellEditor(new COA3CellEditor(accountApi, 3));
-        tblOpening.getColumnModel().getColumn(1).setCellEditor(new COA3CellEditor(accountApi, 3));
-        tblOpening.getColumnModel().getColumn(2).setCellEditor(new TraderCellEditor(accountApi));
-        tblOpening.getColumnModel().getColumn(3).setCellEditor(new TraderCellEditor(accountApi));
+        tblOpening.getColumnModel().getColumn(0).setCellEditor(new COA3CellEditor(accountRepo, 3));
+        tblOpening.getColumnModel().getColumn(1).setCellEditor(new COA3CellEditor(accountRepo, 3));
+        tblOpening.getColumnModel().getColumn(2).setCellEditor(new TraderCellEditor(accountRepo));
+        tblOpening.getColumnModel().getColumn(3).setCellEditor(new TraderCellEditor(accountRepo));
         accountRepo.getDepartment().subscribe((t) -> {
             tblOpening.getColumnModel().getColumn(4).setCellEditor(new DepartmentCellEditor(t));
         });

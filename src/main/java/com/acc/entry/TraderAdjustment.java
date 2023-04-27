@@ -49,6 +49,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -74,8 +75,8 @@ import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 /**
  *
@@ -111,6 +112,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
     private final String path = String.format("%s%s%s", "temp", File.separator, "Ledger" + Global.macId);
     private DateTableDecorator decorator;
     private TraderAdjustmentTableModel adjustmentTableModel = new TraderAdjustmentTableModel();
+    private double opening;
 
     public UserRepo getUserRepo() {
         return userRepo;
@@ -218,8 +220,8 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
     private void initFilter() {
         monoCur = accountRepo.getCurrency();
         monoDep = accountRepo.getDepartment();
-        traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accountApi, null, true);
-        traderAutoCompleter.setSelectionObserver(this);
+        traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accountRepo, null, true);
+        traderAutoCompleter.setObserver(this);
         monoDep.subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDepartment, t, null, true, true);
             departmentAutoCompleter.setObserver(this);
@@ -228,15 +230,18 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         monoCur.subscribe((t) -> {
             currencyAutoCompleter = new CurrencyAAutoCompleter(txtCurrency, t, null, true);
             currencyAutoCompleter.setSelectionObserver(this);
+            accountRepo.findCurrency(Global.currency).subscribe((tt) -> {
+                currencyAutoCompleter.setCurrency(tt);
+            });
         });
-        coaAutoCompleter = new COA3AutoCompleter(txtAccount, accountApi, null, true, 0);
+        coaAutoCompleter = new COA3AutoCompleter(txtAccount, accountRepo, null, true, 0);
         coaAutoCompleter.setSelectionObserver(this);
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
-        despAutoCompleter = new DespAutoCompleter(txtDesp, accountApi, null, true);
-        despAutoCompleter.setSelectionObserver(this);
-        refAutoCompleter = new RefAutoCompleter(txtRefrence, accountApi, null, true);
-        refAutoCompleter.setSelectionObserver(this);
+        despAutoCompleter = new DespAutoCompleter(txtDesp, accountRepo, null, true);
+        despAutoCompleter.setObserver(this);
+        refAutoCompleter = new RefAutoCompleter(txtRefrence, accountRepo, null, true);
+        refAutoCompleter.setObserver(this);
         batAutoCompleter = new BatchNoAutoCompeter(txtBatch, accountApi, null, true);
         batAutoCompleter.setSelectionObserver(this);
 //model
@@ -305,11 +310,11 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         monoDep.subscribe((t) -> {
             tblCash.getColumnModel().getColumn(1).setCellEditor(new DepartmentCellEditor(t));
         });
-        tblCash.getColumnModel().getColumn(2).setCellEditor(new DespEditor(accountApi));
-        tblCash.getColumnModel().getColumn(3).setCellEditor(new RefCellEditor(accountApi));
+        tblCash.getColumnModel().getColumn(2).setCellEditor(new DespEditor(accountRepo));
+        tblCash.getColumnModel().getColumn(3).setCellEditor(new RefCellEditor(accountRepo));
         tblCash.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
         tblCash.getColumnModel().getColumn(5).setCellEditor(new BatchCellEditor(accountApi));
-        tblCash.getColumnModel().getColumn(6).setCellEditor(new COA3CellEditor(accountApi, 3));
+        tblCash.getColumnModel().getColumn(6).setCellEditor(new COA3CellEditor(accountRepo, 3));
         monoCur.subscribe((t) -> {
             tblCash.getColumnModel().getColumn(7).setCellEditor(new CurrencyAEditor(t));
         });
@@ -444,6 +449,59 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
 
     }
 
+    private String getCurCode() {
+        return currencyAutoCompleter == null ? Global.currency : currencyAutoCompleter.getCurrency().getCurCode();
+    }
+
+    private List<String> getListDep() {
+        return departmentAutoCompleter == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
+    }
+
+    private ReportFilter getOPFilter() {
+        String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat);
+        String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
+        String clDate = Util1.toDateStrMYSQL(stDate, "dd/MM/yyyy");
+        ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
+        filter.setOpeningDate(opDate);
+        filter.setFromDate(clDate);
+        filter.setCurCode(getCurCode());
+        filter.setListDepartment(getListDep());
+        filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
+        filter.setCoaCode(traderAutoCompleter.getTrader().getAccount());
+        return filter;
+    }
+
+    private ReportFilter getFilter() {
+        ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
+        filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
+        filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
+        filter.setDesp(despAutoCompleter.getAutoText().getDescription().equals("All") ? "-" : despAutoCompleter.getAutoText().getDescription());
+        filter.setSrcAcc(traderAutoCompleter.getTrader().getAccount());
+        filter.setReference(refAutoCompleter.getAutoText().getDescription().equals("All") ? "-"
+                : refAutoCompleter.getAutoText().getDescription());
+        filter.setCurCode(getCurCode());
+        filter.setListDepartment(getListDep());
+        filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
+        ChartOfAccount coa = coaAutoCompleter.getCOA();
+        String coaLv1 = Util1.getInteger(coa.getCoaLevel()) == 1 ? coa.getKey().getCoaCode() : "-";
+        String coaLv2 = Util1.getInteger(coa.getCoaLevel()) == 2 ? coa.getKey().getCoaCode() : "-";
+        String accCode = Util1.getInteger(coa.getCoaLevel()) == 3 ? coa.getKey().getCoaCode() : "-";
+        filter.setCoaLv1(coaLv1);
+        filter.setCoaLv2(coaLv2);
+        filter.setAcc(accCode);
+        filter.setSummary(chkSummary.isSelected());
+        return filter;
+    }
+
+    private Mono<List<Gl>> getGl(ReportFilter filter) {
+        return accountApi.post()
+                .uri("/account/search-gl")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToFlux(Gl.class)
+                .collectList();
+    }
+
     private void searchCash() {
         TraderA trader = traderAutoCompleter.getTrader();
         String traderCode = trader.getKey().getCode();
@@ -455,46 +513,39 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
             return;
         }
         progress.setIndeterminate(true);
-        ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
-        filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
-        filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
-        filter.setDesp(despAutoCompleter.getAutoText().getDescription().equals("All") ? "-" : despAutoCompleter.getAutoText().getDescription());
-        filter.setReference(refAutoCompleter.getAutoText().getDescription().equals("All") ? "-"
-                : refAutoCompleter.getAutoText().getDescription());
-        filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
-        filter.setListDepartment(departmentAutoCompleter.getListOption());
-        filter.setBatchNo(batAutoCompleter.getAutoText().getDescription().equals("All") ? "-"
-                : batAutoCompleter.getAutoText().getDescription());
-        filter.setTraderCode(traderCode);
-        ChartOfAccount coa = coaAutoCompleter.getCOA();
-        String coaLv1 = Util1.getInteger(coa.getCoaLevel()) == 1 ? coa.getKey().getCoaCode() : "-";
-        String coaLv2 = Util1.getInteger(coa.getCoaLevel()) == 2 ? coa.getKey().getCoaCode() : "-";
-        String accCode = Util1.getInteger(coa.getCoaLevel()) == 3 ? coa.getKey().getCoaCode() : "-";
-        filter.setCoaLv1(coaLv1);
-        filter.setCoaLv2(coaLv2);
-        filter.setAcc(accCode);
-        filter.setSrcAcc(trader.getAccount());
-        filter.setSummary(chkSummary.isSelected());
-        adjustmentTableModel.clear();
-        Flux<Gl> result = accountApi.post()
-                .uri("/account/search-gl")
-                .body(Mono.just(filter), ReportFilter.class)
-                .retrieve()
-                .bodyToFlux(Gl.class);
-        result.subscribe((t) -> {
-            adjustmentTableModel.addVGl(t);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-            progress.setIndeterminate(false);
-        }, () -> {
-            adjustmentTableModel.setGlDate(filter.getFromDate());
-            adjustmentTableModel.fireTableDataChanged();
-            adjustmentTableModel.addNewRow();
-            decorator.refreshButton(filter.getFromDate());
-            progress.setIndeterminate(false);
-            calOpeningClosing(traderCode, trader.getAccount());
-            requestFoucsTable();
+        Mono<TmpOpening> monoOp = accountRepo.getOpening(getOPFilter());
+        ReportFilter filter = getFilter();
+        Mono<List<Gl>> monoGl = getGl(filter);
+        Mono<Tuple2<TmpOpening, List<Gl>>> monoZip = monoOp.zipWith(monoGl);
+        monoZip.hasElement().subscribe((element) -> {
+            if (element) {
+                monoZip.subscribe((t) -> {
+                    TmpOpening op = t.getT1();
+                    opening = op == null ? 0 : op.getOpening();
+                    List<Gl> list = t.getT2();
+                    setData(list, filter.getFromDate());
+                    calDebitCredit();
+                    requestFoucsTable();
+                    decorator.refreshButton(filter.getFromDate());
+                    progress.setIndeterminate(false);
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                    progress.setIndeterminate(false);
+                });
+            } else {
+                setData(new ArrayList<>(), filter.getFromDate());
+                calDebitCredit();
+                requestFoucsTable();
+                decorator.refreshButton(filter.getFromDate());
+                progress.setIndeterminate(false);
+            }
         });
+    }
+
+    private void setData(List<Gl> list, String fromDate) {
+        adjustmentTableModel.setListVGl(list);
+        adjustmentTableModel.setGlDate(fromDate);
+        adjustmentTableModel.addNewRow();
     }
 
     public void clearFilter() {
@@ -1110,49 +1161,22 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         opTableModel.clear();
         inOutTableModel.clear();
         List<Gl> listVGl = adjustmentTableModel.getListVGl();
-        //lblTotalCount.setText(listVGl.size() - 1 + "");
-        Map<String, List<Gl>> hmGroup = listVGl.stream().collect(Collectors.groupingBy(w -> w.getCurCode()));
-        hmGroup.forEach((t, u) -> {
-            double drAmt = 0.0;
-            double crAmt = 0.0;
-            for (Gl gl : u) {
-                drAmt += Util1.getDouble(gl.getDrAmt());
-                crAmt += Util1.getDouble(gl.getCrAmt());
-            }
-            double closing;
-            Gl vgl = hmOpening.get(t);
-            if (vgl != null) {
-                closing = Util1.getDouble(vgl.getDrAmt()) + drAmt - crAmt;
-                vgl.setCrAmt(closing);
-            } else {
-                closing = drAmt - crAmt;
-                vgl = new Gl(t, 0.0, closing);
-            }
-            opTableModel.addVGl(vgl);
-            inOutTableModel.addVGl(new Gl(t, drAmt, crAmt));
-        });
-    }
-
-    private void calOpeningClosing(String traderCode, String account) {
-        String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat);
-        String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
-        String clDate = Util1.toDateStrMYSQL(stDate, "dd/MM/yyyy");
-        ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
-        filter.setOpeningDate(opDate);
-        filter.setFromDate(clDate);
-        filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
-        filter.setListDepartment(departmentAutoCompleter.getListOption());
-        filter.setTraderCode(traderCode);
-        filter.setCoaCode(account);
-        Mono<TmpOpening> result = accountRepo.getOpening(filter);
-        hmOpening.clear();
-        result.subscribe((t) -> {
-            hmOpening.put(t.getKey().getCurCode(), new Gl(t.getKey().getCurCode(), t.getOpening(), t.getClosing()));
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        }, () -> {
-            calDebitCredit();
-        });
+        double drAmt = listVGl.stream()
+                .filter(gl -> gl.getDrAmt() != null)
+                .mapToDouble(Gl::getDrAmt)
+                .sum();
+        double crAmt = listVGl.stream()
+                .filter(gl -> gl.getCrAmt() != null)
+                .mapToDouble(Gl::getCrAmt)
+                .sum();
+        double closing = opening + drAmt - crAmt;
+        Gl vgl = new Gl();
+        vgl.setCurCode(getCurCode());
+        vgl.setDrAmt(opening);
+        vgl.setCrAmt(closing);
+        opTableModel.addVGl(vgl);
+        inOutTableModel.addVGl(new Gl(getCurCode(), drAmt, crAmt));
+        txtRecord.setValue(listVGl.size());
     }
 
     @Override

@@ -61,7 +61,6 @@ public final class SalePriceAutoCompleter implements KeyListener {
             AbstractCellEditor editor) {
         this.textComp = comp;
         this.editor = editor;
-
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         priceTableModel.setListPrice(list);

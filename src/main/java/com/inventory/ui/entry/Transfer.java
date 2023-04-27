@@ -137,6 +137,9 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private void initCombo() {
         inventoryRepo.getLocation().subscribe((t) -> {
             fromLocaitonCompleter = new LocationAutoCompleter(txtFrom, t, null, false, false);
+            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
+                fromLocaitonCompleter.setLocation(tt);
+            });
             toLocaitonCompleter = new LocationAutoCompleter(txtTo, t, null, false, false);
         });
 
@@ -178,8 +181,9 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                 int yes_no = JOptionPane.showConfirmDialog(Global.parentForm,
                         "Are you sure to delete?", "Transfer Voucher delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
-                    inventoryRepo.delete(io.getKey());
-                    clear();
+                    inventoryRepo.delete(io.getKey()).subscribe((t) -> {
+                        clear();
+                    });
                 }
             }
             case "DELETED" -> {
@@ -187,10 +191,12 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                         "Are you sure to restore?", "Transfer Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
                     io.setDeleted(false);
-                    inventoryRepo.restore(io.getKey());
-                    lblStatus.setText("EDIT");
-                    lblStatus.setForeground(Color.blue);
-                    disableForm(true);
+                    inventoryRepo.restore(io.getKey()).subscribe((t) -> {
+                        lblStatus.setText("EDIT");
+                        lblStatus.setForeground(Color.blue);
+                        disableForm(true);
+                    });
+
                 }
             }
             default ->
@@ -247,9 +253,6 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         txtDate.setDate(Util1.getTodayDate());
         progress.setIndeterminate(false);
         txtVou.setText(null);
-        inventoryRepo.getDefaultLocation().subscribe((t) -> {
-            fromLocaitonCompleter.setLocation(t);
-        });
         disableForm(true);
     }
 

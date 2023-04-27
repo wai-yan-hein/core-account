@@ -14,10 +14,13 @@ import com.common.Util1;
 import com.inventory.model.AppUser;
 import com.user.common.UserTableModel;
 import com.user.editor.RoleAutoCompleter;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +66,11 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
      */
     public AppUserSetup() {
         initComponents();
+        initKeyListener();
+    }
+
+    private void initKeyListener() {
+        txtRole.addFocusListener(fa);
     }
 
     private void initCombo() {
@@ -71,6 +79,13 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
             roleAutoCompleter.setAppRole(null);
         });
     }
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            ((JTextField) e.getSource()).selectAll();
+        }
+
+    };
 
     public void initMain() {
         initCombo();
@@ -105,7 +120,7 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
         txtEmail.setText(appUser.getEmail());
         txtPassword.setText(appUser.getPassword());
         chkAtive.setSelected(Util1.getBoolean(appUser.isActive()));
-        userRepo.finRole(user.getRoleCode()).subscribe((t) -> {
+        userRepo.finRole(appUser.getRoleCode()).subscribe((t) -> {
             roleAutoCompleter.setAppRole(t);
         });
         lblStatus.setText("EDIT");
@@ -166,6 +181,7 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
         lblStatus.setText("NEW");
         txtUserName.requestFocus();
         appUser = new AppUser();
+        roleAutoCompleter.setAppRole(null);
     }
 
     /**

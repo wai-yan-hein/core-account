@@ -38,7 +38,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListener, PanelControl {
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(MenuSetup.class);
     private DefaultMutableTreeNode treeRoot;
     DefaultTreeModel treeModel;
     DefaultMutableTreeNode selectedNode;

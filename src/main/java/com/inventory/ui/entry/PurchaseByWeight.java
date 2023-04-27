@@ -498,8 +498,9 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 int yes_no = JOptionPane.showConfirmDialog(this,
                         "Are you sure to delete?", "Purchase Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
-                    inventoryRepo.delete(ph.getKey());
-                    clear();
+                    inventoryRepo.delete(ph.getKey()).subscribe((t) -> {
+                        clear();
+                    });
                 }
             }
             case "DELETED" -> {
@@ -507,10 +508,12 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                         "Are you sure to restore?", "Save Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
                     ph.setDeleted(false);
-                    inventoryRepo.restore(ph.getKey());
-                    lblStatus.setText("EDIT");
-                    lblStatus.setForeground(Color.blue);
-                    disableForm(true);
+                    inventoryRepo.restore(ph.getKey()).subscribe((t) -> {
+                        lblStatus.setText("EDIT");
+                        lblStatus.setForeground(Color.blue);
+                        disableForm(true);
+                    });
+
                 }
             }
             default ->

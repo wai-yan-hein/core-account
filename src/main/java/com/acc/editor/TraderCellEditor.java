@@ -19,7 +19,6 @@ import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.TableCellEditor;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
@@ -29,7 +28,7 @@ public class TraderCellEditor extends AbstractCellEditor implements TableCellEdi
 
     private JComponent component = null;
     private TraderAAutoCompleter completer;
-    private WebClient webClient;
+    private AccountRepo accountRepo;
 
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
@@ -50,8 +49,8 @@ public class TraderCellEditor extends AbstractCellEditor implements TableCellEdi
 
     };
 
-    public TraderCellEditor(WebClient webClient) {
-        this.webClient = webClient;
+    public TraderCellEditor(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
     }
 
     //private List<Medicine> listTrader = new ArrayList();
@@ -93,7 +92,7 @@ public class TraderCellEditor extends AbstractCellEditor implements TableCellEdi
             jtf.setText(value.toString());
             jtf.selectAll();
         }
-        completer = new TraderAAutoCompleter(jtf, webClient, this, false);
+        completer = new TraderAAutoCompleter(jtf, accountRepo, this, false);
         return component;
     }
 

@@ -40,7 +40,6 @@ import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.common.UserRepo;
 import java.awt.Color;
-import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -54,7 +53,6 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -233,9 +231,12 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         tblSale.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//
         if (ProUtil.isSalePriceChange()) {
             if (ProUtil.isPriceOption()) {
-                SalePriceCellEditor editor = new SalePriceCellEditor(inventoryRepo.getPriceOption("Sale"));
-                editor.setSaleTableModel(saleTableModel);
-                tblSale.getColumnModel().getColumn(6).setCellEditor(editor);//price
+                inventoryRepo.getPriceOption("Sale").subscribe((t) -> {
+                    SalePriceCellEditor editor = new SalePriceCellEditor(t);
+                    editor.setSaleTableModel(saleTableModel);
+                    tblSale.getColumnModel().getColumn(6).setCellEditor(editor);//price
+                });
+
             } else {
                 tblSale.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//price
             }
@@ -254,20 +255,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
         monoLoc = inventoryRepo.getLocation();
-        monoLoc.subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
-            locationAutoCompleter.setObserver(this);
-            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
-                locationAutoCompleter.setLocation(tt);
-            });
-        });
-        inventoryRepo.getCurrency().subscribe((t) -> {
-            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
-            currAutoCompleter.setObserver(this);
-            userRepo.getDefaultCurrency().subscribe((tt) -> {
-                currAutoCompleter.setCurrency(tt);
-            });
-        });
         monoLoc.subscribe((t) -> {
             locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
             locationAutoCompleter.setObserver(this);
@@ -385,18 +372,20 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     public void saveSale(boolean print) {
         if (isValidEntry() && saleTableModel.isValidEntry()) {
-            if (Util1.getBoolean(ProUtil.getProperty("trader.balance"))) {
-                String date = Util1.toDateStr(txtSaleDate.getDate(), "yyyy-MM-dd");
-                String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
-                balance = accountRepo.getTraderBalance(date, traderCode, Global.compCode).block();
-                if (balance != 0) {
-                    prvBal = balance - Util1.getDouble(txtVouBalance.getValue());
-                }
-            }
             saleHis.setListSH(saleTableModel.getListDetail());
             saleHis.setListDel(saleTableModel.getDelList());
             saleHis.setBackup(saleTableModel.isChange());
             progress.setIndeterminate(true);
+            if (print) {
+                if (Util1.getBoolean(ProUtil.getProperty("trader.balance"))) {
+                    String date = Util1.toDateStr(txtSaleDate.getDate(), "yyyy-MM-dd");
+                    String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
+                    balance = accountRepo.getTraderBalance(date, traderCode, Global.compCode).block();
+                    if (balance != 0) {
+                        prvBal = balance - Util1.getDouble(txtVouBalance.getValue());
+                    }
+                }
+            }
             inventoryRepo.save(saleHis).subscribe((t) -> {
                 progress.setIndeterminate(false);
                 clear();
@@ -482,8 +471,9 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 int yes_no = JOptionPane.showConfirmDialog(this,
                         "Are you sure to delete?", "Save Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
-                    inventoryRepo.delete(saleHis.getKey());
-                    clear();
+                    inventoryRepo.delete(saleHis.getKey()).subscribe((t) -> {
+                        clear();
+                    });
                 }
             }
             case "DELETED" -> {
@@ -491,11 +481,11 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         "Are you sure to restore?", "Purchase Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
                     saleHis.setDeleted(false);
-                    inventoryRepo.restore(saleHis.getKey());
-                    lblStatus.setText("EDIT");
-                    lblStatus.setForeground(Color.blue);
-                    disableForm(true);
-
+                    inventoryRepo.restore(saleHis.getKey()).subscribe((t) -> {
+                        lblStatus.setText("EDIT");
+                        lblStatus.setForeground(Color.blue);
+                        disableForm(true);
+                    });
                 }
             }
             default ->

@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -144,14 +145,18 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
     private void initCombo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
-        traderAutoCompleter = new TraderAAutoCompleter(txtTrader, accountApi, null, true);
-        traderAutoCompleter.setSelectionObserver(this);
+        traderAutoCompleter = new TraderAAutoCompleter(txtTrader, accountRepo, null, true);
+        traderAutoCompleter.setObserver(this);
         accountRepo.getDepartment().subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true, true);
             departmentAutoCompleter.setObserver(this);
         });
-        cOA3AutoCompleter = new COA3AutoCompleter(txtCOA, accountApi, null, true, 3);
+        cOA3AutoCompleter = new COA3AutoCompleter(txtCOA, accountRepo, null, true, 3);
         cOA3AutoCompleter.setSelectionObserver(this);
+    }
+
+    private List<String> getDepartment() {
+        return departmentAutoCompleter == null ? null : departmentAutoCompleter.getListOption();
     }
 
     private void report() {
@@ -172,7 +177,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                     filter.setFromDate(Util1.toDateStr(stDate, "dd/MM/yyyy", "yyyy-MM-dd"));
                     filter.setToDate(Util1.toDateStr(enDate, "dd/MM/yyyy", "yyyy-MM-dd"));
                     filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
-                    filter.setListDepartment(departmentAutoCompleter.getListOption());
+                    filter.setListDepartment(getDepartment());
                     filter.setCurCode(Global.currency);
                     filter.setFixedAcc(ProUtil.getProperty(ProUtil.FIXED));
                     filter.setCurrentAcc(ProUtil.getProperty(ProUtil.CURRENT));
@@ -232,55 +237,53 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         filter.setReportName(reportName);
         long start = new GregorianCalendar().getTimeInMillis();
 
-        Mono<ReturnObject> result = accountApi
-                .post()
+        accountApi.post()
                 .uri("/report/get-report")
-                .body(Mono.just(filter), FilterObject.class
-                )
+                .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class
-                );
-        result.subscribe((t) -> {
-            try {
-                if (t != null) {
-                    log.info(String.format("printReport %s", t.getMessage()));
-                    String filePath = String.format("%s%s%s", Global.accountRP, File.separator, reportUrl.concat(".jasper"));
-                    if (t.getFile().length > 0) {
-                        long end = new GregorianCalendar().getTimeInMillis();
-                        long pt = end - start;
-                        lblTime.setText(pt / 1000 + " s");
-                        InputStream input = new ByteArrayInputStream(t.getFile());
-                        JsonDataSource ds = new JsonDataSource(input);
-                        param.put("p_gross_profit", t.getGrossProfit());
-                        param.put("p_profit", t.getNetProfit());
-                        param.put("p_cos_pc", t.getCosPercent());
-                        param.put("p_gp_pc", t.getGpPercent());
-                        param.put("p_np_pc", t.getNpPercent());
-                        param.put("p_opening", t.getOpAmt());
-                        param.put("p_closing", t.getClAmt());
-                        param.put("p_trader_name", txtTrader.getText());
-                        param.put("p_trader_type", traderAutoCompleter.getTrader().getTraderType());
-                        JasperPrint js = JasperFillManager.fillReport(filePath, param, ds);
-                        JRViewer viwer = new JRViewer(js);
-                        JFrame frame = new JFrame("Core Value Report");
-                        frame.getContentPane().add(viwer);
-                        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-                        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                        frame.setVisible(true);
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Report Does Not Exists.");
+                .bodyToMono(ReturnObject.class)
+                .subscribe((t) -> {
+                    try {
+                        if (t != null) {
+                            String filePath = String.format("%s%s%s", Global.accountRP, File.separator, reportUrl.concat(".jasper"));
+                            if (t.getFile().length > 0) {
+                                long end = new GregorianCalendar().getTimeInMillis();
+                                long pt = end - start;
+                                lblTime.setText(pt / 1000 + " s");
+                                InputStream input = new ByteArrayInputStream(t.getFile());
+                                JsonDataSource ds = new JsonDataSource(input);
+                                param.put("p_gross_profit", t.getGrossProfit());
+                                param.put("p_profit", t.getNetProfit());
+                                param.put("p_cos_pc", t.getCosPercent());
+                                param.put("p_gp_pc", t.getGpPercent());
+                                param.put("p_np_pc", t.getNpPercent());
+                                param.put("p_opening", t.getOpAmt());
+                                param.put("p_closing", t.getClAmt());
+                                param.put("p_trader_name", txtTrader.getText());
+                                param.put("p_trader_type", traderAutoCompleter.getTrader().getTraderType());
+                                param.put("p_op_date", t.getOpDate());
+                                JasperPrint js = JasperFillManager.fillReport(filePath, param, ds);
+                                JRViewer viwer = new JRViewer(js);
+                                JFrame frame = new JFrame("Core Value Report");
+                                frame.setIconImage(Global.parentForm.getIconImage());
+                                frame.getContentPane().add(viwer);
+                                frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                                frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                                frame.setVisible(true);
+                            } else {
+                                JOptionPane.showMessageDialog(this, "Report Does Not Exists.");
+                            }
+                        }
+                        progress.setIndeterminate(false);
+                    } catch (JRException ex) {
+                        log.error("printVoucher : " + ex.getMessage());
+                        progress.setIndeterminate(false);
+                        JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
                     }
-                }
-                progress.setIndeterminate(false);
-            } catch (JRException ex) {
-                log.error("printVoucher : " + ex.getMessage());
-                progress.setIndeterminate(false);
-                JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
-            }
-        }, (e) -> {
-            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-            progress.setIndeterminate(false);
-        });
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+                    progress.setIndeterminate(false);
+                });
 
     }
     private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {

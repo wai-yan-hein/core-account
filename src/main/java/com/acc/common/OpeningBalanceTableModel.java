@@ -10,7 +10,6 @@ import com.acc.model.Department;
 import com.acc.model.OpeningKey;
 import com.acc.model.TraderA;
 import com.user.model.Currency;
-
 import com.common.SelectionObserver;
 import com.common.Global;
 import com.common.Util1;
@@ -20,7 +19,6 @@ import com.acc.editor.TraderAAutoCompleter;
 import com.toedter.calendar.JDateChooser;
 
 import java.awt.HeadlessException;
-
 import java.util.List;
 import java.util.ArrayList;
 
@@ -148,10 +146,10 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
                     return opening.getCurCode();
                 }
                 case 6 -> {
-                    return Util1.getDouble(opening.getDrAmt());
+                    return Util1.getDouble(opening.getDrAmt()) == 0 ? null : Util1.getDouble(opening.getDrAmt());
                 }
                 case 7 -> {
-                    return Util1.getDouble(opening.getCrAmt());
+                    return Util1.getDouble(opening.getCrAmt()) == 0 ? null : Util1.getDouble(opening.getCrAmt());
                 }
                 default -> {
                     return null;

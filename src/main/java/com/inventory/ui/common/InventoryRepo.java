@@ -11,6 +11,7 @@ import com.common.Global;
 import com.common.ProUtil;
 import com.common.ReturnObject;
 import com.common.Util1;
+import com.inventory.model.AccSetting;
 import com.inventory.model.Category;
 import com.inventory.model.CategoryKey;
 import com.inventory.model.Expense;
@@ -103,18 +104,17 @@ public class InventoryRepo {
         return findSaleMan(code, Global.deptId);
     }
 
-    public List<PriceOption> getPriceOption(String option) {
-        if (listPO == null) {
-            Mono<ResponseEntity<List<PriceOption>>> result = inventoryApi.get()
-                    .uri(builder -> builder.path("/setup/get-price-option")
-                    .queryParam("compCode", Global.compCode)
-                    .queryParam("deptId", ProUtil.getDepId())
-                    .queryParam("option", option)
-                    .build())
-                    .retrieve().toEntityList(PriceOption.class);
-            listPO = result.block().getBody();
-        }
-        return listPO;
+    public Mono<List<PriceOption>> getPriceOption(String option) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/get-price-option")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", ProUtil.getDepId())
+                .queryParam("option", option)
+                .build())
+                .retrieve()
+                .bodyToFlux(PriceOption.class)
+                .collectList();
+
     }
 
     public Mono<List<Category>> getCategory() {
@@ -1125,6 +1125,23 @@ public class InventoryRepo {
                 .body(Mono.just(sh), SaleHis.class)
                 .retrieve()
                 .bodyToMono(SaleHis.class);
+    }
+
+    public Mono<AccSetting> save(AccSetting sh) {
+        return inventoryApi.post()
+                .uri("/setup/saveAccSetting")
+                .body(Mono.just(sh), AccSetting.class)
+                .retrieve()
+                .bodyToMono(AccSetting.class);
+    }
+
+    public Mono<List<AccSetting>> getAccSetting() {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getAccSetting")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().bodyToFlux(AccSetting.class)
+                .collectList();
     }
 
 }

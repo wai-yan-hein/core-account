@@ -16,6 +16,9 @@ import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.ui.setup.dialog.CustomerImportDialog;
+import com.toedter.calendar.JTextFieldDateEditor;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.List;
@@ -35,7 +38,6 @@ import javax.swing.text.JTextComponent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
@@ -51,8 +53,6 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
     private COA3AutoCompleter cOAAutoCompleter;
     @Autowired
     private AccountRepo accountRepo;
-    @Autowired
-    private WebClient accountApi;
     private SelectionObserver observer;
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
@@ -80,6 +80,13 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         initComponents();
         initKeyListener();
     }
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            ((JTextField) e.getSource()).selectAll();
+        }
+
+    };
 
     private void batchLock(boolean lock) {
         txtSysCode.setEnabled(lock);
@@ -102,7 +109,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
     }
 
     private void initCombo() {
-        cOAAutoCompleter = new COA3AutoCompleter(txtAccount, accountApi, null, false, 3);
+        cOAAutoCompleter = new COA3AutoCompleter(txtAccount, accountRepo, null, false, 3);
         cOAAutoCompleter.setCoa(null);
     }
 
@@ -120,7 +127,6 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
                     selectRow = tblCustomer.convertRowIndexToModel(tblCustomer.getSelectedRow());
                     setTrader(traderATableModel.getTrader(selectRow));
                 }
-
             }
         });
         sorter = new TableRowSorter(tblCustomer.getModel());
@@ -588,6 +594,13 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         txtCusEmail.addKeyListener(this);
         chkActive.addKeyListener(this);
         tblCustomer.addKeyListener(this);
+        txtCusCode.addFocusListener(fa);
+        txtCusName.addFocusListener(fa);
+        txtCusPhone.addFocusListener(fa);
+        txtCusAddress.addFocusListener(fa);
+        txtCusEmail.addFocusListener(fa);
+        chkActive.addFocusListener(fa);
+        tblCustomer.addFocusListener(fa);
 
     }
 

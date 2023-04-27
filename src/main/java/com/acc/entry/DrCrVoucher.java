@@ -39,13 +39,12 @@ import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
+import lombok.extern.slf4j.Slf4j;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -57,9 +56,9 @@ import reactor.core.publisher.Mono;
  * @author Lenovo
  */
 @Component
+@Slf4j
 public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver, PanelControl, KeyListener {
 
-    private static final Logger log = LoggerFactory.getLogger(DrCrVoucher.class);
     private int selectRow = -1;
     private DateAutoCompleter dateAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
@@ -162,10 +161,10 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDept, t, null, true, true);
             departmentAutoCompleter.setObserver(this);
         });
-        despAutoCompleter = new DespAutoCompleter(txtDesp, accountApi, null, true);
-        despAutoCompleter.setSelectionObserver(this);
-        refAutoCompleter = new RefAutoCompleter(txtRef, accountApi, null, true);
-        refAutoCompleter.setSelectionObserver(this);
+        despAutoCompleter = new DespAutoCompleter(txtDesp, accountRepo, null, true);
+        despAutoCompleter.setObserver(this);
+        refAutoCompleter = new RefAutoCompleter(txtRef, accountRepo, null, true);
+        refAutoCompleter.setObserver(this);
     }
 
     public void initMain() {
@@ -237,7 +236,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
                 filter.setOpeningDate(opDate);
                 filter.setFromDate(clDate);
                 filter.setCurCode(Global.currency);
-                filter.setListDepartment(departmentAutoCompleter.getListOption());
+                filter.setListDepartment(getListDep());
                 filter.setCoaCode(coa.getKey().getCoaCode());
                 Mono<TmpOpening> result = accountRepo.getOpening(filter);
                 result.subscribe((t) -> {

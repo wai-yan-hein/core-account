@@ -31,7 +31,6 @@ import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -48,7 +47,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     private DepartmentAutoCompleter departmentAutoCompleter;
     private JProgressBar progress;
     private SelectionObserver observer;
-    private final JournalEntryDialog dialog = new JournalEntryDialog();
+    private JournalEntryDialog dialog;
     private int selectRow = 0;
     @Autowired
     private AccountRepo accountRepo;
@@ -154,29 +153,32 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         filter.setDesp(txtDesp.getText());
         filter.setReference(txtRefrence.getText());
         filter.setGlVouNo(txtVouNo.getText());
-        Mono<ResponseEntity<List<Gl>>> result = accountApi
-                .post()
+        accountApi.post()
                 .uri("/account/search-journal")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .toEntityList(Gl.class);
-        result.subscribe((t) -> {
-            tableModel.setListGV(t.getBody());
-            lblCount.setText(tableModel.getListSize() + "");
-            progress.setIndeterminate(false);
-        });
+                .bodyToFlux(Gl.class)
+                .collectList()
+                .subscribe((t) -> {
+                    tableModel.setListGV(t);
+                    lblCount.setText(tableModel.getListSize() + "");
+                    progress.setIndeterminate(false);
+                });
     }
 
     public void openJournalEntryDialog(String glVou, String status) {
+        if (dialog == null) {
+            dialog = new JournalEntryDialog();
+            dialog.setAccountRepo(accountRepo);
+            dialog.setAccountApi(accountApi);
+            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setIconImage(Global.parentForm.getIconImage());
+            dialog.setLocationRelativeTo(null);
+        }
         dialog.clear();
-        dialog.setAccountRepo(accountRepo);
-        dialog.setAccountApi(accountApi);
         dialog.setVouNo(glVou);
         dialog.setStatus(status);
         dialog.initMain();
-        dialog.setSize(Global.width - 100, Global.height - 100);
-        dialog.setIconImage(Global.parentForm.getIconImage());
-        dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }
 

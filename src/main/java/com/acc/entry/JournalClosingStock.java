@@ -149,15 +149,22 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
 
     }
 
+    private String getCurCode() {
+        return currencyAAutoCompleter == null ? "-" : currencyAAutoCompleter.getCurrency().getCurCode();
+    }
+
+    private String getDeptCode() {
+        return departmentAutoCompleter == null ? "-" : departmentAutoCompleter.getDepartment().getKey().getDeptCode();
+    }
+
     private void searchJournal() {
         progress.setIndeterminate(true);
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
         filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
         filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
-        filter.setDeptCode(departmentAutoCompleter.getDepartment().getKey().getDeptCode());
-        filter.setCurCode(currencyAAutoCompleter.getCurrency().getCurCode());
-        Mono<ResponseEntity<List<StockOP>>> result = accountApi
-                .post()
+        filter.setDeptCode(getDeptCode());
+        filter.setCurCode(getCurCode());
+        Mono<ResponseEntity<List<StockOP>>> result = accountApi.post()
                 .uri("/account/search-stock-op")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
@@ -222,8 +229,8 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         monoDep.subscribe((t) -> {
             tblJournal.getColumnModel().getColumn(1).setCellEditor(new DepartmentCellEditor(t));
         });
-        tblJournal.getColumnModel().getColumn(2).setCellEditor(new COA3CellEditor(accountApi, 3));
-        tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountApi, 3));
+        tblJournal.getColumnModel().getColumn(2).setCellEditor(new COA3CellEditor(accountRepo, 3));
+        tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountRepo, 3));
         monoCur.subscribe((t) -> {
             tblJournal.getColumnModel().getColumn(4).setCellEditor(new CurrencyAEditor(t));
         });

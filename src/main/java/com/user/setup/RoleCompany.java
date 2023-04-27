@@ -8,11 +8,9 @@ package com.user.setup;
 import com.common.Global;
 import com.user.common.RoleCompanyTableModel;
 import com.user.common.UserRepo;
-import com.user.model.CompanyInfo;
 import com.user.model.PrivilegeCompany;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JOptionPane;
@@ -21,10 +19,8 @@ import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -84,20 +80,21 @@ public class RoleCompany extends javax.swing.JPanel {
 
     public void searchCompany(String roleCode) {
         tableModel.clear();
-        Mono<ResponseEntity<List<PrivilegeCompany>>> result = userApi.get()
+        userApi.get()
                 .uri(builder -> builder.path("/user/get-privilege-company")
                 .queryParam("roleCode", roleCode)
                 .build())
                 .retrieve()
-                .toEntityList(PrivilegeCompany.class);
-        result.subscribe((t) -> {
-            tableModel.setRoleCode(roleCode);
-            tableModel.setListProperty(t.getBody());
-            tableModel.addNewRow();
-            tblSystem.requestFocus();
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
+                .bodyToFlux(PrivilegeCompany.class)
+                .collectList()
+                .subscribe((t) -> {
+                    tableModel.setRoleCode(roleCode);
+                    tableModel.setListProperty(t);
+                    tableModel.addNewRow();
+                    tblSystem.requestFocus();
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                });
     }
 
     /**

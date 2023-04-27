@@ -66,7 +66,7 @@ public class OPVouSearchTableModel extends AbstractTableModel {
             switch (column) {
                 case 0 -> {
                     //date
-                    return his.getVouDate();
+                    return his.getVouDateStr();
                 }
                 case 1 -> {
                     //vou-no

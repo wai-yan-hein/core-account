@@ -6,7 +6,9 @@
 package com.inventory.editor;
 
 import com.common.Global;
+import com.common.Util1;
 import com.inventory.model.PriceOption;
+import com.inventory.model.Stock;
 import com.inventory.ui.common.SaleTableModel;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -100,10 +102,36 @@ public class SalePriceCellEditor extends AbstractCellEditor implements TableCell
         }
         int row = table.convertRowIndexToModel(table.getSelectedRow());
         if (row >= 0) {
-            listOption = saleTableModel.getPriceOption(row);
+            listOption = getPriceOption(row);
         }
         completer = new SalePriceAutoCompleter(jtf, listOption, this);
         return component;
+    }
+
+    public List<PriceOption> getPriceOption(int row) {
+        Stock s = saleTableModel.getSale(row).getStock();
+        if (!listOption.isEmpty()) {
+            for (PriceOption op : listOption) {
+                switch (Util1.isNull(op.getKey().getPriceType(), "N")) {
+                    case "A" ->
+                        op.setPrice(s.getSalePriceA());
+                    case "B" ->
+                        op.setPrice(s.getSalePriceB());
+                    case "C" ->
+                        op.setPrice(s.getSalePriceC());
+                    case "D" ->
+                        op.setPrice(s.getSalePriceD());
+                    case "E" ->
+                        op.setPrice(s.getSalePriceE());
+                    case "N" ->
+                        op.setPrice(s.getSalePriceN());
+                    default -> {
+                        break;
+                    }
+                }
+            }
+        }
+        return listOption;
     }
 
     @Override

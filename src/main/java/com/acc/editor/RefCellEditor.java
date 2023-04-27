@@ -5,6 +5,7 @@
  */
 package com.acc.editor;
 
+import com.acc.common.AccountRepo;
 import com.acc.model.VDescription;
 import com.common.Global;
 import java.awt.event.FocusAdapter;
@@ -28,7 +29,7 @@ public class RefCellEditor extends AbstractCellEditor implements TableCellEditor
 
     private JComponent component = null;
     private RefAutoCompleter completer;
-    private WebClient webClient;
+    private AccountRepo accountRepo;
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusLost(FocusEvent e) {
@@ -43,8 +44,8 @@ public class RefCellEditor extends AbstractCellEditor implements TableCellEditor
     };
     //private List<Medicine> listCOA = new ArrayList();
 
-    public RefCellEditor(WebClient webClient) {
-        this.webClient = webClient;
+    public RefCellEditor(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
     }
 
     @Override
@@ -84,7 +85,7 @@ public class RefCellEditor extends AbstractCellEditor implements TableCellEditor
             jtf.setText(value.toString());
             jtf.selectAll();
         }
-        completer = new RefAutoCompleter(jtf, webClient, this, false);
+        completer = new RefAutoCompleter(jtf, accountRepo, this, false);
         return component;
     }
 

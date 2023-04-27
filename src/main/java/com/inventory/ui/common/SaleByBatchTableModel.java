@@ -12,12 +12,10 @@ import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.model.GRN;
 import com.inventory.model.Location;
-import com.inventory.model.PriceOption;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.ui.entry.SaleByBatch;
-import com.inventory.ui.setup.dialog.PriceOptionDialog;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
@@ -258,9 +256,6 @@ public class SaleByBatchTableModel extends AbstractTableModel {
                             sd.setQty(1.0f);
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setStock(s);
-                            if (ProUtil.isPricePopup()) {
-                                sd.setPrice(getPopupPrice(row, true));
-                            }
                             sd.setPrice(Util1.getFloat(sd.getPrice()) == 0 ? s.getSalePriceN() : sd.getPrice());
                             parent.setColumnSelectionInterval(5, 5);
                             addNewRow();
@@ -428,44 +423,6 @@ public class SaleByBatchTableModel extends AbstractTableModel {
             }
         }
         return status;
-    }
-
-    public List<PriceOption> getPriceOption(int row) {
-        Stock s = listDetail.get(row).getStock();
-        List<PriceOption> listPrice = inventoryRepo.getPriceOption("-");
-        if (!listPrice.isEmpty()) {
-            for (PriceOption op : listPrice) {
-                switch (Util1.isNull(op.getKey().getPriceType(), "N")) {
-                    case "A" ->
-                        op.setPrice(s.getSalePriceA());
-                    case "B" ->
-                        op.setPrice(s.getSalePriceB());
-                    case "C" ->
-                        op.setPrice(s.getSalePriceC());
-                    case "D" ->
-                        op.setPrice(s.getSalePriceD());
-                    case "E" ->
-                        op.setPrice(s.getSalePriceE());
-                    case "N" ->
-                        op.setPrice(s.getSalePriceN());
-                    default -> {
-                        break;
-                    }
-                }
-            }
-        }
-        return listPrice;
-    }
-
-    private float getPopupPrice(int row, boolean needToChoice) {
-        List<PriceOption> listPrice = getPriceOption(row);
-        PriceOptionDialog dialog = new PriceOptionDialog();
-        dialog.setListPrice(listPrice);
-        dialog.setNeedToChoice(needToChoice);
-        dialog.initData();
-        dialog.setLocationRelativeTo(null);
-        dialog.setVisible(true);
-        return dialog.getOption() == null ? 0.0f : dialog.getOption().getPrice();
     }
 
     public List<String> getDelList() {

@@ -29,7 +29,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.ButtonGroup;
 import javax.swing.JOptionPane;
@@ -42,7 +41,6 @@ import javax.swing.RowFilter;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -220,32 +218,53 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
         }
     };
 
+    private String getBrandCode() {
+        return brandAutoCompleter == null ? "-" : brandAutoCompleter.getBrand().getKey().getBrandCode();
+    }
+
+    private String getCatCode() {
+        return categoryAutoCompleter == null ? "-" : categoryAutoCompleter.getCategory().getKey().getCatCode();
+    }
+
+    private String getTypeCode() {
+        return typeAutoCompleter == null ? "-" : typeAutoCompleter.getStockType().getKey().getStockTypeCode();
+    }
+
+    private String getStockCode() {
+        return stockAutoCompleter == null ? "-" : stockAutoCompleter.getStock().getKey().getStockCode();
+    }
+
+    private String getLocCode() {
+        return locationAutoCompleter == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
+    }
+
     private void getReorderLevel() {
         progress.setIndeterminate(true);
         ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
-        filter.setBrandCode(brandAutoCompleter.getBrand().getKey().getBrandCode());
-        filter.setCatCode(categoryAutoCompleter.getCategory().getKey().getCatCode());
-        filter.setStockTypeCode(typeAutoCompleter.getStockType().getKey().getStockTypeCode());
-        filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
-        filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
+        filter.setBrandCode(getBrandCode());
+        filter.setCatCode(getCatCode());
+        filter.setStockTypeCode(getTypeCode());
+        filter.setStockCode(getStockCode());
+        filter.setLocCode(getLocCode());
         filter.setCalSale(Util1.getBoolean(ProUtil.getProperty("disable.calculate.sale.stock")));
         filter.setCalPur(Util1.getBoolean(ProUtil.getProperty("disable.calculate.purchase.stock")));
         filter.setCalRI(Util1.getBoolean(ProUtil.getProperty("disable.calculate.returin.stock")));
         filter.setCalRO(Util1.getBoolean(ProUtil.getProperty("disable.calculate.retunout.stock")));
-        Mono<ResponseEntity<List<ReorderLevel>>> result = inventoryApi
+        inventoryApi
                 .post()
                 .uri("/report/get-reorder-level")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .toEntityList(ReorderLevel.class);
-        result.subscribe((t) -> {
-            reorderTableModel.setListPattern(t.getBody());
-            calQty();
-            progress.setIndeterminate(false);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-            progress.setIndeterminate(false);
-        });
+                .bodyToFlux(ReorderLevel.class)
+                .collectList()
+                .subscribe((t) -> {
+                    reorderTableModel.setListPattern(t);
+                    calQty();
+                    progress.setIndeterminate(false);
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+                    progress.setIndeterminate(false);
+                });
     }
 
     private void calQty() {

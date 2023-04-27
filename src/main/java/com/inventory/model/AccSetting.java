@@ -15,7 +15,7 @@ import lombok.Data;
 @Data
 public class AccSetting implements Serializable {
 
-    private String type;
+    private AccKey key;
     private String disAccount;
     private String payAccount;
     private String taxAccount;

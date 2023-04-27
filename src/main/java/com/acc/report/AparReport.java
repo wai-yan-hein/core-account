@@ -5,6 +5,7 @@
  */
 package com.acc.report;
 
+import com.acc.dialog.TrialBalanceDetailDialog;
 import com.acc.common.APARTableModel;
 import com.acc.common.AccountRepo;
 import com.acc.common.DateAutoCompleter;
@@ -282,8 +283,8 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             currencyAutoCompleter.setObserver(this);
         });
 
-        traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accountApi, null, true);
-        traderAutoCompleter.setSelectionObserver(this);
+        traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accountRepo, null, true);
+        traderAutoCompleter.setObserver(this);
 
     }
 

@@ -466,8 +466,9 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                 int yes_no = JOptionPane.showConfirmDialog(this,
                         "Are you sure to delete?", "Save Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
-                    inventoryRepo.delete(saleHis.getKey());
-                    clear();
+                    inventoryRepo.delete(saleHis.getKey()).subscribe((t) -> {
+                        clear();
+                    });
                 }
             }
             case "DELETED" -> {
@@ -475,10 +476,11 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                         "Are you sure to restore?", "Purchase Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
                     saleHis.setDeleted(false);
-                    inventoryRepo.restore(saleHis.getKey());
-                    lblStatus.setText("EDIT");
-                    lblStatus.setForeground(Color.blue);
-                    disableForm(true);
+                    inventoryRepo.restore(saleHis.getKey()).subscribe((t) -> {
+                        lblStatus.setText("EDIT");
+                        lblStatus.setForeground(Color.blue);
+                        disableForm(true);
+                    });
 
                 }
             }

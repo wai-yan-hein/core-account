@@ -15,4 +15,5 @@ public class PMKey {
 
     private String roleCode;
     private String menuCode;
+    private String compCode;
 }

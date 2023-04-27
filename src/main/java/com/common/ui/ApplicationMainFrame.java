@@ -35,7 +35,7 @@ import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.GRNEntry;
 import com.inventory.ui.entry.Manufacture;
 import com.user.model.VRoleCompany;
-import com.inventory.ui.entry.OtherSetup;
+import com.inventory.ui.entry.OtherSetupMain;
 import com.inventory.ui.entry.Purchase;
 import com.inventory.ui.entry.PurchaseByWeight;
 import com.inventory.ui.entry.RFID;
@@ -67,7 +67,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import com.inventory.ui.entry.Reports;
 import com.inventory.ui.entry.SaleByBatch;
@@ -82,6 +81,7 @@ import com.user.setup.SystemProperty;
 import com.user.setup.AppUserSetup;
 import com.user.setup.CloudConfig;
 import com.user.setup.CompanySetup;
+import com.user.setup.CompanyTemplate;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -133,7 +133,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     @Autowired
     private SupplierSetup supplierSetup;
     @Autowired
-    private OtherSetup otherSetup;
+    private OtherSetupMain otherSetupMain;
     @Autowired
     private RoleSetting roleSetting;
     @Autowired
@@ -157,8 +157,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private COAManagment cOAManagment;
     @Autowired
     private COASetup cOASetup;
-    @Autowired
-    private COATemplateSetup coaTemplateSetup;
     @Autowired
     private GLReport gLReport;
     @Autowired
@@ -192,6 +190,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private MenuSetup menuSetup;
     @Autowired
     private CompanySetup companySetup;
+    @Autowired
+    private CompanyTemplate companyTemplate;
     private PanelControl control;
     private final HashMap<String, JPanel> hmPanel = new HashMap<>();
     private final ActionListener menuListener = (java.awt.event.ActionEvent evt) -> {
@@ -213,7 +213,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     /**
      * Creates new form ApplicationMainFrame
      *
-     * @return
      */
     public ApplicationMainFrame() {
         initComponents();
@@ -469,8 +468,11 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return supplierSetup;
             }
             case "Other Setup" -> {
-                otherSetup.setName(menuName);
-                return otherSetup;
+                otherSetupMain.setName(menuName);
+                otherSetupMain.setObserver(this);
+                otherSetupMain.setProgress(progress);
+                otherSetupMain.initMain();
+                return otherSetupMain;
             }
             case "Role Setting" -> {
                 roleSetting.setName(menuName);
@@ -595,6 +597,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 companySetup.initMain();
                 return companySetup;
             }
+            case "Company Template" -> {
+                companyTemplate.setName(menuName);
+                companyTemplate.setObserver(this);
+                companyTemplate.setProgress(progress);
+                companyTemplate.intTabMain();
+                return companyTemplate;
+            }
             case "G/L Listing" -> {
                 gLReport.setName(menuName);
                 gLReport.setObserver(this);
@@ -622,13 +631,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 cOASetup.setProgress(progress);
                 cOASetup.initMain();
                 return cOASetup;
-            }
-            case "COA Template" -> {
-                coaTemplateSetup.setName(menuName);
-                coaTemplateSetup.setObserver(this);
-                coaTemplateSetup.setProgress(progress);
-                coaTemplateSetup.initMain();
-                return coaTemplateSetup;
             }
             case "Opening Balance" -> {
                 coaOpening.setName(menuName);
@@ -775,7 +777,16 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     public void initMain() {
         Global.parentForm = this;
         scheduleExit();
+        initUser();
         companyUserRoleAssign();
+    }
+
+    private void initUser() {
+        userRepo.getAppUser().subscribe((list) -> {
+            list.forEach((t) -> {
+                Global.hmUser.put(t.getUserCode(), t.getUserShortName());
+            });
+        });
     }
 
     private void departmentAssign() {
@@ -796,6 +807,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             }
             lblDep.setText(dep.getDeptName());
             Global.deptId = dep.getDeptId();
+        }, (e) -> {
+            log.error(e.getMessage());
         });
 
     }
@@ -917,9 +930,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                         log.info("exit");
                         System.exit(0);
                     }
-                }, Duration.ofSeconds(30).toMillis()); // 60,000 milliseconds = 1 minute
+                }, Duration.ofMinutes(5).toMillis());
                 int confirmed = JOptionPane.showConfirmDialog(null,
-                        "Do you want to exit the program due to inactivity? Program will exit within 30 second.", "Exit Confirmation",
+                        "Do you want to exit the program due to inactivity? Program will exit within 5 minutes.", "Exit Confirmation",
                         JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (confirmed == JOptionPane.YES_OPTION) {
                     System.exit(0);
@@ -927,7 +940,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                     timer.cancel();
                 }
             }
-        }, Duration.ofMinutes(30).toMillis(), Duration.ofMinutes(30).toMillis());
+        }, Duration.ofDays(8).toMillis(), Duration.ofMinutes(8).toMillis());
     }
 
     @Override

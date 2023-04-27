@@ -19,6 +19,7 @@ import com.user.model.CompanyInfo;
 import com.user.model.Currency;
 import com.user.model.MachineProperty;
 import com.user.model.Menu;
+import com.user.model.MenuTemplate;
 import com.user.model.PrivilegeCompany;
 import com.user.model.YearEnd;
 import java.util.HashMap;
@@ -61,9 +62,9 @@ public class UserRepo {
     public Mono<List<AppUser>> getAppUser() {
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-appuser")
-                .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().bodyToFlux(AppUser.class).collectList();
+                .retrieve().bodyToFlux(AppUser.class)
+                .collectList();
     }
 
     public Mono<List<MachineInfo>> getMacList() {
@@ -162,11 +163,18 @@ public class UserRepo {
                 .retrieve().bodyToMono(Currency.class);
     }
 
+    public Mono<CompanyInfo> findCompany(String compCode) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/findCompany")
+                .queryParam("compCode", compCode)
+                .build())
+                .retrieve().bodyToMono(CompanyInfo.class);
+    }
+
     public Mono<AppRole> finRole(String roleCode) {
         return userApi.get()
-                .uri(builder -> builder.path("/user/find-currency")
+                .uri(builder -> builder.path("/user/find-role")
                 .queryParam("roleCode", roleCode)
-                .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve().bodyToMono(AppRole.class);
     }
@@ -356,5 +364,23 @@ public class UserRepo {
                 .retrieve()
                 .bodyToFlux(Menu.class)
                 .collectList();
+    }
+
+    public Mono<List<MenuTemplate>> getMenuTemplate(Integer busId) {
+        return userApi.get()
+                .uri(builder -> builder.path("/template/getMenu")
+                .queryParam("busId", busId)
+                .build())
+                .retrieve()
+                .bodyToFlux(MenuTemplate.class)
+                .collectList();
+    }
+
+    public Mono<MenuTemplate> save(MenuTemplate type) {
+        return userApi.post()
+                .uri("/template/saveMenu")
+                .body(Mono.just(type), MenuTemplate.class)
+                .retrieve()
+                .bodyToMono(MenuTemplate.class);
     }
 }

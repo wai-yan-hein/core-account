@@ -390,8 +390,9 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                 int yes_no = JOptionPane.showConfirmDialog(Global.parentForm,
                         "Are you sure to delete?", "Return In Voucher delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
-                    inventoryRepo.delete(ri.getKey());
-                    clear();
+                    inventoryRepo.delete(ri.getKey()).subscribe((t) -> {
+                        clear();
+                    });
                 }
             }
             case "DELETED" -> {
@@ -399,10 +400,12 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                         "Are you sure to restore?", "Return In Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
                     ri.setDeleted(false);
-                    inventoryRepo.restore(ri.getKey());
-                    lblStatus.setText("EDIT");
-                    lblStatus.setForeground(Color.blue);
-                    disableForm(true);
+                    inventoryRepo.restore(ri.getKey()).subscribe((t) -> {
+                        lblStatus.setText("EDIT");
+                        lblStatus.setForeground(Color.blue);
+                        disableForm(true);
+                    });
+
                 }
             }
             default ->

@@ -22,6 +22,7 @@ import com.acc.model.TmpOpening;
 import com.acc.model.TraderA;
 import com.acc.model.TraderAKey;
 import com.acc.model.StockOPKey;
+import com.acc.model.VDescription;
 import com.common.Global;
 import com.common.ReturnObject;
 import com.common.Util1;
@@ -226,7 +227,7 @@ public class AccountRepo {
 
     public Mono<Double> getTraderBalance(String date, String traderCode, String compCode) {
         return accountApi.get()
-                .uri(builder -> builder.path("/account/report/get-trader-balance")
+                .uri(builder -> builder.path("/report/get-trader-balance")
                 .queryParam("date", date)
                 .queryParam("traderCode", traderCode)
                 .queryParam("compCode", compCode)
@@ -380,4 +381,48 @@ public class AccountRepo {
                 .retrieve().bodyToFlux(DateModel.class);
     }
 
+    public Mono<List<ChartOfAccount>> searchCOA(String str, int level) {
+        return accountApi.get()
+                .uri(builder -> builder.path("/account/search-coa")
+                .queryParam("str", str)
+                .queryParam("level", level)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(ChartOfAccount.class)
+                .collectList();
+    }
+
+    public Mono<List<VDescription>> getDescription(String str) {
+        return accountApi.get()
+                .uri(builder -> builder.path("/account/get-description")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("str", str)
+                .build())
+                .retrieve()
+                .bodyToFlux(VDescription.class)
+                .collectList();
+    }
+
+    public Mono<List<VDescription>> getReference(String str) {
+        return accountApi.get()
+                .uri(builder -> builder.path("/account/get-reference")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("str", str)
+                .build())
+                .retrieve()
+                .bodyToFlux(VDescription.class)
+                .collectList();
+    }
+
+    public Mono<List<TraderA>> searchTrader(String str) {
+        return accountApi.get()
+                .uri(builder -> builder.path("/account/search-trader")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("text", str)
+                .build())
+                .retrieve()
+                .bodyToFlux(TraderA.class)
+                .collectList();
+    }
 }

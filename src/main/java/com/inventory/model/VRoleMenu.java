@@ -23,6 +23,7 @@ public class VRoleMenu {
     private String menuClass;
     private String account;
     private String parentMenuCode;
+    private String compCode;
     private List<VRoleMenu> child;
 
     public VRoleMenu() {

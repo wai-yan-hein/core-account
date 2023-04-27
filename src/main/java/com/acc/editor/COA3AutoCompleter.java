@@ -5,6 +5,7 @@
  */
 package com.acc.editor;
 
+import com.acc.common.AccountRepo;
 import com.acc.common.COA1TableModel;
 import com.acc.common.COA2TableModel;
 import com.acc.common.COA3TableModel;
@@ -62,7 +63,7 @@ public final class COA3AutoCompleter implements KeyListener {
     private int y = 0;
     boolean popupOpen = false;
     private SelectionObserver selectionObserver;
-    private WebClient webClient;
+    private AccountRepo accountRepo;
     private boolean filter;
     private int level;
 
@@ -73,11 +74,11 @@ public final class COA3AutoCompleter implements KeyListener {
     public COA3AutoCompleter() {
     }
 
-    public COA3AutoCompleter(JTextComponent comp, WebClient webClient,
+    public COA3AutoCompleter(JTextComponent comp, AccountRepo accountRepo,
             AbstractCellEditor editor, boolean filter, int level) {
         this.textComp = comp;
         this.editor = editor;
-        this.webClient = webClient;
+        this.accountRepo = accountRepo;
         this.filter = filter;
         this.level = level;
         if (this.filter) {
@@ -377,25 +378,16 @@ public final class COA3AutoCompleter implements KeyListener {
         if (!str.isEmpty()) {
             if (!containKey(e)) {
                 clear(level);
-                webClient.get()
-                        .uri(builder -> builder.path("/account/search-coa")
-                        .queryParam("str", str)
-                        .queryParam("level", this.level)
-                        .queryParam("compCode", Global.compCode)
-                        .build())
-                        .retrieve()
-                        .bodyToFlux(ChartOfAccount.class)
-                        .collectList()
-                        .subscribe((t) -> {
-                            if (this.filter) {
-                                ChartOfAccount s = new ChartOfAccount(new COAKey("-", Global.compCode), "All");
-                                t.add(s);
-                            }
-                            setData(t);
-                            if (!t.isEmpty()) {
-                                table.setRowSelectionInterval(0, 0);
-                            }
-                        });
+                accountRepo.searchCOA(str, level).subscribe((t) -> {
+                    if (this.filter) {
+                        ChartOfAccount s = new ChartOfAccount(new COAKey("-", Global.compCode), "All");
+                        t.add(s);
+                    }
+                    setData(t);
+                    if (!t.isEmpty()) {
+                        table.setRowSelectionInterval(0, 0);
+                    }
+                });
             }
 
         }

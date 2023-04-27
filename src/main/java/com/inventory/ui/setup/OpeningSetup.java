@@ -9,7 +9,6 @@ import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
-import com.common.ReturnObject;
 import com.common.SelectionObserver;
 import com.user.common.UserRepo;
 import com.common.Util1;
@@ -188,7 +187,6 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     private void saveOpening() {
         try {
-            progress.setIndeterminate(true);
             if (isValidEntry() && openingTableModel.isValidEntry()) {
                 progress.setIndeterminate(true);
                 if (lblStatus.getText().equals("NEW")) {
@@ -210,19 +208,15 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                 oPHis.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
                 oPHis.setDetailList(openingTableModel.getListDetail());
                 oPHis.setListDel(openingTableModel.getDelList());
-                Mono<ReturnObject> result = inventoryApi.post()
+                inventoryApi.post()
                         .uri("/setup/save-opening")
                         .body(Mono.just(oPHis), OPHis.class)
                         .retrieve()
-                        .bodyToMono(ReturnObject.class);
-                ReturnObject t = result.block();
-                if (!Util1.isNull(t.getErrorMessage())) {
-                    JOptionPane.showMessageDialog(Global.parentForm, t.getErrorMessage());
-                }
-                clear();
-                progress.setIndeterminate(false);
-            } else {
-                progress.setIndeterminate(false);
+                        .bodyToMono(OPHis.class)
+                        .subscribe((t) -> {
+                            clear();
+                            progress.setIndeterminate(false);
+                        });
             }
         } catch (HeadlessException ex) {
             log.error("Save Opening :" + ex.getMessage());

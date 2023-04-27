@@ -5,6 +5,7 @@
  */
 package com.acc.editor;
 
+import com.acc.common.AccountRepo;
 import com.acc.common.DespTableModel;
 import com.acc.model.VDescription;
 import com.common.Global;
@@ -58,28 +59,27 @@ public final class DespAutoCompleter implements KeyListener {
     private int x = 0;
     private int y = 0;
     boolean popupOpen = false;
-    private SelectionObserver selectionObserver;
-    private WebClient webClient;
+    private SelectionObserver observer;
+    private AccountRepo accountRepo;
     private boolean filter;
 
-    public SelectionObserver getSelectionObserver() {
-        return selectionObserver;
+    public SelectionObserver getObserver() {
+        return observer;
     }
 
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
     }
 
-    //private CashFilter cashFilter = Global.allCash;
     public DespAutoCompleter() {
     }
 
-    public DespAutoCompleter(JTextComponent comp, WebClient client,
+    public DespAutoCompleter(JTextComponent comp, AccountRepo accountRepo,
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
         this.filter = filter;
-        this.webClient = client;
+        this.accountRepo = accountRepo;
         if (this.filter) {
             setAutoText(new VDescription("All"));
         }
@@ -170,8 +170,8 @@ public final class DespAutoCompleter implements KeyListener {
                     table.getSelectedRow()));
             ((JTextField) textComp).setText(desp.getDescription());
             if (editor == null) {
-                if (selectionObserver != null) {
-                    selectionObserver.selected("Selected", desp.getDescription());
+                if (observer != null) {
+                    observer.selected("Selected", desp.getDescription());
                 }
             }
         }
@@ -355,22 +355,12 @@ public final class DespAutoCompleter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                despModel.clear();
-                Flux<VDescription> result = webClient.get()
-                        .uri(builder -> builder.path("/account/get-description")
-                        .queryParam("compCode", Global.compCode)
-                        .queryParam("str", str)
-                        .build())
-                        .retrieve().bodyToFlux(VDescription.class);
-                result.subscribe((t) -> {
-                    despModel.addObject(t);
+                accountRepo.getDescription(str).subscribe((t) -> {
+                    t.add(new VDescription("All"));
+                    despModel.setListAutoText(t);
                 }, (err) -> {
                     log.error(err.getMessage());
                 }, () -> {
-                    if (this.filter) {
-                        despModel.addObject(new VDescription("All"));
-                    }
-                    despModel.fireTableDataChanged();
                 });
             }
 

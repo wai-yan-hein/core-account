@@ -9,27 +9,17 @@ import com.inventory.model.AccSetting;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
-@Component
+@Slf4j
 public class AccountSettingTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(AccountSettingTableModel.class);
     private final String[] columnNames = {"Name"};
     private List<AccSetting> listSetting = new ArrayList<>();
-
-    public AccountSettingTableModel() {
-    }
-
-    public AccountSettingTableModel(List<AccSetting> listSetting) {
-        this.listSetting = listSetting;
-    }
 
     @Override
     public int getRowCount() {
@@ -49,12 +39,12 @@ public class AccountSettingTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         AccSetting category = listSetting.get(rowIndex);
-        switch (columnIndex) {
-            case 0:
-                return category.getType();
-            default:
-                return null;
-        }
+        return switch (columnIndex) {
+            case 0 ->
+                category.getKey().getType();
+            default ->
+                null;
+        };
     }
 
     @Override
@@ -80,7 +70,7 @@ public class AccountSettingTableModel extends AbstractTableModel {
         return listSetting.get(row);
     }
 
-    public void addCategory(AccSetting item) {
+    public void addSetting(AccSetting item) {
         if (!listSetting.isEmpty()) {
             listSetting.add(item);
             fireTableRowsInserted(listSetting.size() - 1, listSetting.size() - 1);

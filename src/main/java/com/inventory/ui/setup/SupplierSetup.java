@@ -42,6 +42,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
@@ -51,6 +52,7 @@ import reactor.core.publisher.Flux;
  * @author Lenovo
  */
 @Component
+@Slf4j
 public class SupplierSetup extends javax.swing.JPanel implements KeyListener, PanelControl {
 
     private int selectRow = -1;
@@ -95,7 +97,6 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     public void initMain() {
         initCombo();
         initTable();
-        clear();
     }
 
     private void initCombo() {
@@ -177,12 +178,18 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         lblStatus.setText("EDIT");
         inventoryRepo.findRegion(supplier.getRegCode()).subscribe((t) -> {
             regionAutoCompleter.setRegion(t);
+        }, (e) -> {
+            log.error(e.getMessage());
         });
         inventoryRepo.findTraderGroup(supplier.getGroupCode(), supplier.getKey().getDeptId()).subscribe((t) -> {
             traderGroupAutoCompleter.setGroup(t);
+        }, (e) -> {
+            log.error(e.getMessage());
         });
         accountRepo.findCOA(supplier.getAccount()).subscribe((t) -> {
             cOAAutoCompleter.setCoa(t);
+        }, (e) -> {
+            log.error(e.getMessage());
         });
 
     }
@@ -203,11 +210,13 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
             if (r != null) {
                 supplier.setRegCode(r.getKey().getRegCode());
             }
-            ChartOfAccount coa = cOAAutoCompleter.getCOA();
-            if (coa != null) {
-                supplier.setAccount(coa.getKey().getCoaCode());
-            } else {
-                supplier.setAccount(ProUtil.getProperty(ProUtil.CREDITOR_ACC));
+            if (cOAAutoCompleter != null) {
+                ChartOfAccount coa = cOAAutoCompleter.getCOA();
+                if (coa != null) {
+                    supplier.setAccount(coa.getKey().getCoaCode());
+                } else {
+                    supplier.setAccount(ProUtil.getProperty(ProUtil.CREDITOR_ACC));
+                }
             }
             supplier.setType("SUP");
             supplier.setCashDown(chkCD.isSelected());
@@ -291,8 +300,8 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
             String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
             String tmp2 = entry.getStringValue(1).toUpperCase().replace(" ", "");
-            String tmp3 = entry.getStringValue(3).toUpperCase().replace(" ", "");
-            String tmp4 = entry.getStringValue(4).toUpperCase().replace(" ", "");
+            String tmp3 = entry.getStringValue(2).toUpperCase().replace(" ", "");
+            String tmp4 = entry.getStringValue(3).toUpperCase().replace(" ", "");
             String text = txtFilter.getText().toUpperCase().replace(" ", "");
             return tmp1.startsWith(text) || tmp2.startsWith(text) || tmp3.startsWith(text) || tmp4.startsWith(text);
         }

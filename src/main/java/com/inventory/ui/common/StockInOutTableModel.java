@@ -299,41 +299,44 @@ public class StockInOutTableModel extends AbstractTableModel {
         String stockCode = s.getKey().getStockCode();
         boolean explode = s.isExplode();
         List<Pattern> t = inventoryRepo.getPattern(stockCode, s.getKey().getDeptId()).block();
-        String input = JOptionPane.showInputDialog("Enter Qty.");
-        if (Util1.isPositive(input)) {
-            float totalPrice = 0.0f;
-            float qty = Util1.getFloat(input);
-            for (Pattern p : t) {
-                StockInOutDetail io = new StockInOutDetail();
-                io.setUserCode(p.getUserCode());
-                if (explode) {
-                    io.setInQty(qty * p.getQty());
-                    io.setInUnitCode(p.getUnitCode());
-                } else {
-                    io.setOutQty(qty * p.getQty());
-                    io.setOutUnitCode(p.getUnitCode());
+        if (!t.isEmpty()) {
+            String input = JOptionPane.showInputDialog("Enter Qty.");
+            if (Util1.isPositive(input)) {
+                float totalPrice = 0.0f;
+                float qty = Util1.getFloat(input);
+                for (Pattern p : t) {
+                    StockInOutDetail io = new StockInOutDetail();
+                    io.setUserCode(p.getUserCode());
+                    if (explode) {
+                        io.setInQty(qty * p.getQty());
+                        io.setInUnitCode(p.getUnitCode());
+                    } else {
+                        io.setOutQty(qty * p.getQty());
+                        io.setOutUnitCode(p.getUnitCode());
+                    }
+                    float costPrice = Util1.getFloat(p.getPrice());
+                    io.setCostPrice(costPrice);
+                    io.setStockCode(p.getKey().getStockCode());
+                    io.setLocCode(p.getLocCode());
+                    io.setLocName(p.getLocName());
+                    io.setStockName(p.getStockName());
+                    addStockIO(io);
+                    totalPrice += costPrice;
                 }
-                float costPrice = Util1.getFloat(p.getPrice());
-                io.setCostPrice(costPrice);
-                io.setStockCode(p.getKey().getStockCode());
-                io.setLocCode(p.getLocCode());
-                io.setLocName(p.getLocName());
-                io.setStockName(p.getStockName());
-                addStockIO(io);
-                totalPrice += costPrice;
+                if (explode) {
+                    iod.setOutQty(qty);
+                    iod.setOutUnitCode(s.getPurUnitCode());
+                    iod.setInUnitCode(null);
+                } else {
+                    iod.setInQty(qty);
+                    iod.setInUnitCode(s.getPurUnitCode());
+                    iod.setOutUnitCode(null);
+                }
+                setRecord(listStock.size());
+                return totalPrice;
             }
-            if (explode) {
-                iod.setOutQty(qty);
-                iod.setOutUnitCode(s.getPurUnitCode());
-                iod.setInUnitCode(null);
-            } else {
-                iod.setInQty(qty);
-                iod.setInUnitCode(s.getPurUnitCode());
-                iod.setOutUnitCode(null);
-            }
-            setRecord(listStock.size());
-            return totalPrice;
         }
+
         return 0.0f;
     }
 

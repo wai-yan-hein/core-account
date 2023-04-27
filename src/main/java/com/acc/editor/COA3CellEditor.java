@@ -5,6 +5,7 @@
  */
 package com.acc.editor;
 
+import com.acc.common.AccountRepo;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import java.awt.event.FocusAdapter;
@@ -18,7 +19,6 @@ import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.TableCellEditor;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
@@ -28,7 +28,7 @@ public class COA3CellEditor extends AbstractCellEditor implements TableCellEdito
 
     private JComponent component = null;
     private COA3AutoCompleter completer;
-    private final WebClient webClient;
+    private final AccountRepo accountRepo;
     private int level;
 
     private final FocusAdapter fa = new FocusAdapter() {
@@ -50,8 +50,8 @@ public class COA3CellEditor extends AbstractCellEditor implements TableCellEdito
     };
     //private List<Medicine> listCOA = new ArrayList();
 
-    public COA3CellEditor(WebClient webClient, int level) {
-        this.webClient = webClient;
+    public COA3CellEditor(AccountRepo accountRepo, int level) {
+        this.accountRepo = accountRepo;
         this.level = level;
     }
 
@@ -91,7 +91,7 @@ public class COA3CellEditor extends AbstractCellEditor implements TableCellEdito
             jtf.setText(value.toString());
             jtf.selectAll();
         }
-        completer = new COA3AutoCompleter(jtf, webClient, this, false, this.level);
+        completer = new COA3AutoCompleter(jtf, accountRepo, this, false, this.level);
         return component;
     }
 

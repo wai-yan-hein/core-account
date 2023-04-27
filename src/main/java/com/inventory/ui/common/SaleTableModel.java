@@ -248,9 +248,6 @@ public class SaleTableModel extends AbstractTableModel {
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setPrice(getTraderPrice(s));
                             sd.setStock(s);
-                            if (ProUtil.isPricePopup()) {
-                                sd.setPrice(getPopupPrice(row, true));
-                            }
                             sd.setPrice(sd.getPrice() == 0 ? s.getSalePriceN() : sd.getPrice());
                             parent.setColumnSelectionInterval(4, 4);
                             addNewRow();
@@ -458,44 +455,6 @@ public class SaleTableModel extends AbstractTableModel {
         return price;
     }
 
-    public List<PriceOption> getPriceOption(int row) {
-        Stock s = listDetail.get(row).getStock();
-        List<PriceOption> listPrice = inventoryRepo.getPriceOption("-");
-        if (!listPrice.isEmpty()) {
-            for (PriceOption op : listPrice) {
-                switch (Util1.isNull(op.getKey().getPriceType(), "N")) {
-                    case "A" ->
-                        op.setPrice(s.getSalePriceA());
-                    case "B" ->
-                        op.setPrice(s.getSalePriceB());
-                    case "C" ->
-                        op.setPrice(s.getSalePriceC());
-                    case "D" ->
-                        op.setPrice(s.getSalePriceD());
-                    case "E" ->
-                        op.setPrice(s.getSalePriceE());
-                    case "N" ->
-                        op.setPrice(s.getSalePriceN());
-                    default -> {
-                        break;
-                    }
-                }
-            }
-        }
-        return listPrice;
-    }
-
-    private float getPopupPrice(int row, boolean needToChoice) {
-        List<PriceOption> listPrice = getPriceOption(row);
-        PriceOptionDialog dialog = new PriceOptionDialog();
-        dialog.setListPrice(listPrice);
-        dialog.setNeedToChoice(needToChoice);
-        dialog.initData();
-        dialog.setLocationRelativeTo(null);
-        dialog.setVisible(true);
-        return dialog.getOption() == null ? 0.0f : dialog.getOption().getPrice();
-    }
-
     public List<String> getDelList() {
         return deleteList;
     }
@@ -527,6 +486,10 @@ public class SaleTableModel extends AbstractTableModel {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
         }
+    }
+
+    public SaleHisDetail getSale(int row) {
+        return listDetail.get(row);
     }
 
     public void clear() {

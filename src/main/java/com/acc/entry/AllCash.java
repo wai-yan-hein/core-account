@@ -289,14 +289,14 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         });
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
-        despAutoCompleter = new DespAutoCompleter(txtDesp, accountApi, null, true);
-        despAutoCompleter.setSelectionObserver(this);
-        refAutoCompleter = new RefAutoCompleter(txtRefrence, accountApi, null, true);
-        refAutoCompleter.setSelectionObserver(this);
-        coaAutoCompleter = new COA3AutoCompleter(txtAccount, accountApi, null, true, 0);
+        despAutoCompleter = new DespAutoCompleter(txtDesp, accountRepo, null, true);
+        despAutoCompleter.setObserver(this);
+        refAutoCompleter = new RefAutoCompleter(txtRefrence, accountRepo, null, true);
+        refAutoCompleter.setObserver(this);
+        coaAutoCompleter = new COA3AutoCompleter(txtAccount, accountRepo, null, true, 0);
         coaAutoCompleter.setSelectionObserver(this);
-        traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accountApi, null, true);
-        traderAutoCompleter.setSelectionObserver(this);
+        traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accountRepo, null, true);
+        traderAutoCompleter.setObserver(this);
 
     }
 
@@ -367,11 +367,11 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         monoDep.subscribe((t) -> {
             tblCash.getColumnModel().getColumn(1).setCellEditor(new DepartmentCellEditor(t));
         });
-        tblCash.getColumnModel().getColumn(2).setCellEditor(new DespEditor(accountApi));
-        tblCash.getColumnModel().getColumn(3).setCellEditor(new RefCellEditor(accountApi));
+        tblCash.getColumnModel().getColumn(2).setCellEditor(new DespEditor(accountRepo));
+        tblCash.getColumnModel().getColumn(3).setCellEditor(new RefCellEditor(accountRepo));
         tblCash.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
-        tblCash.getColumnModel().getColumn(5).setCellEditor(new TraderCellEditor(accountApi));
-        tblCash.getColumnModel().getColumn(6).setCellEditor(new COA3CellEditor(accountApi, 3));
+        tblCash.getColumnModel().getColumn(5).setCellEditor(new TraderCellEditor(accountRepo));
+        tblCash.getColumnModel().getColumn(6).setCellEditor(new COA3CellEditor(accountRepo, 3));
         monoCur.subscribe((t) -> {
             tblCash.getColumnModel().getColumn(7).setCellEditor(new CurrencyAEditor(t));
         });

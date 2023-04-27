@@ -14,12 +14,12 @@ import javax.swing.table.AbstractTableModel;
 
 /**
  *
- * @author Lenovo
+ * @author MyoGyi
  */
 public class VoucherTableModel extends AbstractTableModel {
 
     private List<Gl> listGV = new ArrayList();
-    String[] columnNames = {"Date", "Voucher", "Description", "Refrence", "Ref No", "Vou Type", "Amount"};
+    String[] columnNames = {"Date", "Voucher", "Description", "Refrence", "Narration", "From / To", "For", "Vou Type", "Debit", "Credit"};
     private JTable parent;
 
     @Override
@@ -50,11 +50,17 @@ public class VoucherTableModel extends AbstractTableModel {
             case 3 ->
                 gv.getReference();
             case 4 ->
-                gv.getRefNo();
+                gv.getNarration();
             case 5 ->
-                gv.getTranSource().equals("DR") ? "Payment / Debit" : "Receipt / Credit";
+                gv.getFromDes();
             case 6 ->
-                gv.getTranSource().equals("DR") ? gv.getCrAmt() : gv.getDrAmt();
+                gv.getForDes();
+            case 7 ->
+                gv.getTranSource().equals("DR") ? "Payment / Debit" : "Receipt / Credit";
+            case 8 ->
+                Util1.getDouble(gv.getDrAmt()) == 0 ? null : gv.getDrAmt();
+            case 9 ->
+                Util1.getDouble(gv.getCrAmt()) == 0 ? null : gv.getCrAmt();
             default ->
                 null;
         };
@@ -71,7 +77,12 @@ public class VoucherTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        return column == 6 ? Double.class : String.class;
+        switch (column) {
+            case 8, 9 -> {
+                return Double.class;
+            }
+        }
+        return String.class;
     }
 
     public List<Gl> getListGV() {

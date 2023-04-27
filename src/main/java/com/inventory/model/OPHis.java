@@ -18,6 +18,7 @@ public class OPHis {
 
     private OPHisKey key;
     private Date vouDate;
+    private String vouDateStr;
     private String curCode;
     private String remark;
     private String createdBy;

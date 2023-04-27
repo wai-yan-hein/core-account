@@ -5,6 +5,7 @@
  */
 package com.acc.report;
 
+import com.acc.dialog.TrialBalanceDetailDialog;
 import com.acc.common.AccountRepo;
 import com.acc.common.DateAutoCompleter;
 import com.acc.common.DateTableDecorator;
@@ -20,8 +21,6 @@ import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.inventory.editor.CurrencyAutoCompleter;
 import com.user.common.UserRepo;
 import java.awt.event.KeyEvent;
@@ -31,7 +30,6 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -312,7 +310,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     private void initCombo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
-        cOAAutoCompleter = new COA3AutoCompleter(txtCOA, accountApi, null, true, 0);
+        cOAAutoCompleter = new COA3AutoCompleter(txtCOA, accountRepo, null, true, 0);
         cOAAutoCompleter.setSelectionObserver(this);
         accountRepo.getDepartment().subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t,

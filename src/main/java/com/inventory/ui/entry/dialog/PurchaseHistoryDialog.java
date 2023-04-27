@@ -58,15 +58,6 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
     private SelectionObserver observer;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
-    private VPurchase purchase;
-
-    public VPurchase getPurchase() {
-        return purchase;
-    }
-
-    public void setPurchase(VPurchase purchase) {
-        this.purchase = purchase;
-    }
 
     public WebClient getInventoryApi() {
         return inventoryApi;
@@ -224,7 +215,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         try {
             int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
             if (row >= 0) {
-                setPurchase(tableModel.getSelectVou(row));
+                observer.selected("PUR-HISTORY", tableModel.getSelectVou(row));
                 setVisible(false);
             } else {
                 JOptionPane.showMessageDialog(this, "Please select the voucher.",

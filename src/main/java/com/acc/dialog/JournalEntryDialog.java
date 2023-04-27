@@ -172,8 +172,8 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
             tblJournal.getColumnModel().getColumn(0).setCellEditor(new DepartmentCellEditor(t));
         });
         tblJournal.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
-        tblJournal.getColumnModel().getColumn(2).setCellEditor(new TraderCellEditor(accountApi));
-        tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountApi, 3));
+        tblJournal.getColumnModel().getColumn(2).setCellEditor(new TraderCellEditor(accountRepo));
+        tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountRepo, 3));
         accountRepo.getCurrency().subscribe((t) -> {
             tblJournal.getColumnModel().getColumn(4).setCellEditor(new CurrencyAEditor(t));
         });
@@ -205,11 +205,12 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                 txtRefrence.setText(ref);
                 txtVouNo.setText(vouNo);
                 journalTablModel.setListGV(t);
+                journalTablModel.addEmptyRow();
+                focusOnTable();
             });
 
         }
-        journalTablModel.addEmptyRow();
-        focusOnTable();
+
     }
 
     private boolean saveGeneralVoucher() {

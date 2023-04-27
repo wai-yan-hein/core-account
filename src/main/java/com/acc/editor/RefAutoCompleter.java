@@ -5,6 +5,7 @@
  */
 package com.acc.editor;
 
+import com.acc.common.AccountRepo;
 import com.acc.common.RefTableModel;
 import com.acc.model.VDescription;
 import com.common.Global;
@@ -34,9 +35,6 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 
 /**
  *
@@ -45,7 +43,6 @@ import reactor.core.publisher.Flux;
 @Slf4j
 public final class RefAutoCompleter implements KeyListener {
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(RefAutoCompleter.class);
     private final JTable table = new JTable();
     private JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
@@ -57,27 +54,26 @@ public final class RefAutoCompleter implements KeyListener {
     private int x = 0;
     private int y = 0;
     boolean popupOpen = false;
-    private SelectionObserver selectionObserver;
-    private WebClient webClient;
+    private SelectionObserver observer;
+    private AccountRepo accountRepo;
     private boolean filter;
 
-    public SelectionObserver getSelectionObserver() {
-        return selectionObserver;
+    public SelectionObserver getObserver() {
+        return observer;
     }
 
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
     }
 
-    //private CashFilter cashFilter = Global.allCash;
     public RefAutoCompleter() {
     }
 
-    public RefAutoCompleter(JTextComponent comp, WebClient webClient,
+    public RefAutoCompleter(JTextComponent comp, AccountRepo accountRepo,
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
-        this.webClient = webClient;
+        this.accountRepo = accountRepo;
         this.filter = filter;
         if (this.filter) {
             setAutoText(new VDescription("All"));
@@ -169,8 +165,8 @@ public final class RefAutoCompleter implements KeyListener {
                     table.getSelectedRow()));
             ((JTextField) textComp).setText(ref.getDescription());
             if (editor == null) {
-                if (selectionObserver != null) {
-                    selectionObserver.selected("Selected", ref.getDescription());
+                if (observer != null) {
+                    observer.selected("Selected", ref.getDescription());
                 }
             }
         }
@@ -355,22 +351,14 @@ public final class RefAutoCompleter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                refModel.clear();
-                Flux<VDescription> result = webClient.get()
-                        .uri(builder -> builder.path("/account/get-reference")
-                        .queryParam("compCode", Global.compCode)
-                        .queryParam("str", str)
-                        .build())
-                        .retrieve().bodyToFlux(VDescription.class);
-                result.subscribe((t) -> {
-                    refModel.addObject(t);
+                accountRepo.getReference(str).subscribe((t) -> {
+                    if (this.filter) {
+                        t.add(new VDescription("All"));
+                    }
+                    refModel.setListAutoText(t);
                 }, (er) -> {
                     log.error(er.getMessage());
                 }, () -> {
-                    if (this.filter) {
-                        refModel.addObject(new VDescription("All"));
-                    }
-                    refModel.fireTableDataChanged();
                 });
             }
 

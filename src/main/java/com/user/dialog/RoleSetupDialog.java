@@ -75,9 +75,10 @@ public class RoleSetupDialog extends javax.swing.JDialog {
             AppRole role = new AppRole();
             role.setRoleName(txtRoleName.getText());
             role.setExampleRole(exRole.getRoleCode());
-            userRepo.saveAppRole(role);
-            observer.selected("Refresh", "Refresh");
-            this.dispose();
+            userRepo.saveAppRole(role).subscribe((t) -> {
+                observer.selected("Refresh", "Refresh");
+                this.dispose();
+            });
         } else {
             JOptionPane.showMessageDialog(this, "Select Role.");
         }
