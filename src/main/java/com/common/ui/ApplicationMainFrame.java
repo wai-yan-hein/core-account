@@ -34,6 +34,7 @@ import com.inventory.model.VRoleMenu;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.GRNEntry;
 import com.inventory.ui.entry.Manufacture;
+import com.inventory.ui.entry.OrderEntry;
 import com.user.model.VRoleCompany;
 import com.inventory.ui.entry.OtherSetupMain;
 import com.inventory.ui.entry.Purchase;
@@ -112,6 +113,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private OpeningSetup openingSetup;
     @Autowired
     private Sale sale;
+    @Autowired
+    private OrderEntry order;
     @Autowired
     private SaleByBatch saleByBatch;
     @Autowired
@@ -382,6 +385,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 sale.setProgress(progress);
                 sale.initMain();
                 return sale;
+            }
+            case "Order" -> {
+                order.setName(menuName);
+                order.setObserver(this);
+                order.setProgress(progress);
+                order.initMain();
+                return order;
             }
             case "Sale By Batch" -> {
                 saleByBatch.setName(menuName);

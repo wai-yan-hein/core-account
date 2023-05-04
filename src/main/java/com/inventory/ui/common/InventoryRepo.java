@@ -22,6 +22,8 @@ import com.inventory.model.Location;
 import com.inventory.model.LocationKey;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisKey;
+import com.inventory.model.OrderHis;
+import com.inventory.model.OrderHisKey;
 import com.inventory.model.Pattern;
 import com.inventory.model.PriceOption;
 import com.inventory.model.ProcessHis;
@@ -777,6 +779,18 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToMono(SaleHis.class);
     }
+    
+    public Mono<OrderHis> findOrder(String vouNo, Integer deptId) {
+        OrderHisKey key = new OrderHisKey();
+        key.setVouNo(vouNo);
+        key.setCompCode(Global.compCode);
+        key.setDeptId(deptId);
+        return inventoryApi.post()
+                .uri("/order/find-order")
+                .body(Mono.just(key), OrderHisKey.class)
+                .retrieve()
+                .bodyToMono(OrderHis.class);
+    }
 
     public Mono<OPHis> findOpening(OPHisKey key) {
         return inventoryApi.post()
@@ -897,6 +911,14 @@ public class InventoryRepo {
                 .bodyToMono(Boolean.class);
     }
 
+    public Mono<Boolean> delete(OrderHisKey key) {
+        return inventoryApi.post()
+                .uri("/order/delete-order")
+                .body(Mono.just(key), OrderHisKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+    }
+    
     public Mono<Boolean> restore(SaleHisKey key) {
         return inventoryApi.post()
                 .uri("/sale/restore-sale")
@@ -904,7 +926,15 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToMono(Boolean.class);
     }
-
+    
+    public Mono<Boolean> restore(OrderHisKey key) {
+        return inventoryApi.post()
+                .uri("/sale/restore-sale")
+                .body(Mono.just(key), OrderHisKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+    }
+    
     public Mono<Boolean> restore(RetInHisKey key) {
         return inventoryApi.post()
                 .uri("/retin/restore-retin")
@@ -1126,6 +1156,15 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToMono(SaleHis.class);
     }
+    
+    public Mono<OrderHis> save(OrderHis sh) {
+        return inventoryApi.post()
+                .uri("/sale/save-sale")
+                .body(Mono.just(sh), OrderHis.class)
+                .retrieve()
+                .bodyToMono(OrderHis.class);
+    }
+
 
     public Mono<AccSetting> save(AccSetting sh) {
         return inventoryApi.post()
