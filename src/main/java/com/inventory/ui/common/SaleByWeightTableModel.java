@@ -300,7 +300,6 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                         if (value instanceof StockUnit stockUnit) {
                             sd.setUnitCode(stockUnit.getKey().getUnitCode());
                         }
-
                     }
                     case 8 -> {
                         sd.setStdWeight(Util1.getFloat(value));
@@ -312,7 +311,7 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 sd.setPrice(Util1.getFloat(value));
                                 parent.setColumnSelectionInterval(0, 0);
-                                parent.setRowSelectionInterval(row + 1, row + 1);
+                                parent.setRowSelectionInterval(row + 1, row+1);
                             } else {
                                 showMessageBox("Input value must be positive");
                                 parent.setColumnSelectionInterval(column, column);

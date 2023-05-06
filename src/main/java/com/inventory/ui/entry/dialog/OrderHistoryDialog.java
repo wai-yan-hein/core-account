@@ -26,7 +26,7 @@ import com.inventory.model.Stock;
 import com.inventory.model.Trader;
 import com.inventory.model.VSale;
 import com.inventory.ui.common.InventoryRepo;
-import com.inventory.ui.entry.dialog.common.SaleVouSearchTableModel;
+import com.inventory.ui.entry.dialog.common.OrderVouSearchTableModel;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
@@ -47,13 +47,13 @@ import reactor.core.publisher.Mono;
  * @author wai yan
  */
 @Slf4j
-public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListener {
+public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListener {
 
     /**
-     * Creates new form SaleVouSearchDialog
+     * Creates new form OrderVouSearchDialog
      *
      */
-    private final SaleVouSearchTableModel saleVouTableModel = new SaleVouSearchTableModel();
+    private final OrderVouSearchTableModel orderVouTableModel = new OrderVouSearchTableModel();
     private WebClient inventoryApi;
     private InventoryRepo inventoryRepo;
     private TraderAutoCompleter traderAutoCompleter;
@@ -100,7 +100,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         this.observer = observer;
     }
 
-    public SaleHistoryDialog(JFrame frame) {
+    public OrderHistoryDialog(JFrame frame) {
         super(frame, true);
         initComponents();
         initKeyListener();
@@ -157,8 +157,8 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     }
 
     private void initTableVoucher() {
-        saleVouTableModel.setParent(tblVoucher);
-        tblVoucher.setModel(saleVouTableModel);
+        orderVouTableModel.setParent(tblVoucher);
+        tblVoucher.setModel(orderVouTableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
         tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(20);
         tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(50);
@@ -216,17 +216,17 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         String batchNo = batchAutoCompeter.getBatch().getBatchNo();
         filter.setBatchNo(batchNo.equals("All") ? "-" : batchNo);
         filter.setNullBatch(chkBatch.isSelected());
-        saleVouTableModel.clear();
+        orderVouTableModel.clear();
         txtRecord.setValue(0);
         //
         inventoryApi.post()
-                .uri("/sale/get-sale")
+                .uri("/order/get-order")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(VSale.class)
                 .collectList()
                 .subscribe((t) -> {
-                    saleVouTableModel.setListSaleHis(t);
+                    orderVouTableModel.setListOrderHis(t);
                     calAmount();
                     progress.setIndeterminate(false);
                 }, (e) -> {
@@ -237,7 +237,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     }
 
     private void calAmount() {
-        List<VSale> list = saleVouTableModel.getListSaleHis();
+        List<VSale> list = orderVouTableModel.getListOrderHis();
         txtPaid.setValue(list.stream().mapToDouble(VSale::getPaid).sum());
         txtTotalAmt.setValue(list.stream().mapToDouble(VSale::getVouTotal).sum());
         txtRecord.setValue(list.size());
@@ -247,8 +247,8 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private void select() {
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
-            VSale his = saleVouTableModel.getSelectVou(row);
-            observer.selected("SALE-HISTORY", his);
+            VSale his = orderVouTableModel.getSelectVou(row);
+            observer.selected("ORDER-HISTORY", his);
             setVisible(false);
         } else {
             JOptionPane.showMessageDialog(this, "Please select the voucher.",
@@ -334,7 +334,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Sale Voucher Search");
+        setTitle("Order Voucher Search");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 

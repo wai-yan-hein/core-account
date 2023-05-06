@@ -13,12 +13,10 @@ import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.OrderDetailKey;
 import com.inventory.model.OrderHisDetail;
-import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
 import com.inventory.ui.entry.OrderEntry;
-import com.inventory.ui.entry.Sale;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,8 +33,8 @@ import org.slf4j.LoggerFactory;
  * @author DELL
  */
 public class OrderTableModel extends AbstractTableModel {
-    private static final Logger log = LoggerFactory.getLogger(SaleTableModel.class);
-    private String[] columnNames = {"Code", "Description", "Relation", "Location", "Qty", "Unit", "Price", "Amount"};
+    private static final Logger log = LoggerFactory.getLogger(OrderTableModel.class);
+    private String[] columnNames = {"Code", "Description", "Relation", "Location", "Weight", "Weight Unit", "Qty", "Unit","Total Qty", "Price", "Amount"};
     private JTable parent;
     private List<OrderHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
@@ -156,20 +154,20 @@ public class OrderTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 4, 6, 7 ->
-                Float.class;
-            default ->
+             case 0, 1, 2, 3, 5 ->
                 String.class;
+            default ->
+                Float.class;
         };
     }
 
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 6 -> {
-                return ProUtil.isSalePriceChange();
-            }
-            case 2, 7 -> {
+//            case 9 -> {//price
+//                return ProUtil.isSalePriceChange();
+//            }
+            case 2, 8, 10 -> {//relation,totalqty,amt
                 return false;
             }
         }
@@ -205,17 +203,26 @@ public class OrderTableModel extends AbstractTableModel {
                     return sd.getLocName();
                 }
                 case 4 -> {
+                    return sd.getWeight();
+                }
+                case 5 -> {
+                    return sd.getWeightUnit();
+                }
+                case 6 -> {
                     //qty
                     return sd.getQty();
                 }
-                case 5 -> {
+                case 7 -> {
                     return sd.getUnitCode();
                 }
-                case 6 -> {
+                case 8 -> {
+                    return Util1.getFloat(sd.getWeight()) * Util1.getFloat(sd.getQty());
+                }
+                case 9 -> {
                     //price
                     return sd.getPrice();
                 }
-                case 7 -> {
+                case 10 -> {
                     //amount
                     return sd.getAmount();
                 }
@@ -233,7 +240,7 @@ public class OrderTableModel extends AbstractTableModel {
     public void setValueAt(Object value, int row, int column) {
         try {
             OrderHisDetail sd = listDetail.get(row);
-            if (value != null) {
+           if (value != null) {
                 switch (column) {
                     case 0, 1 -> {
                         //Code
@@ -244,6 +251,7 @@ public class OrderTableModel extends AbstractTableModel {
                             sd.setUserCode(s.getUserCode());
                             sd.setRelName(s.getRelName());
                             sd.setQty(1.0f);
+                            sd.setWeightUnit(s.getWeightUnit());
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setPrice(getTraderPrice(s));
                             sd.setStock(s);
@@ -261,14 +269,22 @@ public class OrderTableModel extends AbstractTableModel {
                         }
                     }
                     case 4 -> {
+                        sd.setWeight(Util1.getFloat(value));
+                    }
+                    case 5 -> {
+                        if (value instanceof StockUnit u) {
+                            sd.setWeightUnit(u.getKey().getUnitCode());
+                        }
+                    }
+                    case 6 -> {
                         //Qty
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 sd.setQty(Util1.getFloat(value));
                                 if (sd.getUnitCode() == null) {
-                                    parent.setColumnSelectionInterval(5, 5);
+                                    parent.setColumnSelectionInterval(7, 7);
                                 } else {
-                                    parent.setColumnSelectionInterval(6, 6);
+                                    parent.setColumnSelectionInterval(9, 9);
                                 }
                             } else {
                                 showMessageBox("Input value must be positive");
@@ -279,21 +295,20 @@ public class OrderTableModel extends AbstractTableModel {
                             parent.setColumnSelectionInterval(column, column);
                         }
                     }
-                    case 5 -> {
+                    case 7 -> {
                         //Unit
                         if (value instanceof StockUnit stockUnit) {
                             sd.setUnitCode(stockUnit.getKey().getUnitCode());
                         }
 
                     }
-
-                    case 6 -> {
+                    case 9 -> {
                         //price
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 sd.setPrice(Util1.getFloat(value));
                                 parent.setColumnSelectionInterval(0, 0);
-                                parent.setRowSelectionInterval(row + 1, row + 1);
+                                parent.setRowSelectionInterval(row + 1, row +1);
                             } else {
                                 showMessageBox("Input value must be positive");
                                 parent.setColumnSelectionInterval(column, column);
@@ -303,14 +318,13 @@ public class OrderTableModel extends AbstractTableModel {
                             parent.setColumnSelectionInterval(column, column);
                         }
                     }
-                    case 7 -> {
+                    case 10 -> {
                         //amt
                         sd.setAmount(Util1.getFloat(value));
-
                     }
 
                 }
-                if (column != 6) {
+                if (column != 9) {
                     if (Util1.getFloat(sd.getPrice()) == 0) {
                         if (ProUtil.isSaleLastPrice()) {
                             if (sd.getStockCode() != null && sd.getUnitCode() != null) {
@@ -390,6 +404,13 @@ public class OrderTableModel extends AbstractTableModel {
 
     private void calculateAmount(OrderHisDetail orderEntry) {
         if (orderEntry.getStockCode() != null) {
+//            float price = Util1.getFloat(orderEntry.getPrice());
+//            float wt = Util1.getFloat(orderEntry.getWeight());
+//            float qty = Util1.getFloat(orderEntry.getQty());
+//            if (orderEntry.getStockCode() != null) {
+//                float amount = (qty * wt * price) / stdWt;
+//                orderEntry.setAmount(Util1.getFloat(Math.round(amount)));
+//            }
             float saleQty = Util1.getFloat(orderEntry.getQty());
             float stdSalePrice = Util1.getFloat(orderEntry.getPrice());
             float amount = saleQty * stdSalePrice;

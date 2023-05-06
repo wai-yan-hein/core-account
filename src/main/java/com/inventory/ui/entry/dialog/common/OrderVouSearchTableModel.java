@@ -19,9 +19,9 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class SaleVouSearchTableModel extends AbstractTableModel {
+public class OrderVouSearchTableModel extends AbstractTableModel {
 
-    private List<VSale> listSaleHis = new ArrayList();
+    private List<VSale> listOrderHis = new ArrayList();
     private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Ref:", "Created By", "Paid Amt", "V-Total"};
 
     private JTable parent;
@@ -41,10 +41,10 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        if (listSaleHis == null) {
+        if (listOrderHis == null) {
             return 0;
         }
-        return listSaleHis.size();
+        return listOrderHis.size();
     }
 
     @Override
@@ -70,8 +70,8 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
         try {
-            if (!listSaleHis.isEmpty()) {
-                VSale his = listSaleHis.get(row);
+            if (!listOrderHis.isEmpty()) {
+                VSale his = listOrderHis.get(row);
                 switch (column) {
                     case 0 -> {
                         //date
@@ -118,31 +118,31 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
         return null;
     }
 
-    public List<VSale> getListSaleHis() {
-        return listSaleHis;
+    public List<VSale> getListOrderHis() {
+        return listOrderHis;
     }
 
-    public void setListSaleHis(List<VSale> listSaleHis) {
-        this.listSaleHis = listSaleHis;
+    public void setListOrderHis(List<VSale> listOrderHis) {
+        this.listOrderHis = listOrderHis;
         fireTableDataChanged();
     }
 
     public VSale getSelectVou(int row) {
-        if (listSaleHis != null) {
-            if (!listSaleHis.isEmpty()) {
-                return listSaleHis.get(row);
+        if (listOrderHis != null) {
+            if (!listOrderHis.isEmpty()) {
+                return listOrderHis.get(row);
             }
         }
         return null;
     }
 
     public void addObject(VSale t) {
-        listSaleHis.add(t);
+        listOrderHis.add(t);
 
     }
 
     public void clear() {
-        listSaleHis.clear();
+        listOrderHis.clear();
         fireTableDataChanged();
     }
 }

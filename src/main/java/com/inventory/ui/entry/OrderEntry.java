@@ -29,17 +29,14 @@ import com.inventory.model.Order;
 import com.inventory.model.OrderHis;
 import com.inventory.model.OrderHisDetail;
 import com.inventory.model.OrderHisKey;
-import com.inventory.model.SaleHis;
-import com.inventory.model.SaleHisDetail;
-import com.inventory.model.SaleHisKey;
 import com.inventory.model.SaleMan;
+import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
 import com.inventory.model.VSale;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.OrderTableModel;
-import com.inventory.ui.common.SaleTableModel;
 import com.inventory.ui.common.StockBalanceTableModel;
-import com.inventory.ui.entry.dialog.SaleHistoryDialog;
+import com.inventory.ui.entry.dialog.OrderHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
@@ -87,7 +84,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
 
     private List<OrderHisDetail> listDetail = new ArrayList();
     private final OrderTableModel orderTableModel = new OrderTableModel();
-    private SaleHistoryDialog dialog;
+    private OrderHistoryDialog dialog;
     private final StockBalanceTableModel stockBalanceTableModel = new StockBalanceTableModel();
     @Autowired
     private WebClient inventoryApi;
@@ -198,13 +195,13 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     public void initMain() {
         initCombo();
         initStockBalanceTable();
-        initSaleTable();
+        initOrderTable();
         assignDefaultValue();
         txtOrderDate.setDate(Util1.getTodayDate());
         txtCus.requestFocus();
     }
 
-    private void initSaleTable() {
+    private void initOrderTable() {
         tblOrder.setModel(orderTableModel);
         orderTableModel.setLblRecord(lblRec);
         orderTableModel.setParent(tblOrder);
@@ -220,30 +217,43 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         tblOrder.getColumnModel().getColumn(1).setPreferredWidth(450);//Name
         tblOrder.getColumnModel().getColumn(2).setPreferredWidth(60);//Rel
         tblOrder.getColumnModel().getColumn(3).setPreferredWidth(60);//Location
-        tblOrder.getColumnModel().getColumn(4).setPreferredWidth(60);//qty
-        tblOrder.getColumnModel().getColumn(5).setPreferredWidth(1);//unit
-        tblOrder.getColumnModel().getColumn(6).setPreferredWidth(1);//price
-        tblOrder.getColumnModel().getColumn(7).setPreferredWidth(40);//amt
+        tblOrder.getColumnModel().getColumn(4).setPreferredWidth(50);//weight
+        tblOrder.getColumnModel().getColumn(5).setPreferredWidth(30);//unit
+        tblOrder.getColumnModel().getColumn(6).setPreferredWidth(50);//qty
+        tblOrder.getColumnModel().getColumn(7).setPreferredWidth(30);//unit
+        tblOrder.getColumnModel().getColumn(8).setPreferredWidth(50);//total
+        tblOrder.getColumnModel().getColumn(9).setPreferredWidth(50);//price
+        tblOrder.getColumnModel().getColumn(10).setPreferredWidth(60);//amt
         tblOrder.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblOrder.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         monoLoc.subscribe((t) -> {
             tblOrder.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
+        });
+        Mono<List<StockUnit>> monoUnit = inventoryRepo.getStockUnit();
+        tblOrder.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//weight
+        monoUnit.subscribe((t) -> {
+            tblOrder.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));//unit
         });
         tblOrder.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
         inventoryRepo.getStockUnit().subscribe((t) -> {
             tblOrder.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));
         });
         tblOrder.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//
+         monoUnit.subscribe((t) -> {
+            tblOrder.getColumnModel().getColumn(7).setCellEditor(new StockUnitEditor(t));//unit
+        });
+        tblOrder.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());//wt
+        tblOrder.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());//
         if (ProUtil.isSalePriceChange()) {
             if (ProUtil.isPriceOption()) {
-                inventoryRepo.getPriceOption("Sale").subscribe((t) -> {
+                inventoryRepo.getPriceOption("Order").subscribe((t) -> {
                     OrderPriceCellEditor editor = new OrderPriceCellEditor(t);
                     editor.setOrderTableModel(orderTableModel);
-                    tblOrder.getColumnModel().getColumn(6).setCellEditor(editor);//price
+                    tblOrder.getColumnModel().getColumn(9).setCellEditor(editor);//price
                 });
 
             } else {
-                tblOrder.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//price
+                tblOrder.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());//price
             }
 
         } else {
@@ -280,7 +290,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void initKeyListener() {
-        txtOrderDate.getDateEditor().getUiComponent().setName("txtSaleDate");
+        txtOrderDate.getDateEditor().getUiComponent().setName("txtOrderDate");
         txtOrderDate.getDateEditor().getUiComponent().addKeyListener(this);
         txtDueDate.getDateEditor().getUiComponent().setName("txtDueDate");
         txtDueDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -476,7 +486,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         switch (status) {
             case "EDIT" -> {
                 int yes_no = JOptionPane.showConfirmDialog(this,
-                        "Are you sure to delete?", "Save Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+                        "Are you sure to delete?", "Save Order Vocher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
                     inventoryRepo.delete(orderHis.getKey()).subscribe((t) -> {
                         clear();
@@ -485,7 +495,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             }
             case "DELETED" -> {
                 int yes_no = JOptionPane.showConfirmDialog(this,
-                        "Are you sure to restore?", "Purchase Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                        "Are you sure to restore?", "Order Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
                     orderHis.setDeleted(false);
                     inventoryRepo.restore(orderHis.getKey()).subscribe((t) -> {
@@ -521,6 +531,9 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         listDetail = orderTableModel.getListDetail();
         totalAmount = listDetail.stream().map(sdh -> Util1.getFloat(sdh.getAmount())).reduce(totalAmount, (accumulator, _item) -> accumulator + _item);
         txtVouTotal.setValue(totalAmount);
+        
+        
+
 
         //cal discAmt
         float discp = Util1.getFloat(txtVouDiscP.getValue());
@@ -566,7 +579,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
 
     public void historySale() {
         if (dialog == null) {
-            dialog = new SaleHistoryDialog(Global.parentForm);
+            dialog = new OrderHistoryDialog(Global.parentForm);
             dialog.setInventoryApi(inventoryApi);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setUserRepo(userRepo);
@@ -599,7 +612,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             });
             String vouNo = sh.getKey().getVouNo();
             Mono<ResponseEntity<List<OrderHisDetail>>> result = inventoryApi.get()
-                    .uri(builder -> builder.path("/sale/get-sale-detail")
+                    .uri(builder -> builder.path("/order/get-order-detail")
                     .queryParam("vouNo", vouNo)
                     .queryParam("compCode", Global.compCode)
                     .queryParam("deptId", sh.getKey().getDeptId())
@@ -688,7 +701,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     private void printVoucher(String vouNo, String reportName, boolean print) {
         clear();
         Mono<byte[]> result = inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-sale-report")
+                .uri(builder -> builder.path("/report/get-order-report")
                 .queryParam("vouNo", vouNo)
                 .queryParam("macId", Global.macId)
                 .build())
