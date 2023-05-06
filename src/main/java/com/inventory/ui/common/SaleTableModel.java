@@ -13,6 +13,7 @@ import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.PriceOption;
+import com.inventory.model.SaleDetailKey;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
@@ -41,7 +42,7 @@ public class SaleTableModel extends AbstractTableModel {
     private JTable parent;
     private List<SaleHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
-    private final List<String> deleteList = new ArrayList();
+    private final List<SaleDetailKey> deleteList = new ArrayList();
     private StockBalanceTableModel sbTableModel;
     private Sale sale;
     private InventoryRepo inventoryRepo;
@@ -455,7 +456,7 @@ public class SaleTableModel extends AbstractTableModel {
         return price;
     }
 
-    public List<String> getDelList() {
+    public List<SaleDetailKey> getDelList() {
         return deleteList;
     }
 
@@ -468,7 +469,7 @@ public class SaleTableModel extends AbstractTableModel {
     public void delete(int row) {
         SaleHisDetail sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
-            deleteList.add(sdh.getKey().getSdCode());
+            deleteList.add(sdh.getKey());
         }
         listDetail.remove(row);
         addNewRow();

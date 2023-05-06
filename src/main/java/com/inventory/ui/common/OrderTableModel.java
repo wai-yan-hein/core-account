@@ -13,6 +13,7 @@ import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.OrderDetailKey;
 import com.inventory.model.OrderHisDetail;
+import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
@@ -500,7 +501,7 @@ public class OrderTableModel extends AbstractTableModel {
         parent.requestFocus();
     }
 
-    public void addSale(OrderHisDetail sd) {
+    public void addOrder(OrderHisDetail sd) {
         if (listDetail != null) {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);

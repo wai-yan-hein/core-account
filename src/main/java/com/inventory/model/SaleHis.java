@@ -55,7 +55,7 @@ public class SaleHis implements java.io.Serializable {
     @NonNull
     private String status = "STATUS";
     private List<SaleHisDetail> listSH;
-    private List<String> listDel;
+    private List<SaleDetailKey> listDel;
     private boolean backup;
 
     public SaleHis() {

@@ -517,7 +517,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 tblOrder.getCellEditor().stopCellEditing();
             }
             int yes_no = JOptionPane.showConfirmDialog(this,
-                    "Are you sure to delete?", "Sale Transaction delete.", JOptionPane.YES_NO_OPTION);
+                    "Are you sure to delete?", "Order Transaction delete.", JOptionPane.YES_NO_OPTION);
             if (yes_no == 0) {
                 orderTableModel.delete(row);
                 calculateTotalAmount(false);
@@ -531,10 +531,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         listDetail = orderTableModel.getListDetail();
         totalAmount = listDetail.stream().map(sdh -> Util1.getFloat(sdh.getAmount())).reduce(totalAmount, (accumulator, _item) -> accumulator + _item);
         txtVouTotal.setValue(totalAmount);
-        
-        
-
-
         //cal discAmt
         float discp = Util1.getFloat(txtVouDiscP.getValue());
         if (discp > 0) {
