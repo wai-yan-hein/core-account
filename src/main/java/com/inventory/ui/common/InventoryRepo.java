@@ -1159,7 +1159,7 @@ public class InventoryRepo {
     
     public Mono<OrderHis> save(OrderHis sh) {
         return inventoryApi.post()
-                .uri("/sale/save-sale")
+                .uri("/order/save-order")
                 .body(Mono.just(sh), OrderHis.class)
                 .retrieve()
                 .bodyToMono(OrderHis.class);

@@ -11,6 +11,7 @@ import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
+import com.inventory.model.OrderDetailKey;
 import com.inventory.model.OrderHisDetail;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
@@ -39,7 +40,7 @@ public class OrderTableModel extends AbstractTableModel {
     private JTable parent;
     private List<OrderHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
-    private final List<String> deleteList = new ArrayList();
+    private final List<OrderDetailKey> deleteList = new ArrayList();
     private StockBalanceTableModel sbTableModel;
     private OrderEntry orderEntry;
     private InventoryRepo inventoryRepo;
@@ -326,7 +327,7 @@ public class OrderTableModel extends AbstractTableModel {
                 calculateAmount(sd);
                 fireTableRowsUpdated(row, row);
                 setRecord(listDetail.size() - 1);
-                selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
+                selectionObserver.selected("ORDER-TOTAL", "ORDER-TOTAL");
                 parent.requestFocusInWindow();
             }
         } catch (Exception ex) {
@@ -452,7 +453,7 @@ public class OrderTableModel extends AbstractTableModel {
         return price;
     }
 
-    public List<String> getDelList() {
+    public List<OrderDetailKey> getDelList() {
         return deleteList;
     }
 
@@ -465,7 +466,7 @@ public class OrderTableModel extends AbstractTableModel {
     public void delete(int row) {
         OrderHisDetail sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
-            deleteList.add(sdh.getKey().getSdCode());
+            deleteList.add(sdh.getKey());
         }
         listDetail.remove(row);
         addNewRow();

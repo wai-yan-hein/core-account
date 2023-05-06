@@ -51,7 +51,7 @@ public class OrderHis implements java.io.Serializable{
     @NonNull
     private String status = "STATUS";
     private List<OrderHisDetail> listSH;
-    private List<String> listDel;
+    private List<OrderDetailKey> listDel;
     private boolean backup;
     
      public OrderHis() {

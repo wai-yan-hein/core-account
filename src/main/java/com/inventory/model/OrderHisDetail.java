@@ -11,8 +11,8 @@ import lombok.Data;
  * @author DELL
  */
 @Data
-public class OrderHisDetail implements java.io.Serializable {
-    private SaleDetailKey key;
+public class OrderHisDetail {
+    private OrderDetailKey key;
     private String stockCode;
     private String userCode;
     private String stockName;

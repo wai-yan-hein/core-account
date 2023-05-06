@@ -18,6 +18,7 @@ import com.common.Util1;
 import com.inventory.editor.CurrencyAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
+import com.inventory.editor.OrderPriceCellEditor;
 import com.inventory.editor.SaleManAutoCompleter;
 import com.inventory.editor.SalePriceCellEditor;
 import com.inventory.editor.StockCellEditor;
@@ -27,6 +28,7 @@ import com.inventory.model.Region;
 import com.inventory.model.Order;
 import com.inventory.model.OrderHis;
 import com.inventory.model.OrderHisDetail;
+import com.inventory.model.OrderHisKey;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.SaleHisKey;
@@ -235,8 +237,8 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         if (ProUtil.isSalePriceChange()) {
             if (ProUtil.isPriceOption()) {
                 inventoryRepo.getPriceOption("Sale").subscribe((t) -> {
-                    SalePriceCellEditor editor = new SalePriceCellEditor(t);
-                    editor.setorderTableModel(orderTableModel);
+                    OrderPriceCellEditor editor = new OrderPriceCellEditor(t);
+                    editor.setOrderTableModel(orderTableModel);
                     tblOrder.getColumnModel().getColumn(6).setCellEditor(editor);//price
                 });
 
@@ -396,6 +398,8 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                     String reportName = getReportName();
                     printVoucher(t.getKey().getVouNo(), reportName, chkVou.isSelected());
                 }
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
             });
 
         }
@@ -452,11 +456,11 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             orderHis.setVouDate(txtOrderDate.getDate());
             orderHis.setMacId(Global.macId);
             if (lblStatus.getText().equals("NEW")) {
-                SaleHisKey key = new SaleHisKey();
+                OrderHisKey key = new OrderHisKey();
                 key.setCompCode(Global.compCode);
                 key.setDeptId(Global.deptId);
                 key.setVouNo(null);
-                //orderHis.setKey(key);
+                orderHis.setKey(key);
                 orderHis.setCreatedDate(Util1.getTodayDate());
                 orderHis.setCreatedBy(Global.loginUser.getUserCode());
                 orderHis.setSession(Global.sessionId);
@@ -1592,7 +1596,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             case "Location" ->
                 setAllLocation();
             case "ORDER" -> {
-                OrderEntry od = (OrderEntry) selectObj;
+                Order od = (Order) selectObj;
                 searchOrder(od);
             }
             case "ORDER-HISTORY" -> {
