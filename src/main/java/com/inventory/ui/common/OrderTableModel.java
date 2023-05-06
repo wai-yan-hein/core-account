@@ -1,7 +1,6 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.inventory.ui.common;
 
@@ -10,13 +9,15 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
+import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
-import com.inventory.model.PriceOption;
-import com.inventory.model.SaleDetailKey;
+import com.inventory.model.OrderDetailKey;
+import com.inventory.model.OrderHisDetail;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
-import com.inventory.ui.entry.SaleByWeight;
+import com.inventory.model.Trader;
+import com.inventory.ui.entry.OrderEntry;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,31 +31,30 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author wai yan
+ * @author DELL
  */
-public class SaleByWeightTableModel extends AbstractTableModel {
-
-    private static final Logger log = LoggerFactory.getLogger(SaleByWeightTableModel.class);
-    private String[] columnNames = {"Code", "Description", "Relation", "Location", "Weight", "Weight Unit", "Qty", "Unit", "Std-Weight", "Total Qty", "Price", "Amount"};
+public class OrderTableModel extends AbstractTableModel {
+    private static final Logger log = LoggerFactory.getLogger(OrderTableModel.class);
+    private String[] columnNames = {"Code", "Description", "Relation", "Location", "Weight", "Weight Unit", "Qty", "Unit","Total Qty", "Price", "Amount"};
     private JTable parent;
-    private List<SaleHisDetail> listDetail = new ArrayList();
+    private List<OrderHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
-    private final List<SaleDetailKey> deleteList = new ArrayList();
+    private final List<OrderDetailKey> deleteList = new ArrayList();
     private StockBalanceTableModel sbTableModel;
+    private OrderEntry orderEntry;
     private InventoryRepo inventoryRepo;
     private JLabel lblStockName;
     private JButton btnProgress;
     private JDateChooser vouDate;
     private boolean change = false;
     private JLabel lblRecord;
-    private SaleByWeight sale;
 
-    public SaleByWeight getSale() {
-        return sale;
+    public OrderEntry getOrderEntry() {
+        return orderEntry;
     }
 
-    public void setSale(SaleByWeight sale) {
-        this.sale = sale;
+    public void setOrderEntry(OrderEntry orderEntry) {
+        this.orderEntry = orderEntry;
     }
 
     public StockBalanceTableModel getSbTableModel() {
@@ -155,7 +155,7 @@ public class SaleByWeightTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 0, 1, 2, 3, 5 ->
+             case 0, 1, 2, 3, 5 ->
                 String.class;
             default ->
                 Float.class;
@@ -165,7 +165,10 @@ public class SaleByWeightTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 2, 9, 11 -> {
+//            case 9 -> {//price
+//                return ProUtil.isSalePriceChange();
+//            }
+            case 2, 8, 10 -> {//relation,totalqty,amt
                 return false;
             }
         }
@@ -175,7 +178,7 @@ public class SaleByWeightTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
         try {
-            SaleHisDetail sd = listDetail.get(row);
+            OrderHisDetail sd = listDetail.get(row);
             switch (column) {
                 case 0 -> {
                     //code
@@ -214,16 +217,13 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                     return sd.getUnitCode();
                 }
                 case 8 -> {
-                    return sd.getStdWeight();
-                }
-                case 9 -> {
                     return Util1.getFloat(sd.getWeight()) * Util1.getFloat(sd.getQty());
                 }
-                case 10 -> {
+                case 9 -> {
                     //price
                     return sd.getPrice();
                 }
-                case 11 -> {
+                case 10 -> {
                     //amount
                     return sd.getAmount();
                 }
@@ -240,8 +240,8 @@ public class SaleByWeightTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object value, int row, int column) {
         try {
-            SaleHisDetail sd = listDetail.get(row);
-            if (value != null) {
+            OrderHisDetail sd = listDetail.get(row);
+           if (value != null) {
                 switch (column) {
                     case 0, 1 -> {
                         //Code
@@ -252,9 +252,9 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                             sd.setUserCode(s.getUserCode());
                             sd.setRelName(s.getRelName());
                             sd.setQty(1.0f);
-                            sd.setStdWeight(s.getWeight());
                             sd.setWeightUnit(s.getWeightUnit());
                             sd.setUnitCode(s.getSaleUnitCode());
+                            sd.setPrice(getTraderPrice(s));
                             sd.setStock(s);
                             sd.setPrice(sd.getPrice() == 0 ? s.getSalePriceN() : sd.getPrice());
                             parent.setColumnSelectionInterval(4, 4);
@@ -301,18 +301,15 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                         if (value instanceof StockUnit stockUnit) {
                             sd.setUnitCode(stockUnit.getKey().getUnitCode());
                         }
-                    }
-                    case 8 -> {
-                        sd.setStdWeight(Util1.getFloat(value));
-                    }
 
-                    case 10 -> {
+                    }
+                    case 9 -> {
                         //price
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 sd.setPrice(Util1.getFloat(value));
                                 parent.setColumnSelectionInterval(0, 0);
-                                parent.setRowSelectionInterval(row + 1, row+1);
+                                parent.setRowSelectionInterval(row + 1, row +1);
                             } else {
                                 showMessageBox("Input value must be positive");
                                 parent.setColumnSelectionInterval(column, column);
@@ -322,14 +319,13 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                             parent.setColumnSelectionInterval(column, column);
                         }
                     }
-                    case 11 -> {
+                    case 10 -> {
                         //amt
                         sd.setAmount(Util1.getFloat(value));
-
                     }
 
                 }
-                if (column != 10) {
+                if (column != 9) {
                     if (Util1.getFloat(sd.getPrice()) == 0) {
                         if (ProUtil.isSaleLastPrice()) {
                             if (sd.getStockCode() != null && sd.getUnitCode() != null) {
@@ -346,17 +342,16 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                 calculateAmount(sd);
                 fireTableRowsUpdated(row, row);
                 setRecord(listDetail.size() - 1);
-                selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
+                selectionObserver.selected("ORDER-TOTAL", "ORDER-TOTAL");
                 parent.requestFocusInWindow();
             }
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
     }
-
-    private void assignLocation(SaleHisDetail sd) {
+    private void assignLocation(OrderHisDetail sd) {
         if (sd.getLocCode() == null) {
-            LocationAutoCompleter completer = sale.getLocationAutoCompleter();
+            LocationAutoCompleter completer = orderEntry.getLocationAutoCompleter();
             if (completer != null) {
                 Location l = completer.getLocation();
                 if (l != null) {
@@ -370,7 +365,7 @@ public class SaleByWeightTableModel extends AbstractTableModel {
     public void addNewRow() {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
-                SaleHisDetail pd = new SaleHisDetail();
+                OrderHisDetail pd = new OrderHisDetail();
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }
@@ -380,7 +375,7 @@ public class SaleByWeightTableModel extends AbstractTableModel {
     private boolean hasEmptyRow() {
         boolean status = false;
         if (listDetail.size() >= 1) {
-            SaleHisDetail get = listDetail.get(listDetail.size() - 1);
+            OrderHisDetail get = listDetail.get(listDetail.size() - 1);
             if (get.getStockCode() == null) {
                 status = true;
             }
@@ -388,11 +383,11 @@ public class SaleByWeightTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<SaleHisDetail> getListDetail() {
+    public List<OrderHisDetail> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<SaleHisDetail> listDetail) {
+    public void setListDetail(List<OrderHisDetail> listDetail) {
         this.listDetail = listDetail;
         setRecord(listDetail.size());
         addNewRow();
@@ -408,14 +403,19 @@ public class SaleByWeightTableModel extends AbstractTableModel {
         addNewRow();
     }
 
-    private void calculateAmount(SaleHisDetail s) {
-        float price = Util1.getFloat(s.getPrice());
-        float stdWt = Util1.getFloat(s.getStdWeight());
-        float wt = Util1.getFloat(s.getWeight());
-        float qty = Util1.getFloat(s.getQty());
-        if (s.getStockCode() != null) {
-            float amount = (qty * wt * price) / stdWt;
-            s.setAmount(amount);
+    private void calculateAmount(OrderHisDetail orderEntry) {
+        if (orderEntry.getStockCode() != null) {
+//            float price = Util1.getFloat(orderEntry.getPrice());
+//            float wt = Util1.getFloat(orderEntry.getWeight());
+//            float qty = Util1.getFloat(orderEntry.getQty());
+//            if (orderEntry.getStockCode() != null) {
+//                float amount = (qty * wt * price) / stdWt;
+//                orderEntry.setAmount(Util1.getFloat(Math.round(amount)));
+//            }
+            float saleQty = Util1.getFloat(orderEntry.getQty());
+            float stdSalePrice = Util1.getFloat(orderEntry.getPrice());
+            float amount = saleQty * stdSalePrice;
+            orderEntry.setAmount(Util1.getFloat(Math.round(amount)));
         }
     }
 
@@ -425,7 +425,7 @@ public class SaleByWeightTableModel extends AbstractTableModel {
 
     public boolean isValidEntry() {
         boolean status = true;
-        for (SaleHisDetail sdh : listDetail) {
+        for (OrderHisDetail sdh : listDetail) {
             if (sdh.getStockCode() != null) {
                 if (Util1.getFloat(sdh.getAmount()) <= 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
@@ -449,8 +449,33 @@ public class SaleByWeightTableModel extends AbstractTableModel {
         return status;
     }
 
+    private float getTraderPrice(Stock s) {
+        float price = 0.0f;
+        String priceType = getTraderType();
+        switch (priceType) {
+            case "N" -> {
+                price = s.getSalePriceN();
+            }
+            case "A" -> {
+                price = s.getSalePriceA();
+            }
+            case "B" -> {
+                price = s.getSalePriceB();
+            }
+            case "C" -> {
+                price = s.getSalePriceC();
+            }
+            case "D" -> {
+                price = s.getSalePriceD();
+            }
+            case "E" -> {
+                price = s.getSalePriceE();
+            }
+        }
+        return price;
+    }
 
-    public List<SaleDetailKey> getDelList() {
+    public List<OrderDetailKey> getDelList() {
         return deleteList;
     }
 
@@ -461,7 +486,7 @@ public class SaleByWeightTableModel extends AbstractTableModel {
     }
 
     public void delete(int row) {
-        SaleHisDetail sdh = listDetail.get(row);
+        OrderHisDetail sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
             deleteList.add(sdh.getKey());
         }
@@ -476,11 +501,15 @@ public class SaleByWeightTableModel extends AbstractTableModel {
         parent.requestFocus();
     }
 
-    public void addSale(SaleHisDetail sd) {
+    public void addOrder(OrderHisDetail sd) {
         if (listDetail != null) {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
         }
+    }
+
+    public OrderHisDetail getOrderEntry(int row) {
+        return listDetail.get(row);
     }
 
     public void clear() {
@@ -489,4 +518,13 @@ public class SaleByWeightTableModel extends AbstractTableModel {
         }
     }
 
+    private String getTraderType() {
+        TraderAutoCompleter completer = orderEntry.getTraderAutoCompleter();
+        if (completer != null) {
+            Trader t = completer.getTrader();
+            return t == null ? "N" : Util1.isNull(t.getPriceType(), "N");
+        }
+        return "N";
+    }
+    
 }

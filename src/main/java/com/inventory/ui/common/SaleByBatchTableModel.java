@@ -12,6 +12,7 @@ import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.model.GRN;
 import com.inventory.model.Location;
+import com.inventory.model.SaleDetailKey;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
@@ -38,7 +39,7 @@ public class SaleByBatchTableModel extends AbstractTableModel {
     private JTable parent;
     private List<SaleHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
-    private final List<String> deleteList = new ArrayList();
+    private final List<SaleDetailKey> deleteList = new ArrayList();
     private StockBalanceTableModel sbTableModel;
     private InventoryRepo inventoryRepo;
     private JLabel lblStockName;
@@ -425,7 +426,7 @@ public class SaleByBatchTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<String> getDelList() {
+    public List<SaleDetailKey> getDelList() {
         return deleteList;
     }
 
@@ -438,7 +439,7 @@ public class SaleByBatchTableModel extends AbstractTableModel {
     public void delete(int row) {
         SaleHisDetail sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
-            deleteList.add(sdh.getKey().getSdCode());
+            deleteList.add(sdh.getKey());
         }
         listDetail.remove(row);
         addNewRow();

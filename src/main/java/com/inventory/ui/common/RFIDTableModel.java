@@ -10,6 +10,7 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.model.PriceOption;
+import com.inventory.model.SaleDetailKey;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ public class RFIDTableModel extends AbstractTableModel {
     private JTable table;
     private List<SaleHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
-    private final List<String> deleteList = new ArrayList();
+    private final List<SaleDetailKey> deleteList = new ArrayList();
     private InventoryRepo inventoryRepo;
     private String locCode;
 
@@ -266,7 +267,7 @@ public class RFIDTableModel extends AbstractTableModel {
 
    
 
-    public List<String> getDelList() {
+    public List<SaleDetailKey> getDelList() {
         return deleteList;
     }
 
@@ -279,7 +280,7 @@ public class RFIDTableModel extends AbstractTableModel {
     public void delete(int row) {
         SaleHisDetail sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
-            deleteList.add(sdh.getKey().getSdCode());
+            deleteList.add(sdh.getKey());
         }
         listDetail.remove(row);
         addNewRow();

@@ -1,25 +1,21 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.inventory.model;
 
-import com.user.model.Currency;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
 import lombok.NonNull;
-
 /**
  *
- * @author wai yan
+ * @author DELL
  */
 @Data
-public class SaleHis implements java.io.Serializable {
-
+public class OrderHis implements java.io.Serializable{
     @NonNull
-    private SaleHisKey key;
+    private OrderHisKey key;
     private String traderCode;
     private String saleManCode;
     @NonNull
@@ -54,10 +50,11 @@ public class SaleHis implements java.io.Serializable {
     private Integer macId;
     @NonNull
     private String status = "STATUS";
-    private List<SaleHisDetail> listSH;
-    private List<SaleDetailKey> listDel;
+    private List<OrderHisDetail> listSH;
+    private List<OrderDetailKey> listDel;
     private boolean backup;
-
-    public SaleHis() {
+    
+     public OrderHis() {
     }
+    
 }
