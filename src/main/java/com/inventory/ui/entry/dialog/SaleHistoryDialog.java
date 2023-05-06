@@ -138,18 +138,26 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private void initCombo() {
         userRepo.getAppUser().subscribe((t) -> {
             appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
+        }, (e) -> {
+            log.error(e.getMessage());
         });
         inventoryRepo.getSaleMan().collectList().subscribe((t) -> {
             saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, t, null, true, false);
+        }, (e) -> {
+            log.error(e.getMessage());
         });
         inventoryRepo.getLocation().subscribe((t) -> {
             locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, false);
+        }, (e) -> {
+            log.error(e.getMessage());
         });
         userRepo.getDeparment().subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true);
             userRepo.findDepartment(Global.deptId).subscribe((tt) -> {
                 departmentAutoCompleter.setDepartment(tt);
             });
+        }, (e) -> {
+            log.error(e.getMessage());
         });
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "CUS");
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);

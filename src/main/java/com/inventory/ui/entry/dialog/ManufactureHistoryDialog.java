@@ -23,6 +23,7 @@ import com.user.common.UserRepo;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -44,7 +45,6 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
     private VouStatusAutoCompleter vouStatusAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
     private SelectionObserver observer;
-    private boolean status = false;
 
     public UserRepo getUserRepo() {
         return userRepo;
@@ -80,9 +80,11 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
 
     /**
      * Creates new form ManufactureHistoryDialog
+     *
+     * @param frame
      */
-    public ManufactureHistoryDialog() {
-        super(Global.parentForm, true);
+    public ManufactureHistoryDialog(JFrame frame) {
+        super(frame, true);
         initComponents();
         initFocusAdapter();
     }
@@ -98,13 +100,9 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
     }
 
     public void initMain() {
-        if (!status) {
-            initDate();
-            initCompleter();
-            initTblProcess();
-            status = true;
-        }
-        searchProcess();
+        initDate();
+        initCompleter();
+        initTblProcess();
     }
 
     private void clear() {
@@ -163,10 +161,10 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
 
     private void select() {
         if (tblProcess.getSelectedRow() >= 0) {
-            selectRow = tblProcess.convertRowIndexToModel(tblProcess.getSelectedRow());
+            int row  = tblProcess.convertRowIndexToModel(tblProcess.getSelectedRow());
             if (observer != null) {
-                observer.selected("Selected", processHisTableModel.getObject(selectRow).getKey());
-                this.dispose();
+                observer.selected("Selected", processHisTableModel.getObject(row).getKey());
+                setVisible(false);
             }
         }
     }
@@ -179,7 +177,7 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
 
-    private void searchProcess() {
+    public void searchProcess() {
         FilterObject f = new FilterObject(Global.compCode, Global.deptId);
         f.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         f.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));

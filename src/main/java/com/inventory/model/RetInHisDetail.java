@@ -13,7 +13,7 @@ import lombok.Data;
 @Data
 public class RetInHisDetail implements java.io.Serializable {
 
-    private RetInKey riKey;
+    private RetInKey key;
     private String stockCode;
     private String userCode;
     private String stockName;

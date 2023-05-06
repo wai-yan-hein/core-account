@@ -9,6 +9,7 @@ import com.common.Global;
 import com.common.Util1;
 import com.inventory.model.PriceOption;
 import com.inventory.model.Stock;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.SaleTableModel;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -31,15 +32,14 @@ public class SalePriceCellEditor extends AbstractCellEditor implements TableCell
 
     private JComponent component = null;
     private SalePriceAutoCompleter completer;
-    private List<PriceOption> listOption;
-    private SaleTableModel saleTableModel;
+    private InventoryRepo inventoryRepo;
 
-    public SaleTableModel getSaleTableModel() {
-        return saleTableModel;
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
     }
 
-    public void setSaleTableModel(SaleTableModel saleTableModel) {
-        this.saleTableModel = saleTableModel;
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
     }
 
     private final FocusAdapter fa = new FocusAdapter() {
@@ -60,8 +60,8 @@ public class SalePriceCellEditor extends AbstractCellEditor implements TableCell
 
     };
 
-    public SalePriceCellEditor(List<PriceOption> listOption) {
-        this.listOption = listOption;
+    public SalePriceCellEditor(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
     }
 
     @Override
@@ -100,38 +100,8 @@ public class SalePriceCellEditor extends AbstractCellEditor implements TableCell
         if (value != null) {
             jtf.setText(value.toString());
         }
-        int row = table.convertRowIndexToModel(table.getSelectedRow());
-        if (row >= 0) {
-            listOption = getPriceOption(row);
-        }
-        completer = new SalePriceAutoCompleter(jtf, listOption, this);
+        completer = new SalePriceAutoCompleter(jtf, table, inventoryRepo, this);
         return component;
-    }
-
-    public List<PriceOption> getPriceOption(int row) {
-        Stock s = saleTableModel.getSale(row).getStock();
-        if (!listOption.isEmpty()) {
-            for (PriceOption op : listOption) {
-                switch (Util1.isNull(op.getKey().getPriceType(), "N")) {
-                    case "A" ->
-                        op.setPrice(s.getSalePriceA());
-                    case "B" ->
-                        op.setPrice(s.getSalePriceB());
-                    case "C" ->
-                        op.setPrice(s.getSalePriceC());
-                    case "D" ->
-                        op.setPrice(s.getSalePriceD());
-                    case "E" ->
-                        op.setPrice(s.getSalePriceE());
-                    case "N" ->
-                        op.setPrice(s.getSalePriceN());
-                    default -> {
-                        break;
-                    }
-                }
-            }
-        }
-        return listOption;
     }
 
     @Override

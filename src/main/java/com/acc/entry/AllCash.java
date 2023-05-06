@@ -21,10 +21,13 @@ import com.acc.editor.TranSourceAutoCompleter;
 import com.acc.common.AllCashTableModel;
 import com.acc.common.CashInOutTableModel;
 import com.acc.common.CashOpeningTableModel;
+import com.acc.common.ColumnHeaderListener;
 import com.acc.common.DateAutoCompleter;
 import com.acc.common.DateTableDecorator;
 import com.acc.common.DayBookTableModel;
 import com.acc.common.OpeningCellRender;
+import com.acc.editor.BatchCellEditor;
+import com.acc.editor.BatchNoAutoCompeter;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.DeleteObj;
@@ -40,10 +43,13 @@ import com.common.SelectionObserver;
 import com.common.Util1;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.common.UserRepo;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.FileInputStream;
@@ -65,6 +71,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
@@ -98,6 +105,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private DespAutoCompleter despAutoCompleter;
     private RefAutoCompleter refAutoCompleter;
     private TranSourceAutoCompleter tranSourceAutoCompleter;
+    private BatchNoAutoCompeter batchNoAutoCompeter;
     private final CashInOutTableModel inOutTableModel = new CashInOutTableModel();
     private final CashOpeningTableModel opTableModel = new CashOpeningTableModel();
     private SelectionObserver observer;
@@ -181,11 +189,36 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     public AllCash(boolean single) {
         this.single = single;
         initComponents();
+        initFocus();
+        initListener();
         initPopup();
         initTableCashInOut();
         initTableCashOP();
         initDateDecorator();
         actionMapping();
+    }
+
+    private void initFocus() {
+        txtDate.addFocusListener(fa);
+        txtDepartment.addFocusListener(fa);
+        txtDesp.addFocusListener(fa);
+        txtRefrence.addFocusListener(fa);
+        txtPerson.addFocusListener(fa);
+        txtAccount.addFocusListener(fa);
+        txtBatchNo.addFocusListener(fa);
+        txtProjectNo.addFocusListener(fa);
+        txtCurrency.addFocusListener(fa);
+        txtOption.addFocusListener(fa);
+    }
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            ((JTextField) e.getSource()).selectAll();
+        }
+    };
+
+    private void initListener() {
+        tblCash.addMouseListener(new ColumnHeaderListener(tblCash));
     }
 
     private void batchLock(boolean lock) {
@@ -297,6 +330,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         coaAutoCompleter.setSelectionObserver(this);
         traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accountRepo, null, true);
         traderAutoCompleter.setObserver(this);
+        batchNoAutoCompeter = new BatchNoAutoCompeter(txtBatchNo, accountRepo, null, true);
+        batchNoAutoCompeter.setObserver(this);
 
     }
 
@@ -307,9 +342,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         initTableCB();
         createDateFilter();
         searchCash();
-        /*accountRepo.listenGl().subscribe((t) -> {
-        log.info(t.toString());
-        });*/
     }
 
     private void requestFoucsTable() {
@@ -359,10 +391,12 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tblCash.getColumnModel().getColumn(2).setPreferredWidth(180);// Description      
         tblCash.getColumnModel().getColumn(3).setPreferredWidth(180);// Ref  
         tblCash.getColumnModel().getColumn(4).setPreferredWidth(90);// Ref  
-        tblCash.getColumnModel().getColumn(5).setPreferredWidth(90);// Person
-        tblCash.getColumnModel().getColumn(6).setPreferredWidth(150);// Account
-        tblCash.getColumnModel().getColumn(7).setPreferredWidth(1);// Curr      
-        tblCash.getColumnModel().getColumn(8).setPreferredWidth(90);// Dr-Amt   
+        tblCash.getColumnModel().getColumn(5).setPreferredWidth(50);// batch  
+        tblCash.getColumnModel().getColumn(6).setPreferredWidth(50);// project  
+        tblCash.getColumnModel().getColumn(7).setPreferredWidth(90);// Person
+        tblCash.getColumnModel().getColumn(8).setPreferredWidth(150);// Account
+        tblCash.getColumnModel().getColumn(9).setPreferredWidth(1);// Curr      
+        tblCash.getColumnModel().getColumn(10).setPreferredWidth(60);// Dr-Amt   
         tblCash.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
         monoDep.subscribe((t) -> {
             tblCash.getColumnModel().getColumn(1).setCellEditor(new DepartmentCellEditor(t));
@@ -370,15 +404,17 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tblCash.getColumnModel().getColumn(2).setCellEditor(new DespEditor(accountRepo));
         tblCash.getColumnModel().getColumn(3).setCellEditor(new RefCellEditor(accountRepo));
         tblCash.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
-        tblCash.getColumnModel().getColumn(5).setCellEditor(new TraderCellEditor(accountRepo));
-        tblCash.getColumnModel().getColumn(6).setCellEditor(new COA3CellEditor(accountRepo, 3));
+        tblCash.getColumnModel().getColumn(5).setCellEditor(new BatchCellEditor(accountRepo));
+        tblCash.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
+        tblCash.getColumnModel().getColumn(7).setCellEditor(new TraderCellEditor(accountRepo));
+        tblCash.getColumnModel().getColumn(8).setCellEditor(new COA3CellEditor(accountRepo, 3));
         monoCur.subscribe((t) -> {
-            tblCash.getColumnModel().getColumn(7).setCellEditor(new CurrencyAEditor(t));
+            tblCash.getColumnModel().getColumn(9).setCellEditor(new CurrencyAEditor(t));
         });
-        tblCash.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
+        tblCash.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());
         if (!single) {
-            tblCash.getColumnModel().getColumn(9).setPreferredWidth(90);// Cr-Amt  
-            tblCash.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
+            tblCash.getColumnModel().getColumn(11).setPreferredWidth(60);// Cr-Amt  
+            tblCash.getColumnModel().getColumn(11).setCellEditor(new AutoClearEditor());
         }
         tblCash.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
@@ -550,9 +586,9 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                     p.put("p_comp_phone", Global.companyPhone);
                     p.put("p_currency", currencyAutoCompleter.getCurrency().getCurCode());
                     Gl vGl = opTableModel.getVGl(0);
-                    double opening = vGl.getDrAmt();
+                    double op = vGl.getDrAmt();
                     double closing = vGl.getCrAmt();
-                    p.put("p_opening", opening);
+                    p.put("p_opening", op);
                     p.put("p_closing", closing);
                     String rpName = chkSummary.isSelected() ? "IndividualLedgerSummary.jasper" : "IndividualLedger.jasper";
                     String filePath = String.format(Global.accountRP + rpName);
@@ -645,6 +681,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         filter.setSrcAcc(sourceAccId);
         filter.setReference(refAutoCompleter.getAutoText().getDescription().equals("All") ? "-"
                 : refAutoCompleter.getAutoText().getDescription());
+        filter.setBatchNo(batchNoAutoCompeter.getAutoText().getDescription().equals("All") ? "-"
+                : batchNoAutoCompeter.getAutoText().getDescription());
         filter.setCurCode(getCurCode());
         filter.setListDepartment(getListDep());
         filter.setTranSource(getTranSource());
@@ -749,6 +787,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         jLabel7 = new javax.swing.JLabel();
         txtOption = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
+        txtBatchNo = new javax.swing.JTextField();
+        jLabel10 = new javax.swing.JLabel();
+        txtProjectNo = new javax.swing.JTextField();
+        jLabel11 = new javax.swing.JLabel();
         panelDate = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         jLabel9 = new javax.swing.JLabel();
@@ -958,6 +1000,44 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         jLabel8.setFont(Global.lableFont);
         jLabel8.setText("Option");
 
+        txtBatchNo.setFont(Global.textFont);
+        txtBatchNo.setName("txtRefrence"); // NOI18N
+        txtBatchNo.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtBatchNoFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txtBatchNoFocusLost(evt);
+            }
+        });
+        txtBatchNo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtBatchNoActionPerformed(evt);
+            }
+        });
+
+        jLabel10.setFont(Global.lableFont);
+        jLabel10.setText("Batch No");
+
+        txtProjectNo.setFont(Global.textFont);
+        txtProjectNo.setName("txtRefrence"); // NOI18N
+        txtProjectNo.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtProjectNoFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txtProjectNoFocusLost(evt);
+            }
+        });
+        txtProjectNo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtProjectNoActionPerformed(evt);
+            }
+        });
+
+        jLabel11.setFont(Global.lableFont);
+        jLabel11.setText("Project No");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -988,6 +1068,14 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                     .addComponent(txtRefrence)
                     .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtBatchNo)
+                    .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtProjectNo)
+                    .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(txtCurrency, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -1013,7 +1101,9 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                             .addComponent(jLabel4)
                             .addComponent(jLabel5)
                             .addComponent(jLabel6)
-                            .addComponent(jLabel3))
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel10)
+                            .addComponent(jLabel11))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1021,7 +1111,9 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                             .addComponent(txtDesp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtRefrence, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtPerson, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtBatchNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel8)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1127,13 +1219,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     private void txtDateFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDateFocusGained
         // TODO add your handling code here:
-        txtDate.selectAll();
     }//GEN-LAST:event_txtDateFocusGained
 
     private void txtDateFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDateFocusLost
         // TODO add your handling code here:
-        //dateAutoCompleter.closePopup();
-        //messageBean.setValue(txtDate.getText());
     }//GEN-LAST:event_txtDateFocusLost
 
     private void txtDateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtDateActionPerformed
@@ -1142,8 +1231,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     private void txtDepartmentFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDepartmentFocusGained
         // TODO add your handling code here:
-        txtDepartment.selectAll();
-        //departmentAutoCompleter.showPopup();
     }//GEN-LAST:event_txtDepartmentFocusGained
 
     private void txtDepartmentFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDepartmentFocusLost
@@ -1152,15 +1239,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     private void txtDepartmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtDepartmentActionPerformed
         // TODO add your handling code here:
-        /*if (txtDepartment.getText().isEmpty()) {
-            selectionObserver.selected("Department", "-");
-        }*/
     }//GEN-LAST:event_txtDepartmentActionPerformed
 
     private void txtPersonFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtPersonFocusGained
         // TODO add your handling code here:
-        txtPerson.selectAll();
-        //traderAutoCompleter.showPopup();
     }//GEN-LAST:event_txtPersonFocusGained
 
     private void txtPersonFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtPersonFocusLost
@@ -1169,33 +1251,23 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     private void txtPersonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPersonActionPerformed
         // TODO add your handling code here:
-        /*if (txtPerson.getText().isEmpty()) {
-            selectionObserver.selected("Trader", "-");
-        }*/
     }//GEN-LAST:event_txtPersonActionPerformed
 
     private void txtAccountFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtAccountFocusGained
         // TODO add your handling code here:
-
-        txtAccount.selectAll();
-        //coaAutoCompleter.showPopup();
     }//GEN-LAST:event_txtAccountFocusGained
 
     private void txtAccountFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtAccountFocusLost
         // TODO add your handling code here:
-        //coaAutoCompleter.closePopup();
     }//GEN-LAST:event_txtAccountFocusLost
 
     private void txtAccountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAccountActionPerformed
         // TODO add your handling code here:
-        /*if (txtAccount.getText().isEmpty()) {
-            selectionObserver.selected("COA", "-");
-        }*/
+
     }//GEN-LAST:event_txtAccountActionPerformed
 
     private void txtDespFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDespFocusGained
         // TODO add your handling code here:
-        txtDesp.selectAll();
     }//GEN-LAST:event_txtDespFocusGained
 
     private void txtDespFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDespFocusLost
@@ -1208,7 +1280,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     private void txtRefrenceFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtRefrenceFocusGained
         // TODO add your handling code here:
-        txtRefrence.selectAll();
     }//GEN-LAST:event_txtRefrenceFocusGained
 
     private void txtRefrenceFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtRefrenceFocusLost
@@ -1221,21 +1292,14 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     private void txtCurrencyFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCurrencyFocusGained
         // TODO add your handling code here:
-
-        txtCurrency.selectAll();
-        // currencyAutoCompleter.showPopup();
     }//GEN-LAST:event_txtCurrencyFocusGained
 
     private void txtCurrencyFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCurrencyFocusLost
         // TODO add your handling code here:
-        //currencyAutoCompleter.closePopup();
     }//GEN-LAST:event_txtCurrencyFocusLost
 
     private void txtCurrencyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCurrencyActionPerformed
         // TODO add your handling code here:
-        /* if (txtCurrency.getText().isEmpty()) {
-            selectionObserver.selected("Currency", "-");
-        }*/
     }//GEN-LAST:event_txtCurrencyActionPerformed
 
     private void txtOptionFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtOptionFocusGained
@@ -1256,10 +1320,36 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         searchCash();
     }//GEN-LAST:event_chkSummaryActionPerformed
 
+    private void txtBatchNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtBatchNoFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtBatchNoFocusGained
+
+    private void txtBatchNoFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtBatchNoFocusLost
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtBatchNoFocusLost
+
+    private void txtBatchNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBatchNoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtBatchNoActionPerformed
+
+    private void txtProjectNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtProjectNoFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtProjectNoFocusGained
+
+    private void txtProjectNoFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtProjectNoFocusLost
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtProjectNoFocusLost
+
+    private void txtProjectNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtProjectNoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtProjectNoActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkSummary;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -1279,12 +1369,14 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JTable tblCashOP;
     private javax.swing.JScrollPane tblScrollPane;
     private javax.swing.JTextField txtAccount;
+    private javax.swing.JTextField txtBatchNo;
     private javax.swing.JTextField txtCurrency;
     private javax.swing.JFormattedTextField txtDate;
     private javax.swing.JTextField txtDepartment;
     private javax.swing.JTextField txtDesp;
     private javax.swing.JTextField txtOption;
     private javax.swing.JTextField txtPerson;
+    private javax.swing.JTextField txtProjectNo;
     private javax.swing.JFormattedTextField txtRecord;
     private javax.swing.JTextField txtRefrence;
     // End of variables declaration//GEN-END:variables

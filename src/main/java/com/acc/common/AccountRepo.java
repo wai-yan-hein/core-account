@@ -33,6 +33,7 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -423,6 +424,17 @@ public class AccountRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(TraderA.class)
+                .collectList();
+    }
+
+    public Mono<List<VDescription>> getBatchNo(String str) {
+        return accountApi.get()
+                .uri(builder -> builder.path("/account/get-batch-no")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("str", str)
+                .build())
+                .retrieve()
+                .bodyToFlux(VDescription.class)
                 .collectList();
     }
 }

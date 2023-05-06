@@ -30,7 +30,6 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.text.DateFormat;
-import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -39,7 +38,6 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -177,25 +175,42 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         searchStock();
     }
 
+    private String getBrand() {
+        return brandAutoCompleter == null ? "-" : brandAutoCompleter.getBrand().getKey().getBrandCode();
+    }
+
+    private String getType() {
+        return typeAutoCompleter == null ? "-" : typeAutoCompleter.getStockType().getKey().getStockTypeCode();
+    }
+
+    private String getStock() {
+        return stockAutoCompleter == null ? "-" : stockAutoCompleter.getStock().getKey().getStockCode();
+    }
+
+    private String getCategory() {
+        return categoryAutoCompleter == null ? "-" : categoryAutoCompleter.getCategory().getKey().getCatCode();
+    }
+
     private void searchStock() {
         ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
-        filter.setBrandCode(brandAutoCompleter.getBrand().getKey().getBrandCode());
-        filter.setCatCode(categoryAutoCompleter.getCategory().getKey().getCatCode());
-        filter.setStockTypeCode(typeAutoCompleter.getStockType().getKey().getStockTypeCode());
-        filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
-        Mono<ResponseEntity<List<Stock>>> result = inventoryApi
+        filter.setBrandCode(getBrand());
+        filter.setCatCode(getCategory());
+        filter.setStockTypeCode(getType());
+        filter.setStockCode(getStock());
+        inventoryApi
                 .post()
                 .uri("/setup/search-stock")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .toEntityList(Stock.class);
-        result.subscribe((t) -> {
-            stockTableModel.setListStock(t.getBody());
-            progress.setIndeterminate(false);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-            progress.setIndeterminate(false);
-        });
+                .bodyToFlux(Stock.class)
+                .collectList()
+                .subscribe((t) -> {
+                    stockTableModel.setListStock(t);
+                    progress.setIndeterminate(false);
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+                    progress.setIndeterminate(false);
+                });
     }
 
     private void initTablePD() {
@@ -244,7 +259,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
             Integer deptId = s.getKey().getDeptId();
             lblStockName.setText(s.getStockName());
             chkEx.setSelected(s.isExplode());
-            inventoryRepo.getPattern(stockCode, deptId).subscribe((t) -> {
+            inventoryRepo.getPattern(stockCode, deptId, null).subscribe((t) -> {
                 lblRec.setText("Records : " + t.size());
                 patternTableModel.setListPattern(t);
                 patternTableModel.setStockCode(stockCode);

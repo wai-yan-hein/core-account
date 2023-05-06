@@ -65,7 +65,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
     private JProgressBar progress;
     private SelectionObserver observer;
     private final ProcessHisDetailTableModel processHisDetailTableModel = new ProcessHisDetailTableModel();
-    private final ManufactureHistoryDialog dialog = new ManufactureHistoryDialog();
+    private ManufactureHistoryDialog dialog;
     private StockAutoCompleter stockAutoCompleter;
     private LocationAutoCompleter locationAutoCompleter;
     private UnitAutoCompleter unitAutoCompleter;
@@ -256,7 +256,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         inventoryRepo.findUnit(ph.getUnit(), deptId).subscribe((t) -> {
             unitAutoCompleter.setStockUnit(t);
         });
-        inventoryRepo.findVouStatus(p.getPtCode(), deptId).subscribe((t) -> {
+        inventoryRepo.findVouStatus(ph.getPtCode(), deptId).subscribe((t) -> {
             vouStatusAutoCompleter.setVoucher(t);
         });
         inventoryRepo.findStock(ph.getStockCode()).subscribe((t) -> {
@@ -274,12 +274,13 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             lblStatus.setText("EDIT");
             lblStatus.setForeground(Color.blue);
         }
-        inventoryRepo.getProcessDetail(ph.getKey().getVouNo(), ph.getKey().getDeptId()).subscribe((t) -> {
-            processHisDetailTableModel.setListDetail(t);
-            processHisDetailTableModel.addNewRow();
-            lblRecord.setText("Records : " + String.valueOf(processHisDetailTableModel.getListDetail().size() - 1));
-            focusOnTable();
-        });
+        inventoryRepo.getProcessDetail(ph.getKey().getVouNo(), ph.getKey().getDeptId())
+                .subscribe((t) -> {
+                    processHisDetailTableModel.setListDetail(t);
+                    processHisDetailTableModel.addNewRow();
+                    lblRecord.setText("Records : " + String.valueOf(processHisDetailTableModel.getListDetail().size() - 1));
+                    focusOnTable();
+                });
 
     }
 
@@ -313,23 +314,15 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
     private void saveProcess() {
         if (isValidProcess() && processHisDetailTableModel.validEntry()) {
             ph.setListDetail(processHisDetailTableModel.getListDetail());
-            if (chkFinish.isSelected()) {
-                int s = JOptionPane.showConfirmDialog(this,
-                        String.format("Production end date is %s", Util1.toDateStr(ph.getEndDate(), "dd/MM/yyyy")),
-                        "Warning", JOptionPane.WARNING_MESSAGE);
-                if (s == JOptionPane.YES_OPTION) {
-                    progress.setIndeterminate(true);
-                    inventoryRepo.saveProcess(ph).subscribe((t) -> {
-                        progress.setIndeterminate(false);
-                        clear();
-                    }, (e) -> {
-                        JOptionPane.showMessageDialog(this, e.getMessage());
-                        progress.setIndeterminate(false);
-                    });
-                } else {
-                    txtEndDate.requestFocusInWindow();
-                }
-            }
+            progress.setIndeterminate(true);
+            inventoryRepo.saveProcess(ph).subscribe((t) -> {
+                progress.setIndeterminate(false);
+                clear();
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
+                progress.setIndeterminate(false);
+            });
+
         }
     }
 
@@ -370,6 +363,14 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             txtQty.requestFocus();
             return false;
         } else {
+            if (chkFinish.isSelected()) {
+                int s = JOptionPane.showConfirmDialog(this,
+                        String.format("Production end date is %s", Util1.toDateStr(ph.getEndDate(), "dd/MM/yyyy")),
+                        "Warning", JOptionPane.WARNING_MESSAGE);
+                if (s == JOptionPane.NO_OPTION) {
+                    return false;
+                }
+            }
             ProcessHisKey key = new ProcessHisKey();
             key.setVouNo(txtVouNo.getText());
             key.setCompCode(Global.compCode);
@@ -422,13 +423,17 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
     }
 
     private void historyDialog() {
-        dialog.setIconImage(searchIcon);
-        dialog.setObserver(this);
-        dialog.setInventoryRepo(inventoryRepo);
-        dialog.setUserRepo(userRepo);
-        dialog.initMain();
-        dialog.setSize(Global.width - 100, Global.height - 100);
-        dialog.setLocationRelativeTo(null);
+        if (dialog == null) {
+            dialog = new ManufactureHistoryDialog(Global.parentForm);
+            dialog.setIconImage(searchIcon);
+            dialog.setObserver(this);
+            dialog.setInventoryRepo(inventoryRepo);
+            dialog.setUserRepo(userRepo);
+            dialog.initMain();
+            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setLocationRelativeTo(null);
+        }
+        dialog.searchProcess();
         dialog.setVisible(true);
     }
 
@@ -455,7 +460,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
 
     private void generatePattern(String code, Integer deptId) {
         Date vouDate = txtStartDate.getDate();
-        inventoryRepo.getPattern(code, deptId).subscribe((t) -> {
+        inventoryRepo.getPattern(code, deptId, Util1.toDateStr(vouDate, "yyyy-MM-dd")).subscribe((t) -> {
             if (!t.isEmpty()) {
                 String input = JOptionPane.showInputDialog("Enter Qty.");
                 float qty = Util1.getFloat(input);
@@ -476,35 +481,22 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
                         his.setQty(p.getQty() * qty);
                         his.setUnit(p.getUnitCode());
                         his.setVouDate(vouDate);
-                        String type = p.getPriceTypeCode();
-                        String date = Util1.toDateStr(vouDate, "yyyy-MM-dd");
-                        if (type != null) {
-                            switch (type) {
-                                case "PUR-R" -> {
-                                    his.setPrice(inventoryRepo.getPurRecentPrice(stockCode, date, his.getUnit()).block().getAmount());
-                                }
-                                case "PUR-A" -> {
-                                    his.setPrice(inventoryRepo.getPurAvgPrice(stockCode, date, his.getUnit()).block().getAmount());
-                                }
-                                case "PRO-R" -> {
-                                    his.setPrice(inventoryRepo.getProductionRecentPrice(stockCode, date, his.getUnit()).block().getAmount());
-                                }
-                                case "WL-R" -> {
-                                    his.setPrice(inventoryRepo.getWeightLossRecentPrice(stockCode, date, his.getUnit()).block().getAmount());
-                                }
-                            }
-                        }
+                        his.setPrice(p.getPrice());
                         processHisDetailTableModel.addObject(his);
                     }
                 } else {
                     JOptionPane.showMessageDialog(this, "Invalid Qty");
                 }
-                processHisDetailTableModel.addNewRow();
-                processHisDetailTableModel.calPrice();
-                focusOnTable();
+
             } else {
                 JOptionPane.showMessageDialog(this, "No pattern.");
             }
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }, () -> {
+            processHisDetailTableModel.addNewRow();
+            processHisDetailTableModel.calPrice();
+            focusOnTable();
         });
 
     }

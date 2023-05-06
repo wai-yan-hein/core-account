@@ -15,7 +15,7 @@ import lombok.Data;
 @Data
 public class StockInOutDetail implements Serializable {
 
-    private StockInOutKey ioKey;
+    private StockInOutKey key;
     private String stockCode;
     private String userCode;
     private String stockName;

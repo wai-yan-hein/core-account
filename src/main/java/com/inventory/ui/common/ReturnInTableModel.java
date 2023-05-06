@@ -401,8 +401,8 @@ public class ReturnInTableModel extends AbstractTableModel {
 
     public void delete(int row) {
         RetInHisDetail sdh = listDetail.get(row);
-        if (sdh.getRiKey() != null) {
-            deleteList.add(sdh.getRiKey().getRdCode());
+        if (sdh.getKey()!= null) {
+            deleteList.add(sdh.getKey().getRdCode());
         }
         listDetail.remove(row);
         addNewRow();

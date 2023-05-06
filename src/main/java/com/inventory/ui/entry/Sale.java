@@ -180,7 +180,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         public void focusGained(FocusEvent e) {
             ((JTextFieldDateEditor) e.getSource()).selectAll();
         }
-
     };
 
     private void initButtonGroup() {
@@ -231,12 +230,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         tblSale.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//
         if (ProUtil.isSalePriceChange()) {
             if (ProUtil.isPriceOption()) {
-                inventoryRepo.getPriceOption("Sale").subscribe((t) -> {
-                    SalePriceCellEditor editor = new SalePriceCellEditor(t);
-                    editor.setSaleTableModel(saleTableModel);
-                    tblSale.getColumnModel().getColumn(6).setCellEditor(editor);//price
-                });
-
+                tblSale.getColumnModel().getColumn(6).setCellEditor(new SalePriceCellEditor(inventoryRepo));//price
             } else {
                 tblSale.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//price
             }
@@ -260,17 +254,27 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             locationAutoCompleter.setObserver(this);
             inventoryRepo.getDefaultLocation().subscribe((tt) -> {
                 locationAutoCompleter.setLocation(tt);
+            }, (e) -> {
+                log.error(e.getMessage());
             });
+        }, (e) -> {
+            log.error(e.getMessage());
         });
         inventoryRepo.getCurrency().subscribe((t) -> {
             currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
             currAutoCompleter.setObserver(this);
             userRepo.getDefaultCurrency().subscribe((tt) -> {
                 currAutoCompleter.setCurrency(tt);
+            }, (e) -> {
+                log.error(e.getMessage());
             });
+        }, (e) -> {
+            log.error(e.getMessage());
         });
         inventoryRepo.getSaleMan().collectList().subscribe((t) -> {
             saleManCompleter = new SaleManAutoCompleter(txtSaleman, t, null, false, false);
+        }, (e) -> {
+            log.error(e.getMessage());
         });
     }
 
@@ -584,6 +588,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             trader.subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);
             });
+
             inventoryRepo.findCurrency(saleHis.getCurCode()).subscribe((t) -> {
                 currAutoCompleter.setCurrency(t);
             });

@@ -19,5 +19,6 @@ public class SaleDetailKey implements Serializable {
     private String vouNo;
     private String sdCode;
     private Integer uniqueId;
+    private Integer deptId;
 
 }

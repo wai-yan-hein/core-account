@@ -18,6 +18,7 @@ import com.acc.editor.RefCellEditor;
 import com.acc.editor.TraderAAutoCompleter;
 import com.acc.common.CashInOutTableModel;
 import com.acc.common.CashOpeningTableModel;
+import com.acc.common.ColumnHeaderListener;
 import com.acc.common.DateAutoCompleter;
 import com.acc.common.DateTableDecorator;
 import com.acc.common.OpeningCellRender;
@@ -43,17 +44,22 @@ import com.user.common.UserRepo;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -63,6 +69,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
@@ -103,13 +110,11 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
     private final JPopupMenu popupmenu = new JPopupMenu();
     private final JLabel lblMessage = new JLabel();
     private TableFilterHeader filterHeader;
-    private final HashMap<String, Gl> hmOpening = new HashMap<>();
     private JProgressBar progress;
     private AccountRepo accountRepo;
     private UserRepo userRepo;
     private Mono<List<Department>> monoDep;
     private Mono<List<Currency>> monoCur;
-    private final String path = String.format("%s%s%s", "temp", File.separator, "Ledger" + Global.macId);
     private DateTableDecorator decorator;
     private TraderAdjustmentTableModel adjustmentTableModel = new TraderAdjustmentTableModel();
     private double opening;
@@ -169,11 +174,35 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
     public TraderAdjustment() {
         initComponents();
         initPopup();
+        initListener();
+        initFocus();
         initTableCashInOut();
         initTableCashOP();
         initDateDecorator();
         actionMapping();
+
     }
+
+    private void initListener() {
+        tblCash.addMouseListener(new ColumnHeaderListener(tblCash));
+    }
+
+    private void initFocus() {
+        txtDate.addFocusListener(fa);
+        txtDepartment.addFocusListener(fa);
+        txtDesp.addFocusListener(fa);
+        txtRefrence.addFocusListener(fa);
+        txtPerson.addFocusListener(fa);
+        txtAccount.addFocusListener(fa);
+        txtBatch.addFocusListener(fa);
+        txtCurrency.addFocusListener(fa);
+    }
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            ((JTextField) e.getSource()).selectAll();
+        }
+    };
 
     private void batchLock(boolean lock) {
         tblCash.setEnabled(lock);
@@ -242,8 +271,8 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         despAutoCompleter.setObserver(this);
         refAutoCompleter = new RefAutoCompleter(txtRefrence, accountRepo, null, true);
         refAutoCompleter.setObserver(this);
-        batAutoCompleter = new BatchNoAutoCompeter(txtBatch, accountApi, null, true);
-        batAutoCompleter.setSelectionObserver(this);
+        batAutoCompleter = new BatchNoAutoCompeter(txtBatch, accountRepo, null, true);
+        batAutoCompleter.setObserver(this);
 //model
     }
 
@@ -313,7 +342,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         tblCash.getColumnModel().getColumn(2).setCellEditor(new DespEditor(accountRepo));
         tblCash.getColumnModel().getColumn(3).setCellEditor(new RefCellEditor(accountRepo));
         tblCash.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
-        tblCash.getColumnModel().getColumn(5).setCellEditor(new BatchCellEditor(accountApi));
+        tblCash.getColumnModel().getColumn(5).setCellEditor(new BatchCellEditor(accountRepo));
         tblCash.getColumnModel().getColumn(6).setCellEditor(new COA3CellEditor(accountRepo, 3));
         monoCur.subscribe((t) -> {
             tblCash.getColumnModel().getColumn(7).setCellEditor(new CurrencyAEditor(t));
@@ -409,10 +438,14 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         String currency = currencyAutoCompleter.getCurrency().getCurCode();
         String stDate = dateAutoCompleter.getStDate();
         String endDate = dateAutoCompleter.getEndDate();
+        TraderA trader = traderAutoCompleter.getTrader();
         if (!currency.equals("-") || !ProUtil.isMultiCur()) {
             progress.setIndeterminate(true);
             taskExecutor.execute(() -> {
                 try {
+                    String path = "temp/Ledger" + Global.macId + ".json";
+                    List<Gl> list = adjustmentTableModel.getListVGl();
+                    Util1.writeJsonFile(list, path);
                     Map<String, Object> p = new HashMap();
                     p.put("p_report_name", traderAutoCompleter.getTrader().getTraderName());
                     p.put("p_date", String.format("Between %s and %s", stDate, endDate));
@@ -422,14 +455,15 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
                     p.put("p_comp_phone", Global.companyPhone);
                     p.put("p_currency", currencyAutoCompleter.getCurrency().getCurCode());
                     p.put("p_batch_no", txtBatch.getText());
+                    p.put("p_trader_name", trader == null ? null : trader.getTraderName());
                     Gl vGl = opTableModel.getVGl(0);
-                    double opening = vGl.getDrAmt();
+                    double op = vGl.getDrAmt();
                     double closing = vGl.getCrAmt();
-                    p.put("p_opening", opening);
+                    p.put("p_opening", op);
                     p.put("p_closing", closing);
                     String rpName = chkSummary.isSelected() ? "IndividualLedgerSummary.jasper" : "TraderLedger.jasper";
                     String filePath = String.format(Global.accountRP + rpName);
-                    InputStream input = new FileInputStream(new File(path.concat(".json")));
+                    InputStream input = new FileInputStream(path);
                     JsonDataSource ds = new JsonDataSource(input);
                     JasperPrint js = JasperFillManager.fillReport(filePath, p, ds);
                     JasperViewer.viewReport(js, false);
@@ -441,6 +475,8 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
 
                 } catch (FileNotFoundException ex) {
                     log.error(ex.getMessage());
+                } catch (IOException ex) {
+                    Logger.getLogger(TraderAdjustment.class.getName()).log(Level.SEVERE, null, ex);
                 }
             });
         } else {
@@ -479,6 +515,8 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         filter.setSrcAcc(traderAutoCompleter.getTrader().getAccount());
         filter.setReference(refAutoCompleter.getAutoText().getDescription().equals("All") ? "-"
                 : refAutoCompleter.getAutoText().getDescription());
+        filter.setBatchNo(batAutoCompleter.getAutoText().getDescription().equals("All") ? "-"
+                : batAutoCompleter.getAutoText().getDescription());
         filter.setCurCode(getCurCode());
         filter.setListDepartment(getListDep());
         filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
@@ -550,28 +588,8 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
 
     public void clearFilter() {
         searchCash();
-
     }
 
-    /*  private void getLatestCurrency() {
-    if (ProUtil.isMultiCur()) {
-    initCurrency();
-    } else {
-    tblCurrency.setVisible(false);
-    jScrollPane4.setBorder(null);
-    }
-    }
-    
-    private void initCurrency() {
-    tblCurrency.setModel(curExchangeRateTableModel);
-    tblCurrency.getTableHeader().setFont(Global.tblHeaderFont);
-    tblCurrency.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    tblCurrency.setFont(Global.shortCutFont);
-    tblCurrency.setCellSelectionEnabled(true);
-    tblCurrency.setDefaultRenderer(Object.class, new TableCellRender());
-    tblCurrency.setDefaultRenderer(Double.class, new TableCellRender());
-    //curExchangeRateTableModel.setListEx(exchangeService.getLatestExchange(Global.compCode, Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd")));
-    }*/
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

@@ -33,7 +33,7 @@ public class AllCashTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(AllCashTableModel.class);
     private List<Gl> listVGl = new ArrayList();
-    private String[] columnNames = {"Date", "Dept:", "Description", "Ref :", "No :", "Person", "Account", "Curr", "Cash In / Dr", "Cash Out / Cr"};
+    private String[] columnNames = {"Date", "Dept:", "Description", "Ref :", "No :", "Batch No", "Project No", "Person", "Account", "Curr", "Cash In / Dr", "Cash Out / Cr"};
     private String sourceAccId;
     private JTable parent;
     private SelectionObserver observer;
@@ -118,9 +118,9 @@ public class AllCashTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 8 ->
+            case 10 ->
                 Double.class;
-            case 9 ->
+            case 11 ->
                 Double.class;
             default ->
                 String.class;
@@ -155,17 +155,23 @@ public class AllCashTableModel extends AbstractTableModel {
                         return vgi.getRefNo();
                     }
                     case 5 -> {
+                        return vgi.getBatchNo();
+                    }
+                    case 6 -> {
+                        return vgi.getProjectNo();
+                    }
+                    case 7 -> {
                         //Person
                         return vgi.getTraderName();
                     }
-                    case 6 -> {
+                    case 8 -> {
                         //Account
                         return vgi.getKey().getGlCode() != null ? Util1.isNull(vgi.getAccName(), "* Journal *") : vgi.getAccName();
                     }
-                    case 7 -> {
+                    case 9 -> {
                         return vgi.getCurCode();
                     }
-                    case 8 -> {
+                    case 10 -> {
                         if (vgi.getDrAmt() != null) {
                             if (vgi.getDrAmt() == 0) {
                                 return null;
@@ -176,7 +182,7 @@ public class AllCashTableModel extends AbstractTableModel {
                             return vgi.getDrAmt();
                         }
                     }
-                    case 9 -> {
+                    case 11 -> {
                         if (vgi.getCrAmt() != null) {
                             if (vgi.getCrAmt() == 0) {
                                 return null;
@@ -246,15 +252,28 @@ public class AllCashTableModel extends AbstractTableModel {
                         } else {
                             gl.setReference(Util1.getString(value));
                         }
+                        parent.setColumnSelectionInterval(4, 4);
                     }
-                    parent.setColumnSelectionInterval(4, 4);
                 }
                 case 4 -> {
                     if (value != null) {
                         gl.setRefNo(Util1.getString(value));
+                        parent.setColumnSelectionInterval(5, 5);
                     }
                 }
                 case 5 -> {
+                    if (value instanceof VDescription v) {
+                        gl.setBatchNo(v.getDescription());
+                        parent.setColumnSelectionInterval(6, 6);
+                    }
+                }
+                case 6 -> {
+                    if (value instanceof VDescription v) {
+                        gl.setProjectNo(v.getDescription());
+                        parent.setColumnSelectionInterval(7, 7);
+                    }
+                }
+                case 7 -> {
                     if (value != null) {
                         if (value instanceof TraderA t) {
                             gl.setTraderCode(t.getKey().getCode());
@@ -279,7 +298,7 @@ public class AllCashTableModel extends AbstractTableModel {
                         }
                     }
                 }
-                case 6 -> {
+                case 8 -> {
                     if (value != null) {
                         if (value instanceof ChartOfAccount coa) {
                             if (!coa.getKey().getCoaCode().equals(sourceAccId)) {
@@ -297,7 +316,7 @@ public class AllCashTableModel extends AbstractTableModel {
 
                     }
                 }
-                case 7 -> {
+                case 9 -> {
                     if (value != null) {
                         if (value instanceof Currency curr) {
                             String cuCode = curr.getCurCode();
@@ -306,11 +325,11 @@ public class AllCashTableModel extends AbstractTableModel {
                     }
                     parent.setColumnSelectionInterval(7, 7);
                 }
-                case 8 -> {
+                case 10 -> {
                     gl.setDrAmt(Util1.getDouble(value));
                     gl.setCrAmt(null);
                 }
-                case 9 -> {
+                case 11 -> {
                     gl.setCrAmt(Util1.getDouble(value));
                     gl.setDrAmt(null);
                 }

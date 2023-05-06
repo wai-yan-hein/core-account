@@ -9,7 +9,6 @@ import com.inventory.model.CFont;
 import com.user.model.Currency;
 import com.common.Global;
 import com.common.ProUtil;
-import com.common.ReturnObject;
 import com.common.Util1;
 import com.inventory.model.AccSetting;
 import com.inventory.model.Category;
@@ -66,12 +65,9 @@ import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
 import com.inventory.model.WeightLossHis;
 import com.inventory.model.WeightLossHisKey;
-import java.time.Duration;
-import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -641,6 +637,21 @@ public class InventoryRepo {
                 .bodyToMono(UnitRelation.class);
     }
 
+    public Mono<General> getPrice(String stockCode, String vouDate, String unit, String type) {
+        return switch (type) {
+            case "PUR-R" ->
+                getPurRecentPrice(stockCode, vouDate, unit);
+            case "PUR-A" ->
+                getPurAvgPrice(stockCode, vouDate, unit);
+            case "PRO-R" ->
+                getProductionRecentPrice(stockCode, vouDate, unit);
+            case "WL-R" ->
+                getWeightLossRecentPrice(stockCode, vouDate, unit);
+            default ->
+                null;
+        };
+    }
+
     public Mono<General> getPurRecentPrice(String stockCode, String vouDate, String unit) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/report/get-purchase-recent-price")
@@ -869,12 +880,13 @@ public class InventoryRepo {
                 .collectList();
     }
 
-    public Mono<List<Pattern>> getPattern(String stockCode, Integer deptId) {
+    public Mono<List<Pattern>> getPattern(String stockCode, Integer deptId, String vouDate) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-pattern")
                 .queryParam("stockCode", stockCode)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", deptId)
+                .queryParam("vouDate", vouDate)
                 .build())
                 .retrieve()
                 .bodyToFlux(Pattern.class)

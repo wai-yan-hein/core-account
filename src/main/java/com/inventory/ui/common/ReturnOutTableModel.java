@@ -383,8 +383,8 @@ public class ReturnOutTableModel extends AbstractTableModel {
 
     public void delete(int row) {
         RetOutHisDetail sdh = listDetail.get(row);
-        if (sdh.getRoKey() != null) {
-            deleteList.add(sdh.getRoKey().getRdCode());
+        if (sdh.getKey() != null) {
+            deleteList.add(sdh.getKey().getRdCode());
         }
         listDetail.remove(row);
         addNewRow();

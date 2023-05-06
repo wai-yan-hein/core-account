@@ -9,7 +9,9 @@ import com.common.Global;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.PriceOption;
+import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.SalePriceTableModel;
+import com.inventory.ui.common.SaleTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -42,6 +44,8 @@ import javax.swing.text.JTextComponent;
 public final class SalePriceAutoCompleter implements KeyListener {
 
     private final JTable table = new JTable();
+    private JTable parent;
+    private InventoryRepo inventoryRepo;
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
@@ -57,13 +61,14 @@ public final class SalePriceAutoCompleter implements KeyListener {
     public SalePriceAutoCompleter() {
     }
 
-    public SalePriceAutoCompleter(JTextComponent comp, List<PriceOption> list,
+    public SalePriceAutoCompleter(JTextComponent comp, JTable parent, InventoryRepo inventoryRepo,
             AbstractCellEditor editor) {
         this.textComp = comp;
         this.editor = editor;
+        this.parent = parent;
+        this.inventoryRepo = inventoryRepo;
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
-        priceTableModel.setListPrice(list);
         table.setModel(priceTableModel);
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
@@ -136,10 +141,6 @@ public final class SalePriceAutoCompleter implements KeyListener {
         });
 
         table.setRequestFocusEnabled(false);
-
-        if (!list.isEmpty()) {
-            //table.setRowSelectionInterval(0, 0);
-        }
     }
 
     public void mouseSelect() {
@@ -317,7 +318,42 @@ public final class SalePriceAutoCompleter implements KeyListener {
      */
     @Override
     public void keyReleased(KeyEvent e) {
+        if (!containKey(e)) {
+            int row = parent.convertRowIndexToModel(parent.getSelectedRow());
+            if (row >= 0) {
+                if (parent.getModel() instanceof SaleTableModel model) {
+                    String stockCode = model.getSale(row).getStockCode();
+                    if (stockCode != null) {
+                        inventoryRepo.findStock(stockCode).subscribe((s) -> {
+                            inventoryRepo.getPriceOption("Sale").subscribe((option) -> {
+                                option.forEach((op) -> {
+                                    switch (Util1.isNull(op.getKey().getPriceType(), "N")) {
+                                        case "A" ->
+                                            op.setPrice(s.getSalePriceA());
+                                        case "B" ->
+                                            op.setPrice(s.getSalePriceB());
+                                        case "C" ->
+                                            op.setPrice(s.getSalePriceC());
+                                        case "D" ->
+                                            op.setPrice(s.getSalePriceD());
+                                        case "E" ->
+                                            op.setPrice(s.getSalePriceE());
+                                        case "N" ->
+                                            op.setPrice(s.getSalePriceN());
+                                    }
+                                });
+                                priceTableModel.setListPrice(option);
+                            });
 
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean containKey(KeyEvent e) {
+        return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;
     }
 
 }

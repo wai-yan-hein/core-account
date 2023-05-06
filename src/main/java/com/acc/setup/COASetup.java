@@ -120,6 +120,8 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         accountRepo.getCOAChild("#").collectList().subscribe((t) -> {
             coaHeadTableModel.setListCoaHead(t);
             tblCoaHead.requestFocus();
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
         });
     }
 
@@ -205,6 +207,8 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
                         if (t) {
                             cOAGroupChildTableModel.delete(row);
                         }
+                    }, (e) -> {
+                        JOptionPane.showMessageDialog(this, e.getMessage());
                     });
                 }
             }
@@ -222,6 +226,8 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
                 coaGroupTableModel.addEmptyRow();
                 lblCoaGroup.setText(c.getCoaNameEng());
                 reqCoaGroup();
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
             });
         }
     }
@@ -250,6 +256,8 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
                 cOAGroupChildTableModel.addEmptyRow();
                 lblCoaChild.setText(c.getCoaNameEng());
                 reqCOAGroupChild();
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
             });
 
         }

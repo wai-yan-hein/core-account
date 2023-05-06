@@ -209,6 +209,9 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                 focusOnTable();
             });
 
+        } else {
+            journalTablModel.addEmptyRow();
+            focusOnTable();
         }
 
     }

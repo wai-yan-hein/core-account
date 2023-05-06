@@ -149,7 +149,7 @@ public class PatternTableModel extends AbstractTableModel {
             if (!Objects.isNull(value)) {
                 Pattern p = listPattern.get(row);
                 switch (column) {
-                    case 0,1 -> {
+                    case 0, 1 -> {
                         if (value instanceof Stock s) {
                             p.getKey().setStockCode(s.getKey().getStockCode());
                             p.setStockName(s.getStockName());
@@ -220,10 +220,6 @@ public class PatternTableModel extends AbstractTableModel {
         }
     }
 
-    private int uniqueId(int row) {
-        return row <= 0 ? 1 : listPattern.get(row - 1).getKey().getUniqueId() + 1;
-    }
-
     private boolean isValidEntry(Pattern pd) {
         boolean status = true;
         if (Util1.isNull(pd.getKey().getStockCode())) {
@@ -243,10 +239,11 @@ public class PatternTableModel extends AbstractTableModel {
 
     private void save(Pattern p, int row) {
         if (isValidEntry(p)) {
-            inventoryRepo.savePattern(p);
-            addNewRow();
-            table.setRowSelectionInterval(row + 1, row + 1);
-            table.setColumnSelectionInterval(0, 0);
+            inventoryRepo.savePattern(p).subscribe((t) -> {
+                addNewRow();
+                table.setRowSelectionInterval(row + 1, row + 1);
+                table.setColumnSelectionInterval(0, 0);
+            });
 
         }
     }

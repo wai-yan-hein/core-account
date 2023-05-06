@@ -14,7 +14,7 @@ import lombok.Data;
 @Data
 public class RetOutHisDetail {
 
-    private RetOutKey roKey;
+    private RetOutKey key;
     private String stockCode;
     private String userCode;
     private String stockName;

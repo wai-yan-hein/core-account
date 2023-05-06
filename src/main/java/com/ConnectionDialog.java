@@ -37,7 +37,7 @@ public class ConnectionDialog extends javax.swing.JDialog {
         setFont(Global.textFont);
 
         lblStatus.setFont(Global.textFont);
-        lblStatus.setText("Connection to Server...");
+        lblStatus.setText("Connecting to Server...");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);

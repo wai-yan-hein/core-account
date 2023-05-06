@@ -5,6 +5,7 @@
  */
 package com.acc.editor;
 
+import com.acc.common.AccountRepo;
 import com.acc.model.VDescription;
 import com.common.Global;
 import java.awt.event.FocusAdapter;
@@ -28,7 +29,7 @@ public class BatchCellEditor extends AbstractCellEditor implements TableCellEdit
 
     private JComponent component = null;
     private BatchNoAutoCompeter completer;
-    private WebClient webClient;
+    private AccountRepo accountRepo;
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusLost(FocusEvent e) {
@@ -42,8 +43,8 @@ public class BatchCellEditor extends AbstractCellEditor implements TableCellEdit
 
     };
 
-    public BatchCellEditor(WebClient webClient) {
-        this.webClient = webClient;
+    public BatchCellEditor(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
     }
 
     @Override
@@ -83,7 +84,7 @@ public class BatchCellEditor extends AbstractCellEditor implements TableCellEdit
             jtf.setText(value.toString());
             jtf.selectAll();
         }
-        completer = new BatchNoAutoCompeter(jtf, webClient, this, false);
+        completer = new BatchNoAutoCompeter(jtf, accountRepo, this, false);
         return component;
     }
 

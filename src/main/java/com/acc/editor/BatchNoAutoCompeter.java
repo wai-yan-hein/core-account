@@ -5,6 +5,7 @@
  */
 package com.acc.editor;
 
+import com.acc.common.AccountRepo;
 import com.acc.common.DespTableModel;
 import com.acc.model.VDescription;
 import com.common.Global;
@@ -17,7 +18,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
 import javax.swing.Action;
@@ -35,9 +35,6 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -57,28 +54,27 @@ public final class BatchNoAutoCompeter implements KeyListener {
     private int x = 0;
     private int y = 0;
     boolean popupOpen = false;
-    private SelectionObserver selectionObserver;
-    private WebClient webClient;
+    private SelectionObserver observer;
+    private AccountRepo accountRepo;
     private boolean filter;
 
-    public SelectionObserver getSelectionObserver() {
-        return selectionObserver;
+    public SelectionObserver getObserver() {
+        return observer;
     }
 
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
     }
 
-    //private CashFilter cashFilter = Global.allCash;
     public BatchNoAutoCompeter() {
     }
 
-    public BatchNoAutoCompeter(JTextComponent comp, WebClient client,
+    public BatchNoAutoCompeter(JTextComponent comp, AccountRepo accountRepo,
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
         this.filter = filter;
-        this.webClient = client;
+        this.accountRepo = accountRepo;
         if (this.filter) {
             setAutoText(new VDescription("All"));
         }
@@ -169,8 +165,8 @@ public final class BatchNoAutoCompeter implements KeyListener {
                     table.getSelectedRow()));
             ((JTextField) textComp).setText(desp.getDescription());
             if (editor == null) {
-                if (selectionObserver != null) {
-                    selectionObserver.selected("Selected", desp.getDescription());
+                if (observer != null) {
+                    observer.selected("Selected", desp.getDescription());
                 }
             }
         }
@@ -354,19 +350,13 @@ public final class BatchNoAutoCompeter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                Mono<ResponseEntity<List<VDescription>>> result = webClient.get()
-                        .uri(builder -> builder.path("/account/get-batch-no")
-                        .queryParam("compCode", Global.compCode)
-                        .queryParam("str", str)
-                        .build())
-                        .retrieve().toEntityList(VDescription.class);
-                result.subscribe((t) -> {
-                    List<VDescription> list = t.getBody();
+                accountRepo.getBatchNo(str).subscribe((t) -> {
                     if (this.filter) {
                         VDescription s = new VDescription("All");
-                        list.add(s);
+                        t.add(s);
                     }
-                    despModel.setListAutoText(list);
+                    despModel.setListAutoText(t);
+                    table.setRowSelectionInterval(0, 0);
                 }, (err) -> {
                     log.error(err.getMessage());
                 });

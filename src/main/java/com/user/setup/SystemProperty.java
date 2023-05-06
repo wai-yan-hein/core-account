@@ -375,6 +375,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             } else {
                 cusCompleter.setTrader(null);
             }
+        }, (e) -> {
+            log.error(e.getMessage());
         });
 
         supCompleter = new TraderAutoCompleter(txtSupplier, inventoryRepo, null, false, "SUP");
@@ -390,6 +392,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             } else {
                 supCompleter.setTrader(null);
             }
+        }, (e) -> {
+            log.error(e.getMessage());
         });
         inventoryRepo.getLocation().subscribe((t) -> {
             locCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
@@ -421,6 +425,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             } else {
                 stockAutoCompleter.setStock(null);
             }
+        }, (e) -> {
+            log.error(e.getMessage());
         });
 
         accountRepo.getDepartment().subscribe((t) -> {
@@ -453,6 +459,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             } else {
                 cashAutoCompleter.setCoa(null);
             }
+        }, (e) -> {
+            log.error(e.getMessage());
         });
         plAutoCompleter = new COA3AutoCompleter(txtPlAcc, accountRepo, null, false, 3);
         plAutoCompleter.setSelectionObserver(this);
@@ -467,6 +475,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             } else {
                 plAutoCompleter.setCoa(null);
             }
+        }, (e) -> {
+            log.error(e.getMessage());
         });
         reAutoCompleter = new COA3AutoCompleter(txtREAcc, accountRepo, null, false, 3);
         reAutoCompleter.setSelectionObserver(this);
@@ -481,6 +491,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             } else {
                 reAutoCompleter.setCoa(null);
             }
+        }, (e) -> {
+            log.error(e.getMessage());
         });
 
         inventoryAutoCompleter = new COA3AutoCompleter(txtInvGroup, accountRepo, null, false, 2);
@@ -496,6 +508,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             } else {
                 inventoryAutoCompleter.setCoa(null);
             }
+        }, (e) -> {
+            log.error(e.getMessage());
         });
         cashGroupAutoCompleter = new COA3AutoCompleter(txtCashGroup, accountRepo, null, false, 2);
         cashGroupAutoCompleter.setSelectionObserver(this);
@@ -511,6 +525,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             } else {
                 cashGroupAutoCompleter.setCoa(null);
             }
+        }, (e) -> {
+            log.error(e.getMessage());
         });
 
         fixedAutoCompleter = new COA3AutoCompleter(txtFixed, accountRepo, null, false, 1);
@@ -526,6 +542,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             } else {
                 fixedAutoCompleter.setCoa(null);
             }
+        }, (e) -> {
+            log.error(e.getMessage());
         });
         currentAutoCompleter = new COA3AutoCompleter(txtCurrent, accountRepo, null, false, 1);
         currentAutoCompleter.setSelectionObserver(this);
@@ -540,6 +558,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             } else {
                 currentAutoCompleter.setCoa(null);
             }
+        }, (e) -> {
+            log.error(e.getMessage());
         });
 
         liaAutoCompleter = new COA3AutoCompleter(txtLiability, accountRepo, null, false, 1);
@@ -555,6 +575,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             } else {
                 liaAutoCompleter.setCoa(null);
             }
+        }, (e) -> {
+            log.error(e.getMessage());
         });
 
         capitalAutoCompleter = new COA3AutoCompleter(txtCapital, accountRepo, null, false, 1);
@@ -570,6 +592,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             } else {
                 capitalAutoCompleter.setCoa(null);
             }
+        }, (e) -> {
+            log.error(e.getMessage());
         });
 
         incomeAutoCompleter = new COA3AutoCompleter(txtIncome, accountRepo, null, false, 1);
@@ -585,6 +609,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             } else {
                 incomeAutoCompleter.setCoa(null);
             }
+        }, (e) -> {
+            log.error(e.getMessage());
         });
 
         otherIncomeAutoCompleter = new COA3AutoCompleter(txtOtherIncome, accountRepo, null, false, 1);
@@ -600,6 +626,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             } else {
                 otherIncomeAutoCompleter.setCoa(null);
             }
+        }, (e) -> {
+            log.error(e.getMessage());
         });
 
         purchaseAutoCompleter = new COA3AutoCompleter(txtPurchase, accountRepo, null, false, 1);
@@ -615,6 +643,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             } else {
                 purchaseAutoCompleter.setCoa(null);
             }
+        }, (e) -> {
+            log.error(e.getMessage());
         });
 
         expenseAutoCompleter = new COA3AutoCompleter(txtExpense, accountRepo, null, false, 1);
@@ -630,6 +660,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             } else {
                 expenseAutoCompleter.setCoa(null);
             }
+        }, (e) -> {
+            log.error(e.getMessage());
         });
 
         debtorGroupAutoCompleter = new COA3AutoCompleter(txtDebtor, accountRepo, null, false, 2);
@@ -645,6 +677,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             } else {
                 debtorGroupAutoCompleter.setCoa(null);
             }
+        }, (e) -> {
+            log.error(e.getMessage());
         });
 
         debtorAccAutoCompleter = new COA3AutoCompleter(txtCus, accountRepo, null, false, 3);
@@ -660,6 +694,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             } else {
                 debtorAccAutoCompleter.setCoa(null);
             }
+        }, (e) -> {
+            log.error(e.getMessage());
         });
 
         creditorGroupAutoCompleter = new COA3AutoCompleter(txtCreditor, accountRepo, null, false, 2);
@@ -675,6 +711,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             } else {
                 creditorGroupAutoCompleter.setCoa(null);
             }
+        }, (e) -> {
+            log.error(e.getMessage());
         });
 
         creditorAccAutoCompleter = new COA3AutoCompleter(txtSup, accountRepo, null, false, 3);
@@ -690,6 +728,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             } else {
                 creditorAccAutoCompleter.setCoa(null);
             }
+        }, (e) -> {
+            log.error(e.getMessage());
         });
     }
 
@@ -712,7 +752,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         p.setKey(pKey);
         p.setPropValue(value);
         userRepo.saveSys(p).subscribe((t) -> {
-            hmProperty.put(key, value);
+            Global.hmRoleProperty.put(key, value);
             log.info("save.");
         });
     }
@@ -726,7 +766,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         p.setKey(pKey);
         p.setPropValue(value);
         userRepo.saveRoleProperty(p).subscribe((t) -> {
-            hmProperty.put(key, value);
+            Global.hmRoleProperty.put(key, value);
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
@@ -740,7 +780,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         p.setKey(mKey);
         p.setPropValue(value);
         userRepo.saveMacProp(p).subscribe((t) -> {
-            hmProperty.put(key, value);
+            Global.hmRoleProperty.put(key, value);
         });
     }
 

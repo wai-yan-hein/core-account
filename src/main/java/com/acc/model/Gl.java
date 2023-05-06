@@ -52,6 +52,7 @@ public class Gl {
     private String narration;
     private String batchNo;
     private String vouDate;
+    private String projectNo;
 
     public Gl(String curCode, Double drAmt, Double crAmt) {
         this.curCode = curCode;
