@@ -11,6 +11,7 @@ import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.model.Location;
+import com.inventory.model.PurDetailKey;
 import com.inventory.model.PurHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
@@ -36,7 +37,7 @@ public class PurchaseTableModel extends AbstractTableModel {
     private JTable parent;
     private List<PurHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
-    private final List<String> deleteList = new ArrayList();
+    private final List<PurDetailKey> deleteList = new ArrayList();
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
     private JLabel lblRec;
@@ -384,7 +385,7 @@ public class PurchaseTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<String> getDelList() {
+    public List<PurDetailKey> getDelList() {
         return deleteList;
     }
 
@@ -397,7 +398,7 @@ public class PurchaseTableModel extends AbstractTableModel {
     public void delete(int row) {
         PurHisDetail sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
-            deleteList.add(sdh.getKey().getPdCode());
+            deleteList.add(sdh.getKey());
         }
         listDetail.remove(row);
         addNewRow();

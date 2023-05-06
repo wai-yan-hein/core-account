@@ -319,10 +319,6 @@ public class GRNTableModel extends AbstractTableModel {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
                 GRNDetail pd = new GRNDetail();
-                GRNDetailKey key = new GRNDetailKey();
-                key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
-                pd.setKey(key);
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }

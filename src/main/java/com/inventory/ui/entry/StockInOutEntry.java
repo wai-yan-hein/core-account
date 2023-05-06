@@ -239,25 +239,22 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     public boolean saveVoucher() {
         boolean status = false;
-        try {
-            if (isValidEntry() && outTableModel.isValidEntry()) {
-                progress.setIndeterminate(true);
-                io.setListSH(outTableModel.getListStock());
-                io.setListDel(outTableModel.getDeleteList());
-                inventoryApi.post()
-                        .uri("/stockio/save-stockio")
-                        .body(Mono.just(io), StockInOut.class)
-                        .retrieve()
-                        .bodyToMono(StockInOut.class)
-                        .subscribe((t) -> {
-                            clear();
-                            focusOnTable();
-                        });
+        if (isValidEntry() && outTableModel.isValidEntry()) {
+            progress.setIndeterminate(true);
+            io.setListSH(outTableModel.getListStock());
+            io.setListDel(outTableModel.getDeleteList());
+            inventoryApi.post()
+                    .uri("/stockio/save-stockio")
+                    .body(Mono.just(io), StockInOut.class)
+                    .retrieve()
+                    .bodyToMono(StockInOut.class)
+                    .subscribe((t) -> {
+                        clear();
+                        focusOnTable();
+                    }, (e) -> {
+                        JOptionPane.showMessageDialog(this, e.getMessage());
+                    });
 
-            }
-        } catch (HeadlessException ex) {
-            log.error("saveVoucher :" + ex.getMessage());
-            JOptionPane.showMessageDialog(this, "Could'nt saved.");
         }
         return status;
     }

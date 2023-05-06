@@ -5,7 +5,6 @@
  */
 package com.inventory.model;
 
-import java.io.Serializable;
 import lombok.Data;
 
 /**
@@ -13,20 +12,11 @@ import lombok.Data;
  * @author lenovo
  */
 @Data
-public class RetOutKey implements Serializable {
+public class RetOutKey {
 
-    private String rdCode;
     private String vouNo;
     private Integer deptId;
+    private Integer uniqueId;
+    private String compCode;
 
-    public RetOutKey() {
-    }
-
-    public RetOutKey(String rdCode, String vouNo, Integer deptId) {
-        this.rdCode = rdCode;
-        this.vouNo = vouNo;
-        this.deptId = deptId;
-    }
-
-   
 }

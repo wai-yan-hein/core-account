@@ -5,7 +5,6 @@
  */
 package com.inventory.model;
 
-import java.io.Serializable;
 import lombok.Data;
 
 /**
@@ -13,16 +12,10 @@ import lombok.Data;
  * @author lenovo
  */
 @Data
-public class StockInOutKey implements Serializable {
+public class StockInOutKey {
 
-    private String sdCode;
     private String vouNo;
-
-    public StockInOutKey() {
-    }
-
-    public StockInOutKey(String sdCode, String vouNo) {
-        this.sdCode = sdCode;
-        this.vouNo = vouNo;
-    }
+    private String compCode;
+    private Integer deptId;
+    private Integer uniqueId;
 }

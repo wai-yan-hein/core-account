@@ -34,6 +34,6 @@ public class RetOutHis implements java.io.Serializable {
     private Integer macId;
     private String status = "STATUS";
     private List<RetOutHisDetail> listRD;
-    private List<String> listDel;
+    private List<RetOutKey> listDel;
     private boolean vouLock;
 }

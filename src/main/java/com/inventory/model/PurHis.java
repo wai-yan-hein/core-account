@@ -49,7 +49,7 @@ public class PurHis implements java.io.Serializable {
     @NonNull
     private String status = "STATUS";
     private List<PurHisDetail> listPD;
-    private List<String> listDel;
+    private List<PurDetailKey> listDel;
     private Float commP;
     private Float commAmt;
     private Float expense;

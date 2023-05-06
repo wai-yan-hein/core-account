@@ -11,6 +11,7 @@ import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.model.OPHisDetail;
+import com.inventory.model.OPHisDetailKey;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class OpeningTableModel extends AbstractTableModel {
     private JTable parent;
     private List<OPHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
-    private final List<String> deleteList = new ArrayList();
+    private final List<OPHisDetailKey> deleteList = new ArrayList();
     private LocationAutoCompleter locationAutoCompleter;
 
     public JTable getParent() {
@@ -90,7 +91,7 @@ public class OpeningTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 3,5,6 ->
+            case 3, 5, 6 ->
                 Float.class;
             default ->
                 String.class;
@@ -100,7 +101,7 @@ public class OpeningTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 2,6 -> {
+            case 2, 6 -> {
                 return false;
             }
         }
@@ -164,7 +165,7 @@ public class OpeningTableModel extends AbstractTableModel {
         try {
             OPHisDetail record = listDetail.get(row);
             switch (column) {
-                case 0,1 -> {
+                case 0, 1 -> {
                     //Code
                     if (value != null) {
                         if (value instanceof Stock s) {
@@ -314,7 +315,7 @@ public class OpeningTableModel extends AbstractTableModel {
         JOptionPane.showMessageDialog(Global.parentForm, text);
     }
 
-    public List<String> getDelList() {
+    public List<OPHisDetailKey> getDelList() {
         return deleteList;
     }
 
@@ -326,8 +327,8 @@ public class OpeningTableModel extends AbstractTableModel {
 
     public void delete(int row) {
         OPHisDetail sdh = listDetail.get(row);
-        if (sdh.getOpCode() != null) {
-            deleteList.add(sdh.getOpCode());
+        if (sdh != null) {
+            deleteList.add(sdh.getKey());
         }
         listDetail.remove(row);
         addNewRow();

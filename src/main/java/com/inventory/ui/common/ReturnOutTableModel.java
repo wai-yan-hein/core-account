@@ -12,6 +12,7 @@ import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.RetOutHisDetail;
+import com.inventory.model.RetOutKey;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.ui.entry.ReturnOut;
@@ -36,7 +37,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
     private JTable parent;
     private List<RetOutHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
-    private final List<String> deleteList = new ArrayList();
+    private final List<RetOutKey> deleteList = new ArrayList();
     private ReturnOut returnOut;
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
@@ -371,7 +372,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<String> getDelList() {
+    public List<RetOutKey> getDelList() {
         return deleteList;
     }
 
@@ -384,7 +385,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
     public void delete(int row) {
         RetOutHisDetail sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
-            deleteList.add(sdh.getKey().getRdCode());
+            deleteList.add(sdh.getKey());
         }
         listDetail.remove(row);
         addNewRow();

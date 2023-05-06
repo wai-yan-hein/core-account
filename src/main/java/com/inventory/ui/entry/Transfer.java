@@ -220,24 +220,21 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
 
     public boolean saveVoucher() {
         boolean status = false;
-        try {
-            if (isValidEntry() && tranTableModel.isValidEntry()) {
-                progress.setIndeterminate(true);
-                io.setListTD(tranTableModel.getListTransfer());
-                io.setDelList(tranTableModel.getDeleteList());
-                inventoryApi.post()
-                        .uri("/transfer/save-transfer")
-                        .body(Mono.just(io), TransferHis.class)
-                        .retrieve()
-                        .bodyToMono(TransferHis.class)
-                        .subscribe((t) -> {
-                            clear();
-                            focusOnTable();
-                        });
-            }
-        } catch (HeadlessException ex) {
-            log.error("saveVoucher :" + ex.getMessage());
-            JOptionPane.showMessageDialog(this, "Could'nt saved.");
+        if (isValidEntry() && tranTableModel.isValidEntry()) {
+            progress.setIndeterminate(true);
+            io.setListTD(tranTableModel.getListTransfer());
+            io.setDelList(tranTableModel.getDeleteList());
+            inventoryApi.post()
+                    .uri("/transfer/save-transfer")
+                    .body(Mono.just(io), TransferHis.class)
+                    .retrieve()
+                    .bodyToMono(TransferHis.class)
+                    .subscribe((t) -> {
+                        clear();
+                        focusOnTable();
+                    }, (e) -> {
+                        JOptionPane.showMessageDialog(this, e.getMessage());
+                    });
         }
         return status;
     }

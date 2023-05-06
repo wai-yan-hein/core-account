@@ -31,7 +31,7 @@ public class OPHis {
     private Integer macId;
     private float opAmt;
     private List<OPHisDetail> detailList;
-    private List<String> listDel;
+    private List<OPHisDetailKey> listDel;
     private String status = "STATUS";
 
 }

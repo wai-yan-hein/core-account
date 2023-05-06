@@ -14,17 +14,9 @@ import lombok.Data;
 @Data
 public class RetInKey {
 
-    private String rdCode;
+    private String compCode;
     private String vouNo;
-    private Integer depId;
-
-    public RetInKey() {
-    }
-
-    public RetInKey(String rdCode, String vouNo, Integer depId) {
-        this.rdCode = rdCode;
-        this.vouNo = vouNo;
-        this.depId = depId;
-    }
+    private Integer deptId;
+    private Integer uniqueId;
 
 }

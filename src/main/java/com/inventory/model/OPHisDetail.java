@@ -13,8 +13,7 @@ import lombok.Data;
  */
 @Data
 public class OPHisDetail {
-
-    private String opCode;
+    private OPHisDetailKey key;
     private String stockCode;
     private String userCode;
     private String stockName;
@@ -27,6 +26,4 @@ public class OPHisDetail {
     private Float amount;
     private String locCode;
     private String unitCode;
-    private String vouNo;
-    private Integer uniqueId;
 }

@@ -304,27 +304,25 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     public void saveRetIn(boolean print) {
-        try {
-            if (isValidEntry() && retInTableModel.isValidEntry()) {
-                progress.setIndeterminate(true);
-                ri.setListRD(retInTableModel.getListDetail());
-                ri.setListDel(retInTableModel.getDelList());
-                Mono<RetInHis> result = inventoryApi.post()
-                        .uri("/retin/save-retin")
-                        .body(Mono.just(ri), RetInHis.class)
-                        .retrieve()
-                        .bodyToMono(RetInHis.class);
-                RetInHis r = result.block();
-                if (r != null) {
-                    if (print) {
-                        printSaveVoucher(ri.getKey().getVouNo());
-                    }
-                    clear();
-                }
-            }
-        } catch (HeadlessException ex) {
-            log.error("saveRetIn :" + ex.getMessage());
-            JOptionPane.showMessageDialog(Global.parentForm, "Could'nt saved.");
+        if (isValidEntry() && retInTableModel.isValidEntry()) {
+            progress.setIndeterminate(true);
+            ri.setListRD(retInTableModel.getListDetail());
+            ri.setListDel(retInTableModel.getDelList());
+            inventoryApi.post()
+                    .uri("/retin/save-retin")
+                    .body(Mono.just(ri), RetInHis.class)
+                    .retrieve()
+                    .bodyToMono(RetInHis.class)
+                    .subscribe((t) -> {
+                        progress.setIndeterminate(false);
+                        clear();
+                        if (print) {
+                            printSaveVoucher(ri.getKey().getVouNo());
+                        }
+                    }, (e) -> {
+                        JOptionPane.showMessageDialog(this, e.getMessage());
+                    });
+
         }
     }
 

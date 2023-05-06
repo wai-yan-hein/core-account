@@ -12,6 +12,7 @@ import com.common.Util1;
 import com.inventory.model.Stock;
 import com.inventory.model.TransferHisDetail;
 import com.inventory.model.StockUnit;
+import com.inventory.model.THDetailKey;
 import com.toedter.calendar.JDateChooser;
 import java.awt.HeadlessException;
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ public class TransferTableModel extends AbstractTableModel {
     private String[] columnNames = {"Stock Code", "Stock Name", "Relation", "Qty", "Unit"};
     private JTable parent;
     private List<TransferHisDetail> listTransfer = new ArrayList();
-    private List<String> deleteList = new ArrayList();
+    private List<THDetailKey> deleteList = new ArrayList();
     private SelectionObserver observer;
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
@@ -197,11 +198,11 @@ public class TransferTableModel extends AbstractTableModel {
         lblRec.setText("Records : " + size);
     }
 
-    public List<String> getDeleteList() {
+    public List<THDetailKey> getDeleteList() {
         return deleteList;
     }
 
-    public void setDeleteList(List<String> deleteList) {
+    public void setDeleteList(List<THDetailKey> deleteList) {
         this.deleteList = deleteList;
     }
 
@@ -285,8 +286,8 @@ public class TransferTableModel extends AbstractTableModel {
 
     public void delete(int row) {
         TransferHisDetail sdh = listTransfer.get(row);
-        if (sdh.getKey().getTdCode() != null) {
-            deleteList.add(sdh.getKey().getTdCode());
+        if (sdh.getKey()!= null) {
+            deleteList.add(sdh.getKey());
         }
         listTransfer.remove(row);
         addNewRow();

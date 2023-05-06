@@ -46,7 +46,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
@@ -283,27 +282,24 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     }
 
     public void saveRetIn(boolean print) {
-        try {
-            if (isValidEntry() && roTableModel.isValidEntry()) {
-                progress.setIndeterminate(true);
-                ri.setListRD(roTableModel.getListDetail());
-                ri.setListDel(roTableModel.getDelList());
-                Mono<RetInHis> result = inventoryApi.post()
-                        .uri("/retout/save-retout")
-                        .body(Mono.just(ri), RetInHis.class)
-                        .retrieve()
-                        .bodyToMono(RetInHis.class);
-                RetInHis t = result.block();
-                if (t != null) {
-                    if (print) {
-                        printVoucher(ri.getKey().getVouNo());
-                    }
-                    clear();
-                }
-            }
-        } catch (HeadlessException ex) {
-            log.error("saveRetIn :" + ex.getMessage());
-            JOptionPane.showMessageDialog(this, "Could not saved.");
+        if (isValidEntry() && roTableModel.isValidEntry()) {
+            progress.setIndeterminate(true);
+            ri.setListRD(roTableModel.getListDetail());
+            ri.setListDel(roTableModel.getDelList());
+            inventoryApi.post()
+                    .uri("/retout/save-retout")
+                    .body(Mono.just(ri), RetInHis.class)
+                    .retrieve()
+                    .bodyToMono(RetInHis.class)
+                    .subscribe((t) -> {
+                        progress.setIndeterminate(false);
+                        clear();
+                        if (print) {
+                            printVoucher(t.getKey().getVouNo());
+                        }
+                    }, (e) -> {
+                        JOptionPane.showMessageDialog(this, e.getMessage());
+                    });
         }
     }
 

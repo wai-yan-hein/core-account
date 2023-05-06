@@ -11,7 +11,7 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
-public class RetInHisDetail implements java.io.Serializable {
+public class RetInHisDetail {
 
     private RetInKey key;
     private String stockCode;
@@ -28,6 +28,5 @@ public class RetInHisDetail implements java.io.Serializable {
     private Float amount;
     private String locCode;
     private String locName;
-    private Integer uniqueId;
 
 }

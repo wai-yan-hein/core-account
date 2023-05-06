@@ -164,9 +164,11 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
                 int status = JOptionPane.showConfirmDialog(tblProcessDetail,
                         "Are you sure to delete?", "Delete", JOptionPane.CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
                 if (status == JOptionPane.YES_OPTION) {
-                    inventoryRepo.delete(processHisDetailTableModel.getObject(row).getKey());
-                    processHisDetailTableModel.deleteObject(row);
-                    processHisDetailTableModel.calPrice();
+                    inventoryRepo.delete(processHisDetailTableModel.getObject(row).getKey()).subscribe((t) -> {
+                        processHisDetailTableModel.deleteObject(row);
+                        processHisDetailTableModel.calPrice();
+                    });
+
                 }
             }
         }

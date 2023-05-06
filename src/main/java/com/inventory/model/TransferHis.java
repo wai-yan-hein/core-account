@@ -27,7 +27,7 @@ public class TransferHis {
     private String locCodeTo;
     private Integer macId;
     private List<TransferHisDetail> listTD;
-    private List<String> delList;
+    private List<THDetailKey> delList;
     private String status;
     private boolean vouLock;
 

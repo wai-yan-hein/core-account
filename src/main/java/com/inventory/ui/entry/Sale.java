@@ -397,6 +397,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     String reportName = getReportName();
                     printVoucher(t.getKey().getVouNo(), reportName, chkVou.isSelected());
                 }
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
             });
 
         }

@@ -186,41 +186,38 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     }
 
     private void saveOpening() {
-        try {
-            if (isValidEntry() && openingTableModel.isValidEntry()) {
-                progress.setIndeterminate(true);
-                if (lblStatus.getText().equals("NEW")) {
-                    OPHisKey key = new OPHisKey();
-                    key.setCompCode(Global.compCode);
-                    key.setDeptId(Global.deptId);
-                    key.setVouNo(null);
-                    oPHis.setKey(key);
-                    oPHis.setCreatedBy(Global.loginUser.getUserCode());
-                    oPHis.setCreatedDate(Util1.getTodayDate());
-                } else {
-                    oPHis.setCreatedBy(Global.loginUser.getUserCode());
-                }
-                oPHis.setCurCode(currencyAAutoCompleter.getCurrency().getCurCode());
-                oPHis.setVouDate(txtOPDate.getDate());
-                oPHis.setRemark(txtRemark.getText());
-                oPHis.setStatus(lblStatus.getText());
-                oPHis.setMacId(Global.macId);
-                oPHis.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
-                oPHis.setDetailList(openingTableModel.getListDetail());
-                oPHis.setListDel(openingTableModel.getDelList());
-                inventoryApi.post()
-                        .uri("/setup/save-opening")
-                        .body(Mono.just(oPHis), OPHis.class)
-                        .retrieve()
-                        .bodyToMono(OPHis.class)
-                        .subscribe((t) -> {
-                            clear();
-                            progress.setIndeterminate(false);
-                        });
+        if (isValidEntry() && openingTableModel.isValidEntry()) {
+            progress.setIndeterminate(true);
+            if (lblStatus.getText().equals("NEW")) {
+                OPHisKey key = new OPHisKey();
+                key.setCompCode(Global.compCode);
+                key.setDeptId(Global.deptId);
+                key.setVouNo(null);
+                oPHis.setKey(key);
+                oPHis.setCreatedBy(Global.loginUser.getUserCode());
+                oPHis.setCreatedDate(Util1.getTodayDate());
+            } else {
+                oPHis.setCreatedBy(Global.loginUser.getUserCode());
             }
-        } catch (HeadlessException ex) {
-            log.error("Save Opening :" + ex.getMessage());
-            JOptionPane.showMessageDialog(Global.parentForm, "Could'nt saved.");
+            oPHis.setCurCode(currencyAAutoCompleter.getCurrency().getCurCode());
+            oPHis.setVouDate(txtOPDate.getDate());
+            oPHis.setRemark(txtRemark.getText());
+            oPHis.setStatus(lblStatus.getText());
+            oPHis.setMacId(Global.macId);
+            oPHis.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
+            oPHis.setDetailList(openingTableModel.getListDetail());
+            oPHis.setListDel(openingTableModel.getDelList());
+            inventoryApi.post()
+                    .uri("/setup/save-opening")
+                    .body(Mono.just(oPHis), OPHis.class)
+                    .retrieve()
+                    .bodyToMono(OPHis.class)
+                    .subscribe((t) -> {
+                        clear();
+                        progress.setIndeterminate(false);
+                    }, (e) -> {
+                        JOptionPane.showMessageDialog(this, e.getMessage());
+                    });
         }
     }
 

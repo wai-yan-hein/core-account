@@ -11,11 +11,11 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
-public class THDetailKey {
+public class OPHisDetailKey {
 
     private String vouNo;
+    private String compCode;
     private Integer deptId;
     private Integer uniqueId;
-    private String compCode;
 
 }

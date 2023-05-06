@@ -28,7 +28,6 @@ public class RetOutHisDetail {
     private Float amount;
     private String locCode;
     private String locName;
-    private Integer uniqueId;
-    private String compCode;
+
 
 }

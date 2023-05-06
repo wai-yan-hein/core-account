@@ -29,5 +29,5 @@ public class StockInOut implements Serializable {
     private Boolean deleted;
     private String status = "STATUS";
     private List<StockInOutDetail> listSH;
-    private List<String> listDel;
+    private List<StockInOutKey> listDel;
 }

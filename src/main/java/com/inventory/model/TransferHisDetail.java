@@ -23,5 +23,4 @@ public class TransferHisDetail {
     private String relName;
     private Float qty;
     private String unitCode;
-    private Integer uniqueId;
 }

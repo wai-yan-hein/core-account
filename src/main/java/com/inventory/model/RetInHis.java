@@ -4,7 +4,6 @@
  */
 package com.inventory.model;
 
-import com.user.model.Currency;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
@@ -14,7 +13,7 @@ import lombok.Data;
  * @author WSwe
  */
 @Data
-public class RetInHis implements java.io.Serializable {
+public class RetInHis {
 
     private RetInHisKey key;
     private String traderCode;
@@ -35,7 +34,7 @@ public class RetInHis implements java.io.Serializable {
     private Integer macId;
     private String status = "STATUS";
     private List<RetInHisDetail> listRD;
-    private List<String> listDel;
+    private List<RetInKey> listDel;
     private boolean vouLock;
 
 }

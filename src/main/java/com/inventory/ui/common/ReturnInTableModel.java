@@ -12,6 +12,7 @@ import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.RetInHisDetail;
+import com.inventory.model.RetInKey;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.ui.entry.ReturnIn;
@@ -36,7 +37,7 @@ public class ReturnInTableModel extends AbstractTableModel {
     private JTable parent;
     private List<RetInHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
-    private final List<String> deleteList = new ArrayList();
+    private final List<RetInKey> deleteList = new ArrayList();
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
     private JLabel lblRec;
@@ -389,7 +390,7 @@ public class ReturnInTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<String> getDelList() {
+    public List<RetInKey> getDelList() {
         return deleteList;
     }
 
@@ -402,7 +403,7 @@ public class ReturnInTableModel extends AbstractTableModel {
     public void delete(int row) {
         RetInHisDetail sdh = listDetail.get(row);
         if (sdh.getKey()!= null) {
-            deleteList.add(sdh.getKey().getRdCode());
+            deleteList.add(sdh.getKey());
         }
         listDetail.remove(row);
         addNewRow();

@@ -13,6 +13,7 @@ import com.inventory.model.Location;
 import com.inventory.model.Pattern;
 import com.inventory.model.Stock;
 import com.inventory.model.StockInOutDetail;
+import com.inventory.model.StockInOutKey;
 import com.inventory.model.StockUnit;
 import com.toedter.calendar.JDateChooser;
 import java.awt.HeadlessException;
@@ -35,7 +36,7 @@ public class StockInOutTableModel extends AbstractTableModel {
         "In-Qty", "In-Unit", "Out-Qty", "Out-Unit", "Cost Price", "Amount"};
     private JTable parent;
     private List<StockInOutDetail> listStock = new ArrayList();
-    private List<String> deleteList = new ArrayList();
+    private List<StockInOutKey> deleteList = new ArrayList();
     private SelectionObserver observer;
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
@@ -343,12 +344,8 @@ public class StockInOutTableModel extends AbstractTableModel {
 
     }
 
-    public List<String> getDeleteList() {
+    public List<StockInOutKey> getDeleteList() {
         return deleteList;
-    }
-
-    public void setDeleteList(List<String> deleteList) {
-        this.deleteList = deleteList;
     }
 
     private void setColumnSelection(int column) {
@@ -446,7 +443,7 @@ public class StockInOutTableModel extends AbstractTableModel {
     public void delete(int row) {
         StockInOutDetail sdh = listStock.get(row);
         if (sdh.getKey() != null) {
-            deleteList.add(sdh.getKey().getSdCode());
+            deleteList.add(sdh.getKey());
         }
         listStock.remove(row);
         addNewRow();
