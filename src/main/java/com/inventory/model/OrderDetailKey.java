@@ -5,16 +5,15 @@
  */
 package com.inventory.model;
 
-import java.io.Serializable;
 import lombok.Data;
-
 
 /**
  *
  * @author wai yan
  */
 @Data
-public class OrderDetailKey implements Serializable {
+public class OrderDetailKey {
+
     private String compCode;
     private Integer deptId;
     private String vouNo;

@@ -242,8 +242,8 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             tblOrder.getColumnModel().getColumn(7).setCellEditor(new StockUnitEditor(t));//unit
         });
         tblOrder.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());//wt
+        tblOrder.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());//price
         tblOrder.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());//
-        tblOrder.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//price
         tblOrder.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblOrder.setDefaultRenderer(Float.class, new DecimalFormatRender());
         tblOrder.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -592,55 +592,56 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 saleManCompleter.setSaleMan(t);
             });
             String vouNo = sh.getKey().getVouNo();
-            Mono<ResponseEntity<List<OrderHisDetail>>> result = inventoryApi.get()
+            inventoryApi.get()
                     .uri(builder -> builder.path("/order/get-order-detail")
                     .queryParam("vouNo", vouNo)
                     .queryParam("compCode", Global.compCode)
                     .queryParam("deptId", sh.getKey().getDeptId())
                     .build())
-                    .retrieve().toEntityList(OrderHisDetail.class);
-            result.subscribe((t) -> {
-                orderTableModel.setListDetail(t.getBody());
-                orderTableModel.addNewRow();
-                if (sh.isVouLock()) {
-                    lblStatus.setText("Voucher is locked.");
-                    lblStatus.setForeground(Color.RED);
-                    disableForm(false);
-                } else if (!ProUtil.isSaleEdit()) {
-                    lblStatus.setText("No Permission.");
-                    lblStatus.setForeground(Color.RED);
-                    disableForm(false);
-                    observer.selected("print", true);
-                } else if (Util1.getBoolean(sh.getDeleted())) {
-                    lblStatus.setText("DELETED");
-                    lblStatus.setForeground(Color.RED);
-                    disableForm(false);
-                    observer.selected("delete", true);
-                } else {
-                    lblStatus.setText("EDIT");
-                    lblStatus.setForeground(Color.blue);
-                    disableForm(true);
-                }
-                txtVouNo.setText(orderHis.getKey().getVouNo());
-                txtDueDate.setDate(orderHis.getCreditTerm());
-                txtRemark.setText(orderHis.getRemark());
-                txtReference.setText(orderHis.getReference());
-                txtOrderDate.setDate(orderHis.getVouDate());
-                txtVouTotal.setValue(Util1.getFloat(orderHis.getVouTotal()));
-                txtVouDiscP.setValue(Util1.getFloat(orderHis.getDiscP()));
-                txtVouDiscount.setValue(Util1.getFloat(orderHis.getDiscount()));
-                txtVouTaxP.setValue(Util1.getFloat(orderHis.getTaxPercent()));
-                txtTax.setValue(Util1.getFloat(orderHis.getTaxAmt()));
-                txtVouPaid.setValue(Util1.getFloat(orderHis.getPaid()));
-                txtVouBalance.setValue(Util1.getFloat(orderHis.getBalance()));
-                txtGrandTotal.setValue(Util1.getFloat(orderHis.getGrandTotal()));
-                chkPaid.setSelected(orderHis.getPaid() > 0);
-                focusTable();
-                progress.setIndeterminate(false);
-            }, (e) -> {
-                progress.setIndeterminate(false);
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+                    .retrieve().bodyToFlux(OrderHisDetail.class)
+                    .collectList()
+                    .subscribe((t) -> {
+                        orderTableModel.setListDetail(t);
+                        orderTableModel.addNewRow();
+                        if (sh.isVouLock()) {
+                            lblStatus.setText("Voucher is locked.");
+                            lblStatus.setForeground(Color.RED);
+                            disableForm(false);
+                        } else if (!ProUtil.isSaleEdit()) {
+                            lblStatus.setText("No Permission.");
+                            lblStatus.setForeground(Color.RED);
+                            disableForm(false);
+                            observer.selected("print", true);
+                        } else if (Util1.getBoolean(sh.getDeleted())) {
+                            lblStatus.setText("DELETED");
+                            lblStatus.setForeground(Color.RED);
+                            disableForm(false);
+                            observer.selected("delete", true);
+                        } else {
+                            lblStatus.setText("EDIT");
+                            lblStatus.setForeground(Color.blue);
+                            disableForm(true);
+                        }
+                        txtVouNo.setText(orderHis.getKey().getVouNo());
+                        txtDueDate.setDate(orderHis.getCreditTerm());
+                        txtRemark.setText(orderHis.getRemark());
+                        txtReference.setText(orderHis.getReference());
+                        txtOrderDate.setDate(orderHis.getVouDate());
+                        txtVouTotal.setValue(Util1.getFloat(orderHis.getVouTotal()));
+                        txtVouDiscP.setValue(Util1.getFloat(orderHis.getDiscP()));
+                        txtVouDiscount.setValue(Util1.getFloat(orderHis.getDiscount()));
+                        txtVouTaxP.setValue(Util1.getFloat(orderHis.getTaxPercent()));
+                        txtTax.setValue(Util1.getFloat(orderHis.getTaxAmt()));
+                        txtVouPaid.setValue(Util1.getFloat(orderHis.getPaid()));
+                        txtVouBalance.setValue(Util1.getFloat(orderHis.getBalance()));
+                        txtGrandTotal.setValue(Util1.getFloat(orderHis.getGrandTotal()));
+                        chkPaid.setSelected(orderHis.getPaid() > 0);
+                        focusTable();
+                        progress.setIndeterminate(false);
+                    }, (e) -> {
+                        progress.setIndeterminate(false);
+                        JOptionPane.showMessageDialog(this, e.getMessage());
+                    });
         }
     }
 
