@@ -226,14 +226,21 @@ public class AccountRepo {
                 .bodyToMono(ChartOfAccount.class);
     }
 
-    public Mono<Double> getTraderBalance(String date, String traderCode, String compCode) {
-        return accountApi.get()
-                .uri(builder -> builder.path("/report/get-trader-balance")
-                .queryParam("date", date)
-                .queryParam("traderCode", traderCode)
-                .queryParam("compCode", compCode)
-                .build())
-                .retrieve().bodyToMono(Double.class);
+    public Double getTraderBalance(String date, String traderCode, String compCode) {
+        try {
+            return accountApi.get()
+                    .uri(builder -> builder.path("/report/get-trader-balance")
+                    .queryParam("date", date)
+                    .queryParam("traderCode", traderCode)
+                    .queryParam("compCode", compCode)
+                    .build())
+                    .retrieve()
+                    .bodyToMono(Double.class)
+                    .block();
+        } catch (Exception e) {
+            log.error("getTraderBalance : " + e.getMessage());
+        }
+        return 0.0;
     }
 
     public Flux<COATemplate> getCOAChildTemplate(String coaCode, Integer busId) {
