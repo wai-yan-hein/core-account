@@ -43,7 +43,6 @@ import com.common.SelectionObserver;
 import com.common.Util1;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
-import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.common.UserRepo;
 import java.awt.Color;
 import java.awt.Dimension;

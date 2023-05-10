@@ -19,7 +19,6 @@ import com.inventory.editor.CurrencyAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.SaleManAutoCompleter;
-import com.inventory.editor.SalePriceCellEditor;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
@@ -68,7 +67,6 @@ import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -89,8 +87,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     private WebClient inventoryApi;
     @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
-    private AccountRepo accountRepo;
     @Autowired
     private UserRepo userRepo;
     private CurrencyAutoCompleter currAutoCompleter;
@@ -376,16 +372,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             orderHis.setListDel(orderTableModel.getDelList());
             orderHis.setBackup(orderTableModel.isChange());
             progress.setIndeterminate(true);
-            if (print) {
-                if (Util1.getBoolean(ProUtil.getProperty("trader.balance"))) {
-                    String date = Util1.toDateStr(txtOrderDate.getDate(), "yyyy-MM-dd");
-                    String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
-                    balance = accountRepo.getTraderBalance(date, traderCode, Global.compCode).block();
-                    if (balance != 0) {
-                        prvBal = balance - Util1.getDouble(txtVouBalance.getValue());
-                    }
-                }
-            }
             inventoryRepo.save(orderHis).subscribe((t) -> {
                 progress.setIndeterminate(false);
                 clear();
