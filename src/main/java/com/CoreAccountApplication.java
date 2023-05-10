@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +46,7 @@ public class CoreAccountApplication {
     private static Tray tray;
     private static final Image appIcon = new ImageIcon(CoreAccountApplication.class.getResource("/images/applogo.png")).getImage();
     private static final String APP_NAME = "Core Account";
-
+    private static ServerThread serverThread;
     public static void main(String[] args) {
         applayTheme();
         loadProperty();
@@ -94,6 +95,7 @@ public class CoreAccountApplication {
         Thread thread = new Thread(() -> {
             context.close();
             tray.removeTray();
+            serverThread.shutDown();
             main(args.getSourceArgs());
         });
         thread.setDaemon(true);
@@ -132,8 +134,8 @@ public class CoreAccountApplication {
             initFont(Util1.getInteger(p.getProperty("font.size")));
             int port = getPort(p.get("program.id"));
             checkRun(port);
-            ServerThread t = new ServerThread(port);
-            t.start();
+            serverThread = new ServerThread(port);
+            serverThread.start();
         } catch (IOException e) {
             log.error("loadProperty : " + e.getMessage());
             JOptionPane.showMessageDialog(Global.parentForm, "Property file not found.");
