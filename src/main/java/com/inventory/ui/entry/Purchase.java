@@ -929,7 +929,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         d.initMain();
         d.setLocationRelativeTo(null);
         d.setVisible(true);
-
     }
 
     private void expenseDialog() {

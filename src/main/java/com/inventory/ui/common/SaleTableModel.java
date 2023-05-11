@@ -12,9 +12,12 @@ import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
-import com.inventory.model.PriceOption;
+import com.inventory.model.OrderHis;
+import com.inventory.model.OrderHisDetail;
 import com.inventory.model.SaleDetailKey;
+import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
+import com.inventory.model.SaleHisKey;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
@@ -371,6 +374,32 @@ public class SaleTableModel extends AbstractTableModel {
 
     public List<SaleHisDetail> getListDetail() {
         return listDetail;
+    }
+
+    public void setListOrderDetail(List<OrderHisDetail> listDetail) {
+        for (OrderHisDetail ld : listDetail) {
+            SaleHisDetail sdl = new SaleHisDetail();
+            sdl.setAmount(ld.getAmount());
+            sdl.setBatchNo(ld.getBatchNo());
+            sdl.setBrandName(ld.getBrandName());
+            sdl.setCatName(ld.getCatName());
+            sdl.setGroupName(ld.getGroupName());
+            sdl.setLocCode(ld.getLocCode());
+            sdl.setLocName(ld.getLocName());
+            sdl.setPrice(ld.getPrice());
+            sdl.setQty(ld.getQty());
+            sdl.setRelName(ld.getRelName());
+            sdl.setStdWeight(ld.getStdWeight());
+            sdl.setStock(ld.getStock());
+            sdl.setStockCode(ld.getStockCode());
+            sdl.setStockName(ld.getStockName());
+            sdl.setTraderName(ld.getTraderName());
+            sdl.setUnitCode(ld.getUnitCode());
+            this.listDetail.add(sdl);
+        }
+//        this.listDetail = listDetail;
+        setRecord(listDetail.size());
+        addNewRow();
     }
 
     public void setListDetail(List<SaleHisDetail> listDetail) {
