@@ -33,6 +33,7 @@ public class OpeningBalance {
     private String coaUsrCode;
     private String coaParent;
     private String regCode;
+    private String projectNo;
 
     public OpeningBalance() {
 

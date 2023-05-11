@@ -22,7 +22,10 @@ import com.acc.model.TmpOpening;
 import com.acc.model.TraderA;
 import com.acc.model.TraderAKey;
 import com.acc.model.StockOPKey;
+import com.acc.model.VApar;
 import com.acc.model.VDescription;
+import com.acc.model.VTriBalance;
+import com.common.FilterObject;
 import com.common.Global;
 import com.common.ReturnObject;
 import com.common.Util1;
@@ -442,6 +445,69 @@ public class AccountRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(VDescription.class)
+                .collectList();
+    }
+
+    public Mono<List<Gl>> searchJournal(ReportFilter filter) {
+        return accountApi.post()
+                .uri("/account/search-journal")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToFlux(Gl.class)
+                .collectList();
+    }
+
+    public Mono<List<StockOP>> searchOP(ReportFilter filter) {
+        return accountApi.post()
+                .uri("/account/search-stock-op")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToFlux(StockOP.class)
+                .collectList();
+    }
+
+    public Mono<List<OpeningBalance>> getOpeningBalance(ReportFilter filter) {
+        return accountApi.post()
+                .uri("/account/get-opening")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToFlux(OpeningBalance.class)
+                .collectList();
+    }
+
+    public Mono<ReturnObject> getReport(ReportFilter filter) {
+        return accountApi
+                .post()
+                .uri("/report/get-report")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+    }
+
+    public Mono<List<VApar>> getArAp(ReportFilter filter) {
+        return accountApi.post()
+                .uri("/report/get-arap")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToFlux(VApar.class)
+                .collectList();
+    }
+
+    public Mono<List<VTriBalance>> getTri(ReportFilter filter) {
+        return accountApi.post()
+                .uri("/report/get-tri-balance")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToFlux(VTriBalance.class)
+                .collectList();
+    }
+
+    public Mono<List<Gl>> searchGl(ReportFilter filter) {
+        return accountApi.post()
+                .uri("/account/search-gl")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToFlux(Gl.class)
                 .collectList();
     }
 }

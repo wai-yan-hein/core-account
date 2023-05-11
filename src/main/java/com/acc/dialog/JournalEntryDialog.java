@@ -6,6 +6,7 @@
 package com.acc.dialog;
 
 import com.acc.common.AccountRepo;
+import com.acc.common.ColumnHeaderListener;
 import com.acc.common.JournalEntryTableModel;
 import com.acc.editor.COA3CellEditor;
 import com.acc.editor.CurrencyAEditor;
@@ -18,6 +19,10 @@ import com.common.ProUtil;
 import com.common.Util1;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
+import com.user.common.UserRepo;
+import com.user.editor.ProjectAutoCompleter;
+import com.user.model.Project;
+import com.user.model.ProjectKey;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
@@ -30,12 +35,12 @@ import java.util.Objects;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
@@ -44,17 +49,18 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class JournalEntryDialog extends javax.swing.JDialog implements KeyListener {
 
     private final JournalEntryTableModel journalTablModel = new JournalEntryTableModel();
+    private ProjectAutoCompleter projectAutoCompleter;
     private String status;
     private AccountRepo accountRepo;
-    private WebClient accountApi;
+    private UserRepo userRepo;
     private String vouNo;
 
-    public WebClient getAccountApi() {
-        return accountApi;
+    public UserRepo getUserRepo() {
+        return userRepo;
     }
 
-    public void setAccountApi(WebClient accountApi) {
-        this.accountApi = accountApi;
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
     }
 
     public String getVouNo() {
@@ -86,8 +92,8 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
      *
      * @param frame
      */
-    public JournalEntryDialog() {
-        super(Global.parentForm, true);
+    public JournalEntryDialog(JFrame frame) {
+        super(frame, true);
         initComponents();
         initKeyListener();
         initFocusListener();
@@ -103,9 +109,14 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         btnNew.setEnabled(lock);
     }
 
+    private void initCombo() {
+        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
+    }
+
     private void initFocusListener() {
         txtVouDate.getDateEditor().getUiComponent().addFocusListener(fa);
         txtRefrence.addFocusListener(fa);
+        txtProjectNo.addFocusListener(fa);
     }
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
@@ -153,6 +164,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         batchLock(!Global.batchLock);
         btnConversion.setVisible(ProUtil.isMultiCur());
         initTable();
+        initCombo();
         searchJournalByVouId();
         txtVouDate.requestFocusInWindow();
     }
@@ -201,12 +213,20 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
             accountRepo.getJournal(vouNo).collectList().subscribe((t) -> {
                 Date glDate = t.get(0).getGlDate();
                 String ref = t.get(0).getReference();
+                String projectNo = t.get(0).getProjectNo();
+                userRepo.find(new ProjectKey(projectNo, Global.compCode)).subscribe((p) -> {
+                    projectAutoCompleter.setProject(p);
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                });
                 txtVouDate.setDate(glDate);
                 txtRefrence.setText(ref);
                 txtVouNo.setText(vouNo);
                 journalTablModel.setListGV(t);
                 journalTablModel.addEmptyRow();
                 focusOnTable();
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
             });
 
         } else {
@@ -224,9 +244,9 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                 list.get(0).setDelList(journalTablModel.getDelList());
             }
             accountRepo.saveGl(list).subscribe((t) -> {
-                if (t != null) {
-                    clear();
-                }
+                clear();
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
             });
 
         }
@@ -236,6 +256,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
     public boolean isValidData() {
         for (Gl g : journalTablModel.getListGV()) {
             g.setReference(txtRefrence.getText());
+            g.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
             g.setGlDate(txtVouDate.getDate());
             g.setMacId(Global.macId);
             if (lblStatus.getText().equals("EDIT")) {
@@ -269,6 +290,8 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         txtVouDate.getDateEditor().getUiComponent().addKeyListener(this);
         txtRefrence.addKeyListener(this);
         txtVouNo.addKeyListener(this);
+        txtProjectNo.addKeyListener(this);
+        tblJournal.addMouseListener(new ColumnHeaderListener(tblJournal));
         tblJournal.addKeyListener(this);
         btnSave.addKeyListener(this);
     }
@@ -284,6 +307,9 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         txtVouNo.setEditable(false);
         journalTablModel.clear();
         journalTablModel.addEmptyRow();
+        if (projectAutoCompleter != null) {
+            projectAutoCompleter.setProject(null);
+        }
         focusOnTable();
     }
 
@@ -322,6 +348,8 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         txtVouNo = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         txtRefrence = new javax.swing.JTextField();
+        txtProjectNo = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblJournal = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
@@ -385,6 +413,17 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
             }
         });
 
+        txtProjectNo.setFont(Global.textFont);
+        txtProjectNo.setName("txtProjectNo"); // NOI18N
+        txtProjectNo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtProjectNoActionPerformed(evt);
+            }
+        });
+
+        jLabel5.setFont(Global.lableFont);
+        jLabel5.setText("Project No");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -393,15 +432,19 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                 .addContainerGap()
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtVouDate, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+                .addComponent(txtVouDate, javax.swing.GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtVouNo, javax.swing.GroupLayout.DEFAULT_SIZE, 261, Short.MAX_VALUE)
+                .addComponent(txtVouNo, javax.swing.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtRefrence, javax.swing.GroupLayout.DEFAULT_SIZE, 263, Short.MAX_VALUE)
+                .addComponent(txtRefrence, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtProjectNo, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -413,7 +456,9 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                         .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(txtRefrence, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel4))
+                        .addComponent(jLabel4)
+                        .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel5))
                     .addComponent(txtVouDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -612,6 +657,10 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         clear();
     }//GEN-LAST:event_btnNewActionPerformed
 
+    private void txtProjectNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtProjectNoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtProjectNoActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -623,6 +672,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
@@ -630,6 +680,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
     private javax.swing.JTable tblJournal;
     private javax.swing.JFormattedTextField txtFCrdAmt;
     private javax.swing.JFormattedTextField txtFDrAmt;
+    private javax.swing.JTextField txtProjectNo;
     private javax.swing.JTextField txtRefrence;
     private com.toedter.calendar.JDateChooser txtVouDate;
     private javax.swing.JTextField txtVouNo;
@@ -683,14 +734,17 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                 break;
             case "txtRefrence":
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_RIGHT) {
-                    tblJournal.requestFocus();
-                    if (tblJournal.getRowCount() >= 0) {
-                        tblJournal.setRowSelectionInterval(0, 0);
-                    }
+                    txtProjectNo.requestFocus();
                 }
                 if (e.getKeyCode() == KeyEvent.VK_LEFT) {
                     txtVouNo.requestFocus();
                 }
+                break;
+            case "txtProjectNo":
+                if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_RIGHT) {
+                    focusOnTable();
+                }
+
                 break;
             case "btnSave":
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_RIGHT) {

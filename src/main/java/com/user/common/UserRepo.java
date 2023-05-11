@@ -412,4 +412,15 @@ public class UserRepo {
                 .bodyToMono(Project.class);
     }
 
+    public Mono<List<Project>> searchProjectByCode(String code) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/searchProjectByCode")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("code", code)
+                .build())
+                .retrieve()
+                .bodyToFlux(Project.class)
+                .collectList();
+    }
+
 }

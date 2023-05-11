@@ -16,6 +16,7 @@ import com.common.SelectionObserver;
 import com.common.Util1;
 import com.google.gson.JsonSyntaxException;
 import com.user.model.Currency;
+import com.user.model.Project;
 import java.awt.HeadlessException;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +34,7 @@ public class DayBookTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(DayBookTableModel.class);
     private List<Gl> listVGl = new ArrayList();
-    private String[] columnNames = {"Date", "Dept:", "Description", "Ref :", "No :", "Person", "Account", "Curr", "Amount"};
+    private String[] columnNames = {"Date", "Dept:", "Description", "Ref :", "No :", "Batch No", "Project No", "Person", "Account", "Curr", "Amount"};
     private String sourceAccId;
     private JTable parent;
     private SelectionObserver observer;
@@ -51,7 +52,6 @@ public class DayBookTableModel extends AbstractTableModel {
     public void setCredit(boolean credit) {
         this.credit = credit;
     }
-    
 
     public DayBookTableModel() {
     }
@@ -126,7 +126,7 @@ public class DayBookTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 8 ->
+            case 10 ->
                 Double.class;
             default ->
                 String.class;
@@ -161,17 +161,25 @@ public class DayBookTableModel extends AbstractTableModel {
                         return vgi.getRefNo();
                     }
                     case 5 -> {
+                        //batch
+                        return vgi.getBatchNo();
+                    }
+                    case 6 -> {
+                        //project
+                        return vgi.getProjectNo();
+                    }
+                    case 7 -> {
                         //Person
                         return vgi.getTraderName();
                     }
-                    case 6 -> {
+                    case 8 -> {
                         //Account
                         return vgi.getKey().getGlCode() != null ? Util1.isNull(vgi.getAccName(), "* Journal *") : vgi.getAccName();
                     }
-                    case 7 -> {
+                    case 9 -> {
                         return vgi.getCurCode();
                     }
-                    case 8 -> {
+                    case 10 -> {
                         return credit ? vgi.getCrAmt() : vgi.getDrAmt();
                     }
                     default -> {
@@ -243,6 +251,18 @@ public class DayBookTableModel extends AbstractTableModel {
                     }
                 }
                 case 5 -> {
+                    if (value instanceof VDescription v) {
+                        gl.setBatchNo(v.getDescription());
+                        parent.setColumnSelectionInterval(6, 6);
+                    }
+                }
+                case 6 -> {
+                    if (value instanceof Project p) {
+                        gl.setProjectNo(p.getKey().getProjectNo());
+                        parent.setColumnSelectionInterval(7, 7);
+                    }
+                }
+                case 7 -> {
                     if (value != null) {
                         if (value instanceof TraderA t) {
                             gl.setTraderCode(t.getKey().getCode());
@@ -267,7 +287,7 @@ public class DayBookTableModel extends AbstractTableModel {
                         }
                     }
                 }
-                case 6 -> {
+                case 8 -> {
                     if (value != null) {
                         if (value instanceof ChartOfAccount coa) {
                             if (!coa.getKey().getCoaCode().equals(sourceAccId)) {
@@ -285,7 +305,7 @@ public class DayBookTableModel extends AbstractTableModel {
 
                     }
                 }
-                case 7 -> {
+                case 9 -> {
                     if (value != null) {
                         if (value instanceof Currency curr) {
                             String cuCode = curr.getCurCode();
@@ -294,7 +314,7 @@ public class DayBookTableModel extends AbstractTableModel {
                     }
                     parent.setColumnSelectionInterval(7, 7);
                 }
-                case 8 -> {
+                case 10 -> {
                     if (credit) {
                         gl.setDrAmt(null);
                         gl.setCrAmt(Util1.getDouble(value));

@@ -23,6 +23,7 @@ import com.common.Util1;
 import com.inventory.model.VRoleMenu;
 import com.inventory.ui.common.ReportTableModel;
 import com.user.common.UserRepo;
+import com.user.editor.ProjectAutoCompleter;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.io.ByteArrayInputStream;
@@ -71,6 +72,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
     private DateAutoCompleter dateAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
     private COA3AutoCompleter cOA3AutoCompleter;
+    private ProjectAutoCompleter projectAutoCompleter;
     private ReportFilter filter;
     private SelectionObserver observer;
     private JProgressBar progress;
@@ -110,6 +112,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         txtDep.addFocusListener(fa);
         txtTrader.addFocusListener(fa);
         txtCOA.addFocusListener(fa);
+        txtProjectNo.addFocusListener(fa);
     }
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
@@ -153,6 +156,8 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         });
         cOA3AutoCompleter = new COA3AutoCompleter(txtCOA, accountRepo, null, true, 3);
         cOA3AutoCompleter.setSelectionObserver(this);
+        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
+        projectAutoCompleter.setObserver(this);
     }
 
     private List<String> getDepartment() {
@@ -318,6 +323,8 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         txtDep = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         txtCOA = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
+        txtProjectNo = new javax.swing.JTextField();
         lable2 = new javax.swing.JLabel();
         lblTime = new javax.swing.JLabel();
 
@@ -413,6 +420,20 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
             }
         });
 
+        jLabel3.setFont(Global.lableFont);
+        jLabel3.setText("Project");
+
+        txtProjectNo.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtProjectNoFocusGained(evt);
+            }
+        });
+        txtProjectNo.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtProjectNoKeyReleased(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -423,13 +444,15 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                     .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel14, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel15, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE)
                     .addComponent(txtTrader, javax.swing.GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE)
                     .addComponent(txtDep, javax.swing.GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE)
-                    .addComponent(txtCOA, javax.swing.GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE))
+                    .addComponent(txtCOA, javax.swing.GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE)
+                    .addComponent(txtProjectNo, javax.swing.GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -451,6 +474,10 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtCOA, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -492,7 +519,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 299, Short.MAX_VALUE)))
+                        .addGap(0, 271, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel12)
@@ -552,6 +579,14 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         // TODO add your handling code here:
     }//GEN-LAST:event_txtCOAKeyReleased
 
+    private void txtProjectNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtProjectNoFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtProjectNoFocusGained
+
+    private void txtProjectNoKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtProjectNoKeyReleased
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtProjectNoKeyReleased
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
@@ -559,6 +594,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lable2;
@@ -569,6 +605,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
     private javax.swing.JTextField txtDate;
     private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtFilter;
+    private javax.swing.JTextField txtProjectNo;
     private javax.swing.JTextField txtTrader;
     // End of variables declaration//GEN-END:variables
 
