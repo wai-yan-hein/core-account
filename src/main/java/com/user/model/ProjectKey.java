@@ -14,4 +14,13 @@ import lombok.Data;
 public class ProjectKey {
     private String projectNo;
     private String compCode;
+
+    public ProjectKey(String projectNo, String compCode) {
+        this.projectNo = projectNo;
+        this.compCode = compCode;
+    }
+
+    public ProjectKey() {
+    }
+    
 }

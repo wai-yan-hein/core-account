@@ -21,4 +21,13 @@ public class Project {
     private Double budget;
     private String projectStatus;
 
+    public Project() {
+    }
+    
+
+    public Project(ProjectKey key, String projectName) {
+        this.key = key;
+        this.projectName = projectName;
+    }
+
 }

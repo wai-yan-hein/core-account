@@ -44,6 +44,8 @@ import com.common.Util1;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.user.common.UserRepo;
+import com.user.editor.ProjectAutoCompleter;
+import com.user.editor.ProjectCellEditor;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -105,6 +107,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private RefAutoCompleter refAutoCompleter;
     private TranSourceAutoCompleter tranSourceAutoCompleter;
     private BatchNoAutoCompeter batchNoAutoCompeter;
+    private ProjectAutoCompleter projectAutoCompleter;
     private final CashInOutTableModel inOutTableModel = new CashInOutTableModel();
     private final CashOpeningTableModel opTableModel = new CashOpeningTableModel();
     private SelectionObserver observer;
@@ -331,6 +334,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         traderAutoCompleter.setObserver(this);
         batchNoAutoCompeter = new BatchNoAutoCompeter(txtBatchNo, accountRepo, null, true);
         batchNoAutoCompeter.setObserver(this);
+        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
+        projectAutoCompleter.setObserver(this);
 
     }
 
@@ -404,7 +409,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tblCash.getColumnModel().getColumn(3).setCellEditor(new RefCellEditor(accountRepo));
         tblCash.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
         tblCash.getColumnModel().getColumn(5).setCellEditor(new BatchCellEditor(accountRepo));
-        tblCash.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
+        tblCash.getColumnModel().getColumn(6).setCellEditor(new ProjectCellEditor(userRepo));
         tblCash.getColumnModel().getColumn(7).setCellEditor(new TraderCellEditor(accountRepo));
         tblCash.getColumnModel().getColumn(8).setCellEditor(new COA3CellEditor(accountRepo, 3));
         monoCur.subscribe((t) -> {
@@ -672,6 +677,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 .collectList();
     }
 
+    private String getProjectNo() {
+        return projectAutoCompleter == null ? "-" : projectAutoCompleter.getProject().getKey().getProjectNo();
+    }
+
     private ReportFilter getFilter() {
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
         filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
@@ -682,6 +691,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 : refAutoCompleter.getAutoText().getDescription());
         filter.setBatchNo(batchNoAutoCompeter.getAutoText().getDescription().equals("All") ? "-"
                 : batchNoAutoCompeter.getAutoText().getDescription());
+        filter.setProjectNo(getProjectNo());
         filter.setCurCode(getCurCode());
         filter.setListDepartment(getListDep());
         filter.setTranSource(getTranSource());

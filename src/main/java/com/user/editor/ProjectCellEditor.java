@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.acc.editor;
+package com.user.editor;
 
-import com.acc.common.AccountRepo;
-import com.acc.model.TraderA;
 import com.common.Global;
+import com.user.common.UserRepo;
+import com.user.model.Project;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
@@ -24,12 +24,11 @@ import javax.swing.table.TableCellEditor;
  *
  * @author Lenovo
  */
-public class TraderCellEditor extends AbstractCellEditor implements TableCellEditor {
+public class ProjectCellEditor extends AbstractCellEditor implements TableCellEditor {
 
     private JComponent component = null;
-    private TraderAAutoCompleter completer;
-    private AccountRepo accountRepo;
-
+    private ProjectAutoCompleter completer;
+    private UserRepo userRepo;
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusLost(FocusEvent e) {
@@ -37,26 +36,21 @@ public class TraderCellEditor extends AbstractCellEditor implements TableCellEdi
 
         @Override
         public void focusGained(FocusEvent e) {
-            try {
-                JTextField jtf = (JTextField) e.getSource();
-                String lastString = jtf.getText().substring(jtf.getText().length() - 1);
-                jtf.setText("");
-                jtf.setText(lastString);
-            } catch (Exception ex) {
-
-            }
+            JTextField jtf = (JTextField) e.getSource();
+            jtf.setCaretPosition(jtf.getText().length());
         }
 
     };
 
-    public TraderCellEditor(AccountRepo accountRepo) {
-        this.accountRepo = accountRepo;
+    public ProjectCellEditor(UserRepo userRepo) {
+        this.userRepo = userRepo;
     }
 
     @Override
     public java.awt.Component getTableCellEditorComponent(JTable table, Object value,
             boolean isSelected, int rowIndex, int vColIndex) {
         JTextField jtf = new JTextField();
+        jtf.setFont(Global.textFont);
         KeyListener keyListener = new KeyListener() {
             @Override
             public void keyPressed(KeyEvent keyEvent) {
@@ -89,17 +83,17 @@ public class TraderCellEditor extends AbstractCellEditor implements TableCellEdi
             jtf.setText(value.toString());
             jtf.selectAll();
         }
-        completer = new TraderAAutoCompleter(jtf, accountRepo, this, false);
+        completer = new ProjectAutoCompleter(jtf, userRepo, this, false);
         return component;
     }
 
     @Override
     public Object getCellEditorValue() {
         Object obj;
-        TraderA trader = completer.getTrader();
+        Project p = completer.getProject();
 
-        if (trader != null) {
-            obj = trader;
+        if (p != null) {
+            obj = p;
         } else {
             obj = ((JTextField) component).getText();
         }

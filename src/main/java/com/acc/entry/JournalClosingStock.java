@@ -5,9 +5,9 @@
 package com.acc.entry;
 
 import com.acc.common.AccountRepo;
+import com.acc.common.ColumnHeaderListener;
 import com.acc.common.DateAutoCompleter;
 import com.acc.common.JournalClosingStockTableModel;
-import com.acc.dialog.JournalEntryDialog;
 import com.acc.editor.COA3CellEditor;
 import com.acc.editor.CurrencyAAutoCompleter;
 import com.acc.editor.CurrencyAEditor;
@@ -21,6 +21,9 @@ import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
+import com.user.common.UserRepo;
+import com.user.editor.ProjectAutoCompleter;
+import com.user.editor.ProjectCellEditor;
 import com.user.model.Currency;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
@@ -36,9 +39,7 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
@@ -52,13 +53,13 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
     private DateAutoCompleter dateAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
     private CurrencyAAutoCompleter currencyAAutoCompleter;
+    private ProjectAutoCompleter projectAutoCompleter;
     private JProgressBar progress;
     private SelectionObserver observer;
-    private final JournalEntryDialog dialog = new JournalEntryDialog();
     @Autowired
     private AccountRepo accountRepo;
     @Autowired
-    private WebClient accountApi;
+    private UserRepo userRepo;
     private Mono<List<Currency>> monoCur;
     private Mono<List<Department>> monoDep;
 
@@ -103,6 +104,8 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
     private void initListener() {
         txtDep.addFocusListener(fa);
         txtCur.addFocusListener(fa);
+        txtProjectNo.addFocusListener(fa);
+        tblJournal.addMouseListener(new ColumnHeaderListener(tblJournal));
     }
 
     private final FocusAdapter fa = new FocusAdapter() {
@@ -164,29 +167,14 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
         filter.setDeptCode(getDeptCode());
         filter.setCurCode(getCurCode());
-        Mono<ResponseEntity<List<StockOP>>> result = accountApi.post()
-                .uri("/account/search-stock-op")
-                .body(Mono.just(filter), ReportFilter.class)
-                .retrieve()
-                .toEntityList(StockOP.class);
-        result.subscribe((t) -> {
-            tableModel.setListGV(t.getBody());
+        filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
+        accountRepo.searchOP(filter).subscribe((t) -> {
+            tableModel.setListGV(t);
             tableModel.addNewRow();
             lblCount.setText(tableModel.getListSize() + "");
             progress.setIndeterminate(false);
             focusOnTable();
         });
-    }
-
-    public void openJournalEntryDialog(String glVou, String status) {
-        dialog.setAccountRepo(accountRepo);
-        dialog.setVouNo(glVou);
-        dialog.setStatus(status);
-        dialog.initMain();
-        dialog.setSize(Global.width - 100, Global.height - 100);
-        dialog.setIconImage(Global.parentForm.getIconImage());
-        dialog.setLocationRelativeTo(null);
-        dialog.setVisible(true);
     }
 
     private void initCompleter() {
@@ -198,6 +186,8 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         });
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
+        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
+        projectAutoCompleter.setObserver(this);
         monoCur.subscribe((t) -> {
             currencyAAutoCompleter = new CurrencyAAutoCompleter(txtCur, t, null, true);
             currencyAAutoCompleter.setSelectionObserver(this);
@@ -219,8 +209,9 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         tblJournal.getColumnModel().getColumn(1).setPreferredWidth(1);//Vou
         tblJournal.getColumnModel().getColumn(2).setPreferredWidth(5);//Ref
         tblJournal.getColumnModel().getColumn(3).setPreferredWidth(400);//Ref
-        tblJournal.getColumnModel().getColumn(4).setPreferredWidth(1);//Ref
-        tblJournal.getColumnModel().getColumn(5).setPreferredWidth(100);//amt
+        tblJournal.getColumnModel().getColumn(4).setPreferredWidth(100);//project
+        tblJournal.getColumnModel().getColumn(5).setPreferredWidth(1);//cur
+        tblJournal.getColumnModel().getColumn(6).setPreferredWidth(100);//amt
         tblJournal.setShowGrid(true);
         tblJournal.setCellSelectionEnabled(true);
         tblJournal.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -231,10 +222,11 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         });
         tblJournal.getColumnModel().getColumn(2).setCellEditor(new COA3CellEditor(accountRepo, 3));
         tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountRepo, 3));
+        tblJournal.getColumnModel().getColumn(4).setCellEditor(new ProjectCellEditor(userRepo));
         monoCur.subscribe((t) -> {
-            tblJournal.getColumnModel().getColumn(4).setCellEditor(new CurrencyAEditor(t));
+            tblJournal.getColumnModel().getColumn(5).setCellEditor(new CurrencyAEditor(t));
         });
-        tblJournal.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
+        tblJournal.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
 
     }
 
@@ -270,6 +262,8 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         txtDep = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
         txtCur = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
+        txtProjectNo = new javax.swing.JTextField();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -342,6 +336,12 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
 
         txtCur.setFont(Global.textFont);
 
+        jLabel3.setFont(Global.lableFont);
+        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel3.setText("Project No");
+
+        txtProjectNo.setFont(Global.textFont);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -355,6 +355,10 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtDep)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtProjectNo)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel7)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -371,7 +375,9 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtCur, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtCur, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -409,6 +415,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
@@ -419,6 +426,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
     private javax.swing.JTextField txtCur;
     private javax.swing.JTextField txtDate;
     private javax.swing.JTextField txtDep;
+    private javax.swing.JTextField txtProjectNo;
     // End of variables declaration//GEN-END:variables
 
     @Override

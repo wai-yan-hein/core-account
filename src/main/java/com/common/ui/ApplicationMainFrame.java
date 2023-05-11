@@ -19,7 +19,6 @@ import com.acc.setup.COAManagment;
 
 import com.acc.setup.COAOpening;
 import com.acc.setup.COASetup;
-import com.acc.setup.COATemplateSetup;
 import com.acc.setup.DepartmentSetup;
 import com.acc.setup.TraderSetup;
 import com.common.Global;
@@ -78,7 +77,6 @@ import com.inventory.ui.setup.OpeningSetup;
 import com.inventory.ui.setup.PatternSetup;
 import com.user.dialog.CompanyOptionDialog;
 import com.user.dialog.DepartmentDialog;
-import com.user.model.Project;
 import com.user.setup.SystemProperty;
 import com.user.setup.AppUserSetup;
 import com.user.setup.CloudConfig;

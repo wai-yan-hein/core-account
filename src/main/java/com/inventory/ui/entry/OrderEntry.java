@@ -34,6 +34,7 @@ import com.inventory.model.VSale;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.OrderTableModel;
 import com.inventory.ui.common.StockBalanceTableModel;
+import com.inventory.ui.entry.dialog.BatchSearchDialog;
 import com.inventory.ui.entry.dialog.OrderHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
@@ -198,7 +199,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
 
     private void initOrderTable() {
         tblOrder.setModel(orderTableModel);
-        orderTableModel.setLblRecord(lblRec);
         orderTableModel.setParent(tblOrder);
         orderTableModel.setOrderEntry(this);
         orderTableModel.addNewRow();
@@ -544,7 +544,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         txtVouBalance.setValue(Util1.getFloat(totalVouBalance));
     }
 
-    public void historySale() {
+    public void historyOrder() {
         if (dialog == null) {
             dialog = new OrderHistoryDialog(Global.parentForm);
             dialog.setInventoryApi(inventoryApi);
@@ -564,6 +564,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             progress.setIndeterminate(true);
             orderHis = sh;
             Integer deptId = sh.getKey().getDeptId();
+            String vouNo = sh.getKey().getVouNo();
             inventoryRepo.findLocation(orderHis.getLocCode(), deptId).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
@@ -577,57 +578,48 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             inventoryRepo.findSaleMan(orderHis.getSaleManCode(), deptId).subscribe((t) -> {
                 saleManCompleter.setSaleMan(t);
             });
-            String vouNo = sh.getKey().getVouNo();
-            inventoryApi.get()
-                    .uri(builder -> builder.path("/order/get-order-detail")
-                    .queryParam("vouNo", vouNo)
-                    .queryParam("compCode", Global.compCode)
-                    .queryParam("deptId", sh.getKey().getDeptId())
-                    .build())
-                    .retrieve().bodyToFlux(OrderHisDetail.class)
-                    .collectList()
-                    .subscribe((t) -> {
-                        orderTableModel.setListDetail(t);
-                        orderTableModel.addNewRow();
-                        if (sh.isVouLock()) {
-                            lblStatus.setText("Voucher is locked.");
-                            lblStatus.setForeground(Color.RED);
-                            disableForm(false);
-                        } else if (!ProUtil.isSaleEdit()) {
-                            lblStatus.setText("No Permission.");
-                            lblStatus.setForeground(Color.RED);
-                            disableForm(false);
-                            observer.selected("print", true);
-                        } else if (Util1.getBoolean(sh.getDeleted())) {
-                            lblStatus.setText("DELETED");
-                            lblStatus.setForeground(Color.RED);
-                            disableForm(false);
-                            observer.selected("delete", true);
-                        } else {
-                            lblStatus.setText("EDIT");
-                            lblStatus.setForeground(Color.blue);
-                            disableForm(true);
-                        }
-                        txtVouNo.setText(orderHis.getKey().getVouNo());
-                        txtDueDate.setDate(orderHis.getCreditTerm());
-                        txtRemark.setText(orderHis.getRemark());
-                        txtReference.setText(orderHis.getReference());
-                        txtOrderDate.setDate(orderHis.getVouDate());
-                        txtVouTotal.setValue(Util1.getFloat(orderHis.getVouTotal()));
-                        txtVouDiscP.setValue(Util1.getFloat(orderHis.getDiscP()));
-                        txtVouDiscount.setValue(Util1.getFloat(orderHis.getDiscount()));
-                        txtVouTaxP.setValue(Util1.getFloat(orderHis.getTaxPercent()));
-                        txtTax.setValue(Util1.getFloat(orderHis.getTaxAmt()));
-                        txtVouPaid.setValue(Util1.getFloat(orderHis.getPaid()));
-                        txtVouBalance.setValue(Util1.getFloat(orderHis.getBalance()));
-                        txtGrandTotal.setValue(Util1.getFloat(orderHis.getGrandTotal()));
-                        chkPaid.setSelected(orderHis.getPaid() > 0);
-                        focusTable();
-                        progress.setIndeterminate(false);
-                    }, (e) -> {
-                        progress.setIndeterminate(false);
-                        JOptionPane.showMessageDialog(this, e.getMessage());
-                    });
+            inventoryRepo.getOrderListDetail(vouNo, deptId).subscribe((t) -> {
+                orderTableModel.setListDetail(t);
+                orderTableModel.addNewRow();
+                if (sh.isVouLock()) {
+                    lblStatus.setText("Voucher is locked.");
+                    lblStatus.setForeground(Color.RED);
+                    disableForm(false);
+                } else if (!ProUtil.isSaleEdit()) {
+                    lblStatus.setText("No Permission.");
+                    lblStatus.setForeground(Color.RED);
+                    disableForm(false);
+                    observer.selected("print", true);
+                } else if (Util1.getBoolean(sh.getDeleted())) {
+                    lblStatus.setText("DELETED");
+                    lblStatus.setForeground(Color.RED);
+                    disableForm(false);
+                    observer.selected("delete", true);
+                } else {
+                    lblStatus.setText("EDIT");
+                    lblStatus.setForeground(Color.blue);
+                    disableForm(true);
+                }
+                txtVouNo.setText(orderHis.getKey().getVouNo());
+                txtDueDate.setDate(orderHis.getCreditTerm());
+                txtRemark.setText(orderHis.getRemark());
+                txtReference.setText(orderHis.getReference());
+                txtOrderDate.setDate(orderHis.getVouDate());
+                txtVouTotal.setValue(Util1.getFloat(orderHis.getVouTotal()));
+                txtVouDiscP.setValue(Util1.getFloat(orderHis.getDiscP()));
+                txtVouDiscount.setValue(Util1.getFloat(orderHis.getDiscount()));
+                txtVouTaxP.setValue(Util1.getFloat(orderHis.getTaxPercent()));
+                txtTax.setValue(Util1.getFloat(orderHis.getTaxAmt()));
+                txtVouPaid.setValue(Util1.getFloat(orderHis.getPaid()));
+                txtVouBalance.setValue(Util1.getFloat(orderHis.getBalance()));
+                txtGrandTotal.setValue(Util1.getFloat(orderHis.getGrandTotal()));
+                chkPaid.setSelected(orderHis.getPaid() > 0);
+                focusTable();
+                progress.setIndeterminate(false);
+            }, (e) -> {
+                progress.setIndeterminate(false);
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            });
         }
     }
 
@@ -796,6 +788,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         chkVou = new javax.swing.JCheckBox();
         chkA4 = new javax.swing.JCheckBox();
         lblRec = new javax.swing.JLabel();
+        lblRec1 = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
         jPanel3 = new javax.swing.JPanel();
         jLabel13 = new javax.swing.JLabel();
@@ -1107,6 +1100,9 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         lblRec.setFont(Global.lableFont);
         lblRec.setText("Records");
 
+        lblRec1.setFont(Global.lableFont);
+        lblRec1.setText("Records");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -1120,20 +1116,27 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                         .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, 193, Short.MAX_VALUE))
                     .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
+            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel2Layout.createSequentialGroup()
+                    .addGap(69, 69, 69)
+                    .addComponent(lblRec1, javax.swing.GroupLayout.DEFAULT_SIZE, 193, Short.MAX_VALUE)
+                    .addGap(70, 70, 70)))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(16, 16, 16)
-                        .addComponent(lblRec)))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblRec))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(lblStatus)
                 .addContainerGap())
+            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel2Layout.createSequentialGroup()
+                    .addGap(88, 88, 88)
+                    .addComponent(lblRec1)
+                    .addContainerGap(88, Short.MAX_VALUE)))
         );
 
         jLabel13.setFont(Global.lableFont);
@@ -1740,6 +1743,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JLabel lblRec;
+    private javax.swing.JLabel lblRec1;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelSale;
     private javax.swing.JPanel sbPanel;
@@ -1787,7 +1791,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
 
     @Override
     public void history() {
-        historySale();
+        historyOrder();
     }
 
     @Override

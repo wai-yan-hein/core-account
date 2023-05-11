@@ -22,6 +22,7 @@ import com.inventory.model.LocationKey;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisKey;
 import com.inventory.model.OrderHis;
+import com.inventory.model.OrderHisDetail;
 import com.inventory.model.OrderHisKey;
 import com.inventory.model.Pattern;
 import com.inventory.model.PriceOption;
@@ -802,7 +803,6 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToMono(OrderHis.class);
     }
-
     public Mono<OPHis> findOpening(OPHisKey key) {
         return inventoryApi.post()
                 .uri("/setup/find-opening")
@@ -1194,5 +1194,24 @@ public class InventoryRepo {
                 .retrieve().bodyToFlux(AccSetting.class)
                 .collectList();
     }
-
+    public Flux<OrderHisDetail> getOrderDetail(String vouNo, Integer depId){
+        return inventoryApi.get()
+                       .uri(builder -> builder.path("/order/get-order-detail")
+                       .queryParam("vouNo", vouNo)
+                       .queryParam("compCode", Global.compCode)
+                       .queryParam("deptId", depId)
+                       .build())
+                       .retrieve().bodyToFlux(OrderHisDetail.class);
+    }
+    
+    public Mono<List<OrderHisDetail>> getOrderListDetail(String vouNo, Integer depId){
+        return inventoryApi.get()
+                       .uri(builder -> builder.path("/order/get-order-detail")
+                       .queryParam("vouNo", vouNo)
+                       .queryParam("compCode", Global.compCode)
+                       .queryParam("deptId", depId)
+                       .build())
+                       .retrieve().bodyToFlux(OrderHisDetail.class)
+                       .collectList();
+    }
 }

@@ -28,4 +28,5 @@ public class StockOP {
     private String coaCodeUser;
     private String coaNameEng;
     private String deptUsrCode;
+    private String projectNo;
 }

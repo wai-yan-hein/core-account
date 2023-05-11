@@ -68,7 +68,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private String endDate;
     private String curCode;
     private List<String> department;
-    private WebClient accountApi;
     private AccountRepo accountRepo;
     private DateAutoCompleter dateAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
@@ -91,14 +90,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
-    }
-
-    public WebClient getAccountApi() {
-        return accountApi;
-    }
-
-    public void setAccountApi(WebClient accountApi) {
-        this.accountApi = accountApi;
     }
 
     public String getStDate() {
@@ -231,25 +222,22 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         filter.setReference(refAutoCompleter.getAutoText().getDescription().equals("All") ? "-"
                 : refAutoCompleter.getAutoText().getDescription());
         list = new ArrayList<>();
-        Flux<Gl> result = accountApi.post()
-                .uri("/account/search-gl")
-                .body(Mono.just(filter), ReportFilter.class)
-                .retrieve()
-                .bodyToFlux(Gl.class);
-        result.subscribe((t) -> {
-            list.add(t);
-            double drAmt = Util1.getDouble(t.getDrAmt());
-            double crAmt = Util1.getDouble(t.getCrAmt());
-            if (drAmt > 0) {
-                drAmtTableModel.addVGl(t);
-            }
-            if (crAmt > 0) {
-                crAmtTableModel.addVGl(t);
-            }
-            txtDrCount.setValue(drAmtTableModel.getListVGl().size());
-            txtCrCount.setValue(crAmtTableModel.getListVGl().size());
-            txtDrAmt.setValue(drAmtTableModel.getDrAmt());
-            txtCrAmt.setValue(crAmtTableModel.getCrAmt());
+        accountRepo.searchGl(filter).subscribe((gl) -> {
+            list = gl;
+            gl.forEach((t) -> {
+                double drAmt = Util1.getDouble(t.getDrAmt());
+                double crAmt = Util1.getDouble(t.getCrAmt());
+                if (drAmt > 0) {
+                    drAmtTableModel.addVGl(t);
+                }
+                if (crAmt > 0) {
+                    crAmtTableModel.addVGl(t);
+                }
+                txtDrCount.setValue(drAmtTableModel.getListVGl().size());
+                txtCrCount.setValue(crAmtTableModel.getListVGl().size());
+                txtDrAmt.setValue(drAmtTableModel.getDrAmt());
+                txtCrAmt.setValue(crAmtTableModel.getCrAmt());
+            });
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
             progress.setIndeterminate(false);

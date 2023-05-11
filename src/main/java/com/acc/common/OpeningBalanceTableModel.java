@@ -17,6 +17,7 @@ import com.common.Util1;
 import com.acc.editor.TraderAAutoCompleter;
 
 import com.toedter.calendar.JDateChooser;
+import com.user.model.Project;
 
 import java.awt.HeadlessException;
 import java.util.List;
@@ -42,7 +43,7 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
     private TraderAAutoCompleter tradeAutoCompleter;
     private SelectionObserver selectionObserver;
 
-    private String[] columnsName = {"Code", "Chart Of Account", "Trader Code", "Trader Name", "Dept:", "Currency", "Dr-Amt", "Cr-Amt"};
+    private String[] columnsName = {"Code", "Chart Of Account", "Trader Code", "Trader Name", "Dept:", "Project No ", "Currency", "Dr-Amt", "Cr-Amt"};
     private List<OpeningBalance> listOpening = new ArrayList();
     private JDateChooser opDate;
 
@@ -112,9 +113,9 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 6 ->
-                Double.class;
             case 7 ->
+                Double.class;
+            case 8 ->
                 Double.class;
             default ->
                 String.class;
@@ -143,12 +144,15 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
                     return opening.getDeptUsrCode();
                 }
                 case 5 -> {
-                    return opening.getCurCode();
+                    return opening.getProjectNo();
                 }
                 case 6 -> {
-                    return Util1.getDouble(opening.getDrAmt()) == 0 ? null : Util1.getDouble(opening.getDrAmt());
+                    return opening.getCurCode();
                 }
                 case 7 -> {
+                    return Util1.getDouble(opening.getDrAmt()) == 0 ? null : Util1.getDouble(opening.getDrAmt());
+                }
+                case 8 -> {
                     return Util1.getDouble(opening.getCrAmt()) == 0 ? null : Util1.getDouble(opening.getCrAmt());
                 }
                 default -> {
@@ -208,18 +212,26 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
                 }
                 case 5 -> {
                     if (value != null) {
-                        if (value instanceof Currency cur) {
-                            opening.setCurCode(cur.getCurCode());
-                            parent.setRowSelectionInterval(rowIndex, rowIndex);
+                        if (value instanceof Project p) {
+                            opening.setProjectNo(p.getKey().getProjectNo());
                             parent.setColumnSelectionInterval(6, 6);
                         }
                     }
                 }
                 case 6 -> {
+                    if (value != null) {
+                        if (value instanceof Currency cur) {
+                            opening.setCurCode(cur.getCurCode());
+                            parent.setRowSelectionInterval(rowIndex, rowIndex);
+                            parent.setColumnSelectionInterval(7, 7);
+                        }
+                    }
+                }
+                case 7 -> {
                     opening.setDrAmt(Util1.getDouble(value));
                     opening.setCrAmt(null);
                 }
-                case 7 -> {
+                case 8 -> {
                     opening.setCrAmt(Util1.getDouble(value));
                     opening.setDrAmt(null);
                 }
