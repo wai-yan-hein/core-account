@@ -18,14 +18,14 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class ServerThread extends Thread {
-    
+
     private ServerSocket server;
-    private int port;
-    
+    private final int port;
+
     public ServerThread(int port) {
         this.port = port;
     }
-    
+
     @Override
     public void run() {
         try {
@@ -53,7 +53,15 @@ public class ServerThread extends Thread {
             System.err.println("Error starting server: " + e.getMessage());
         }
     }
-    
+
+    public void shutDown() {
+        try {
+            server.close();
+        } catch (IOException e) {
+            // Ignore
+        }
+    }
+
     @Override
     public void interrupt() {
         super.interrupt();

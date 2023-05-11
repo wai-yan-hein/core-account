@@ -375,8 +375,8 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             inventoryRepo.save(orderHis).subscribe((t) -> {
                 progress.setIndeterminate(false);
                 clear();
-                if (print) {
-                    String reportName = getReportName();
+                if (print) {  
+                    String reportName = "OrderVoucher";
                     printVoucher(t.getKey().getVouNo(), reportName, chkVou.isSelected());
                 }
             }, (e) -> {
