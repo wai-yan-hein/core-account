@@ -183,7 +183,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         inventoryRepo.getRegion().subscribe((t) -> {
             regionAutoCompleter = new RegionAutoCompleter(txtRegion, t, null, true, false);
         });
-        inventoryRepo.getCurrency().subscribe((t) -> {
+        userRepo.getCurrency().subscribe((t) -> {
             currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
             currencyAutoCompleter.setObserver(this);
             userRepo.getDefaultCurrency().subscribe((tt) -> {

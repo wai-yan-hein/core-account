@@ -279,6 +279,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         if (dialog == null) {
             dialog = new TrialBalanceDetailDialog(Global.parentForm);
             dialog.setAccountRepo(accountRepo);
+            dialog.setUserRepo(userRepo);
             dialog.initMain();
             dialog.setSize(Global.width - 50, Global.height - 50);
             dialog.setLocationRelativeTo(null);

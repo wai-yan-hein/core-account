@@ -317,7 +317,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "SUP");
         traderAutoCompleter.setObserver(this);
         monoLoc = inventoryRepo.getLocation();
-        inventoryRepo.getCurrency().subscribe((t) -> {
+        userRepo.getCurrency().subscribe((t) -> {
             currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
             currAutoCompleter.setObserver(this);
             userRepo.getDefaultCurrency().subscribe((tt) -> {

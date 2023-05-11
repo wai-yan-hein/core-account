@@ -346,7 +346,7 @@ public class AllCashTableModel extends AbstractTableModel {
     private void save(Gl gl, int row, int column) {
         if (isValidEntry(gl, row, column)) {
             try {
-                accountRepo.saveGl(gl).subscribe((t) -> {
+                accountRepo.save(gl).subscribe((t) -> {
                     if (t != null) {
                         listVGl.set(row, t);
                         addNewRow();

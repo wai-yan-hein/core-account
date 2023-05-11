@@ -13,34 +13,29 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class StockBalanceTableModel extends AbstractTableModel {
 
-    static Logger log = LoggerFactory.getLogger(StockBalanceTableModel.class.getName());
     private List<VStockBalance> listStockBalance = new ArrayList();
     private final String[] columnNames = {"Locaiton", "Qty",};
-    private WebClient inventoryApi;
+    private InventoryRepo inventoryRepo;
     private JProgressBar progress;
 
-    public WebClient getInventoryApi() {
-        return inventoryApi;
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
     }
 
-    public void setInventoryApi(WebClient inventoryApi) {
-        this.inventoryApi = inventoryApi;
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
     }
-    
 
     public JProgressBar getProgress() {
         return progress;
@@ -130,20 +125,8 @@ public class StockBalanceTableModel extends AbstractTableModel {
     public void calStockBalance(String stockCode) {
         if (ProUtil.isCalStock()) {
             progress.setIndeterminate(true);
-            Mono<ResponseEntity<List<VStockBalance>>> result = inventoryApi.get()
-                    .uri(builder -> builder.path("/report/get-stock-balance")
-                    .queryParam("stockCode", stockCode)
-                    .queryParam("calSale", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.sale.stock")))
-                    .queryParam("calPur", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.purchase.stock")))
-                    .queryParam("calRI", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.returnin.stock")))
-                    .queryParam("calRO", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.returnout.stock")))
-                    .queryParam("compCode", Global.compCode)
-                    .queryParam("deptId", Global.deptId)
-                    .queryParam("macId", Global.macId)
-                    .build())
-                    .retrieve().toEntityList(VStockBalance.class);
-            result.subscribe((t) -> {
-                setListStockBalance(t.getBody());
+            inventoryRepo.getStockBalance(stockCode).subscribe((t) -> {
+                setListStockBalance(t);
                 progress.setIndeterminate(false);
             }, (e) -> {
                 progress.setIndeterminate(false);

@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.toedter.calendar.JTextFieldDateEditor;
+import com.user.common.UserRepo;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
@@ -70,7 +71,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     @Autowired
     private AccountRepo accountRepo;
     @Autowired
-    private WebClient accountApi;
+    private UserRepo userRepo;
 
     public JProgressBar getProgress() {
         return progress;
@@ -197,14 +198,8 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
             filter.setDesp(txtDesp.getText());
             filter.setGlVouNo(txtVouNo.getText());
             filter.setReference(txtRef.getText());
-            Mono<ResponseEntity<List<Gl>>> result = accountApi
-                    .post()
-                    .uri("/account/search-voucher")
-                    .body(Mono.just(filter), ReportFilter.class)
-                    .retrieve()
-                    .toEntityList(Gl.class);
-            result.subscribe((t) -> {
-                voucherTableModel.setListGV(t.getBody());
+            accountRepo.searchVoucher(filter).subscribe((t) -> {
+                voucherTableModel.setListGV(t);
                 lblRecord.setText(voucherTableModel.getListSize() + "");
                 calAmt();
                 progress.setIndeterminate(false);
@@ -258,7 +253,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         VoucherEntryDailog dailog = new VoucherEntryDailog();
         dailog.setIconImage(Global.parentForm.getIconImage());
         dailog.setAccountRepo(accountRepo);
-        dailog.setAccountApi(accountApi);
+        dailog.setUserRepo(userRepo);
         dailog.setVouType(type);
         dailog.setObserver(this);
         dailog.setListVGl(listVGl);

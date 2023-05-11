@@ -21,6 +21,7 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.user.common.UserRepo;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.io.File;
@@ -46,8 +47,6 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -69,12 +68,22 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private String curCode;
     private List<String> department;
     private AccountRepo accountRepo;
+    private UserRepo userRepo;
     private DateAutoCompleter dateAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
     private CurrencyAAutoCompleter currencyAAutoCompleter;
     private DespAutoCompleter despAutoCompleter;
     private RefAutoCompleter refAutoCompleter;
     private List<Gl> list;
+
+    public UserRepo getUserRepo() {
+        return userRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+    
 
     public List<String> getDepartment() {
         return department;
@@ -187,7 +196,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
             departmentAutoCompleter.setListOption(department);
 
         });
-        accountRepo.getCurrency().subscribe((t) -> {
+        userRepo.getCurrency().subscribe((t) -> {
             currencyAAutoCompleter = new CurrencyAAutoCompleter(txtCur, t, null, false);
             currencyAAutoCompleter.setSelectionObserver(this);
             accountRepo.findCurrency(curCode).subscribe((tt) -> {

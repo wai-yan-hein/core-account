@@ -253,7 +253,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                 locationAutoCompleter.setLocation(tt);
             });
         });
-        inventoryRepo.getCurrency().subscribe((t) -> {
+        userRepo.getCurrency().subscribe((t) -> {
             currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
             currAutoCompleter.setObserver(this);
             userRepo.getDefaultCurrency().subscribe((tt) -> {
@@ -305,7 +305,6 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
 
     private void initStockBalanceTable() {
         if (ProUtil.isCalStock()) {
-            stockBalanceTableModel.setInventoryApi(inventoryApi);
             tblStockBalance.setModel(stockBalanceTableModel);
             stockBalanceTableModel.setProgress(sbProgress);
             tblStockBalance.getColumnModel().getColumn(0).setPreferredWidth(100);//Unit
@@ -556,7 +555,6 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
     public void historySale() {
         if (dialog == null) {
             dialog = new SaleHistoryDialog(Global.parentForm);
-            dialog.setInventoryApi(inventoryApi);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setUserRepo(userRepo);
             dialog.setObserver(this);

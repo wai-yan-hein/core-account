@@ -5,7 +5,6 @@
  */
 package com.inventory.ui.entry;
 
-import com.acc.common.AccountRepo;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.JasperReportUtil;
@@ -66,9 +65,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
@@ -83,8 +80,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     private final OrderTableModel orderTableModel = new OrderTableModel();
     private OrderHistoryDialog dialog;
     private final StockBalanceTableModel stockBalanceTableModel = new StockBalanceTableModel();
-    @Autowired
-    private WebClient inventoryApi;
     @Autowired
     private InventoryRepo inventoryRepo;
     @Autowired
@@ -258,7 +253,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 locationAutoCompleter.setLocation(tt);
             });
         });
-        inventoryRepo.getCurrency().subscribe((t) -> {
+        userRepo.getCurrency().subscribe((t) -> {
             currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
             currAutoCompleter.setObserver(this);
             userRepo.getDefaultCurrency().subscribe((tt) -> {
@@ -313,7 +308,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
 
     private void initStockBalanceTable() {
         if (ProUtil.isCalStock()) {
-            stockBalanceTableModel.setInventoryApi(inventoryApi);
             tblStockBalance.setModel(stockBalanceTableModel);
             stockBalanceTableModel.setProgress(sbProgress);
             tblStockBalance.getColumnModel().getColumn(0).setPreferredWidth(100);//Unit
@@ -375,7 +369,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             inventoryRepo.save(orderHis).subscribe((t) -> {
                 progress.setIndeterminate(false);
                 clear();
-                if (print) {  
+                if (print) {
                     String reportName = "OrderVoucher";
                     printVoucher(t.getKey().getVouNo(), reportName, chkVou.isSelected());
                 }
@@ -547,7 +541,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     public void historySale() {
         if (dialog == null) {
             dialog = new OrderHistoryDialog(Global.parentForm);
-            dialog.setInventoryApi(inventoryApi);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setUserRepo(userRepo);
             dialog.setObserver(this);
@@ -578,14 +571,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 saleManCompleter.setSaleMan(t);
             });
             String vouNo = sh.getKey().getVouNo();
-            inventoryApi.get()
-                    .uri(builder -> builder.path("/order/get-order-detail")
-                    .queryParam("vouNo", vouNo)
-                    .queryParam("compCode", Global.compCode)
-                    .queryParam("deptId", sh.getKey().getDeptId())
-                    .build())
-                    .retrieve().bodyToFlux(OrderHisDetail.class)
-                    .collectList()
+            inventoryRepo.getOrderDetail(vouNo, sh.getKey().getDeptId())
                     .subscribe((t) -> {
                         orderTableModel.setListDetail(t);
                         orderTableModel.addNewRow();
@@ -668,49 +654,38 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
 
     private void printVoucher(String vouNo, String reportName, boolean print) {
         clear();
-        Mono<byte[]> result = inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-order-report")
-                .queryParam("vouNo", vouNo)
-                .queryParam("macId", Global.macId)
-                .build())
-                .retrieve()
-                .bodyToMono(ByteArrayResource.class)
-                .map(ByteArrayResource::getByteArray);
-        result.subscribe((t) -> {
-            try {
-                if (t != null) {
-                    viewReport(t, reportName, print);
-                }
-            } catch (JRException ex) {
-                log.error("printVoucher : " + ex.getMessage());
-                JOptionPane.showMessageDialog(this, ex.getMessage());
-            }
+        inventoryRepo.getOrderReport(vouNo).subscribe((t) -> {
+            viewReport(t, reportName, print);
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
 
     }
 
-    private void viewReport(byte[] t, String reportName, boolean print) throws JRException {
+    private void viewReport(byte[] t, String reportName, boolean print) {
         if (reportName != null) {
-            String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
-            Map<String, Object> param = new HashMap<>();
-            param.put("p_print_date", Util1.getTodayDateTime());
-            param.put("p_comp_name", Global.companyName);
-            param.put("p_comp_address", Global.companyAddress);
-            param.put("p_comp_phone", Global.companyPhone);
-            param.put("p_logo_path", logoPath);
-            param.put("p_balance", balance);
-            param.put("p_prv_balance", prvBal);
-            String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");
-            ByteArrayInputStream stream = new ByteArrayInputStream(t);
-            JsonDataSource ds = new JsonDataSource(stream);
-            JasperPrint jp = JasperFillManager.fillReport(reportPath, param, ds);
-            log.info(ProUtil.getFontPath());
-            if (print) {
-                JasperReportUtil.print(jp);
-            } else {
-                JasperViewer.viewReport(jp, false);
+            try {
+                String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
+                Map<String, Object> param = new HashMap<>();
+                param.put("p_print_date", Util1.getTodayDateTime());
+                param.put("p_comp_name", Global.companyName);
+                param.put("p_comp_address", Global.companyAddress);
+                param.put("p_comp_phone", Global.companyPhone);
+                param.put("p_logo_path", logoPath);
+                param.put("p_balance", balance);
+                param.put("p_prv_balance", prvBal);
+                String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");
+                ByteArrayInputStream stream = new ByteArrayInputStream(t);
+                JsonDataSource ds = new JsonDataSource(stream);
+                JasperPrint jp = JasperFillManager.fillReport(reportPath, param, ds);
+                log.info(ProUtil.getFontPath());
+                if (print) {
+                    JasperReportUtil.print(jp);
+                } else {
+                    JasperViewer.viewReport(jp, false);
+                }
+            } catch (JRException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage());
             }
         } else {
             JOptionPane.showMessageDialog(this, "Select Report Type");

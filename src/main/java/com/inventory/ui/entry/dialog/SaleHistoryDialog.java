@@ -68,14 +68,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
 
-    public WebClient getInventoryApi() {
-        return inventoryApi;
-    }
-
-    public void setInventoryApi(WebClient inventoryApi) {
-        this.inventoryApi = inventoryApi;
-    }
-
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
     }

@@ -21,7 +21,9 @@ import com.inventory.model.Location;
 import com.inventory.model.LocationKey;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisKey;
+import com.inventory.model.OrderDetail;
 import com.inventory.model.OrderHis;
+import com.inventory.model.OrderHisDetail;
 import com.inventory.model.OrderHisKey;
 import com.inventory.model.Pattern;
 import com.inventory.model.PriceOption;
@@ -63,6 +65,8 @@ import com.inventory.model.TransferHis;
 import com.inventory.model.TransferHisKey;
 import com.inventory.model.UnitRelation;
 import com.inventory.model.UnitRelationDetail;
+import com.inventory.model.VSale;
+import com.inventory.model.VStockBalance;
 import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
 import com.inventory.model.WeightLossHis;
@@ -70,6 +74,7 @@ import com.inventory.model.WeightLossHisKey;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -474,15 +479,6 @@ public class InventoryRepo {
                 .collectList();
     }
 
-    public Mono<List<Currency>> getCurrency() {
-        return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-currency").build())
-                .retrieve()
-                .bodyToFlux(Currency.class)
-                .collectList();
-
-    }
-
     public Mono<List<VouStatus>> getVoucherStatus() {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-voucher-status")
@@ -790,7 +786,7 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToMono(SaleHis.class);
     }
-    
+
     public Mono<OrderHis> findOrder(String vouNo, Integer deptId) {
         OrderHisKey key = new OrderHisKey();
         key.setVouNo(vouNo);
@@ -930,7 +926,7 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToMono(Boolean.class);
     }
-    
+
     public Mono<Boolean> restore(SaleHisKey key) {
         return inventoryApi.post()
                 .uri("/sale/restore-sale")
@@ -938,7 +934,7 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToMono(Boolean.class);
     }
-    
+
     public Mono<Boolean> restore(OrderHisKey key) {
         return inventoryApi.post()
                 .uri("/sale/restore-sale")
@@ -946,7 +942,7 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToMono(Boolean.class);
     }
-    
+
     public Mono<Boolean> restore(RetInHisKey key) {
         return inventoryApi.post()
                 .uri("/retin/restore-retin")
@@ -1168,7 +1164,7 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToMono(SaleHis.class);
     }
-    
+
     public Mono<OrderHis> save(OrderHis sh) {
         return inventoryApi.post()
                 .uri("/order/save-order")
@@ -1176,7 +1172,6 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToMono(OrderHis.class);
     }
-
 
     public Mono<AccSetting> save(AccSetting sh) {
         return inventoryApi.post()
@@ -1195,4 +1190,73 @@ public class InventoryRepo {
                 .collectList();
     }
 
+    public Mono<List<VStockBalance>> getStockBalance(String stockCode) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/report/get-stock-balance")
+                .queryParam("stockCode", stockCode)
+                .queryParam("calSale", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.sale.stock")))
+                .queryParam("calPur", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.purchase.stock")))
+                .queryParam("calRI", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.returnin.stock")))
+                .queryParam("calRO", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.returnout.stock")))
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
+                .queryParam("macId", Global.macId)
+                .build())
+                .retrieve().bodyToFlux(VStockBalance.class)
+                .collectList();
+    }
+
+    public Mono<List<SaleHisDetail>> getSaleDetail(String vouNo, int deptId) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/sale/get-sale-detail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", deptId)
+                .build())
+                .retrieve().bodyToFlux(SaleHisDetail.class)
+                .collectList();
+    }
+
+    public Mono<byte[]> getSaleReport(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/report/get-sale-report")
+                .queryParam("vouNo", vouNo)
+                .queryParam("macId", Global.macId)
+                .build())
+                .retrieve()
+                .bodyToMono(ByteArrayResource.class)
+                .map(ByteArrayResource::getByteArray);
+    }
+
+    public Mono<byte[]> getOrderReport(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/report/get-order-report")
+                .queryParam("vouNo", vouNo)
+                .queryParam("macId", Global.macId)
+                .build())
+                .retrieve()
+                .bodyToMono(ByteArrayResource.class)
+                .map(ByteArrayResource::getByteArray);
+    }
+
+    public Mono<List<VSale>> getOrder(FilterObject filter) {
+        return inventoryApi.post()
+                .uri("/order/get-order")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToFlux(VSale.class)
+                .collectList();
+    }
+
+    public Mono<List<OrderHisDetail>> getOrderDetail(String vouNo, int deptId) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/order/get-order-detail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", deptId)
+                .build())
+                .retrieve().bodyToFlux(OrderHisDetail.class)
+                .collectList();
+
+    }
 }

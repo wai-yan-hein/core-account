@@ -179,7 +179,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
 
     private void initCompleter() {
         monoDep = accountRepo.getDepartment();
-        monoCur = accountRepo.getCurrency();
+        monoCur = userRepo.getCurrency();
         monoDep.subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true, false);
             departmentAutoCompleter.setObserver(this);

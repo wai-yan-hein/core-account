@@ -20,9 +20,9 @@ import com.common.Util1;
 import com.inventory.editor.CurrencyEditor;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
+import com.user.common.UserRepo;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.List;
@@ -35,18 +35,16 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.reactive.function.client.WebClient;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListener {
 
-    private static final Logger log = LoggerFactory.getLogger(VoucherEntryDailog.class);
     private final CrDrVoucherEntryTableModel tableModel = new CrDrVoucherEntryTableModel();
 
     private TableRowSorter<TableModel> sorter;
@@ -54,9 +52,17 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
     private String vouType;
     private SelectionObserver observer;
     private AccountRepo accountRepo;
-    private WebClient accountApi;
+    private UserRepo userRepo;
     private String srcAcc;
     private List<Gl> listVGl;
+
+    public UserRepo getUserRepo() {
+        return userRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
 
     public SelectionObserver getObserver() {
         return observer;
@@ -103,13 +109,6 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         txtVouNo.setEditable(status.equals("NEW"));
     }
 
-    public WebClient getAccountApi() {
-        return accountApi;
-    }
-
-    public void setAccountApi(WebClient accountApi) {
-        this.accountApi = accountApi;
-    }
 
     /**
      * Creates new form JournalEntryDialog
@@ -187,7 +186,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         tblJournal.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
         tblJournal.getColumnModel().getColumn(2).setCellEditor(new TraderCellEditor(accountRepo));
         tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountRepo, 3));
-        accountRepo.getCurrency().subscribe((t) -> {
+        userRepo.getCurrency().subscribe((t) -> {
             tblJournal.getColumnModel().getColumn(4).setCellEditor(new CurrencyEditor(t));
         });
         tblJournal.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());

@@ -15,7 +15,6 @@ import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
-import com.inventory.model.General;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.SaleHisKey;
@@ -40,6 +39,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -70,8 +71,6 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private List<SaleHisDetail> listDetail = new ArrayList();
     private final RFIDTableModel tableModel = new RFIDTableModel();
     private SaleHistoryDialog dialog;
-    @Autowired
-    private WebClient inventoryApi;
     @Autowired
     private InventoryRepo inventoryRepo;
     @Autowired
@@ -355,7 +354,6 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
     public void historySale() {
         if (dialog == null) {
             dialog = new SaleHistoryDialog(Global.parentForm);
-            dialog.setInventoryApi(inventoryApi);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setUserRepo(userRepo);
             dialog.setObserver(this);
@@ -377,15 +375,8 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 traderAutoCompleter.setTrader(t);
             });
             String vouNo = sh.getKey().getVouNo();
-            Mono<ResponseEntity<List<SaleHisDetail>>> result = inventoryApi.get()
-                    .uri(builder -> builder.path("/sale/get-sale-detail")
-                    .queryParam("vouNo", vouNo)
-                    .queryParam("compCode", Global.compCode)
-                    .queryParam("deptId", sh.getKey().getDeptId())
-                    .build())
-                    .retrieve().toEntityList(SaleHisDetail.class);
-            result.subscribe((t) -> {
-                tableModel.setListDetail(t.getBody());
+            inventoryRepo.getSaleDetail(vouNo, sh.getKey().getDeptId()).subscribe((t) -> {
+                tableModel.setListDetail(t);
                 tableModel.addNewRow();
                 if (sh.isVouLock()) {
                     lblStatus.setText("Voucher is locked.");
@@ -470,34 +461,25 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }
 
     private void printVoucher(String vouNo) {
-        Mono<byte[]> result = inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-sale-report")
-                .queryParam("vouNo", vouNo)
-                .queryParam("macId", Global.macId)
-                .build())
-                .retrieve()
-                .bodyToMono(ByteArrayResource.class)
-                .map(ByteArrayResource::getByteArray);
-        result.subscribe((t) -> {
-            if (t != null) {
-                try {
-                    String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
-                    Map<String, Object> param = new HashMap<>();
-                    param.put("p_print_date", Util1.getTodayDateTime());
-                    param.put("p_comp_name", Global.companyName);
-                    param.put("p_comp_address", Global.companyAddress);
-                    param.put("p_comp_phone", Global.companyPhone);
-                    param.put("p_logo_path", logoPath);
-                    String reportPath = ProUtil.getReportPath() + "RFIDVoucher.jasper";
-                    ByteArrayInputStream stream = new ByteArrayInputStream(t);
-                    JsonDataSource ds = new JsonDataSource(stream);
-                    JasperPrint jp = JasperFillManager.fillReport(reportPath, param, ds);
-                    JasperReportUtil.print(jp);
-                } catch (JRException e) {
-                    JOptionPane.showMessageDialog(this, e.getMessage(), "Voucher", JOptionPane.ERROR_MESSAGE);
-                }
-
+        inventoryRepo.getSaleReport(vouNo).subscribe((t) -> {
+            try {
+                String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
+                Map<String, Object> param = new HashMap<>();
+                param.put("p_print_date", Util1.getTodayDateTime());
+                param.put("p_comp_name", Global.companyName);
+                param.put("p_comp_address", Global.companyAddress);
+                param.put("p_comp_phone", Global.companyPhone);
+                param.put("p_logo_path", logoPath);
+                String reportPath = ProUtil.getReportPath() + "RFIDVoucher.jasper";
+                ByteArrayInputStream stream = new ByteArrayInputStream(t);
+                JsonDataSource ds = new JsonDataSource(stream);
+                JasperPrint jp = JasperFillManager.fillReport(reportPath, param, ds);
+                JasperReportUtil.print(jp);
+            } catch (JRException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage());
             }
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
         });
 
     }

@@ -299,7 +299,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     private void initFilter() {
         monoDep = accountRepo.getDepartment();
-        monoCur = accountRepo.getCurrency();
+        monoCur = userRepo.getCurrency();
         monoDep.subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDepartment, t, null, true, true);
             departmentAutoCompleter.setObserver(this);
@@ -315,7 +315,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         }, (e) -> {
             log.error(e.getMessage());
         });
-
         accountRepo.getTranSource().collectList().subscribe((t) -> {
             tranSourceAutoCompleter = new TranSourceAutoCompleter(txtOption, t, null, true);
             tranSourceAutoCompleter.setSelectionObserver(this);

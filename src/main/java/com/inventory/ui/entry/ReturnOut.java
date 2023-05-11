@@ -214,7 +214,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                 locationAutoCompleter.setLocation(tt);
             });
         });
-        inventoryRepo.getCurrency().subscribe((t) -> {
+        userRepo.getCurrency().subscribe((t) -> {
             currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
             currAutoCompleter.setObserver(this);
             userRepo.getDefaultCurrency().subscribe((tt) -> {

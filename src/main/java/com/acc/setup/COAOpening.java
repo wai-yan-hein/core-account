@@ -167,7 +167,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
             departmenttAutoCompleter = new DepartmentAutoCompleter(txtDept, t, null, true, true);
             departmenttAutoCompleter.setObserver(this);
         });
-        accountRepo.getCurrency().subscribe((t) -> {
+        userRepo.getCurrency().subscribe((t) -> {
             currencyAutoCompleter = new CurrencyAAutoCompleter(txtCurrency, t, null, true);
             currencyAutoCompleter.setSelectionObserver(this);
         });
@@ -233,7 +233,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
             tblOpening.getColumnModel().getColumn(4).setCellEditor(new DepartmentCellEditor(t));
         });
         tblOpening.getColumnModel().getColumn(5).setCellEditor(new ProjectCellEditor(userRepo));
-        accountRepo.getCurrency().subscribe((t) -> {
+        userRepo.getCurrency().subscribe((t) -> {
             tblOpening.getColumnModel().getColumn(6).setCellEditor(new CurrencyAEditor(t));
         });
         tblOpening.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());

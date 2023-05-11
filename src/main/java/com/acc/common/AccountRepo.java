@@ -125,13 +125,6 @@ public class AccountRepo {
                 .retrieve().bodyToFlux(ChartOfAccount.class);
     }
 
-    public Mono<List<Currency>> getCurrency() {
-        return accountApi.get()
-                .uri(builder -> builder.path("/account/get-currency")
-                .build())
-                .retrieve().bodyToFlux(Currency.class).collectList().cache();
-    }
-
     public Flux<Gl> getTranSource() {
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-tran-source")
@@ -140,7 +133,7 @@ public class AccountRepo {
                 .retrieve().bodyToFlux(Gl.class);
     }
 
-    public Mono<Gl> saveGl(Gl gl) {
+    public Mono<Gl> save(Gl gl) {
         return accountApi.post()
                 .uri("/account/save-gl")
                 .body(Mono.just(gl), Gl.class)
@@ -505,6 +498,16 @@ public class AccountRepo {
     public Mono<List<Gl>> searchGl(ReportFilter filter) {
         return accountApi.post()
                 .uri("/account/search-gl")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToFlux(Gl.class)
+                .collectList();
+    }
+
+    public Mono<List<Gl>> searchVoucher(ReportFilter filter) {
+        return accountApi
+                .post()
+                .uri("/account/search-voucher")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(Gl.class)
