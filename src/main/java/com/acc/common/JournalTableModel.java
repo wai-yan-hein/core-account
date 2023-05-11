@@ -21,9 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 public class JournalTableModel extends AbstractTableModel {
 
     private List<Gl> listGV = new ArrayList();
-    private final String[] columnNames = {"Date", "Voucher No", "Description", "Refrence", "Amount"};
+    private final String[] columnNames = {"Date", "Voucher No", "Description", "Refrence", "Project No", "Amount"};
     private JTable parent;
-  
 
     @Override
     public int getRowCount() {
@@ -57,6 +56,8 @@ public class JournalTableModel extends AbstractTableModel {
                 case 3 ->
                     gv.getReference();
                 case 4 ->
+                    gv.getProjectNo();
+                case 5 ->
                     gv.getDrAmt() == 0 ? null : gv.getDrAmt();
                 default ->
                     null;
@@ -80,7 +81,7 @@ public class JournalTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        if (column == 4) {
+        if (column == 5) {
             return Double.class;
         }
         return String.class;

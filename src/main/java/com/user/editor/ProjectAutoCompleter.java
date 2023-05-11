@@ -3,14 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.acc.editor;
+package com.user.editor;
 
+import com.acc.editor.*;
 import com.acc.common.AccountRepo;
 import com.acc.common.DespTableModel;
 import com.acc.model.VDescription;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.user.common.ProjectTableModel;
+import com.user.common.UserRepo;
+import com.user.model.Project;
+import com.user.model.ProjectKey;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -41,21 +46,21 @@ import lombok.extern.slf4j.Slf4j;
  * @author Lenovo
  */
 @Slf4j
-public final class DespAutoCompleter implements KeyListener {
+public final class ProjectAutoCompleter implements KeyListener {
 
     private final JTable table = new JTable();
     private JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private final DespTableModel despModel = new DespTableModel();
-    private VDescription desp;
+    private final ProjectTableModel projectTableModel = new ProjectTableModel();
+    private Project project;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
     boolean popupOpen = false;
     private SelectionObserver observer;
-    private AccountRepo accountRepo;
+    private UserRepo userRepo;
     private boolean filter;
 
     public SelectionObserver getObserver() {
@@ -66,21 +71,21 @@ public final class DespAutoCompleter implements KeyListener {
         this.observer = observer;
     }
 
-    public DespAutoCompleter() {
+    public ProjectAutoCompleter() {
     }
 
-    public DespAutoCompleter(JTextComponent comp, AccountRepo accountRepo,
+    public ProjectAutoCompleter(JTextComponent comp, UserRepo userRepo,
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
         this.filter = filter;
-        this.accountRepo = accountRepo;
+        this.userRepo = userRepo;
         if (this.filter) {
-            setAutoText(new VDescription("All"));
+            setProject(new Project(new ProjectKey("All", Global.compCode), "All"));
         }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
-        table.setModel(despModel);
+        table.setModel(projectTableModel);
         table.getTableHeader().setFont(Global.lableFont);
         table.setFont(Global.textFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
@@ -161,12 +166,12 @@ public final class DespAutoCompleter implements KeyListener {
 
     public void mouseSelect() {
         if (table.getSelectedRow() != -1) {
-            desp = despModel.getRemark(table.convertRowIndexToModel(
+            project = projectTableModel.get(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            ((JTextField) textComp).setText(desp.getDescription());
+            ((JTextField) textComp).setText(project.getKey().getProjectNo());
             if (editor == null) {
                 if (observer != null) {
-                    observer.selected("Selected", desp.getDescription());
+                    observer.selected("Selected", project);
                 }
             }
         }
@@ -242,7 +247,7 @@ public final class DespAutoCompleter implements KeyListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            DespAutoCompleter completer = (DespAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            ProjectAutoCompleter completer = (ProjectAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 if (completer.popup.isVisible()) {
                     completer.selectNextPossibleValue();
@@ -259,7 +264,7 @@ public final class DespAutoCompleter implements KeyListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            DespAutoCompleter completer = (DespAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            ProjectAutoCompleter completer = (ProjectAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 if (completer.popup.isVisible()) {
                     completer.selectPreviousPossibleValue();
@@ -271,7 +276,7 @@ public final class DespAutoCompleter implements KeyListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            DespAutoCompleter completer = (DespAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            ProjectAutoCompleter completer = (ProjectAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 completer.popup.setVisible(false);
                 popupOpen = false;
@@ -313,16 +318,14 @@ public final class DespAutoCompleter implements KeyListener {
         table.scrollRectToVisible(rect);
     }
 
-    public VDescription getAutoText() {
-        return desp;
-
+    public Project getProject() {
+        return project;
     }
 
-    public void setAutoText(VDescription desp) {
-        this.desp = desp;
-        textComp.setText(desp == null ? null : desp.getDescription());
+    public void setProject(Project project) {
+        this.project = project;
+        textComp.setText(project == null ? null : project.getKey().getProjectNo());
     }
-
 
     /*
      * KeyListener implementation
@@ -349,9 +352,14 @@ public final class DespAutoCompleter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                accountRepo.getDescription(str).subscribe((t) -> {
-                    t.add(new VDescription("All"));
-                    despModel.setListAutoText(t);
+                userRepo.searchProjectByCode(str).subscribe((t) -> {
+                    if (this.filter) {
+                        t.add(new Project(new ProjectKey("All", Global.compCode), "All"));
+                    }
+                    projectTableModel.setListProject(t);
+                    if (!t.isEmpty()) {
+                        table.setRowSelectionInterval(0, 0);
+                    }
                 }, (err) -> {
                     log.error(err.getMessage());
                 }, () -> {

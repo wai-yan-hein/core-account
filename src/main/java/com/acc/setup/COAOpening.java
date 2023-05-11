@@ -23,10 +23,11 @@ import com.common.PanelControl;
 import com.common.Global;
 import com.common.Util1;
 import com.common.DecimalFormatRender;
-import com.common.FilterObject;
-import com.common.ReturnObject;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
+import com.user.common.UserRepo;
+import com.user.editor.ProjectAutoCompleter;
+import com.user.editor.ProjectCellEditor;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
@@ -52,7 +53,6 @@ import net.coderazzi.filters.gui.AutoChoices;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import net.coderazzi.filters.gui.TableFilterHeader;
 import net.sf.jasperreports.engine.JRException;
@@ -60,7 +60,6 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -75,13 +74,13 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     @Autowired
     private AccountRepo accountRepo;
     @Autowired
-    private WebClient accountApi;
+    private UserRepo userRepo;
 
     private DepartmentAutoCompleter departmenttAutoCompleter;
     private CurrencyAAutoCompleter currencyAutoCompleter;
     private COA3AutoCompleter coaAutoCompleter;
     private TraderAAutoCompleter tradeAutoCompleter;
-
+    private ProjectAutoCompleter projectAutoCompleter;
     private SelectionObserver observer;
     private TableFilterHeader filterHeader;
     private JProgressBar progress;
@@ -174,6 +173,8 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         });
         coaAutoCompleter = new COA3AutoCompleter(txtCOA, accountRepo, null, true, 0);
         coaAutoCompleter.setSelectionObserver(this);
+        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
+        projectAutoCompleter.setObserver(this);
     }
 
     private void initFocusListener() {
@@ -181,6 +182,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         txtCOA.addFocusListener(fa);
         txtCurrency.addFocusListener(fa);
         txtDate.addFocusListener(fa);
+        txtProjectNo.addFocusListener(fa);
     }
 
     private final FocusAdapter fa = new FocusAdapter() {
@@ -230,15 +232,15 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         accountRepo.getDepartment().subscribe((t) -> {
             tblOpening.getColumnModel().getColumn(4).setCellEditor(new DepartmentCellEditor(t));
         });
+        tblOpening.getColumnModel().getColumn(5).setCellEditor(new ProjectCellEditor(userRepo));
         accountRepo.getCurrency().subscribe((t) -> {
-            tblOpening.getColumnModel().getColumn(5).setCellEditor(new CurrencyAEditor(t));
+            tblOpening.getColumnModel().getColumn(6).setCellEditor(new CurrencyAEditor(t));
         });
-        tblOpening.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
         tblOpening.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
+        tblOpening.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
         tblOpening.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblOpening.getInputMap().put(KeyStroke.getKeyStroke("F8"), "F8-Action");
-
         filterHeader = new TableFilterHeader(tblOpening, AutoChoices.ENABLED);
         filterHeader.setPosition(TableFilterHeader.Position.TOP);
         filterHeader.setFont(Global.textFont);
@@ -269,6 +271,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         filter.setCoaLv1(Util1.getInteger(coa.getCoaLevel()) == 1 ? coa.getKey().getCoaCode() : "-");
         filter.setCoaLv2(Util1.getInteger(coa.getCoaLevel()) == 2 ? coa.getKey().getCoaCode() : "-");
         filter.setAcc(Util1.getInteger(coa.getCoaLevel()) == 3 ? coa.getKey().getCoaCode() : "-");
+        filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
         if (chkCus.isSelected()) {
             filter.setTraderType("C");
         } else if (chkSup.isSelected()) {
@@ -277,22 +280,16 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
             filter.setTraderType("-");
         }
         openingTableModel.clear();
-        accountApi.post()
-                .uri("/account/get-opening")
-                .body(Mono.just(filter), ReportFilter.class)
-                .retrieve()
-                .bodyToFlux(OpeningBalance.class)
-                .collectList()
-                .subscribe((t) -> {
-                    openingTableModel.setListOpening(t);
-                    openingTableModel.addNewRow();
-                    btnGenerateZero.setEnabled(openingTableModel.getListOpening().isEmpty());
-                    calTotalAmt();
-                    focusOnTable();
-                    progress.setIndeterminate(false);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                });
+        accountRepo.getOpeningBalance(filter).subscribe((t) -> {
+            openingTableModel.setListOpening(t);
+            openingTableModel.addNewRow();
+            btnGenerateZero.setEnabled(openingTableModel.getListOpening().isEmpty());
+            calTotalAmt();
+            focusOnTable();
+            progress.setIndeterminate(false);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        });
 
     }
 
@@ -328,14 +325,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         filter.setOpeningDate(Util1.toDateStr(txtDate.getDate(), "yyyy-MM-dd"));
         filter.setDeptCode(departmenttAutoCompleter.getDepartment().getKey().getDeptCode());
         filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
-        Mono<ReturnObject> result = accountApi
-                .post()
-                .uri("/report/get-report")
-                .body(Mono.just(filter), FilterObject.class)
-                .retrieve()
-                .bodyToMono(ReturnObject.class
-                );
-        result.subscribe((t) -> {
+        accountRepo.getReport(filter).subscribe((t) -> {
             try {
                 Map<String, Object> p = new HashMap();
                 p.put("p_report_name", "Opening Tri Balance");
@@ -430,6 +420,8 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         chkSup = new javax.swing.JCheckBox();
         jLabel2 = new javax.swing.JLabel();
         txtDate = new com.toedter.calendar.JDateChooser();
+        jLabel6 = new javax.swing.JLabel();
+        txtProjectNo = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblOpening = new javax.swing.JTable();
         jPanel3 = new javax.swing.JPanel();
@@ -496,6 +488,11 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
             }
         });
 
+        jLabel6.setFont(Global.lableFont);
+        jLabel6.setText("Project No");
+
+        txtProjectNo.setFont(Global.textFont);
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -504,19 +501,23 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap()
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 152, Short.MAX_VALUE)
+                .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtDept, javax.swing.GroupLayout.DEFAULT_SIZE, 152, Short.MAX_VALUE)
+                .addComponent(txtDept, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtCurrency, javax.swing.GroupLayout.DEFAULT_SIZE, 152, Short.MAX_VALUE)
+                .addComponent(txtCurrency, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel5)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtCOA, javax.swing.GroupLayout.DEFAULT_SIZE, 152, Short.MAX_VALUE)
+                .addComponent(txtCOA, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel6)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtProjectNo, javax.swing.GroupLayout.DEFAULT_SIZE, 104, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addComponent(chkCus)
                 .addGap(18, 18, 18)
@@ -542,7 +543,9 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
                             .addComponent(jLabel5)
                             .addComponent(chkSup)
                             .addComponent(chkCus)
-                            .addComponent(btnGenerateZero))
+                            .addComponent(btnGenerateZero)
+                            .addComponent(jLabel6)
+                            .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -686,6 +689,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
@@ -701,6 +705,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JFormattedTextField txtFCrAmt;
     private javax.swing.JFormattedTextField txtFDrAmt;
     private javax.swing.JFormattedTextField txtFOB;
+    private javax.swing.JTextField txtProjectNo;
     // End of variables declaration//GEN-END:variables
 
 }

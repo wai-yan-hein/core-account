@@ -19,7 +19,6 @@ import com.acc.setup.COAManagment;
 
 import com.acc.setup.COAOpening;
 import com.acc.setup.COASetup;
-import com.acc.setup.COATemplateSetup;
 import com.acc.setup.DepartmentSetup;
 import com.acc.setup.TraderSetup;
 import com.common.Global;
@@ -83,6 +82,7 @@ import com.user.setup.AppUserSetup;
 import com.user.setup.CloudConfig;
 import com.user.setup.CompanySetup;
 import com.user.setup.CompanyTemplate;
+import com.user.setup.ProjectSetup;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -195,6 +195,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private CompanySetup companySetup;
     @Autowired
     private CompanyTemplate companyTemplate;
+    @Autowired
+    private ProjectSetup projectSetup;
     private PanelControl control;
     private final HashMap<String, JPanel> hmPanel = new HashMap<>();
     private final ActionListener menuListener = (java.awt.event.ActionEvent evt) -> {
@@ -529,6 +531,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 cloudConfig.setObserver(this);
                 cloudConfig.initMain();
                 return cloudConfig;
+            }
+            case "Project" -> {
+                projectSetup.setName(menuName);
+                projectSetup.setObserver(this);
+                projectSetup.setProgress(progress);
+                projectSetup.initMain();
+                return projectSetup;
             }
             case "Pattern Setup" -> {
                 patternSetup.setName(menuName);

@@ -21,6 +21,8 @@ import com.user.model.MachineProperty;
 import com.user.model.Menu;
 import com.user.model.MenuTemplate;
 import com.user.model.PrivilegeCompany;
+import com.user.model.Project;
+import com.user.model.ProjectKey;
 import com.user.model.YearEnd;
 import java.util.HashMap;
 import java.util.List;
@@ -383,4 +385,42 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(MenuTemplate.class);
     }
+
+    public Mono<List<Project>> searchProject() {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/searchProject")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(Project.class)
+                .collectList();
+    }
+
+    public Mono<Project> find(ProjectKey key) {
+        return userApi.post()
+                .uri("/user/findProject")
+                .body(Mono.just(key), ProjectKey.class)
+                .retrieve()
+                .bodyToMono(Project.class);
+    }
+
+    public Mono<Project> save(Project obj) {
+        return userApi.post()
+                .uri("/user/saveProject")
+                .body(Mono.just(obj), Project.class)
+                .retrieve()
+                .bodyToMono(Project.class);
+    }
+
+    public Mono<List<Project>> searchProjectByCode(String code) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/searchProjectByCode")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("code", code)
+                .build())
+                .retrieve()
+                .bodyToFlux(Project.class)
+                .collectList();
+    }
+
 }

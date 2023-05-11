@@ -12,6 +12,7 @@ import com.acc.model.StockOPKey;
 import com.common.Global;
 import com.common.Util1;
 import com.user.model.Currency;
+import com.user.model.Project;
 import java.awt.HeadlessException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JournalClosingStockTableModel extends AbstractTableModel {
 
     private List<StockOP> listGV = new ArrayList();
-    private final String[] columnNames = {"Stock Closing Date", "Dep :", "Code", "COA Name", "Currency", "Closing Amount"};
+    private final String[] columnNames = {"Stock Closing Date", "Dep :", "Code", "COA Name", "Project No", "Currency", "Closing Amount"};
     private JTable parent;
     private AccountRepo accountRepo;
     private Department department;
@@ -81,8 +82,10 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
                 case 3 ->
                     op.getCoaNameEng();
                 case 4 ->
-                    op.getCurCode();
+                    op.getProjectNo();
                 case 5 ->
+                    op.getCurCode();
+                case 6 ->
                     op.getClAmt();
                 default ->
                     null;
@@ -134,14 +137,19 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
                             }
                         }
                     }
-
                     case 4 -> {
-                        if (value instanceof Currency c) {
-                            op.setCurCode(c.getCurCode());
+                        if (value instanceof Project c) {
+                            op.setProjectNo(c.getKey().getProjectNo());
                             foucsTable(row, 5);
                         }
                     }
-                    case 5 ->
+                    case 5 -> {
+                        if (value instanceof Currency c) {
+                            op.setCurCode(c.getCurCode());
+                            foucsTable(row, 6);
+                        }
+                    }
+                    case 6 ->
                         op.setClAmt(Util1.getDouble(value));
 
                 }
@@ -165,7 +173,7 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        if (column == 5) {
+        if (column == 6) {
             return Double.class;
         }
         return String.class;

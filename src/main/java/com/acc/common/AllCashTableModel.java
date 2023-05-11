@@ -16,6 +16,7 @@ import com.common.SelectionObserver;
 import com.common.Util1;
 import com.google.gson.JsonSyntaxException;
 import com.user.model.Currency;
+import com.user.model.Project;
 import java.awt.HeadlessException;
 import java.util.ArrayList;
 import java.util.List;
@@ -268,8 +269,8 @@ public class AllCashTableModel extends AbstractTableModel {
                     }
                 }
                 case 6 -> {
-                    if (value instanceof VDescription v) {
-                        gl.setProjectNo(v.getDescription());
+                    if (value instanceof Project p) {
+                        gl.setProjectNo(p.getKey().getProjectNo());
                         parent.setColumnSelectionInterval(7, 7);
                     }
                 }

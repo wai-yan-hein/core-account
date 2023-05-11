@@ -23,6 +23,9 @@ import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.CurrencyAutoCompleter;
 import com.user.common.UserRepo;
+import com.user.editor.ProjectAutoCompleter;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
@@ -68,13 +71,12 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     private int selectRow = -1;
     private static final Logger log = LoggerFactory.getLogger(GLReport.class);
     private DateAutoCompleter dateAutoCompleter;
+    private ProjectAutoCompleter projectAutoCompleter;
     private String stDate, endDate;
     @Autowired
     private AccountRepo accountRepo;
     @Autowired
     private UserRepo userRepo;
-    @Autowired
-    private WebClient accountApi;
     private TrialBalanceDetailDialog dialog;
     private DateTableDecorator decorator;
 
@@ -114,6 +116,15 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         initDateDecorator();
     }
 
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            if (e.getSource() instanceof JTextField txt) {
+                txt.selectAll();
+            }
+        }
+    };
+
     private void initDateDecorator() {
         decorator = DateTableDecorator.decorate(panelDate);
         decorator.setObserver(this);
@@ -141,6 +152,10 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     private void initKeyListener() {
         txtDep.addKeyListener(this);
         txtCOA.addKeyListener(this);
+        txtProjectNo.addKeyListener(this);
+        txtDep.addFocusListener(fa);
+        txtCOA.addFocusListener(fa);
+        txtProjectNo.addFocusListener(fa);
     }
 
     public void initMain() {
@@ -235,31 +250,26 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             filter.setClosing(chkClosing.isSelected());
             filter.setCurCode(getCurCode());
             filter.setListDepartment(getListDep());
+            filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
             decorator.refreshButton(filter.getFromDate());
-            accountApi.post()
-                    .uri("/report/get-tri-balance")
-                    .body(Mono.just(filter), ReportFiller.class)
-                    .retrieve()
-                    .bodyToFlux(VTriBalance.class)
-                    .collectList()
-                    .subscribe((t) -> {
-                        glListingTableModel.setListTBAL(t);
-                        calGLTotlaAmount();
-                        if (chkActive.isSelected()) {
-                            removeZero();
-                        }
-                        isGLCal = false;
-                        progress.setIndeterminate(false);
-                        long end = new GregorianCalendar().getTimeInMillis();
-                        long pt = end - start;
-                        lblCalTime.setText(pt / 1000 + " s");
-                        tblGL.requestFocus();
-                    }, (e) -> {
-                        tblGL.requestFocus();
-                        JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-                        isGLCal = false;
-                        progress.setIndeterminate(false);
-                    });
+            accountRepo.getTri(filter).subscribe((t) -> {
+                glListingTableModel.setListTBAL(t);
+                calGLTotlaAmount();
+                if (chkActive.isSelected()) {
+                    removeZero();
+                }
+                isGLCal = false;
+                progress.setIndeterminate(false);
+                long end = new GregorianCalendar().getTimeInMillis();
+                long pt = end - start;
+                lblCalTime.setText(pt / 1000 + " s");
+                tblGL.requestFocus();
+            }, (e) -> {
+                tblGL.requestFocus();
+                JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+                isGLCal = false;
+                progress.setIndeterminate(false);
+            });
 
         }
 
@@ -269,7 +279,6 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         if (dialog == null) {
             dialog = new TrialBalanceDetailDialog(Global.parentForm);
             dialog.setAccountRepo(accountRepo);
-            dialog.setAccountApi(accountApi);
             dialog.initMain();
             dialog.setSize(Global.width - 50, Global.height - 50);
             dialog.setLocationRelativeTo(null);
@@ -312,14 +321,14 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         dateAutoCompleter.setSelectionObserver(this);
         cOAAutoCompleter = new COA3AutoCompleter(txtCOA, accountRepo, null, true, 0);
         cOAAutoCompleter.setSelectionObserver(this);
+        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
+        projectAutoCompleter.setObserver(this);
         accountRepo.getDepartment().subscribe((t) -> {
-            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t,
-                    null, true, true);
+            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true, true);
             departmentAutoCompleter.setObserver(this);
         });
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t,
-                    null, true);
+            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, true);
             currencyAutoCompleter.setObserver(this);
         });
     }
@@ -349,9 +358,8 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             JOptionPane.showMessageDialog(Global.parentForm, "Report", ex.getMessage(), JOptionPane.ERROR_MESSAGE);
             log.error("printGLListing : " + ex.getMessage());
         } catch (IOException ex) {
-            java.util.logging.Logger.getLogger(GLReport.class.getName()).log(Level.SEVERE, null, ex);
+            log.error("printGLListing : " + ex.getMessage());
         }
-
     }
 
     public void clear() {
@@ -387,6 +395,8 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         jLabel3 = new javax.swing.JLabel();
         txtCurrency = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        txtProjectNo = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblGL = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
@@ -463,6 +473,22 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         jLabel4.setFont(Global.lableFont);
         jLabel4.setText("Currency");
 
+        jLabel7.setFont(Global.lableFont);
+        jLabel7.setText("Project No");
+
+        txtProjectNo.setFont(Global.textFont);
+        txtProjectNo.setName("txtCOA"); // NOI18N
+        txtProjectNo.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtProjectNoFocusGained(evt);
+            }
+        });
+        txtProjectNo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtProjectNoActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -481,6 +507,10 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                 .addGap(18, 18, 18)
                 .addComponent(txtCOA)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel7)
+                .addGap(18, 18, 18)
+                .addComponent(txtProjectNo)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel4)
                 .addGap(18, 18, 18)
                 .addComponent(txtCurrency)
@@ -498,7 +528,9 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                     .addComponent(txtCOA, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3)
                     .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel4))
+                    .addComponent(jLabel4)
+                    .addComponent(jLabel7)
+                    .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -712,12 +744,10 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
 
     private void txtDepFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDepFocusGained
         // TODO add your handling code here:
-        txtDep.selectAll();
     }//GEN-LAST:event_txtDepFocusGained
 
     private void txtCOAFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCOAFocusGained
         // TODO add your handling code here:
-        txtCOA.selectAll();
     }//GEN-LAST:event_txtCOAFocusGained
 
     private void tblGLKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblGLKeyReleased
@@ -743,6 +773,14 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         searchGLListing();
     }//GEN-LAST:event_chkDetailActionPerformed
 
+    private void txtProjectNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtProjectNoFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtProjectNoFocusGained
+
+    private void txtProjectNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtProjectNoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtProjectNoActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkActive;
@@ -754,6 +792,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -769,6 +808,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JFormattedTextField txtFTotalCrAmt;
     private javax.swing.JFormattedTextField txtFTotalDrAmt;
     private javax.swing.JFormattedTextField txtOB;
+    private javax.swing.JTextField txtProjectNo;
     // End of variables declaration//GEN-END:variables
 
     @Override

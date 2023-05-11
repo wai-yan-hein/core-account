@@ -5,9 +5,11 @@
 package com.acc.entry;
 
 import com.acc.common.AccountRepo;
+import com.acc.common.ColumnHeaderListener;
 import com.acc.common.DateAutoCompleter;
 import com.acc.common.JournalTableModel;
 import com.acc.dialog.JournalEntryDialog;
+import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.model.DeleteObj;
 import com.acc.model.Department;
@@ -18,6 +20,8 @@ import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.user.common.UserRepo;
+import com.user.editor.ProjectAutoCompleter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -32,7 +36,6 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
@@ -45,6 +48,8 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     private final JournalTableModel tableModel = new JournalTableModel();
     private DateAutoCompleter dateAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
+    private ProjectAutoCompleter projectAutoCompleter;
+    private COA3AutoCompleter cOA3AutoCompleter;
     private JProgressBar progress;
     private SelectionObserver observer;
     private JournalEntryDialog dialog;
@@ -52,7 +57,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     @Autowired
     private AccountRepo accountRepo;
     @Autowired
-    private WebClient accountApi;
+    private UserRepo userRepo;
 
     public JProgressBar getProgress() {
         return progress;
@@ -125,8 +130,11 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         txtRefrence.addFocusListener(fa);
         txtDesp.addFocusListener(fa);
         txtVouNo.addFocusListener(fa);
+        txtAccount.addFocusListener(fa);
+        txtProjectNo.addFocusListener(fa);
         txtRefrence.addActionListener(action);
         txtDesp.addActionListener(action);
+        tblJournal.addMouseListener(new ColumnHeaderListener(tblJournal));
     }
     private final ActionListener action = (ActionEvent e) -> {
         searchJournal();
@@ -144,6 +152,10 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         return departmentAutoCompleter == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
     }
 
+    private String getProjectNo() {
+        return projectAutoCompleter == null ? "-" : projectAutoCompleter.getProject().getKey().getProjectNo();
+    }
+
     private void searchJournal() {
         progress.setIndeterminate(true);
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
@@ -153,24 +165,20 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         filter.setDesp(txtDesp.getText());
         filter.setReference(txtRefrence.getText());
         filter.setGlVouNo(txtVouNo.getText());
-        accountApi.post()
-                .uri("/account/search-journal")
-                .body(Mono.just(filter), ReportFilter.class)
-                .retrieve()
-                .bodyToFlux(Gl.class)
-                .collectList()
-                .subscribe((t) -> {
-                    tableModel.setListGV(t);
-                    lblCount.setText(tableModel.getListSize() + "");
-                    progress.setIndeterminate(false);
-                });
+        filter.setProjectNo(getProjectNo());
+        filter.setCoaCode(cOA3AutoCompleter.getCOA().getKey().getCoaCode());
+        accountRepo.searchJournal(filter).subscribe((t) -> {
+            tableModel.setListGV(t);
+            lblCount.setText(tableModel.getListSize() + "");
+            progress.setIndeterminate(false);
+        });
     }
 
     public void openJournalEntryDialog(String glVou, String status) {
         if (dialog == null) {
-            dialog = new JournalEntryDialog();
+            dialog = new JournalEntryDialog(Global.parentForm);
             dialog.setAccountRepo(accountRepo);
-            dialog.setAccountApi(accountApi);
+            dialog.setUserRepo(userRepo);
             dialog.setSize(Global.width - 100, Global.height - 100);
             dialog.setIconImage(Global.parentForm.getIconImage());
             dialog.setLocationRelativeTo(null);
@@ -185,6 +193,10 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     private void initCompleter() {
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
+        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
+        projectAutoCompleter.setObserver(this);
+        cOA3AutoCompleter = new COA3AutoCompleter(txtAccount, accountRepo, null, true, 3);
+        cOA3AutoCompleter.setSelectionObserver(this);
         Mono<List<Department>> monoDep = accountRepo.getDepartment();
         monoDep.subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true, true);
@@ -200,7 +212,8 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         tblJournal.getColumnModel().getColumn(1).setPreferredWidth(50);//Vou
         tblJournal.getColumnModel().getColumn(2).setPreferredWidth(400);//Ref
         tblJournal.getColumnModel().getColumn(3).setPreferredWidth(400);//Ref
-        tblJournal.getColumnModel().getColumn(4).setPreferredWidth(50);//Ref
+        tblJournal.getColumnModel().getColumn(4).setPreferredWidth(100);//Ref
+        tblJournal.getColumnModel().getColumn(5).setPreferredWidth(50);//amt
         tblJournal.setDefaultRenderer(Object.class, new TableCellRender());
         tblJournal.setDefaultRenderer(Double.class, new TableCellRender());
         tblJournal.addMouseListener(new MouseAdapter() {
@@ -214,7 +227,6 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
                     }
                 }
             }
-
         });
 
     }
@@ -245,6 +257,10 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         txtDep = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
         txtDesp = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
+        txtProjectNo = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
+        txtAccount = new javax.swing.JTextField();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -352,6 +368,30 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
             }
         });
 
+        jLabel7.setFont(Global.lableFont);
+        jLabel7.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel7.setText("Project No");
+
+        txtProjectNo.setFont(Global.shortCutFont);
+        txtProjectNo.setName("txtRefrence"); // NOI18N
+        txtProjectNo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtProjectNoActionPerformed(evt);
+            }
+        });
+
+        jLabel8.setFont(Global.lableFont);
+        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel8.setText("Account");
+
+        txtAccount.setFont(Global.shortCutFont);
+        txtAccount.setName("txtRefrence"); // NOI18N
+        txtAccount.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtAccountActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -377,6 +417,14 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtDesp)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtAccount)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel7)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtProjectNo)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnEntry)
                 .addContainerGap())
@@ -393,7 +441,11 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
                         .addComponent(txtRefrence, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(btnEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel6)
-                        .addComponent(txtDesp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtDesp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel7)
+                        .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel8)
+                        .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -445,6 +497,14 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         // TODO add your handling code here:
     }//GEN-LAST:event_txtDespActionPerformed
 
+    private void txtProjectNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtProjectNoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtProjectNoActionPerformed
+
+    private void txtAccountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAccountActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtAccountActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEntry;
@@ -454,14 +514,18 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblCount;
     private javax.swing.JTable tblJournal;
+    private javax.swing.JTextField txtAccount;
     private javax.swing.JTextField txtDate;
     private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtDesp;
+    private javax.swing.JTextField txtProjectNo;
     private javax.swing.JTextField txtRefrence;
     private javax.swing.JTextField txtVouNo;
     // End of variables declaration//GEN-END:variables
