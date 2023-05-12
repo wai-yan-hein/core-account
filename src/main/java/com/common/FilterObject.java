@@ -38,6 +38,7 @@ public class FilterObject {
     private boolean nullBatch;
     private String batchNo;
     private boolean orderByBatch;
+    private String projectNo;
     public FilterObject(String compCode, Integer deptId) {
         this.compCode = compCode;
         this.deptId = deptId;

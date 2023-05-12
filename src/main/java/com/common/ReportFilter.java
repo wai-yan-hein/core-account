@@ -69,6 +69,7 @@ public class ReportFilter {
     private String plAcc;
     private String reAcc;
     private String batchNo;
+    private String projectNo;
 
     public ReportFilter(Integer macId, String compCode, Integer deptId) {
         this.macId = macId;
