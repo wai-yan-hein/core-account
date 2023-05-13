@@ -54,7 +54,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
      *
      */
     private final SaleVouSearchTableModel saleVouTableModel = new SaleVouSearchTableModel();
-    private WebClient inventoryApi;
     private InventoryRepo inventoryRepo;
     private TraderAutoCompleter traderAutoCompleter;
     private AppUserAutoCompleter appUserAutoCompleter;
@@ -219,20 +218,14 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         saleVouTableModel.clear();
         txtRecord.setValue(0);
         //
-        inventoryApi.post()
-                .uri("/sale/get-sale")
-                .body(Mono.just(filter), FilterObject.class)
-                .retrieve()
-                .bodyToFlux(VSale.class)
-                .collectList()
-                .subscribe((t) -> {
-                    saleVouTableModel.setListSaleHis(t);
-                    calAmount();
-                    progress.setIndeterminate(false);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                    progress.setIndeterminate(false);
-                });
+        inventoryRepo.getSaleHistory(filter).subscribe((t) -> {
+            saleVouTableModel.setListSaleHis(t);
+            calAmount();
+            progress.setIndeterminate(false);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+            progress.setIndeterminate(false);
+        });
 
     }
 

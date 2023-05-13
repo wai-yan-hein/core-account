@@ -11,7 +11,7 @@ import lombok.NonNull;
 
 /**
  *
- * @author winswe
+ * @author wai yan
  */
 @Data
 public class PurHis implements java.io.Serializable {

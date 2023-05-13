@@ -9,16 +9,15 @@ import com.user.model.CurExchange;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
- * @author winswe
+ * @author wai yan
  */
+@Slf4j
 public class CurExchangeRateTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(CurExchangeRateTableModel.class);
     private List<CurExchange> listEx = new ArrayList();
     private String[] columnNames = {"Date", "H-Currency", "F-Currency", "Exchange Rate"};
 

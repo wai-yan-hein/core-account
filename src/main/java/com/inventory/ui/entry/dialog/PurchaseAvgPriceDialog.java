@@ -12,7 +12,11 @@ import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.UnitComboBoxModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.util.List;
+import javax.swing.JFormattedTextField;
+import javax.swing.JOptionPane;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -83,6 +87,12 @@ public class PurchaseAvgPriceDialog extends javax.swing.JDialog {
         cboUnit.setModel(unitModel);
         cboAvgUnit.setModel(lossUnitModel);
     }
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            ((JFormattedTextField) e.getSource()).selectAll();
+        }
+    };
 
     private void initData() {
         inventoryRepo.findStock(pd.getStockCode()).subscribe((s) -> {
@@ -91,10 +101,20 @@ public class PurchaseAvgPriceDialog extends javax.swing.JDialog {
                 txtQty.setValue(pd.getQty());
                 float orgPrice = Util1.getFloat(pd.getOrgPrice());
                 txtPrice.setValue(orgPrice > 0 ? orgPrice : pd.getPrice());
-                unitModel.setSelectedItem(inventoryRepo.findUnit(pd.getUnitCode(), Global.deptId));
+                inventoryRepo.findUnit(pd.getUnitCode(), Global.deptId).subscribe((t) -> {
+                    unitModel.setSelectedItem(t);
+                    cboUnit.setModel(unitModel);
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                });
                 txtAvgQty.setValue(pd.getAvgQty());
                 txtAvgPrice.setValue(Util1.getFloat(pd.getPrice()));
-                lossUnitModel.setSelectedItem(inventoryRepo.findUnit(s.getWeightUnit(), Global.deptId));
+                inventoryRepo.findUnit(s.getWeightUnit(), Global.deptId).subscribe((t) -> {
+                    lossUnitModel.setSelectedItem(t);
+                    cboAvgUnit.setModel(lossUnitModel);
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                });
                 txtAvgQty.requestFocus();
             }
         });
@@ -108,6 +128,7 @@ public class PurchaseAvgPriceDialog extends javax.swing.JDialog {
         txtAvgPrice.setFormatterFactory(Util1.getDecimalFormat());
         txtDiffPrice.setFormatterFactory(Util1.getDecimalFormat());
         txtAvgQty.addActionListener(action);
+        txtAvgQty.addFocusListener(fa);
     }
     private final ActionListener action = (ActionEvent e) -> {
         calPrice();
@@ -116,15 +137,18 @@ public class PurchaseAvgPriceDialog extends javax.swing.JDialog {
     private void calPrice() {
         if (lossUnitModel.getSelectedItem() instanceof StockUnit unit) {
             String unitCode = unit.getKey().getUnitCode();
-            float qty = inventoryRepo.getSmallQty(pd.getStockCode(), unitCode).block().getQty();
-            float avgQty = Util1.getFloat(txtAvgQty.getValue());
-            float price = Util1.getFloat(txtPrice.getValue());
-            float avgPrice = avgQty / qty * price;
-            pd.setPrice(avgPrice);
-            pd.setAvgQty(avgQty);
-            txtAvgPrice.setValue(avgPrice);
-            txtDiffPrice.setValue(price - avgPrice);
-            btnConfirm.requestFocus();
+            inventoryRepo.getSmallQty(pd.getStockCode(), unitCode).subscribe((t) -> {
+                float qty = t.getQty();
+                float avgQty = Util1.getFloat(txtAvgQty.getValue());
+                float price = Util1.getFloat(txtPrice.getValue());
+                float avgPrice = avgQty / qty * price;
+                pd.setPrice(avgPrice);
+                pd.setAvgQty(avgQty);
+                txtAvgPrice.setValue(avgPrice);
+                txtDiffPrice.setValue(price - avgPrice);
+                btnConfirm.requestFocus();
+            });
+
         }
 
     }

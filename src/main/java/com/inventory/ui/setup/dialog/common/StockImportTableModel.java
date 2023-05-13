@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 /**
  *
- * @author winswe
+ * @author wai yan
  */
 @Component
 public class StockImportTableModel extends AbstractTableModel {

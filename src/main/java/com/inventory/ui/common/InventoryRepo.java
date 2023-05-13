@@ -1039,6 +1039,14 @@ public class InventoryRepo {
                 .bodyToMono(Boolean.class);
     }
 
+    public Mono<Boolean> open(GRNKey key) {
+        return inventoryApi.post()
+                .uri("/grn/open-grn")
+                .body(Mono.just(key), GRNKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+    }
+
     public Mono<Boolean> delete(ProcessHisDetailKey key) {
         return inventoryApi.post()
                 .uri("/process/delete-process-detail")
@@ -1258,5 +1266,14 @@ public class InventoryRepo {
                 .retrieve().bodyToFlux(OrderHisDetail.class)
                 .collectList();
 
+    }
+
+    public Mono<List<VSale>> getSaleHistory(FilterObject filter) {
+        return inventoryApi.post()
+                .uri("/sale/get-sale")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToFlux(VSale.class)
+                .collectList();
     }
 }

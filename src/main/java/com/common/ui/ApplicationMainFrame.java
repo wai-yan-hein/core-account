@@ -771,6 +771,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                     lblCompName.setText(Global.companyName);
                     lblUserName.setText(Global.loginUser.getUserName());
                     userRepo.setupProperty();
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
                 });
 
     }

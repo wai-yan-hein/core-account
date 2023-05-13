@@ -326,6 +326,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         chkClose.setEnabled(status);
         txtRemark.setEnabled(status);
         tblGRN.setEnabled(status);
+        txtLocation.setEnabled(status);
         observer.selected("save", status);
         observer.selected("print", status);
     }
@@ -389,7 +390,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                         tableModel.setListDetail(t);
                         tableModel.addNewRow();
                         if (grn.isClosed()) {
-                            lblStatus.setText("This Batch is closed.");
+                            lblStatus.setText("CLOSED");
                             lblStatus.setForeground(Color.RED);
                             disableForm(false);
                         } else if (grn.isDeleted()) {
@@ -423,10 +424,22 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         switch (status) {
             case "EDIT" -> {
                 int yes_no = JOptionPane.showConfirmDialog(this,
-                        "Are you sure to delete?", "Save Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+                        "Are you sure to delete?", "GRN Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
                     inventoryRepo.delete(grn.getKey()).subscribe((t) -> {
                         clear();
+                    });
+                }
+            }
+            case "CLOSED" -> {
+                int yes_no = JOptionPane.showConfirmDialog(this,
+                        "Are you sure to open batch?", "GRN Voucher Batch Open.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (yes_no == 0) {
+                    chkClose.setSelected(false);
+                    inventoryRepo.open(grn.getKey()).subscribe((t) -> {
+                        lblStatus.setText("EDIT");
+                        lblStatus.setForeground(Color.blue);
+                        disableForm(true);
                     });
                 }
             }

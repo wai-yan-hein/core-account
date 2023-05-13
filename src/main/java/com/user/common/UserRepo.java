@@ -5,6 +5,8 @@
 package com.user.common;
 
 import com.acc.model.BusinessType;
+import com.acc.model.DeleteObj;
+import com.acc.model.ReportFilter;
 import com.common.Global;
 import com.common.ReturnObject;
 import com.user.model.RoleProperty;
@@ -16,7 +18,9 @@ import com.inventory.model.MachineInfo;
 import com.inventory.model.VRoleMenu;
 import com.user.model.SysProperty;
 import com.user.model.CompanyInfo;
+import com.user.model.CurExchange;
 import com.user.model.Currency;
+import com.user.model.ExchangeKey;
 import com.user.model.MachineProperty;
 import com.user.model.Menu;
 import com.user.model.MenuTemplate;
@@ -28,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -421,6 +426,24 @@ public class UserRepo {
                 .retrieve()
                 .bodyToFlux(Project.class)
                 .collectList();
+    }
+
+    public Mono<List<CurExchange>> searchExchange(ReportFilter filter) {
+        return userApi.post()
+                .uri("/user/search-exchange")
+                .accept(MediaType.APPLICATION_JSON)
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToFlux(CurExchange.class)
+                .collectList();
+    }
+
+    public Mono<Boolean> delete(ExchangeKey obj) {
+        return userApi.post()
+                .uri("/user/delete-exchange")
+                .body(Mono.just(obj), DeleteObj.class)
+                .retrieve()
+                .bodyToMono(Boolean.class);
     }
 
 }

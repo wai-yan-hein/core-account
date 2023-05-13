@@ -3,26 +3,24 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.acc.setup;
+package com.user.setup;
 
-import com.acc.common.AccountRepo;
 import com.acc.common.CurExchangeRateTableModel;
 import com.acc.common.DateAutoCompleter;
-import com.acc.dialog.ExchangeDialog;
+import com.user.dialog.ExchangeDialog;
 import com.acc.model.ReportFilter;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.user.common.UserRepo;
 import com.user.model.CurExchange;
-import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
 
 /**
  *
@@ -39,7 +37,7 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
     private JProgressBar progress;
     private DateAutoCompleter dateAutoCompleter;
     @Autowired
-    private AccountRepo accountRepo;
+    private UserRepo userRepo;
 
     public JProgressBar getProgress() {
         return progress;
@@ -92,7 +90,7 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
         filter.setFromDate(fromDate);
         filter.setToDate(toDate);
-        accountRepo.searchExchange(filter).subscribe((t) -> {
+        userRepo.searchExchange(filter).subscribe((t) -> {
             exchangeTableModel.setListEx(t);
             double amt = t.stream()
                     .filter((ex) -> ex.getExRate() != null)
@@ -125,7 +123,7 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
             int y = JOptionPane.showConfirmDialog(this, "Are you sure to deleted?");
             if (y == JOptionPane.YES_OPTION) {
                 CurExchange ex = exchangeTableModel.getEX(row);
-                accountRepo.delete(ex.getKey());
+                userRepo.delete(ex.getKey());
             }
         }
     }

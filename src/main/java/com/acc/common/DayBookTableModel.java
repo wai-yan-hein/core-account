@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author winswe
+ * @author wai yan
  */
 public class DayBookTableModel extends AbstractTableModel {
 

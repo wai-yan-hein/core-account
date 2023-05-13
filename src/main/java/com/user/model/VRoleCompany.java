@@ -10,7 +10,7 @@ import lombok.Data;
 
 /**
  *
- * @author winswe
+ * @author wai yan
  */
 @Data
 public class VRoleCompany implements java.io.Serializable {

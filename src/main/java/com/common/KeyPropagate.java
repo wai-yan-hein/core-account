@@ -9,7 +9,7 @@ import java.awt.event.KeyEvent;
 
 /**
  *
- * @author winswe
+ * @author wai yan
  */
 public interface KeyPropagate {
     void keyEvent(KeyEvent e);

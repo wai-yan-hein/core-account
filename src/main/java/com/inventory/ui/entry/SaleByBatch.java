@@ -304,6 +304,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
         if (ProUtil.isCalStock()) {
             tblStockBalance.setModel(stockBalanceTableModel);
             stockBalanceTableModel.setProgress(sbProgress);
+            stockBalanceTableModel.setInventoryRepo(inventoryRepo);
             tblStockBalance.getColumnModel().getColumn(0).setPreferredWidth(100);//Unit
             tblStockBalance.getColumnModel().getColumn(1).setPreferredWidth(140);//Cost Price
             tblStockBalance.getTableHeader().setFont(Global.tblHeaderFont);

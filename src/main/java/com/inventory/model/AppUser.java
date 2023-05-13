@@ -9,7 +9,7 @@ import lombok.Data;
 
 /**
  *
- * @author winswe
+ * @author wai yan
  */
 @Data
 public class AppUser implements java.io.Serializable {

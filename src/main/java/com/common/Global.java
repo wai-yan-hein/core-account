@@ -16,7 +16,7 @@ import javax.swing.JFrame;
 
 /**
  *
- * @author winswe
+ * @author wai yan
  */
 public class Global {
 

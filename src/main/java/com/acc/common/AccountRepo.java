@@ -182,13 +182,6 @@ public class AccountRepo {
                 .bodyToMono(Boolean.class);
     }
 
-    public Mono<Boolean> delete(ExchangeKey obj) {
-        return accountApi.post()
-                .uri("/account/delete-exchange")
-                .body(Mono.just(obj), DeleteObj.class)
-                .retrieve()
-                .bodyToMono(Boolean.class);
-    }
 
     public Mono<Boolean> deleteVoucher(DeleteObj gl) {
         return accountApi.post()
@@ -349,15 +342,7 @@ public class AccountRepo {
         return null;
     }
 
-    public Mono<List<CurExchange>> searchExchange(ReportFilter filter) {
-        return accountApi.post()
-                .uri("/account/search-exchange")
-                .accept(MediaType.APPLICATION_JSON)
-                .body(Mono.just(filter), ReportFilter.class)
-                .retrieve()
-                .bodyToFlux(CurExchange.class)
-                .collectList();
-    }
+    
 
     public Flux<Gl> listenGl() {
         return accountApi.get()

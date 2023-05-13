@@ -7,7 +7,7 @@ package com.common;
 
 /**
  *
- * @author winswe
+ * @author wai yan
  */
 public interface SelectionObserver {
 

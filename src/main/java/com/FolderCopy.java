@@ -24,13 +24,13 @@ public class FolderCopy {
         String remoteHost = "localhost";
         String remoteUsername = "username";
         String remotePassword = "password";
-        String sourceFolder = "/path/to/source/folder";
+        String sourceFolder = "D:/CoreValue/test";
         String destinationFolder = System.getProperty("user.dir");
         FTPClient ftpClient = new FTPClient();
         try {
             ftpClient.connect(remoteHost);
-            ftpClient.login(remoteUsername, remotePassword);
-            ftpClient.enterLocalPassiveMode();
+            //ftpClient.login(remoteUsername, remotePassword);
+            //ftpClient.enterLocalPassiveMode();
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
 
             copyFolder(ftpClient, sourceFolder, destinationFolder);

@@ -9,7 +9,7 @@ import lombok.Data;
 
 /**
  *
- * @author winswe
+ * @author wai yan
  */
 @Data
 public class VTriBalance implements java.io.Serializable {
