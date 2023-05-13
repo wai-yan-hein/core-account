@@ -199,6 +199,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     private void initOrderTable() {
         tblOrder.setModel(orderTableModel);
         orderTableModel.setParent(tblOrder);
+        orderTableModel.setLblRecord(lblRec);
         orderTableModel.setOrderEntry(this);
         orderTableModel.addNewRow();
         orderTableModel.setSelectionObserver(this);
