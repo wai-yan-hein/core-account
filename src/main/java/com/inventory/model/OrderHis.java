@@ -53,7 +53,7 @@ public class OrderHis implements java.io.Serializable{
     private List<OrderHisDetail> listSH;
     private List<OrderDetailKey> listDel;
     private boolean backup;
-    
+    private String projectNo;
      public OrderHis() {
     }
     

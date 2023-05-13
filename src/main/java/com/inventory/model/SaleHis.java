@@ -56,6 +56,7 @@ public class SaleHis {
     private List<SaleDetailKey> listDel;
     private boolean backup;
     private String orderNo;
+    private String projectNo;
 
     public SaleHis() {
     }
