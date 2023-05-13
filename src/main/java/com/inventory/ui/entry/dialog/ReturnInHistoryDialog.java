@@ -24,6 +24,7 @@ import com.inventory.model.VReturnIn;
 import com.inventory.model.VReturnOut;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.RetInVouSearchTableModel;
+import com.user.editor.ProjectAutoCompleter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.List;
@@ -55,6 +56,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     private AppUserAutoCompleter appUserAutoCompleter;
     private StockAutoCompleter stockAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
+    private ProjectAutoCompleter projectAutoCompleter;
     private SelectionObserver observer;
     private StartWithRowFilter tblFilter;
     private TableRowSorter<TableModel> sorter;
@@ -121,7 +123,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "CUS");
-
+        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
     }
 
     private void initTableVoucher() {
@@ -189,7 +191,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(getDepId());
-        //
+        filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
         tableModel.clear();
         inventoryApi
                 .post()
@@ -270,6 +272,8 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         chkDel = new javax.swing.JCheckBox();
         jLabel9 = new javax.swing.JLabel();
         txtDep = new javax.swing.JTextField();
+        jLabel10 = new javax.swing.JLabel();
+        txtProjectNo = new javax.swing.JTextField();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
         txtFilter = new javax.swing.JTextField();
@@ -392,6 +396,17 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
             }
         });
 
+        jLabel10.setFont(Global.lableFont);
+        jLabel10.setText("Project No");
+
+        txtProjectNo.setFont(Global.textFont);
+        txtProjectNo.setName("txtUser"); // NOI18N
+        txtProjectNo.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtProjectNoFocusGained(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -412,7 +427,8 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
                             .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -431,7 +447,8 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
                                 .addComponent(txtToDate, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addComponent(chkDel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtDep))))
+                            .addComponent(txtDep)
+                            .addComponent(txtProjectNo))))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -473,6 +490,10 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel9)
                             .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel10)
+                            .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(8, 8, 8)
                         .addComponent(chkDel))
                     .addComponent(jSeparator2))
@@ -480,7 +501,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton1))
-                .addContainerGap(39, Short.MAX_VALUE))
+                .addContainerGap(11, Short.MAX_VALUE))
         );
 
         tblVoucher.setFont(Global.textFont);
@@ -698,6 +719,10 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         // TODO add your handling code here:
     }//GEN-LAST:event_txtDepFocusGained
 
+    private void txtProjectNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtProjectNoFocusGained
+        txtProjectNo.selectAll();        // TODO add your handling code here:
+    }//GEN-LAST:event_txtProjectNoFocusGained
+
     /**
      * @param args the command line arguments
      */
@@ -708,6 +733,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     private javax.swing.JCheckBox chkDel;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -734,6 +760,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     private com.toedter.calendar.JDateChooser txtFromDate;
     private javax.swing.JTextField txtLocation;
     private javax.swing.JFormattedTextField txtPaid;
+    private javax.swing.JTextField txtProjectNo;
     private javax.swing.JFormattedTextField txtRecord;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtStock;

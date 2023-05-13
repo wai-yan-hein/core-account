@@ -22,7 +22,6 @@ import com.inventory.editor.SaleManAutoCompleter;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
-import com.inventory.model.Order;
 import com.inventory.model.Region;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
@@ -100,7 +99,6 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
     private SelectionObserver observer;
     private SaleHis saleHis = new SaleHis();
     private Region region;
-    private String orderCode;
     private JProgressBar progress;
     private Mono<List<Location>> monoLoc;
     private double prvBal = 0;
@@ -433,7 +431,6 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             saleHis.setBalance(Util1.getFloat(txtVouBalance.getValue()));
             saleHis.setCurCode(currAutoCompleter.getCurrency().getCurCode());
             saleHis.setDeleted(Util1.getNullTo(saleHis.getDeleted()));
-            saleHis.setOrderCode(orderCode);
             saleHis.setRegion(region);
             saleHis.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             saleHis.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
@@ -736,14 +733,6 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             name = ProUtil.getProperty("report.sale.A5");
         }
         return name;
-    }
-
-    private void searchOrder(Order order) {
-        traderAutoCompleter.setTrader(order.getTrader());
-        txtRemark.setText(order.getDesp());
-        orderCode = order.getOrderCode();
-        lblStatus.setText("NEW");
-
     }
 
     private void focusTable() {
@@ -1582,10 +1571,6 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                 calculateTotalAmount(false);
             case "Location" ->
                 setAllLocation();
-            case "ORDER" -> {
-                Order od = (Order) selectObj;
-                searchOrder(od);
-            }
             case "SALE-HISTORY" -> {
                 if (selectObj instanceof VSale s) {
                     inventoryRepo.findSale(s.getVouNo(), s.getDeptId()).subscribe((t) -> {

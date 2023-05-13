@@ -12,7 +12,7 @@ import lombok.Data;
  * @author wai yan
  */
 @Data
-public class SaleHisDetail implements java.io.Serializable {
+public class SaleHisDetail {
 
     private SaleDetailKey key;
     private String stockCode;

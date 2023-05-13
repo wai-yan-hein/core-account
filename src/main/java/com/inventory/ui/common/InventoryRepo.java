@@ -798,7 +798,6 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToMono(OrderHis.class);
     }
-
     public Mono<OPHis> findOpening(OPHisKey key) {
         return inventoryApi.post()
                 .uri("/setup/find-opening")

@@ -13,7 +13,7 @@ import lombok.Data;
  * @author WSwe
  */
 @Data
-public class RetOutHis implements java.io.Serializable {
+public class RetOutHis {
 
     private RetOutHisKey key;
     private String traderCode;
@@ -36,4 +36,5 @@ public class RetOutHis implements java.io.Serializable {
     private List<RetOutHisDetail> listRD;
     private List<RetOutKey> listDel;
     private boolean vouLock;
+    private String projectNo;
 }

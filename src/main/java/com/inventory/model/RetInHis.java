@@ -36,5 +36,5 @@ public class RetInHis {
     private List<RetInHisDetail> listRD;
     private List<RetInKey> listDel;
     private boolean vouLock;
-
+    private String projectNo;
 }

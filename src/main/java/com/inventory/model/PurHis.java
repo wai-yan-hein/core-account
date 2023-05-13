@@ -54,6 +54,7 @@ public class PurHis implements java.io.Serializable {
     private Float commAmt;
     private Float expense;
     private List<PurExpense> listExpense;
+    private String projectNo;
     public PurHis() {
     }
 

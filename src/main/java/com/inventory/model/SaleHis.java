@@ -5,7 +5,6 @@
  */
 package com.inventory.model;
 
-import com.user.model.Currency;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
@@ -16,7 +15,7 @@ import lombok.NonNull;
  * @author wai yan
  */
 @Data
-public class SaleHis implements java.io.Serializable {
+public class SaleHis {
 
     @NonNull
     private SaleHisKey key;
@@ -43,7 +42,6 @@ public class SaleHis implements java.io.Serializable {
     private Integer session;
     private String updatedBy;
     private String address;
-    private String orderCode;
     private String remark;
     private String reference;
     private Region region;
@@ -57,6 +55,7 @@ public class SaleHis implements java.io.Serializable {
     private List<SaleHisDetail> listSH;
     private List<SaleDetailKey> listDel;
     private boolean backup;
+    private String orderNo;
 
     public SaleHis() {
     }
