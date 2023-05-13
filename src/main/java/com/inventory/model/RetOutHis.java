@@ -36,4 +36,5 @@ public class RetOutHis implements java.io.Serializable {
     private List<RetOutHisDetail> listRD;
     private List<RetOutKey> listDel;
     private boolean vouLock;
+    private String projectNo;
 }
