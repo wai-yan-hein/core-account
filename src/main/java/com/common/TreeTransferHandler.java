@@ -33,13 +33,13 @@ public class TreeTransferHandler extends TransferHandler {
 
     private static final Logger log = LoggerFactory.getLogger(TreeTransferHandler.class);
     private DefaultMutableTreeNode parent;
-    private WebClient inventoryApi;
+    private WebClient accountApi;
     DataFlavor nodesFlavor;
     DataFlavor[] flavors = new DataFlavor[1];
     DefaultMutableTreeNode[] nodesToRemove;
 
-    public TreeTransferHandler(WebClient inventoryApi) {
-        this.inventoryApi = inventoryApi;
+    public TreeTransferHandler(WebClient accountApi) {
+        this.accountApi = accountApi;
         try {
             String mimeType = DataFlavor.javaJVMLocalObjectMimeType
                     + ";class=\""
@@ -188,7 +188,7 @@ public class TreeTransferHandler extends TransferHandler {
     }
 
     private void saveCOA(ChartOfAccount coa) {
-        Mono<ReturnObject> result = inventoryApi.post()
+        Mono<ReturnObject> result = accountApi.post()
                 .uri("/account/save-coa")
                 .body(Mono.just(coa), ChartOfAccount.class)
                 .retrieve()

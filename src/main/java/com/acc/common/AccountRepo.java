@@ -116,6 +116,14 @@ public class AccountRepo {
                 .build())
                 .retrieve().bodyToFlux(ChartOfAccount.class);
     }
+    
+    public Flux<ChartOfAccount> getCOATree() {
+        return accountApi.get()
+                .uri(builder -> builder.path("/account/get-coa-tree")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().bodyToFlux(ChartOfAccount.class);
+    }
 
     public Flux<ChartOfAccount> getTraderAccount() {
         return accountApi.get()

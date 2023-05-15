@@ -16,6 +16,7 @@ import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
+import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.TreeTransferHandler;
 import com.common.Util1;
@@ -51,7 +52,6 @@ import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
-import javax.swing.RowFilter;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -63,10 +63,8 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -88,8 +86,6 @@ public class COAManagment extends javax.swing.JPanel implements
     private final COAUnusedDailog unusedDailog = new COAUnusedDailog();
     private final COAViewTableModel cOAViewTableModel = new COAViewTableModel();
     @Autowired
-    private WebClient inventoryApi;
-    @Autowired
     private WebClient accountApi;
     @Autowired
     private UserRepo userRepo;
@@ -105,6 +101,7 @@ public class COAManagment extends javax.swing.JPanel implements
     private ChartOfAccount coa;
     private boolean isNew = false;
     private JProgressBar progress;
+    private StartWithRowFilter swrf;
 
     public JProgressBar getProgress() {
         return progress;
@@ -191,7 +188,8 @@ public class COAManagment extends javax.swing.JPanel implements
         tblCOA.setDefaultRenderer(Object.class, new TableCellRender());
         sorter = new TableRowSorter<>(tblCOA.getModel());
         tblCOA.setRowSorter(sorter);
-        searchCOAStandard();
+        swrf = new StartWithRowFilter(txtCOASearch);
+        searchCOAView();
     }
 
     private void newCOA() {
@@ -324,7 +322,7 @@ public class COAManagment extends javax.swing.JPanel implements
         treeModel = (DefaultTreeModel) treeCOA.getModel();
         treeCOA.setDragEnabled(true);
         treeCOA.setDropMode(DropMode.ON_OR_INSERT);
-        treeCOA.setTransferHandler(new TreeTransferHandler(inventoryApi));
+        treeCOA.setTransferHandler(new TreeTransferHandler(accountApi));
         treeCOA.getSelectionModel().setSelectionMode(
                 TreeSelectionModel.CONTIGUOUS_TREE_SELECTION);
         treeRoot = new DefaultMutableTreeNode(parentRootName);
@@ -332,11 +330,7 @@ public class COAManagment extends javax.swing.JPanel implements
     }
 
     private void createTreeNode(DefaultMutableTreeNode treeRoot) {
-        accountApi.get()
-                .uri(builder -> builder.path("/account/get-coa-tree")
-                .queryParam("compCode", Global.compCode)
-                .build())
-                .retrieve().bodyToFlux(ChartOfAccount.class)
+        accountRepo.getCOATree()
                 .collectList().subscribe((t) -> {
                     if (!t.isEmpty()) {
                         t.forEach((menu) -> {
@@ -581,14 +575,18 @@ public class COAManagment extends javax.swing.JPanel implements
 
     private void searchCOAStandard() {
         log.info("searchCOAStandard");
-        Mono<ResponseEntity<List<ChartOfAccount>>> result = inventoryApi.get()
-                .uri(builder -> builder.path("/account/get-coa")
-                .queryParam("compCode", Global.compCode)
-                .build())
-                .retrieve().toEntityList(ChartOfAccount.class);
-
-        result.subscribe((t) -> {
-            standardCOATableModel.setListCOA(t.getBody());
+        accountRepo.getChartOfAccount()
+        .collectList().subscribe((t) -> {
+            standardCOATableModel.setListCOA(t);
+        }, (e) -> {
+        });
+    }
+    
+    private void searchCOAView() {
+        log.info("searchCOAStandard");
+        accountRepo.getChartOfAccount()
+        .collectList().subscribe((t) -> {
+            cOAViewTableModel.setListCOA(t);
         }, (e) -> {
         });
     }
@@ -1069,7 +1067,7 @@ public class COAManagment extends javax.swing.JPanel implements
         if (txtCOASearch.getText().isEmpty()) {
             sorter.setRowFilter(null);
         } else {
-            sorter.setRowFilter(RowFilter.regexFilter(txtCOASearch.getText()));
+            sorter.setRowFilter(swrf);
         }
     }//GEN-LAST:event_txtCOASearchKeyReleased
 
