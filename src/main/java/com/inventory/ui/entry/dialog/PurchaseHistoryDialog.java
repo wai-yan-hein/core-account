@@ -14,6 +14,7 @@ import com.common.TableCellRender;
 import com.user.common.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
+import com.inventory.editor.CurrencyAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
@@ -56,6 +57,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
     private StockAutoCompleter stockAutoCompleter;
     private LocationAutoCompleter locationAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
+    private CurrencyAutoCompleter currAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
     private SelectionObserver observer;
     private TableRowSorter<TableModel> sorter;
@@ -122,6 +124,16 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
                 departmentAutoCompleter.setDepartment(tt);
             });
         });
+        userRepo.getCurrency().subscribe((t) -> {
+            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
+            userRepo.getDefaultCurrency().subscribe((tt) -> {
+                currAutoCompleter.setCurrency(tt);
+            }, (e) -> {
+                log.error(e.getMessage());
+            });
+        }, (e) -> {
+            log.error(e.getMessage());
+        });
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
     }
 
@@ -179,6 +191,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(getDepId());
         filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
+        filter.setCurCode(Global.currency);
         tableModel.clear();
         inventoryApi.post()
                 .uri("/pur/get-pur")
@@ -238,6 +251,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         txtVouNo.addKeyListener(this);
         txtCus.addKeyListener(this);
         txtUser.addKeyListener(this);
+        txtCurrency.addKeyListener(this);
         //tblStock.addKeyListener(this);
     }
 
@@ -277,6 +291,8 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         txtDep = new javax.swing.JTextField();
         jLabel12 = new javax.swing.JLabel();
         txtProjectNo = new javax.swing.JTextField();
+        txtCurrency = new javax.swing.JTextField();
+        jLabel15 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
         progess = new javax.swing.JProgressBar();
@@ -421,18 +437,31 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
             }
         });
 
+        txtCurrency.setFont(Global.textFont);
+        txtCurrency.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+        txtCurrency.setName("txtCurrency"); // NOI18N
+        txtCurrency.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtCurrencyFocusGained(evt);
+            }
+        });
+        txtCurrency.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtCurrencyActionPerformed(evt);
+            }
+        });
+
+        jLabel15.setFont(Global.lableFont);
+        jLabel15.setText("Currency");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jSeparator3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -442,10 +471,11 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
                             .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, 73, Short.MAX_VALUE)
+                            .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 3, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtVouNo)
@@ -455,27 +485,31 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
                             .addComponent(txtStock)
                             .addComponent(txtRef)
                             .addComponent(txtLocation)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addComponent(txtFromDate, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jLabel3)
-                                        .addGap(18, 18, 18)
-                                        .addComponent(txtToDate, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addComponent(chkDel))
-                                .addGap(0, 0, Short.MAX_VALUE))
                             .addComponent(txtDep)
-                            .addComponent(txtProjectNo))))
+                            .addComponent(txtProjectNo)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(txtFromDate, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(txtToDate, javax.swing.GroupLayout.DEFAULT_SIZE, 124, Short.MAX_VALUE))
+                            .addComponent(txtCurrency)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addGap(182, 182, 182)
+                                .addComponent(chkDel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jSeparator3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(txtFromDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(txtToDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -516,17 +550,18 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel12)
                             .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(8, 8, 8)
-                        .addComponent(chkDel))
-                    .addComponent(jSeparator2))
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(7, 7, 7)
-                        .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel15)))
+                    .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 302, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkDel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButton1)
+                    .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
 
         tblVoucher.setFont(Global.textFont);
@@ -650,8 +685,8 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(progess, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                    .addComponent(progess, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -685,21 +720,6 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void txtCusFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCusFocusGained
-        // TODO add your handling code here:
-        txtCus.selectAll();
-    }//GEN-LAST:event_txtCusFocusGained
-
-    private void txtVouNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtVouNoFocusGained
-        // TODO add your handling code here:
-        txtVouNo.selectAll();
-    }//GEN-LAST:event_txtVouNoFocusGained
-
-    private void txtUserFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtUserFocusGained
-        // TODO add your handling code here:
-        txtUser.selectAll();
-    }//GEN-LAST:event_txtUserFocusGained
-
     private void tblVoucherMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblVoucherMouseClicked
         if (evt.getClickCount() == 2) {
             select();
@@ -714,20 +734,6 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         search();
     }//GEN-LAST:event_btnSearchActionPerformed
 
-    private void txtRemarkFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtRemarkFocusGained
-        // TODO add your handling code here:
-        txtRemark.selectAll();
-    }//GEN-LAST:event_txtRemarkFocusGained
-
-    private void txtStockFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtStockFocusGained
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtStockFocusGained
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-        clearFilter();
-    }//GEN-LAST:event_jButton1ActionPerformed
-
     private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
         // TODO add your handling code here:
         if (txtFilter.getText().isEmpty()) {
@@ -737,21 +743,58 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         }
     }//GEN-LAST:event_txtFilterKeyReleased
 
-    private void txtRefFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtRefFocusGained
+    private void txtCurrencyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCurrencyActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtRefFocusGained
+    }//GEN-LAST:event_txtCurrencyActionPerformed
 
-    private void txtLocationFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtLocationFocusGained
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtLocationFocusGained
+    private void txtProjectNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtProjectNoFocusGained
+        txtProjectNo.selectAll();        // TODO add your handling code here:
+    }//GEN-LAST:event_txtProjectNoFocusGained
 
     private void txtDepFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDepFocusGained
         // TODO add your handling code here:
     }//GEN-LAST:event_txtDepFocusGained
 
-    private void txtProjectNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtProjectNoFocusGained
-        txtProjectNo.selectAll();        // TODO add your handling code here:
-    }//GEN-LAST:event_txtProjectNoFocusGained
+    private void txtLocationFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtLocationFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtLocationFocusGained
+
+    private void txtRefFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtRefFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtRefFocusGained
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        clearFilter();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void txtStockFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtStockFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtStockFocusGained
+
+    private void txtRemarkFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtRemarkFocusGained
+        // TODO add your handling code here:
+        txtRemark.selectAll();
+    }//GEN-LAST:event_txtRemarkFocusGained
+
+    private void txtUserFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtUserFocusGained
+        // TODO add your handling code here:
+        txtUser.selectAll();
+    }//GEN-LAST:event_txtUserFocusGained
+
+    private void txtVouNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtVouNoFocusGained
+        // TODO add your handling code here:
+        txtVouNo.selectAll();
+    }//GEN-LAST:event_txtVouNoFocusGained
+
+    private void txtCusFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCusFocusGained
+        // TODO add your handling code here:
+        txtCus.selectAll();
+    }//GEN-LAST:event_txtCusFocusGained
+
+    private void txtCurrencyFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCurrencyFocusGained
+       txtCurrency.selectAll(); // TODO add your handling code here:
+    }//GEN-LAST:event_txtCurrencyFocusGained
 
     /**
      * @param args the command line arguments
@@ -766,6 +809,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -784,6 +828,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
     private javax.swing.JLabel lblTtlRecord;
     private javax.swing.JProgressBar progess;
     private javax.swing.JTable tblVoucher;
+    private javax.swing.JTextField txtCurrency;
     private javax.swing.JTextField txtCus;
     private javax.swing.JTextField txtDep;
     private javax.swing.JTextField txtFilter;

@@ -90,7 +90,7 @@ public class ProUtil {
     }
 
     public static boolean isMultiCur() {
-        return Util1.getBoolean(Global.hmRoleProperty.get("system.multi.currency.flag"));
+        return true;
     }
 
     public static boolean isDisableDep() {
