@@ -175,6 +175,10 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
     private Integer getDepId() {
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
+    
+    private String getCurCode(){
+        return currAutoCompleter==null? Global.currency: currAutoCompleter.getCurrency().getCurCode();
+    }
 
     public void search() {
         progess.setIndeterminate(true);
@@ -191,7 +195,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(getDepId());
         filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
-        filter.setCurCode(Global.currency);
+        filter.setCurCode(currAutoCompleter.getCurrency().getCurCode());
         tableModel.clear();
         inventoryApi.post()
                 .uri("/pur/get-pur")
@@ -226,6 +230,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         traderAutoCompleter.setTrader(new Trader("-", "All"));
         stockAutoCompleter.setStock(new Stock("-", "All"));
         appUserAutoCompleter.setAppUser(new AppUser("-", "All"));
+        currAutoCompleter.setCurrency(null);
     }
 
     private void select() {

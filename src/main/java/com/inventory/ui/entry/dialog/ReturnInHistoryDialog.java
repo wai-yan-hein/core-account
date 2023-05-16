@@ -169,6 +169,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         traderAutoCompleter.setTrader(new Trader("-", "All"));
         stockAutoCompleter.setStock(new Stock("-", "All"));
         appUserAutoCompleter.setAppUser(new AppUser("-", "All"));
+        currAutoCompleter.setCurrency(null);
     }
 
     private void setTodayDate() {
@@ -189,6 +190,10 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     private Integer getDepId() {
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
+    
+    private String getCurCode(){
+        return currAutoCompleter==null? Global.currency: currAutoCompleter.getCurrency().getCurCode();
+    }
 
     public void search() {
         progress.setIndeterminate(true);
@@ -204,7 +209,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(getDepId());
         filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
-        filter.setCurCode(Global.currency);
+        filter.setCurCode(getCurCode());
         tableModel.clear();
         inventoryApi
                 .post()

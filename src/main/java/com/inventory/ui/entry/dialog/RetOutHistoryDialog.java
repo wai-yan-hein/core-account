@@ -188,6 +188,14 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
     private Integer getDepId() {
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
+    
+    private String getProjectNo(){
+        return projectAutoCompleter==null? "-": projectAutoCompleter.getProject().getKey().getProjectNo();
+    }
+    
+    private String getCurCode(){
+        return currAutoCompleter==null? Global.currency: currAutoCompleter.getCurrency().getCurCode();
+    }
 
     public void search() {
         progress.setIndeterminate(true);
@@ -202,8 +210,8 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(getDepId());
-        filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
-        filter.setCurCode(Global.currency);
+        filter.setProjectNo(getProjectNo());
+        filter.setCurCode(getCurCode());
         inventoryApi.post()
                 .uri("/retout/get-retout")
                 .body(Mono.just(filter), FilterObject.class)

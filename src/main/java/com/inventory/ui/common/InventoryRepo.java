@@ -417,16 +417,7 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToMono(ProcessHis.class);
     }
-
-    public Mono<Currency> findCurrency(String curCode) {
-        return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/find-currency")
-                .queryParam("curCode", curCode)
-                .build())
-                .retrieve()
-                .bodyToMono(Currency.class);
-    }
-
+    
     public Mono<List<Location>> getLocation() {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-location")

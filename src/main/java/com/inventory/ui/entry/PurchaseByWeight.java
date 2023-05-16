@@ -623,7 +623,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             progress.setIndeterminate(true);
             ph = pur;
             Integer deptId = ph.getKey().getDeptId();
-            inventoryRepo.findCurrency(ph.getCurCode()).subscribe((t) -> {
+            userRepo.findCurrency(ph.getCurCode()).subscribe((t) -> {
                 currAutoCompleter.setCurrency(t);
             });
             inventoryRepo.findLocation(ph.getLocCode(), deptId).subscribe((t) -> {
