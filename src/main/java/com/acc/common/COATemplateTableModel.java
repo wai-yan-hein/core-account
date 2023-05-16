@@ -102,19 +102,19 @@ public class COATemplateTableModel extends AbstractTableModel {
         try {
             COATemplate coa = listCOA.get(row);
             switch (column) {
-                case 2 -> {
+                case 1-> {
                     //user code
                     if (value != null) {
-                        coa.setCoaCodeUsr(value.toString());
+                        coa.getKey().setCoaCode(Util1.getString(value));
                         parent.setColumnSelectionInterval(2, 2);
                     }
                 }
-                case 3 -> {
+                case 2 -> {
                     if (value != null) {
                         coa.setCoaNameEng(value.toString());
                     }
                 }
-                case 4 -> {
+                case 3 -> {
                     if (value != null) {
                         Boolean active = (Boolean) value;
                         coa.setActive(active);
@@ -122,7 +122,7 @@ public class COATemplateTableModel extends AbstractTableModel {
                         coa.setActive(Boolean.TRUE);
                     }
                 }
-                case 5 -> {
+                case 4 -> {
                     if (value instanceof COATemplate c) {
                         int yn = JOptionPane.showConfirmDialog(parent, "Do you want to change group?", "Confirm Dialog", JOptionPane.WARNING_MESSAGE);
                         if (yn == JOptionPane.YES_OPTION) {
@@ -132,6 +132,7 @@ public class COATemplateTableModel extends AbstractTableModel {
                 }
             }
             coa.setCoaLevel(3);
+            coa.getKey().setBusId(busId);
             coa.setCoaParent(Util1.isNull(coa.getCoaParent(), coaGroupCode));
             save(coa, row);
             parent.requestFocus();
