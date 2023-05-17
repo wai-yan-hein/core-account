@@ -148,8 +148,6 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
             currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
             userRepo.getDefaultCurrency().subscribe((tt) -> {
                 currAutoCompleter.setCurrency(tt);
-            }, (e) -> {
-                log.error(e.getMessage());
             });
         }, (e) -> {
             log.error(e.getMessage());
@@ -201,6 +199,9 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
     private Integer getDepId() {
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
+    private String getCurCode(){
+        return currAutoCompleter==null? Global.currency: currAutoCompleter.getCurrency().getCurCode();
+    }
 
     public void search() {
         progress.setIndeterminate(true);
@@ -221,7 +222,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         filter.setBatchNo(batchNo.equals("All") ? "-" : batchNo);
         String projectNo = projectAutoCompleter.getProject().getKey().getProjectNo();
         filter.setProjectNo(projectNo.equals("All") ? "-" : projectNo);
-        filter.setCurCode(Global.currency);
+        filter.setCurCode(getCurCode());
         filter.setNullBatch(chkBatch.isSelected());
         orderVouTableModel.clear();
         txtRecord.setValue(0);
@@ -278,7 +279,8 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         appUserAutoCompleter.setAppUser(new AppUser("-", "All"));
         saleManAutoCompleter.setSaleMan(new SaleMan("-", "All"));
         batchAutoCompeter.setBatch(new GRN());
-    }
+        currAutoCompleter.setCurrency(null);
+    }   
 
     /**
      * This method is called from within the constructor to initialize the form.

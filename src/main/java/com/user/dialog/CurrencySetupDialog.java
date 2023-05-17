@@ -3,55 +3,90 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.inventory.ui.setup.dialog;
+package com.user.dialog;
 
 import com.common.Global;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.user.model.Currency;
-import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.common.CurrencyTabelModel;
+import com.user.common.UserRepo;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFormattedTextField;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 @Slf4j
 public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListener {
 
     private int selectRow = -1;
-    private Currency currency;
-    @Autowired
-    private CurrencyTabelModel currencyTabelModel;
-    @Autowired
-    private InventoryRepo inventoryRepo;
-    boolean status = true;
+    private Currency currency = new Currency();
+    private final CurrencyTabelModel currencyTabelModel = new CurrencyTabelModel();
+    private UserRepo userRepo;
+
+    public UserRepo getUserRepo() {
+        return userRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
 
     /**
      * Creates new form CurrencySetup
+     *
+     * @param frame
      */
-    public CurrencySetupDialog() {
+    public CurrencySetupDialog(JFrame frame) {
+        super(frame, true);
         initComponents();
         initKeyListener();
+        initFocusAdapter();
     }
 
     public void initMain() {
         initTable();
-        txtCurrCode.requestFocus();
+    }
+
+    private void initFocusAdapter() {
+        txtCurrCode.addFocusListener(fa);
+        txtCurrName.addFocusListener(fa);
+        txtCurrSymbol.addFocusListener(fa);
+    }
+    private FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            Object obj = e.getSource();
+            if (obj instanceof JTextField txt) {
+                txt.selectAll();
+            } else if (obj instanceof JFormattedTextField txt) {
+                txt.selectAll();
+            }
+        }
+    };
+
+    public void searchCurrency() {
+        userRepo.getCurrency().subscribe((t) -> {
+            currencyTabelModel.setListCurrency(t);
+            txtCurrCode.requestFocus();
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        });
     }
 
     private void initTable() {
@@ -79,20 +114,18 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
         });
         tblCurrency.setRowHeight(Global.tblRowHeight);
         tblCurrency.setDefaultRenderer(Object.class, new TableCellRender());
-        /* inventoryRepo.getCurrency().subscribe((t) -> {
-        currencyTabelModel.setListCurrency(t);
-        });*/
     }
 
     private void saveCurrency() {
-        currency = new Currency();
-        currency.setCurCode(txtCurrCode.getText());
-        currency.setActive(chkActive.isSelected());
-        currency.setCurrencyName(txtCurrName.getText());
-        currency.setCurrencySymbol(txtCurrSymbol.getText());
-        if (isValidCurrency(currency, lblStatus.getText())) {
-            inventoryRepo.saveCurrency(currency);
-
+        if (isValidCurrency()) {
+            userRepo.saveCurrency(currency).subscribe((t) -> {
+                if (lblStatus.getText().equals("NEW")) {
+                    currencyTabelModel.addCurrency(t);
+                } else {
+                    currencyTabelModel.setCurrency(selectRow, currency);
+                }
+                clear();
+            });
         }
     }
 
@@ -124,15 +157,22 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
         tblCurrency.addKeyListener(this);
     }
 
-    private boolean isValidCurrency(Currency cur, String editStatus) {
-        if (Util1.isNull(cur.getCurCode())) {
-            status = false;
+    private boolean isValidCurrency() {
+        String curCode = txtCurrCode.getText();
+        String curName = txtCurrName.getText();
+        if (Util1.isNullOrEmpty(curCode)) {
             JOptionPane.showMessageDialog(this, "Invalid currency code.");
-        } else if (Util1.isNull(cur.getCurrencyName(), "-").equals("-")) {
-            status = false;
+            return false;
+        } else if (Util1.isNullOrEmpty(curName)) {
             JOptionPane.showMessageDialog(this, "Invalid currency name.");
+            return false;
+        } else {
+            currency.setCurCode(curCode);
+            currency.setCurrencyName(curName);
+            currency.setActive(chkActive.isSelected());
+            currency.setCurrencySymbol(txtCurrSymbol.getText());
         }
-        return status;
+        return true;
     }
 
     /**
@@ -178,7 +218,7 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
         tblCurrency.setRowHeight(Global.tblRowHeight);
         jScrollPane1.setViewportView(tblCurrency);
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED));
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         jPanel1.setFont(Global.textFont);
 
         jLabel2.setFont(Global.lableFont);
@@ -295,7 +335,7 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 349, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -320,12 +360,7 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         // TODO add your handling code here:
-        try {
-            saveCurrency();
-        } catch (Exception e) {
-            log.error("Save Currency :" + e.getMessage());
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Save Currency", JOptionPane.ERROR_MESSAGE);
-        }
+        saveCurrency();
     }//GEN-LAST:event_btnSaveActionPerformed
 
     /**

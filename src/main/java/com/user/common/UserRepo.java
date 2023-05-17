@@ -8,7 +8,6 @@ import com.acc.model.BusinessType;
 import com.acc.model.DeleteObj;
 import com.acc.model.ReportFilter;
 import com.common.Global;
-import com.common.ReturnObject;
 import com.user.model.RoleProperty;
 import com.common.Util1;
 import com.inventory.model.AppRole;
@@ -18,9 +17,9 @@ import com.inventory.model.MachineInfo;
 import com.inventory.model.VRoleMenu;
 import com.user.model.SysProperty;
 import com.user.model.CompanyInfo;
-import com.user.model.CurExchange;
 import com.user.model.Currency;
 import com.user.model.ExchangeKey;
+import com.user.model.ExchangeRate;
 import com.user.model.MachineProperty;
 import com.user.model.Menu;
 import com.user.model.MenuTemplate;
@@ -417,6 +416,14 @@ public class UserRepo {
                 .bodyToMono(Project.class);
     }
 
+    public Mono<ExchangeRate> save(ExchangeRate obj) {
+        return userApi.post()
+                .uri("/user/saveExchange")
+                .body(Mono.just(obj), ExchangeRate.class)
+                .retrieve()
+                .bodyToMono(ExchangeRate.class);
+    }
+
     public Mono<List<Project>> searchProjectByCode(String code) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/searchProjectByCode")
@@ -428,13 +435,16 @@ public class UserRepo {
                 .collectList();
     }
 
-    public Mono<List<CurExchange>> searchExchange(ReportFilter filter) {
-        return userApi.post()
-                .uri("/user/search-exchange")
-                .accept(MediaType.APPLICATION_JSON)
-                .body(Mono.just(filter), ReportFilter.class)
+    public Mono<List<ExchangeRate>> searchExchange(String startDate, String endDate, String targetCur) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/searchProjectByCode")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("startDate", startDate)
+                .queryParam("endDate", endDate)
+                .queryParam("targetCur", targetCur)
+                .build())
                 .retrieve()
-                .bodyToFlux(CurExchange.class)
+                .bodyToFlux(ExchangeRate.class)
                 .collectList();
     }
 

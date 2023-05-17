@@ -576,7 +576,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             trader.subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);
             });
-            inventoryRepo.findCurrency(orderHis.getCurCode()).subscribe((t) -> {
+            userRepo.findCurrency(orderHis.getCurCode()).subscribe((t) -> {
                 currAutoCompleter.setCurrency(t);
             });
             inventoryRepo.findSaleMan(orderHis.getSaleManCode(), deptId).subscribe((t) -> {

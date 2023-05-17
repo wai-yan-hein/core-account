@@ -680,7 +680,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 progress.setIndeterminate(true);
                 ph = pur;
                 Integer deptId = ph.getKey().getDeptId();
-                inventoryRepo.findCurrency(ph.getCurCode()).subscribe((t) -> {
+                userRepo.findCurrency(ph.getCurCode()).subscribe((t) -> {
                     currAutoCompleter.setCurrency(t);
                 }, (e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());

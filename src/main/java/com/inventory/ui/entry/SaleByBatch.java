@@ -564,7 +564,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
             trader.subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);
             });
-            inventoryRepo.findCurrency(saleHis.getCurCode()).subscribe((t) -> {
+            userRepo.findCurrency(saleHis.getCurCode()).subscribe((t) -> {
                 currAutoCompleter.setCurrency(t);
             });
             inventoryRepo.findSaleMan(saleHis.getSaleManCode(), deptId).subscribe((t) -> {
