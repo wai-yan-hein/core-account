@@ -122,7 +122,7 @@ public class StockBalanceTableModel extends AbstractTableModel {
     public void calStockBalance(String stockCode) {
         if (ProUtil.isCalStock()) {
             progress.setIndeterminate(true);
-            inventoryRepo.getStockBalance(stockCode).subscribe((t) -> {
+            inventoryRepo.getStockBalance(stockCode, false).subscribe((t) -> {
                 setListStockBalance(t);
                 progress.setIndeterminate(false);
             }, (e) -> {

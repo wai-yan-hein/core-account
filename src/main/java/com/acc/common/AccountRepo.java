@@ -29,14 +29,11 @@ import com.common.FilterObject;
 import com.common.Global;
 import com.common.ReturnObject;
 import com.common.Util1;
-import com.user.model.CurExchange;
-import com.user.model.ExchangeKey;
 import com.user.model.YearEnd;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -74,15 +71,6 @@ public class AccountRepo {
                 .bodyToMono(Department.class);
     }
 
-    public Mono<Currency> findCurrency(String curCode) {
-        return accountApi.get()
-                .uri(builder -> builder.path("/account/find-currency")
-                .queryParam("curCode", curCode)
-                .build())
-                .retrieve()
-                .bodyToMono(Currency.class);
-    }
-
     public Mono<List<Department>> getDepartment() {
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-department")
@@ -116,7 +104,7 @@ public class AccountRepo {
                 .build())
                 .retrieve().bodyToFlux(ChartOfAccount.class);
     }
-    
+
     public Flux<ChartOfAccount> getCOATree() {
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-coa-tree")
@@ -189,7 +177,6 @@ public class AccountRepo {
                 .retrieve()
                 .bodyToMono(Boolean.class);
     }
-
 
     public Mono<Boolean> deleteVoucher(DeleteObj gl) {
         return accountApi.post()
@@ -349,8 +336,6 @@ public class AccountRepo {
     public List<String> deleteTrader(TraderAKey key) {
         return null;
     }
-
-    
 
     public Flux<Gl> listenGl() {
         return accountApi.get()

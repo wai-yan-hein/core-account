@@ -5,17 +5,22 @@
  */
 package com.user.dialog;
 
-
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.editor.CurrencyAutoCompleter;
-import com.user.model.CurExchange;
+import com.user.common.CurrencyComboBoxModel;
+import com.user.common.UserRepo;
+import com.user.model.Currency;
+import com.user.model.ExchangeKey;
+import com.user.model.ExchangeRate;
 import java.awt.Color;
-import java.awt.event.KeyEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 
 /**
  *
@@ -24,10 +29,19 @@ import javax.swing.JOptionPane;
 public class ExchangeDialog extends javax.swing.JDialog {
 
     private String status;
-    private CurExchange exchange = new CurExchange();
+    private ExchangeRate exchange = new ExchangeRate();
     private SelectionObserver observer;
-    private CurrencyAutoCompleter currencyAutoCompleter;
+    private CurrencyComboBoxModel homeComboBoxModel;
+    private CurrencyComboBoxModel targetComboBoxModel;
+    private UserRepo userRepo;
 
+    public UserRepo getUserRepo() {
+        return userRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
 
     public SelectionObserver getObserver() {
         return observer;
@@ -49,90 +63,119 @@ public class ExchangeDialog extends javax.swing.JDialog {
             lblStatus.setForeground(Color.green);
         } else {
             lblStatus.setForeground(Color.blue);
-            setExchange();
         }
     }
 
     /**
      * Creates new form ExchangeDialog
+     *
      * @param frame
      */
     public ExchangeDialog(JFrame frame) {
         super(frame, true);
         initComponents();
+        initTextFormat();
+        initFocusAdapter();
     }
 
-    private void setExchange() {
-        lblHC.setText(exchange.getExCur());
-        txtDate.setDate(exchange.getExDate());
-        //currencyAutoCompleter.setCurrency(exchange.getExCur());
-        txtRate.setText(exchange.getExRate().toString());
-        txtRemark1.setText(exchange.getRemark());
-        txtDate.setEnabled(false);
-        txtDate.setForeground(Color.black);
-    }
+    private void initTextFormat() {
+        txtHome.setFormatterFactory(Util1.getDecimalFormat());
+        txtTarget.setFormatterFactory(Util1.getDecimalFormat());
+        txtHome.setHorizontalAlignment(JTextField.RIGHT);
+        txtTarget.setHorizontalAlignment(JTextField.RIGHT);
+        txtHome.setValue(1);
+        txtTarget.setValue(1);
 
-    private void initDate() {
-
-    }
-
-    public void setupData() {
-        initDate();
-        lblHC.setText(Global.currency);
-    }
-
-    private void saveCurrency() {
-        if (isValidEntry()) {
-            try {
-                double exRate = Util1.getDouble(txtRate.getText());
-                if (txtRemark1.getText().isBlank() || lblStatus.getText().equals("EDIT")) {
-                    String home = Global.currency;
-                    String ex = currencyAutoCompleter.getCurrency().getCurCode();
-                    exchange.setRemark(String.format("Currency Conversion %s to %s (%s)", home, ex, exRate));
-                } else {
-                    exchange.setRemark(txtRemark1.getText());
-                }
-                exchange.setExDate(txtDate.getDate());
-                exchange.setHomeCur(Global.currency);
-                //exchange.setEx(currencyAutoCompleter.getCurrency());
-                exchange.setExRate(exRate);
-                if (lblStatus.getText().equals("NEW")) {
-                    exchange.setCreatedBy(Global.loginUser.getUserCode());
-                    exchange.setMacId(Global.macId);
-                    exchange.setCreatedDate(Util1.getTodayDate());
-                    //exchange.setCompCode(Global.compCode);
-                } else {
-                    exchange.setUpdatedBy(Global.loginUser.getUserCode());
-                }
-                clear();
-
-            }
-            catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, ex.getMessage());
-            }
-        }
     }
 
     private void clear() {
         initDate();
-        txtRate.setText(null);
+        txtHome.setValue(1);
+        txtTarget.setValue(1);
         lblStatus.setText("NEW");
-        txtRemark1.setText(null);
-        txtDate.setEnabled(true);
+        txtTarget.requestFocus();
+    }
+
+    private void initFocusAdapter() {
+        txtHome.addFocusListener(fa);
+        txtTarget.addFocusListener(fa);
+    }
+    private FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            Object obj = e.getSource();
+            if (obj instanceof JTextField txt) {
+                txt.selectAll();
+            } else if (obj instanceof JFormattedTextField txt) {
+                txt.selectAll();
+            }
+        }
+    };
+
+    private void initDate() {
+        txtDate.setDate(Util1.getTodayDate());
+    }
+
+    private void initCombo() {
+        userRepo.getCurrency().subscribe((t) -> {
+            homeComboBoxModel = new CurrencyComboBoxModel(t);
+            targetComboBoxModel = new CurrencyComboBoxModel(t);
+            cboHC.setModel(homeComboBoxModel);
+            cboTC.setModel(targetComboBoxModel);
+            cboTC.setSelectedIndex(0);
+            userRepo.findCurrency(Global.currency).subscribe((c) -> {
+                cboHC.setSelectedItem(c);
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            });
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        });
+    }
+
+    public void initMain() {
+        initDate();
+        initCombo();
+    }
+
+    private void saveCurrency() {
+        if (isValidEntry()) {
+            userRepo.save(exchange).subscribe((t) -> {
+                clear();
+            }, (er) -> {
+                JOptionPane.showMessageDialog(this, er.getMessage());
+            });
+        }
     }
 
     private boolean isValidEntry() {
         if (!ProUtil.isValidDate(txtDate.getDate())) {
             return false;
-        } else if (currencyAutoCompleter.getCurrency() == null) {
-            JOptionPane.showMessageDialog(this, "Invalid Currency");
+        } else if (cboHC.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(this, "Invalid Home Currency");
             return false;
-        } else if (currencyAutoCompleter.getCurrency().getCurCode().equals(Global.currency)) {
-            JOptionPane.showMessageDialog(this, "Invalid Currency");
+        } else if (cboTC.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(this, "Invalid Target Currency");
             return false;
-        } else if (Util1.getDouble(txtRate.getText()) <= 0) {
-            JOptionPane.showMessageDialog(this, "Invalid Exchange Rate");
-            return false;
+        } else {
+            if (cboHC.getSelectedItem() instanceof Currency cur) {
+                exchange.setHomeCur(cur.getCurCode());
+            }
+            if (cboTC.getSelectedItem() instanceof Currency cur) {
+                exchange.setTargetCur(cur.getCurCode());
+            }
+            exchange.setExDate(txtDate.getDate());
+            if (lblStatus.getText().equals("NEW")) {
+                ExchangeKey key = new ExchangeKey();
+                key.setCompCode(Global.compCode);
+                exchange.setKey(key);
+                exchange.setCreatedBy(Global.loginUser.getUserCode());
+                exchange.setCreatedDate(Util1.getTodayDate());
+                exchange.setDeleted(false);
+            } else {
+                exchange.setUpdatedBy(Global.loginUser.getUserCode());
+                exchange.setUpdatedDate(Util1.getTodayDate());
+            }
         }
         return true;
     }
@@ -148,20 +191,22 @@ public class ExchangeDialog extends javax.swing.JDialog {
 
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        lblHC = new javax.swing.JLabel();
         btnUpdate = new javax.swing.JButton();
         lblStatus = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
         jSeparator3 = new javax.swing.JSeparator();
         jPanel2 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
-        txtRemark1 = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        txtRate = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
         txtDate = new com.toedter.calendar.JDateChooser();
-        txtCur = new javax.swing.JTextField();
+        cboHC = new javax.swing.JComboBox<>();
+        cboTC = new javax.swing.JComboBox<>();
+        txtHome = new javax.swing.JFormattedTextField();
+        txtTarget = new javax.swing.JFormattedTextField();
+        jLabel4 = new javax.swing.JLabel();
+        txtExId = new javax.swing.JTextField();
+        btnUpdate1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Currency Exchange");
@@ -177,9 +222,7 @@ public class ExchangeDialog extends javax.swing.JDialog {
         });
 
         jLabel1.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
-        jLabel1.setText("Home Currency");
-
-        lblHC.setFont(new java.awt.Font("Arial", 1, 14)); // NOI18N
+        jLabel1.setText("Exchange Rate Setup");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -187,18 +230,14 @@ public class ExchangeDialog extends javax.swing.JDialog {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
-                .addGap(18, 18, 18)
-                .addComponent(lblHC, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 29, Short.MAX_VALUE)
-                    .addComponent(lblHC, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 29, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -216,32 +255,15 @@ public class ExchangeDialog extends javax.swing.JDialog {
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel2.setFont(Global.lableFont);
-        jLabel2.setText("Exchange Rate");
-
-        txtRemark1.setFont(Global.textFont);
-        txtRemark1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtRemark1ActionPerformed(evt);
-            }
-        });
+        jLabel2.setText("Target Currency");
 
         jLabel3.setFont(Global.lableFont);
         jLabel3.setText("Exchange Date");
 
-        jLabel4.setFont(Global.lableFont);
-        jLabel4.setText("Remark");
-
-        txtRate.setFont(Global.textFont);
-        txtRate.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtRateActionPerformed(evt);
-            }
-        });
-
         jLabel5.setFont(Global.lableFont);
-        jLabel5.setText("Exchange Cur");
+        jLabel5.setText("Home Currency");
 
-        txtDate.setDateFormatString("dd/MM/yyyy hh:mm:ss");
+        txtDate.setDateFormatString("dd/MM/yyyy");
         txtDate.setFont(Global.textFont);
         txtDate.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
@@ -249,12 +271,19 @@ public class ExchangeDialog extends javax.swing.JDialog {
             }
         });
 
-        txtCur.setFont(Global.textFont);
-        txtCur.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtCurActionPerformed(evt);
-            }
-        });
+        cboHC.setFont(Global.textFont);
+
+        cboTC.setFont(Global.textFont);
+
+        txtHome.setFont(Global.textFont);
+
+        txtTarget.setFont(Global.textFont);
+
+        jLabel4.setFont(Global.lableFont);
+        jLabel4.setText("Exchange Id");
+
+        txtExId.setEditable(false);
+        txtExId.setFont(Global.textFont);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -262,41 +291,56 @@ public class ExchangeDialog extends javax.swing.JDialog {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel3)
-                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(jLabel2)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, 97, Short.MAX_VALUE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtCur)
-                    .addComponent(txtRemark1)
-                    .addComponent(txtRate)
-                    .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE))
+                    .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtHome)
+                            .addComponent(txtTarget))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(cboTC, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(cboHC, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(txtExId))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtExId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtCur)
-                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(cboHC, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtHome, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtRate)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtRemark1)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(cboTC, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtTarget, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
+
+        btnUpdate1.setFont(Global.lableFont);
+        btnUpdate1.setText("Clear");
+        btnUpdate1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdate1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -308,28 +352,37 @@ public class ExchangeDialog extends javax.swing.JDialog {
                     .addComponent(jSeparator3)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 262, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnUpdate))
+                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(84, 84, 84))
                     .addComponent(jSeparator1)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnUpdate1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnUpdate)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 4, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnUpdate, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)
-                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 4, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnUpdate))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(277, 277, 277)
+                        .addComponent(btnUpdate1)))
                 .addContainerGap())
         );
 
@@ -346,27 +399,9 @@ public class ExchangeDialog extends javax.swing.JDialog {
         saveCurrency();
     }//GEN-LAST:event_btnUpdateActionPerformed
 
-    private void txtCurActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCurActionPerformed
-        // TODO add your handling code here:
-        txtRate.requestFocus();
-
-    }//GEN-LAST:event_txtCurActionPerformed
-
-    private void txtRateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtRateActionPerformed
-        // TODO add your handling code here:
-        txtRemark1.requestFocus();
-    }//GEN-LAST:event_txtRateActionPerformed
-
-    private void txtRemark1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtRemark1ActionPerformed
-        // TODO add your handling code here:
-        btnUpdate.requestFocus();
-    }//GEN-LAST:event_txtRemark1ActionPerformed
-
     private void txtDateKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtDateKeyReleased
         // TODO add your handling code here:
-        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            txtCur.requestFocus();
-        }
+
     }//GEN-LAST:event_txtDateKeyReleased
 
     private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
@@ -374,11 +409,19 @@ public class ExchangeDialog extends javax.swing.JDialog {
         observer.selected("S", "S");
     }//GEN-LAST:event_formWindowClosed
 
+    private void btnUpdate1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdate1ActionPerformed
+        // TODO add your handling code here:
+        clear();
+    }//GEN-LAST:event_btnUpdate1ActionPerformed
+
     /**
      * @param args the command line arguments
      */
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnUpdate;
+    private javax.swing.JButton btnUpdate1;
+    private javax.swing.JComboBox<Currency> cboHC;
+    private javax.swing.JComboBox<Currency> cboTC;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -388,11 +431,10 @@ public class ExchangeDialog extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator3;
-    private javax.swing.JLabel lblHC;
     private javax.swing.JLabel lblStatus;
-    private javax.swing.JTextField txtCur;
     private com.toedter.calendar.JDateChooser txtDate;
-    private javax.swing.JTextField txtRate;
-    private javax.swing.JTextField txtRemark1;
+    private javax.swing.JTextField txtExId;
+    private javax.swing.JFormattedTextField txtHome;
+    private javax.swing.JFormattedTextField txtTarget;
     // End of variables declaration//GEN-END:variables
 }

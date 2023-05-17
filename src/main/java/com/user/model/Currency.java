@@ -28,5 +28,9 @@ public class Currency {
     public Currency() {
     }
 
+    @Override
+    public String toString() {
+        return curCode;
+    }
 
 }

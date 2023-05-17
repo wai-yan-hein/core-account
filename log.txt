@@ -1,0 +1,17 @@
+2023-05-17T14:47:03.780+06:30  INFO 7844 --- [main] com.CoreAccountApplication               : Starting CoreAccountApplication using Java 19.0.2 with PID 7844 (D:\CoreValue\GitHub\core-inventory\target\classes started by Lenovo in D:\CoreValue\GitHub\core-inventory)
+2023-05-17T14:47:03.797+06:30  INFO 7844 --- [main] com.CoreAccountApplication               : No active profile set, falling back to 1 default profile: "default"
+2023-05-17T14:47:07.712+06:30  INFO 7844 --- [main] com.acc.setup.COAManagment               : Selected 0
+2023-05-17T14:47:10.702+06:30  INFO 7844 --- [main] com.CoreAccountApplication               : Started CoreAccountApplication in 7.456 seconds (process running for 8.657)
+2023-05-17T14:47:10.712+06:30  INFO 7844 --- [main] com.Tray                                 : Tray started.
+2023-05-17T14:47:11.495+06:30 ERROR 7844 --- [main] com.user.common.UserRepo                 : Connection refused: no further information: /127.0.0.1:8079
+2023-05-17T15:49:00.116+06:30  INFO 14848 --- [main] com.CoreAccountApplication               : Starting CoreAccountApplication using Java 19.0.2 with PID 14848 (D:\CoreValue\GitHub\core-inventory\target\classes started by Lenovo in D:\CoreValue\GitHub\core-inventory)
+2023-05-17T15:49:00.121+06:30  INFO 14848 --- [main] com.CoreAccountApplication               : No active profile set, falling back to 1 default profile: "default"
+2023-05-17T15:49:04.802+06:30  INFO 14848 --- [main] com.acc.setup.COAManagment               : Selected 0
+2023-05-17T15:49:07.777+06:30  INFO 14848 --- [main] com.CoreAccountApplication               : Started CoreAccountApplication in 8.519 seconds (process running for 11.151)
+2023-05-17T15:49:07.783+06:30  INFO 14848 --- [main] com.Tray                                 : Tray started.
+2023-05-17T15:49:12.072+06:30  INFO 14848 --- [main] com.CoreAccountApplication               : login sucess.
+2023-05-17T15:49:12.250+06:30  INFO 14848 --- [reactor-http-nio-3] com.user.common.UserRepo                 : setupProperty.
+2023-05-17T15:49:14.579+06:30  INFO 14848 --- [AWT-EventQueue-0] com.inventory.ui.entry.Sale              : change.
+2023-05-17T15:49:14.623+06:30  INFO 14848 --- [AWT-EventQueue-0] com.inventory.ui.entry.Sale              : change.
+2023-05-17T15:49:14.625+06:30  INFO 14848 --- [AWT-EventQueue-0] com.inventory.ui.entry.Sale              : change.
+2023-05-17T15:50:22.211+06:30  INFO 14848 --- [AWT-EventQueue-0] com.acc.setup.COAManagment               : initTree
