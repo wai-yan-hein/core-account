@@ -474,7 +474,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             trader.subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);
             });
-            inventoryRepo.findCurrency(ri.getCurCode()).subscribe((t) -> {
+            userRepo.findCurrency(ri.getCurCode()).subscribe((t) -> {
                 currAutoCompleter.setCurrency(t);
             });
             if(retin.getProjectNo() != null) {

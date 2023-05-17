@@ -504,7 +504,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             trader.subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);
             });
-            inventoryRepo.findCurrency(ri.getCurCode()).subscribe((t) -> {
+            userRepo.findCurrency(ri.getCurCode()).subscribe((t) -> {
                 currAutoCompleter.setCurrency(t);
             });
             if(ro.getProjectNo() !=null) {

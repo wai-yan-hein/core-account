@@ -97,15 +97,24 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
         tblCOAHead();
         tblCOAGroup();
         tblCOA();
-        searchCOA();
+//        searchCOA();
     }
 
     private void tblCOAHead() {
-        tblCoaHead.setModel(coaHeadTableModel);
+//        tblCoaHead.setModel(coaHeadTableModel);
+//        tblCoaHead.getTableHeader().setFont(Global.tblHeaderFont);
+        tblCoaHead.setCellSelectionEnabled(true);
+        tblCoaHead.setShowGrid(true);
         tblCoaHead.getTableHeader().setFont(Global.tblHeaderFont);
+        tblCoaHead.setModel(coaHeadTableModel);
+//        coaGroupTableModel.setParent(tblCoaGroup);
+//        coaGroupTableModel.setParetnDesp(lblCoaGroup);
+        coaHeadTableModel.setAccountRepo(accountRepo);
         tblCoaHead.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCoaHead.getColumnModel().getColumn(0).setPreferredWidth(10);// Code
         tblCoaHead.getColumnModel().getColumn(1).setPreferredWidth(500);// Name
+        tblCoaHead.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
+        tblCoaHead.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
         tblCoaHead.setDefaultRenderer(Object.class, new TableCellRender());
         tblCoaHead.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
@@ -121,6 +130,7 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
         filterHeader.setPosition(TableFilterHeader.Position.TOP);
         filterHeader.setFont(Global.textFont);
         filterHeader.setVisible(false);
+        searchCOA();
     }
 
     private void searchCOA() {
@@ -133,7 +143,9 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
                     .collectList()
                     .subscribe((t) -> {
                         coaHeadTableModel.setList(t);
-                        tblCoaHead.requestFocus();
+                        coaHeadTableModel.addEmptyRow();
+                        coaHeadTableModel.setBusId(busId);
+                        reqCoaHead();
                     }, (e) -> {
                         log.error(e.getMessage());
                     });
@@ -243,6 +255,19 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
                             reqCoaGroup();
                         });
             }
+        }
+    }
+    
+    private void reqCoaHead() {
+        int row = tblCoaHead.getRowCount();
+        if (row > 0) {
+            tblCoaHead.setRowSelectionInterval(row - 1, row - 1);
+            tblCoaHead.setColumnSelectionInterval(1, 1);
+            tblCoaHead.requestFocus();
+        } else {
+            tblCoaHead.setRowSelectionInterval(row, row);
+            tblCoaHead.setColumnSelectionInterval(1, 1);
+            tblCoaHead.requestFocus();
         }
     }
 

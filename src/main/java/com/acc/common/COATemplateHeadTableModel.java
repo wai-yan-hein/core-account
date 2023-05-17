@@ -6,9 +6,11 @@
 package com.acc.common;
 
 import com.acc.model.COATemplate;
+import com.acc.model.COATemplateKey;
 import com.common.Util1;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,6 +24,7 @@ public class COATemplateHeadTableModel extends AbstractTableModel {
     private List<COATemplate> list = new ArrayList();
     private final String[] columnNames = {"Code", "Name"};
     private AccountRepo accountRepo;
+    private Integer busId;
 
     public AccountRepo getAccountRepo() {
         return accountRepo;
@@ -29,6 +32,14 @@ public class COATemplateHeadTableModel extends AbstractTableModel {
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
+    }
+
+    public Integer getBusId() {
+        return busId;
+    }
+
+    public void setBusId(Integer busId) {
+        this.busId = busId;
     }
 
     @Override
@@ -51,7 +62,14 @@ public class COATemplateHeadTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return false;
+        return switch (column) {
+            case 0 ->
+                true;
+            case 1 ->
+                true;
+            default ->
+                true;
+        };
     }
 
     @Override
@@ -98,7 +116,10 @@ public class COATemplateHeadTableModel extends AbstractTableModel {
                     case 1 ->
                         obj.setCoaNameEng(Util1.getString(value));
                 }
-                save(obj);
+                obj.setCoaLevel(1);
+                obj.getKey().setBusId(busId);
+                obj.setCoaParent("#");
+                save(obj, row);
                 fireTableRowsUpdated(row, row);
             }
 
@@ -107,12 +128,31 @@ public class COATemplateHeadTableModel extends AbstractTableModel {
         }
     }
 
-    private void save(COATemplate obj) {
-        accountRepo.save(obj).subscribe((t) -> {
-            obj.setKey(t.getKey());
-        }, (e) -> {
-            log.error(e.getMessage());
-        });
+    public boolean isValidCOA(COATemplate coa) {
+        boolean status = true;
+        if (Util1.isNull(coa.getCoaNameEng())) {
+            status = false;
+        } else if (Util1.isNull(coa.getKey().getCoaCode())) {
+            status = false;
+        } else if (Util1.isNull(coa.getCoaLevel())) {
+            status = false;
+        } else {
+            coa.setActive(true);
+        }
+        return status;
+    }
+
+    private void save(COATemplate obj, int row) {
+        if (isValidCOA(obj)) {
+            accountRepo.save(obj).subscribe((t) -> {
+                obj.setKey(t.getKey());
+                list.set(row, t);
+                addEmptyRow();
+            }, (e) -> {
+                log.error(e.getMessage());
+            });
+        }
+
     }
 
     public COATemplate getCOATemplate(int row) {
@@ -128,4 +168,30 @@ public class COATemplateHeadTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
+    private boolean hasEmptyRow() {
+        boolean valid = true;
+        if (list.isEmpty() || list == null) {
+            valid = true;
+        } else {
+            COATemplate coa = list.get(list.size() - 1);
+            if (coa.getKey().getCoaCode() == null) {
+                valid = false;
+            }
+        }
+
+        return valid;
+    }
+
+    public void addEmptyRow() {
+        if (list != null) {
+            if (hasEmptyRow()) {
+                COATemplate coa = new COATemplate();
+                COATemplateKey key = new COATemplateKey();
+                coa.setKey(key);
+                list.add(coa);
+                fireTableRowsInserted(list.size() - 1, list.size() - 1);
+            }
+        }
+
+    }
 }

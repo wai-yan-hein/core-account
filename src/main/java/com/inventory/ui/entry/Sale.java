@@ -195,7 +195,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                             traderAutoCompleter.setTrader(t);
                         });
 
-                        inventoryRepo.findCurrency(oh.getCurCode()).subscribe((t) -> {
+                        userRepo.findCurrency(oh.getCurCode()).subscribe((t) -> {
                             currAutoCompleter.setCurrency(t);
                         });
                         inventoryRepo.findSaleMan(oh.getSaleManCode(), deptId).subscribe((t) -> {
@@ -682,9 +682,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 traderAutoCompleter.setTrader(t);
             });
 
-            inventoryRepo.findCurrency(saleHis.getCurCode()).subscribe((t) -> {
+            userRepo.findCurrency(saleHis.getCurCode()).subscribe((t) -> {
                 currAutoCompleter.setCurrency(t);
             });
+            
             inventoryRepo.findSaleMan(saleHis.getSaleManCode(), deptId).subscribe((t) -> {
                 saleManCompleter.setSaleMan(t);
             });

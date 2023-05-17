@@ -275,7 +275,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
             inventoryRepo.findLocation(oPHis.getLocCode(), oPHis.getKey().getDeptId()).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
-            inventoryRepo.findCurrency(oPHis.getCurCode()).subscribe((t) -> {
+            userRepo.findCurrency(oPHis.getCurCode()).subscribe((t) -> {
                 currencyAAutoCompleter.setCurrency(t);
             });
             progress.setIndeterminate(true);
