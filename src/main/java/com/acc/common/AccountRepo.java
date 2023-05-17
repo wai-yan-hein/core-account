@@ -284,6 +284,15 @@ public class AccountRepo {
                 .build())
                 .retrieve().bodyToFlux(Gl.class);
     }
+    
+    public Mono<COATemplate> findCOATemplate(COATemplateKey key) {
+        return accountApi.post()
+                .uri("/template/find-coa-template")
+                .body(Mono.just(key), COATemplateKey.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(COATemplate.class);
+    }
 
     public Mono<ChartOfAccount> findCOA(String coaCode) {
         COAKey key = new COAKey();
