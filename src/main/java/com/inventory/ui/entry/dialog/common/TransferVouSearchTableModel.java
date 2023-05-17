@@ -112,5 +112,9 @@ public class TransferVouSearchTableModel extends AbstractTableModel {
 
     public VTransfer getSelectVou(int row) {
         return listDetail.get(row);
+    }    
+    public void clear() {
+        listDetail.clear();
+        fireTableDataChanged();
     }
 }

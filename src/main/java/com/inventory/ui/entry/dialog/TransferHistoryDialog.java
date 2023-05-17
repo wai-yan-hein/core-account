@@ -19,6 +19,7 @@ import com.inventory.editor.StockAutoCompleter;
 import com.inventory.model.AppUser;
 import com.inventory.model.Location;
 import com.inventory.model.Stock;
+import com.inventory.model.VPurchase;
 import com.inventory.model.VTransfer;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.TransferVouSearchTableModel;
@@ -175,8 +176,7 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         filter.setLocCode(getLocCode());
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(getDepId());
-
-        //
+        tableModel.clear();
         inventoryApi
                 .post()
                 .uri("/transfer/get-transfer")
@@ -188,11 +188,11 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
                     tableModel.setListDetail(t);
                     calAmount();
                     progess.setIndeterminate(false);
+                    log.info("trader test" ,t);
                 }, (e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
                     progess.setIndeterminate(false);
                 });
-
     }
 
     private void calAmount() {

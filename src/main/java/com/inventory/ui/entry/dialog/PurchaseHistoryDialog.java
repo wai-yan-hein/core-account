@@ -195,7 +195,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(getDepId());
         filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
-        filter.setCurCode(currAutoCompleter.getCurrency().getCurCode());
+        filter.setCurCode(getCurCode());
         tableModel.clear();
         inventoryApi.post()
                 .uri("/pur/get-pur")
@@ -211,7 +211,6 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
                     progess.setIndeterminate(false);
                     JOptionPane.showMessageDialog(this, e.getMessage());
                 });
-
     }
 
     private void calAmount() {
