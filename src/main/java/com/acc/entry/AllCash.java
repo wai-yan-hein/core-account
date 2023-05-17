@@ -309,7 +309,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         monoCur.subscribe((t) -> {
             currencyAutoCompleter = new CurrencyAAutoCompleter(txtCurrency, t, null, true);
             currencyAutoCompleter.setSelectionObserver(this);
-            accountRepo.findCurrency(Global.currency).subscribe((tt) -> {
+            userRepo.findCurrency(Global.currency).subscribe((tt) -> {
                 currencyAutoCompleter.setCurrency(tt);
             });
         }, (e) -> {
@@ -525,7 +525,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     private void deleteVoucher(boolean force) {
         closeCellEditor();
-        int selectRow = tblCash.convertRowIndexToModel(tblCash.getSelectedRow());
+        int selectRow = tblCash.getSelectedRow();
         int yes_no;
         if (tblCash.getSelectedRow() >= 0) {
             Gl vgl;

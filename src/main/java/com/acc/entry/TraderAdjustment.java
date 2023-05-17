@@ -257,7 +257,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         monoCur.subscribe((t) -> {
             currencyAutoCompleter = new CurrencyAAutoCompleter(txtCurrency, t, null, true);
             currencyAutoCompleter.setSelectionObserver(this);
-            accountRepo.findCurrency(Global.currency).subscribe((tt) -> {
+            userRepo.findCurrency(Global.currency).subscribe((tt) -> {
                 currencyAutoCompleter.setCurrency(tt);
             });
         });

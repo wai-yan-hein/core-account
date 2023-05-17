@@ -8,23 +8,19 @@ import com.user.model.Currency;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author wai yan
  */
-@Component
+@Slf4j
 public class CurrencyTabelModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(CurrencyTabelModel.class);
     private List<Currency> listCurrency = new ArrayList();
     private String[] columnNames = {"Code", "Name", "Symbol", "Active"};
 
-    public CurrencyTabelModel(List<Currency> listCurrency) {
-        this.listCurrency = listCurrency;
+    public CurrencyTabelModel() {
     }
 
     @Override
@@ -39,18 +35,18 @@ public class CurrencyTabelModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        switch (column) {
-            case 0:
-                return String.class;
-            case 1:
-                return String.class;
-            case 2:
-                return String.class;
-            case 3:
-                return Boolean.class;
-            default:
-                return Object.class;
-        }
+        return switch (column) {
+            case 0 ->
+                String.class;
+            case 1 ->
+                String.class;
+            case 2 ->
+                String.class;
+            case 3 ->
+                Boolean.class;
+            default ->
+                Object.class;
+        };
 
     }
 
@@ -61,11 +57,16 @@ public class CurrencyTabelModel extends AbstractTableModel {
             Currency currency = listCurrency.get(row);
 
             return switch (column) {
-                case 0 -> currency.getCurCode();
-                case 1 -> currency.getCurrencyName();
-                case 2 -> currency.getCurrencySymbol();
-                case 3 -> currency.isActive();
-                default -> null;
+                case 0 ->
+                    currency.getCurCode();
+                case 1 ->
+                    currency.getCurrencyName();
+                case 2 ->
+                    currency.getCurrencySymbol();
+                case 3 ->
+                    currency.isActive();
+                default ->
+                    null;
             }; //Id
             //Name
         } catch (Exception ex) {
@@ -109,8 +110,6 @@ public class CurrencyTabelModel extends AbstractTableModel {
         this.listCurrency = listCurrency;
         fireTableDataChanged();
     }
-
-    
 
     public Currency getCurrency(int row) {
         return listCurrency.get(row);

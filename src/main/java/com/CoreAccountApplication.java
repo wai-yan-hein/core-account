@@ -1,5 +1,7 @@
 package com;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.core.util.StatusPrinter;
 import com.common.Global;
 import com.common.Util1;
 import com.formdev.flatlaf.FlatLightLaf;
@@ -30,6 +32,7 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.Banner;
 import org.springframework.boot.WebApplicationType;
@@ -46,6 +49,7 @@ public class CoreAccountApplication {
     private static final Image appIcon = new ImageIcon(CoreAccountApplication.class.getResource("/images/applogo.png")).getImage();
     private static final String APP_NAME = "Core Account";
     private static ServerThread serverThread;
+
     public static void main(String[] args) {
         applayTheme();
         loadProperty();

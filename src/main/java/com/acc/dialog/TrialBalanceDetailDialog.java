@@ -199,7 +199,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         userRepo.getCurrency().subscribe((t) -> {
             currencyAAutoCompleter = new CurrencyAAutoCompleter(txtCur, t, null, false);
             currencyAAutoCompleter.setSelectionObserver(this);
-            accountRepo.findCurrency(curCode).subscribe((tt) -> {
+            userRepo.findCurrency(curCode).subscribe((tt) -> {
                 currencyAAutoCompleter.setCurrency(tt);
             });
         });

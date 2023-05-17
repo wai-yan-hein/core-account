@@ -798,6 +798,7 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToMono(OrderHis.class);
     }
+
     public Mono<OPHis> findOpening(OPHisKey key) {
         return inventoryApi.post()
                 .uri("/setup/find-opening")
@@ -1197,7 +1198,7 @@ public class InventoryRepo {
                 .collectList();
     }
 
-    public Mono<List<VStockBalance>> getStockBalance(String stockCode) {
+    public Mono<List<VStockBalance>> getStockBalance(String stockCode, boolean summary) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/report/get-stock-balance")
                 .queryParam("stockCode", stockCode)
@@ -1208,6 +1209,7 @@ public class InventoryRepo {
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", Global.deptId)
                 .queryParam("macId", Global.macId)
+                .queryParam("summary", summary)
                 .build())
                 .retrieve().bodyToFlux(VStockBalance.class)
                 .collectList();
