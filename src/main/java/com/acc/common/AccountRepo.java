@@ -209,6 +209,17 @@ public class AccountRepo {
                 .retrieve()
                 .bodyToMono(ChartOfAccount.class);
     }
+    
+    public Mono<List<ChartOfAccount>> saveCOAFromTemplate(Integer busId, String compCode) {
+        return accountApi.get()
+                .uri(builder -> builder.path("/account/save-coa-from-template")
+                .queryParam("busId", busId)
+                .queryParam("compCode", compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(ChartOfAccount.class)
+                .collectList();
+    }
 
     public Double getTraderBalance(String date, String traderCode, String compCode) {
         try {
