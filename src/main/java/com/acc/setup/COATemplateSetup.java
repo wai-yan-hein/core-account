@@ -107,7 +107,7 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
         tblCoaHead.setShowGrid(true);
         tblCoaHead.getTableHeader().setFont(Global.tblHeaderFont);
         tblCoaHead.setModel(coaHeadTableModel);
-//        coaGroupTableModel.setParent(tblCoaGroup);
+        coaGroupTableModel.setParent(tblCoaHead);
 //        coaGroupTableModel.setParetnDesp(lblCoaGroup);
         coaHeadTableModel.setAccountRepo(accountRepo);
         tblCoaHead.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

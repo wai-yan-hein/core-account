@@ -16,6 +16,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 /**
  *
@@ -147,14 +148,36 @@ public class COATemplateGroupTableModel extends AbstractTableModel {
     private void save(COATemplate coa, int row) {
         if (isValidCOA(coa)) {
             try {
-                accountRepo.save(coa).subscribe((t) -> {
-                    if (t.getKey().getCoaCode() != null) {
-                        listCOA.set(row, t);
-                        addEmptyRow();
-                        table.setRowSelectionInterval(row + 1, row + 1);
-                        table.setColumnSelectionInterval(1, 1);
-                    }
-                });
+                accountRepo.findCOATemplate(coa.getKey())
+                        .flatMap(t -> {
+                            if (t == null) {
+                                return Mono.just(Boolean.TRUE);
+                            } else {
+                                return Mono.just(Boolean.FALSE);
+                            }
+                        })
+                        .switchIfEmpty(Mono.defer(() -> {
+                            return accountRepo.save(coa).doOnNext((t) -> {
+                                if (t.getKey().getCoaCode() != null) {
+                                    listCOA.set(row, t);
+                                    addEmptyRow();
+                                    table.setRowSelectionInterval(row + 1, row + 1);
+                                    table.setColumnSelectionInterval(1, 1);
+                                }
+                            }).thenReturn(Boolean.TRUE);
+
+                        }))
+                        .subscribe(
+                                status -> {
+                                    if (!status) {
+                                        coa.getKey().setCoaCode(null);
+                                        JOptionPane.showMessageDialog(table, "COA Code already exists!");
+                                    }
+                                },
+                                err -> {
+                                    JOptionPane.showMessageDialog(table, err.getMessage());
+                                }
+                        );
 
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(table, ex.getMessage());

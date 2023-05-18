@@ -15,6 +15,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 /**
  *
@@ -102,7 +103,7 @@ public class COATemplateTableModel extends AbstractTableModel {
         try {
             COATemplate coa = listCOA.get(row);
             switch (column) {
-                case 1-> {
+                case 1 -> {
                     //user code
                     if (value != null) {
                         coa.getKey().setCoaCode(Util1.getString(value));
@@ -144,14 +145,36 @@ public class COATemplateTableModel extends AbstractTableModel {
 
     private void save(COATemplate coa, int row) {
         if (isValidCOA(coa)) {
-            accountRepo.save(coa).subscribe((t) -> {
-                if (t.getKey().getCoaCode() != null) {
-                    listCOA.set(row, t);
-                    addEmptyRow();
-                    parent.setRowSelectionInterval(row + 1, row + 1);
-                    parent.setColumnSelectionInterval(1, 1);
-                }
-            });
+            accountRepo.findCOATemplate(coa.getKey())
+                    .flatMap(t -> {
+                        if (t == null) {
+                            return Mono.just(Boolean.TRUE);
+                        } else {
+                            return Mono.just(Boolean.FALSE);
+                        }
+                    })
+                    .switchIfEmpty(Mono.defer(() -> {
+                        return accountRepo.save(coa).doOnNext((t) -> {
+                            if (t.getKey().getCoaCode() != null) {
+                                listCOA.set(row, t);
+                                addEmptyRow();
+                                parent.setRowSelectionInterval(row + 1, row + 1);
+                                parent.setColumnSelectionInterval(1, 1);
+                            }
+                        }).thenReturn(Boolean.TRUE);
+
+                    }))
+                    .subscribe(
+                            status -> {
+                                if (!status) {
+                                    coa.getKey().setCoaCode(null);
+                                    JOptionPane.showMessageDialog(parent, "COA Code already exists!");
+                                }
+                            },
+                            err -> {
+                                JOptionPane.showMessageDialog(parent, err.getMessage());
+                            }
+                    );
 
         }
     }

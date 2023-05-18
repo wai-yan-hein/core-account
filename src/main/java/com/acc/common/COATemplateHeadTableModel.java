@@ -11,8 +11,10 @@ import com.common.Util1;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 /**
  *
@@ -25,6 +27,7 @@ public class COATemplateHeadTableModel extends AbstractTableModel {
     private final String[] columnNames = {"Code", "Name"};
     private AccountRepo accountRepo;
     private Integer busId;
+    private JTable table;
 
     public AccountRepo getAccountRepo() {
         return accountRepo;
@@ -40,6 +43,14 @@ public class COATemplateHeadTableModel extends AbstractTableModel {
 
     public void setBusId(Integer busId) {
         this.busId = busId;
+    }
+
+    public JTable getParent() {
+        return table;
+    }
+
+    public void setParent(JTable table) {
+        this.table = table;
     }
 
     @Override
@@ -144,13 +155,35 @@ public class COATemplateHeadTableModel extends AbstractTableModel {
 
     private void save(COATemplate obj, int row) {
         if (isValidCOA(obj)) {
-            accountRepo.save(obj).subscribe((t) -> {
-                obj.setKey(t.getKey());
-                list.set(row, t);
-                addEmptyRow();
-            }, (e) -> {
-                log.error(e.getMessage());
-            });
+            accountRepo.findCOATemplate(obj.getKey())
+                    .flatMap(t -> {
+                        if (t == null) {
+                            return Mono.just(Boolean.TRUE);
+                        } else {
+                            return Mono.just(Boolean.FALSE);
+                        }
+                    })
+                    .switchIfEmpty(Mono.defer(() -> {
+                        return accountRepo.save(obj)
+                                .doOnNext(savedObj -> {
+                                    obj.setKey(savedObj.getKey());
+                                    list.set(row, savedObj);
+                                    addEmptyRow();
+                                })
+                                .thenReturn(Boolean.TRUE);
+                    }))
+                    .subscribe(
+                            status -> {
+                                if (!status) {
+                                    obj.getKey().setCoaCode(null);
+                                    JOptionPane.showMessageDialog(table, "COA Code already exists!");
+                                }
+                            },
+                            err -> {
+                                JOptionPane.showMessageDialog(table, err.getMessage());
+                            }
+                    );
+
         }
 
     }
