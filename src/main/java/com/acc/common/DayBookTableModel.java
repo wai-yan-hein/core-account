@@ -40,10 +40,19 @@ public class DayBookTableModel extends AbstractTableModel {
     private SelectionObserver observer;
     private DateAutoCompleter dateAutoCompleter;
     private String glDate;
-    private Currency currency;
     private Department department;
     private AccountRepo accountRepo;
     private boolean credit;
+    private String curCode;
+
+    public String getCurCode() {
+        return curCode;
+    }
+
+    public void setCurCode(String curCode) {
+        this.curCode = curCode;
+    }
+    
 
     public boolean isCredit() {
         return credit;
@@ -62,14 +71,6 @@ public class DayBookTableModel extends AbstractTableModel {
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
-    }
-
-    public Currency getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
     }
 
     public Department getDepartment() {
@@ -442,19 +443,13 @@ public class DayBookTableModel extends AbstractTableModel {
             gl.setKey(key);
             gl.setMacId(Global.macId);
             gl.setTranSource("CB");
-            if (ProUtil.getProperty(sourceAccId) != null) {
-                gl.setCurCode(ProUtil.getProperty(sourceAccId));
-            } else {
-                if (currency != null) {
-                    gl.setCurCode(currency.getCurCode());
-                }
-            }
             if (department != null) {
                 gl.setDeptCode(department.getKey().getDeptCode());
                 gl.setDeptUsrCode(department.getUserCode());
             }
             gl.setGlDate(glDate == null ? Util1.getTodayDate() : Util1.toDate(glDate, "dd/MM/yyyy"));
             gl.setSrcAccCode(sourceAccId);
+            gl.setCurCode(curCode);
             listVGl.add(gl);
             fireTableRowsInserted(listVGl.size() - 1, listVGl.size() - 1);
         }

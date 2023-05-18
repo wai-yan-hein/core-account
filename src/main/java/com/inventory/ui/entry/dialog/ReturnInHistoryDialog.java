@@ -13,7 +13,6 @@ import com.common.TableCellRender;
 import com.user.common.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
-import com.inventory.editor.CurrencyAutoCompleter;
 import com.inventory.editor.DepartmentAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
@@ -22,9 +21,9 @@ import com.inventory.model.AppUser;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;
 import com.inventory.model.VReturnIn;
-import com.inventory.model.VReturnOut;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.RetInVouSearchTableModel;
+import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -36,7 +35,6 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -124,7 +122,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
             });
         });
         userRepo.getCurrency().subscribe((t) -> {
-            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
+            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
             userRepo.getDefaultCurrency().subscribe((tt) -> {
                 currAutoCompleter.setCurrency(tt);
             }, (e) -> {
@@ -190,9 +188,12 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     private Integer getDepId() {
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
-    
-    private String getCurCode(){
-        return currAutoCompleter==null? Global.currency: currAutoCompleter.getCurrency().getCurCode();
+
+    private String getCurCode() {
+        if (currAutoCompleter == null || currAutoCompleter.getCurrency() == null) {
+            return Global.currency;
+        }
+        return currAutoCompleter.getCurrency().getCurCode();
     }
 
     public void search() {

@@ -5,6 +5,7 @@
  */
 package com.acc.editor;
 
+import com.user.editor.CurrencyAutoCompleter;
 import com.user.model.Currency;
 import com.common.Global;
 import java.awt.event.FocusAdapter;
@@ -27,7 +28,7 @@ import javax.swing.table.TableCellEditor;
 public class CurrencyAEditor extends AbstractCellEditor implements TableCellEditor {
 
     private JComponent component = null;
-    private CurrencyAAutoCompleter completer;
+    private CurrencyAutoCompleter completer;
     private List<Currency> listCurrency;
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
@@ -83,7 +84,7 @@ public class CurrencyAEditor extends AbstractCellEditor implements TableCellEdit
             jtf.setText(value.toString());
             jtf.selectAll();
         }
-        completer = new CurrencyAAutoCompleter(jtf, listCurrency, this, false);
+        completer = new CurrencyAutoCompleter(jtf, listCurrency, this);
 
         return component;
     }

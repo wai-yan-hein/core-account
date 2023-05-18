@@ -19,7 +19,6 @@ import com.common.Util1;
 import com.inventory.editor.BatchAutoCompeter;
 import com.inventory.editor.BrandAutoCompleter;
 import com.inventory.editor.CategoryAutoCompleter;
-import com.inventory.editor.CurrencyAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.RegionAutoCompleter;
 import com.inventory.editor.SaleManAutoCompleter;
@@ -31,6 +30,7 @@ import com.inventory.model.VRoleMenu;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.ReportTableModel;
 import com.user.common.UserRepo;
+import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
 import java.awt.event.KeyEvent;
@@ -187,7 +187,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             regionAutoCompleter = new RegionAutoCompleter(txtRegion, t, null, true, false);
         });
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
+            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
             currencyAutoCompleter.setObserver(this);
             userRepo.getDefaultCurrency().subscribe((tt) -> {
                 currencyAutoCompleter.setCurrency(tt);

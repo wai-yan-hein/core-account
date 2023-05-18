@@ -11,11 +11,11 @@ import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.inventory.editor.CurrencyAutoCompleter;
 import com.user.common.CompanyTableModel;
 import com.user.common.UserRepo;
 import com.user.dialog.YearEndProcessingDailog;
 import com.user.editor.BusinessTypeAutoCompleter;
+import com.user.editor.CurrencyAutoCompleter;
 import com.user.model.CompanyInfo;
 import java.awt.HeadlessException;
 import java.awt.event.KeyEvent;
@@ -105,7 +105,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
 
     private void initCombo() {
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
+            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
         });
         userRepo.getBusinessType().subscribe((t) -> {
             businessTypeAutoCompleter = new BusinessTypeAutoCompleter(txtBusType, t, null, false);

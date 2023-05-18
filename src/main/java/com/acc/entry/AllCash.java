@@ -7,7 +7,7 @@ package com.acc.entry;
 
 import com.acc.common.AccountRepo;
 import com.acc.editor.COA3CellEditor;
-import com.acc.editor.CurrencyAAutoCompleter;
+import com.user.editor.CurrencyAutoCompleter;
 import com.acc.editor.CurrencyAEditor;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.DepartmentCellEditor;
@@ -102,7 +102,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private TraderAAutoCompleter traderAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
     private COA3AutoCompleter coaAutoCompleter;
-    private CurrencyAAutoCompleter currencyAutoCompleter;
+    private CurrencyAutoCompleter currencyAutoCompleter;
     private DespAutoCompleter despAutoCompleter;
     private RefAutoCompleter refAutoCompleter;
     private TranSourceAutoCompleter tranSourceAutoCompleter;
@@ -247,11 +247,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 }, (e) -> {
                     log.error(e.getMessage());
                 });
-                userRepo.getDefaultCurrency().subscribe((t) -> {
-                    dayBookTableModel.setCurrency(t);
-                }, (e) -> {
-                    log.error(e.getMessage());
-                });
                 dayBookTableModel.setCredit(coa.isCredit());
                 dayBookTableModel.addNewRow();
             });
@@ -268,12 +263,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             }, (e) -> {
                 log.error(e.getMessage());
             });
-            userRepo.getDefaultCurrency().subscribe((t) -> {
-                allCashTableModel.setCurrency(t);
-            }, (e) -> {
-                log.error(e.getMessage());
-            });
-
         }
     }
 
@@ -307,8 +296,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             log.error(e.getMessage());
         });
         monoCur.subscribe((t) -> {
-            currencyAutoCompleter = new CurrencyAAutoCompleter(txtCurrency, t, null, true);
-            currencyAutoCompleter.setSelectionObserver(this);
+            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
+            currencyAutoCompleter.setObserver(this);
             userRepo.findCurrency(Global.currency).subscribe((tt) -> {
                 currencyAutoCompleter.setCurrency(tt);
             });
@@ -340,6 +329,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     public void initMain() {
         batchLock(!Global.batchLock);
+        txtCurrency.setEnabled(ProUtil.isMultiCur());
         initFilter();
         initTableModel();
         initTableCB();
@@ -759,10 +749,12 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         if (single) {
             dayBookTableModel.setListVGl(list);
             dayBookTableModel.setGlDate(fromDate);
+            dayBookTableModel.setCurCode(getCurCode());
             dayBookTableModel.addNewRow();
         } else {
             allCashTableModel.setListVGl(list);
             allCashTableModel.setGlDate(fromDate);
+            allCashTableModel.setCurCode(getCurCode());
             allCashTableModel.addNewRow();
         }
     }
@@ -969,7 +961,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
         txtCurrency.setFont(Global.textFont);
         txtCurrency.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-        txtCurrency.setEnabled(false);
         txtCurrency.setName("txtCurrency"); // NOI18N
         txtCurrency.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {

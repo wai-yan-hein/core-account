@@ -14,7 +14,6 @@ import com.common.TableCellRender;
 import com.user.common.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
-import com.inventory.editor.CurrencyAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
@@ -24,6 +23,7 @@ import com.inventory.model.Trader;
 import com.inventory.model.VPurchase;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.PurVouSearchTableModel;
+import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import java.awt.HeadlessException;
 import java.awt.event.KeyEvent;
@@ -125,7 +125,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
             });
         });
         userRepo.getCurrency().subscribe((t) -> {
-            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
+            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
             userRepo.getDefaultCurrency().subscribe((tt) -> {
                 currAutoCompleter.setCurrency(tt);
             }, (e) -> {
@@ -176,8 +176,11 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
     
-    private String getCurCode(){
-        return currAutoCompleter==null? Global.currency: currAutoCompleter.getCurrency().getCurCode();
+    private String getCurCode() {
+        if (currAutoCompleter == null || currAutoCompleter.getCurrency() == null) {
+            return Global.currency;
+        }
+        return currAutoCompleter.getCurrency().getCurCode();
     }
 
     public void search() {

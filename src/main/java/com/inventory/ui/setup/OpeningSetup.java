@@ -12,7 +12,6 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.user.common.UserRepo;
 import com.common.Util1;
-import com.inventory.editor.CurrencyAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.model.Location;
@@ -24,9 +23,9 @@ import com.inventory.ui.common.OpeningTableModel;
 import com.inventory.ui.entry.dialog.OPHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
+import com.user.editor.CurrencyAutoCompleter;
 import java.awt.Color;
 import java.awt.FileDialog;
-import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.List;
@@ -129,7 +128,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
             });
         });
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
+            currencyAAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
             userRepo.getDefaultCurrency().subscribe((tt) -> {
                 currencyAAutoCompleter.setCurrency(tt);
             });

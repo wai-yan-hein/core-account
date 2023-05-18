@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.acc.editor;
+package com.user.editor;
 
 import com.acc.common.CurrencyATableModel;
 import com.user.model.Currency;
@@ -18,7 +18,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
@@ -42,7 +41,7 @@ import javax.swing.text.JTextComponent;
  *
  * @author Lenovo
  */
-public final class CurrencyAAutoCompleter implements KeyListener, SelectionObserver {
+public final class CurrencyAutoCompleter implements KeyListener, SelectionObserver {
 
     private JTable table = new JTable();
     private JPopupMenu popup = new JPopupMenu();
@@ -55,26 +54,23 @@ public final class CurrencyAAutoCompleter implements KeyListener, SelectionObser
     private int x = 0;
     private int y = 0;
     private boolean popupOpen = false;
-    private SelectionObserver selectionObserver;
+    private SelectionObserver observer;
 
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
+    public SelectionObserver getObserver() {
+        return observer;
     }
 
-    //private CashFilter cashFilter = Global.allCash;
-    public CurrencyAAutoCompleter() {
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
     }
 
-    public CurrencyAAutoCompleter(JTextComponent comp, List<Currency> list,
-            AbstractCellEditor editor, boolean filter) {
+    public CurrencyAutoCompleter() {
+    }
+
+    public CurrencyAutoCompleter(JTextComponent comp, List<Currency> list,
+            AbstractCellEditor editor) {
         this.textComp = comp;
         this.editor = editor;
-        if (filter) {
-            list = new ArrayList<>(list);
-            Currency c = new Currency("-", "All");
-            list.add(0, c);
-            setCurrency(c);
-        }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         currencyTabelModel = new CurrencyATableModel(list);
@@ -164,9 +160,9 @@ public final class CurrencyAAutoCompleter implements KeyListener, SelectionObser
                     table.getSelectedRow()));
             ((JTextField) textComp).setText(currency.getCurrencySymbol());
             if (editor == null) {
-                if (selectionObserver != null) {
+                if (observer != null) {
                     String code = Util1.isNull(currency.getCurCode(), "-");
-                    selectionObserver.selected("Selected", code);
+                    observer.selected("Selected", code);
                 }
             }
         }
@@ -244,7 +240,7 @@ public final class CurrencyAAutoCompleter implements KeyListener, SelectionObser
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            CurrencyAAutoCompleter completer = (CurrencyAAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            CurrencyAutoCompleter completer = (CurrencyAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 if (completer.popup.isVisible()) {
                     completer.selectNextPossibleValue();
@@ -262,7 +258,7 @@ public final class CurrencyAAutoCompleter implements KeyListener, SelectionObser
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            CurrencyAAutoCompleter completer = (CurrencyAAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            CurrencyAutoCompleter completer = (CurrencyAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 if (completer.popup.isVisible()) {
                     completer.selectPreviousPossibleValue();
@@ -274,7 +270,7 @@ public final class CurrencyAAutoCompleter implements KeyListener, SelectionObser
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            CurrencyAAutoCompleter completer = (CurrencyAAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            CurrencyAutoCompleter completer = (CurrencyAutoCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 completer.popup.setVisible(false);
                 popupOpen = false;

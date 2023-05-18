@@ -9,7 +9,7 @@ import com.acc.common.AccountRepo;
 import com.acc.common.CrAmtTableModel;
 import com.acc.common.DateAutoCompleter;
 import com.acc.common.DrAmtTableModel;
-import com.acc.editor.CurrencyAAutoCompleter;
+import com.user.editor.CurrencyAutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.DespAutoCompleter;
 import com.acc.editor.RefAutoCompleter;
@@ -71,7 +71,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private UserRepo userRepo;
     private DateAutoCompleter dateAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
-    private CurrencyAAutoCompleter currencyAAutoCompleter;
+    private CurrencyAutoCompleter currencyAAutoCompleter;
     private DespAutoCompleter despAutoCompleter;
     private RefAutoCompleter refAutoCompleter;
     private List<Gl> list;
@@ -197,8 +197,8 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
         });
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAAutoCompleter = new CurrencyAAutoCompleter(txtCur, t, null, false);
-            currencyAAutoCompleter.setSelectionObserver(this);
+            currencyAAutoCompleter = new CurrencyAutoCompleter(txtCur, t, null);
+            currencyAAutoCompleter.setObserver(this);
             userRepo.findCurrency(curCode).subscribe((tt) -> {
                 currencyAAutoCompleter.setCurrency(tt);
             });

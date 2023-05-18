@@ -9,7 +9,7 @@ import com.acc.common.ColumnHeaderListener;
 import com.acc.common.DateAutoCompleter;
 import com.acc.common.JournalClosingStockTableModel;
 import com.acc.editor.COA3CellEditor;
-import com.acc.editor.CurrencyAAutoCompleter;
+import com.user.editor.CurrencyAutoCompleter;
 import com.acc.editor.CurrencyAEditor;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.DepartmentCellEditor;
@@ -52,7 +52,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
     private final JournalClosingStockTableModel tableModel = new JournalClosingStockTableModel();
     private DateAutoCompleter dateAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
-    private CurrencyAAutoCompleter currencyAAutoCompleter;
+    private CurrencyAutoCompleter currencyAAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
     private JProgressBar progress;
     private SelectionObserver observer;
@@ -189,8 +189,8 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
         projectAutoCompleter.setObserver(this);
         monoCur.subscribe((t) -> {
-            currencyAAutoCompleter = new CurrencyAAutoCompleter(txtCur, t, null, true);
-            currencyAAutoCompleter.setSelectionObserver(this);
+            currencyAAutoCompleter = new CurrencyAutoCompleter(txtCur, t, null);
+            currencyAAutoCompleter.setObserver(this);
         });
 
     }
