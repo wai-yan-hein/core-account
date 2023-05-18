@@ -36,6 +36,7 @@ public class ProUtil {
     public static final String P_SHOW_GRN = "purchase.show.grn";
     public static final String P_BATCH_DETAIL = "purchase.batch.detail";
     public static final String P_COM_AMT = "purchase.commission.amount";
+    public static final String MULTI_CUR = "multi.currency";
 
     public static String getFontPath() {
         return Global.hmRoleProperty.get("font.path");
@@ -90,7 +91,7 @@ public class ProUtil {
     }
 
     public static boolean isMultiCur() {
-        return true;
+        return Util1.getBoolean(Global.hmRoleProperty.get(MULTI_CUR));
     }
 
     public static boolean isDisableDep() {

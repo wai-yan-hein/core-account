@@ -21,8 +21,8 @@ import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.editor.CurrencyAutoCompleter;
 import com.user.common.UserRepo;
+import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -39,7 +39,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
@@ -51,14 +50,11 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
-import net.sf.jasperreports.engine.fill.ReportFiller;
 import net.sf.jasperreports.view.JasperViewer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -329,7 +325,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             departmentAutoCompleter.setObserver(this);
         });
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, true);
+            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
             currencyAutoCompleter.setObserver(this);
         });
     }

@@ -16,7 +16,7 @@ import com.acc.editor.DepartmentCellEditor;
 import com.acc.editor.CurrencyAEditor;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.TraderAAutoCompleter;
-import com.acc.editor.CurrencyAAutoCompleter;
+import com.user.editor.CurrencyAutoCompleter;
 import com.acc.model.OpeningKey;
 import com.common.SelectionObserver;
 import com.common.PanelControl;
@@ -77,7 +77,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     private UserRepo userRepo;
 
     private DepartmentAutoCompleter departmenttAutoCompleter;
-    private CurrencyAAutoCompleter currencyAutoCompleter;
+    private CurrencyAutoCompleter currencyAutoCompleter;
     private COA3AutoCompleter coaAutoCompleter;
     private TraderAAutoCompleter tradeAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
@@ -168,8 +168,8 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
             departmenttAutoCompleter.setObserver(this);
         });
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAutoCompleter = new CurrencyAAutoCompleter(txtCurrency, t, null, true);
-            currencyAutoCompleter.setSelectionObserver(this);
+            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
+            currencyAutoCompleter.setObserver(this);
         });
         coaAutoCompleter = new COA3AutoCompleter(txtCOA, accountRepo, null, true, 0);
         coaAutoCompleter.setSelectionObserver(this);

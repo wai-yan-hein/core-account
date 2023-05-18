@@ -7,7 +7,7 @@ package com.acc.entry;
 
 import com.acc.common.AccountRepo;
 import com.acc.editor.COA3CellEditor;
-import com.acc.editor.CurrencyAAutoCompleter;
+import com.user.editor.CurrencyAutoCompleter;
 import com.acc.editor.CurrencyAEditor;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.DepartmentCellEditor;
@@ -97,7 +97,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
     private TraderAAutoCompleter traderAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
     private COA3AutoCompleter coaAutoCompleter;
-    private CurrencyAAutoCompleter currencyAutoCompleter;
+    private CurrencyAutoCompleter currencyAutoCompleter;
     private SelectionObserver selectionObserver;
     private DespAutoCompleter despAutoCompleter;
     private RefAutoCompleter refAutoCompleter;
@@ -255,8 +255,8 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         });
 
         monoCur.subscribe((t) -> {
-            currencyAutoCompleter = new CurrencyAAutoCompleter(txtCurrency, t, null, true);
-            currencyAutoCompleter.setSelectionObserver(this);
+            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
+            currencyAutoCompleter.setObserver(this);
             userRepo.findCurrency(Global.currency).subscribe((tt) -> {
                 currencyAutoCompleter.setCurrency(tt);
             });

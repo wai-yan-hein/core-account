@@ -254,9 +254,13 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
     }
 
     public boolean isValidData() {
+        String projectNo = null;
+        if (projectAutoCompleter.getProject() != null) {
+            projectNo = projectAutoCompleter.getProject().getKey().getProjectNo();
+        }
         for (Gl g : journalTablModel.getListGV()) {
             g.setReference(txtRefrence.getText());
-            g.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
+            g.setProjectNo(projectNo);
             g.setGlDate(txtVouDate.getDate());
             g.setMacId(Global.macId);
             if (lblStatus.getText().equals("EDIT")) {

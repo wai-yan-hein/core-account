@@ -15,7 +15,6 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.inventory.editor.CurrencyAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.SaleManAutoCompleter;
@@ -38,6 +37,7 @@ import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.common.UserRepo;
+import com.user.editor.CurrencyAutoCompleter;
 import java.awt.Color;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
@@ -165,13 +165,22 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         txtDueDate.getDateEditor().getUiComponent().setName("txtDueDate");
         txtDueDate.getDateEditor().getUiComponent().addKeyListener(this);
         txtDueDate.getDateEditor().getUiComponent().addFocusListener(fa);
+        txtCurrency.addFocusListener(fa);
+        txtCus.addFocusListener(fa);
+        txtLocation.addFocusListener(fa);
+        txtSaleman.addFocusListener(fa);
+        txtRemark.addFocusListener(fa);
+        txtReference.addFocusListener(fa);
     }
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusGained(FocusEvent e) {
-            ((JTextFieldDateEditor) e.getSource()).selectAll();
+            if (e.getSource() instanceof JTextField txt) {
+                txt.selectAll();
+            } else if (e.getSource() instanceof JTextFieldDateEditor txt) {
+                txt.selectAll();
+            }
         }
-
     };
 
     private void initButtonGroup() {
@@ -252,7 +261,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             });
         });
         userRepo.getCurrency().subscribe((t) -> {
-            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null, false);
+            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
             currAutoCompleter.setObserver(this);
             userRepo.getDefaultCurrency().subscribe((tt) -> {
                 currAutoCompleter.setCurrency(tt);

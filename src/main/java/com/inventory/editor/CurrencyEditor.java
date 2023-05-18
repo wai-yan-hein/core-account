@@ -6,6 +6,7 @@
 package com.inventory.editor;
 
 import com.common.Global;
+import com.user.editor.CurrencyAutoCompleter;
 import com.user.model.Currency;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -83,7 +84,7 @@ public class CurrencyEditor extends AbstractCellEditor implements TableCellEdito
         if (value != null) {
             jtf.setText(value.toString());
         }
-        completer = new CurrencyAutoCompleter(jtf, listCurrency, this, false);
+        completer = new CurrencyAutoCompleter(jtf, listCurrency, this);
 
         return component;
     }
