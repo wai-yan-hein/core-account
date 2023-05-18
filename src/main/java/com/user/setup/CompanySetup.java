@@ -27,6 +27,7 @@ import javax.swing.event.ListSelectionEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 /**
  *
@@ -85,6 +86,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         tblCompany.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
             if (e.getValueIsAdjusting()) {
                 if (tblCompany.getSelectedRow() >= 0) {
+                    txtBusType.setEditable(false);
                     selectRow = tblCompany.convertRowIndexToModel(tblCompany.getSelectedRow());
                     CompanyInfo com = tableModel.getCompany(selectRow);
                     setCompanyInfo(com);
@@ -140,19 +142,46 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
             try {
                 progress.setIndeterminate(true);
                 String status = lblStatus.getText();
-                userRepo.saveCompany(companyInfo).subscribe((t) -> {
-                    if (status.equals("NEW")) {
-                        tableModel.addCompany(t);
-                    } else {
-                        tableModel.setCompany(selectRow, t);
-                    }
-                    updateCompany(t);
-                    clear();
-                    progress.setIndeterminate(false);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                    progress.setIndeterminate(false);
-                });
+                userRepo.saveCompany(companyInfo)
+                        .flatMap(c -> {
+                            if (c == null) {
+                                return Mono.just(Boolean.FALSE);
+                            } else {
+                                if (status.equals("NEW")) {
+                                    tableModel.addCompany(c);
+                                } else {
+                                    tableModel.setCompany(selectRow, c);
+                                }
+                                updateCompany(c);
+                                return accountRepo.saveCOAFromTemplate(companyInfo.getBusId(), c.getCompCode())
+                                        .doOnNext(t -> {
+                                            clear();
+                                            progress.setIndeterminate(false);
+                                        })
+                                        .thenReturn(Boolean.TRUE);
+                            }
+                        })
+                        .subscribe(
+                                sta -> {
+                                },
+                                err -> {
+                                    JOptionPane.showMessageDialog(this, err.getMessage());
+                                    progress.setIndeterminate(false);
+                                }
+                        );
+//                userRepo.saveCompany(companyInfo).subscribe((t) -> {
+//                    if (status.equals("NEW")) {
+//                        tableModel.addCompany(t);
+//                    } else {
+//                        tableModel.setCompany(selectRow, t);
+//                    }
+//                    updateCompany(t);
+//                    clear();
+//                    progress.setIndeterminate(false);
+//                }, (e) -> {
+//                    JOptionPane.showMessageDialog(this, e.getMessage());
+//                    progress.setIndeterminate(false);
+//                });
 
             } catch (HeadlessException e) {
                 log.error("Save Company :" + e.getMessage());
@@ -212,6 +241,8 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         lblStatus.setText("NEW");
         companyInfo = new CompanyInfo();
         txtUserCode.requestFocus();
+        txtBusType.setEditable(true);
+        currencyAutoCompleter.setCurrency(null);
         businessTypeAutoCompleter.setObject(null);
     }
 
@@ -239,8 +270,9 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         chkActive.addKeyListener(this);
         tblCompany.addKeyListener(this);
     }
-    private void yearEndDialog(){
-        YearEndProcessingDailog d =new YearEndProcessingDailog(Global.parentForm);
+
+    private void yearEndDialog() {
+        YearEndProcessingDailog d = new YearEndProcessingDailog(Global.parentForm);
         d.setUserRepo(userRepo);
         d.setAccountRepo(accountRepo);
         d.initMain();
