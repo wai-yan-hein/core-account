@@ -437,7 +437,7 @@ public class UserRepo {
 
     public Mono<List<ExchangeRate>> searchExchange(String startDate, String endDate, String targetCur) {
         return userApi.get()
-                .uri(builder -> builder.path("/user/searchProjectByCode")
+                .uri(builder -> builder.path("/user/searchExchange")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("startDate", startDate)
                 .queryParam("endDate", endDate)

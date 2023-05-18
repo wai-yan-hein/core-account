@@ -153,7 +153,10 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
     }
 
     private String getCurCode() {
-        return currencyAAutoCompleter == null ? "-" : currencyAAutoCompleter.getCurrency().getCurCode();
+        if (currencyAAutoCompleter == null || currencyAAutoCompleter.getCurrency() == null) {
+            return Global.currency;
+        }
+        return currencyAAutoCompleter.getCurrency().getCurCode();
     }
 
     private String getDeptCode() {

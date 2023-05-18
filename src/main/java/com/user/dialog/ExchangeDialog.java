@@ -165,6 +165,8 @@ public class ExchangeDialog extends javax.swing.JDialog {
                 exchange.setTargetCur(cur.getCurCode());
             }
             exchange.setExDate(txtDate.getDate());
+            exchange.setHomeFactor(Util1.getDouble(txtHome.getValue()));
+            exchange.setTargetFactor(Util1.getDouble(txtTarget.getValue()));
             if (lblStatus.getText().equals("NEW")) {
                 ExchangeKey key = new ExchangeKey();
                 key.setCompCode(Global.compCode);

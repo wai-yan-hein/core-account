@@ -203,6 +203,13 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
                 : cOAAutoCompleter.getCOA().getKey().getCoaCode();
     }
 
+    private String getCurCode() {
+        if (currencyAutoCompleter == null || currencyAutoCompleter.getCurrency() == null) {
+            return Global.currency;
+        }
+        return currencyAutoCompleter.getCurrency().getCurCode();
+    }
+
     private void searchAPAR() {
         if (!isApPrCal) {
             long start = new GregorianCalendar().getTimeInMillis();
@@ -221,7 +228,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             filter.setToDate(endDate);
             filter.setOpeningDate(opDate);
             filter.setTraderCode(traderCode);
-            filter.setCurCode(Util1.isNull(filter.getCurCode(), "-"));
+            filter.setCurCode(getCurCode());
             filter.setTraderType(traderType);
             filter.setListDepartment(getListDep());
             filter.setCoaCode(getCoaCode());
@@ -286,7 +293,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             cOAAutoCompleter.setSelectionObserver(this);
         });
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t,null);
+            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
             currencyAutoCompleter.setObserver(this);
         });
 
