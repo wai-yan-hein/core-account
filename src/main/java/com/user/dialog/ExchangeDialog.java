@@ -17,6 +17,8 @@ import com.user.model.ExchangeRate;
 import java.awt.Color;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -43,6 +45,19 @@ public class ExchangeDialog extends javax.swing.JDialog {
         this.userRepo = userRepo;
     }
 
+    public ExchangeRate getExchange() {
+        return exchange;
+    }
+
+    public void setExchange(ExchangeRate exchange) {
+        this.exchange = exchange;
+        if (exchange == null) {
+            clear();
+        } else {
+            setData(exchange);
+        }
+    }
+
     public SelectionObserver getObserver() {
         return observer;
     }
@@ -58,12 +73,7 @@ public class ExchangeDialog extends javax.swing.JDialog {
     public void setStatus(String status) {
         this.status = status;
         lblStatus.setText(status);
-        if (status.equals("NEW")) {
-            clear();
-            lblStatus.setForeground(Color.green);
-        } else {
-            lblStatus.setForeground(Color.blue);
-        }
+        lblStatus.setForeground(status.equals("NEW") ? Color.GREEN : Color.BLUE);
     }
 
     /**
@@ -83,24 +93,37 @@ public class ExchangeDialog extends javax.swing.JDialog {
         txtTarget.setFormatterFactory(Util1.getDecimalFormat());
         txtHome.setHorizontalAlignment(JTextField.RIGHT);
         txtTarget.setHorizontalAlignment(JTextField.RIGHT);
-        txtHome.setValue(1);
-        txtTarget.setValue(1);
-
     }
 
     private void clear() {
         initDate();
+        txtExId.setText("");
         txtHome.setValue(1);
         txtTarget.setValue(1);
         lblStatus.setText("NEW");
         txtTarget.requestFocus();
     }
 
+    private void setData(ExchangeRate e) {
+        txtExId.setText(e.getKey().getExCode());
+        txtDate.setDate(e.getExDate());
+        txtHome.setValue(e.getHomeFactor());
+        txtTarget.setValue(e.getTargetFactor());
+        userRepo.findCurrency(e.getHomeCur()).subscribe((t) -> {
+            cboHC.setSelectedItem(t);
+            cboHC.setModel(homeComboBoxModel);
+        });
+        userRepo.findCurrency(e.getTargetCur()).subscribe((t) -> {
+            cboTC.setSelectedItem(t);
+            cboTC.setModel(targetComboBoxModel);
+        });
+    }
+
     private void initFocusAdapter() {
         txtHome.addFocusListener(fa);
         txtTarget.addFocusListener(fa);
     }
-    private FocusAdapter fa = new FocusAdapter() {
+    private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusGained(FocusEvent e) {
             Object obj = e.getSource();
@@ -119,10 +142,15 @@ public class ExchangeDialog extends javax.swing.JDialog {
     private void initCombo() {
         userRepo.getCurrency().subscribe((t) -> {
             homeComboBoxModel = new CurrencyComboBoxModel(t);
-            targetComboBoxModel = new CurrencyComboBoxModel(t);
+            List<Currency> updatedList = new ArrayList<>(t);
+            updatedList.removeIf(c -> c.getCurCode().equals(Global.currency));
+
+            targetComboBoxModel = new CurrencyComboBoxModel(updatedList);
+
             cboHC.setModel(homeComboBoxModel);
             cboTC.setModel(targetComboBoxModel);
             cboTC.setSelectedIndex(0);
+            cboHC.setEnabled(false);
             userRepo.findCurrency(Global.currency).subscribe((c) -> {
                 cboHC.setSelectedItem(c);
             }, (e) -> {
@@ -141,6 +169,7 @@ public class ExchangeDialog extends javax.swing.JDialog {
     private void saveCurrency() {
         if (isValidEntry()) {
             userRepo.save(exchange).subscribe((t) -> {
+                observer.selected("exchange", t);
                 clear();
             }, (er) -> {
                 JOptionPane.showMessageDialog(this, er.getMessage());
@@ -408,7 +437,7 @@ public class ExchangeDialog extends javax.swing.JDialog {
 
     private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
         // TODO add your handling code here:
-        observer.selected("S", "S");
+//        observer.selected("S", "S");
     }//GEN-LAST:event_formWindowClosed
 
     private void btnUpdate1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdate1ActionPerformed

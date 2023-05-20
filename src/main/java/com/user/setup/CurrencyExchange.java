@@ -109,19 +109,20 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
         selectRow = tblExchange.convertRowIndexToModel(tblExchange.getSelectedRow());
         if (selectRow >= 0) {
             ExchangeRate ex = exchangeTableModel.getEX(selectRow);
-            exDialog(ex, "EDIT");
+            exDialog(ex);
         }
     }
 
-    private void exDialog(ExchangeRate ex, String status) {
+    private void exDialog(ExchangeRate ex) {
         if (dialog == null) {
             dialog = new ExchangeDialog(Global.parentForm);
             dialog.setUserRepo(userRepo);
             dialog.setObserver(this);
             dialog.setLocationRelativeTo(null);
+            dialog.initMain();
         }
-        dialog.setStatus(status);
-        dialog.initMain();
+        dialog.setExchange(ex);
+        dialog.setStatus(ex == null ? "NEW" : "EDIT");
         dialog.setVisible(true);
     }
 
@@ -324,7 +325,7 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        exDialog(null, "NEW");
+        exDialog(null);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
@@ -394,8 +395,16 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
 
     @Override
     public void selected(Object source, Object selectObj) {
-        if (source != null) {
-            searchExchange();
+        if (source.equals("exchange")) {
+            if (selectObj instanceof ExchangeRate ex) {
+                if (dialog.getStatus().equals("NEW")) {
+                    exchangeTableModel.addEX(ex);
+                } else if (dialog.getStatus().equals("EDIT")) {
+                    selectRow = tblExchange.convertRowIndexToModel(tblExchange.getSelectedRow());
+                    exchangeTableModel.setEX(selectRow, ex);
+                }
+            }
+//            searchExchange();
         }
     }
 
