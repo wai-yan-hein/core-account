@@ -30,18 +30,17 @@ import java.awt.Color;
 import java.util.List;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author wai yan
  */
-@Component
+@Slf4j
 public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListener {
 
-    private static final Logger log = LoggerFactory.getLogger(SaleManSetupDialog.class);
     private InventoryRepo inventoryRepo;
-    @Autowired
-    private SaleManTableModel saleManTableModel;
+    private final SaleManTableModel saleManTableModel = new SaleManTableModel();
     private int selectRow = - 1;
     private SaleMan saleMan = new SaleMan();
     private TableRowSorter<TableModel> sorter;
@@ -153,13 +152,17 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
 
     private void save() {
         if (isValidEntry()) {
-            inventoryRepo.saveSaleMan(saleMan);
-            if (lblStatus.getText().equals("EDIT")) {
-                listSaleMan.set(selectRow, saleMan);
-            } else {
-                listSaleMan.add(saleMan);
-            }
-            clear();
+            inventoryRepo.saveSaleMan(saleMan).subscribe((t) -> {
+                if (lblStatus.getText().equals("EDIT")) {
+                    listSaleMan.set(selectRow, t);
+                } else {
+                    listSaleMan.add(t);
+                }
+                clear();
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            });
+
         }
     }
 

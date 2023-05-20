@@ -53,8 +53,16 @@ public class OtherSetupMain extends javax.swing.JPanel {
     }
 
     public void initMain() {
+        tabMain.add("Setup", getOtherSetup());
         tabMain.add("Account Setting", getSettingPanel());
         tabMain.setSelectedIndex(0);
+    }
+
+    private JPanel getOtherSetup() {
+        OtherSetup setup = new OtherSetup();
+        setup.setInventoryRepo(inventoryRepo);
+        return setup;
+
     }
 
     private JPanel getSettingPanel() {

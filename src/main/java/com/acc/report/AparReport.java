@@ -295,6 +295,9 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         userRepo.getCurrency().subscribe((t) -> {
             currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
             currencyAutoCompleter.setObserver(this);
+            userRepo.findCurrency(Global.currency).subscribe((c) -> {
+                currencyAutoCompleter.setCurrency(c);
+            });
         });
 
         traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accountRepo, null, true);

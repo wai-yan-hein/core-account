@@ -15,26 +15,32 @@ import com.inventory.ui.setup.dialog.SaleManSetupDialog;
 import com.inventory.ui.setup.dialog.VouStatusSetupDialog;
 import java.awt.Image;
 import javax.swing.ImageIcon;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
-@Component
+@Slf4j
 public class OtherSetup extends javax.swing.JPanel {
 
     private final Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
-    @Autowired
     private InventoryRepo inventoryRepo;
     private RegionSetup regionSetup;
     private LocationSetupDialog locationSetup;
     private RelationSetupDialog relationSetupDialog;
     private ProcessTypeSetupDialog processTypeDialog;
-    @Autowired
     private SaleManSetupDialog smDialog;
     private VouStatusSetupDialog vsDialog;
+
+    public InventoryRepo getInventoryRepo() {
+        return inventoryRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+    
 
     /**
      * Creates new form OtherSetup
@@ -67,6 +73,7 @@ public class OtherSetup extends javax.swing.JPanel {
 
     private void saleManSetup() {
         inventoryRepo.getSaleMan().collectList().subscribe((t) -> {
+            smDialog = new SaleManSetupDialog();
             smDialog.setIconImage(icon);
             smDialog.setInventoryRepo(inventoryRepo);
             smDialog.setListSaleMan(t);
