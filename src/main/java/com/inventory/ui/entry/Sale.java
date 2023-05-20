@@ -1729,6 +1729,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 if (selectObj instanceof VSale s) {
                     inventoryRepo.findSale(s.getVouNo(), s.getDeptId()).subscribe((t) -> {
                         setSaleVoucher(t);
+                    }, (e) -> {
+                        JOptionPane.showMessageDialog(this, e.getMessage());
                     });
                 }
             }
@@ -1738,6 +1740,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 //get sale
                 inventoryRepo.findOrder(s.getVouNo(), s.getDeptId()).subscribe((t) -> {
                     setSaleVoucherDetail(t);
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
                 });
 //                }
             }

@@ -6,7 +6,6 @@ package com.user.common;
 
 import com.acc.model.BusinessType;
 import com.acc.model.DeleteObj;
-import com.acc.model.ReportFilter;
 import com.common.Global;
 import com.user.model.RoleProperty;
 import com.common.Util1;
@@ -31,7 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -214,7 +212,8 @@ public class UserRepo {
                 .queryParam("roleCode", Global.roleCode)
                 .queryParam("macId", Global.macId)
                 .build())
-                .retrieve().bodyToMono(HashMap.class);
+                .retrieve()
+                .bodyToMono(HashMap.class);
         result.subscribe((t) -> {
             Global.hmRoleProperty = t;
             log.info("setupProperty.");
@@ -227,7 +226,9 @@ public class UserRepo {
                 .uri(builder -> builder.path("/user/get-system-property")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().bodyToFlux(SysProperty.class).collectList();
+                .retrieve()
+                .bodyToFlux(SysProperty.class)
+                .collectList();
     }
 
     public HashMap<String, String> getRoleProperty(String roleCode) {
