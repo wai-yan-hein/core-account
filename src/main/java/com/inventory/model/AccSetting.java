@@ -16,11 +16,11 @@ import lombok.Data;
 public class AccSetting implements Serializable {
 
     private AccKey key;
-    private String disAccount;
-    private String payAccount;
-    private String taxAccount;
-    private String department;
-    private String soureAccount;
-    private String balAccount;
-
+    private String discountAcc;
+    private String payAcc;
+    private String taxAcc;
+    private String sourceAcc;
+    private String balanceAcc;
+    private String commAcc;
+    private String deptCode;
 }

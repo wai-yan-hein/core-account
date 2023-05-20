@@ -28,6 +28,8 @@ public class OtherSetupMain extends javax.swing.JPanel {
     private AccountRepo accountRepo;
     private JProgressBar progress;
     private SelectionObserver observer;
+    private AccountSettingEntry entry;
+    private OtherSetup setup;
 
     public JProgressBar getProgress() {
         return progress;
@@ -59,17 +61,22 @@ public class OtherSetupMain extends javax.swing.JPanel {
     }
 
     private JPanel getOtherSetup() {
-        OtherSetup setup = new OtherSetup();
-        setup.setInventoryRepo(inventoryRepo);
+        if (setup == null) {
+            setup = new OtherSetup();
+            setup.setInventoryRepo(inventoryRepo);
+        }
         return setup;
 
     }
 
     private JPanel getSettingPanel() {
-        AccountSettingEntry entry = new AccountSettingEntry();
-        entry.setInventoryRepo(inventoryRepo);
-        entry.setAccountRepo(accountRepo);
-        entry.initMain();
+        if (entry == null) {
+            entry = new AccountSettingEntry();
+            entry.setInventoryRepo(inventoryRepo);
+            entry.setAccountRepo(accountRepo);
+            entry.initMain();
+        }
+        entry.searchAccSetting();
         return entry;
     }
 

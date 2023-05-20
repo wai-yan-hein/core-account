@@ -5,15 +5,21 @@
 package com.inventory.ui.entry;
 
 import com.acc.common.AccountRepo;
+import com.acc.editor.COA3AutoCompleter;
+import com.acc.editor.DepartmentAutoCompleter;
 import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.inventory.model.AccKey;
 import com.inventory.model.AccSetting;
+import com.inventory.model.AccType;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.AccountSettingTableModel;
 import java.awt.Color;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
@@ -24,26 +30,32 @@ import javax.swing.table.TableRowSorter;
  * @author Lenovo
  */
 public class AccountSettingEntry extends javax.swing.JPanel {
-
+    
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
     private AccSetting setting = new AccSetting();
-    private AccountSettingTableModel settingTableModel = new AccountSettingTableModel();
+    private final AccountSettingTableModel settingTableModel = new AccountSettingTableModel();
     private InventoryRepo inventoryRepo;
     private AccountRepo accountRepo;
-
+    private COA3AutoCompleter sourceCompleter;
+    private COA3AutoCompleter cashCompleter;
+    private COA3AutoCompleter disCompleter;
+    private COA3AutoCompleter taxCompleter;
+    private COA3AutoCompleter balCompleter;
+    private DepartmentAutoCompleter deptCompleter;
+    
     public AccountRepo getAccountRepo() {
         return accountRepo;
     }
-
+    
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
-
+    
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
     }
-
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
@@ -53,12 +65,45 @@ public class AccountSettingEntry extends javax.swing.JPanel {
      */
     public AccountSettingEntry() {
         initComponents();
+        initFoucsAdapter();
     }
-
+    
     public void initMain() {
         initAccTable();
+        initComobo();
     }
-
+    
+    private void initFoucsAdapter() {
+        txtSrc.addFocusListener(fa);
+        txtCash.addFocusListener(fa);
+        txtDiscount.addFocusListener(fa);
+        txtTax.addFocusListener(fa);
+        txtBal.addFocusListener(fa);
+        txtDep.addFocusListener(fa);
+    }
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            Object s = e.getSource();
+            if (s instanceof JTextField txt) {
+                txt.selectAll();
+            }
+        }
+    };
+    
+    private void initComobo() {
+        sourceCompleter = new COA3AutoCompleter(txtSrc, accountRepo, null, false, 3);
+        cashCompleter = new COA3AutoCompleter(txtCash, accountRepo, null, false, 3);
+        disCompleter = new COA3AutoCompleter(txtDiscount, accountRepo, null, false, 3);
+        taxCompleter = new COA3AutoCompleter(txtTax, accountRepo, null, false, 3);
+        balCompleter = new COA3AutoCompleter(txtBal, accountRepo, null, false, 3);
+        accountRepo.getDepartment().subscribe((t) -> {
+            deptCompleter = new DepartmentAutoCompleter(txtDep, t, null, false, true);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        });
+    }
+    
     private void initAccTable() {
         swrf = new StartWithRowFilter(txtFilter);
         tblSetting.setModel(settingTableModel);
@@ -77,23 +122,60 @@ public class AccountSettingEntry extends javax.swing.JPanel {
         });
         tblSetting.setRowHeight(Global.tblRowHeight);
         tblSetting.setDefaultRenderer(Object.class, new TableCellRender());
-        searchAccSetting();
     }
-
-    private void searchAccSetting() {
+    
+    public void searchAccSetting() {
         inventoryRepo.getAccSetting().subscribe((t) -> {
             settingTableModel.setListSetting(t);
         });
     }
-
+    
     private void setAccSetting(AccSetting cat) {
         setting = cat;
         txtSrc.requestFocus();
         lblStatus.setText("EDIT");
         lblStatus.setForeground(Color.blue);
-
+        cboType.setEnabled(false);
+        cboType.setSelectedIndex(AccType.valueOf(setting.getKey().getType()).ordinal());
+//        txtType.setText(setting.getKey().getType());
+//        txtType.setEnabled(false);
+        txtCash.setText(setting.getPayAcc());
+        txtDiscount.setText(setting.getDiscountAcc());
+        txtTax.setText(setting.getTaxAcc());
+        txtBal.setText(setting.getBalanceAcc());
+        txtDep.setText(setting.getDeptCode());
+        accountRepo.findCOA(cat.getSourceAcc()).subscribe((t) -> {
+            sourceCompleter.setCoa(t);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        });
+        accountRepo.findCOA(cat.getSourceAcc()).subscribe((t) -> {
+            cashCompleter.setCoa(t);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        });
+        accountRepo.findCOA(cat.getSourceAcc()).subscribe((t) -> {
+            disCompleter.setCoa(t);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        });
+        accountRepo.findCOA(cat.getSourceAcc()).subscribe((t) -> {
+            taxCompleter.setCoa(t);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        });
+        accountRepo.findCOA(cat.getSourceAcc()).subscribe((t) -> {
+            balCompleter.setCoa(t);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        });
+        accountRepo.findDepartment(cat.getDeptCode()).subscribe((t) -> {
+            deptCompleter.setDepartment(t);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        });
     }
-
+    
     private void saveSetting() {
         if (isValidEntry()) {
             inventoryRepo.save(setting).subscribe((t) -> {
@@ -107,29 +189,68 @@ public class AccountSettingEntry extends javax.swing.JPanel {
             });
         }
     }
-
+    
     private void clearSetting() {
-        txtType.setText(null);
+//        txtType.setText(null);
+//        txtType.setEnabled(true);
+        cboType.setEnabled(true);
         txtFilter.setText(null);
-        txtSrc.setText(null);
+        sourceCompleter.setCoa(null);
+        cashCompleter.setCoa(null);
+        disCompleter.setCoa(null);
+        taxCompleter.setCoa(null);
+        balCompleter.setCoa(null);
+        deptCompleter.setDepartment(null);
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.green);
         setting = new AccSetting();
         tblSetting.requestFocus();
-        txtType.requestFocus();
+//        txtType.requestFocus();
     }
-
+    
     private boolean isValidEntry() {
         boolean status = true;
         if (txtSrc.getText().isEmpty()) {
             status = false;
             JOptionPane.showMessageDialog(this, "Invalid Name");
             txtSrc.requestFocus();
+        }
+        if (txtCash.getText().isEmpty()) {
+            status = false;
+            JOptionPane.showMessageDialog(this, "Invalid Cash");
+            txtCash.requestFocus();
+        }
+        if (txtDiscount.getText().isEmpty()) {
+            status = false;
+            JOptionPane.showMessageDialog(this, "Invalid Discount");
+            txtDiscount.requestFocus();
+        }
+        if (txtTax.getText().isEmpty()) {
+            status = false;
+            JOptionPane.showMessageDialog(this, "Invalid Tax");
+            txtTax.requestFocus();
+        }
+        if (txtBal.getText().isEmpty()) {
+            status = false;
+            JOptionPane.showMessageDialog(this, "Invalid Balance");
+            txtBal.requestFocus();
+        }
+        if (txtDep.getText().isEmpty()) {
+            status = false;
+            JOptionPane.showMessageDialog(this, "Invalid Department");
+            txtDep.requestFocus();
         } else {
             AccKey key = new AccKey();
-            key.setType(null);
+            AccType s = (AccType) cboType.getSelectedItem();
+            key.setType(s.name());
             key.setCompCode(Global.compCode);
             setting.setKey(key);
+            setting.setSourceAcc(sourceCompleter.getCOA().getKey().getCoaCode());
+            setting.setPayAcc(cashCompleter.getCOA().getKey().getCoaCode());
+            setting.setDiscountAcc(disCompleter.getCOA().getKey().getCoaCode());
+            setting.setTaxAcc(taxCompleter.getCOA().getKey().getCoaCode());
+            setting.setBalanceAcc(balCompleter.getCOA().getKey().getCoaCode());
+            setting.setDeptCode(deptCompleter.getDepartment().getKey().getDeptCode());
         }
         return status;
     }
@@ -152,7 +273,6 @@ public class AccountSettingEntry extends javax.swing.JPanel {
         txtSrc = new javax.swing.JTextField();
         lblStatus = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
-        txtType = new javax.swing.JTextField();
         jSeparator1 = new javax.swing.JSeparator();
         jLabel4 = new javax.swing.JLabel();
         txtCash = new javax.swing.JTextField();
@@ -166,6 +286,7 @@ public class AccountSettingEntry extends javax.swing.JPanel {
         btnClear = new javax.swing.JButton();
         jLabel8 = new javax.swing.JLabel();
         txtDep = new javax.swing.JTextField();
+        cboType = new javax.swing.JComboBox<>(AccType.values());
 
         tblSetting.setFont(Global.textFont);
         tblSetting.setModel(new javax.swing.table.DefaultTableModel(
@@ -212,19 +333,6 @@ public class AccountSettingEntry extends javax.swing.JPanel {
 
         jLabel3.setFont(Global.lableFont);
         jLabel3.setText("Type");
-
-        txtType.setFont(Global.textFont);
-        txtType.setName("txtType"); // NOI18N
-        txtType.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                txtTypeFocusGained(evt);
-            }
-        });
-        txtType.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtTypeActionPerformed(evt);
-            }
-        });
 
         jLabel4.setFont(Global.lableFont);
         jLabel4.setText("Cash");
@@ -298,6 +406,11 @@ public class AccountSettingEntry extends javax.swing.JPanel {
         });
 
         btnClear.setText("Clear");
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
 
         jLabel8.setFont(Global.lableFont);
         jLabel8.setText("Department");
@@ -314,6 +427,8 @@ public class AccountSettingEntry extends javax.swing.JPanel {
                 txtDepActionPerformed(evt);
             }
         });
+
+        cboType.setFont(Global.textFont);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -333,14 +448,14 @@ public class AccountSettingEntry extends javax.swing.JPanel {
                             .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtSrc, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtType, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtCash, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtDiscount, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtTax, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtBal, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtDep, javax.swing.GroupLayout.Alignment.LEADING)))
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtSrc)
+                            .addComponent(txtCash)
+                            .addComponent(txtDiscount)
+                            .addComponent(txtTax)
+                            .addComponent(txtBal)
+                            .addComponent(txtDep)
+                            .addComponent(cboType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 46, Short.MAX_VALUE)
                         .addGap(111, 111, 111)
@@ -355,7 +470,7 @@ public class AccountSettingEntry extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
-                    .addComponent(txtType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cboType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
@@ -449,20 +564,11 @@ public class AccountSettingEntry extends javax.swing.JPanel {
 
     private void txtSrcFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSrcFocusGained
         // TODO add your handling code here:
-        txtSrc.selectAll();
     }//GEN-LAST:event_txtSrcFocusGained
 
     private void txtSrcActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSrcActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtSrcActionPerformed
-
-    private void txtTypeFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtTypeFocusGained
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtTypeFocusGained
-
-    private void txtTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTypeActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtTypeActionPerformed
 
     private void txtCashFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCashFocusGained
         // TODO add your handling code here:
@@ -509,10 +615,15 @@ public class AccountSettingEntry extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtDepActionPerformed
 
+    private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
+        clearSetting();
+    }//GEN-LAST:event_btnClearActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnSave;
+    private javax.swing.JComboBox<AccType> cboType;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -533,6 +644,5 @@ public class AccountSettingEntry extends javax.swing.JPanel {
     private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtSrc;
     private javax.swing.JTextField txtTax;
-    private javax.swing.JTextField txtType;
     // End of variables declaration//GEN-END:variables
 }

@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.setup.dialog.common;
 
+import com.inventory.model.AccKey;
 import com.inventory.model.AccSetting;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,38 @@ public class AccountSettingTableModel extends AbstractTableModel {
             default ->
                 null;
         };
+    }
+
+    @Override
+    public void setValueAt(Object value, int row, int column) {
+        if (value != null) {
+            AccSetting record = listSetting.get(row);
+            switch (column) {
+                case 0 -> {
+                    AccKey key = new AccKey();
+                    key.setType(value.toString());
+                    record.setKey(key);
+                }
+//                case 1 -> {
+//                    record.setSourceAcc(value.toString());
+//                }
+//                case 2 -> {
+//                    record.setPayAcc(value.toString());
+//                }
+//                case 3 -> {
+//                    record.setDiscountAcc(value.toString());
+//                }
+//                case 4 -> {
+//                    record.setTaxAcc(value.toString());
+//                }
+//                case 5 -> {
+//                    record.setBalanceAcc(value.toString());
+//                }
+//                case 6 -> {
+//                    record.setDeptCode(value.toString());
+//                }
+            }
+        }
     }
 
     @Override
