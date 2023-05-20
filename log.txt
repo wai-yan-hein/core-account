@@ -1,7 +1,0 @@
-2023-05-20T09:58:21.990+06:30  INFO 2728 --- [main] com.CoreAccountApplication               : Starting CoreAccountApplication using Java 19.0.2 with PID 2728 (D:\Workspace\CoreValue\core-account\target\classes started by Athu Sint in D:\Workspace\CoreValue\core-account)
-2023-05-20T09:58:22.006+06:30  INFO 2728 --- [main] com.CoreAccountApplication               : No active profile set, falling back to 1 default profile: "default"
-2023-05-20T09:58:30.843+06:30  INFO 2728 --- [main] com.acc.setup.COAManagment               : Selected 0
-2023-05-20T09:58:34.511+06:30  INFO 2728 --- [main] com.CoreAccountApplication               : Started CoreAccountApplication in 13.54 seconds (process running for 15.916)
-2023-05-20T09:58:34.520+06:30  INFO 2728 --- [main] com.Tray                                 : Tray started.
-2023-05-20T10:01:46.171+06:30  INFO 2728 --- [main] com.CoreAccountApplication               : login sucess.
-2023-05-20T10:01:48.092+06:30  INFO 2728 --- [reactor-http-nio-3] com.user.common.UserRepo                 : setupProperty.
