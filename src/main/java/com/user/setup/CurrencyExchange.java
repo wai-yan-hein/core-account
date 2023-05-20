@@ -15,6 +15,7 @@ import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.user.common.UserRepo;
 import com.user.dialog.CurrencySetupDialog;
+import com.user.editor.CurrencyAutoCompleter;
 import com.user.model.ExchangeRate;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -38,6 +39,7 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
     private SelectionObserver observer;
     private JProgressBar progress;
     private DateAutoCompleter dateAutoCompleter;
+    private CurrencyAutoCompleter currAutoCompleter;
     @Autowired
     private UserRepo userRepo;
 
@@ -72,6 +74,15 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
     private void initComobo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
+        userRepo.getCurrency().subscribe((t) -> {
+            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
+            currAutoCompleter.setObserver(this);
+            userRepo.getDefaultCurrency().subscribe((tt) -> {
+                currAutoCompleter.setCurrency(tt);
+            });
+        }, (e) -> {
+            log.error(e.getMessage());
+        });
     }
 
     private void initTable() {
@@ -91,7 +102,7 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
     private void searchExchange() {
         String fromDate = dateAutoCompleter.getStDate();
         String toDate = dateAutoCompleter.getEndDate();
-        String targetCur = "-";
+        String targetCur = getCurCode();
         userRepo.searchExchange(fromDate, toDate, targetCur).subscribe((t) -> {
             exchangeTableModel.setListEx(t);
             double amt = t.stream()
@@ -109,19 +120,20 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
         selectRow = tblExchange.convertRowIndexToModel(tblExchange.getSelectedRow());
         if (selectRow >= 0) {
             ExchangeRate ex = exchangeTableModel.getEX(selectRow);
-            exDialog(ex, "EDIT");
+            exDialog(ex);
         }
     }
 
-    private void exDialog(ExchangeRate ex, String status) {
+    private void exDialog(ExchangeRate ex) {
         if (dialog == null) {
             dialog = new ExchangeDialog(Global.parentForm);
             dialog.setUserRepo(userRepo);
             dialog.setObserver(this);
             dialog.setLocationRelativeTo(null);
+            dialog.initMain();
         }
-        dialog.setStatus(status);
-        dialog.initMain();
+        dialog.setExchange(ex);
+        dialog.setStatus(ex == null ? "NEW" : "EDIT");
         dialog.setVisible(true);
     }
 
@@ -146,6 +158,13 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
             }
         }
     }
+    
+    private String getCurCode() {
+        if (currAutoCompleter == null || currAutoCompleter.getCurrency() == null) {
+            return Global.currency;
+        }
+        return currAutoCompleter.getCurrency().getCurCode();
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -163,6 +182,8 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
         txtDate = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
+        jLabel15 = new javax.swing.JLabel();
+        txtCurrency = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         txtRecord = new javax.swing.JTextField();
@@ -221,6 +242,23 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
             }
         });
 
+        jLabel15.setFont(Global.lableFont);
+        jLabel15.setText("Target Currency");
+
+        txtCurrency.setFont(Global.textFont);
+        txtCurrency.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+        txtCurrency.setName("txtCurrency"); // NOI18N
+        txtCurrency.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtCurrencyFocusGained(evt);
+            }
+        });
+        txtCurrency.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtCurrencyActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -230,6 +268,10 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButton2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -239,20 +281,23 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(6, 6, 6)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap())
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 28, Short.MAX_VALUE)
+                            .addComponent(jButton2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addContainerGap())
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtCurrency)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(jLabel15, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel1)
+                                    .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
@@ -315,7 +360,7 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 145, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -324,7 +369,7 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        exDialog(null, "NEW");
+        exDialog(null);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
@@ -344,11 +389,20 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
         currencySetup();
     }//GEN-LAST:event_jButton2ActionPerformed
 
+    private void txtCurrencyFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCurrencyFocusGained
+        txtCurrency.selectAll();        // TODO add your handling code here:
+    }//GEN-LAST:event_txtCurrencyFocusGained
+
+    private void txtCurrencyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCurrencyActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtCurrencyActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
@@ -356,6 +410,7 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable tblExchange;
     private javax.swing.JFormattedTextField txtAvg;
+    private javax.swing.JTextField txtCurrency;
     private javax.swing.JTextField txtDate;
     private javax.swing.JTextField txtRecord;
     // End of variables declaration//GEN-END:variables
@@ -394,7 +449,16 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
 
     @Override
     public void selected(Object source, Object selectObj) {
-        if (source != null) {
+        if (source.equals("exchange")) {
+            if (selectObj instanceof ExchangeRate ex) {
+                if (dialog.getStatus().equals("NEW")) {
+                    exchangeTableModel.addEX(ex);
+                } else if (dialog.getStatus().equals("EDIT")) {
+                    selectRow = tblExchange.convertRowIndexToModel(tblExchange.getSelectedRow());
+                    exchangeTableModel.setEX(selectRow, ex);
+                }
+            }
+        } else {
             searchExchange();
         }
     }

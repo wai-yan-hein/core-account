@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CurExchangeRateTableModel extends AbstractTableModel {
 
     private List<ExchangeRate> listEx = new ArrayList();
-    private String[] columnNames = {"Date", "H-Currency", "F-Currency", "Exchange Rate"};
+    private String[] columnNames = {"Date", "H-Factor", "H-Currency", "T-Factor", "T-Currency", "Exchange Rate"};
 
     @Override
     public String getColumnName(int column) {
@@ -34,7 +34,7 @@ public class CurExchangeRateTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 3 ->
+            case 1,3,5 ->
                 Double.class;
             default ->
                 String.class;
@@ -51,12 +51,18 @@ public class CurExchangeRateTableModel extends AbstractTableModel {
                     yield Util1.toDateStr(apar.getExDate(), "dd/MM/yyyy HH:mm:ss a");
                 }
                 case 1 -> {
-                    yield apar.getHomeCur();
+                    yield apar.getHomeFactor();
                 }
                 case 2 -> {
-                    yield apar.getTargetCur();
+                    yield apar.getHomeCur();
                 }
                 case 3 -> {
+                    yield apar.getTargetFactor();
+                }
+                case 4 -> {
+                    yield apar.getTargetCur();
+                }
+                case 5 -> {
                     yield apar.getExRate();
                 }
                 default -> {
