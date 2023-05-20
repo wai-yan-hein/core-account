@@ -5,15 +5,21 @@
  */
 package com.user.setup;
 
+import com.acc.common.AccountRepo;
+import com.acc.editor.COA3AutoCompleter;
+import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.common.UserRepo;
 import com.user.model.Menu;
 import com.user.model.MenuKey;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -21,13 +27,13 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,11 +47,14 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
     private DefaultMutableTreeNode treeRoot;
     DefaultTreeModel treeModel;
     DefaultMutableTreeNode selectedNode;
+    private COA3AutoCompleter cOA3AutoCompleter;
     @Autowired
     private UserRepo userRepo;
+    @Autowired
+    private AccountRepo accountRepo;
 
     private SelectionObserver observer;
-    private final String parentRootName = "Root Menu";
+    private final String parentRootName = "Core Account";
     private JProgressBar progress;
 
     public JProgressBar getProgress() {
@@ -88,10 +97,16 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         initComponents();
         initKeyListener();
         initPopup();
+        initFocusListener();
+    }
+
+    private void initCombo() {
+        cOA3AutoCompleter = new COA3AutoCompleter(txtAccount, accountRepo, null, false, 3);
     }
 
     public void initMain() {
         initTree();
+        initCombo();
     }
 
     private void deleteMenu() {
@@ -243,7 +258,10 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
             menu.setMenuName(menuName);
             menu.setParentMenuCode(parentCode);
             menu.setMenuUrl(txtMenuUrl.getText());
-            menu.setAccount(txtAccount.getText());
+            ChartOfAccount coa = cOA3AutoCompleter.getCOA();
+            if (coa != null) {
+                menu.setAccount(coa.getKey().getCoaCode());
+            }
             menu.setMenuType(txtMenuType.getText().trim());
             menu.setMenuClass(txtClass.getText());
             menu.setOrderBy(Integer.valueOf(Util1.isNull(txtOrder.getText(), "0")));
@@ -251,13 +269,15 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
                 menu.setOrderBy(Util1.getInteger(txtOrder.getText()));
             }
             userRepo.save(menu).subscribe((t) -> {
+                observer.selected("menu", "menu");
                 selectedNode.setUserObject(t);
                 TreePath path = treeCOA.getSelectionPath();
                 DefaultTreeModel model = (DefaultTreeModel) treeCOA.getModel();
                 model.nodeChanged(selectedNode);
                 treeCOA.setSelectionPath(path);
                 clear();
-                observer.selected("menu", "menu");
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
             });
         }
     }
@@ -266,7 +286,11 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         txtMenuName.setText(menu.getMenuName());
         txtMenuUrl.setText(menu.getMenuUrl());
         txtOrder.setText(menu.getOrderBy() == null ? null : menu.getOrderBy().toString());
-        txtAccount.setText(menu.getAccount());
+        accountRepo.findCOA(menu.getAccount()).subscribe((t) -> {
+            cOA3AutoCompleter.setCoa(t);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        });
         txtMenuType.setText(menu.getMenuType());
         txtClass.setText(menu.getMenuClass());
         enableControl(true);
@@ -294,6 +318,26 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
     private void removeSpace() {
         txtMenuUrl.setText(txtMenuUrl.getText().replaceAll(" ", ""));
     }
+
+    private void initFocusListener() {
+        txtMenuName.addFocusListener(fa);
+        txtMenuMM.addFocusListener(fa);
+        txtAccount.addFocusListener(fa);
+        txtClass.addFocusListener(fa);
+        txtMenuType.addFocusListener(fa);
+        txtMenuUrl.addFocusListener(fa);
+        txtOrder.addFocusListener(fa);
+    }
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            if (e.getSource() instanceof JTextField txt) {
+                txt.selectAll();
+            } else if (e.getSource() instanceof JTextFieldDateEditor txt) {
+                txt.selectAll();
+            }
+        }
+    };
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -500,22 +544,18 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
 
     private void txtMenuNameFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtMenuNameFocusGained
         // TODO add your handling code here:
-        txtMenuName.selectAll();
     }//GEN-LAST:event_txtMenuNameFocusGained
 
     private void txtMenuUrlFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtMenuUrlFocusGained
         // TODO add your handling code here:
-        txtMenuUrl.selectAll();
     }//GEN-LAST:event_txtMenuUrlFocusGained
 
     private void txtAccountFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtAccountFocusGained
         // TODO add your handling code here:
-        txtAccount.selectAll();
     }//GEN-LAST:event_txtAccountFocusGained
 
     private void txtOrderFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtOrderFocusGained
         // TODO add your handling code here:
-        txtOrder.selectAll();
     }//GEN-LAST:event_txtOrderFocusGained
 
     private void txtMenuTypeFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtMenuTypeFocusGained
