@@ -560,7 +560,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     public void printVoucher() {
-        String currency = currencyAutoCompleter.getCurrency().getCurCode();
+        String currency = getCurCode();
         String stDate = dateAutoCompleter.getStDate();
         String endDate = dateAutoCompleter.getEndDate();
         if (!currency.equals("-") || !ProUtil.isMultiCur()) {
@@ -577,7 +577,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                     p.put("p_comp_name", Global.companyName);
                     p.put("p_comp_address", Global.companyAddress);
                     p.put("p_comp_phone", Global.companyPhone);
-                    p.put("p_currency", currencyAutoCompleter.getCurrency().getCurCode());
+                    p.put("p_currency", currency);
                     Gl vGl = opTableModel.getVGl(0);
                     double op = vGl.getDrAmt();
                     double closing = vGl.getCrAmt();

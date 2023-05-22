@@ -69,6 +69,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private COA3AutoCompleter reAutoCompleter;
     private COA3AutoCompleter inventoryAutoCompleter;
     private COA3AutoCompleter cashGroupAutoCompleter;
+    private COA3AutoCompleter bankGroupAutoCompleter;
     private COA3AutoCompleter fixedAutoCompleter;
     private COA3AutoCompleter currentAutoCompleter;
     private COA3AutoCompleter capitalAutoCompleter;
@@ -192,7 +193,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtCash.setName("default.cash");
         txtPages.setName("printer.pages");
         txtInvGroup.setName("inventory.group");
-        txtCashGroup.setName("cash.group");
+        txtCashGroup.setName(ProUtil.CASH_GROUP);
+        txtBankGroup.setName(ProUtil.BANK_GROUP);
         txtComP.setName("purchase.commission");
         chkPrint.setName("printer.print");
         chkDisableDep.setName("disable.department");
@@ -527,6 +529,23 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
             } else {
                 cashGroupAutoCompleter.setCoa(null);
+            }
+        }, (e) -> {
+            log.error(e.getMessage());
+        });
+        bankGroupAutoCompleter = new COA3AutoCompleter(txtBankGroup, accountRepo, null, false, 2);
+        bankGroupAutoCompleter.setSelectionObserver(this);
+        Mono<ChartOfAccount> bg = accountRepo.findCOA(hmProperty.get(txtBankGroup.getName()));
+        bg.hasElement().subscribe((element) -> {
+            if (element) {
+                bg.subscribe((t) -> {
+                    bankGroupAutoCompleter.setCoa(t);
+                }, (e) -> {
+                    log.error(e.getMessage());
+                });
+
+            } else {
+                bankGroupAutoCompleter.setCoa(null);
             }
         }, (e) -> {
             log.error(e.getMessage());
@@ -909,6 +928,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtCashGroup = new javax.swing.JTextField();
         jLabel20 = new javax.swing.JLabel();
         txtCash = new javax.swing.JTextField();
+        jLabel26 = new javax.swing.JLabel();
+        txtBankGroup = new javax.swing.JTextField();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -987,7 +1008,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                             .addComponent(jLabel22, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtCustomer, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
+                            .addComponent(txtCustomer, javax.swing.GroupLayout.DEFAULT_SIZE, 136, Short.MAX_VALUE)
                             .addComponent(txtSupplier)
                             .addComponent(txtLocation)
                             .addComponent(txtDep)
@@ -1134,7 +1155,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     .addComponent(chkDisableSale, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkDisablePur, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkDisableRI, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkDisableRO, javax.swing.GroupLayout.DEFAULT_SIZE, 326, Short.MAX_VALUE)
+                    .addComponent(chkDisableRO, javax.swing.GroupLayout.DEFAULT_SIZE, 332, Short.MAX_VALUE)
                     .addComponent(chkDisableStockIO, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkDepFilter, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkDepOption, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1246,7 +1267,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                             .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtA5Report, javax.swing.GroupLayout.DEFAULT_SIZE, 133, Short.MAX_VALUE)
+                            .addComponent(txtA5Report, javax.swing.GroupLayout.DEFAULT_SIZE, 139, Short.MAX_VALUE)
                             .addComponent(txtVouReport)
                             .addComponent(txtA4Report)))
                     .addComponent(chkVouEdit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1337,9 +1358,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                             .addComponent(jLabel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtComAmt, javax.swing.GroupLayout.DEFAULT_SIZE, 139, Short.MAX_VALUE)
-                            .addComponent(txtComP, javax.swing.GroupLayout.DEFAULT_SIZE, 139, Short.MAX_VALUE)
-                            .addComponent(txtPurReport, javax.swing.GroupLayout.DEFAULT_SIZE, 139, Short.MAX_VALUE))))
+                            .addComponent(txtComAmt, javax.swing.GroupLayout.DEFAULT_SIZE, 145, Short.MAX_VALUE)
+                            .addComponent(txtComP, javax.swing.GroupLayout.DEFAULT_SIZE, 145, Short.MAX_VALUE)
+                            .addComponent(txtPurReport, javax.swing.GroupLayout.DEFAULT_SIZE, 145, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -1437,6 +1458,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         txtCash.setFont(Global.textFont);
 
+        jLabel26.setText("Bank Group");
+
+        txtBankGroup.setFont(Global.textFont);
+
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
@@ -1456,25 +1481,27 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                                     .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtCreditor, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
-                                    .addComponent(txtDebtor)
-                                    .addComponent(txtCus)
-                                    .addComponent(txtSup)))
+                                    .addComponent(txtCreditor, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
+                                    .addComponent(txtDebtor, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
+                                    .addComponent(txtCus, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
+                                    .addComponent(txtSup, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)))
                             .addComponent(chkDisableDep, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(jPanel5Layout.createSequentialGroup()
-                                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addComponent(jLabel20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel17, javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jLabel24, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(jLabel23, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel24, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 90, Short.MAX_VALUE)
-                                    .addComponent(jLabel25, javax.swing.GroupLayout.Alignment.LEADING))
+                                    .addComponent(jLabel17, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel25, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel26, javax.swing.GroupLayout.Alignment.LEADING))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(txtInvGroup)
                                     .addComponent(txtPlAcc)
                                     .addComponent(txtREAcc)
                                     .addComponent(txtCashGroup)
-                                    .addComponent(txtCash))))))
+                                    .addComponent(txtCash)
+                                    .addComponent(txtBankGroup))))))
                 .addContainerGap())
         );
         jPanel5Layout.setVerticalGroup(
@@ -1502,6 +1529,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel25)
                     .addComponent(txtCashGroup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel26)
+                    .addComponent(txtBankGroup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel17)
@@ -1618,6 +1649,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel24;
     private javax.swing.JLabel jLabel25;
+    private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel30;
@@ -1647,6 +1679,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JPanel panelMac;
     private javax.swing.JTextField txtA4Report;
     private javax.swing.JTextField txtA5Report;
+    private javax.swing.JTextField txtBankGroup;
     private javax.swing.JTextField txtCapital;
     private javax.swing.JTextField txtCash;
     private javax.swing.JTextField txtCashGroup;
@@ -1737,6 +1770,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             ChartOfAccount cg = cashGroupAutoCompleter.getCOA();
             if (cg != null) {
                 save(txtCashGroup.getName(), cg.getKey().getCoaCode());
+            }
+            ChartOfAccount bg = bankGroupAutoCompleter.getCOA();
+            if (cg != null) {
+                save(txtBankGroup.getName(), bg.getKey().getCoaCode());
             }
 
             ChartOfAccount f = fixedAutoCompleter.getCOA();

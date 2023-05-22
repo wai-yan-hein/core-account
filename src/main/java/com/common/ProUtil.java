@@ -37,6 +37,8 @@ public class ProUtil {
     public static final String P_BATCH_DETAIL = "purchase.batch.detail";
     public static final String P_COM_AMT = "purchase.commission.amount";
     public static final String MULTI_CUR = "multi.currency";
+    public static final String CASH_GROUP = "cash.group";
+    public static final String BANK_GROUP = "bank.group";
 
     public static String getFontPath() {
         return Global.hmRoleProperty.get("font.path");

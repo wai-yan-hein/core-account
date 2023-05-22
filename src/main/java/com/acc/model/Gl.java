@@ -28,8 +28,6 @@ public class Gl {
     private String deptCode;
     private String vouNo;
     private String traderCode;
-    private Date createdDate;
-    private Date modifyDate;
     private String modifyBy;
     private String createdBy;
     private String tranSource;
@@ -53,6 +51,7 @@ public class Gl {
     private String batchNo;
     private String vouDate;
     private String projectNo;
+    private Date createdDate;
 
     public Gl(String curCode, Double drAmt, Double crAmt) {
         this.curCode = curCode;
