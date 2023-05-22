@@ -256,7 +256,10 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private String getCurCode() {
-        return currencyAutoCompleter == null ? Global.currency : currencyAutoCompleter.getCurrency().getCurCode();
+        if (currencyAutoCompleter == null || currencyAutoCompleter.getCurrency() == null) {
+            return Global.currency;
+        }
+        return currencyAutoCompleter.getCurrency().getCurCode();
     }
 
     private String getDepCode() {
