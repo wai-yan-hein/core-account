@@ -87,7 +87,10 @@ import com.user.setup.ProjectSetup;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.net.InetAddress;
 import java.time.Duration;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -200,6 +203,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private ProjectSetup projectSetup;
     @Autowired
     private CurrencyExchange currencyExchange;
+    @Autowired
+    private String hostName;
     private PanelControl control;
     private final HashMap<String, JPanel> hmPanel = new HashMap<>();
     private final ActionListener menuListener = (java.awt.event.ActionEvent evt) -> {
@@ -807,6 +812,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     public void initMain() {
         Global.parentForm = this;
+        scheduleNetwork();
         scheduleExit();
         initUser();
         companyUserRoleAssign();
@@ -949,6 +955,29 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         CoreAccountApplication.restart();
     }
 
+    private void scheduleNetwork() {
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    log.info("scheduleNetwork start.");
+                    InetAddress inet = InetAddress.getByName(hostName);
+                    long start = new GregorianCalendar().getTimeInMillis();
+                    if (inet.isReachable(0)) {
+                        long finish = new GregorianCalendar().getTimeInMillis();
+                        long time = finish - start;
+                        setNetwork(time);
+                    }else{
+                        setNetwork(-1);
+                    }
+                } catch (IOException e) {
+                    log.error("scheduleNetwork : " + e.getMessage());
+                }
+            }
+        }, 0, Duration.ofSeconds(5).toMillis());
+    }
+
     private void scheduleExit() {
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -1001,6 +1030,10 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 lblCompName.setText(Global.companyName);
             }
         }
+    }
+
+    private void setNetwork(long time) {
+
     }
 
     /**

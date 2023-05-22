@@ -149,22 +149,22 @@ public class AccountSettingEntry extends javax.swing.JPanel {
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
-        accountRepo.findCOA(cat.getSourceAcc()).subscribe((t) -> {
+        accountRepo.findCOA(cat.getPayAcc()).subscribe((t) -> {
             cashCompleter.setCoa(t);
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
-        accountRepo.findCOA(cat.getSourceAcc()).subscribe((t) -> {
+        accountRepo.findCOA(cat.getDiscountAcc()).subscribe((t) -> {
             disCompleter.setCoa(t);
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
-        accountRepo.findCOA(cat.getSourceAcc()).subscribe((t) -> {
+        accountRepo.findCOA(cat.getTaxAcc()).subscribe((t) -> {
             taxCompleter.setCoa(t);
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
-        accountRepo.findCOA(cat.getSourceAcc()).subscribe((t) -> {
+        accountRepo.findCOA(cat.getBalanceAcc()).subscribe((t) -> {
             balCompleter.setCoa(t);
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
