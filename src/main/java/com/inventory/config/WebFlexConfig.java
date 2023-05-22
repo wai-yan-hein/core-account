@@ -110,4 +110,8 @@ public class WebFlexConfig {
                 .baseUrl(url)
                 .build();
     }
+    @Bean
+    public String hostName(){
+        return environment.getProperty("host.name");
+    }
 }
