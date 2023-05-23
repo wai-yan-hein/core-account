@@ -960,6 +960,22 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void scheduleDownload() {
+        downloadInventory();
+    }
+
+    private void downloadUser() {
+
+    }
+
+    private void downloadInventory() {
+        downloadStock();
+    }
+
+    private void downloadAccount() {
+
+    }
+
+    private void downloadStock() {
         inventoryRepo.getStock(false).subscribe((t) -> {
             t.forEach((s) -> {
                 stockService.save(s);
@@ -1047,14 +1063,14 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void setNetwork(long time) {
-        log.info(time + "ms");
-        if(time < 0) {
+//        log.info(time + "ms");
+        if (time < 0) {
             lblNetwork.setText("Offline");
             lblNetwork.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/wifi_no_internet.png")));
-        } else if(time < 100) {
+        } else if (time < 100) {
             lblNetwork.setText(time + " ms");
             lblNetwork.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/wi-fi_green.png")));
-        } else if(time >= 100 && time < 150) {
+        } else if (time >= 100 && time < 150) {
             lblNetwork.setText(time + " ms");
             lblNetwork.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/wifi_yellow.png")));
         } else {
