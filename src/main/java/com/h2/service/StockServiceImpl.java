@@ -6,6 +6,7 @@ package com.h2.service;
 
 import com.h2.dao.StockDao;
 import com.inventory.model.Stock;
+import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,16 @@ public class StockServiceImpl implements StockService {
     @Override
     public List<Stock> findAll(String compCode) {
         return dao.findAll(compCode);
+    }
+
+    @Override
+    public Date getMaxDate() {
+        return dao.getMaxDate();
+    }
+
+    @Override
+    public List<Stock> findAll() {
+        return dao.findAll();
     }
 
 }

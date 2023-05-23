@@ -5,6 +5,7 @@
 package com.h2.dao;
 
 import com.inventory.model.Stock;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -15,6 +16,9 @@ public interface StockDao {
 
     Stock save(Stock stock);
 
+    Date getMaxDate();
+
     List<Stock> findAll(String compCode);
+    List<Stock> findAll();
 
 }

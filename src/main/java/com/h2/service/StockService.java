@@ -5,6 +5,7 @@
 package com.h2.service;
 
 import com.inventory.model.Stock;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,4 +18,7 @@ public interface StockService {
 
     List<Stock> findAll(String compCode);
 
+    Date getMaxDate();
+
+    List<Stock> findAll();
 }

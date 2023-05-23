@@ -28,6 +28,7 @@ import com.common.SelectionObserver;
 import com.user.common.UserRepo;
 import com.common.Util1;
 import com.h2.service.StockService;
+import com.inventory.model.Stock;
 import com.user.setup.MenuSetup;
 import com.user.model.DepartmentUser;
 import com.inventory.model.VRoleMenu;
@@ -206,6 +207,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private CurrencyExchange currencyExchange;
     @Autowired
     private String hostName;
+    @Autowired
+    private boolean localDatabase;
     @Autowired
     private StockService stockService;
     private PanelControl control;
@@ -784,6 +787,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                     } else {
                         assignCompany(t.get(0));
                     }
+                    scheduleDownload();
                     departmentAssign();
                     initMenu();
                     lblCompName.setText(Global.companyName);
@@ -815,7 +819,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     public void initMain() {
         Global.parentForm = this;
-        scheduleDownload();
         scheduleNetwork();
         scheduleExit();
         initUser();
@@ -960,7 +963,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void scheduleDownload() {
-        downloadInventory();
+        if (localDatabase) {
+            downloadInventory();
+        }
     }
 
     private void downloadUser() {
@@ -976,11 +981,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void downloadStock() {
-        inventoryRepo.getStock(false).subscribe((t) -> {
+        inventoryRepo.getUpdateStock(stockService.getMaxDate()).subscribe((t) -> {
+            log.info("download stock list : " + t.size());
             t.forEach((s) -> {
                 stockService.save(s);
             });
-            log.info("stock download done.");
+            List<Stock> list = stockService.findAll(Global.compCode);;
+            log.info("stock download done : " + list.size());
         }, (e) -> {
             log.info(e.getMessage());
         });

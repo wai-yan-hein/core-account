@@ -65,6 +65,10 @@ public class Util1 {
         return obj == null || obj.toString().isEmpty();
     }
 
+    public static Date getOldDate() {
+        return Util1.toDate("1998-10-07");
+    }
+
     public static boolean isNumber(Object obj) {
         boolean status = false;
         try {
@@ -92,6 +96,21 @@ public class Util1 {
 
     public static Date toDate(Object objDate) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = null;
+
+        try {
+            if (objDate != null) {
+                date = formatter.parse(objDate.toString());
+            }
+        } catch (ParseException ex) {
+            log.info("toDateStr Error : " + ex.getMessage());
+        }
+
+        return date;
+    }
+
+    public static Date toDateTime(Object objDate) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = null;
 
         try {
