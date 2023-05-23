@@ -964,7 +964,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                     log.info("scheduleNetwork start.");
                     InetAddress inet = InetAddress.getByName(hostName);
                     long start = new GregorianCalendar().getTimeInMillis();
-                    if (inet.isReachable(0)) {
+                    if (inet.isReachable(5000)) {
                         long finish = new GregorianCalendar().getTimeInMillis();
                         long time = finish - start;
                         setNetwork(time);
@@ -1033,7 +1033,20 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void setNetwork(long time) {
-
+        log.info(time + "ms");
+        if(time < 0) {
+            lblNetwork.setText("Offline");
+            lblNetwork.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/wifi_no_internet.png")));
+        } else if(time < 100) {
+            lblNetwork.setText(time + " ms");
+            lblNetwork.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/wi-fi_green.png")));
+        } else if(time >= 100 && time < 150) {
+            lblNetwork.setText(time + " ms");
+            lblNetwork.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/wifi_yellow.png")));
+        } else {
+            lblNetwork.setText(time + " ms");
+            lblNetwork.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/wi-fi_red.png")));
+        }
     }
 
     /**
@@ -1075,6 +1088,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         lblCompName = new javax.swing.JLabel();
         lblPanelName = new javax.swing.JLabel();
         lblLock = new javax.swing.JLabel();
+        jPanel3 = new javax.swing.JPanel();
+        lblNetwork = new javax.swing.JLabel();
         menuBar = new javax.swing.JMenuBar();
 
         jMenu1.setText("jMenu1");
@@ -1243,8 +1258,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblUserName, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)
-                    .addComponent(lblDep, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE))
+                    .addComponent(lblUserName, javax.swing.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE)
+                    .addComponent(lblDep, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -1278,12 +1293,11 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblPanelName, javax.swing.GroupLayout.DEFAULT_SIZE, 32, Short.MAX_VALUE)
+                .addComponent(lblPanelName, javax.swing.GroupLayout.DEFAULT_SIZE, 28, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblLock, javax.swing.GroupLayout.DEFAULT_SIZE, 32, Short.MAX_VALUE)
+                .addComponent(lblLock, javax.swing.GroupLayout.DEFAULT_SIZE, 28, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, 91, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, 84, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1293,6 +1307,29 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                     .addComponent(lblPanelName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblCompName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblLock, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+
+        lblNetwork.setFont(Global.lableFont);
+        lblNetwork.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblNetwork.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/wifi_no_internet.png"))); // NOI18N
+        lblNetwork.setText("Offline ");
+        lblNetwork.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblNetwork, javax.swing.GroupLayout.DEFAULT_SIZE, 61, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblNetwork, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1313,6 +1350,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
             .addComponent(jSeparator4)
@@ -1326,7 +1365,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(0, 0, 0)
                 .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1417,6 +1457,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private javax.swing.JMenu jMenu1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JToolBar.Separator jSeparator1;
     private javax.swing.JToolBar.Separator jSeparator11;
     private javax.swing.JToolBar.Separator jSeparator2;
@@ -1431,6 +1472,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private javax.swing.JLabel lblCompName;
     private javax.swing.JLabel lblDep;
     private javax.swing.JLabel lblLock;
+    private javax.swing.JLabel lblNetwork;
     private javax.swing.JLabel lblPanelName;
     private javax.swing.JLabel lblUserName;
     private javax.swing.JMenuBar menuBar;
