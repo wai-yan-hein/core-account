@@ -27,6 +27,7 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.user.common.UserRepo;
 import com.common.Util1;
+import com.h2.service.StockService;
 import com.user.setup.MenuSetup;
 import com.user.model.DepartmentUser;
 import com.inventory.model.VRoleMenu;
@@ -205,6 +206,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private CurrencyExchange currencyExchange;
     @Autowired
     private String hostName;
+    @Autowired
+    private StockService stockService;
     private PanelControl control;
     private final HashMap<String, JPanel> hmPanel = new HashMap<>();
     private final ActionListener menuListener = (java.awt.event.ActionEvent evt) -> {
@@ -812,6 +815,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     public void initMain() {
         Global.parentForm = this;
+        scheduleDownload();
         scheduleNetwork();
         scheduleExit();
         initUser();
@@ -955,20 +959,30 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         CoreAccountApplication.restart();
     }
 
+    private void scheduleDownload() {
+        inventoryRepo.getStock(false).subscribe((t) -> {
+            t.forEach((s) -> {
+                stockService.save(s);
+            });
+            log.info("stock download done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
+
     private void scheduleNetwork() {
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 try {
-                    log.info("scheduleNetwork start.");
                     InetAddress inet = InetAddress.getByName(hostName);
                     long start = new GregorianCalendar().getTimeInMillis();
                     if (inet.isReachable(0)) {
                         long finish = new GregorianCalendar().getTimeInMillis();
                         long time = finish - start;
                         setNetwork(time);
-                    }else{
+                    } else {
                         setNetwork(-1);
                     }
                 } catch (IOException e) {

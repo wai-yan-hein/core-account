@@ -427,15 +427,16 @@ public class InventoryRepo {
                 .retrieve().bodyToFlux(Location.class).collectList();
     }
 
-    public Flux<Stock> getStock(boolean active) {
-        Flux<Stock> result = inventoryApi.get()
+    public Mono<List<Stock>> getStock(boolean active) {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-stock")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("active", active)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
-                .retrieve().bodyToFlux(Stock.class);
-        return result;
+                .retrieve()
+                .bodyToFlux(Stock.class)
+                .collectList();
     }
 
     public Mono<List<Stock>> getStock(String str) {

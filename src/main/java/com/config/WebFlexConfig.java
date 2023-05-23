@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.inventory.config;
+package com.config;
 
 import com.common.Util1;
 import java.net.MalformedURLException;

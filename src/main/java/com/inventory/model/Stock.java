@@ -5,6 +5,13 @@
  */
 package com.inventory.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import java.util.Date;
 import lombok.Data;
 
@@ -12,46 +19,85 @@ import lombok.Data;
  *
  * @author Lenovo
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Entity
 @Data
+@Table(name = "stock")
 public class Stock implements java.io.Serializable {
 
+    @EmbeddedId
     private StockKey key;
+    @Column(name = "active")
     private boolean active;
-    private String brandCode;
-    private String stockName;
-    private String catCode;
+    @Column(name = "stock_type_code")
     private String typeCode;
-    private String createdBy;
-    private String updatedBy;
-    private String barcode;
-    private String shortName;
-    private Float purWeight;
-    private Float purPrice;
+    @Column(name = "brand_code")
+    private String brandCode;
+    @Column(name = "stock_name")
+    private String stockName;
+    @Column(name = "category_code")
+    private String catCode;
+    @Column(name = "pur_unit")
     private String purUnitCode;
-    private Float saleWeight;
+    @Column(name = "sale_unit")
     private String saleUnitCode;
-    private String weightUnit;
-    private Float weight;
+    @Column(name = "created_by")
+    private String createdBy;
+    @Column(name = "updated_by")
+    private String updatedBy;
+    @Column(name = "barcode")
+    private String barcode;
+    @Column(name = "short_name")
+    private String shortName;
+    @Column(name = "pur_price")
+    private Float purPrice;
+    @Temporal(TemporalType.DATE)
+    @Column(name = "licence_exp_date")
     private Date expireDate;
+    @Column(name = "remark")
     private String remark;
+    @Column(name = "sale_price_n")
     private Float salePriceN;
+    @Column(name = "sale_price_a")
     private Float salePriceA;
+    @Column(name = "sale_price_b")
     private Float salePriceB;
+    @Column(name = "sale_price_c")
     private Float salePriceC;
+    @Column(name = "sale_price_d")
     private Float salePriceD;
+    @Column(name = "sale_price_e")
     private Float salePriceE;
-
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "updated_date")
+    private Date updatedDate;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_date")
     private Date createdDate;
+    @Column(name = "mig_code")
     private String migCode;
+    @Column(name = "user_code")
     private String userCode;
+    @Column(name = "rel_code")
     private String relCode;
+    @Column(name = "mac_id")
     private Integer macId;
+    @Column(name = "calculate")
     private boolean calculate;
+    @Column(name = "intg_upd_status")
+    private String intgUpdStatus;
+    @Column(name = "explode")
     private boolean explode;
-    private String relName;
-    private String groupName;
-    private String catName;
-    private String brandName;
+    @Column(name = "weight_unit")
+    private String weightUnit;
+    @Column(name = "weight")
+    private Float weight;
+    @Column(name = "favorite")
+    private boolean favorite;
+    private transient String relName;
+    private transient String groupName;
+    private transient String brandName;
+    private transient String catName;
 
     public Stock() {
     }

@@ -221,19 +221,14 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
     private void searchStock() {
         progress.setIndeterminate(true);
-        Flux<Stock> result = inventoryRepo.getStock(false);
-        List<Stock> list = new ArrayList<>();
-        result.subscribe((t) -> {
-            list.add(t);
-            lblRecord.setText(list.size() + "");
+        inventoryRepo.getStock(false).subscribe((t) -> {
+            stockTableModel.setListStock(t);
+            lblRecord.setText(t.size() + "");
+            progress.setIndeterminate(false);
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
             progress.setIndeterminate(false);
-        }, () -> {
-            stockTableModel.setListStock(list);
-            progress.setIndeterminate(false);
         });
-
     }
 
     private void initCombo() {
