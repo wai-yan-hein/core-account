@@ -27,7 +27,10 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.user.common.UserRepo;
 import com.common.Util1;
+import com.h2.service.BusinessTypeService;
 import com.h2.service.StockService;
+import com.h2.service.UserService;
+import com.inventory.model.AppUser;
 import com.user.setup.MenuSetup;
 import com.user.model.DepartmentUser;
 import com.inventory.model.VRoleMenu;
@@ -208,6 +211,10 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private String hostName;
     @Autowired
     private StockService stockService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private BusinessTypeService businessTypeService;
     private PanelControl control;
     private final HashMap<String, JPanel> hmPanel = new HashMap<>();
     private final ActionListener menuListener = (java.awt.event.ActionEvent evt) -> {
@@ -960,11 +967,35 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void scheduleDownload() {
+        downloadUser();
         downloadInventory();
+        downloadAccount();
+
     }
 
     private void downloadUser() {
+        downloadAppUser();
+        downloadBusinessType();
+    }
 
+    private void downloadAppUser() {
+        userRepo.getAppUser().subscribe((u) -> {
+            u.forEach((a) -> {
+                userService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadBusinessType() {
+        userRepo.getBusinessType().subscribe((b) -> {
+            b.forEach((a) -> {
+                businessTypeService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
     }
 
     private void downloadInventory() {
