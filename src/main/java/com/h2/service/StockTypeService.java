@@ -2,22 +2,20 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.h2.dao;
+package com.h2.service;
 
-import com.inventory.model.Stock;
+import com.inventory.model.StockType;
 import java.util.List;
 
 /**
  *
  * @author Lenovo
  */
-public interface StockDao {
+public interface StockTypeService {
 
-    Stock save(Stock stock);
+    StockType save(StockType type);
 
-    String getMaxDate();
+    List<StockType> findAll(String compCode);
 
-    List<Stock> findAll(String compCode);
-    List<Stock> findAll();
-
+    String getMaDate();
 }
