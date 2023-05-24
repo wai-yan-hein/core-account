@@ -4,22 +4,22 @@
  */
 package com.h2.service;
 
-import com.inventory.model.Stock;
+import com.inventory.model.SaleMan;
+import com.inventory.model.SaleManKey;
 import java.util.List;
 
 /**
  *
  * @author Lenovo
  */
-public interface StockService {
+public interface SaleManService {
 
-    Stock save(Stock stock);
+    SaleMan save(SaleMan stock);
 
-    List<Stock> findAll(String compCode);
+    SaleMan find(SaleManKey key);
 
-    List<Stock> getStock(String str, String compCode, Integer deptId);
+    List<SaleMan> findAll(String compCode);
 
     String getMaxDate();
 
-    List<Stock> findAll();
 }

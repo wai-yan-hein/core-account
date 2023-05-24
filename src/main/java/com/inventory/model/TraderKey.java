@@ -4,6 +4,9 @@
  */
 package com.inventory.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import java.io.Serializable;
 import lombok.Data;
 
 /**
@@ -11,10 +14,14 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
-public class TraderKey {
+@Embeddable
+public class TraderKey implements Serializable {
 
+    @Column(name = "code")
     private String code;
+    @Column(name = "comp_code")
     private String compCode;
+    @Column(name = "dept_id")
     private Integer deptId;
 
     public TraderKey() {
@@ -25,6 +32,5 @@ public class TraderKey {
         this.compCode = compCode;
         this.deptId = deptId;
     }
-    
 
 }

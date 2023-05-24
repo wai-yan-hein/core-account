@@ -4,22 +4,19 @@
  */
 package com.h2.service;
 
-import com.inventory.model.Stock;
+import com.inventory.model.StockBrand;
 import java.util.List;
 
 /**
  *
  * @author Lenovo
  */
-public interface StockService {
+public interface BrandService {
 
-    Stock save(Stock stock);
+    StockBrand save(StockBrand stock);
 
-    List<Stock> findAll(String compCode);
-
-    List<Stock> getStock(String str, String compCode, Integer deptId);
+    List<StockBrand> findAll(String compCode);
 
     String getMaxDate();
 
-    List<Stock> findAll();
 }

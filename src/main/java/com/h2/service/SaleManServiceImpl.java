@@ -4,8 +4,10 @@
  */
 package com.h2.service;
 
-import com.h2.dao.StockDao;
-import com.inventory.model.Stock;
+import com.h2.dao.BrandDao;
+import com.h2.dao.SaleManDao;
+import com.inventory.model.SaleMan;
+import com.inventory.model.SaleManKey;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,18 +19,18 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class StockServiceImpl implements StockService {
+public class SaleManServiceImpl implements SaleManService {
 
     @Autowired
-    private StockDao dao;
+    private SaleManDao dao;
 
     @Override
-    public Stock save(Stock stock) {
-        return dao.save(stock);
+    public SaleMan save(SaleMan cat) {
+        return dao.save(cat);
     }
 
     @Override
-    public List<Stock> findAll(String compCode) {
+    public List<SaleMan> findAll(String compCode) {
         return dao.findAll(compCode);
     }
 
@@ -38,13 +40,8 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public List<Stock> findAll() {
-        return dao.findAll();
-    }
-
-    @Override
-    public List<Stock> getStock(String str, String compCode, Integer deptId) {
-        return dao.getStock(str, compCode, deptId);
+    public SaleMan find(SaleManKey key) {
+        return dao.find(key);
     }
 
 }

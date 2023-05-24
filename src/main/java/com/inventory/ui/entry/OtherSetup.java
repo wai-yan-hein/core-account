@@ -72,7 +72,7 @@ public class OtherSetup extends javax.swing.JPanel {
     }
 
     private void saleManSetup() {
-        inventoryRepo.getSaleMan().collectList().subscribe((t) -> {
+        inventoryRepo.getSaleMan().subscribe((t) -> {
             smDialog = new SaleManSetupDialog();
             smDialog.setIconImage(icon);
             smDialog.setInventoryRepo(inventoryRepo);

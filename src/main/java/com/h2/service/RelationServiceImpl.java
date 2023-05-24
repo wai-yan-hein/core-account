@@ -4,8 +4,8 @@
  */
 package com.h2.service;
 
-import com.h2.dao.StockDao;
-import com.inventory.model.Stock;
+import com.h2.dao.RelationDao;
+import com.inventory.model.UnitRelation;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,34 +17,24 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class StockServiceImpl implements StockService {
+public class RelationServiceImpl implements RelationService {
 
     @Autowired
-    private StockDao dao;
+    private RelationDao dao;
 
     @Override
-    public Stock save(Stock stock) {
-        return dao.save(stock);
+    public UnitRelation save(UnitRelation cat) {
+        return dao.save(cat);
     }
 
     @Override
-    public List<Stock> findAll(String compCode) {
+    public List<UnitRelation> findAll(String compCode) {
         return dao.findAll(compCode);
     }
 
     @Override
     public String getMaxDate() {
         return dao.getMaxDate();
-    }
-
-    @Override
-    public List<Stock> findAll() {
-        return dao.findAll();
-    }
-
-    @Override
-    public List<Stock> getStock(String str, String compCode, Integer deptId) {
-        return dao.getStock(str, compCode, deptId);
     }
 
 }

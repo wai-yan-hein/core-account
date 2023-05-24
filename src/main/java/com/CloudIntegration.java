@@ -4,18 +4,28 @@
  */
 package com;
 
+import com.common.Global;
+import com.h2.service.BrandService;
 import com.h2.service.BusinessTypeService;
+import com.h2.service.CategoryService;
 import com.h2.service.CompanyInfoService;
 import com.h2.service.CurrencyService;
 import com.h2.service.DepartmentUserService;
+import com.h2.service.LocationService;
+import com.h2.service.RelationService;
+import com.h2.service.SaleManService;
 import com.h2.service.StockService;
 import com.h2.service.StockTypeService;
+import com.h2.service.StockUnitService;
 import com.h2.service.UserService;
+import com.inventory.model.Location;
 import com.inventory.ui.common.InventoryRepo;
 import com.user.common.UserRepo;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 /**
  *
@@ -46,6 +56,18 @@ public class CloudIntegration {
     private CurrencyService currencyService;
     @Autowired
     private DepartmentUserService departmentService;
+    @Autowired
+    private CategoryService categoryService;
+    @Autowired
+    private BrandService brandService;
+    @Autowired
+    private StockUnitService stockUnitService;
+    @Autowired
+    private RelationService relationService;
+    @Autowired
+    private LocationService locationService;
+    @Autowired
+    private SaleManService saleManService;
 
     public void startDownload() {
         if (localDatabase) {
@@ -115,7 +137,13 @@ public class CloudIntegration {
     }
 
     private void downloadInventory() {
+        downloadSaleMan();
+        downloadLocation();
+        downloadRelation();
+        downloadUnit();
+        downloadBrand();
         downloadStockType();
+        downloadCategory();
         downloadStock();
     }
 
@@ -123,11 +151,83 @@ public class CloudIntegration {
 
     }
 
+    private void downloadInvTrader() {
+        inventoryRepo.getUpdateSaleMan(saleManService.getMaxDate()).subscribe((t) -> {
+            log.info("downloadInvTrader list : " + t.size());
+            t.forEach((s) -> {
+                saleManService.save(s);
+            });
+            log.info("downloadInvTrader done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
+
+    private void downloadSaleMan() {
+        inventoryRepo.getUpdateSaleMan(saleManService.getMaxDate()).subscribe((t) -> {
+            log.info("downloadSaleMan list : " + t.size());
+            t.forEach((s) -> {
+                saleManService.save(s);
+            });
+            log.info("downloadSaleMan done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
+
+    private void downloadLocation() {
+        inventoryRepo.getUpdateLocation(locationService.getMaxDate()).subscribe((t) -> {
+            log.info("downloadLocation list : " + t.size());
+            t.forEach((s) -> {
+                locationService.save(s);
+            });
+            log.info("downloadLocation done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
+
+    private void downloadRelation() {
+        inventoryRepo.getUpdateRelation(relationService.getMaxDate()).subscribe((t) -> {
+            log.info("downloadRelation list : " + t.size());
+            t.forEach((s) -> {
+                relationService.save(s);
+            });
+            log.info("downloadRelation done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
+
+    private void downloadUnit() {
+        inventoryRepo.getUpdateUnit(stockService.getMaxDate()).subscribe((t) -> {
+            log.info("downloadUnit list : " + t.size());
+            t.forEach((s) -> {
+                stockUnitService.save(s);
+            });
+            log.info("downloadUnit done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
+
+    private void downloadBrand() {
+        inventoryRepo.getUpdateBrand(brandService.getMaxDate()).subscribe((t) -> {
+            log.info("downloadBrand list : " + t.size());
+            t.forEach((s) -> {
+                brandService.save(s);
+            });
+            log.info("downloadBrand done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
+
     private void downloadCategory() {
-        inventoryRepo.getUpdateStockType(stockTypeService.getMaDate()).subscribe((t) -> {
+        inventoryRepo.getUpdateCategory(categoryService.getMaxDate()).subscribe((t) -> {
             log.info("downloadCategory list : " + t.size());
             t.forEach((s) -> {
-                stockTypeService.save(s);
+                categoryService.save(s);
             });
             log.info("downloadCategory done.");
         }, (e) -> {
