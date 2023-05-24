@@ -28,6 +28,8 @@ import com.common.SelectionObserver;
 import com.user.common.UserRepo;
 import com.common.Util1;
 import com.h2.service.BusinessTypeService;
+import com.h2.service.CompanyInfoService;
+import com.h2.service.CurrencyService;
 import com.h2.service.StockService;
 import com.h2.service.UserService;
 import com.inventory.model.AppUser;
@@ -102,6 +104,7 @@ import java.util.TimerTask;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import org.springframework.core.task.TaskExecutor;
+import com.h2.service.DepartmentUserService;
 
 /**
  *
@@ -218,6 +221,12 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private UserService userService;
     @Autowired
     private BusinessTypeService businessTypeService;
+    @Autowired
+    private CompanyInfoService companyInfoService;
+    @Autowired
+    private CurrencyService currencyService;
+    @Autowired
+    private DepartmentUserService departmentService;
     private PanelControl control;
     private final HashMap<String, JPanel> hmPanel = new HashMap<>();
     private final ActionListener menuListener = (java.awt.event.ActionEvent evt) -> {
@@ -982,6 +991,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private void downloadUser() {
         downloadAppUser();
         downloadBusinessType();
+        downloadCompanyInfo();
+        downloadCurrency();
+        downloadDepartment();
     }
 
     private void downloadAppUser() {
@@ -998,6 +1010,36 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         userRepo.getBusinessType().subscribe((b) -> {
             b.forEach((a) -> {
                 businessTypeService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadCompanyInfo() {
+        userRepo.getCompany(true).subscribe((c) -> {
+            c.forEach((a) -> {
+                companyInfoService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadCurrency() {
+        userRepo.getCurrency().subscribe((c) -> {
+            c.forEach((a) -> {
+                currencyService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadDepartment() {
+        userRepo.getDeparment().subscribe((d) -> {
+            d.forEach((a) -> {
+                departmentService.save(a);
             });
         }, (err) -> {
             log.info(err.getMessage());
