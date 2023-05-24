@@ -460,7 +460,7 @@ public class UserRepo {
     public Mono<List<AppUser>> getAppUserByDate(String updatedDate) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/getUserByDate")
-                .queryParam("updatedDate", Util1.toDateTime(updatedDate))
+                .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(AppUser.class)
                 .collectList();
@@ -469,7 +469,7 @@ public class UserRepo {
     public Mono<List<BusinessType>> getBusinessTypeByDate(String updatedDate) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/getBusinessTypeByDate")
-                .queryParam("updatedDate", Util1.toDateStrMYSQL(updatedDate, Global.dateFormat))
+                .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(BusinessType.class)
                 .collectList();
@@ -478,7 +478,7 @@ public class UserRepo {
     public Mono<List<CompanyInfo>> getCompanyInfoByDate(String updatedDate) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/getCompanyInfoByDate")
-                .queryParam("updatedDate", Util1.toDateStrMYSQL(updatedDate, Global.dateFormat))
+                .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(CompanyInfo.class)
                 .collectList();
@@ -487,7 +487,7 @@ public class UserRepo {
     public Mono<List<Currency>> getCurrencyByDate(String updatedDate) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/getCurrencyByDate")
-                .queryParam("updatedDate", Util1.toDateStrMYSQL(updatedDate, Global.dateFormat))
+                .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(Currency.class)
                 .collectList();
@@ -496,7 +496,7 @@ public class UserRepo {
     public Mono<List<DepartmentUser>> getDepartmentByDate(String updatedDate) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/getDepartmentByDate")
-                .queryParam("updatedDate", Util1.toDateStrMYSQL(updatedDate, Global.dateFormat))
+                .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(DepartmentUser.class)
                 .collectList();
