@@ -428,8 +428,6 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
             saleHis.setPaid(Util1.getFloat(txtVouPaid.getValue()));
             saleHis.setBalance(Util1.getFloat(txtVouBalance.getValue()));
             saleHis.setCurCode(currAutoCompleter.getCurrency().getCurCode());
-            saleHis.setDeleted(Util1.getNullTo(saleHis.getDeleted()));
-            saleHis.setRegion(region);
             saleHis.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             saleHis.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
             saleHis.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
@@ -599,7 +597,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
                     lblStatus.setForeground(Color.RED);
                     disableForm(false);
                     observer.selected("print", true);
-                } else if (Util1.getBoolean(sh.getDeleted())) {
+                } else if (sh.isDeleted()) {
                     lblStatus.setText("DELETED");
                     lblStatus.setForeground(Color.RED);
                     disableForm(false);
