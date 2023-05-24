@@ -39,8 +39,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -54,10 +52,7 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
@@ -272,7 +267,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             status = false;
             clear();
         } else {
-            saleHis.setDeleted(Util1.getNullTo(saleHis.getDeleted()));
+            saleHis.setDeleted(Util1.getNullTo(saleHis.isDeleted()));
             saleHis.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
             saleHis.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
             saleHis.setGrandTotal(saleHis.getVouTotal());
@@ -387,7 +382,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     lblStatus.setForeground(Color.RED);
                     disableForm(false);
                     observer.selected("print", true);
-                } else if (Util1.getBoolean(sh.getDeleted())) {
+                } else if (Util1.getBoolean(sh.isDeleted())) {
                     lblStatus.setText("DELETED");
                     lblStatus.setForeground(Color.RED);
                     disableForm(false);

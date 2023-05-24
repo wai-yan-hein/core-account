@@ -4,6 +4,9 @@
  */
 package com.inventory.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import java.io.Serializable;
 import lombok.Data;
 
 /**
@@ -11,9 +14,13 @@ import lombok.Data;
  * @author DELL
  */
 @Data
-public class CategoryKey {
+@Embeddable
+public class CategoryKey implements Serializable{
 
+    @Column(name = "cat_code")
     private String catCode;
+    @Column(name = "comp_code")
     private String compCode;
+    @Column(name = "dept_id")
     private Integer deptId;
 }

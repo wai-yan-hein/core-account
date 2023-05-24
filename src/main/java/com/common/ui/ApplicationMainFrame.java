@@ -5,6 +5,7 @@
  */
 package com.common.ui;
 
+import com.CloudIntegration;
 import com.CoreAccountApplication;
 import com.acc.common.AccountRepo;
 import com.acc.entry.AllCash;
@@ -27,14 +28,6 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.user.common.UserRepo;
 import com.common.Util1;
-import com.h2.service.BusinessTypeService;
-import com.h2.service.CompanyInfoService;
-import com.h2.service.CurrencyService;
-import com.h2.service.StockService;
-import com.h2.service.StockTypeService;
-import com.h2.service.UserService;
-import com.inventory.model.AppUser;
-import com.inventory.model.Stock;
 import com.user.setup.MenuSetup;
 import com.user.model.DepartmentUser;
 import com.inventory.model.VRoleMenu;
@@ -105,7 +98,6 @@ import java.util.TimerTask;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import org.springframework.core.task.TaskExecutor;
-import com.h2.service.DepartmentUserService;
 
 /**
  *
@@ -215,21 +207,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     @Autowired
     private String hostName;
     @Autowired
-    private boolean localDatabase;
-    @Autowired
-    private StockService stockService;
-    @Autowired
-    private StockTypeService stockTypeService;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private BusinessTypeService businessTypeService;
-    @Autowired
-    private CompanyInfoService companyInfoService;
-    @Autowired
-    private CurrencyService currencyService;
-    @Autowired
-    private DepartmentUserService departmentService;
+    private CloudIntegration integration;
+
     private PanelControl control;
     private final HashMap<String, JPanel> hmPanel = new HashMap<>();
     private final ActionListener menuListener = (java.awt.event.ActionEvent evt) -> {
@@ -806,7 +785,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                     } else {
                         assignCompany(t.get(0));
                     }
-                    scheduleDownload();
+                    integration.startDownload();
                     departmentAssign();
                     initMenu();
                     lblCompName.setText(Global.companyName);
@@ -979,111 +958,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private void logout() {
         dispose();
         CoreAccountApplication.restart();
-    }
-
-    private void scheduleDownload() {
-        if (localDatabase) {
-            downloadUser();
-            downloadInventory();
-            downloadAccount();
-        }
-
-    }
-
-    private void downloadUser() {
-        downloadAppUser();
-        downloadBusinessType();
-        downloadCompanyInfo();
-        downloadCurrency();
-        downloadDepartment();
-    }
-
-    private void downloadAppUser() {
-        userRepo.getAppUserByDate(userService.getMaxDate()).subscribe((u) -> {
-            log.info("user list " + u.size());
-            u.forEach((a) -> {
-                userService.save(a);
-            });
-        }, (err) -> {
-            log.info(err.getMessage());
-        });
-    }
-
-    private void downloadBusinessType() {
-        userRepo.getBusinessTypeByDate(businessTypeService.getMaxDate()).subscribe((b) -> {
-            log.info("bs type list " + b.size());
-            b.forEach((a) -> {
-                businessTypeService.save(a);
-            });
-        }, (err) -> {
-            log.info(err.getMessage());
-        });
-    }
-
-    private void downloadCompanyInfo() {
-        userRepo.getCompanyInfoByDate(companyInfoService.getMaxDate()).subscribe((c) -> {
-            log.info("comp info list " + c.size());
-            c.forEach((a) -> {
-                companyInfoService.save(a);
-            });
-        }, (err) -> {
-            log.info(err.getMessage());
-        });
-    }
-
-    private void downloadCurrency() {
-        userRepo.getCurrencyByDate(currencyService.getMaxDate()).subscribe((c) -> {
-            log.info("currency list " + c.size());
-            c.forEach((a) -> {
-                currencyService.save(a);
-            });
-        }, (err) -> {
-            log.info(err.getMessage());
-        });
-    }
-
-    private void downloadDepartment() {
-        userRepo.getDepartmentByDate(departmentService.getMaxDate()).subscribe((d) -> {
-            log.info("department list " + d.size());
-            d.forEach((a) -> {
-                departmentService.save(a);
-            });
-        }, (err) -> {
-            log.info(err.getMessage());
-        });
-    }
-
-    private void downloadInventory() {
-        downloadStockType();
-        downloadStock();
-    }
-
-    private void downloadAccount() {
-
-    }
-
-    private void downloadStockType() {
-        inventoryRepo.getUpdateStockType(stockTypeService.getMaDate()).subscribe((t) -> {
-            log.info("downloadStockType list : " + t.size());
-            t.forEach((s) -> {
-                stockTypeService.save(s);
-            });
-            log.info("downloadStockType done.");
-        }, (e) -> {
-            log.info(e.getMessage());
-        });
-    }
-
-    private void downloadStock() {
-        inventoryRepo.getUpdateStock(stockService.getMaxDate()).subscribe((t) -> {
-            log.info("downloadStock list : " + t.size());
-            t.forEach((s) -> {
-                stockService.save(s);
-            });
-            log.info("downloadStock done.");
-        }, (e) -> {
-            log.info(e.getMessage());
-        });
     }
 
     private void scheduleNetwork() {
