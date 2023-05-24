@@ -169,6 +169,16 @@ public class InventoryRepo {
                 .retrieve().bodyToFlux(StockType.class).collectList();
     }
 
+    public Mono<List<StockType>> getUpdateStockType(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdateStockType")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(StockType.class)
+                .collectList();
+    }
+
     public Mono<List<StockUnit>> getStockUnit() {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-unit")
@@ -440,7 +450,7 @@ public class InventoryRepo {
                 .collectList();
     }
 
-    public Mono<List<Stock>> getUpdateStock(Date updatedDate) {
+    public Mono<List<Stock>> getUpdateStock(String updatedDate) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getUpdateStock")
                 .queryParam("updatedDate", updatedDate)

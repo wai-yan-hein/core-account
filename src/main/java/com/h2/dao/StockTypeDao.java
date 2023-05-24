@@ -4,20 +4,18 @@
  */
 package com.h2.dao;
 
-import com.inventory.model.Stock;
+import com.inventory.model.StockType;
 import java.util.List;
 
 /**
  *
  * @author Lenovo
  */
-public interface StockDao {
+public interface StockTypeDao {
 
-    Stock save(Stock stock);
+    StockType save(StockType type);
 
-    String getMaxDate();
+    List<StockType> findAll(String compCode);
 
-    List<Stock> findAll(String compCode);
-    List<Stock> findAll();
-
+    String getMaDate();
 }

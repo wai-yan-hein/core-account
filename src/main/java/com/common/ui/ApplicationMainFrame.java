@@ -29,6 +29,7 @@ import com.user.common.UserRepo;
 import com.common.Util1;
 import com.h2.service.BusinessTypeService;
 import com.h2.service.StockService;
+import com.h2.service.StockTypeService;
 import com.h2.service.UserService;
 import com.inventory.model.AppUser;
 import com.inventory.model.Stock;
@@ -214,6 +215,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private boolean localDatabase;
     @Autowired
     private StockService stockService;
+    @Autowired
+    private StockTypeService stockTypeService;
     @Autowired
     private UserService userService;
     @Autowired
@@ -971,11 +974,10 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     private void scheduleDownload() {
         if (localDatabase) {
+            downloadUser();
             downloadInventory();
+            downloadAccount();
         }
-        downloadUser();
-        downloadInventory();
-        downloadAccount();
 
     }
 
@@ -1005,6 +1007,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void downloadInventory() {
+        downloadStockType();
         downloadStock();
     }
 
@@ -1012,14 +1015,25 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     }
 
+    private void downloadStockType() {
+        inventoryRepo.getUpdateStockType(stockTypeService.getMaDate()).subscribe((t) -> {
+            log.info("downloadStockType list : " + t.size());
+            t.forEach((s) -> {
+                stockTypeService.save(s);
+            });
+            log.info("downloadStockType done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
+
     private void downloadStock() {
         inventoryRepo.getUpdateStock(stockService.getMaxDate()).subscribe((t) -> {
-            log.info("download stock list : " + t.size());
+            log.info("downloadStock list : " + t.size());
             t.forEach((s) -> {
                 stockService.save(s);
             });
-            List<Stock> list = stockService.findAll(Global.compCode);;
-            log.info("stock download done : " + list.size());
+            log.info("downloadStock done.");
         }, (e) -> {
             log.info(e.getMessage());
         });
