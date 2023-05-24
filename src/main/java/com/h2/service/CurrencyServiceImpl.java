@@ -26,4 +26,9 @@ public class CurrencyServiceImpl implements CurrencyService {
         return curDao.save(cur);
     }
 
+    @Override
+    public String getMaxDate() {
+        return curDao.getMaxDate();
+    }
+
 }

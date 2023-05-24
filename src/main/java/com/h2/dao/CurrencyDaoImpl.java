@@ -4,7 +4,9 @@
  */
 package com.h2.dao;
 
+import com.common.Util1;
 import com.user.model.Currency;
+import java.util.Date;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -18,6 +20,13 @@ public class CurrencyDaoImpl extends AbstractDao<String, Currency> implements Cu
     public Currency save(Currency cur) {
         saveOrUpdate(cur, cur.getCurCode());
         return cur;
+    }
+
+    @Override
+    public String getMaxDate() {
+        String jpql = "select max(o.updatedDate) from Currency o";
+        Date date = getDate(jpql);
+        return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 
 }

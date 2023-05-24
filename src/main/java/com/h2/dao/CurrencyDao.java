@@ -13,4 +13,6 @@ import com.user.model.Currency;
 public interface CurrencyDao {
 
     Currency save(Currency cur);
+
+    String getMaxDate();
 }

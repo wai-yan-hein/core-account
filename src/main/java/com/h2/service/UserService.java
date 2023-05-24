@@ -16,4 +16,6 @@ public interface UserService {
     AppUser save(AppUser appUser);
 
     List<AppUser> findAll();
+
+    String getMaxDate();
 }

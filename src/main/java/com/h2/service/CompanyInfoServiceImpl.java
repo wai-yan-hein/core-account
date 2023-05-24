@@ -26,4 +26,9 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
         return compDao.save(comp);
     }
 
+    @Override
+    public String getMaxDate() {
+        return compDao.getMaxDate();
+    }
+
 }

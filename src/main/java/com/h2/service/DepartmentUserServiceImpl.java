@@ -26,4 +26,9 @@ public class DepartmentUserServiceImpl implements DepartmentUserService {
         return deptDao.save(dept);
     }
 
+    @Override
+    public String getMaxDate() {
+        return deptDao.getMaxDate();
+    }
+
 }

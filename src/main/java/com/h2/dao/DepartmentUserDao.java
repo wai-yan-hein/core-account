@@ -13,4 +13,6 @@ import com.user.model.DepartmentUser;
 public interface DepartmentUserDao {
 
     DepartmentUser save(DepartmentUser dept);
+
+    String getMaxDate();
 }

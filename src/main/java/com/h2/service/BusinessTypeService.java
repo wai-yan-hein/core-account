@@ -12,5 +12,7 @@ import com.acc.model.BusinessType;
  */
 public interface BusinessTypeService {
 
-    public BusinessType save(BusinessType bus);
+    BusinessType save(BusinessType bus);
+
+    String getMaxDate();
 }

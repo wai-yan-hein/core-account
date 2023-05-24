@@ -26,4 +26,9 @@ public class BusinessTypeServiceImpl implements BusinessTypeService {
         return bDao.save(bus);
     }
 
+    @Override
+    public String getMaxDate() {
+        return bDao.getMaxDate();
+    }
+
 }

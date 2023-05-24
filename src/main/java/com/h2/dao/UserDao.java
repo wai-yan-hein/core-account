@@ -17,4 +17,5 @@ public interface UserDao {
 
     List<AppUser> findAll();
 
+    String getMaxDate();
 }

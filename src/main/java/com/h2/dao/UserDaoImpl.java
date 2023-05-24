@@ -4,7 +4,9 @@
  */
 package com.h2.dao;
 
+import com.common.Util1;
 import com.inventory.model.AppUser;
+import java.util.Date;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 
@@ -25,6 +27,13 @@ public class UserDaoImpl extends AbstractDao<String, AppUser> implements UserDao
     public List<AppUser> findAll() {
         String sql = "select o from AppUser o";
         return findHSQL(sql);
+    }
+
+    @Override
+    public String getMaxDate() {
+        String jpql = "select max(o.updatedDate) from AppUser o";
+        Date date = getDate(jpql);
+        return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 
 }

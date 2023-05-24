@@ -32,4 +32,9 @@ public class UserServiceimpl implements UserService {
         return userDao.findAll();
     }
 
+    @Override
+    public String getMaxDate() {
+        return userDao.getMaxDate();
+    }
+
 }

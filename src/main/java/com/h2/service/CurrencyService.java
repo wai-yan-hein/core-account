@@ -11,5 +11,8 @@ import com.user.model.Currency;
  * @author Athu Sint
  */
 public interface CurrencyService {
-    public Currency save(Currency cur);
+
+    Currency save(Currency cur);
+
+    String getMaxDate();
 }

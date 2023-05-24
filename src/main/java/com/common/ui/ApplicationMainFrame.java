@@ -999,7 +999,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void downloadAppUser() {
-        userRepo.getAppUser().subscribe((u) -> {
+        userRepo.getAppUserByDate(userService.getMaxDate()).subscribe((u) -> {
+            log.info("user list " + u.size());
             u.forEach((a) -> {
                 userService.save(a);
             });
@@ -1009,7 +1010,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void downloadBusinessType() {
-        userRepo.getBusinessType().subscribe((b) -> {
+        userRepo.getBusinessTypeByDate(businessTypeService.getMaxDate()).subscribe((b) -> {
+            log.info("bs type list " + b.size());
             b.forEach((a) -> {
                 businessTypeService.save(a);
             });
@@ -1019,7 +1021,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void downloadCompanyInfo() {
-        userRepo.getCompany(true).subscribe((c) -> {
+        userRepo.getCompanyInfoByDate(companyInfoService.getMaxDate()).subscribe((c) -> {
+            log.info("comp info list " + c.size());
             c.forEach((a) -> {
                 companyInfoService.save(a);
             });
@@ -1029,7 +1032,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void downloadCurrency() {
-        userRepo.getCurrency().subscribe((c) -> {
+        userRepo.getCurrencyByDate(currencyService.getMaxDate()).subscribe((c) -> {
+            log.info("currency list " + c.size());
             c.forEach((a) -> {
                 currencyService.save(a);
             });
@@ -1039,7 +1043,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void downloadDepartment() {
-        userRepo.getDeparment().subscribe((d) -> {
+        userRepo.getDepartmentByDate(departmentService.getMaxDate()).subscribe((d) -> {
+            log.info("department list " + d.size());
             d.forEach((a) -> {
                 departmentService.save(a);
             });

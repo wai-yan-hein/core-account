@@ -11,5 +11,8 @@ import com.user.model.CompanyInfo;
  * @author Athu Sint
  */
 public interface CompanyInfoService {
-    public CompanyInfo save(CompanyInfo comp);
+
+    CompanyInfo save(CompanyInfo comp);
+
+    String getMaxDate();
 }

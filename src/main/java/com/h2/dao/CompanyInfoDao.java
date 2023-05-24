@@ -14,4 +14,6 @@ public interface CompanyInfoDao {
 
     CompanyInfo save(CompanyInfo comp);
 
+    String getMaxDate();
+
 }
