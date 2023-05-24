@@ -4,9 +4,8 @@
  */
 package com.h2.service;
 
-import com.h2.dao.StockDao;
-import com.inventory.model.Stock;
-import java.util.Date;
+import com.h2.dao.UserDao;
+import com.inventory.model.AppUser;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,33 +13,23 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
- * @author Lenovo
+ * @author Athu Sint
  */
 @Service
 @Transactional
-public class StockServiceImpl implements StockService {
+public class UserServiceimpl implements UserService {
 
     @Autowired
-    private StockDao dao;
+    UserDao userDao;
 
     @Override
-    public Stock save(Stock stock) {
-        return dao.save(stock);
+    public AppUser save(AppUser appUser) {
+        return userDao.save(appUser);
     }
 
     @Override
-    public List<Stock> findAll(String compCode) {
-        return dao.findAll(compCode);
-    }
-
-    @Override
-    public String getMaxDate() {
-        return dao.getMaxDate();
-    }
-
-    @Override
-    public List<Stock> findAll() {
-        return dao.findAll();
+    public List<AppUser> findAll() {
+        return userDao.findAll();
     }
 
 }

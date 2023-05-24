@@ -4,20 +4,12 @@
  */
 package com.h2.service;
 
-import com.inventory.model.Stock;
-import java.util.List;
+import com.user.model.CompanyInfo;
 
 /**
  *
- * @author Lenovo
+ * @author Athu Sint
  */
-public interface StockService {
-
-    Stock save(Stock stock);
-
-    List<Stock> findAll(String compCode);
-
-    String getMaxDate();
-
-    List<Stock> findAll();
+public interface CompanyInfoService {
+    public CompanyInfo save(CompanyInfo comp);
 }

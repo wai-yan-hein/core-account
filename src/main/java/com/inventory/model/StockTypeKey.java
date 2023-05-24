@@ -4,6 +4,8 @@
  */
 package com.inventory.model;
 
+import jakarta.persistence.Column;
+import java.io.Serializable;
 import lombok.Data;
 
 /**
@@ -11,9 +13,12 @@ import lombok.Data;
  * @author DELL
  */
 @Data
-public class StockTypeKey {
+public class StockTypeKey implements Serializable {
 
+    @Column(name = "stock_type_code")
     private String stockTypeCode;
+    @Column(name = "comp_code")
     private String compCode;
+    @Column(name = "dept_id")
     private Integer deptId;
 }

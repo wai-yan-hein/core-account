@@ -23,7 +23,7 @@ import lombok.Data;
 @Entity
 @Data
 @Table(name = "stock")
-public class Stock implements java.io.Serializable {
+public class Stock {
 
     @EmbeddedId
     private StockKey key;

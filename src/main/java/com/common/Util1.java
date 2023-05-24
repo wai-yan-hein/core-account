@@ -65,6 +65,10 @@ public class Util1 {
         return obj == null || obj.toString().isEmpty();
     }
 
+    public static String getOldDate() {
+        return Util1.toDateTimeStrMYSQL(Util1.toDate("1998-10-07"));
+    }
+
     public static boolean isNumber(Object obj) {
         boolean status = false;
         try {
@@ -92,6 +96,21 @@ public class Util1 {
 
     public static Date toDate(Object objDate) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = null;
+
+        try {
+            if (objDate != null) {
+                date = formatter.parse(objDate.toString());
+            }
+        } catch (ParseException ex) {
+            log.info("toDateStr Error : " + ex.getMessage());
+        }
+
+        return date;
+    }
+
+    public static Date toDateTime(Object objDate) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = null;
 
         try {
@@ -160,17 +179,9 @@ public class Util1 {
         return status;
     }
 
-    public static String toDateTimeStrMYSQL(String strDate) {
+    public static String toDateTimeStrMYSQL(Date date) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String date = null;
-
-        try {
-            date = formatter.format(toDate(strDate, "dd/MM/yyyy"));
-        } catch (Exception ex) {
-            log.info("toDateTimeStrMYSQL : " + ex.getMessage());
-        }
-
-        return date;
+        return date == null ? null : formatter.format(date);
     }
 
     public static String getTodayDateTimeStrMySql() {

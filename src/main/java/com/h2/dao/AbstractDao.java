@@ -16,7 +16,7 @@ import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import java.sql.ResultSet;
 import java.sql.Statement;
-
+import java.util.Date;
 
 /**
  *
@@ -24,11 +24,11 @@ import java.sql.Statement;
  * @param <PK>
  * @param <T>
  */
-
 @Slf4j
 public abstract class AbstractDao<PK extends Serializable, T> {
 
     private final Class<T> persistentClass;
+
     @SuppressWarnings("unchecked")
     public AbstractDao() {
         this.persistentClass = (Class<T>) ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[1];
@@ -39,23 +39,23 @@ public abstract class AbstractDao<PK extends Serializable, T> {
     @PersistenceContext
     private EntityManager entityManager;
 
-
     public T getByKey(PK key) {
         return entityManager.find(persistentClass, key);
     }
 
-
-    public void saveOrUpdate(T entity,PK pk) {
+    public void saveOrUpdate(T entity, PK pk) {
         T t = entityManager.find(persistentClass, pk);
-        if (t == null) entityManager.persist(entity);
-        else entityManager.merge(entity);
+        if (t == null) {
+            entityManager.persist(entity);
+        } else {
+            entityManager.merge(entity);
+        }
 
     }
 
     public void update(T entity) {
         entityManager.merge(entity);
     }
-
 
     public List<T> findHSQL(String hsql) {
         return entityManager.createQuery(hsql, persistentClass).getResultList();
@@ -73,8 +73,13 @@ public abstract class AbstractDao<PK extends Serializable, T> {
             entityManager.remove(byKey);
         }
     }
+
     public List<Map<String, Object>> getList(String sql) {
         return jdbcTemplate.queryForList(sql);
+    }
+
+    public Date getDate(String jpql) {
+        return entityManager.createQuery(jpql, Date.class).getSingleResult();
     }
 
     public ResultSet getResult(String sql) {

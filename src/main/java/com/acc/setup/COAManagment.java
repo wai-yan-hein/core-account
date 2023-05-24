@@ -1091,7 +1091,6 @@ public class COAManagment extends javax.swing.JPanel implements
 
     private void tabMainStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tabMainStateChanged
         // TODO add your handling code here:
-        log.info(String.format("Selected %s", tabMain.getSelectedIndex()));
         int index = tabMain.getSelectedIndex();
         switch (index) {
             case 1 ->

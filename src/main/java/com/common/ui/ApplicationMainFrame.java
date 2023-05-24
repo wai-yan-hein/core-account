@@ -27,7 +27,14 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.user.common.UserRepo;
 import com.common.Util1;
+import com.h2.service.BusinessTypeService;
+import com.h2.service.CompanyInfoService;
+import com.h2.service.CurrencyService;
 import com.h2.service.StockService;
+import com.h2.service.StockTypeService;
+import com.h2.service.UserService;
+import com.inventory.model.AppUser;
+import com.inventory.model.Stock;
 import com.user.setup.MenuSetup;
 import com.user.model.DepartmentUser;
 import com.inventory.model.VRoleMenu;
@@ -98,6 +105,7 @@ import java.util.TimerTask;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import org.springframework.core.task.TaskExecutor;
+import com.h2.service.DepartmentUserService;
 
 /**
  *
@@ -207,7 +215,21 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     @Autowired
     private String hostName;
     @Autowired
+    private boolean localDatabase;
+    @Autowired
     private StockService stockService;
+    @Autowired
+    private StockTypeService stockTypeService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private BusinessTypeService businessTypeService;
+    @Autowired
+    private CompanyInfoService companyInfoService;
+    @Autowired
+    private CurrencyService currencyService;
+    @Autowired
+    private DepartmentUserService departmentService;
     private PanelControl control;
     private final HashMap<String, JPanel> hmPanel = new HashMap<>();
     private final ActionListener menuListener = (java.awt.event.ActionEvent evt) -> {
@@ -784,6 +806,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                     } else {
                         assignCompany(t.get(0));
                     }
+                    scheduleDownload();
                     departmentAssign();
                     initMenu();
                     lblCompName.setText(Global.companyName);
@@ -815,7 +838,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     public void initMain() {
         Global.parentForm = this;
-        scheduleDownload();
         scheduleNetwork();
         scheduleExit();
         initUser();
@@ -960,14 +982,74 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void scheduleDownload() {
-        downloadInventory();
+        if (localDatabase) {
+            downloadUser();
+            downloadInventory();
+            downloadAccount();
+        }
+
     }
 
     private void downloadUser() {
+        downloadAppUser();
+        downloadBusinessType();
+        downloadCompanyInfo();
+        downloadCurrency();
+        downloadDepartment();
+    }
 
+    private void downloadAppUser() {
+        userRepo.getAppUser().subscribe((u) -> {
+            u.forEach((a) -> {
+                userService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadBusinessType() {
+        userRepo.getBusinessType().subscribe((b) -> {
+            b.forEach((a) -> {
+                businessTypeService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadCompanyInfo() {
+        userRepo.getCompany(true).subscribe((c) -> {
+            c.forEach((a) -> {
+                companyInfoService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadCurrency() {
+        userRepo.getCurrency().subscribe((c) -> {
+            c.forEach((a) -> {
+                currencyService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadDepartment() {
+        userRepo.getDeparment().subscribe((d) -> {
+            d.forEach((a) -> {
+                departmentService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
     }
 
     private void downloadInventory() {
+        downloadStockType();
         downloadStock();
     }
 
@@ -975,12 +1057,25 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     }
 
+    private void downloadStockType() {
+        inventoryRepo.getUpdateStockType(stockTypeService.getMaDate()).subscribe((t) -> {
+            log.info("downloadStockType list : " + t.size());
+            t.forEach((s) -> {
+                stockTypeService.save(s);
+            });
+            log.info("downloadStockType done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
+
     private void downloadStock() {
-        inventoryRepo.getStock(false).subscribe((t) -> {
+        inventoryRepo.getUpdateStock(stockService.getMaxDate()).subscribe((t) -> {
+            log.info("downloadStock list : " + t.size());
             t.forEach((s) -> {
                 stockService.save(s);
             });
-            log.info("stock download done.");
+            log.info("downloadStock done.");
         }, (e) -> {
             log.info(e.getMessage());
         });

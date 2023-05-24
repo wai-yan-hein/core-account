@@ -71,6 +71,7 @@ import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
 import com.inventory.model.WeightLossHis;
 import com.inventory.model.WeightLossHisKey;
+import java.util.Date;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -166,6 +167,16 @@ public class InventoryRepo {
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve().bodyToFlux(StockType.class).collectList();
+    }
+
+    public Mono<List<StockType>> getUpdateStockType(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdateStockType")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(StockType.class)
+                .collectList();
     }
 
     public Mono<List<StockUnit>> getStockUnit() {
@@ -417,7 +428,7 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToMono(ProcessHis.class);
     }
-    
+
     public Mono<List<Location>> getLocation() {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-location")
@@ -433,6 +444,16 @@ public class InventoryRepo {
                 .queryParam("compCode", Global.compCode)
                 .queryParam("active", active)
                 .queryParam("deptId", ProUtil.getDepId())
+                .build())
+                .retrieve()
+                .bodyToFlux(Stock.class)
+                .collectList();
+    }
+
+    public Mono<List<Stock>> getUpdateStock(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdateStock")
+                .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve()
                 .bodyToFlux(Stock.class)
