@@ -34,5 +34,6 @@ build/
 /nbproject/
 
 ###h2###
-/data/
+database.mv.db
+database.trace.db
 log.txt
