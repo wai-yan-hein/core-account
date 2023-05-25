@@ -34,5 +34,5 @@ build/
 /nbproject/
 
 ###h2###
-data/
+/data/
 log.txt

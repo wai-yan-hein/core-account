@@ -60,13 +60,13 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
     private List<Stock> getStockList(String filter, String compCode, Integer deptId) {
         List<Stock> listStock = new ArrayList<>();
         String sql = """
-                     select s.*,rel.rel_name,st.stock_type_name,cat.cat_name,b.brand_name
-                     from stock s
-                     join unit_relation rel on s.rel_code= rel.rel_code
-                     left join stock_type st on s.stock_type_code = st.stock_type_code
-                     left join category cat  on s.category_code = cat.cat_code
-                     left join stock_brand b on s.brand_code  = b.brand_code
-                     where s.comp_code ='""" + compCode + "'\n" + "and s.active =1\n"
+        select s.*,rel.rel_name,st.stock_type_name,cat.cat_name,b.brand_name
+        from stock s
+        join unit_relation rel on s.rel_code= rel.rel_code
+        left join stock_type st on s.stock_type_code = st.stock_type_code
+        left join category cat  on s.category_code = cat.cat_code
+        left join stock_brand b on s.brand_code  = b.brand_code
+        where s.comp_code ='""" + compCode + "'\n" + "and s.active =true\n"
                 + "and (s.dept_id =" + deptId + " or 0 =" + deptId + ")\n"
                 + "and " + filter + "\n"
                 + "order by s.user_code,s.stock_name\n" + "limit 100";
