@@ -10,6 +10,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import java.util.Date;
 import lombok.Data;
 
 /**
@@ -28,6 +31,9 @@ public class RoleProperty {
     private String propValue;
     @Column(name = "remark")
     private String remark;
+    @Column(name = "updated_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedDate;
 
     public RoleProperty() {
     }

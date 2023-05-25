@@ -25,7 +25,7 @@ public class RolePropertyDaoImpl extends AbstractDao<RolePropertyKey, RoleProper
 
     @Override
     public String getMaxDate() {
-        String sql = "select max(o.updatedDate) from RoleProperty";
+        String sql = "select max(o.updatedDate) from RoleProperty o";
         Date date = getDate(sql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }

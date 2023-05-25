@@ -25,7 +25,7 @@ public class MacPropertyDaoImpl extends AbstractDao<MachinePropertyKey, MachineP
 
     @Override
     public String getMaxDate() {
-        String sql = "select max(o.updatedDate) from MachineProperty";
+        String sql = "select max(o.updatedDate) from MachineProperty o";
         Date date = getDate(sql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }

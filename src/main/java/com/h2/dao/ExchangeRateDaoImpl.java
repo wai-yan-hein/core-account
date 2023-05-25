@@ -25,7 +25,7 @@ public class ExchangeRateDaoImpl extends AbstractDao<ExchangeKey, ExchangeRate> 
 
     @Override
     public String getMaxDate() {
-        String sql = "select max(o.updatedDate) from ExchangeRate";
+        String sql = "select max(o.updatedDate) from ExchangeRate o";
         Date date = getDate(sql);
         return date == null? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }

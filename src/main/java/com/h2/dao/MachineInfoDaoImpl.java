@@ -24,7 +24,7 @@ public class MachineInfoDaoImpl extends AbstractDao<Integer, MachineInfo> implem
 
     @Override
     public String getMaxDate() {
-        String sql = "select max(o.updatedDate) from MachineInfo";
+        String sql = "select max(o.updatedDate) from MachineInfo o";
         Date date = getDate(sql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }

@@ -25,7 +25,7 @@ public class PrivilegeMenuDaoImpl extends AbstractDao<PMKey, PrivilegeMenu> impl
 
     @Override
     public String getMaxDate() {
-        String sql = "select max(o.updatedDate) from PrivilegeMenu";
+        String sql = "select max(o.updatedDate) from PrivilegeMenu o";
         Date date = getDate(sql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }

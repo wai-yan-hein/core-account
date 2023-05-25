@@ -5,8 +5,8 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.user.model.Project;
-import com.user.model.ProjectKey;
+import com.user.model.PropertyKey;
+import com.user.model.SysProperty;
 import java.util.Date;
 import org.springframework.stereotype.Repository;
 
@@ -15,17 +15,17 @@ import org.springframework.stereotype.Repository;
  * @author Athu Sint
  */
 @Repository
-public class ProjectDaoImpl extends AbstractDao<ProjectKey, Project> implements ProjectDao {
+public class SystemPropertyDaoImpl extends AbstractDao<PropertyKey, SysProperty> implements SystemPropertyDao {
 
     @Override
-    public Project save(Project p) {
+    public SysProperty save(SysProperty p) {
         saveOrUpdate(p, p.getKey());
         return p;
     }
 
     @Override
     public String getMaxDate() {
-        String sql = "select max(o.updatedDate) from Project o";
+        String sql = "select max(o.updatedDate) from SysProperty o";
         Date date = getDate(sql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }

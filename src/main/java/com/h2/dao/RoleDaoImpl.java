@@ -24,7 +24,7 @@ public class RoleDaoImpl extends AbstractDao<String, AppRole> implements RoleDao
 
     @Override
     public String getMaxDate() {
-        String sql = "select max(o.updatedDate) from AppRole";
+        String sql = "select max(o.updatedDate) from AppRole o";
         Date date = getDate(sql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }

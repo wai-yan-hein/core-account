@@ -505,7 +505,7 @@ public class UserRepo {
 
     public Mono<List<ExchangeRate>> getExchangeRateByDate(String updatedDate) {
         return userApi.get()
-                .uri(builder -> builder.path("/user/getDepartmentByDate")
+                .uri(builder -> builder.path("/user/getExchangeRateByDate")
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(ExchangeRate.class)
@@ -583,5 +583,13 @@ public class UserRepo {
                 .retrieve().bodyToFlux(RoleProperty.class)
                 .collectList();
     }
-
+    
+    public Mono<List<SysProperty>> getSystemPropertyByDate(String updatedDate) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getSystemPropertyByDate")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve().bodyToFlux(SysProperty.class)
+                .collectList();
+    }
 }

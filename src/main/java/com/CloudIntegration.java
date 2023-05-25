@@ -4,6 +4,7 @@
  */
 package com;
 
+import com.h2.dao.SystemPropertyDao;
 import com.h2.service.BrandService;
 import com.h2.service.BusinessTypeService;
 import com.h2.service.CategoryService;
@@ -73,6 +74,7 @@ public class CloudIntegration {
     private LocationService locationService;
     @Autowired
     private SaleManService saleManService;
+    @Autowired
     private ExchangeRateService exchangeRateService;
     @Autowired
     private MachineInfoService machineInfoService;
@@ -90,6 +92,8 @@ public class CloudIntegration {
     private RoleService roleService;
     @Autowired
     private RolePropertyService rpService;
+    @Autowired
+    private SystemPropertyDao sysPropertyDao;
 
     public void startDownload() {
         if (localDatabase) {
@@ -115,6 +119,7 @@ public class CloudIntegration {
         downloadProject();
         downloadRole();
         downloadRoleProperty();
+        downloadSystemProperty();
     }
 
     private void downloadAppUser() {
@@ -265,6 +270,17 @@ public class CloudIntegration {
             log.info("role prop size = " + r.size());
             r.forEach((a) -> {
                 rpService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+    
+    private void downloadSystemProperty() {
+        userRepo.getSystemPropertyByDate(sysPropertyDao.getMaxDate()).subscribe((r) -> {
+            log.info("sys prop size = " + r.size());
+            r.forEach((a) -> {
+                sysPropertyDao.save(a);
             });
         }, (err) -> {
             log.info(err.getMessage());

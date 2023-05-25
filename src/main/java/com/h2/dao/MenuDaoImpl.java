@@ -25,7 +25,7 @@ public class MenuDaoImpl extends AbstractDao<MenuKey, Menu> implements MenuDao {
 
     @Override
     public String getMaxDate() {
-        String sql = "select max(o.updatedDate) from Menu";
+        String sql = "select max(o.updatedDate) from Menu o";
         Date date = getDate(sql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }

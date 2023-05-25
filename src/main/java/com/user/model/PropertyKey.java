@@ -4,6 +4,9 @@
  */
 package com.user.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import java.io.Serializable;
 import lombok.Data;
 
 /**
@@ -11,9 +14,12 @@ import lombok.Data;
  * @author DELL
  */
 @Data
-public class PropertyKey {
+@Embeddable
+public class PropertyKey implements Serializable{
 
+    @Column(name = "prop_key")
     private String propKey;
+    @Column(name = "comp_code")
     private String compCode;
 }
 

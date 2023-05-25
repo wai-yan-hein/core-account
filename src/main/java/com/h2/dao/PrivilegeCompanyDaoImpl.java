@@ -7,7 +7,6 @@ package com.h2.dao;
 import com.common.Util1;
 import com.user.model.PCKey;
 import com.user.model.PrivilegeCompany;
-import java.io.Serializable;
 import java.util.Date;
 import org.springframework.stereotype.Repository;
 
@@ -26,7 +25,7 @@ public class PrivilegeCompanyDaoImpl extends AbstractDao<PCKey, PrivilegeCompany
 
     @Override
     public String getMaxDate() {
-        String sql = "select max(o.updatedDate) from PrivilegeCompany";
+        String sql = "select max(o.updatedDate) from PrivilegeCompany o";
         Date date = getDate(sql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }

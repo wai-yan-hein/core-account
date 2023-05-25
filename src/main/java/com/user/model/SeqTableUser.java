@@ -10,28 +10,19 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import java.util.Date;
-import lombok.Data;
+import lombok.*;
 
 /**
- *
- * @author Lenovo
+ * @author winswe
  */
 @Data
 @Entity
-@Table(name = "sys_prop")
+@Table(name = "seq_table_user")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SysProperty {
+public class SeqTableUser implements java.io.Serializable {
 
     @EmbeddedId
-    private PropertyKey key;
-    @Column(name = "prop_value")
-    private String propValue;
-    @Column(name = "remark")
-    private String remark;
-    @Column(name = "updated_date")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedDate;
+    private SeqKeyUser key;
+    @Column(name = "seq_no")
+    private Integer seqNo;
 }
