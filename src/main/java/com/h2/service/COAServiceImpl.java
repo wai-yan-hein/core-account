@@ -1,0 +1,111 @@
+package com.h2.service;
+import com.acc.model.COAKey;
+import com.acc.model.ChartOfAccount;
+import com.common.Util1;
+import com.h2.dao.COADao;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Date;
+import java.util.List;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Slf4j
+@Service
+@Transactional
+public class COAServiceImpl implements COAService {
+
+    @Autowired
+    private COADao dao;
+    @Autowired
+    private SeqTableService seqService;
+
+    @Override
+    public ChartOfAccount save(ChartOfAccount coa) {
+        if (Util1.isNullOrEmpty(coa.getKey().getCoaCode())) {
+            Integer macId = coa.getMacId();
+            String compCode = coa.getKey().getCompCode();
+            String coaCode = getCOACode(macId, compCode);
+            coa.getKey().setCoaCode(coaCode);
+            ChartOfAccount valid = findById(coa.getKey());
+            if (valid != null) {
+                log.info("code " + coa.getKey().getCoaCode());
+                log.info("company" + coa.getKey().getCompCode());
+                throw new IllegalStateException("Duplicate Account Code");
+            }
+        }
+        return dao.save(coa);
+    }
+
+    @Override
+    public ChartOfAccount save(ChartOfAccount coa, String opDate) throws Exception {
+        return save(coa);
+    }
+
+    @Override
+    public ChartOfAccount findById(COAKey key) {
+        return dao.findById(key);
+    }
+
+    @Override
+    public List<ChartOfAccount> getCOA(String compCode) {
+        return dao.getCOA(compCode);
+    }
+
+    @Override
+    public List<ChartOfAccount> getCOA(String headCode, String compCode) {
+        return dao.getCOA(headCode, compCode);
+    }
+
+    @Override
+    public Boolean delete(COAKey key) {
+        return dao.delete(key);
+    }
+
+
+    @Override
+    public List<ChartOfAccount> searchCOA(String str, Integer level, String compCode) {
+        return dao.searchCOA(str, level, compCode);
+    }
+
+    private String getCOACode(Integer macId, String compCode) {
+        int seqNo = seqService.getSequence(macId, "COA", "-", compCode);
+        return String.format("%0" + 3 + "d", macId) + "-" + String.format("%0" + 5 + "d", seqNo);
+    }
+
+    @Override
+    public List<ChartOfAccount> getCOATree(String compCode) {
+        return dao.getCOATree(compCode);
+    }
+
+    @Override
+    public List<ChartOfAccount> getCOAChild(String parentCode, String compCode) {
+        return dao.getCOAChild(parentCode, compCode);
+    }
+
+    @Override
+    public List<ChartOfAccount> getTraderCOA(String compCode) {
+        return dao.getTraderCOA(compCode);
+    }
+
+    @Override
+    public List<ChartOfAccount> search(String updatedDate) {
+        return dao.search(updatedDate);
+    }
+
+    @Override
+    public List<ChartOfAccount> unUpload() {
+        return dao.unUpload();
+    }
+
+    @Override
+    public List<ChartOfAccount> findAllActive(String compCode) {
+        return dao.findAllActive(compCode);
+    }
+
+    @Override
+    public Date getMaxDate() {
+        return dao.getMaxDate();
+    }
+
+}

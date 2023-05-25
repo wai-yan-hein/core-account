@@ -4,6 +4,7 @@
  */
 package com;
 
+import com.acc.common.AccountRepo;
 import com.h2.service.BusinessTypeService;
 import com.h2.service.CompanyInfoService;
 import com.h2.service.CurrencyService;
@@ -31,6 +32,8 @@ public class CloudIntegration {
     private UserRepo userRepo;
     @Autowired
     private InventoryRepo inventoryRepo;
+    @Autowired
+    private AccountRepo accounRepo;
 
     @Autowired
     private StockService stockService;
@@ -125,7 +128,28 @@ public class CloudIntegration {
     }
 
     private void downloadAccount() {
-
+        downloadChatofAccount();
+    }
+    
+    private void downloadChatofAccount() {
+       // accounRepo.getChartOfAccount()
+//        inventoryRepo.getUpdateStockType(stockTypeService.getMaDate()).subscribe((t) -> {
+//            log.info("downloadStockType list : " + t.size());
+//            t.forEach((s) -> {
+//                stockTypeService.save(s);
+//            });
+//            log.info("downloadStockType done.");
+//        }, (e) -> {
+//            log.info(e.getMessage());
+//        });
+        
+//         accounRepo.getChartOfAccount().subscribe((u) -> {
+//            u.forEach((a) -> {
+//                userService.save(a);
+//            });
+//        }, (err) -> {
+//            log.info(err.getMessage());
+//        });
     }
 
     private void downloadCategory() {
