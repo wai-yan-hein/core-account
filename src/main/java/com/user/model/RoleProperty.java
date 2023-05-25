@@ -5,7 +5,11 @@
  */
 package com.user.model;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.Data;
 
 /**
@@ -13,10 +17,16 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
+@Entity
+@Table(name = "role_prop")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RoleProperty {
 
+    @EmbeddedId
     private RolePropertyKey key;
+    @Column(name = "prop_value")
     private String propValue;
+    @Column(name = "remark")
     private String remark;
 
     public RoleProperty() {

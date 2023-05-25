@@ -23,6 +23,7 @@ import com.user.model.MachineProperty;
 import com.user.model.Menu;
 import com.user.model.MenuTemplate;
 import com.user.model.PrivilegeCompany;
+import com.user.model.PrivilegeMenu;
 import com.user.model.Project;
 import com.user.model.ProjectKey;
 import com.user.model.YearEnd;
@@ -528,7 +529,7 @@ public class UserRepo {
                 .retrieve().bodyToFlux(MachineInfo.class)
                 .collectList();
     }
-    
+
     public Mono<List<Menu>> getMenuByDate(String updatedDate) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/getMenuByDate")
@@ -537,13 +538,49 @@ public class UserRepo {
                 .retrieve().bodyToFlux(Menu.class)
                 .collectList();
     }
-    
+
     public Mono<List<PrivilegeCompany>> getPCByDate(String updatedDate) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/getPCByDate")
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(PrivilegeCompany.class)
+                .collectList();
+    }
+
+    public Mono<List<PrivilegeMenu>> getPMByDate(String updatedDate) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getPMByDate")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve().bodyToFlux(PrivilegeMenu.class)
+                .collectList();
+    }
+
+    public Mono<List<Project>> getProjectByDate(String updatedDate) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getProjectByDate")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve().bodyToFlux(Project.class)
+                .collectList();
+    }
+
+    public Mono<List<AppRole>> getRoleByDate(String updatedDate) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getRoleByDate")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve().bodyToFlux(AppRole.class)
+                .collectList();
+    }
+
+    public Mono<List<RoleProperty>> getRolePropByDate(String updatedDate) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getRolePropByDate")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve().bodyToFlux(RoleProperty.class)
                 .collectList();
     }
 

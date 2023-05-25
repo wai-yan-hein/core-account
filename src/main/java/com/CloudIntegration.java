@@ -4,7 +4,6 @@
  */
 package com;
 
-import com.common.Global;
 import com.h2.service.BrandService;
 import com.h2.service.BusinessTypeService;
 import com.h2.service.CategoryService;
@@ -19,19 +18,19 @@ import com.h2.service.MacPropertyService;
 import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
 import com.h2.service.PrivilegeCompanyService;
+import com.h2.service.PrivilegeMenuService;
+import com.h2.service.ProjectService;
+import com.h2.service.RolePropertyService;
+import com.h2.service.RoleService;
 import com.h2.service.StockService;
 import com.h2.service.StockTypeService;
 import com.h2.service.StockUnitService;
 import com.h2.service.UserService;
-import com.inventory.model.Location;
 import com.inventory.ui.common.InventoryRepo;
 import com.user.common.UserRepo;
-import java.util.List;
-import com.user.model.ExchangeRate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -83,6 +82,14 @@ public class CloudIntegration {
     private MenuService menuService;
     @Autowired
     private PrivilegeCompanyService pcService;
+    @Autowired
+    private PrivilegeMenuService pmService;
+    @Autowired
+    private ProjectService pService;
+    @Autowired
+    private RoleService roleService;
+    @Autowired
+    private RolePropertyService rpService;
 
     public void startDownload() {
         if (localDatabase) {
@@ -104,6 +111,10 @@ public class CloudIntegration {
         downloadMacProperty();
         downloadMenu();
         downloadPC();
+        downloadPM();
+        downloadProject();
+        downloadRole();
+        downloadRoleProperty();
     }
 
     private void downloadAppUser() {
@@ -210,6 +221,50 @@ public class CloudIntegration {
             log.info("pc size = " + p.size());
             p.forEach((a) -> {
                 pcService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadPM() {
+        userRepo.getPMByDate(pmService.getMaxDate()).subscribe((m) -> {
+            log.info("pm size = " + m.size());
+            m.forEach((a) -> {
+                pmService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadProject() {
+        userRepo.getProjectByDate(pService.getMaxDate()).subscribe((p) -> {
+            log.info("project size = " + p.size());
+            p.forEach((a) -> {
+                pService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadRole() {
+        userRepo.getRoleByDate(roleService.getMaxDate()).subscribe((r) -> {
+            log.info("role size = " + r.size());
+            r.forEach((a) -> {
+                roleService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadRoleProperty() {
+        userRepo.getRolePropByDate(rpService.getMaxDate()).subscribe((r) -> {
+            log.info("role prop size = " + r.size());
+            r.forEach((a) -> {
+                rpService.save(a);
             });
         }, (err) -> {
             log.info(err.getMessage());
