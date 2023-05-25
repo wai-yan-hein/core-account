@@ -4,22 +4,22 @@
  */
 package com.h2.service;
 
-import com.inventory.model.Stock;
+import com.inventory.model.Location;
+import com.inventory.model.LocationKey;
 import java.util.List;
 
 /**
  *
  * @author Lenovo
  */
-public interface StockService {
+public interface LocationService {
 
-    Stock save(Stock stock);
+    Location save(Location stock);
 
-    List<Stock> findAll(String compCode);
+    Location find(LocationKey key);
 
-    List<Stock> getStock(String str, String compCode, Integer deptId);
+    List<Location> findAll(String compCode);
 
     String getMaxDate();
 
-    List<Stock> findAll();
 }

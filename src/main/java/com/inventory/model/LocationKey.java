@@ -4,6 +4,9 @@
  */
 package com.inventory.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import java.io.Serializable;
 import lombok.Data;
 
 /**
@@ -11,9 +14,13 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
-public class LocationKey {
+@Embeddable
+public class LocationKey implements Serializable{
 
+    @Column(name = "loc_code")
     private String locCode;
+    @Column(name = "comp_code")
     private String compCode;
+    @Column(name = "dept_id")
     private Integer deptId;
 }

@@ -264,7 +264,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 currAutoCompleter.setCurrency(tt);
             });
         });
-        inventoryRepo.getSaleMan().collectList().subscribe((t) -> {
+        inventoryRepo.getSaleMan().subscribe((t) -> {
             saleManCompleter = new SaleManAutoCompleter(txtSaleman, t, null, false, false);
         });
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);

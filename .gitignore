@@ -32,3 +32,8 @@ build/
 ### VS Code ###
 .vscode/
 /nbproject/
+
+###h2###
+database.mv.db
+database.trace.db
+log.txt

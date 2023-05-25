@@ -170,7 +170,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, true);
         });
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, true, "-");
-        inventoryRepo.getSaleMan().collectList().subscribe((t) -> {
+        inventoryRepo.getSaleMan().subscribe((t) -> {
             saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, t, null, true, false);
         });
 

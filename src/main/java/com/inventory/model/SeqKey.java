@@ -5,22 +5,20 @@
 package com.inventory.model;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 import lombok.Data;
 
 /**
  *
- * @author DELL
+ * @author Lenovo
  */
 @Data
-@Embeddable
-public class SaleManKey implements Serializable{
+public class SeqKey implements Serializable{
 
-    @Column(name = "saleman_code")
-    private String saleManCode;
+    @Column(name = "seq_option")
+    private String seqOption;
+    @Column(name = "period")
+    private String period;
     @Column(name = "comp_code")
     private String compCode;
-    @Column(name = "dept_id")
-    private Integer deptId;
 }

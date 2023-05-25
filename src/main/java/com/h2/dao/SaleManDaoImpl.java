@@ -5,8 +5,8 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.Category;
-import com.inventory.model.CategoryKey;
+import com.inventory.model.SaleMan;
+import com.inventory.model.SaleManKey;
 import java.util.Date;
 import java.util.List;
 import org.springframework.stereotype.Repository;
@@ -16,25 +16,30 @@ import org.springframework.stereotype.Repository;
  * @author Lenovo
  */
 @Repository
-public class CategoryDaoImpl extends AbstractDao<CategoryKey, Category> implements CategoryDao {
+public class SaleManDaoImpl extends AbstractDao<SaleManKey, SaleMan> implements SaleManDao {
 
     @Override
-    public Category save(Category cat) {
+    public SaleMan save(SaleMan cat) {
         saveOrUpdate(cat, cat.getKey());
         return cat;
     }
 
     @Override
     public String getMaxDate() {
-        String jpql = "select max(o.updatedDate) from Category o";
+        String jpql = "select max(o.updatedDate) from SaleMan o";
         Date date = getDate(jpql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 
     @Override
-    public List<Category> findAll(String compCode) {
-        String hsql = "select o from Category o where o.key.compCode ='" + compCode + "'";
+    public List<SaleMan> findAll(String compCode) {
+        String hsql = "select o from SaleMan o where o.key.compCode ='" + compCode + "'";
         return findHSQL(hsql);
+    }
+
+    @Override
+    public SaleMan find(SaleManKey key) {
+        return getByKey(key);
     }
 
 }

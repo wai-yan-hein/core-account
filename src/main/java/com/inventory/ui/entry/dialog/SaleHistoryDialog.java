@@ -136,7 +136,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         }, (e) -> {
             log.error(e.getMessage());
         });
-        inventoryRepo.getSaleMan().collectList().subscribe((t) -> {
+        inventoryRepo.getSaleMan().subscribe((t) -> {
             saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, t, null, true, false);
         }, (e) -> {
             log.error(e.getMessage());

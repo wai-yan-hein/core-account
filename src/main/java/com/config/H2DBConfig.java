@@ -4,9 +4,13 @@
  */
 package com.config;
 
+import javax.sql.DataSource;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  *
@@ -17,4 +21,8 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource("classpath:application.properties") // Use the same properties file as your main configuration
 public class H2DBConfig {
 
+    @Bean
+    public JdbcTemplate jdbcTemplate(DataSource dataSource) {
+        return new JdbcTemplate(dataSource);
+    }
 }

@@ -5,20 +5,22 @@
 package com.inventory.model;
 
 import jakarta.persistence.Column;
-import java.io.Serializable;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.Data;
 
 /**
  *
- * @author DELL
+ * @author Lenovo
  */
 @Data
-public class StockUnitKey implements Serializable{
+@Entity
+@Table(name = "seq_table")
+public class SeqTable {
 
-    @Column(name = "unit_code")
-    private String unitCode;
-    @Column(name = "comp_code")
-    private String compCode;
-    @Column(name = "dept_id")
-    private Integer deptId;
+    @EmbeddedId
+    private SeqKey key;
+    @Column(name = "seq_no")
+    private Integer seqNo;
 }

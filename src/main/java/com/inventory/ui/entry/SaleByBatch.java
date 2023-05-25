@@ -99,7 +99,6 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
     private LocationAutoCompleter locationAutoCompleter;
     private SelectionObserver observer;
     private SaleHis saleHis = new SaleHis();
-    private Region region;
     private JProgressBar progress;
     private Mono<List<Location>> monoLoc;
     private double prvBal = 0;
@@ -258,7 +257,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
                 currAutoCompleter.setCurrency(tt);
             });
         });
-        inventoryRepo.getSaleMan().collectList().subscribe((t) -> {
+        inventoryRepo.getSaleMan().subscribe((t) -> {
             saleManCompleter = new SaleManAutoCompleter(txtSaleman, t, null, false, false);
             inventoryRepo.getDefaultSaleMan().subscribe((s) -> {
                 saleManCompleter.setSaleMan(s);
