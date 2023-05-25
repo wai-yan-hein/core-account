@@ -42,4 +42,9 @@ public class StockServiceImpl implements StockService {
         return dao.findAll();
     }
 
+    @Override
+    public List<Stock> getStock(String str, String compCode, Integer deptId) {
+        return dao.getStock(str, compCode, deptId);
+    }
+
 }

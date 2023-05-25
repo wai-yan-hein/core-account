@@ -6,17 +6,31 @@ package com;
 
 import com.acc.common.AccountRepo;
 import com.h2.service.BusinessTypeService;
+import com.h2.service.CategoryService;
 import com.h2.service.CompanyInfoService;
 import com.h2.service.CurrencyService;
 import com.h2.service.DepartmentUserService;
+import com.h2.service.LocationService;
+import com.h2.service.RelationService;
+import com.h2.service.SaleManService;
+import com.h2.service.ExchangeRateService;
+import com.h2.service.MacPropertyService;
+import com.h2.service.MachineInfoService;
+import com.h2.service.MenuService;
+import com.h2.service.PrivilegeCompanyService;
 import com.h2.service.StockService;
 import com.h2.service.StockTypeService;
+import com.h2.service.StockUnitService;
 import com.h2.service.UserService;
+import com.inventory.model.Location;
 import com.inventory.ui.common.InventoryRepo;
 import com.user.common.UserRepo;
+import java.util.List;
+import com.user.model.ExchangeRate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 /**
  *
@@ -49,6 +63,27 @@ public class CloudIntegration {
     private CurrencyService currencyService;
     @Autowired
     private DepartmentUserService departmentService;
+    @Autowired
+    private CategoryService categoryService;
+    @Autowired
+    private BrandService brandService;
+    @Autowired
+    private StockUnitService stockUnitService;
+    @Autowired
+    private RelationService relationService;
+    @Autowired
+    private LocationService locationService;
+    @Autowired
+    private SaleManService saleManService;
+    private ExchangeRateService exchangeRateService;
+    @Autowired
+    private MachineInfoService machineInfoService;
+    @Autowired
+    private MacPropertyService macPropertyService;
+    @Autowired
+    private MenuService menuService;
+    @Autowired
+    private PrivilegeCompanyService pcService;
 
     public void startDownload() {
         if (localDatabase) {
@@ -65,8 +100,36 @@ public class CloudIntegration {
         downloadCompanyInfo();
         downloadCurrency();
         downloadDepartment();
+        downloadExchangeRate();
+        downloadMachineInfo();
+        downloadMacProperty();
+        downloadMenu();
+        downloadPC();
     }
+    private void downloadAccount() {
+            downloadChatofAccount();
+        }
 
+        private void downloadChatofAccount() {
+           // accounRepo.getChartOfAccount()
+    //        inventoryRepo.getUpdateStockType(stockTypeService.getMaDate()).subscribe((t) -> {
+    //            log.info("downloadStockType list : " + t.size());
+    //            t.forEach((s) -> {
+    //                stockTypeService.save(s);
+    //            });
+    //            log.info("downloadStockType done.");
+    //        }, (e) -> {
+    //            log.info(e.getMessage());
+    //        });
+
+    //         accounRepo.getChartOfAccount().subscribe((u) -> {
+    //            u.forEach((a) -> {
+    //                userService.save(a);
+    //            });
+    //        }, (err) -> {
+    //            log.info(err.getMessage());
+    //        });
+        }
     private void downloadAppUser() {
         userRepo.getAppUserByDate(userService.getMaxDate()).subscribe((u) -> {
             log.info("user size = " + u.size());
@@ -122,41 +185,148 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadInventory() {
-        downloadStockType();
-        downloadStock();
+    private void downloadExchangeRate() {
+        userRepo.getExchangeRateByDate(exchangeRateService.getMaxDate()).subscribe((ex) -> {
+            log.info("exchange rate size = " + ex.size());
+            ex.forEach((a) -> {
+                exchangeRateService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
     }
 
-    private void downloadAccount() {
-        downloadChatofAccount();
+    private void downloadMachineInfo() {
+        userRepo.getMachineInfoByDate(machineInfoService.getMaxDate()).subscribe((m) -> {
+            log.info("machine info size = " + m.size());
+            m.forEach((a) -> {
+                machineInfoService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
     }
-    
-    private void downloadChatofAccount() {
-       // accounRepo.getChartOfAccount()
-//        inventoryRepo.getUpdateStockType(stockTypeService.getMaDate()).subscribe((t) -> {
-//            log.info("downloadStockType list : " + t.size());
-//            t.forEach((s) -> {
-//                stockTypeService.save(s);
-//            });
-//            log.info("downloadStockType done.");
-//        }, (e) -> {
-//            log.info(e.getMessage());
-//        });
-        
-//         accounRepo.getChartOfAccount().subscribe((u) -> {
-//            u.forEach((a) -> {
-//                userService.save(a);
-//            });
-//        }, (err) -> {
-//            log.info(err.getMessage());
-//        });
+
+    private void downloadMacProperty() {
+        userRepo.getMacPropertyByDate(macPropertyService.getMaxDate()).subscribe((m) -> {
+            log.info("mac prop size = " + m.size());
+            m.forEach((a) -> {
+                macPropertyService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadMenu() {
+        userRepo.getMenuByDate(menuService.getMaxDate()).subscribe((m) -> {
+            log.info("menu size = " + m.size());
+            m.forEach((a) -> {
+                menuService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadPC() {
+        userRepo.getPCByDate(pcService.getMaxDate()).subscribe((p) -> {
+            log.info("pc size = " + p.size());
+            p.forEach((a) -> {
+                pcService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadInventory() {
+        downloadSaleMan();
+        downloadLocation();
+        downloadRelation();
+        downloadUnit();
+        downloadBrand();
+        downloadStockType();
+        downloadCategory();
+        downloadStock();
+    }
+    private void downloadInvTrader() {
+        inventoryRepo.getUpdateSaleMan(saleManService.getMaxDate()).subscribe((t) -> {
+            log.info("downloadInvTrader list : " + t.size());
+            t.forEach((s) -> {
+                saleManService.save(s);
+            });
+            log.info("downloadInvTrader done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
+
+    private void downloadSaleMan() {
+        inventoryRepo.getUpdateSaleMan(saleManService.getMaxDate()).subscribe((t) -> {
+            log.info("downloadSaleMan list : " + t.size());
+            t.forEach((s) -> {
+                saleManService.save(s);
+            });
+            log.info("downloadSaleMan done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
+
+    private void downloadLocation() {
+        inventoryRepo.getUpdateLocation(locationService.getMaxDate()).subscribe((t) -> {
+            log.info("downloadLocation list : " + t.size());
+            t.forEach((s) -> {
+                locationService.save(s);
+            });
+            log.info("downloadLocation done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
+
+    private void downloadRelation() {
+        inventoryRepo.getUpdateRelation(relationService.getMaxDate()).subscribe((t) -> {
+            log.info("downloadRelation list : " + t.size());
+            t.forEach((s) -> {
+                relationService.save(s);
+            });
+            log.info("downloadRelation done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
+
+    private void downloadUnit() {
+        inventoryRepo.getUpdateUnit(stockService.getMaxDate()).subscribe((t) -> {
+            log.info("downloadUnit list : " + t.size());
+            t.forEach((s) -> {
+                stockUnitService.save(s);
+            });
+            log.info("downloadUnit done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
+
+    private void downloadBrand() {
+        inventoryRepo.getUpdateBrand(brandService.getMaxDate()).subscribe((t) -> {
+            log.info("downloadBrand list : " + t.size());
+            t.forEach((s) -> {
+                brandService.save(s);
+            });
+            log.info("downloadBrand done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
     }
 
     private void downloadCategory() {
-        inventoryRepo.getUpdateStockType(stockTypeService.getMaDate()).subscribe((t) -> {
+        inventoryRepo.getUpdateCategory(categoryService.getMaxDate()).subscribe((t) -> {
             log.info("downloadCategory list : " + t.size());
             t.forEach((s) -> {
-                stockTypeService.save(s);
+                categoryService.save(s);
             });
             log.info("downloadCategory done.");
         }, (e) -> {

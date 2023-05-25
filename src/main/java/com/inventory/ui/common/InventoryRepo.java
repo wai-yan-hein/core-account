@@ -4,6 +4,7 @@
  */
 package com.inventory.ui.common;
 
+import com.H2Repo;
 import com.common.FilterObject;
 import com.inventory.model.CFont;
 import com.user.model.Currency;
@@ -21,7 +22,6 @@ import com.inventory.model.Location;
 import com.inventory.model.LocationKey;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisKey;
-import com.inventory.model.OrderDetail;
 import com.inventory.model.OrderHis;
 import com.inventory.model.OrderHisDetail;
 import com.inventory.model.OrderHisKey;
@@ -71,7 +71,6 @@ import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
 import com.inventory.model.WeightLossHis;
 import com.inventory.model.WeightLossHisKey;
-import java.util.Date;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,9 +88,12 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class InventoryRepo {
 
-    private List<PriceOption> listPO = null;
     @Autowired
     private WebClient inventoryApi;
+    @Autowired
+    private boolean localDatabase;
+    @Autowired
+    private H2Repo h2Repo;
 
     public Mono<Location> getDefaultLocation() {
         String locCode = Global.hmRoleProperty.get("default.location");
@@ -130,13 +132,38 @@ public class InventoryRepo {
                 .retrieve().bodyToFlux(Category.class).collectList();
     }
 
-    public Flux<SaleMan> getSaleMan() {
+    public Mono<List<Category>> getUpdateCategory(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdateCategory")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(Category.class)
+                .collectList();
+    }
+
+    public Mono<List<SaleMan>> getSaleMan() {
+        if (localDatabase) {
+            return h2Repo.getSaleMan();
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-saleman")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
-                .retrieve().bodyToFlux(SaleMan.class);
+                .retrieve()
+                .bodyToFlux(SaleMan.class)
+                .collectList();
+    }
+
+    public Mono<List<SaleMan>> getUpdateSaleMan(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdateSaleMan")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(SaleMan.class)
+                .collectList();
     }
 
     public Mono<SaleMan> findSaleMan(String code, Integer deptId) {
@@ -144,6 +171,9 @@ public class InventoryRepo {
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setSaleManCode(code);
+        if (localDatabase) {
+            return h2Repo.find(key);
+        }
         return inventoryApi.post()
                 .uri("/setup/find-saleman")
                 .body(Mono.just(key), SaleManKey.class)
@@ -158,6 +188,16 @@ public class InventoryRepo {
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve().bodyToFlux(StockBrand.class).collectList();
+    }
+
+    public Mono<List<StockBrand>> getUpdateBrand(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdateBrand")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(StockBrand.class)
+                .collectList();
     }
 
     public Mono<List<StockType>> getStockType() {
@@ -180,12 +220,27 @@ public class InventoryRepo {
     }
 
     public Mono<List<StockUnit>> getStockUnit() {
+        if (localDatabase) {
+            return h2Repo.getStockUnit();
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-unit")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
-                .retrieve().bodyToFlux(StockUnit.class).collectList();
+                .retrieve()
+                .bodyToFlux(StockUnit.class)
+                .collectList();
+    }
+
+    public Mono<List<StockUnit>> getUpdateUnit(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdateUnit")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(StockUnit.class)
+                .collectList();
     }
 
     public Flux<StockUnit> getUnit(String relCode, Integer deptId) {
@@ -314,6 +369,9 @@ public class InventoryRepo {
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setLocCode(locCode);
+        if (localDatabase) {
+            return h2Repo.find(key);
+        }
         return inventoryApi.post()
                 .uri("/setup/find-location")
                 .body(Mono.just(key), LocationKey.class)
@@ -430,12 +488,27 @@ public class InventoryRepo {
     }
 
     public Mono<List<Location>> getLocation() {
+        if (localDatabase) {
+            return h2Repo.getLocation();
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-location")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
-                .retrieve().bodyToFlux(Location.class).collectList();
+                .retrieve()
+                .bodyToFlux(Location.class)
+                .collectList();
+    }
+
+    public Mono<List<Location>> getUpdateLocation(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdateLocation")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(Location.class)
+                .collectList();
     }
 
     public Mono<List<Stock>> getStock(boolean active) {
@@ -461,6 +534,9 @@ public class InventoryRepo {
     }
 
     public Mono<List<Stock>> getStock(String str) {
+        if (localDatabase) {
+            return h2Repo.getStock(str);
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-stock-list")
                 .queryParam("text", str)
@@ -510,6 +586,16 @@ public class InventoryRepo {
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve().bodyToFlux(UnitRelation.class).collectList();
+    }
+
+    public Mono<List<UnitRelation>> getUpdateRelation(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdateRelation")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(UnitRelation.class)
+                .collectList();
     }
 
     public Mono<Trader> saveTrader(Trader t) {

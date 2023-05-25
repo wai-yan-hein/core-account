@@ -132,7 +132,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         userRepo.getAppUser().subscribe((t) -> {
             appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
         });
-        inventoryRepo.getSaleMan().collectList().subscribe((t) -> {
+        inventoryRepo.getSaleMan().subscribe((t) -> {
             saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, t, null, true, false);
         });
         inventoryRepo.getLocation().subscribe((t) -> {

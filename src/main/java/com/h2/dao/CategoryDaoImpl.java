@@ -33,7 +33,7 @@ public class CategoryDaoImpl extends AbstractDao<CategoryKey, Category> implemen
 
     @Override
     public List<Category> findAll(String compCode) {
-        String hsql = "select o from Stock o where o.key.compCode ='" + compCode + "'";
+        String hsql = "select o from Category o where o.key.compCode ='" + compCode + "'";
         return findHSQL(hsql);
     }
 

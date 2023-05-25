@@ -37,11 +37,13 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author wai yan
  */
+@Slf4j
 public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
 
     private final JTable table = new JTable();
@@ -330,6 +332,8 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
                     if (!t.isEmpty()) {
                         table.setRowSelectionInterval(0, 0);
                     }
+                }, (er) -> {
+                    log.error(er.getMessage());
                 });
             }
 

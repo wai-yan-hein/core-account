@@ -8,15 +8,18 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
+import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.Date;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import javax.sql.DataSource;
 
 /**
  *
@@ -36,6 +39,8 @@ public abstract class AbstractDao<PK extends Serializable, T> {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private DataSource dataSource;
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -85,6 +90,8 @@ public abstract class AbstractDao<PK extends Serializable, T> {
     public Date getDate(String jpql) {
         return entityManager.createQuery(jpql, Date.class).getSingleResult();
     }
+
+   
 
     public ResultSet getResult(String sql) {
         return jdbcTemplate.execute((ConnectionCallback<ResultSet>) con -> {

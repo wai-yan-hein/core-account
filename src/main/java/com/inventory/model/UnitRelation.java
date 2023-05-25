@@ -5,7 +5,12 @@
  */
 package com.inventory.model;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import java.util.Date;
 import java.util.List;
 import lombok.Data;
 
@@ -13,12 +18,20 @@ import lombok.Data;
  *
  * @author Lenovo
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
-public class UnitRelation implements Serializable {
+@Entity
+@Table(name = "unit_relation")public class UnitRelation {
 
+    @EmbeddedId
     private RelationKey key;
+    @Column(name = "rel_name")
     private String relName;
-    private List<UnitRelationDetail> detailList;
+    @Column(name = "intg_upd_status")
+    private String intgUpdStatus;
+    @Column(name = "updated_date")
+    private Date updatedDate;
+    private transient List<UnitRelationDetail> detailList;
 
     public UnitRelation() {
     }

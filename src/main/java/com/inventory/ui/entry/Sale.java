@@ -23,7 +23,6 @@ import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.OrderHis;
-import com.inventory.model.Region;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.SaleHisKey;
@@ -303,10 +302,14 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         monoLoc.subscribe((t) -> {
             tblSale.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
+        }, (e) -> {
+            log.error("getLocation : " + e.getMessage());
         });
         tblSale.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
         inventoryRepo.getStockUnit().subscribe((t) -> {
             tblSale.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));
+        }, (e) -> {
+            log.error("getStockUnit: " + e.getMessage());
         });
         tblSale.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//
         if (ProUtil.isSalePriceChange()) {
@@ -352,7 +355,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         }, (e) -> {
             log.error(e.getMessage());
         });
-        inventoryRepo.getSaleMan().collectList().subscribe((t) -> {
+        inventoryRepo.getSaleMan().subscribe((t) -> {
             saleManCompleter = new SaleManAutoCompleter(txtSaleman, t, null, false, false);
         }, (e) -> {
             log.error(e.getMessage());
@@ -422,6 +425,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         Mono<Trader> trader = inventoryRepo.findTrader(Global.hmRoleProperty.get("default.customer"), Global.deptId);
         trader.subscribe((t) -> {
             traderAutoCompleter.setTrader(t);
+        }, (e) -> {
+            log.error("findTrader : " + e.getMessage());
         });
         if (saleManCompleter != null) {
             inventoryRepo.getDefaultSaleMan().subscribe((tt) -> {
