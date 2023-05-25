@@ -1,59 +1,84 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.acc.model;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
+import lombok.Data;
 import java.util.Date;
 import java.util.List;
-import lombok.Data;
-
-/**
- *
- * @author Lenovo
- */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Entity
+@Table(name = "chart_of_account")
 public class ChartOfAccount {
 
-    private COAKey key;
-    private String coaNameEng;
-    private String coaNameMya;
-    private boolean active;
-    private Integer sortId;
-    private Date createdDate;
-    private Date modifiedDate;
-    private String createdBy;
-    private String modifiedBy;
-    private String coaParent;
-    private String option;
-    private Integer coaLevel;
-    private String coaCodeUsr;
-    private String parentUsrCode;
-    private String appShortName;
-    private String migCode;
-    private Integer macId;
-    private boolean marked;
-    private boolean credit;
-    private String curCode;
-    private String groupCode;
-    private String groupUsrCode;
-    private String groupName;
-    private String headCode;
-    private String headUsrCode;
-    private String headName;
-    private List<ChartOfAccount> child;
+ @EmbeddedId
+ private COAKey key;
+ @Column(name = "coa_name_eng")
+ private String coaNameEng;
+ @Column(name = "coa_name_mya")
+ private String coaNameMya;
+ @Column(name = "active")
+ private boolean active;
+ @Temporal(TemporalType.TIMESTAMP)
+ @Column(name = "created_date")
+ private Date createdDate;
+ @Temporal(TemporalType.TIMESTAMP)
+ @Column(name = "modify_date")
+ private Date modifiedDate;
+ @Column(name = "created_by", length = 15)
+ private String createdBy;
+ @Column(name = "updated_by", length = 15)
+ private String modifiedBy;
+ @Column(name = "coa_parent")
+ private String coaParent;
+ @Column(name = "coa_option", length = 5)
+ private String option;
+ @Column(name = "coa_level")
+ private Integer coaLevel;
+ @Column(name = "coa_code_usr")
+ private String coaCodeUsr;
+ @Column(name = "parent_usr_code")
+ private String parentUsrCode;
+ @Column(name = "mac_id")
+ private Integer macId;
+ @Column(name = "marked")
+ private boolean marked;
+ @Column(name = "cur_code")
+ private String curCode;
+ @Column(name = "dept_code")
+ private String deptCode;
+ @Column(name = "deleted")
+ private boolean deleted;
+ @Column(name = "mig_code")
+ private String migCode;
+ @Column(name = "intg_upd_status")
+ private String intgUpdStatus;
+ @Column(name = "credit")
+ private boolean credit;
+ @Transient
+ private String groupCode;
+ @Transient
+ private String groupUsrCode;
+ @Transient
+ private String groupName;
+ @Transient
+ private String headCode;
+ @Transient
+ private String headUsrCode;
+ @Transient
+ private String headName;
+ @Transient
+ private List<ChartOfAccount> child;
 
-    public ChartOfAccount(COAKey key, String coaNameEng) {
-        this.key = key;
-        this.coaNameEng = coaNameEng;
-    }
+ public ChartOfAccount() {
+ }
 
-    public ChartOfAccount() {
-    }
-
-    @Override
-    public String toString() {
-        return coaNameEng;
-    }
-
+ public ChartOfAccount(Date modifiedDate) {
+  this.modifiedDate = modifiedDate;
+ }
 }

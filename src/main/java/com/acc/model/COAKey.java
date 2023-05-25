@@ -4,24 +4,17 @@
  */
 package com.acc.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import lombok.Data;
+import java.io.Serializable;
 
-/**
- *
- * @author DELL
- */
+@Embeddable
 @Data
-public class COAKey {
-
+public class COAKey implements Serializable {
+    @Column(name = "coa_code")
     private String coaCode;
+    @Column(name = "comp_code")
     private String compCode;
+}  
 
-    public COAKey(String coaCode, String compCode) {
-        this.coaCode = coaCode;
-        this.compCode = compCode;
-    }
-
-    public COAKey() {
-    }
-    
-}

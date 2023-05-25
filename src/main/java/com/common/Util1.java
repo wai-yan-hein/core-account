@@ -507,6 +507,11 @@ public class Util1 {
     public static String getString(Object obj) {
         return obj == null ? null : obj.toString().strip();
     }
+    
+    public static boolean getBoolean(Object obj) {
+        return obj != null && (obj.toString().equals("1") || obj.toString().equalsIgnoreCase("true"));
+
+    }
 
     public static Float getFloat(Object number) {
         float value = 0.0f;
