@@ -5,6 +5,7 @@
 package com.inventory.model;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 import lombok.Data;
 
@@ -13,6 +14,7 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
+@Embeddable
 public class SeqKey implements Serializable{
 
     @Column(name = "seq_option")

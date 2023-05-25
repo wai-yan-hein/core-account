@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
@@ -824,4 +826,25 @@ public class Util1 {
 
     }
 
+    public static String getMacAddress() {
+        try {
+            InetAddress localHost = InetAddress.getLocalHost();
+            NetworkInterface networkInterface = NetworkInterface.getByInetAddress(localHost);
+            byte[] macAddressBytes = networkInterface.getHardwareAddress();
+            StringBuilder macAddressBuilder = new StringBuilder();
+            if (macAddressBytes != null) {
+                for (byte b : macAddressBytes) {
+                    macAddressBuilder.append(String.format("%02X:", b));
+                }
+
+                if (macAddressBuilder.length() > 0) {
+                    macAddressBuilder.deleteCharAt(macAddressBuilder.length() - 1);
+                }
+                return macAddressBuilder.toString();
+            }
+        } catch (SocketException | UnknownHostException e) {
+            log.error(e.getMessage());
+        }
+        return null;
+    }
 }

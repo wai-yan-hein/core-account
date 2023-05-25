@@ -111,8 +111,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     @Autowired
     private UserRepo userRepo;
     @Autowired
-    private WebClient userApi;
-    @Autowired
     private StockSetup stockSetup;
     @Autowired
     private OpeningSetup openingSetup;
@@ -753,48 +751,40 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void companyUserRoleAssign() {
-        userApi.get()
-                .uri(builder -> builder.path("/user/get-privilege-role-company")
-                .queryParam("roleCode", Global.loginUser.getRoleCode())
-                .build())
-                .retrieve()
-                .bodyToFlux(VRoleCompany.class)
-                .collectList()
-                .subscribe((t) -> {
-                    if (t.isEmpty()) {
-                        JOptionPane.showMessageDialog(new JFrame(),
-                                "No company assign to the user",
-                                "Invalid Compay Access", JOptionPane.ERROR_MESSAGE);
+        userRepo.getRoleCompany(Global.roleCode).subscribe((t) -> {
+            if (t.isEmpty()) {
+                JOptionPane.showMessageDialog(new JFrame(),
+                        "No company assign to the user",
+                        "Invalid Compay Access", JOptionPane.ERROR_MESSAGE);
+                System.exit(0);
+            } else if (t.size() > 1) {
+                CompanyOptionDialog d = new CompanyOptionDialog(Global.parentForm);
+                d.setListCompany(t);
+                d.initMain();
+                d.setLocationRelativeTo(null);
+                d.setVisible(true);
+                if (d.getCompanyInfo() == null) {
+                    int confirmed = JOptionPane.showConfirmDialog(null,
+                            "Are you sure you want to exit?", "Exit Confirmation",
+                            JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                    if (confirmed == JOptionPane.YES_OPTION) {
+                        dispose();
                         System.exit(0);
-                    } else if (t.size() > 1) {
-                        CompanyOptionDialog d = new CompanyOptionDialog(Global.parentForm);
-                        d.setListCompany(t);
-                        d.initMain();
-                        d.setLocationRelativeTo(null);
-                        d.setVisible(true);
-                        if (d.getCompanyInfo() == null) {
-                            int confirmed = JOptionPane.showConfirmDialog(null,
-                                    "Are you sure you want to exit?", "Exit Confirmation",
-                                    JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-                            if (confirmed == JOptionPane.YES_OPTION) {
-                                dispose();
-                                System.exit(0);
-                            }
-                        }
-                        assignCompany(d.getCompanyInfo());
-                    } else {
-                        assignCompany(t.get(0));
                     }
-                    integration.startDownload();
-                    integration.startUpload();
-                    departmentAssign();
-                    initMenu();
-                    lblCompName.setText(Global.companyName);
-                    lblUserName.setText(Global.loginUser.getUserName());
-                    userRepo.setupProperty();
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                });
+                }
+                assignCompany(d.getCompanyInfo());
+            } else {
+                assignCompany(t.get(0));
+            }
+            integration.start();
+            departmentAssign();
+            initMenu();
+            lblCompName.setText(Global.companyName);
+            lblUserName.setText(Global.loginUser.getUserName());
+            userRepo.setupProperty();
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        });
 
     }
 
@@ -858,15 +848,11 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     public void initMenu() {
         menuBar.removeAll();
-        String url = "/user/get-privilege-role-menu-tree?roleCode=" + Global.roleCode + "&compCode=" + Global.compCode;
-        userApi.get().uri(url)
-                .retrieve().bodyToFlux(VRoleMenu.class)
-                .collectList()
-                .subscribe((t) -> {
-                    createMenu(t);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-                });
+        userRepo.getRoleMenu(Global.roleCode).subscribe((t) -> {
+            createMenu(t);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+        });
     }
 
     private void createMenu(List<VRoleMenu> listVRM) {

@@ -17,14 +17,24 @@ import com.h2.service.PriceOptionService;
 import com.h2.service.RelationService;
 import com.h2.service.SaleHisService;
 import com.h2.service.SaleManService;
+import com.h2.service.ExchangeRateService;
+import com.h2.service.MacPropertyService;
+import com.h2.service.MachineInfoService;
+import com.h2.service.MenuService;
+import com.h2.service.PrivilegeCompanyService;
+import com.h2.service.PrivilegeMenuService;
+import com.h2.service.ProjectService;
+import com.h2.service.RolePropertyService;
+import com.h2.service.RoleService;
 import com.h2.service.StockService;
 import com.h2.service.StockTypeService;
 import com.h2.service.StockUnitService;
 import com.h2.service.TraderInvService;
-import com.h2.service.UserService;
 import com.h2.service.VouStatusService;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
+import com.h2.service.SystemPropertyService;
+import com.h2.service.UserService;
 import com.inventory.ui.common.InventoryRepo;
 import com.user.common.UserRepo;
 import java.util.List;
@@ -83,6 +93,26 @@ public class CloudIntegration {
     private SaleHisService saleHisService;
     @Autowired
     private SaleHisDetailDao saleHisDetailDao;
+    @Autowired
+    private ExchangeRateService exchangeRateService;
+    @Autowired
+    private MachineInfoService machineInfoService;
+    @Autowired
+    private MacPropertyService macPropertyService;
+    @Autowired
+    private MenuService menuService;
+    @Autowired
+    private PrivilegeCompanyService pcService;
+    @Autowired
+    private PrivilegeMenuService pmService;
+    @Autowired
+    private ProjectService pService;
+    @Autowired
+    private RoleService roleService;
+    @Autowired
+    private RolePropertyService rpService;
+    @Autowired
+    private SystemPropertyService sysPropertyService;
 
     public void startDownload() {
         if (localDatabase) {
@@ -111,6 +141,16 @@ public class CloudIntegration {
         downloadCompanyInfo();
         downloadCurrency();
         downloadDepartment();
+        downloadExchangeRate();
+        downloadMachineInfo();
+        downloadMacProperty();
+        downloadMenu();
+        downloadPC();
+        downloadPM();
+        downloadProject();
+        downloadRole();
+        downloadRoleProperty();
+        downloadSystemProperty();
     }
 
     private void downloadAppUser() {
@@ -136,6 +176,8 @@ public class CloudIntegration {
     }
 
     private void downloadCompanyInfo() {
+        String maxDate = companyInfoService.getMaxDate();
+        log.info("comp date = " + maxDate);
         userRepo.getCompanyInfoByDate(companyInfoService.getMaxDate()).subscribe((c) -> {
             log.info("comp info size = " + c.size());
             c.forEach((a) -> {
@@ -162,6 +204,116 @@ public class CloudIntegration {
             log.info("dept size = " + d.size());
             d.forEach((a) -> {
                 departmentService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadExchangeRate() {
+        userRepo.getExchangeRateByDate(exchangeRateService.getMaxDate()).subscribe((ex) -> {
+            log.info("exchange rate size = " + ex.size());
+            ex.forEach((a) -> {
+                exchangeRateService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadMachineInfo() {
+        userRepo.getMachineInfoByDate(machineInfoService.getMaxDate()).subscribe((m) -> {
+            log.info("machine info size = " + m.size());
+            m.forEach((a) -> {
+                machineInfoService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadMacProperty() {
+        userRepo.getMacPropertyByDate(macPropertyService.getMaxDate()).subscribe((m) -> {
+            log.info("mac prop size = " + m.size());
+            m.forEach((a) -> {
+                macPropertyService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadMenu() {
+        userRepo.getMenuByDate(menuService.getMaxDate()).subscribe((m) -> {
+            log.info("menu size = " + m.size());
+            m.forEach((a) -> {
+                menuService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadPC() {
+        userRepo.getPCByDate(pcService.getMaxDate()).subscribe((p) -> {
+            log.info("pc size = " + p.size());
+            p.forEach((a) -> {
+                pcService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadPM() {
+        userRepo.getPMByDate(pmService.getMaxDate()).subscribe((m) -> {
+            log.info("pm size = " + m.size());
+            m.forEach((a) -> {
+                pmService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadProject() {
+        userRepo.getProjectByDate(pService.getMaxDate()).subscribe((p) -> {
+            log.info("project size = " + p.size());
+            p.forEach((a) -> {
+                pService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadRole() {
+        userRepo.getRoleByDate(roleService.getMaxDate()).subscribe((r) -> {
+            log.info("role size = " + r.size());
+            r.forEach((a) -> {
+                roleService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadRoleProperty() {
+        userRepo.getRolePropByDate(rpService.getMaxDate()).subscribe((r) -> {
+            log.info("role prop size = " + r.size());
+            r.forEach((a) -> {
+                rpService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadSystemProperty() {
+        userRepo.getSystemPropertyByDate(sysPropertyService.getMaxDate()).subscribe((r) -> {
+            log.info("sys prop size = " + r.size());
+            r.forEach((a) -> {
+                sysPropertyService.save(a);
             });
         }, (err) -> {
             log.info(err.getMessage());
@@ -316,5 +468,10 @@ public class CloudIntegration {
         }, (e) -> {
             log.info(e.getMessage());
         });
+    }
+
+    public void start() {
+        startDownload();
+        startUpload();
     }
 }

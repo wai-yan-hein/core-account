@@ -4,6 +4,13 @@
  */
 package com.user.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import java.util.Date;
 import lombok.Data;
 
@@ -12,18 +19,29 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
+@Entity
+@Table(name = "project")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Project {
 
+    @EmbeddedId
     private ProjectKey key;
+    @Column(name = "project_name")
     private String projectName;
+    @Column(name = "start_date")
     private Date startDate;
+    @Column(name = "end_date")
     private Date endDate;
+    @Column(name = "budget")
     private Double budget;
+    @Column(name = "project_status")
     private String projectStatus;
+    @Column(name = "updated_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedDate;
 
     public Project() {
     }
-    
 
     public Project(ProjectKey key, String projectName) {
         this.key = key;

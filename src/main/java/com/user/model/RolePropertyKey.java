@@ -5,6 +5,9 @@
  */
 package com.user.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import java.io.Serializable;
 import lombok.Data;
 
 /**
@@ -12,9 +15,13 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
-public class RolePropertyKey {
+@Embeddable
+public class RolePropertyKey implements Serializable{
 
+    @Column(name = "role_code")
     private String roleCode;
+    @Column(name = "prop_key")
     private String propKey;
+    @Column(name = "comp_code")
     private String compCode;
 }

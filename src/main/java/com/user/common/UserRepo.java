@@ -23,8 +23,10 @@ import com.user.model.MachineProperty;
 import com.user.model.Menu;
 import com.user.model.MenuTemplate;
 import com.user.model.PrivilegeCompany;
+import com.user.model.PrivilegeMenu;
 import com.user.model.Project;
 import com.user.model.ProjectKey;
+import com.user.model.VRoleCompany;
 import com.user.model.YearEnd;
 import java.util.HashMap;
 import java.util.List;
@@ -42,17 +44,17 @@ import reactor.core.publisher.Mono;
 @Component
 @Slf4j
 public class UserRepo {
-    
+
     @Autowired
     private WebClient userApi;
-    
+
     public Mono<List<Currency>> getCurrency() {
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-currency")
                 .build())
                 .retrieve().bodyToFlux(Currency.class).collectList();
     }
-    
+
     public Mono<List<CompanyInfo>> getCompany(boolean active) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-company")
@@ -62,7 +64,7 @@ public class UserRepo {
                 .bodyToFlux(CompanyInfo.class)
                 .collectList();
     }
-    
+
     public Mono<List<AppUser>> getAppUser() {
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-appuser")
@@ -70,14 +72,14 @@ public class UserRepo {
                 .retrieve().bodyToFlux(AppUser.class)
                 .collectList();
     }
-    
+
     public Mono<List<MachineInfo>> getMacList() {
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-mac-list")
                 .build())
                 .retrieve().bodyToFlux(MachineInfo.class).collectList();
     }
-    
+
     public Mono<List<AppRole>> getAppRole() {
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-role")
@@ -85,23 +87,17 @@ public class UserRepo {
                 .build())
                 .retrieve().bodyToFlux(AppRole.class).collectList();
     }
-    
-    public MachineInfo register(String macName) {
-        try {
-            return userApi.get()
-                    .uri(builder -> builder.path("/user/get-mac-info")
-                    .queryParam("macName", macName)
-                    .build())
-                    .retrieve()
-                    .bodyToMono(MachineInfo.class)
-                    .block();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return null;
-        }
-        
+
+    public Mono<MachineInfo> register(String macName) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/get-mac-info")
+                .queryParam("macName", macName)
+                .build())
+                .retrieve()
+                .bodyToMono(MachineInfo.class);
+
     }
-    
+
     public Mono<MachineInfo> register(MachineInfo mac) {
         return userApi.post()
                 .uri("/user/save-mac")
@@ -109,7 +105,7 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(MachineInfo.class);
     }
-    
+
     public String updateProgram() {
         Mono<ResponseEntity<String>> result = userApi.get()
                 .uri(builder -> builder.path("/user/update-program")
@@ -118,7 +114,7 @@ public class UserRepo {
                 .retrieve().toEntity(String.class);
         return result.block().getBody();
     }
-    
+
     public Mono<CompanyInfo> saveCompany(CompanyInfo app) {
         return userApi.post()
                 .uri("/user/save-company")
@@ -126,7 +122,7 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(CompanyInfo.class);
     }
-    
+
     public Mono<Currency> saveCurrency(Currency app) {
         return userApi.post()
                 .uri("/user/save-currency")
@@ -134,7 +130,7 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(Currency.class);
     }
-    
+
     public Mono<AppRole> saveAppRole(AppRole app) {
         return userApi.post()
                 .uri("/user/save-role")
@@ -142,7 +138,7 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(AppRole.class);
     }
-    
+
     public Mono<PrivilegeCompany> saveCompRole(PrivilegeCompany app) {
         return userApi.post()
                 .uri("/user/save-privilege-company")
@@ -150,7 +146,7 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(PrivilegeCompany.class);
     }
-    
+
     public Mono<AppUser> saveUser(AppUser app) {
         return userApi.post()
                 .uri("/user/save-user")
@@ -158,7 +154,7 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(AppUser.class);
     }
-    
+
     public Mono<Currency> findCurrency(String curCode) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/find-currency")
@@ -166,7 +162,7 @@ public class UserRepo {
                 .build())
                 .retrieve().bodyToMono(Currency.class);
     }
-    
+
     public Mono<CompanyInfo> findCompany(String compCode) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/findCompany")
@@ -174,7 +170,7 @@ public class UserRepo {
                 .build())
                 .retrieve().bodyToMono(CompanyInfo.class);
     }
-    
+
     public Mono<AppRole> finRole(String roleCode) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/find-role")
@@ -182,7 +178,7 @@ public class UserRepo {
                 .build())
                 .retrieve().bodyToMono(AppRole.class);
     }
-    
+
     public Mono<DepartmentUser> findDepartment(Integer deptId) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/find-department")
@@ -191,7 +187,7 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(DepartmentUser.class);
     }
-    
+
     public Mono<DepartmentUser> saveDepartment(DepartmentUser d) {
         return userApi.post()
                 .uri("/user/save-department")
@@ -199,12 +195,12 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(DepartmentUser.class);
     }
-    
+
     public Mono<Currency> getDefaultCurrency() {
         String curCode = Global.hmRoleProperty.get("default.currency");
         return findCurrency(Util1.isNull(curCode, "-"));
     }
-    
+
     public void setupProperty() {
         Mono<HashMap> result = userApi.get()
                 .uri(builder -> builder.path("/user/get-property")
@@ -218,9 +214,9 @@ public class UserRepo {
             Global.hmRoleProperty = t;
             log.info("setupProperty.");
         });
-        
+
     }
-    
+
     public Mono<List<SysProperty>> getSystProperty() {
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-system-property")
@@ -230,7 +226,7 @@ public class UserRepo {
                 .bodyToFlux(SysProperty.class)
                 .collectList();
     }
-    
+
     public HashMap<String, String> getRoleProperty(String roleCode) {
         HashMap<String, String> hm = new HashMap<>();
         Mono<ResponseEntity<List<RoleProperty>>> result = userApi.get()
@@ -244,7 +240,7 @@ public class UserRepo {
         });
         return hm;
     }
-    
+
     public HashMap<String, String> getMachineProperty(Integer macId) {
         HashMap<String, String> hm = new HashMap<>();
         if (macId == null) {
@@ -261,7 +257,7 @@ public class UserRepo {
         });
         return hm;
     }
-    
+
     public Mono<SysProperty> saveSys(SysProperty prop) {
         return userApi.post()
                 .uri("/user/save-system-property")
@@ -269,7 +265,7 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(SysProperty.class);
     }
-    
+
     public Mono<RoleProperty> saveRoleProperty(RoleProperty prop) {
         return userApi.post()
                 .uri("/user/save-role-property")
@@ -277,7 +273,7 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(RoleProperty.class);
     }
-    
+
     public Mono<MachineProperty> saveMacProp(MachineProperty prop) {
         return userApi.post()
                 .uri("/user/save-mac-property")
@@ -285,14 +281,14 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(MachineProperty.class);
     }
-    
+
     public Mono<List<DepartmentUser>> getDeparment() {
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-department")
                 .build())
                 .retrieve().bodyToFlux(DepartmentUser.class).collectList();
     }
-    
+
     public Mono<List<VRoleMenu>> getReport(String menuClass) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-report")
@@ -302,7 +298,7 @@ public class UserRepo {
                 .build())
                 .retrieve().bodyToFlux(VRoleMenu.class).collectList();
     }
-    
+
     public Mono<List<BusinessType>> getBusinessType() {
         return userApi.get()
                 .uri(builder -> builder.path("/user/getBusinessType")
@@ -311,7 +307,7 @@ public class UserRepo {
                 .bodyToFlux(BusinessType.class)
                 .collectList();
     }
-    
+
     public Mono<BusinessType> save(BusinessType type) {
         return userApi.post()
                 .uri("/user/saveBusinessType")
@@ -319,7 +315,7 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(BusinessType.class);
     }
-    
+
     public Mono<BusinessType> find(Integer id) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/findBusinessType")
@@ -328,7 +324,7 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(BusinessType.class);
     }
-    
+
     public Mono<YearEnd> yearEnd(YearEnd end) {
         return userApi.post()
                 .uri("/user/yearEnd")
@@ -336,7 +332,7 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(YearEnd.class);
     }
-    
+
     public Mono<Menu> save(Menu menu) {
         return userApi.post()
                 .uri("/user/save-menu")
@@ -344,7 +340,7 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(Menu.class);
     }
-    
+
     public Mono<List<Menu>> getMenuTree() {
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-menu-tree")
@@ -354,7 +350,7 @@ public class UserRepo {
                 .bodyToFlux(Menu.class)
                 .collectList();
     }
-    
+
     public Mono<Boolean> delete(Menu menu) {
         return userApi.post()
                 .uri("/user/delete-menu")
@@ -362,7 +358,7 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(Boolean.class);
     }
-    
+
     public Mono<List<Menu>> getMenuParent() {
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-menu-parent")
@@ -372,7 +368,7 @@ public class UserRepo {
                 .bodyToFlux(Menu.class)
                 .collectList();
     }
-    
+
     public Mono<List<MenuTemplate>> getMenuTemplate(Integer busId) {
         return userApi.get()
                 .uri(builder -> builder.path("/template/getMenu")
@@ -382,7 +378,7 @@ public class UserRepo {
                 .bodyToFlux(MenuTemplate.class)
                 .collectList();
     }
-    
+
     public Mono<MenuTemplate> save(MenuTemplate type) {
         return userApi.post()
                 .uri("/template/saveMenu")
@@ -390,7 +386,7 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(MenuTemplate.class);
     }
-    
+
     public Mono<List<Project>> searchProject() {
         return userApi.get()
                 .uri(builder -> builder.path("/user/searchProject")
@@ -400,7 +396,7 @@ public class UserRepo {
                 .bodyToFlux(Project.class)
                 .collectList();
     }
-    
+
     public Mono<Project> find(ProjectKey key) {
         return userApi.post()
                 .uri("/user/findProject")
@@ -408,7 +404,7 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(Project.class);
     }
-    
+
     public Mono<Project> save(Project obj) {
         return userApi.post()
                 .uri("/user/saveProject")
@@ -416,7 +412,7 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(Project.class);
     }
-    
+
     public Mono<ExchangeRate> save(ExchangeRate obj) {
         return userApi.post()
                 .uri("/user/saveExchange")
@@ -424,7 +420,7 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(ExchangeRate.class);
     }
-    
+
     public Mono<List<Project>> searchProjectByCode(String code) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/searchProjectByCode")
@@ -435,7 +431,7 @@ public class UserRepo {
                 .bodyToFlux(Project.class)
                 .collectList();
     }
-    
+
     public Mono<List<ExchangeRate>> searchExchange(String startDate, String endDate, String targetCur) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/searchExchange")
@@ -448,7 +444,7 @@ public class UserRepo {
                 .bodyToFlux(ExchangeRate.class)
                 .collectList();
     }
-    
+
     public Mono<Boolean> delete(ExchangeKey obj) {
         return userApi.post()
                 .uri("/user/delete-exchange")
@@ -456,7 +452,7 @@ public class UserRepo {
                 .retrieve()
                 .bodyToMono(Boolean.class);
     }
-    
+
     public Mono<List<AppUser>> getAppUserByDate(String updatedDate) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/getUserByDate")
@@ -465,7 +461,7 @@ public class UserRepo {
                 .retrieve().bodyToFlux(AppUser.class)
                 .collectList();
     }
-    
+
     public Mono<List<BusinessType>> getBusinessTypeByDate(String updatedDate) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/getBusinessTypeByDate")
@@ -474,7 +470,7 @@ public class UserRepo {
                 .retrieve().bodyToFlux(BusinessType.class)
                 .collectList();
     }
-    
+
     public Mono<List<CompanyInfo>> getCompanyInfoByDate(String updatedDate) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/getCompanyInfoByDate")
@@ -483,7 +479,7 @@ public class UserRepo {
                 .retrieve().bodyToFlux(CompanyInfo.class)
                 .collectList();
     }
-    
+
     public Mono<List<Currency>> getCurrencyByDate(String updatedDate) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/getCurrencyByDate")
@@ -492,13 +488,133 @@ public class UserRepo {
                 .retrieve().bodyToFlux(Currency.class)
                 .collectList();
     }
-    
+
     public Mono<List<DepartmentUser>> getDepartmentByDate(String updatedDate) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/getDepartmentByDate")
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(DepartmentUser.class)
+                .collectList();
+    }
+
+    public Mono<List<ExchangeRate>> getExchangeRateByDate(String updatedDate) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getExchangeRateByDate")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve().bodyToFlux(ExchangeRate.class)
+                .collectList();
+    }
+
+    public Mono<List<MachineProperty>> getMacPropertyByDate(String updatedDate) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getMacPropertyByDate")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve().bodyToFlux(MachineProperty.class)
+                .collectList();
+    }
+
+    public Mono<List<MachineInfo>> getMachineInfoByDate(String updatedDate) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getMachineInfoByDate")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve().bodyToFlux(MachineInfo.class)
+                .collectList();
+    }
+
+    public Mono<List<Menu>> getMenuByDate(String updatedDate) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getMenuByDate")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve().bodyToFlux(Menu.class)
+                .collectList();
+    }
+
+    public Mono<List<PrivilegeCompany>> getPCByDate(String updatedDate) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getPCByDate")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve().bodyToFlux(PrivilegeCompany.class)
+                .collectList();
+    }
+
+    public Mono<List<PrivilegeMenu>> getPMByDate(String updatedDate) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getPMByDate")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve().bodyToFlux(PrivilegeMenu.class)
+                .collectList();
+    }
+
+    public Mono<List<Project>> getProjectByDate(String updatedDate) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getProjectByDate")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve().bodyToFlux(Project.class)
+                .collectList();
+    }
+
+    public Mono<List<AppRole>> getRoleByDate(String updatedDate) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getRoleByDate")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve().bodyToFlux(AppRole.class)
+                .collectList();
+    }
+
+    public Mono<List<RoleProperty>> getRolePropByDate(String updatedDate) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getRolePropByDate")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve().bodyToFlux(RoleProperty.class)
+                .collectList();
+    }
+
+    public Mono<List<SysProperty>> getSystemPropertyByDate(String updatedDate) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getSystemPropertyByDate")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve().bodyToFlux(SysProperty.class)
+                .collectList();
+    }
+
+    public Mono<AppUser> login(String userName, String password) {
+        return userApi.get().uri(builder -> builder.path("/user/login")
+                .queryParam("userName", userName)
+                .queryParam("password", password)
+                .build())
+                .retrieve()
+                .bodyToMono(AppUser.class);
+    }
+
+    public Mono<List<VRoleCompany>> getRoleCompany(String roleCode) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/get-privilege-role-company")
+                .queryParam("roleCode", roleCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(VRoleCompany.class)
+                .collectList();
+    }
+
+    public Mono<List<VRoleMenu>> getRoleMenu(String roleCode) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/get-privilege-role-menu-tree")
+                .queryParam("roleCode", roleCode)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(VRoleMenu.class)
                 .collectList();
     }
 }
