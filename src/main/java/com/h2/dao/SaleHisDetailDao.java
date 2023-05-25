@@ -4,22 +4,24 @@
  */
 package com.h2.dao;
 
-import com.inventory.model.Category;
-import com.inventory.model.CategoryKey;
+import com.inventory.model.SaleDetailKey;
+import com.inventory.model.SaleHisDetail;
 import java.util.List;
 
 /**
  *
  * @author Lenovo
  */
-public interface CategoryDao {
+public interface SaleHisDetailDao {
 
-    Category save(Category stock);
+    SaleHisDetail save(SaleHisDetail obj);
 
-    Category find(CategoryKey key);
+    SaleHisDetail find(SaleDetailKey key);
+
+    void delete(SaleDetailKey key);
 
     String getMaxDate();
 
-    List<Category> findAll(String compCode);
+    List<SaleHisDetail> findAll(String compCode);
 
 }

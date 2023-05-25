@@ -5,6 +5,7 @@
 package com.h2.dao;
 
 import com.inventory.model.StockBrand;
+import com.inventory.model.StockBrandKey;
 import java.util.List;
 
 /**
@@ -14,6 +15,8 @@ import java.util.List;
 public interface BrandDao {
 
     StockBrand save(StockBrand stock);
+
+    StockBrand find(StockBrandKey key);
 
     String getMaxDate();
 

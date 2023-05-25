@@ -4,21 +4,21 @@
  */
 package com.h2.service;
 
-import com.inventory.model.StockBrand;
-import com.inventory.model.StockBrandKey;
+import com.inventory.model.SaleHis;
+import com.inventory.model.SaleHisKey;
 import java.util.List;
 
 /**
  *
  * @author Lenovo
  */
-public interface BrandService {
+public interface SaleHisService {
 
-    StockBrand save(StockBrand stock);
+    SaleHis save(SaleHis obj);
 
-    StockBrand find(StockBrandKey key);
+    SaleHis find(SaleHisKey key);
 
-    List<StockBrand> findAll(String compCode);
+    List<SaleHis> findAll(String compCode);
 
     String getMaxDate();
 

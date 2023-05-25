@@ -115,4 +115,9 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
         return listStock;
     }
 
+    @Override
+    public Stock find(StockKey key) {
+        return getByKey(key);
+    }
+
 }

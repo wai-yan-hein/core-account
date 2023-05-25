@@ -5,6 +5,7 @@
 package com;
 
 import com.common.Global;
+import com.h2.dao.SaleHisDetailDao;
 import com.h2.service.BrandService;
 import com.h2.service.BusinessTypeService;
 import com.h2.service.CategoryService;
@@ -12,20 +13,24 @@ import com.h2.service.CompanyInfoService;
 import com.h2.service.CurrencyService;
 import com.h2.service.DepartmentUserService;
 import com.h2.service.LocationService;
+import com.h2.service.PriceOptionService;
 import com.h2.service.RelationService;
+import com.h2.service.SaleHisService;
 import com.h2.service.SaleManService;
 import com.h2.service.StockService;
 import com.h2.service.StockTypeService;
 import com.h2.service.StockUnitService;
+import com.h2.service.TraderInvService;
 import com.h2.service.UserService;
-import com.inventory.model.Location;
+import com.h2.service.VouStatusService;
+import com.inventory.model.SaleHis;
+import com.inventory.model.SaleHisDetail;
 import com.inventory.ui.common.InventoryRepo;
 import com.user.common.UserRepo;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -68,6 +73,16 @@ public class CloudIntegration {
     private LocationService locationService;
     @Autowired
     private SaleManService saleManService;
+    @Autowired
+    private TraderInvService traderInvService;
+    @Autowired
+    private VouStatusService vouStatusService;
+    @Autowired
+    private PriceOptionService priceOptionService;
+    @Autowired
+    private SaleHisService saleHisService;
+    @Autowired
+    private SaleHisDetailDao saleHisDetailDao;
 
     public void startDownload() {
         if (localDatabase) {
@@ -75,7 +90,19 @@ public class CloudIntegration {
             downloadInventory();
             downloadAccount();
         }
+    }
 
+    public void startUpload() {
+        if (localDatabase) {
+            List<SaleHis> list = saleHisService.findAll(Global.compCode);
+            if (!list.isEmpty()) {
+                log.info("need to upload sale his : " + list.size());
+            }
+            List<SaleHisDetail> listD = saleHisDetailDao.findAll(Global.compCode);
+            if (!listD.isEmpty()) {
+                log.info("need to upload sale his detail : " + listD.size());
+            }
+        }
     }
 
     private void downloadUser() {
@@ -142,6 +169,9 @@ public class CloudIntegration {
     }
 
     private void downloadInventory() {
+        downloadPriceOption();
+        downloadVouStatus();
+        downloadInvTrader();
         downloadSaleMan();
         downloadLocation();
         downloadRelation();
@@ -156,11 +186,35 @@ public class CloudIntegration {
 
     }
 
+    private void downloadPriceOption() {
+        inventoryRepo.getUpdatePriceOption(priceOptionService.getMaxDate()).subscribe((t) -> {
+            log.info("downloadPriceOption list : " + t.size());
+            t.forEach((s) -> {
+                priceOptionService.save(s);
+            });
+            log.info("downloadPriceOption done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
+
+    private void downloadVouStatus() {
+        inventoryRepo.getUpdateVouStatus(vouStatusService.getMaxDate()).subscribe((t) -> {
+            log.info("downloadVouStatus list : " + t.size());
+            t.forEach((s) -> {
+                vouStatusService.save(s);
+            });
+            log.info("downloadVouStatus done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
+
     private void downloadInvTrader() {
-        inventoryRepo.getUpdateSaleMan(saleManService.getMaxDate()).subscribe((t) -> {
+        inventoryRepo.getUpdateTrader(traderInvService.getMaxDate()).subscribe((t) -> {
             log.info("downloadInvTrader list : " + t.size());
             t.forEach((s) -> {
-                saleManService.save(s);
+                traderInvService.save(s);
             });
             log.info("downloadInvTrader done.");
         }, (e) -> {

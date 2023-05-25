@@ -4,6 +4,13 @@
  */
 package com.inventory.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import java.util.Date;
 import lombok.Data;
 
 /**
@@ -11,11 +18,21 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
+@Entity
+@Table(name = "price_option")
 public class PriceOption {
 
+    @EmbeddedId
     private PriceOptionKey key;
+    @Column(name = "desp")
     private String description;
-    private String compCode;
-    private Float price;
+    @Column(name = "unique_id")
+    private Integer uniqueId;
+    @Column(name = "tran_option")
     private String tranOption;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "updated_date")
+    private Date updatedDate;
+    private transient Float price;
+
 }

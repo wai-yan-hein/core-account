@@ -4,6 +4,8 @@
  */
 package com.inventory.model;
 
+import jakarta.persistence.Column;
+import java.io.Serializable;
 import lombok.Data;
 
 /**
@@ -11,9 +13,12 @@ import lombok.Data;
  * @author DELL
  */
 @Data
-public class VouStatusKey {
+public class VouStatusKey implements Serializable {
 
+    @Column(name = "code")
     private String code;
+    @Column(name = "comp_code")
     private String compCode;
+    @Column(name = "dept_id")
     private Integer deptId;
 }

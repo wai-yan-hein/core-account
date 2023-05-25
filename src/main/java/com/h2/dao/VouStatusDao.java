@@ -2,24 +2,24 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.h2.service;
+package com.h2.dao;
 
-import com.inventory.model.StockBrand;
-import com.inventory.model.StockBrandKey;
+import com.inventory.model.VouStatus;
+import com.inventory.model.VouStatusKey;
 import java.util.List;
 
 /**
  *
  * @author Lenovo
  */
-public interface BrandService {
+public interface VouStatusDao {
 
-    StockBrand save(StockBrand stock);
+    VouStatus save(VouStatus obj);
 
-    StockBrand find(StockBrandKey key);
-
-    List<StockBrand> findAll(String compCode);
+    VouStatus find(VouStatusKey key);
 
     String getMaxDate();
+
+    List<VouStatus> findAll(String compCode);
 
 }

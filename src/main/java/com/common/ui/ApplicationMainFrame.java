@@ -786,6 +786,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                         assignCompany(t.get(0));
                     }
                     integration.startDownload();
+                    integration.startUpload();
                     departmentAssign();
                     initMenu();
                     lblCompName.setText(Global.companyName);

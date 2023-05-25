@@ -6,6 +6,7 @@ package com.h2.service;
 
 import com.h2.dao.StockTypeDao;
 import com.inventory.model.StockType;
+import com.inventory.model.StockTypeKey;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,11 @@ public class StockTypeServiceImpl implements StockTypeService {
     @Override
     public String getMaDate() {
         return dao.getMaDate();
+    }
+
+    @Override
+    public StockType find(StockTypeKey type) {
+        return dao.find(type);
     }
 
 }

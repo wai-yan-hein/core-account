@@ -37,4 +37,9 @@ public class BrandDaoImpl extends AbstractDao<StockBrandKey, StockBrand> impleme
         return findHSQL(hsql);
     }
 
+    @Override
+    public StockBrand find(StockBrandKey key) {
+        return getByKey(key);
+    }
+
 }

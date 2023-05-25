@@ -127,7 +127,7 @@ public class StockBalanceTableModel extends AbstractTableModel {
                 progress.setIndeterminate(false);
             }, (e) -> {
                 progress.setIndeterminate(false);
-                JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+                log.error("calStockBalance : " + e.getMessage());
             });
         }
     }

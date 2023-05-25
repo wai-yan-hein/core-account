@@ -6,6 +6,7 @@ package com.inventory.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import java.io.Serializable;
 import lombok.Data;
 
 /**
@@ -14,7 +15,7 @@ import lombok.Data;
  */
 @Data
 @Embeddable
-public class SaleHisKey {
+public class SaleHisKey implements Serializable{
 
     @Column(name = "vou_no")
     private String vouNo;
