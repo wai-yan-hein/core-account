@@ -26,6 +26,7 @@ import com.h2.service.RoleService;
 import com.h2.service.StockService;
 import com.h2.service.StockTypeService;
 import com.h2.service.StockUnitService;
+import com.h2.service.SystemPropertyService;
 import com.h2.service.UserService;
 import com.inventory.ui.common.InventoryRepo;
 import com.user.common.UserRepo;
@@ -93,7 +94,7 @@ public class CloudIntegration {
     @Autowired
     private RolePropertyService rpService;
     @Autowired
-    private SystemPropertyDao sysPropertyDao;
+    private SystemPropertyService sysPropertyService;
 
     public void startDownload() {
         if (localDatabase) {
@@ -145,6 +146,8 @@ public class CloudIntegration {
     }
 
     private void downloadCompanyInfo() {
+        String maxDate = companyInfoService.getMaxDate();
+        log.info("comp date = " + maxDate);
         userRepo.getCompanyInfoByDate(companyInfoService.getMaxDate()).subscribe((c) -> {
             log.info("comp info size = " + c.size());
             c.forEach((a) -> {
@@ -277,10 +280,10 @@ public class CloudIntegration {
     }
     
     private void downloadSystemProperty() {
-        userRepo.getSystemPropertyByDate(sysPropertyDao.getMaxDate()).subscribe((r) -> {
+        userRepo.getSystemPropertyByDate(sysPropertyService.getMaxDate()).subscribe((r) -> {
             log.info("sys prop size = " + r.size());
             r.forEach((a) -> {
-                sysPropertyDao.save(a);
+                sysPropertyService.save(a);
             });
         }, (err) -> {
             log.info(err.getMessage());

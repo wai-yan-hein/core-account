@@ -27,7 +27,7 @@ import lombok.Data;
 public class MachineInfo implements java.io.Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "mac_id")
     private Integer macId;
     @Column(name = "mac_name")
