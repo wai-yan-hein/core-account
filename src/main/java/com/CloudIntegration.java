@@ -8,11 +8,17 @@ import com.h2.service.BusinessTypeService;
 import com.h2.service.CompanyInfoService;
 import com.h2.service.CurrencyService;
 import com.h2.service.DepartmentUserService;
+import com.h2.service.ExchangeRateService;
+import com.h2.service.MacPropertyService;
+import com.h2.service.MachineInfoService;
+import com.h2.service.MenuService;
+import com.h2.service.PrivilegeCompanyService;
 import com.h2.service.StockService;
 import com.h2.service.StockTypeService;
 import com.h2.service.UserService;
 import com.inventory.ui.common.InventoryRepo;
 import com.user.common.UserRepo;
+import com.user.model.ExchangeRate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -46,6 +52,16 @@ public class CloudIntegration {
     private CurrencyService currencyService;
     @Autowired
     private DepartmentUserService departmentService;
+    @Autowired
+    private ExchangeRateService exchangeRateService;
+    @Autowired
+    private MachineInfoService machineInfoService;
+    @Autowired
+    private MacPropertyService macPropertyService;
+    @Autowired
+    private MenuService menuService;
+    @Autowired
+    private PrivilegeCompanyService pcService;
 
     public void startDownload() {
         if (localDatabase) {
@@ -62,6 +78,11 @@ public class CloudIntegration {
         downloadCompanyInfo();
         downloadCurrency();
         downloadDepartment();
+        downloadExchangeRate();
+        downloadMachineInfo();
+        downloadMacProperty();
+        downloadMenu();
+        downloadPC();
     }
 
     private void downloadAppUser() {
@@ -113,6 +134,61 @@ public class CloudIntegration {
             log.info("dept size = " + d.size());
             d.forEach((a) -> {
                 departmentService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadExchangeRate() {
+        userRepo.getExchangeRateByDate(exchangeRateService.getMaxDate()).subscribe((ex) -> {
+            log.info("exchange rate size = " + ex.size());
+            ex.forEach((a) -> {
+                exchangeRateService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadMachineInfo() {
+        userRepo.getMachineInfoByDate(machineInfoService.getMaxDate()).subscribe((m) -> {
+            log.info("machine info size = " + m.size());
+            m.forEach((a) -> {
+                machineInfoService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadMacProperty() {
+        userRepo.getMacPropertyByDate(macPropertyService.getMaxDate()).subscribe((m) -> {
+            log.info("mac prop size = " + m.size());
+            m.forEach((a) -> {
+                macPropertyService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadMenu() {
+        userRepo.getMenuByDate(menuService.getMaxDate()).subscribe((m) -> {
+            log.info("menu size = " + m.size());
+            m.forEach((a) -> {
+                menuService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadPC() {
+        userRepo.getPCByDate(pcService.getMaxDate()).subscribe((p) -> {
+            log.info("pc size = " + p.size());
+            p.forEach((a) -> {
+                pcService.save(a);
             });
         }, (err) -> {
             log.info(err.getMessage());

@@ -4,6 +4,9 @@
  */
 package com.user.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import java.io.Serializable;
 import lombok.Data;
 
 /**
@@ -11,8 +14,11 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
-public class MenuKey {
+@Embeddable
+public class MenuKey implements Serializable{
 
+    @Column(name = "menu_code")
     private String menuCode;
+    @Column(name = "comp_code")
     private String compCode;
 }

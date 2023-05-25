@@ -4,6 +4,9 @@
  */
 package com.user.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import java.io.Serializable;
 import lombok.Data;
 
 /**
@@ -11,9 +14,12 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
-public class MachinePropertyKey {
+@Embeddable
+public class MachinePropertyKey implements Serializable {
 
+    @Column(name = "mac_id")
     private Integer macId;
+    @Column(name = "prop_key")
     private String propKey;
 
     public MachinePropertyKey(Integer macId, String propKey) {
