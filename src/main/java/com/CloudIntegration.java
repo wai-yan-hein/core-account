@@ -3,8 +3,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com;
-
 import com.acc.common.AccountRepo;
+import com.common.Global;
+import com.h2.dao.SaleHisDetailDao;
 import com.h2.service.BrandService;
 import com.h2.service.BusinessTypeService;
 import com.h2.service.COAService;
@@ -13,23 +14,37 @@ import com.h2.service.CompanyInfoService;
 import com.h2.service.CurrencyService;
 import com.h2.service.DepartmentUserService;
 import com.h2.service.LocationService;
+import com.h2.service.PriceOptionService;
 import com.h2.service.RelationService;
+import com.h2.service.SaleHisService;
 import com.h2.service.SaleManService;
 import com.h2.service.ExchangeRateService;
 import com.h2.service.MacPropertyService;
 import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
 import com.h2.service.PrivilegeCompanyService;
+import com.h2.service.PrivilegeMenuService;
+import com.h2.service.ProjectService;
+import com.h2.service.RolePropertyService;
+import com.h2.service.RoleService;
 import com.h2.service.StockService;
 import com.h2.service.StockTypeService;
 import com.h2.service.StockUnitService;
+import com.h2.service.SystemPropertyService;
 import com.h2.service.TraderAService;
+import com.h2.service.TraderInvService;
 import com.h2.service.UserService;
+import com.h2.service.VouStatusService;
+import com.inventory.model.SaleHis;
+import com.inventory.model.SaleHisDetail;
 import com.inventory.ui.common.InventoryRepo;
 import com.user.common.UserRepo;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -74,6 +89,17 @@ public class CloudIntegration {
     private LocationService locationService;
     @Autowired
     private SaleManService saleManService;
+    @Autowired
+    private TraderInvService traderInvService;
+    @Autowired
+    private VouStatusService vouStatusService;
+    @Autowired
+    private PriceOptionService priceOptionService;
+    @Autowired
+    private SaleHisService saleHisService;
+    @Autowired
+    private SaleHisDetailDao saleHisDetailDao;
+    @Autowired
     private ExchangeRateService exchangeRateService;
     @Autowired
     private MachineInfoService machineInfoService;
@@ -83,6 +109,16 @@ public class CloudIntegration {
     private MenuService menuService;
     @Autowired
     private PrivilegeCompanyService pcService;
+    @Autowired
+    private PrivilegeMenuService pmService;
+    @Autowired
+    private ProjectService pService;
+    @Autowired
+    private RoleService roleService;
+    @Autowired
+    private RolePropertyService rpService;
+    @Autowired
+    private SystemPropertyService sysPropertyService;
     @Autowired
     private COAService coaService;
     @Autowired
@@ -94,7 +130,19 @@ public class CloudIntegration {
             downloadInventory();
             downloadAccount();
         }
+    }
 
+    public void startUpload() {
+        if (localDatabase) {
+            List<SaleHis> list = saleHisService.findAll(Global.compCode);
+            if (!list.isEmpty()) {
+                log.info("need to upload sale his : " + list.size());
+            }
+            List<SaleHisDetail> listD = saleHisDetailDao.findAll(Global.compCode);
+            if (!listD.isEmpty()) {
+                log.info("need to upload sale his detail : " + listD.size());
+            }
+        }
     }
 
     private void downloadUser() {
@@ -108,6 +156,11 @@ public class CloudIntegration {
         downloadMacProperty();
         downloadMenu();
         downloadPC();
+        downloadPM();
+        downloadProject();
+        downloadRole();
+        downloadRoleProperty();
+        downloadSystemProperty();
     }
 
     private void downloadAccount() {
@@ -162,6 +215,8 @@ public class CloudIntegration {
     }
 
     private void downloadCompanyInfo() {
+        String maxDate = companyInfoService.getMaxDate();
+        log.info("comp date = " + maxDate);
         userRepo.getCompanyInfoByDate(companyInfoService.getMaxDate()).subscribe((c) -> {
             log.info("comp info size = " + c.size());
             c.forEach((a) -> {
@@ -249,7 +304,65 @@ public class CloudIntegration {
         });
     }
 
+    private void downloadPM() {
+        userRepo.getPMByDate(pmService.getMaxDate()).subscribe((m) -> {
+            log.info("pm size = " + m.size());
+            m.forEach((a) -> {
+                pmService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadProject() {
+        userRepo.getProjectByDate(pService.getMaxDate()).subscribe((p) -> {
+            log.info("project size = " + p.size());
+            p.forEach((a) -> {
+                pService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadRole() {
+        userRepo.getRoleByDate(roleService.getMaxDate()).subscribe((r) -> {
+            log.info("role size = " + r.size());
+            r.forEach((a) -> {
+                roleService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadRoleProperty() {
+        userRepo.getRolePropByDate(rpService.getMaxDate()).subscribe((r) -> {
+            log.info("role prop size = " + r.size());
+            r.forEach((a) -> {
+                rpService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
+    private void downloadSystemProperty() {
+        userRepo.getSystemPropertyByDate(sysPropertyService.getMaxDate()).subscribe((r) -> {
+            log.info("sys prop size = " + r.size());
+            r.forEach((a) -> {
+                sysPropertyService.save(a);
+            });
+        }, (err) -> {
+            log.info(err.getMessage());
+        });
+    }
+
     private void downloadInventory() {
+        downloadPriceOption();
+        downloadVouStatus();
+        downloadInvTrader();
         downloadSaleMan();
         downloadLocation();
         downloadRelation();
@@ -260,11 +373,36 @@ public class CloudIntegration {
         downloadStock();
     }
 
+
+    private void downloadPriceOption() {
+        inventoryRepo.getUpdatePriceOption(priceOptionService.getMaxDate()).subscribe((t) -> {
+            log.info("downloadPriceOption list : " + t.size());
+            t.forEach((s) -> {
+                priceOptionService.save(s);
+            });
+            log.info("downloadPriceOption done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
+
+    private void downloadVouStatus() {
+        inventoryRepo.getUpdateVouStatus(vouStatusService.getMaxDate()).subscribe((t) -> {
+            log.info("downloadVouStatus list : " + t.size());
+            t.forEach((s) -> {
+                vouStatusService.save(s);
+            });
+            log.info("downloadVouStatus done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
+
     private void downloadInvTrader() {
-        inventoryRepo.getUpdateSaleMan(saleManService.getMaxDate()).subscribe((t) -> {
+        inventoryRepo.getUpdateTrader(traderInvService.getMaxDate()).subscribe((t) -> {
             log.info("downloadInvTrader list : " + t.size());
             t.forEach((s) -> {
-                saleManService.save(s);
+                traderInvService.save(s);
             });
             log.info("downloadInvTrader done.");
         }, (e) -> {
@@ -366,5 +504,10 @@ public class CloudIntegration {
         }, (e) -> {
             log.info(e.getMessage());
         });
+    }
+
+    public void start() {
+        startDownload();
+        startUpload();
     }
 }

@@ -3,7 +3,6 @@ package com;
 import com.common.Global;
 import com.common.Util1;
 import com.formdev.flatlaf.FlatLightLaf;
-import com.common.ui.ApplicationMainFrame;
 import com.common.ui.LoginDialog;
 import java.awt.Color;
 import java.awt.Font;
@@ -25,7 +24,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import javax.swing.ImageIcon;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -44,7 +42,6 @@ public class CoreAccountApplication {
     private static ConfigurableApplicationContext context;
     private static Tray tray;
     private static final Image appIcon = new ImageIcon(CoreAccountApplication.class.getResource("/images/applogo.png")).getImage();
-    private static final String APP_NAME = "Core Account";
     private static ServerThread serverThread;
 
     public static void main(String[] args) {
@@ -66,28 +63,8 @@ public class CoreAccountApplication {
         LoginDialog lg = context.getBean(LoginDialog.class);
         URL imgUrl = CoreAccountApplication.class.getResource("/images/male_user_16px.png");
         lg.setIconImage(new ImageIcon(imgUrl).getImage());
+        lg.setIconImage(appIcon);
         lg.checkMachineRegister();
-        lg.setLocationRelativeTo(null);
-        lg.setVisible(true);
-        if (lg.isLogin()) {
-            if (Global.macId != null) {
-                ApplicationMainFrame appMain = context.getBean(ApplicationMainFrame.class);
-                java.awt.EventQueue.invokeLater(() -> {
-                    appMain.setName(APP_NAME);
-                    appMain.setIconImage(appIcon);
-                    appMain.setExtendedState(JFrame.MAXIMIZED_BOTH);
-                    appMain.initMain();
-                    appMain.setVisible(true);
-                });
-                log.info("login sucess.");
-            } else {
-                JOptionPane.showMessageDialog(Global.parentForm, "Your machine is not register.", "Security Alert", JOptionPane.ERROR_MESSAGE);
-                System.exit(1);
-            }
-        } else {
-            log.info("exit");
-            System.exit(0);
-        }
     }
 
     public static void restart() {

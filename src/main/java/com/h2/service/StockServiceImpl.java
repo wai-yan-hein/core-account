@@ -6,6 +6,7 @@ package com.h2.service;
 
 import com.h2.dao.StockDao;
 import com.inventory.model.Stock;
+import com.inventory.model.StockKey;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,11 @@ public class StockServiceImpl implements StockService {
     @Override
     public List<Stock> getStock(String str, String compCode, Integer deptId) {
         return dao.getStock(str, compCode, deptId);
+    }
+
+    @Override
+    public Stock find(StockKey key) {
+        return dao.find(key);
     }
 
 }

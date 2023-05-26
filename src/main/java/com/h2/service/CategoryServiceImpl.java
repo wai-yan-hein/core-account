@@ -6,6 +6,7 @@ package com.h2.service;
 
 import com.h2.dao.CategoryDao;
 import com.inventory.model.Category;
+import com.inventory.model.CategoryKey;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,11 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public String getMaxDate() {
         return dao.getMaxDate();
+    }
+
+    @Override
+    public Category find(CategoryKey key) {
+        return dao.find(key);
     }
 
 }

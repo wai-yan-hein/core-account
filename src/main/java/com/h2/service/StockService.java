@@ -5,6 +5,7 @@
 package com.h2.service;
 
 import com.inventory.model.Stock;
+import com.inventory.model.StockKey;
 import java.util.List;
 
 /**
@@ -14,6 +15,8 @@ import java.util.List;
 public interface StockService {
 
     Stock save(Stock stock);
+
+    Stock find(StockKey key);
 
     List<Stock> findAll(String compCode);
 

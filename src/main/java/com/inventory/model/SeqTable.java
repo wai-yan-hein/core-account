@@ -4,6 +4,7 @@
  */
 package com.inventory.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -16,7 +17,8 @@ import lombok.Data;
  */
 @Data
 @Entity
-@Table(name = "seq_table")
+@Table(name = "seq_table_inv")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SeqTable {
 
     @EmbeddedId

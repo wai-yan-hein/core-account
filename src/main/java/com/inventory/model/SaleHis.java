@@ -5,8 +5,11 @@
  */
 package com.inventory.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.util.Date;
@@ -17,7 +20,10 @@ import lombok.Data;
  *
  * @author wai yan
  */
+@Entity
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Table(name = "sale_his")
 public class SaleHis {
 
     @EmbeddedId

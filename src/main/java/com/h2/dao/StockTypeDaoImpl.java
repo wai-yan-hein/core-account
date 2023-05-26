@@ -37,4 +37,9 @@ public class StockTypeDaoImpl extends AbstractDao<StockTypeKey, StockType> imple
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 
+    @Override
+    public StockType find(StockTypeKey type) {
+        return getByKey(type);
+    }
+
 }

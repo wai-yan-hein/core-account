@@ -5,6 +5,7 @@
 package com.h2.service;
 
 import com.inventory.model.StockBrand;
+import com.inventory.model.StockBrandKey;
 import java.util.List;
 
 /**
@@ -14,6 +15,8 @@ import java.util.List;
 public interface BrandService {
 
     StockBrand save(StockBrand stock);
+
+    StockBrand find(StockBrandKey key);
 
     List<StockBrand> findAll(String compCode);
 

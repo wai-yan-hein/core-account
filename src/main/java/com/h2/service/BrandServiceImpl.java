@@ -6,6 +6,7 @@ package com.h2.service;
 
 import com.h2.dao.BrandDao;
 import com.inventory.model.StockBrand;
+import com.inventory.model.StockBrandKey;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,11 @@ public class BrandServiceImpl implements BrandService {
     @Override
     public String getMaxDate() {
         return dao.getMaxDate();
+    }
+
+    @Override
+    public StockBrand find(StockBrandKey key) {
+        return dao.find(key);
     }
 
 }

@@ -37,4 +37,9 @@ public class CategoryDaoImpl extends AbstractDao<CategoryKey, Category> implemen
         return findHSQL(hsql);
     }
 
+    @Override
+    public Category find(CategoryKey key) {
+        return getByKey(key);
+    }
+
 }

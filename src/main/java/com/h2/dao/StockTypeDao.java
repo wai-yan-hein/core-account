@@ -5,6 +5,7 @@
 package com.h2.dao;
 
 import com.inventory.model.StockType;
+import com.inventory.model.StockTypeKey;
 import java.util.List;
 
 /**
@@ -18,4 +19,7 @@ public interface StockTypeDao {
     List<StockType> findAll(String compCode);
 
     String getMaDate();
+
+    StockType find(StockTypeKey type);
+
 }

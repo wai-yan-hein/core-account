@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.H2Repo;
 import com.acc.common.AccountRepo;
 import com.common.DecimalFormatRender;
 import com.common.Global;
@@ -70,6 +71,7 @@ import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.core.publisher.Mono;
 
 /**
@@ -86,6 +88,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private final StockBalanceTableModel stockBalanceTableModel = new StockBalanceTableModel();
     @Autowired
     private InventoryRepo inventoryRepo;
+    @Autowired
+    private H2Repo h2Repo;
     @Autowired
     private AccountRepo accountRepo;
     @Autowired

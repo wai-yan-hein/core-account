@@ -5,6 +5,7 @@
 package com.h2.dao;
 
 import com.inventory.model.Category;
+import com.inventory.model.CategoryKey;
 import java.util.List;
 
 /**
@@ -14,6 +15,8 @@ import java.util.List;
 public interface CategoryDao {
 
     Category save(Category stock);
+
+    Category find(CategoryKey key);
 
     String getMaxDate();
 
