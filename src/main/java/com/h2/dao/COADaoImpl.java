@@ -26,7 +26,7 @@ public class COADaoImpl extends AbstractDao<COAKey, ChartOfAccount> implements C
 
     @Override
     public String getMaxDate() {
-        String jpql = "select max(o.updatedDate) from ChartOfAccount o";
+        String jpql = "select max(o.modifiedDate) from ChartOfAccount o";
         Date date = getDate(jpql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }

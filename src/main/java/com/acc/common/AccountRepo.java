@@ -241,6 +241,16 @@ public class AccountRepo {
                 .bodyToFlux(TraderA.class)
                 .collectList();
     }
+    
+    public Mono<List<TraderA>> getUpdateDepartmentAByDate(String updatedDate) {
+        return accountApi.get()
+                .uri(builder -> builder.path("/account/getDepartmentByDate")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(TraderA.class)
+                .collectList();
+    }
 
     public Double getTraderBalance(String date, String traderCode, String compCode) {
         try {

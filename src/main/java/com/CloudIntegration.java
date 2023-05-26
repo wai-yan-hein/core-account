@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com;
+
 import com.acc.common.AccountRepo;
 import com.common.Global;
 import com.h2.dao.SaleHisDetailDao;
@@ -166,6 +167,7 @@ public class CloudIntegration {
     private void downloadAccount() {
         downloadChartofAccount();
         downloadTrader();
+        downloadDepartmentAccount();
     }
 
     private void downloadChartofAccount() {
@@ -190,6 +192,18 @@ public class CloudIntegration {
         }, (e) -> {
             log.info(e.getMessage());
         });
+    }
+    
+    private void downloadDepartmentAccount() {
+//        accounRepo.getUpdateDepartmentAByDate(traderService.getMaxDate()).subscribe((t) -> {
+//            log.info("download Department Account list : " + t.size());
+//            t.forEach((tr) -> {
+//                traderService.save(tr);
+//            });
+//            log.info("download department account done.");
+//        }, (e) -> {
+//            log.info(e.getMessage());
+//        });
     }
 
     private void downloadAppUser() {
@@ -372,7 +386,6 @@ public class CloudIntegration {
         downloadCategory();
         downloadStock();
     }
-
 
     private void downloadPriceOption() {
         inventoryRepo.getUpdatePriceOption(priceOptionService.getMaxDate()).subscribe((t) -> {
