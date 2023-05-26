@@ -9,8 +9,8 @@ import com.ConnectionDialog;
 import com.common.Global;
 import com.user.common.UserRepo;
 import com.common.Util1;
+import com.inventory.model.AppUser;
 import com.inventory.model.MachineInfo;
-import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.event.FocusAdapter;
 import java.awt.event.KeyEvent;
@@ -97,18 +97,18 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
                 String toDayKey = Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd");
                 toDayKey = toDayKey.replaceAll("-", "");
                 if (inputKey.equals(toDayKey)) {
-                    register().subscribe((mac) -> {
-                        Global.macId = mac.getMacId();
-                    }, (e) -> {
-                        JOptionPane.showMessageDialog(this, e.getMessage());
-                        System.exit(1);
-                    }, () -> {
-                        setLocationRelativeTo(null);
-                        setVisible(true);
+                    register().subscribe((info) -> {
+                        if (info != null) {
+                            Global.macId = info.getMacId();
+                            log.info("Mac Id : " + Global.machineName);
+                            setLocationRelativeTo(null);
+                            setVisible(true);
+                        }
                     });
+
                 } else {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Security Key.");
-                    System.exit(1);
+                    System.exit(0);
                 }
             } else {
                 lblStatus.setText("Latest version.");
@@ -202,27 +202,30 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
                     "Authentication error.", JOptionPane.ERROR_MESSAGE);
             loginAttempt++;
         } else {
-            userRepo.login(userName, password).subscribe((t) -> {
-                if (Util1.isNull(t)) {
+            Mono<AppUser> user = userRepo.login(userName, password);
+            user.hasElement().subscribe((status) -> {
+                if (status) {
+                    userRepo.login(userName, password).subscribe((t) -> {
+                        Global.loginUser = t;
+                        Global.roleCode = t.getRoleCode();
+                        taskExecutor.execute(() -> {
+                            mainFrame.setName(APP_NAME);
+                            mainFrame.setIconImage(appIcon);
+                            mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                            mainFrame.initMain();
+                            mainFrame.setVisible(true);
+                        });
+                        setVisible(false);
+                    }, (e) -> {
+                        JOptionPane.showMessageDialog(this, e.getMessage());
+                    });
+                } else {
                     JOptionPane.showMessageDialog(this, "Invalid user name or password.",
                             "Authentication error.", JOptionPane.ERROR_MESSAGE);
                     loginAttempt++;
-                } else {
-                    log.info("1");
-                    Global.loginUser = t;
-                    Global.roleCode = t.getRoleCode();
-                    taskExecutor.execute(() -> {
-                        mainFrame.setName(APP_NAME);
-                        mainFrame.setIconImage(appIcon);
-                        mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-                        mainFrame.initMain();
-                        mainFrame.setVisible(true);
-                    });
-                    setVisible(false);
                 }
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
             });
+
         }
 
         if (loginAttempt >= 3) {

@@ -117,7 +117,7 @@ public class WebFlexConfig {
     }
 
     @Bean
-    public boolean localDatabse() {
+    public boolean localDatabase() {
         return Util1.getBoolean(environment.getProperty("local.database"));
     }
 }

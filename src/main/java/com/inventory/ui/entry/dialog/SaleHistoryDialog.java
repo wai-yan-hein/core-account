@@ -27,6 +27,7 @@ import com.inventory.model.Trader;
 import com.inventory.model.VSale;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.SaleVouSearchTableModel;
+import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import java.awt.event.FocusAdapter;
@@ -41,8 +42,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -120,14 +119,31 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
 
         @Override
         public void focusGained(FocusEvent e) {
-            JTextField jtf = (JTextField) e.getSource();
-            jtf.selectAll();
+            if (e.getSource() instanceof JTextField txt) {
+                txt.selectAll();
+            } else if (e.getSource() instanceof JTextFieldDateEditor txt) {
+                txt.selectAll();
+            }
         }
 
     };
 
     private void initFocous() {
         txtStock.addFocusListener(fa);
+        txtVouNo.addFocusListener(fa);
+        txtFromDate.addFocusListener(fa);
+        txtToDate.addFocusListener(fa);
+        txtBatchNo.addFocusListener(fa);
+        txtProjectNo.addFocusListener(fa);
+        txtRemark.addFocusListener(fa);
+        txtRef.addFocusListener(fa);
+        txtCus.addFocusListener(fa);
+        txtSaleMan.addFocusListener(fa);
+        txtStock.addFocusListener(fa);
+        txtLocation.addFocusListener(fa);
+        txtUser.addFocusListener(fa);
+        txtDep.addFocusListener(fa);
+        txtCurrency.addFocusListener(fa);
     }
 
     private void initCombo() {
@@ -209,7 +225,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private Integer getDepId() {
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
-    
+
     private String getCurCode() {
         if (currAutoCompleter == null || currAutoCompleter.getCurrency() == null) {
             return Global.currency;
@@ -237,7 +253,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         String projectNo = projectAutoCompleter.getProject().getKey().getProjectNo();
         filter.setProjectNo(projectNo.equals("All") ? "-" : projectNo);
         filter.setCurCode(getCurCode());
-        filter.setNullBatch(chkBatch.isSelected());        
+        filter.setNullBatch(chkBatch.isSelected());
         saleVouTableModel.clear();
         txtRecord.setValue(0);
         //
@@ -249,7 +265,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
             JOptionPane.showMessageDialog(this, e.getMessage());
             progress.setIndeterminate(false);
         });
-
     }
 
     private void calAmount() {
@@ -551,14 +566,14 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                             .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, 75, Short.MAX_VALUE)
+                                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, 75, Short.MAX_VALUE)
+                                    .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, 75, Short.MAX_VALUE)
+                                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -828,22 +843,18 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
 
     private void txtCusFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCusFocusGained
         // TODO add your handling code here:
-        txtCus.selectAll();
     }//GEN-LAST:event_txtCusFocusGained
 
     private void txtVouNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtVouNoFocusGained
         // TODO add your handling code here:
-        txtVouNo.selectAll();
     }//GEN-LAST:event_txtVouNoFocusGained
 
     private void txtUserFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtUserFocusGained
         // TODO add your handling code here:
-        txtUser.selectAll();
     }//GEN-LAST:event_txtUserFocusGained
 
     private void txtRemarkFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtRemarkFocusGained
         // TODO add your handling code here:
-        txtRemark.selectAll();
     }//GEN-LAST:event_txtRemarkFocusGained
 
     private void txtStockFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtStockFocusGained
@@ -897,7 +908,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     }//GEN-LAST:event_txtBatchNoFocusGained
 
     private void txtProjectNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtProjectNoFocusGained
-        txtProjectNo.selectAll();        // TODO add your handling code here:
     }//GEN-LAST:event_txtProjectNoFocusGained
 
     private void txtCurrencyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCurrencyActionPerformed
@@ -905,7 +915,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     }//GEN-LAST:event_txtCurrencyActionPerformed
 
     private void txtCurrencyFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCurrencyFocusGained
-        txtCurrency.selectAll();        // TODO add your handling code here:
     }//GEN-LAST:event_txtCurrencyFocusGained
 
     /**
