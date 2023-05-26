@@ -36,4 +36,11 @@ public class UserDaoImpl extends AbstractDao<String, AppUser> implements UserDao
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 
+    @Override
+    public AppUser login(String userName, String password) {
+        String sql = "select o from AppUser o where o.userShortName = '" + userName +"' and o.password = '" + password + "'";
+        List<AppUser> list = findHSQL(sql);
+        return list.isEmpty() ? null : list.get(0);
+    }
+
 }

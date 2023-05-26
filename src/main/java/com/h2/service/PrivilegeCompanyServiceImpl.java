@@ -6,6 +6,8 @@ package com.h2.service;
 
 import com.h2.dao.PrivilegeCompanyDao;
 import com.user.model.PrivilegeCompany;
+import com.user.model.VRoleCompany;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,11 @@ public class PrivilegeCompanyServiceImpl implements PrivilegeCompanyService {
     @Override
     public String getMaxDate() {
         return dao.getMaxDate();
+    }
+
+    @Override
+    public List<VRoleCompany> getPrivilegeCompany(String roleCode) {
+        return dao.getPrivilegeCompany(roleCode);
     }
 
 }

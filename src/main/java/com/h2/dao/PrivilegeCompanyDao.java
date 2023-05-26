@@ -5,6 +5,8 @@
 package com.h2.dao;
 
 import com.user.model.PrivilegeCompany;
+import com.user.model.VRoleCompany;
+import java.util.List;
 
 /**
  *
@@ -15,4 +17,6 @@ public interface PrivilegeCompanyDao {
     PrivilegeCompany save(PrivilegeCompany p);
 
     String getMaxDate();
+    
+    List<VRoleCompany> getPrivilegeCompany(String roleCode);
 }

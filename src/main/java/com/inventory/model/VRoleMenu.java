@@ -24,6 +24,7 @@ public class VRoleMenu {
     private String account;
     private String parentMenuCode;
     private String compCode;
+    private Integer orderBy;
     private List<VRoleMenu> child;
 
     public VRoleMenu() {

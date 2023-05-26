@@ -5,7 +5,9 @@
 package com.h2.service;
 
 import com.h2.dao.MenuDao;
+import com.inventory.model.VRoleMenu;
 import com.user.model.Menu;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,11 @@ public class MenuServiceimpl implements MenuService {
     @Override
     public String getMaxDate() {
         return dao.getMaxDate();
+    }
+
+    @Override
+    public List<VRoleMenu> getMenuTree(String roleCode, String compCode) {
+        return dao.getMenuTree(roleCode, compCode);
     }
 
 }
