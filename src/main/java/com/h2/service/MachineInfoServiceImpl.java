@@ -31,4 +31,9 @@ public class MachineInfoServiceImpl implements MachineInfoService {
         return dao.getMaxDate();
     }
 
+    @Override
+    public MachineInfo getMachineInfo(String machineName) {
+        return dao.getMachineInfo(machineName);
+    }
+
 }

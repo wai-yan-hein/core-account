@@ -18,4 +18,6 @@ public interface UserService {
     List<AppUser> findAll();
 
     String getMaxDate();
+    
+    AppUser login(String userName, String password);
 }

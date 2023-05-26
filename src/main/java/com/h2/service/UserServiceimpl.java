@@ -37,4 +37,9 @@ public class UserServiceimpl implements UserService {
         return userDao.getMaxDate();
     }
 
+    @Override
+    public AppUser login(String userName, String password) {
+        return userDao.login(userName, password);
+    }
+
 }

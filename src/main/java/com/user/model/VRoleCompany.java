@@ -5,6 +5,9 @@
  */
 package com.user.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import java.util.Date;
 import lombok.Data;
 
@@ -25,4 +28,6 @@ public class VRoleCompany implements java.io.Serializable {
     private String currency;
     private boolean batchLock;
     private Date yearEndDate;
+    private boolean allow;
+    private boolean active;
 }

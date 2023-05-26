@@ -5,6 +5,8 @@
 package com.h2.service;
 
 import com.user.model.PrivilegeCompany;
+import com.user.model.VRoleCompany;
+import java.util.List;
 
 /**
  *
@@ -15,4 +17,6 @@ public interface PrivilegeCompanyService {
     PrivilegeCompany save(PrivilegeCompany pc);
 
     String getMaxDate();
+
+    List<VRoleCompany> getPrivilegeCompany(String roleCode);
 }

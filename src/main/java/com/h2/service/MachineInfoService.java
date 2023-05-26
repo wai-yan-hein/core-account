@@ -15,4 +15,6 @@ public interface MachineInfoService {
     MachineInfo save(MachineInfo mInfo);
 
     String getMaxDate();
+    
+    MachineInfo getMachineInfo(String machineName);
 }

@@ -8,17 +8,23 @@ import com.common.Global;
 import com.h2.service.BrandService;
 import com.h2.service.CategoryService;
 import com.h2.service.LocationService;
+import com.h2.service.MachineInfoService;
+import com.h2.service.MenuService;
+import com.h2.service.PrivilegeCompanyService;
 import com.h2.service.SaleHisService;
 import com.h2.service.SaleManService;
 import com.h2.service.StockService;
 import com.h2.service.StockTypeService;
 import com.h2.service.StockUnitService;
 import com.h2.service.TraderInvService;
+import com.h2.service.UserService;
 import com.h2.service.VouStatusService;
+import com.inventory.model.AppUser;
 import com.inventory.model.Category;
 import com.inventory.model.CategoryKey;
 import com.inventory.model.Location;
 import com.inventory.model.LocationKey;
+import com.inventory.model.MachineInfo;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleMan;
 import com.inventory.model.SaleManKey;
@@ -32,8 +38,10 @@ import com.inventory.model.StockUnit;
 import com.inventory.model.StockUnitKey;
 import com.inventory.model.Trader;
 import com.inventory.model.TraderKey;
+import com.inventory.model.VRoleMenu;
 import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
+import com.user.model.VRoleCompany;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -66,6 +74,14 @@ public class H2Repo {
     private VouStatusService vouStatusService;
     @Autowired
     private SaleHisService saleHisService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private MachineInfoService machineInfoService;
+    @Autowired
+    private PrivilegeCompanyService pcService;
+    @Autowired
+    private MenuService menuService;
 
     public Mono<List<Location>> getLocation() {
         return Mono.justOrEmpty(locationService.findAll(Global.compCode));
@@ -141,5 +157,27 @@ public class H2Repo {
 
     public Mono<SaleHis> save(SaleHis sh) {
         return Mono.justOrEmpty(saleHisService.save(sh));
+    }
+    
+    public Mono<AppUser> login(String userName, String password) {
+        return Mono.justOrEmpty(userService.login(userName, password));
+    }
+    
+    public Mono<MachineInfo> getMachineInfo(String machineName) {
+        return Mono.justOrEmpty(machineInfoService.getMachineInfo(machineName));
+    }
+    
+    public Mono<List<AppUser>> getAppUser() {
+        return Mono.justOrEmpty(userService.findAll());
+    }
+    
+    public Mono<List<VRoleCompany>> getPrivilegeCompany(String roleCode) {
+        return Mono.justOrEmpty(pcService.getPrivilegeCompany(roleCode));
+    }
+    
+    public Mono<List<VRoleMenu>> getMenuTree(String roleCode, String compCode) {
+        List<VRoleMenu> menus = menuService.getMenuTree(roleCode, compCode);
+        menus.removeIf(m -> !m.isAllow());
+        return Mono.justOrEmpty(menus);
     }
 }

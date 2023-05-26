@@ -3,10 +3,8 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.h2.service;
-
-import com.h2.dao.MenuDao;
-import com.inventory.model.VRoleMenu;
-import com.user.model.Menu;
+import com.acc.model.ChartOfAccount;
+import com.h2.dao.COADao;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,28 +12,28 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
- * @author Athu Sint
+ * @author Lenovo
  */
 @Service
 @Transactional
-public class MenuServiceimpl implements MenuService {
+public class COAServiceImpl implements COAService {
 
     @Autowired
-    private MenuDao dao;
+    private COADao dao;
+    
+    @Override
+    public ChartOfAccount save(ChartOfAccount coa) {
+        return dao.save(coa);
+    }
 
     @Override
-    public Menu save(Menu menu) {
-        return dao.save(menu);
+    public List<ChartOfAccount> findAll(String compCode) {
+        return dao.findAll(compCode);
     }
 
     @Override
     public String getMaxDate() {
         return dao.getMaxDate();
-    }
-
-    @Override
-    public List<VRoleMenu> getMenuTree(String roleCode, String compCode) {
-        return dao.getMenuTree(roleCode, compCode);
     }
 
 }

@@ -47,6 +47,10 @@ public abstract class AbstractDao<PK extends Serializable, T> {
     public T getByKey(PK key) {
         return entityManager.find(persistentClass, key);
     }
+    
+    public void persist(T entity) {
+        entityManager.persist(entity);
+    }
 
     public void saveOrUpdate(T entity, PK pk) {
         T t = entityManager.find(persistentClass, pk);

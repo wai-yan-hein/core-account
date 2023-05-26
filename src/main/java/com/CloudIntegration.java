@@ -4,10 +4,12 @@
  */
 package com;
 
+import com.acc.common.AccountRepo;
 import com.common.Global;
 import com.h2.dao.SaleHisDetailDao;
 import com.h2.service.BrandService;
 import com.h2.service.BusinessTypeService;
+import com.h2.service.COAService;
 import com.h2.service.CategoryService;
 import com.h2.service.CompanyInfoService;
 import com.h2.service.CurrencyService;
@@ -29,18 +31,21 @@ import com.h2.service.RoleService;
 import com.h2.service.StockService;
 import com.h2.service.StockTypeService;
 import com.h2.service.StockUnitService;
+import com.h2.service.SystemPropertyService;
+import com.h2.service.TraderAService;
 import com.h2.service.TraderInvService;
+import com.h2.service.UserService;
 import com.h2.service.VouStatusService;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
-import com.h2.service.SystemPropertyService;
-import com.h2.service.UserService;
 import com.inventory.ui.common.InventoryRepo;
 import com.user.common.UserRepo;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -56,6 +61,8 @@ public class CloudIntegration {
     private UserRepo userRepo;
     @Autowired
     private InventoryRepo inventoryRepo;
+    @Autowired
+    private AccountRepo accounRepo;
 
     @Autowired
     private StockService stockService;
@@ -113,6 +120,10 @@ public class CloudIntegration {
     private RolePropertyService rpService;
     @Autowired
     private SystemPropertyService sysPropertyService;
+    @Autowired
+    private COAService coaService;
+    @Autowired
+    private TraderAService traderService;
 
     public void startDownload() {
         if (localDatabase) {
@@ -151,6 +162,48 @@ public class CloudIntegration {
         downloadRole();
         downloadRoleProperty();
         downloadSystemProperty();
+    }
+
+    private void downloadAccount() {
+        downloadChartofAccount();
+        downloadTrader();
+        downloadDepartmentAccount();
+    }
+
+    private void downloadChartofAccount() {
+        accounRepo.getUpdateChartOfAccountByDate(coaService.getMaxDate()).subscribe((t) -> {
+            log.info("downloadChartOfAccount list : " + t.size());
+            t.forEach((coa) -> {
+                coaService.save(coa);
+            });
+            log.info("downloadChartOfAccount done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
+
+    private void downloadTrader() {
+        accounRepo.getUpdateTraderByDate(traderService.getMaxDate()).subscribe((t) -> {
+            log.info("downloadTrader list : " + t.size());
+            t.forEach((tr) -> {
+                traderService.save(tr);
+            });
+            log.info("downloadTrader done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
+    
+    private void downloadDepartmentAccount() {
+//        accounRepo.getUpdateDepartmentAByDate(traderService.getMaxDate()).subscribe((t) -> {
+//            log.info("download Department Account list : " + t.size());
+//            t.forEach((tr) -> {
+//                traderService.save(tr);
+//            });
+//            log.info("download department account done.");
+//        }, (e) -> {
+//            log.info(e.getMessage());
+//        });
     }
 
     private void downloadAppUser() {
@@ -332,10 +385,6 @@ public class CloudIntegration {
         downloadStockType();
         downloadCategory();
         downloadStock();
-    }
-
-    private void downloadAccount() {
-
     }
 
     private void downloadPriceOption() {

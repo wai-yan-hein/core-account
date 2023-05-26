@@ -4,7 +4,9 @@
  */
 package com.h2.service;
 
+import com.inventory.model.VRoleMenu;
 import com.user.model.Menu;
+import java.util.List;
 
 /**
  *
@@ -15,4 +17,6 @@ public interface MenuService {
     Menu save(Menu menu);
 
     String getMaxDate();
+
+    List<VRoleMenu> getMenuTree(String roleCode, String compCode);
 }

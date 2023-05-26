@@ -4,6 +4,7 @@
  */
 package com.user.common;
 
+import com.H2Repo;
 import com.acc.model.BusinessType;
 import com.acc.model.DeleteObj;
 import com.common.Global;
@@ -47,6 +48,10 @@ public class UserRepo {
 
     @Autowired
     private WebClient userApi;
+    @Autowired
+    private H2Repo h2Repo;
+    @Autowired
+    private boolean localdatabase;
 
     public Mono<List<Currency>> getCurrency() {
         return userApi.get()
@@ -66,6 +71,9 @@ public class UserRepo {
     }
 
     public Mono<List<AppUser>> getAppUser() {
+        if (localdatabase) {
+            return h2Repo.getAppUser();
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-appuser")
                 .build())
@@ -94,7 +102,13 @@ public class UserRepo {
                 .queryParam("macName", macName)
                 .build())
                 .retrieve()
-                .bodyToMono(MachineInfo.class);
+                .bodyToMono(MachineInfo.class)
+                .onErrorResume((e) -> {
+                    if (localdatabase) {
+                        return h2Repo.getMachineInfo(macName);
+                    }
+                    return Mono.error(e);
+                });
 
     }
 
@@ -589,15 +603,25 @@ public class UserRepo {
     }
 
     public Mono<AppUser> login(String userName, String password) {
+
         return userApi.get().uri(builder -> builder.path("/user/login")
                 .queryParam("userName", userName)
                 .queryParam("password", password)
                 .build())
                 .retrieve()
-                .bodyToMono(AppUser.class);
+                .bodyToMono(AppUser.class)
+                .onErrorResume((e) -> {
+                    if (localdatabase) {
+                        return h2Repo.login(userName, password);
+                    }
+                    return Mono.error(e);
+                });
     }
 
     public Mono<List<VRoleCompany>> getRoleCompany(String roleCode) {
+        if (localdatabase) {
+            return h2Repo.getPrivilegeCompany(roleCode);
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-privilege-role-company")
                 .queryParam("roleCode", roleCode)
@@ -608,6 +632,9 @@ public class UserRepo {
     }
 
     public Mono<List<VRoleMenu>> getRoleMenu(String roleCode) {
+        if (localdatabase) {
+            return h2Repo.getMenuTree(roleCode, Global.compCode);
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-privilege-role-menu-tree")
                 .queryParam("roleCode", roleCode)
