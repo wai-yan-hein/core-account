@@ -3,18 +3,19 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.h2.service;
-import com.acc.model.ChartOfAccount;
+import com.acc.model.TraderA;
 import java.util.List;
 
 /**
  *
  * @author Lenovo
  */
-public interface COAService {
+public interface TraderAService {
 
-    ChartOfAccount save(ChartOfAccount stock);
+    TraderA save(TraderA stock);
 
-    List<ChartOfAccount> findAll(String compCode);
+    List<TraderA> findAll(String compCode);
 
     String getMaxDate();
+
 }

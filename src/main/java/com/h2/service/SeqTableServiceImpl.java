@@ -4,14 +4,14 @@
  * and open the template in the editor.
  */
 package com.h2.service;
-import com.acc.model.SeqKey;
-import com.acc.model.SeqTable;
-import com.h2.dao.SeqTableDao;
+import com.acc.model.SeqKeyAccount;
+import com.acc.model.SeqAccountTable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import com.h2.dao.SeqAccountTableDao;
 
 /**
  *
@@ -22,26 +22,26 @@ import java.util.List;
 public class SeqTableServiceImpl implements SeqTableService{
     
     @Autowired
-    private SeqTableDao dao;
+    private SeqAccountTableDao dao;
     
     @Override
-    public SeqTable save(SeqTable st){
+    public SeqAccountTable save(SeqAccountTable st){
         st = dao.save(st);
         return st;
     }
     
     @Override
-    public SeqTable findById(SeqKey id){
+    public SeqAccountTable findById(SeqKeyAccount id){
         return dao.findById(id);
     }
     
     @Override
-    public List<SeqTable> search(String option, String period, String compCode){
+    public List<SeqAccountTable> search(String option, String period, String compCode){
         return dao.search(option, period, compCode);
     }
     
     @Override
-    public SeqTable getSeqTable(String option, String period, String compCode){
+    public SeqAccountTable getSeqTable(String option, String period, String compCode){
         return dao.getSeqTable(option, period, compCode);
     }
     
@@ -56,7 +56,7 @@ public class SeqTableServiceImpl implements SeqTableService{
     }
     
     @Override
-    public List<SeqTable> findAll(String compCode) {
+    public List<SeqAccountTable> findAll(String compCode) {
         return dao.findAll(compCode);
     }
 }

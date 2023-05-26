@@ -4,8 +4,8 @@
  * and open the template in the editor.
  */
 package com.h2.dao;
-import com.acc.model.SeqKey;
-import com.acc.model.SeqTable;
+import com.acc.model.SeqKeyAccount;
+import com.acc.model.SeqAccountTable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,21 +14,21 @@ import java.util.List;
  * @author winswe
  */
 @Repository
-public class SeqTableDaoImpl extends AbstractDao<SeqKey, SeqTable> implements SeqTableDao {
+public class SeqAccountTableDaoImpl extends AbstractDao<SeqKeyAccount, SeqAccountTable> implements SeqAccountTableDao {
 
     @Override
-    public SeqTable save(SeqTable st) {
+    public SeqAccountTable save(SeqAccountTable st) {
         persist(st);
         return st;
     }
 
     @Override
-    public SeqTable findById(SeqKey id) {
+    public SeqAccountTable findById(SeqKeyAccount id) {
         return getByKey(id);
     }
 
     @Override
-    public List<SeqTable> search(String option, String period, String compCode) {
+    public List<SeqAccountTable> search(String option, String period, String compCode) {
         String strSql = "select o from SeqTable o where o.seqOption = '" + option
                 + "' and o.compCode = '" + compCode + "'";
 
@@ -40,9 +40,9 @@ public class SeqTableDaoImpl extends AbstractDao<SeqKey, SeqTable> implements Se
     }
 
     @Override
-    public SeqTable getSeqTable(String option, String period, String compCode) {
-        List<SeqTable> listST = search(option, period, compCode);
-        SeqTable st = null;
+    public SeqAccountTable getSeqTable(String option, String period, String compCode) {
+        List<SeqAccountTable> listST = search(option, period, compCode);
+        SeqAccountTable st = null;
 
         if (listST != null) {
             if (!listST.isEmpty()) {
@@ -62,14 +62,14 @@ public class SeqTableDaoImpl extends AbstractDao<SeqKey, SeqTable> implements Se
 
     @Override
     public int getSequence(Integer macId, String option, String period, String compCode) {
-        SeqKey key = new SeqKey();
+        SeqKeyAccount key = new SeqKeyAccount();
         key.setCompCode(compCode);
         key.setMacId(macId);
         key.setPeriod(period);
         key.setSeqOption(option);
-        SeqTable st = findById(key);
+        SeqAccountTable st = findById(key);
         if (st == null) {
-            st = new SeqTable();
+            st = new SeqAccountTable();
             st.setKey(key);
             st.setSeqNo(1);
         } else {
@@ -80,7 +80,7 @@ public class SeqTableDaoImpl extends AbstractDao<SeqKey, SeqTable> implements Se
     }
 
     @Override
-    public List<SeqTable> findAll(String compCode) {
+    public List<SeqAccountTable> findAll(String compCode) {
         String strSql = "select o from SeqTable o where o.key.compCode ='" + compCode + "'";
         return findHSQL(strSql);
     }

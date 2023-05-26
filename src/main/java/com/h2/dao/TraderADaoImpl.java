@@ -4,8 +4,8 @@
  */
 package com.h2.dao;
 
-import com.acc.model.COAKey;
-import com.acc.model.ChartOfAccount;
+import com.acc.model.TraderA;
+import com.acc.model.TraderAKey;
 import com.common.Util1;
 import java.util.Date;
 import java.util.List;
@@ -16,24 +16,25 @@ import org.springframework.stereotype.Repository;
  * @author Lenovo
  */
 @Repository
-public class COADaoImpl extends AbstractDao<COAKey, ChartOfAccount> implements COADao {
+public class TraderADaoImpl extends AbstractDao<TraderAKey, TraderA> implements TraderADao {
 
     @Override
-    public ChartOfAccount save(ChartOfAccount coa) {
-        saveOrUpdate(coa, coa.getKey());
-        return coa;
+    public TraderA save(TraderA trader) {
+        saveOrUpdate(trader, trader.getKey());
+        return trader;
     }
 
     @Override
     public String getMaxDate() {
-        String jpql = "select max(o.updatedDate) from ChartOfAccount o";
+        String jpql = "select max(o.updatedDate) from TraderA o";
         Date date = getDate(jpql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 
     @Override
-    public List<ChartOfAccount> findAll(String compCode) {
-        String hsql = "select o from ChartOfAccount o where o.key.compCode ='" + compCode + "'";
+    public List<TraderA> findAll(String compCode) {
+        String hsql = "select o from TraderA o where o.key.compCode ='" + compCode + "'";
         return findHSQL(hsql);
     }
+
 }

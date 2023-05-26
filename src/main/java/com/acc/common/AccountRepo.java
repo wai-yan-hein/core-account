@@ -29,6 +29,7 @@ import com.common.FilterObject;
 import com.common.Global;
 import com.common.ReturnObject;
 import com.common.Util1;
+import com.inventory.model.StockBrand;
 import com.user.model.YearEnd;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -218,6 +219,26 @@ public class AccountRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(ChartOfAccount.class)
+                .collectList();
+    }
+    
+    public Mono<List<ChartOfAccount>> getUpdateChartOfAccountByDate(String updatedDate) {
+        return accountApi.get()
+                .uri(builder -> builder.path("/account/getCOAByDate")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(ChartOfAccount.class)
+                .collectList();
+    }
+    
+    public Mono<List<TraderA>> getUpdateTraderByDate(String updatedDate) {
+        return accountApi.get()
+                .uri(builder -> builder.path("/account/getTraderByDate")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(TraderA.class)
                 .collectList();
     }
 

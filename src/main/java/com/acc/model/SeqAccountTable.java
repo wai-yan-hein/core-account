@@ -15,9 +15,9 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "seq_table")
-public class SeqTable implements java.io.Serializable {
+public class SeqAccountTable implements java.io.Serializable {
     @EmbeddedId
-    private SeqKey key;
+    private SeqKeyAccount key;
     @Column(name = "seq_no")
     private Integer seqNo;
 

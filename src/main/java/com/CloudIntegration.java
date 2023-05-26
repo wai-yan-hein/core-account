@@ -5,7 +5,9 @@
 package com;
 
 import com.acc.common.AccountRepo;
+import com.h2.service.BrandService;
 import com.h2.service.BusinessTypeService;
+import com.h2.service.COAService;
 import com.h2.service.CategoryService;
 import com.h2.service.CompanyInfoService;
 import com.h2.service.CurrencyService;
@@ -21,16 +23,13 @@ import com.h2.service.PrivilegeCompanyService;
 import com.h2.service.StockService;
 import com.h2.service.StockTypeService;
 import com.h2.service.StockUnitService;
+import com.h2.service.TraderAService;
 import com.h2.service.UserService;
-import com.inventory.model.Location;
 import com.inventory.ui.common.InventoryRepo;
 import com.user.common.UserRepo;
-import java.util.List;
-import com.user.model.ExchangeRate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -84,6 +83,10 @@ public class CloudIntegration {
     private MenuService menuService;
     @Autowired
     private PrivilegeCompanyService pcService;
+    @Autowired
+    private COAService coaService;
+    @Autowired
+    private TraderAService traderService;
 
     public void startDownload() {
         if (localDatabase) {
@@ -106,30 +109,36 @@ public class CloudIntegration {
         downloadMenu();
         downloadPC();
     }
+
     private void downloadAccount() {
-            downloadChatofAccount();
-        }
+        downloadChartofAccount();
+        downloadTrader();
+    }
 
-        private void downloadChatofAccount() {
-           // accounRepo.getChartOfAccount()
-    //        inventoryRepo.getUpdateStockType(stockTypeService.getMaDate()).subscribe((t) -> {
-    //            log.info("downloadStockType list : " + t.size());
-    //            t.forEach((s) -> {
-    //                stockTypeService.save(s);
-    //            });
-    //            log.info("downloadStockType done.");
-    //        }, (e) -> {
-    //            log.info(e.getMessage());
-    //        });
+    private void downloadChartofAccount() {
+        accounRepo.getUpdateChartOfAccountByDate(coaService.getMaxDate()).subscribe((t) -> {
+            log.info("downloadChartOfAccount list : " + t.size());
+            t.forEach((coa) -> {
+                coaService.save(coa);
+            });
+            log.info("downloadChartOfAccount done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
 
-    //         accounRepo.getChartOfAccount().subscribe((u) -> {
-    //            u.forEach((a) -> {
-    //                userService.save(a);
-    //            });
-    //        }, (err) -> {
-    //            log.info(err.getMessage());
-    //        });
-        }
+    private void downloadTrader() {
+        accounRepo.getUpdateTraderByDate(traderService.getMaxDate()).subscribe((t) -> {
+            log.info("downloadTrader list : " + t.size());
+            t.forEach((tr) -> {
+                traderService.save(tr);
+            });
+            log.info("downloadTrader done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
+    }
+
     private void downloadAppUser() {
         userRepo.getAppUserByDate(userService.getMaxDate()).subscribe((u) -> {
             log.info("user size = " + u.size());
@@ -250,6 +259,7 @@ public class CloudIntegration {
         downloadCategory();
         downloadStock();
     }
+
     private void downloadInvTrader() {
         inventoryRepo.getUpdateSaleMan(saleManService.getMaxDate()).subscribe((t) -> {
             log.info("downloadInvTrader list : " + t.size());

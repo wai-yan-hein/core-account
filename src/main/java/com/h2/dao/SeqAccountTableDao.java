@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.h2.service;
+package com.h2.dao;
 import com.acc.model.SeqKeyAccount;
 import com.acc.model.SeqAccountTable;
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author winswe
  */
- public interface SeqTableService {
+ public interface SeqAccountTableDao {
 
      SeqAccountTable save(SeqAccountTable st);
 

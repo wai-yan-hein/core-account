@@ -14,7 +14,7 @@ import java.io.Serializable;
  */
 @Data
 @Embeddable
-public class SeqKey implements Serializable {
+public class SeqKeyAccount implements Serializable {
     @Column(name = "mac_id")
     private Integer macId;
     @Column(name = "seq_option")

@@ -193,7 +193,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
                 key.setCode(null);
                 trader.setKey(key);
             } else {
-                trader.setUpdatedBy(Global.loginUser.getUserCode());
+                trader.setUpdatedUser(Global.loginUser.getUserCode());//**pann edit upadated by
             }
         }
         return status;

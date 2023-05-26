@@ -4,6 +4,8 @@
  */
 package com.acc.model;
 
+import jakarta.persistence.Column;
+import java.io.Serializable;
 import lombok.Data;
 
 /**
@@ -11,9 +13,11 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
-public class TraderAKey {
+public class TraderAKey implements Serializable{
 
+    @Column(name = "code")
     private String code;
+    @Column(name = "comp_code")
     private String compCode;
 
     public TraderAKey() {
