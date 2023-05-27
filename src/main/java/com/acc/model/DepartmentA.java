@@ -4,6 +4,7 @@
  */
 package com.acc.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -20,6 +21,7 @@ import lombok.Data;
  * @author Dell
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "department")
 public class DepartmentA {
@@ -53,10 +55,10 @@ public class DepartmentA {
     @Transient
     private List<DepartmentA> child;
 
-    public DepartmentA(String deptCode, String deptName) {
-        this.key = new DepartmentAKey();
-        this.key.setDeptCode(deptCode);
-        this.deptName = deptName;
+   public DepartmentA(String deptCode, String deptName) {
+       this.key = new DepartmentAKey();
+       this.key.setDeptCode(deptCode);
+       this.deptName = deptName;
     }
 
     public DepartmentA() {
