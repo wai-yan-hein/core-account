@@ -3,18 +3,22 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.h2.service;
-import com.acc.model.ChartOfAccount;
+import com.acc.model.DepartmentA;
+import com.acc.model.DepartmentAKey;
 import java.util.List;
 
 /**
  *
- * @author Lenovo
+ * @author Dell
  */
-public interface COAService {
+public interface DepartmentAccService {
 
-    ChartOfAccount save(ChartOfAccount coa);
+    DepartmentA save(DepartmentA dep);
 
-    List<ChartOfAccount> findAll(String compCode);
+    DepartmentA find(DepartmentAKey key);
+
+    List<DepartmentA> findAll(String compCode);
 
     String getMaxDate();
+
 }

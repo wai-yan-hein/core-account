@@ -29,7 +29,7 @@ import com.acc.editor.COA3AutoCompleter;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.DeleteObj;
 import com.user.model.Currency;
-import com.acc.model.Department;
+import com.acc.model.DepartmentA;
 import com.acc.model.ReportFilter;
 import com.acc.model.TmpOpening;
 import com.acc.model.Gl;
@@ -111,7 +111,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
     private JProgressBar progress;
     private AccountRepo accountRepo;
     private UserRepo userRepo;
-    private Mono<List<Department>> monoDep;
+    private Mono<List<DepartmentA>> monoDep;
     private Mono<List<Currency>> monoCur;
     private DateTableDecorator decorator;
     private TraderAdjustmentTableModel adjustmentTableModel = new TraderAdjustmentTableModel();

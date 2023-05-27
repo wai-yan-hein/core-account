@@ -13,7 +13,7 @@ import com.user.editor.CurrencyAutoCompleter;
 import com.acc.editor.CurrencyAEditor;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.DepartmentCellEditor;
-import com.acc.model.Department;
+import com.acc.model.DepartmentA;
 import com.acc.model.StockOP;
 import com.common.Global;
 import com.acc.model.ReportFilter;
@@ -61,7 +61,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
     @Autowired
     private UserRepo userRepo;
     private Mono<List<Currency>> monoCur;
-    private Mono<List<Department>> monoDep;
+    private Mono<List<DepartmentA>> monoDep;
 
     public JProgressBar getProgress() {
         return progress;

@@ -17,7 +17,7 @@ import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.DespAutoCompleter;
 import com.acc.editor.RefAutoCompleter;
 import com.acc.model.DeleteObj;
-import com.acc.model.Department;
+import com.acc.model.DepartmentA;
 import com.acc.model.ReportFilter;
 import com.acc.model.TmpOpening;
 import static com.common.ProUtil.gson;
@@ -157,7 +157,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     private void initCombo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
-        Mono<List<Department>> monoDep = accountRepo.getDepartment();
+        Mono<List<DepartmentA>> monoDep = accountRepo.getDepartment();
         monoDep.subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDept, t, null, true, true);
             departmentAutoCompleter.setObserver(this);

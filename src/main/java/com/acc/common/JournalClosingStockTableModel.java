@@ -6,7 +6,7 @@
 package com.acc.common;
 
 import com.acc.model.ChartOfAccount;
-import com.acc.model.Department;
+import com.acc.model.DepartmentA;
 import com.acc.model.StockOP;
 import com.acc.model.StockOPKey;
 import com.common.Global;
@@ -32,13 +32,13 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
     private final String[] columnNames = {"Stock Closing Date", "Dep :", "Code", "COA Name", "Project No", "Currency", "Closing Amount"};
     private JTable parent;
     private AccountRepo accountRepo;
-    private Department department;
+    private DepartmentA department;
 
-    public Department getDepartment() {
+    public DepartmentA getDepartment() {
         return department;
     }
 
-    public void setDepartment(Department department) {
+    public void setDepartment(DepartmentA department) {
         this.department = department;
     }
 
@@ -119,7 +119,7 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
                         }
                     }
                     case 1 -> {
-                        if (value instanceof Department dep) {
+                        if (value instanceof DepartmentA dep) {
                             op.setDeptUsrCode(dep.getUserCode());
                             op.setDeptCode(dep.getKey().getDeptCode());
                             foucsTable(row, 2);

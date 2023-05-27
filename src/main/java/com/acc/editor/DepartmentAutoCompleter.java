@@ -6,7 +6,7 @@
 package com.acc.editor;
 
 import com.acc.common.DepartmentTableModel;
-import com.acc.model.Department;
+import com.acc.model.DepartmentA;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
@@ -52,7 +52,7 @@ public final class DepartmentAutoCompleter implements KeyListener {
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
     private DepartmentTableModel depTableModel;
-    private Department department;
+    private DepartmentA department;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
@@ -61,7 +61,7 @@ public final class DepartmentAutoCompleter implements KeyListener {
     private boolean custom = false;
     private List<String> listOption = new ArrayList<>();
     private OptionDialog optionDialog;
-    private List<Department> listDepartment;
+    private List<DepartmentA> listDepartment;
 
     public List<String> getListOption() {
         return listOption;
@@ -100,7 +100,7 @@ public final class DepartmentAutoCompleter implements KeyListener {
     public DepartmentAutoCompleter() {
     }
 
-    public DepartmentAutoCompleter(JTextComponent comp, List<Department> list,
+    public DepartmentAutoCompleter(JTextComponent comp, List<DepartmentA> list,
             AbstractCellEditor editor, boolean filter, boolean custom) {
         this.textComp = comp;
         this.editor = editor;
@@ -111,13 +111,13 @@ public final class DepartmentAutoCompleter implements KeyListener {
         initOption();
         if (filter) {
             list = new ArrayList<>(list);
-            Department dep = new Department("-", "All");
+            DepartmentA dep = new DepartmentA("-", "All");
             list.add(0, dep);
             setDepartment(dep);
         }
         if (custom) {
             list = new ArrayList<>(list);
-            list.add(1, new Department("C", "Custom"));
+            list.add(1, new DepartmentA("C", "Custom"));
         }
         depTableModel = new DepartmentTableModel(list);
         depTableModel.setTable(table);
@@ -383,11 +383,11 @@ public final class DepartmentAutoCompleter implements KeyListener {
         table.scrollRectToVisible(rect);
     }
 
-    public Department getDepartment() {
+    public DepartmentA getDepartment() {
         return department;
     }
 
-    public void setDepartment(Department department) {
+    public void setDepartment(DepartmentA department) {
         this.department = department;
         if (department != null) {
             this.textComp.setText(this.department.getDeptName());

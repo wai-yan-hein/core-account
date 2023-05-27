@@ -4,16 +4,22 @@
  */
 package com.acc.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import java.io.Serializable;
 import lombok.Data;
 
 /**
  *
  * @author DELL
  */
+@Embeddable
 @Data
-public class DepartmentKey {
+public class DepartmentAKey implements Serializable{
 
+    @Column(name = "dept_code")
     private String deptCode;
+    @Column(name = "comp_code")
     private String compCode;
 
 }
