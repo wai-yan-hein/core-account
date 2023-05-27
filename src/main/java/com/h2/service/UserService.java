@@ -5,6 +5,7 @@
 package com.h2.service;
 
 import com.inventory.model.AppUser;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -20,4 +21,6 @@ public interface UserService {
     String getMaxDate();
     
     AppUser login(String userName, String password);
+    
+    HashMap<String, String> getProperty(String compCode, String roleCode, Integer macId);
 }

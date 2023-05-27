@@ -54,6 +54,9 @@ public class UserRepo {
     private boolean localdatabase;
 
     public Mono<List<Currency>> getCurrency() {
+        if (localdatabase) {
+            return h2Repo.getCurrency();
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-currency")
                 .build())
@@ -61,6 +64,9 @@ public class UserRepo {
     }
 
     public Mono<List<CompanyInfo>> getCompany(boolean active) {
+        if (localdatabase) {
+            return h2Repo.getCompany(active);
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-company")
                 .queryParam("active", active)
@@ -82,6 +88,9 @@ public class UserRepo {
     }
 
     public Mono<List<MachineInfo>> getMacList() {
+        if (localdatabase) {
+            return h2Repo.getMacList();
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-mac-list")
                 .build())
@@ -89,6 +98,9 @@ public class UserRepo {
     }
 
     public Mono<List<AppRole>> getAppRole() {
+        if (localdatabase) {
+            return h2Repo.getAppRole(Global.compCode);
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-role")
                 .queryParam("compCode", Global.compCode)
@@ -216,22 +228,29 @@ public class UserRepo {
     }
 
     public void setupProperty() {
-        Mono<HashMap> result = userApi.get()
-                .uri(builder -> builder.path("/user/get-property")
-                .queryParam("compCode", Global.compCode)
-                .queryParam("roleCode", Global.roleCode)
-                .queryParam("macId", Global.macId)
-                .build())
-                .retrieve()
-                .bodyToMono(HashMap.class);
-        result.subscribe((t) -> {
-            Global.hmRoleProperty = t;
-            log.info("setupProperty.");
-        });
+        if (localdatabase) {
+            Global.hmRoleProperty = h2Repo.getProperty(Global.compCode, Global.roleCode, Global.macId);
+        } else {
+            Mono<HashMap> result = userApi.get()
+                    .uri(builder -> builder.path("/user/get-property")
+                    .queryParam("compCode", Global.compCode)
+                    .queryParam("roleCode", Global.roleCode)
+                    .queryParam("macId", Global.macId)
+                    .build())
+                    .retrieve()
+                    .bodyToMono(HashMap.class);
+            result.subscribe((t) -> {
+                Global.hmRoleProperty = t;
+                log.info("setupProperty.");
+            });
+        }
 
     }
 
     public Mono<List<SysProperty>> getSystProperty() {
+        if (localdatabase) {
+            return h2Repo.getSysProperty(Global.compCode);
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-system-property")
                 .queryParam("compCode", Global.compCode)
@@ -314,6 +333,9 @@ public class UserRepo {
     }
 
     public Mono<List<BusinessType>> getBusinessType() {
+        if (localdatabase) {
+            return h2Repo.getBusinessType();
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/getBusinessType")
                 .build())
@@ -402,6 +424,9 @@ public class UserRepo {
     }
 
     public Mono<List<Project>> searchProject() {
+        if (localdatabase) {
+            return h2Repo.getProject(Global.compCode);
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/searchProject")
                 .queryParam("compCode", Global.compCode)
@@ -603,7 +628,6 @@ public class UserRepo {
     }
 
     public Mono<AppUser> login(String userName, String password) {
-
         return userApi.get().uri(builder -> builder.path("/user/login")
                 .queryParam("userName", userName)
                 .queryParam("password", password)
@@ -619,22 +643,23 @@ public class UserRepo {
     }
 
     public Mono<List<VRoleCompany>> getRoleCompany(String roleCode) {
-        if (localdatabase) {
-            return h2Repo.getPrivilegeCompany(roleCode);
-        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-privilege-role-company")
                 .queryParam("roleCode", roleCode)
                 .build())
                 .retrieve()
                 .bodyToFlux(VRoleCompany.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    if (localdatabase) {
+                        return h2Repo.getPrivilegeCompany(roleCode);
+                    }
+
+                    return Mono.error(e);
+                });
     }
 
     public Mono<List<VRoleMenu>> getRoleMenu(String roleCode) {
-        if (localdatabase) {
-            return h2Repo.getMenuTree(roleCode, Global.compCode);
-        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-privilege-role-menu-tree")
                 .queryParam("roleCode", roleCode)
@@ -642,6 +667,12 @@ public class UserRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(VRoleMenu.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    if (localdatabase) {
+                        return h2Repo.getMenuTree(roleCode, Global.compCode);
+                    }
+                    return Mono.error(e);
+                });
     }
 }

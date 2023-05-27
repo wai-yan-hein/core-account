@@ -5,6 +5,7 @@
 package com.h2.service;
 
 import com.user.model.MachineProperty;
+import java.util.List;
 
 /**
  *
@@ -15,4 +16,6 @@ public interface MacPropertyService {
     MachineProperty save(MachineProperty mProp);
 
     String getMaxDate();
+
+    List<MachineProperty> getMacProperty(Integer macId);
 }

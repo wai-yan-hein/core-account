@@ -5,6 +5,7 @@
 package com.h2.service;
 
 import com.acc.model.BusinessType;
+import java.util.List;
 
 /**
  *
@@ -15,4 +16,6 @@ public interface BusinessTypeService {
     BusinessType save(BusinessType bus);
 
     String getMaxDate();
+    
+    List<BusinessType> findAll();
 }

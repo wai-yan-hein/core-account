@@ -5,6 +5,7 @@
 package com.h2.service;
 
 import com.user.model.Currency;
+import java.util.List;
 
 /**
  *
@@ -15,4 +16,6 @@ public interface CurrencyService {
     Currency save(Currency cur);
 
     String getMaxDate();
+
+    List<Currency> findAll();
 }
