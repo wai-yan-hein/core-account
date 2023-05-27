@@ -21,6 +21,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.List;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -87,7 +88,6 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
 
     private void initCombo() {
         accountRepo.getCOA3(ProUtil.getProperty(ProUtil.INCOME))
-                .collectList()
                 .subscribe((t) -> {
                     coaComboModel = new COAComboBoxModel(t);
                     cboAccount.setModel(coaComboModel);
@@ -152,9 +152,9 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
         if (isValidEntry()) {
             inventoryRepo.saveExpense(exp).subscribe((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
-                    expenseTableModel.setObject(exp, selectRow);
+                    expenseTableModel.setObject(t, selectRow);
                 } else {
-                    expenseTableModel.addObject(exp);
+                    expenseTableModel.addObject(t);
                 }
                 clear();
             });
@@ -288,6 +288,16 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
         });
 
         cboAccount.setFont(Global.textFont);
+        cboAccount.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cboAccountItemStateChanged(evt);
+            }
+        });
+        cboAccount.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cboAccountActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -321,12 +331,12 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(cboAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -399,6 +409,18 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
     private void txtNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNameActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtNameActionPerformed
+
+    private void cboAccountItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cboAccountItemStateChanged
+        // TODO add your handling code here:
+
+    }//GEN-LAST:event_cboAccountItemStateChanged
+
+    private void cboAccountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboAccountActionPerformed
+        // TODO add your handling code here:
+        if (cboAccount.getSelectedItem() instanceof ChartOfAccount coa) {
+            txtName.setText(coa.getCoaNameEng());
+        }
+    }//GEN-LAST:event_cboAccountActionPerformed
 
     /**
      * @param args the command line arguments

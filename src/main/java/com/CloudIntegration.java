@@ -40,12 +40,15 @@ import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.ui.common.InventoryRepo;
 import com.user.common.UserRepo;
+import java.time.Duration;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.TaskScheduler;
 
 /**
  *
@@ -124,6 +127,10 @@ public class CloudIntegration {
     private COAService coaService;
     @Autowired
     private TraderAService traderService;
+    @Autowired
+    private TaskExecutor taskExecutor;
+    @Autowired
+    private TaskScheduler taskScheduler;
 
     public void startDownload() {
         if (localDatabase) {
@@ -193,7 +200,7 @@ public class CloudIntegration {
             log.info(e.getMessage());
         });
     }
-    
+
     private void downloadDepartmentAccount() {
 //        accounRepo.getUpdateDepartmentAByDate(traderService.getMaxDate()).subscribe((t) -> {
 //            log.info("download Department Account list : " + t.size());
@@ -520,7 +527,12 @@ public class CloudIntegration {
     }
 
     public void start() {
-        startDownload();
-        startUpload();
+        if (localDatabase) {
+            taskScheduler.scheduleAtFixedRate(() -> {
+                startDownload();
+                startUpload();
+            }, Duration.ofMinutes(5));
+        }
+
     }
 }
