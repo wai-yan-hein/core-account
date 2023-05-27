@@ -11,6 +11,7 @@ import com.h2.service.BusinessTypeService;
 import com.h2.service.CategoryService;
 import com.h2.service.CompanyInfoService;
 import com.h2.service.CurrencyService;
+import com.h2.service.ExchangeRateService;
 import com.h2.service.LocationService;
 import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
@@ -52,6 +53,7 @@ import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
 import com.user.model.CompanyInfo;
 import com.user.model.Currency;
+import com.user.model.ExchangeRate;
 import com.user.model.Project;
 import com.user.model.RoleProperty;
 import com.user.model.SysProperty;
@@ -110,6 +112,8 @@ public class H2Repo {
     private CurrencyService currencyService;
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private ExchangeRateService exchangeRateService;
 
     public Mono<List<Location>> getLocation() {
         return Mono.justOrEmpty(locationService.findAll(Global.compCode));
@@ -239,5 +243,13 @@ public class H2Repo {
 
     public Mono<List<Project>> getProject(String compCode) {
         return Mono.justOrEmpty(projectService.searchProject(compCode));
+    }
+
+    public Mono<Currency> findCurrency(String curCode) {
+        return Mono.justOrEmpty(currencyService.findById(curCode));
+    }
+
+    public Mono<List<ExchangeRate>> search(String startDate, String endDate, String targetCur, String compCode) {
+        return Mono.justOrEmpty(exchangeRateService.searchExchange(startDate, endDate, targetCur, compCode));
     }
 }

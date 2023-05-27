@@ -1772,7 +1772,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 save(txtCashGroup.getName(), cg.getKey().getCoaCode());
             }
             ChartOfAccount bg = bankGroupAutoCompleter.getCOA();
-            if (cg != null) {
+            if (bg != null) {
                 save(txtBankGroup.getName(), bg.getKey().getCoaCode());
             }
 
