@@ -129,6 +129,7 @@ public class CloudIntegration {
     private TraderAService traderService;
     @Autowired
     private TaskScheduler taskScheduler;
+    @Autowired
     private DepartmentAccService departmentAService;
 
     public void startDownload() {
