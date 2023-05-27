@@ -6,6 +6,7 @@ package com.h2.service;
 
 import com.h2.dao.ExchangeRateDao;
 import com.user.model.ExchangeRate;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,9 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class ExchangeRateServiceImpl implements ExchangeRateService{
+public class ExchangeRateServiceImpl implements ExchangeRateService {
+
     @Autowired
     private ExchangeRateDao dao;
+
     @Override
     public ExchangeRate save(ExchangeRate exRate) {
         return dao.save(exRate);
@@ -28,5 +31,10 @@ public class ExchangeRateServiceImpl implements ExchangeRateService{
     public String getMaxDate() {
         return dao.getMaxDate();
     }
-    
+
+    @Override
+    public List<ExchangeRate> searchExchange(String startDate, String endDate, String targetCur, String compCode) {
+        return dao.searchExchange(startDate, endDate, targetCur, compCode);
+    }
+
 }

@@ -6,6 +6,7 @@ package com.h2.service;
 
 import com.acc.model.BusinessType;
 import com.h2.dao.BusinessTypeDao;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,11 @@ public class BusinessTypeServiceImpl implements BusinessTypeService {
     @Override
     public String getMaxDate() {
         return bDao.getMaxDate();
+    }
+
+    @Override
+    public List<BusinessType> findAll() {
+        return bDao.findAll();
     }
 
 }

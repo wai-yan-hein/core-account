@@ -5,6 +5,7 @@
 package com.h2.service;
 
 import com.user.model.Project;
+import java.util.List;
 
 /**
  *
@@ -15,4 +16,6 @@ public interface ProjectService {
     Project save(Project pc);
 
     String getMaxDate();
+    
+    List<Project> searchProject(String compCode);
 }

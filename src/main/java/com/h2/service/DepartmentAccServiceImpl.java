@@ -4,8 +4,9 @@
  */
 package com.h2.service;
 
-import com.h2.dao.ProjectDao;
-import com.user.model.Project;
+import com.acc.model.DepartmentA;
+import com.acc.model.DepartmentAKey;
+import com.h2.dao.DepartmentAccDao;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,18 +14,23 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
- * @author Athu Sint
+ * @author Lenovo
  */
 @Service
 @Transactional
-public class ProjectServiceImpl implements ProjectService {
+public class DepartmentAccServiceImpl implements DepartmentAccService {
 
     @Autowired
-    private ProjectDao dao;
+    private DepartmentAccDao dao;
 
     @Override
-    public Project save(Project pc) {
-        return dao.save(pc);
+    public DepartmentA save(DepartmentA dep) {
+        return dao.save(dep);
+    }
+
+    @Override
+    public List<DepartmentA> findAll(String compCode) {
+        return dao.findAll(compCode);
     }
 
     @Override
@@ -33,8 +39,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<Project> searchProject(String compCode) {
-        return dao.searchProject(compCode);
+    public DepartmentA find(DepartmentAKey key) {
+        return dao.find(key);
     }
 
 }

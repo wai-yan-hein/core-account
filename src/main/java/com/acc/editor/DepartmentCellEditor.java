@@ -5,7 +5,7 @@
  */
 package com.acc.editor;
 
-import com.acc.model.Department;
+import com.acc.model.DepartmentA;
 import com.common.Global;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -28,7 +28,7 @@ public class DepartmentCellEditor extends AbstractCellEditor implements TableCel
 
     private JComponent component = null;
     private DepartmentAutoCompleter completer;
-    private final List<Department> listDepartment;
+    private final List<DepartmentA> listDepartment;
 
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
@@ -45,7 +45,7 @@ public class DepartmentCellEditor extends AbstractCellEditor implements TableCel
 
     };
 
-    public DepartmentCellEditor(List<Department> listDepartment) {
+    public DepartmentCellEditor(List<DepartmentA> listDepartment) {
         this.listDepartment = listDepartment;
     }
 
@@ -93,7 +93,7 @@ public class DepartmentCellEditor extends AbstractCellEditor implements TableCel
     @Override
     public Object getCellEditorValue() {
         Object obj;
-        Department department = completer.getDepartment();
+        DepartmentA department = completer.getDepartment();
 
         if (department != null) {
             obj = department;

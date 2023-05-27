@@ -5,6 +5,7 @@
 package com.h2.dao;
 
 import com.inventory.model.AppRole;
+import java.util.List;
 
 /**
  *
@@ -15,4 +16,6 @@ public interface RoleDao {
     AppRole save(AppRole p);
 
     String getMaxDate();
+    
+    List<AppRole> findAll(String compCode);
 }

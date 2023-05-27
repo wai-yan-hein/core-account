@@ -5,7 +5,7 @@
  */
 package com.acc.common;
 
-import com.acc.model.Department;
+import com.acc.model.DepartmentA;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 public class DepartmentOptionTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(DepartmentOptionTableModel.class);
-    private List<Department> listDep = new ArrayList();
+    private List<DepartmentA> listDep = new ArrayList();
     private final String[] columnNames = {"Code", "Name", "Select"};
 
     @Override
@@ -58,7 +58,7 @@ public class DepartmentOptionTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
         try {
-            Department dep = listDep.get(row);
+            DepartmentA dep = listDep.get(row);
             return switch (column) {
                 case 0 ->
                     dep.getUserCode();
@@ -80,7 +80,7 @@ public class DepartmentOptionTableModel extends AbstractTableModel {
     public void setValueAt(Object value, int row, int column) {
         try {
             if (!listDep.isEmpty()) {
-                Department dep = listDep.get(row);
+                DepartmentA dep = listDep.get(row);
                 if (value != null) {
                     switch (column) {
                         case 2 ->
@@ -94,11 +94,11 @@ public class DepartmentOptionTableModel extends AbstractTableModel {
         }
     }
 
-    public List<Department> getListDep() {
+    public List<DepartmentA> getListDep() {
         return listDep;
     }
 
-    public void setListDep(List<Department> listDep) {
+    public void setListDep(List<DepartmentA> listDep) {
         this.listDep = new ArrayList<>(listDep);
         this.listDep.forEach((d) -> d.setActive(false));
         fireTableDataChanged();

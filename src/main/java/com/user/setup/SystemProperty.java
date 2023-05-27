@@ -9,7 +9,7 @@ import com.acc.common.AccountRepo;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.model.ChartOfAccount;
-import com.acc.model.Department;
+import com.acc.model.DepartmentA;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -437,7 +437,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         accountRepo.getDepartment().subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, false, false);
             departmentAutoCompleter.setObserver(this);
-            Mono<Department> dep = accountRepo.findDepartment(hmProperty.get(txtDep.getName()));
+            Mono<DepartmentA> dep = accountRepo.findDepartment(hmProperty.get(txtDep.getName()));
             dep.hasElement().subscribe((element) -> {
                 if (element) {
                     dep.subscribe((tt) -> {
@@ -1746,7 +1746,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             macId = macAutoCompleter.getInfo().getMacId();
             initMain();
         } else if (source.equals("Department")) {
-            Department d = departmentAutoCompleter.getDepartment();
+            DepartmentA d = departmentAutoCompleter.getDepartment();
             if (d != null) {
                 save(txtDep.getName(), d.getKey().getDeptCode());
             }

@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface TraderAService {
 
-    TraderA save(TraderA stock);
+    TraderA save(TraderA trader);
 
     List<TraderA> findAll(String compCode);
 

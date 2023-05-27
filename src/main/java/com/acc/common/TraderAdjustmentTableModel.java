@@ -6,7 +6,7 @@ package com.acc.common;
 
 import com.acc.editor.TraderAAutoCompleter;
 import com.acc.model.ChartOfAccount;
-import com.acc.model.Department;
+import com.acc.model.DepartmentA;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
 import com.acc.model.TraderA;
@@ -41,7 +41,7 @@ public class TraderAdjustmentTableModel extends AbstractTableModel {
     private DateAutoCompleter dateAutoCompleter;
     private String glDate;
     private Currency currency;
-    private Department department;
+    private DepartmentA department;
     private AccountRepo accountRepo;
     private TraderAAutoCompleter traderAAutoCompleter;
 
@@ -69,11 +69,11 @@ public class TraderAdjustmentTableModel extends AbstractTableModel {
         this.currency = currency;
     }
 
-    public Department getDepartment() {
+    public DepartmentA getDepartment() {
         return department;
     }
 
-    public void setDepartment(Department department) {
+    public void setDepartment(DepartmentA department) {
         this.department = department;
     }
 
@@ -232,7 +232,7 @@ public class TraderAdjustmentTableModel extends AbstractTableModel {
                     parent.setColumnSelectionInterval(1, 1);
                 }
                 case 1 -> {
-                    if (value instanceof Department dep) {
+                    if (value instanceof DepartmentA dep) {
                         gl.setDeptUsrCode(dep.getUserCode());
                         gl.setDeptCode(dep.getKey().getDeptCode());
                     }

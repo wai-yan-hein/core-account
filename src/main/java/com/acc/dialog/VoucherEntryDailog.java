@@ -10,7 +10,7 @@ import com.acc.common.CrDrVoucherEntryTableModel;
 import com.acc.editor.COA3CellEditor;
 import com.acc.editor.DepartmentCellEditor;
 import com.acc.editor.TraderCellEditor;
-import com.acc.model.Department;
+import com.acc.model.DepartmentA;
 import com.acc.model.Gl;
 import com.common.DecimalFormatRender;
 import com.common.Global;
@@ -179,7 +179,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         tableModel.setTtlAmt(txtAmt);
         tblJournal.getTableHeader().setFont(Global.lableFont);
         tblJournal.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        Mono<List<Department>> monoDep = accountRepo.getDepartment();
+        Mono<List<DepartmentA>> monoDep = accountRepo.getDepartment();
         monoDep.subscribe((t) -> {
             tblJournal.getColumnModel().getColumn(0).setCellEditor(new DepartmentCellEditor(t));
         });

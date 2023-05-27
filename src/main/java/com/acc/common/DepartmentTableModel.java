@@ -5,7 +5,7 @@
  */
 package com.acc.common;
 
-import com.acc.model.Department;
+import com.acc.model.DepartmentA;
 import com.common.Util1;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 public class DepartmentTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(DepartmentTableModel.class);
-    private List<Department> listDep = new ArrayList<>();
+    private List<DepartmentA> listDep = new ArrayList<>();
     private final String[] columnNames = {"Code", "Name"};
     private JTable table;
 
@@ -33,18 +33,18 @@ public class DepartmentTableModel extends AbstractTableModel {
         this.table = table;
     }
 
-    public DepartmentTableModel(List<Department> listDep) {
+    public DepartmentTableModel(List<DepartmentA> listDep) {
         this.listDep = listDep;
     }
 
     public DepartmentTableModel() {
     }
 
-    public List<Department> getListDep() {
+    public List<DepartmentA> getListDep() {
         return listDep;
     }
 
-    public void setListDep(List<Department> listDep) {
+    public void setListDep(List<DepartmentA> listDep) {
         this.listDep = listDep;
         fireTableDataChanged();
     }
@@ -67,7 +67,7 @@ public class DepartmentTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
         try {
-            Department dep = listDep.get(row);
+            DepartmentA dep = listDep.get(row);
             return switch (column) {
                 case 0 ->
                     Util1.isNull(dep.getUserCode(), dep.getKey().getDeptCode());
@@ -103,14 +103,14 @@ public class DepartmentTableModel extends AbstractTableModel {
         return columnNames.length;
     }
 
-    public Department getDepatment(int row) {
+    public DepartmentA getDepatment(int row) {
         return listDep.get(row);
 
     }
 
     public void addNewRow() {
         if (hasEmptyRow()) {
-            Department dep = new Department();
+            DepartmentA dep = new DepartmentA();
             listDep.add(dep);
             fireTableRowsInserted(listDep.size() - 1, listDep.size() - 1);
         }
@@ -121,7 +121,7 @@ public class DepartmentTableModel extends AbstractTableModel {
         if (listDep.isEmpty() || listDep == null) {
             status = true;
         } else {
-            Department dep = listDep.get(listDep.size() - 1);
+            DepartmentA dep = listDep.get(listDep.size() - 1);
             if (dep.getKey().getDeptCode() == null) {
                 status = false;
             }
@@ -130,7 +130,7 @@ public class DepartmentTableModel extends AbstractTableModel {
         return status;
     }
 
-    public void addDepartment(Department dep) {
+    public void addDepartment(DepartmentA dep) {
         if (!listDep.isEmpty()) {
             if (dep != null) {
                 listDep.add(dep);
@@ -141,7 +141,7 @@ public class DepartmentTableModel extends AbstractTableModel {
 
     public void delete(int row) {
         if (!listDep.isEmpty()) {
-            Department dep = listDep.get(row);
+            DepartmentA dep = listDep.get(row);
             if (dep.getKey().getDeptCode() != null) {
                 listDep.remove(row);
                 if (table.getCellEditor() != null) {

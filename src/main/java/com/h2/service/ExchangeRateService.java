@@ -5,6 +5,7 @@
 package com.h2.service;
 
 import com.user.model.ExchangeRate;
+import java.util.List;
 
 /**
  *
@@ -15,4 +16,6 @@ public interface ExchangeRateService {
     ExchangeRate save(ExchangeRate exRate);
 
     String getMaxDate();
+
+    List<ExchangeRate> searchExchange(String startDate, String endDate, String targetCur, String compCode);
 }

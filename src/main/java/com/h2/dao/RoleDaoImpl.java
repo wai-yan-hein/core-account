@@ -7,6 +7,7 @@ package com.h2.dao;
 import com.common.Util1;
 import com.inventory.model.AppRole;
 import java.util.Date;
+import java.util.List;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -27,6 +28,12 @@ public class RoleDaoImpl extends AbstractDao<String, AppRole> implements RoleDao
         String sql = "select max(o.updatedDate) from AppRole o";
         Date date = getDate(sql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
+    }
+
+    @Override
+    public List<AppRole> findAll(String compCode) {
+        String sql = "select o from AppRole o";
+        return findHSQL(sql);
     }
 
 }

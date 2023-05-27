@@ -13,6 +13,7 @@ import com.h2.service.COAService;
 import com.h2.service.CategoryService;
 import com.h2.service.CompanyInfoService;
 import com.h2.service.CurrencyService;
+import com.h2.service.DepartmentAccService;
 import com.h2.service.DepartmentUserService;
 import com.h2.service.LocationService;
 import com.h2.service.PriceOptionService;
@@ -43,7 +44,6 @@ import com.user.common.UserRepo;
 import java.time.Duration;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -128,9 +128,8 @@ public class CloudIntegration {
     @Autowired
     private TraderAService traderService;
     @Autowired
-    private TaskExecutor taskExecutor;
-    @Autowired
     private TaskScheduler taskScheduler;
+    private DepartmentAccService departmentAService;
 
     public void startDownload() {
         if (localDatabase) {
@@ -172,9 +171,9 @@ public class CloudIntegration {
     }
 
     private void downloadAccount() {
-        downloadChartofAccount();
-        downloadTrader();
         downloadDepartmentAccount();
+        downloadTraderAccount();
+        downloadChartofAccount();
     }
 
     private void downloadChartofAccount() {
@@ -189,7 +188,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadTrader() {
+    private void downloadTraderAccount() {
         accounRepo.getUpdateTraderByDate(traderService.getMaxDate()).subscribe((t) -> {
             log.info("downloadTrader list : " + t.size());
             t.forEach((tr) -> {
@@ -202,15 +201,15 @@ public class CloudIntegration {
     }
 
     private void downloadDepartmentAccount() {
-//        accounRepo.getUpdateDepartmentAByDate(traderService.getMaxDate()).subscribe((t) -> {
-//            log.info("download Department Account list : " + t.size());
-//            t.forEach((tr) -> {
-//                traderService.save(tr);
-//            });
-//            log.info("download department account done.");
-//        }, (e) -> {
-//            log.info(e.getMessage());
-//        });
+        accounRepo.getUpdateDepartmentAByDate(departmentAService.getMaxDate()).subscribe((d) -> {
+            log.info("download Department Account list : " + d.size());
+            d.forEach((da) -> {
+                departmentAService.save(da);
+            });
+            log.info("download department account done.");
+        }, (e) -> {
+            log.info(e.getMessage());
+        });
     }
 
     private void downloadAppUser() {

@@ -6,6 +6,8 @@ package com.h2.service;
 
 import com.h2.dao.RoleDao;
 import com.inventory.model.AppRole;
+import com.user.model.RoleProperty;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,4 +33,8 @@ public class RoleServiceImpl implements RoleService {
         return dao.getMaxDate();
     }
 
+    @Override
+    public List<AppRole> findAll(String compCode) {
+        return dao.findAll(compCode);
+    }
 }

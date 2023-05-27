@@ -11,8 +11,8 @@ import com.acc.model.ChartOfAccount;
 import com.acc.model.DateModel;
 import com.acc.model.DeleteObj;
 import com.user.model.Currency;
-import com.acc.model.Department;
-import com.acc.model.DepartmentKey;
+import com.acc.model.DepartmentA;
+import com.acc.model.DepartmentAKey;
 import com.acc.model.Gl;
 import com.acc.model.OpeningBalance;
 import com.acc.model.OpeningKey;
@@ -51,7 +51,7 @@ public class AccountRepo {
     @Autowired
     private WebClient accountApi;
 
-    public Mono<Department> getDefaultDepartment() {
+    public Mono<DepartmentA> getDefaultDepartment() {
         String deptCode = Global.hmRoleProperty.get("default.department");
         return findDepartment(Util1.isNull(deptCode, "-"));
     }
@@ -61,24 +61,25 @@ public class AccountRepo {
         return findCOA(Util1.isNull(coaCode, "-"));
     }
 
-    public Mono<Department> findDepartment(String deptCode) {
-        DepartmentKey key = new DepartmentKey();
+    public Mono<DepartmentA> findDepartment(String deptCode) {
+        DepartmentAKey key = new DepartmentAKey();
         key.setDeptCode(Util1.isNull(deptCode, "-"));
         key.setCompCode(Global.compCode);
+        
         return accountApi.post()
                 .uri("/account/find-department")
-                .body(Mono.just(key), DepartmentKey.class)
+                .body(Mono.just(key), DepartmentAKey.class)
                 .retrieve()
-                .bodyToMono(Department.class);
+                .bodyToMono(DepartmentA.class);
     }
 
-    public Mono<List<Department>> getDepartment() {
+    public Mono<List<DepartmentA>> getDepartment() {
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-department")
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToFlux(Department.class).collectList();
+                .bodyToFlux(DepartmentA.class).collectList();
     }
 
     public Flux<TraderA> getTrader() {
@@ -224,7 +225,7 @@ public class AccountRepo {
     
     public Mono<List<ChartOfAccount>> getUpdateChartOfAccountByDate(String updatedDate) {
         return accountApi.get()
-                .uri(builder -> builder.path("/account/getCOAByDate")
+                .uri(builder -> builder.path("/account/get-COAByDate")
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve()
@@ -234,7 +235,7 @@ public class AccountRepo {
     
     public Mono<List<TraderA>> getUpdateTraderByDate(String updatedDate) {
         return accountApi.get()
-                .uri(builder -> builder.path("/account/getTraderByDate")
+                .uri(builder -> builder.path("/account/get-TraderByDate")
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve()
@@ -242,13 +243,23 @@ public class AccountRepo {
                 .collectList();
     }
     
-    public Mono<List<TraderA>> getUpdateDepartmentAByDate(String updatedDate) {
+    public Mono<List<DepartmentA>> getUpdateDepartmentAByDate(String updatedDate) {
         return accountApi.get()
-                .uri(builder -> builder.path("/account/getDepartmentByDate")
+                .uri(builder -> builder.path("/account/get-DepartmentByDate")
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve()
-                .bodyToFlux(TraderA.class)
+                .bodyToFlux(DepartmentA.class)
+                .collectList();
+    }
+    
+    public Mono<List<ChartOfAccount>> getUpdateCOAOpeningByDate(String updatedDate) {
+        return accountApi.get()
+                .uri(builder -> builder.path("/account/get-COAOpeningByDate")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(ChartOfAccount.class)
                 .collectList();
     }
 
@@ -337,20 +348,20 @@ public class AccountRepo {
                 .bodyToMono(ChartOfAccount.class);
     }
 
-    public Mono<Department> saveDepartment(Department dep) {
+    public Mono<DepartmentA> saveDepartment(DepartmentA dep) {
         return accountApi.post()
                 .uri("/account/save-department")
-                .body(Mono.just(dep), Department.class)
+                .body(Mono.just(dep), DepartmentA.class)
                 .retrieve()
-                .bodyToMono(Department.class);
+                .bodyToMono(DepartmentA.class);
     }
 
-    public Flux<Department> getDepartmentTree() {
+    public Flux<DepartmentA> getDepartmentTree() {
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-department-tree")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().bodyToFlux(Department.class);
+                .retrieve().bodyToFlux(DepartmentA.class);
     }
 
     public Mono<OpeningBalance> saveCOAOpening(OpeningBalance opening) {

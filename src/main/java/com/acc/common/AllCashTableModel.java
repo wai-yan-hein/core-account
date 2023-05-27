@@ -5,7 +5,7 @@
 package com.acc.common;
 
 import com.acc.model.ChartOfAccount;
-import com.acc.model.Department;
+import com.acc.model.DepartmentA;
 import com.acc.model.TraderA;
 import com.acc.model.VDescription;
 import com.acc.model.Gl;
@@ -41,7 +41,7 @@ public class AllCashTableModel extends AbstractTableModel {
     private DateAutoCompleter dateAutoCompleter;
     private String glDate;
     private String curCode;
-    private Department department;
+    private DepartmentA department;
     private AccountRepo accountRepo;
 
     public String getCurCode() {
@@ -62,11 +62,11 @@ public class AllCashTableModel extends AbstractTableModel {
     }
 
 
-    public Department getDepartment() {
+    public DepartmentA getDepartment() {
         return department;
     }
 
-    public void setDepartment(Department department) {
+    public void setDepartment(DepartmentA department) {
         this.department = department;
     }
 
@@ -231,7 +231,7 @@ public class AllCashTableModel extends AbstractTableModel {
                     parent.setColumnSelectionInterval(1, 1);
                 }
                 case 1 -> {
-                    if (value instanceof Department dep) {
+                    if (value instanceof DepartmentA dep) {
                         gl.setDeptUsrCode(dep.getUserCode());
                         gl.setDeptCode(dep.getKey().getDeptCode());
                     }

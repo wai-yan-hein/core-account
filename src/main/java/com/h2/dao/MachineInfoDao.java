@@ -5,6 +5,7 @@
 package com.h2.dao;
 
 import com.inventory.model.MachineInfo;
+import java.util.List;
 
 /**
  *
@@ -17,4 +18,6 @@ public interface MachineInfoDao {
     String getMaxDate();
     
     MachineInfo getMachineInfo(String machineName);
+    
+    List<MachineInfo> findAll();
 }

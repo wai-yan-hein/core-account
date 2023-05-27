@@ -12,7 +12,7 @@ import com.acc.dialog.JournalEntryDialog;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.model.DeleteObj;
-import com.acc.model.Department;
+import com.acc.model.DepartmentA;
 import com.acc.model.Gl;
 import com.common.Global;
 import com.acc.model.ReportFilter;
@@ -197,7 +197,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         projectAutoCompleter.setObserver(this);
         cOA3AutoCompleter = new COA3AutoCompleter(txtAccount, accountRepo, null, true, 3);
         cOA3AutoCompleter.setSelectionObserver(this);
-        Mono<List<Department>> monoDep = accountRepo.getDepartment();
+        Mono<List<DepartmentA>> monoDep = accountRepo.getDepartment();
         monoDep.subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true, true);
             departmentAutoCompleter.setObserver(this);
