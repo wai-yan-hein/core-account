@@ -182,6 +182,9 @@ public class UserRepo {
     }
 
     public Mono<Currency> findCurrency(String curCode) {
+        if (localdatabase) {
+            return h2Repo.findCurrency(curCode);
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/find-currency")
                 .queryParam("curCode", curCode)
@@ -472,11 +475,16 @@ public class UserRepo {
     }
 
     public Mono<List<ExchangeRate>> searchExchange(String startDate, String endDate, String targetCur) {
+        String fromDate = Util1.toDateStrMYSQL(startDate, Global.dateFormat);
+        String toDate = Util1.toDateStrMYSQL(endDate, Global.dateFormat);
+        if(localdatabase) {
+            return h2Repo.search(fromDate, toDate, targetCur,Global.compCode);
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/searchExchange")
                 .queryParam("compCode", Global.compCode)
-                .queryParam("startDate", Util1.toDateStrMYSQL(startDate, Global.dateFormat))
-                .queryParam("endDate", Util1.toDateStrMYSQL(endDate, Global.dateFormat))
+                .queryParam("startDate", fromDate)
+                .queryParam("endDate", toDate)
                 .queryParam("targetCur", targetCur)
                 .build())
                 .retrieve()

@@ -37,4 +37,9 @@ public class CurrencyServiceImpl implements CurrencyService {
         return curDao.findAll();
     }
 
+    @Override
+    public Currency findById(String curCode) {
+        return curDao.findById(curCode);
+    }
+
 }

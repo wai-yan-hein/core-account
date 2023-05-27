@@ -18,4 +18,6 @@ public interface CurrencyService {
     String getMaxDate();
 
     List<Currency> findAll();
+
+    Currency findById(String curCode);
 }

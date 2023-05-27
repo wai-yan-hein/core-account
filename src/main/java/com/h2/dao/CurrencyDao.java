@@ -18,4 +18,6 @@ public interface CurrencyDao {
     String getMaxDate();
     
     List<Currency> findAll();
+    
+    Currency findById(String curCode);
 }
