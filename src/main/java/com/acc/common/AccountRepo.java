@@ -251,6 +251,16 @@ public class AccountRepo {
                 .bodyToFlux(TraderA.class)
                 .collectList();
     }
+    
+    public Mono<List<ChartOfAccount>> getUpdateCOAOpeningByDate(String updatedDate) {
+        return accountApi.get()
+                .uri(builder -> builder.path("/account/getCOAOpeningByDate")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(ChartOfAccount.class)
+                .collectList();
+    }
 
     public Double getTraderBalance(String date, String traderCode, String compCode) {
         try {
