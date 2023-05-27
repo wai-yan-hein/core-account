@@ -6,8 +6,8 @@
 package com.acc.setup;
 
 import com.acc.common.AccountRepo;
-import com.acc.model.Department;
-import com.acc.model.DepartmentKey;
+import com.acc.model.DepartmentA;
+import com.acc.model.DepartmentAKey;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
@@ -146,7 +146,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
         });
     }
 
-    private void addChildMenu(DefaultMutableTreeNode parent, List<Department> departments) {
+    private void addChildMenu(DefaultMutableTreeNode parent, List<DepartmentA> departments) {
         departments.forEach((dep) -> {
             if (dep.getChild() != null) {
                 if (!dep.getChild().isEmpty()) {
@@ -170,7 +170,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
         chkActive.setEnabled(status);
     }
 
-    private void setDepartment(Department dep) {
+    private void setDepartment(DepartmentA dep) {
         txtSystemCode.setText(dep.getKey().getDeptCode());
         txtUserCode.setText(dep.getUserCode());
         txtName.setText(dep.getDeptName());
@@ -212,8 +212,8 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
     }
 
     private void newDepartment() {
-        Department dep = new Department();
-        DepartmentKey key = new DepartmentKey();
+        DepartmentA dep = new DepartmentA();
+        DepartmentAKey key = new DepartmentAKey();
         key.setCompCode(Global.compCode);
         dep.setKey(key);
         dep.setDeptName("New Department");
@@ -228,8 +228,8 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
     }
 
     private void saveDepartment() {
-        Department dep = new Department();
-        DepartmentKey key = new DepartmentKey();
+        DepartmentA dep = new DepartmentA();
+        DepartmentAKey key = new DepartmentAKey();
         key.setCompCode(Global.compCode);
         key.setDeptCode(txtSystemCode.getText());
         dep.setKey(key);
@@ -253,7 +253,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
         }
     }
 
-    private boolean isValidDepartment(Department dept) {
+    private boolean isValidDepartment(DepartmentA dept) {
         if (Util1.isNull(dept.getDeptName(), "-").equals("-")) {
             JOptionPane.showMessageDialog(Global.parentForm, "Invalid department code.");
             return false;
@@ -265,7 +265,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
             if (userObject.toString().equals(parentRootName)) {
                 dept.setParentDept("#");
             } else {
-                Department dep = (Department) userObject;
+                DepartmentA dep = (DepartmentA) userObject;
                 dept.setParentDept(dep.getKey().getDeptCode());
             }
         }
@@ -441,7 +441,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
         selectedNode = (DefaultMutableTreeNode) treeDep.getLastSelectedPathComponent();
         if (selectedNode != null) {
             if (!selectedNode.getUserObject().toString().equals(parentRootName)) {
-                Department dep = (Department) selectedNode.getUserObject();
+                DepartmentA dep = (DepartmentA) selectedNode.getUserObject();
                 setDepartment(dep);
                 setEnabledControl(true);
             } else {
@@ -544,7 +544,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
                 if (e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP) {
                     if (selectedNode != null) {
                         if (!selectedNode.getUserObject().toString().equals(parentRootName)) {
-                            Department dep = (Department) selectedNode.getUserObject();
+                            DepartmentA dep = (DepartmentA) selectedNode.getUserObject();
                             setDepartment(dep);
                             setEnabledControl(true);
                         } else {
@@ -560,6 +560,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
                     txtUserCode.requestFocus();
                 }
             }
+
 
         }
     }

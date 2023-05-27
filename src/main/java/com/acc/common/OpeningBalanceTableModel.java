@@ -6,7 +6,7 @@ package com.acc.common;
 
 import com.acc.model.OpeningBalance;
 import com.acc.model.ChartOfAccount;
-import com.acc.model.Department;
+import com.acc.model.DepartmentA;
 import com.acc.model.OpeningKey;
 import com.acc.model.TraderA;
 import com.user.model.Currency;
@@ -203,7 +203,7 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
                 }
                 case 4 -> {
                     if (value != null) {
-                        if (value instanceof Department dep) {
+                        if (value instanceof DepartmentA dep) {
                             opening.setDeptCode(dep.getKey().getDeptCode());
                             opening.setDeptUsrCode(dep.getUserCode());
                             parent.setColumnSelectionInterval(5, 5);

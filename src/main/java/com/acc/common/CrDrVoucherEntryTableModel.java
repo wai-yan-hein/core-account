@@ -6,7 +6,7 @@
 package com.acc.common;
 
 import com.acc.model.ChartOfAccount;
-import com.acc.model.Department;
+import com.acc.model.DepartmentA;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
 import com.acc.model.TraderA;
@@ -38,7 +38,7 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
     private List<GlKey> delList = new ArrayList<>();
     private boolean change = false;
     private AccountRepo accountRepo;
-    private Department department;
+    private DepartmentA department;
     private boolean edit = false;
 
     public boolean isEdit() {
@@ -49,11 +49,11 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
         this.edit = edit;
     }
 
-    public Department getDepartment() {
+    public DepartmentA getDepartment() {
         return department;
     }
 
-    public void setDepartment(Department department) {
+    public void setDepartment(DepartmentA department) {
         this.department = department;
     }
 
@@ -146,7 +146,7 @@ public class CrDrVoucherEntryTableModel extends AbstractTableModel {
                 Gl gl = listVGl.get(row);
                 switch (column) {
                     case 0 -> {
-                        if (value instanceof Department dep) {
+                        if (value instanceof DepartmentA dep) {
                             gl.setDeptCode(dep.getKey().getDeptCode());
                             gl.setDeptUsrCode(dep.getUserCode());
                         }

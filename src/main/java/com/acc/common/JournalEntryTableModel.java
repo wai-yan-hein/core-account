@@ -6,7 +6,7 @@
 package com.acc.common;
 
 import com.acc.model.ChartOfAccount;
-import com.acc.model.Department;
+import com.acc.model.DepartmentA;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
 import com.acc.model.TraderA;
@@ -148,7 +148,7 @@ public class JournalEntryTableModel extends AbstractTableModel {
                 Gl gv = listGV.get(row);
                 switch (column) {
                     case 0 -> {
-                        if (value instanceof Department dep) {
+                        if (value instanceof DepartmentA dep) {
                             gv.setDeptUsrCode(dep.getUserCode());
                             gv.setDeptCode(dep.getKey().getDeptCode());
                             parent.setColumnSelectionInterval(1, 1);
