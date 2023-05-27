@@ -166,9 +166,9 @@ public class CloudIntegration {
 
     private void downloadAccount() {
         downloadChartofAccount();
-        downloadTrader();
         downloadDepartmentAccount();
         downloadCOAOpening();
+        downloadTrader();       
     }
 
     private void downloadChartofAccount() {
@@ -196,15 +196,15 @@ public class CloudIntegration {
     }
     
     private void downloadCOAOpening() {
-        accounRepo.getUpdateCOAOpeningByDate(coaService.getMaxDate()).subscribe((t) -> {
-            log.info("downloadChartOfAccount list : " + t.size());
-            t.forEach((coa) -> {
-                coaService.save(coa);
-            });
-            log.info("downloadChartOfAccount done.");
-        }, (e) -> {
-            log.info(e.getMessage());
-        });
+//        accounRepo.getUpdateCOAOpeningByDate(coaService.getMaxDate()).subscribe((t) -> {
+//            log.info("downloadChartOfAccount list : " + t.size());
+//            t.forEach((coa) -> {
+//                coaService.save(coa);
+//            });
+//            log.info("downloadChartOfAccount done.");
+//        }, (e) -> {
+//            log.info(e.getMessage());
+//        });
     }
 
     
