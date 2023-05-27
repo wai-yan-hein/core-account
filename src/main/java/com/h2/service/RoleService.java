@@ -5,6 +5,7 @@
 package com.h2.service;
 
 import com.inventory.model.AppRole;
+import java.util.List;
 
 /**
  *
@@ -15,4 +16,6 @@ public interface RoleService {
     AppRole save(AppRole pc);
 
     String getMaxDate();
+    
+    List<AppRole> findAll(String compCode);
 }

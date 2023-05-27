@@ -5,6 +5,7 @@
 package com.h2.dao;
 
 import com.user.model.MachineProperty;
+import java.util.List;
 
 /**
  *
@@ -15,4 +16,6 @@ public interface MacPropertyDao {
     MachineProperty save(MachineProperty mProp);
 
     String getMaxDate();
+
+    List<MachineProperty> getMacProperty(Integer macId);
 }

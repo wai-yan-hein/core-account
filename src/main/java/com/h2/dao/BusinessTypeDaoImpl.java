@@ -7,6 +7,7 @@ package com.h2.dao;
 import com.acc.model.BusinessType;
 import com.common.Util1;
 import java.util.Date;
+import java.util.List;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -27,6 +28,12 @@ public class BusinessTypeDaoImpl extends AbstractDao<Integer, BusinessType> impl
         String jpql = "select max(o.updatedDate) from BusinessType o";
         Date date = getDate(jpql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
+    }
+
+    @Override
+    public List<BusinessType> findAll() {
+        String sql = "select o from BusinessType o";
+        return findHSQL(sql);
     }
 
 }

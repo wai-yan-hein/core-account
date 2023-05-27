@@ -6,6 +6,7 @@ package com.h2.service;
 
 import com.h2.dao.MachineInfoDao;
 import com.inventory.model.MachineInfo;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,11 @@ public class MachineInfoServiceImpl implements MachineInfoService {
     @Override
     public MachineInfo getMachineInfo(String machineName) {
         return dao.getMachineInfo(machineName);
+    }
+
+    @Override
+    public List<MachineInfo> findAll() {
+        return dao.findAll();
     }
 
 }

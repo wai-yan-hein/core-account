@@ -5,6 +5,7 @@
 package com.h2.dao;
 
 import com.acc.model.BusinessType;
+import java.util.List;
 
 /**
  *
@@ -15,4 +16,6 @@ public interface BusinessTypeDao {
     BusinessType save(BusinessType bus);
 
     String getMaxDate();
+    
+    List<BusinessType> findAll();
 }

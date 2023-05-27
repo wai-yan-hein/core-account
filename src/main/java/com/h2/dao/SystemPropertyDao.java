@@ -3,7 +3,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
  */
 package com.h2.dao;
+
 import com.user.model.SysProperty;
+import java.util.List;
 
 /**
  *
@@ -14,4 +16,6 @@ public interface SystemPropertyDao {
     SysProperty save(SysProperty systemProperty);
 
     String getMaxDate();
+
+    List<SysProperty> getSystemProperty(String compCode);
 }

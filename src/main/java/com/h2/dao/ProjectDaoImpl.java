@@ -8,6 +8,7 @@ import com.common.Util1;
 import com.user.model.Project;
 import com.user.model.ProjectKey;
 import java.util.Date;
+import java.util.List;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -28,6 +29,12 @@ public class ProjectDaoImpl extends AbstractDao<ProjectKey, Project> implements 
         String sql = "select max(o.updatedDate) from Project o";
         Date date = getDate(sql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
+    }
+
+    @Override
+    public List<Project> searchProject(String compCode) {
+        String hsql = "select o from Project o where o.key.compCode ='" + compCode + "'";
+        return findHSQL(hsql);
     }
 
 }

@@ -5,6 +5,7 @@
 package com.h2.dao;
 
 import com.user.model.CompanyInfo;
+import java.util.List;
 
 /**
  *
@@ -15,5 +16,7 @@ public interface CompanyInfoDao {
     CompanyInfo save(CompanyInfo comp);
 
     String getMaxDate();
+    
+    List<CompanyInfo> findAll(boolean active);
 
 }

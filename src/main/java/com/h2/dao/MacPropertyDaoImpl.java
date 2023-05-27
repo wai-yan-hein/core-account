@@ -8,6 +8,7 @@ import com.common.Util1;
 import com.user.model.MachineProperty;
 import com.user.model.MachinePropertyKey;
 import java.util.Date;
+import java.util.List;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -30,4 +31,9 @@ public class MacPropertyDaoImpl extends AbstractDao<MachinePropertyKey, MachineP
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 
+    @Override
+    public List<MachineProperty> getMacProperty(Integer macId) {
+        String sql = "select o from MachineProperty o where o.key.macId = " + macId;
+        return findHSQL(sql);
+    }
 }

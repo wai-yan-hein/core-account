@@ -6,6 +6,7 @@ package com.h2.service;
 
 import com.h2.dao.UserDao;
 import com.inventory.model.AppUser;
+import java.util.HashMap;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,11 @@ public class UserServiceimpl implements UserService {
     @Override
     public AppUser login(String userName, String password) {
         return userDao.login(userName, password);
+    }
+
+    @Override
+    public HashMap<String, String> getProperty(String compCode, String roleCode, Integer macId) {
+        return userDao.getProperty(compCode, roleCode, macId);
     }
 
 }

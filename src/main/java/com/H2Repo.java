@@ -4,21 +4,30 @@
  */
 package com;
 
+import com.acc.model.BusinessType;
 import com.common.Global;
 import com.h2.service.BrandService;
+import com.h2.service.BusinessTypeService;
 import com.h2.service.CategoryService;
+import com.h2.service.CompanyInfoService;
+import com.h2.service.CurrencyService;
 import com.h2.service.LocationService;
 import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
 import com.h2.service.PrivilegeCompanyService;
+import com.h2.service.ProjectService;
+import com.h2.service.RolePropertyService;
+import com.h2.service.RoleService;
 import com.h2.service.SaleHisService;
 import com.h2.service.SaleManService;
 import com.h2.service.StockService;
 import com.h2.service.StockTypeService;
 import com.h2.service.StockUnitService;
+import com.h2.service.SystemPropertyService;
 import com.h2.service.TraderInvService;
 import com.h2.service.UserService;
 import com.h2.service.VouStatusService;
+import com.inventory.model.AppRole;
 import com.inventory.model.AppUser;
 import com.inventory.model.Category;
 import com.inventory.model.CategoryKey;
@@ -41,8 +50,15 @@ import com.inventory.model.TraderKey;
 import com.inventory.model.VRoleMenu;
 import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
+import com.user.model.CompanyInfo;
+import com.user.model.Currency;
+import com.user.model.Project;
+import com.user.model.RoleProperty;
+import com.user.model.SysProperty;
 import com.user.model.VRoleCompany;
+import java.util.HashMap;
 import java.util.List;
+import org.apache.commons.collections4.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -82,6 +98,18 @@ public class H2Repo {
     private PrivilegeCompanyService pcService;
     @Autowired
     private MenuService menuService;
+    @Autowired
+    private SystemPropertyService spService;
+    @Autowired
+    private RoleService roleService;
+    @Autowired
+    private CompanyInfoService companyInfoService;
+    @Autowired
+    private BusinessTypeService businessTypeService;
+    @Autowired
+    private CurrencyService currencyService;
+    @Autowired
+    private ProjectService projectService;
 
     public Mono<List<Location>> getLocation() {
         return Mono.justOrEmpty(locationService.findAll(Global.compCode));
@@ -158,26 +186,58 @@ public class H2Repo {
     public Mono<SaleHis> save(SaleHis sh) {
         return Mono.justOrEmpty(saleHisService.save(sh));
     }
-    
+
     public Mono<AppUser> login(String userName, String password) {
         return Mono.justOrEmpty(userService.login(userName, password));
     }
-    
+
     public Mono<MachineInfo> getMachineInfo(String machineName) {
         return Mono.justOrEmpty(machineInfoService.getMachineInfo(machineName));
     }
-    
+
     public Mono<List<AppUser>> getAppUser() {
         return Mono.justOrEmpty(userService.findAll());
     }
-    
+
     public Mono<List<VRoleCompany>> getPrivilegeCompany(String roleCode) {
         return Mono.justOrEmpty(pcService.getPrivilegeCompany(roleCode));
     }
-    
+
     public Mono<List<VRoleMenu>> getMenuTree(String roleCode, String compCode) {
         List<VRoleMenu> menus = menuService.getMenuTree(roleCode, compCode);
         menus.removeIf(m -> !m.isAllow());
         return Mono.justOrEmpty(menus);
+    }
+
+    public HashMap<String, String> getProperty(String compCode, String roleCode, Integer macId) {
+        return userService.getProperty(compCode, roleCode, macId);
+    }
+
+    public Mono<List<SysProperty>> getSysProperty(String compCode) {
+        return Mono.justOrEmpty(spService.getSystemProperty(compCode));
+    }
+
+    public Mono<List<AppRole>> getAppRole(String compCode) {
+        return Mono.justOrEmpty(roleService.findAll(compCode));
+    }
+
+    public Mono<List<CompanyInfo>> getCompany(boolean active) {
+        return Mono.justOrEmpty(companyInfoService.findAll(active));
+    }
+
+    public Mono<List<BusinessType>> getBusinessType() {
+        return Mono.justOrEmpty(businessTypeService.findAll());
+    }
+
+    public Mono<List<Currency>> getCurrency() {
+        return Mono.justOrEmpty(currencyService.findAll());
+    }
+
+    public Mono<List<MachineInfo>> getMacList() {
+        return Mono.justOrEmpty(machineInfoService.findAll());
+    }
+
+    public Mono<List<Project>> getProject(String compCode) {
+        return Mono.justOrEmpty(projectService.searchProject(compCode));
     }
 }

@@ -5,6 +5,7 @@
 package com.h2.service;
 
 import com.user.model.CompanyInfo;
+import java.util.List;
 
 /**
  *
@@ -15,4 +16,6 @@ public interface CompanyInfoService {
     CompanyInfo save(CompanyInfo comp);
 
     String getMaxDate();
+    
+    List<CompanyInfo> findAll(boolean active);
 }

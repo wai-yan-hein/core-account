@@ -5,8 +5,8 @@
 package com.h2.service;
 
 import com.h2.dao.MacPropertyDao;
-import com.h2.dao.MachineInfoDao;
 import com.user.model.MachineProperty;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +30,11 @@ public class MacPropertyServiceImpl implements MacPropertyService {
     @Override
     public String getMaxDate() {
         return dao.getMaxDate();
+    }
+
+    @Override
+    public List<MachineProperty> getMacProperty(Integer macId) {
+        return dao.getMacProperty(macId);
     }
 
 }

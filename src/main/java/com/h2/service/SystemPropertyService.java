@@ -5,6 +5,7 @@
 package com.h2.service;
 
 import com.user.model.SysProperty;
+import java.util.List;
 
 /**
  *
@@ -15,4 +16,6 @@ public interface SystemPropertyService {
     SysProperty save(SysProperty pc);
 
     String getMaxDate();
+
+    List<SysProperty> getSystemProperty(String compCode);
 }

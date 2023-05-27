@@ -6,6 +6,7 @@ package com.h2.service;
 
 import com.h2.dao.CompanyInfoDao;
 import com.user.model.CompanyInfo;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,11 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
     @Override
     public String getMaxDate() {
         return compDao.getMaxDate();
+    }
+
+    @Override
+    public List<CompanyInfo> findAll(boolean active) {
+        return compDao.findAll(active);
     }
 
 }

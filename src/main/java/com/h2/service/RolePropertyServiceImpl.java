@@ -4,9 +4,9 @@
  */
 package com.h2.service;
 
-import com.h2.dao.RoleDao;
 import com.h2.dao.RolePropertyDao;
 import com.user.model.RoleProperty;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +30,11 @@ public class RolePropertyServiceImpl implements RolePropertyService {
     @Override
     public String getMaxDate() {
         return dao.getMaxDate();
+    }
+
+    @Override
+    public List<RoleProperty> getRoleProperty(String roleCode) {
+        return dao.getRoleProperty(roleCode);
     }
 
 }

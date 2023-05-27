@@ -8,6 +8,7 @@ import com.common.Util1;
 import com.user.model.PropertyKey;
 import com.user.model.SysProperty;
 import java.util.Date;
+import java.util.List;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -28,6 +29,12 @@ public class SystemPropertyDaoImpl extends AbstractDao<PropertyKey, SysProperty>
         String sql = "select max(o.updatedDate) from SysProperty o";
         Date date = getDate(sql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
+    }   
+    
+    @Override
+    public List<SysProperty> getSystemProperty(String compCode) {
+        String sql = "select o from SysProperty o where o.key.compCode = '" + compCode + "' or '-' = '" + compCode + "'";
+        return findHSQL(sql);
     }
 
 }

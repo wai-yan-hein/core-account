@@ -6,6 +6,7 @@ package com.h2.service;
 
 import com.h2.dao.CurrencyDao;
 import com.user.model.Currency;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,11 @@ public class CurrencyServiceImpl implements CurrencyService {
     @Override
     public String getMaxDate() {
         return curDao.getMaxDate();
+    }
+
+    @Override
+    public List<Currency> findAll() {
+        return curDao.findAll();
     }
 
 }
