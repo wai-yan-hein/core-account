@@ -13,5 +13,6 @@ public interface TraderADao {
     String getMaxDate();
 
     List<TraderA> findAll(String compCode);
-
+    
+    List<TraderA> getTrader(String text,String compCode);
 }

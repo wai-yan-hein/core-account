@@ -5,12 +5,21 @@
 package com;
 
 import com.acc.model.BusinessType;
+import com.acc.model.COAKey;
+import com.acc.model.ChartOfAccount;
+import com.acc.model.DepartmentA;
+import com.acc.model.DepartmentAKey;
+import com.acc.model.Gl;
+import com.acc.model.TraderA;
+import com.acc.model.TraderAKey;
 import com.common.Global;
 import com.h2.service.BrandService;
 import com.h2.service.BusinessTypeService;
+import com.h2.service.COAService;
 import com.h2.service.CategoryService;
 import com.h2.service.CompanyInfoService;
 import com.h2.service.CurrencyService;
+import com.h2.service.DepartmentAccService;
 import com.h2.service.ExchangeRateService;
 import com.h2.service.LocationService;
 import com.h2.service.MacPropertyService;
@@ -26,6 +35,7 @@ import com.h2.service.StockService;
 import com.h2.service.StockTypeService;
 import com.h2.service.StockUnitService;
 import com.h2.service.SystemPropertyService;
+import com.h2.service.TraderAService;
 import com.h2.service.TraderInvService;
 import com.h2.service.UserService;
 import com.h2.service.VouStatusService;
@@ -64,9 +74,9 @@ import com.user.model.SysProperty;
 import com.user.model.VRoleCompany;
 import java.util.HashMap;
 import java.util.List;
-import org.apache.commons.collections4.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -122,6 +132,12 @@ public class H2Repo {
     private RolePropertyService rolePropertyService;
     @Autowired
     private MacPropertyService macPropertyService;
+    @Autowired
+    private DepartmentAccService departmentAccService;
+    @Autowired
+    private TraderAService traderAccService;
+    @Autowired
+    private COAService coaService;    
 
     public Mono<List<Location>> getLocation() {
         return Mono.justOrEmpty(locationService.findAll(Global.compCode));
@@ -276,5 +292,32 @@ public class H2Repo {
     public List<MachineProperty> getMacProperty(Integer macId) {
         return macPropertyService.getMacProperty(macId);
     }
+    
+    public Mono<List<DepartmentA>> getDepartmentAccount() {
+        return Mono.justOrEmpty(departmentAccService.findAll(Global.compCode));
+    }
 
+    public Mono<DepartmentA> find(DepartmentAKey key) {
+        return Mono.justOrEmpty(departmentAccService.find(key));
+    }
+    
+    public  Flux<TraderA> getTraderAccount() {
+        return Flux.fromIterable(traderAccService.findAll(Global.compCode));
+    }
+
+    public Flux<TraderA> findTraderAccount(String str) {
+        return Flux.fromIterable(traderAccService.getTrader(str,Global.compCode));
+    }
+    
+    public Flux<ChartOfAccount> getChartofAccount() {
+        return Flux.fromIterable(coaService.findAll(Global.compCode));
+    }
+
+    public Mono<ChartOfAccount> find(COAKey key) {
+        return Mono.justOrEmpty(coaService.findById(key));
+    }
+    
+//    public Mono<Gl> save(Gl sh) {
+//        return Mono.justOrEmpty(saleHisService.save(sh));
+//    }
 }
