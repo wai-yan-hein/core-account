@@ -33,7 +33,6 @@ import com.inventory.model.PurExpenseKey;
 import com.inventory.model.PurHis;
 import com.inventory.model.PurHisDetail;
 import com.inventory.model.PurHisKey;
-import com.inventory.model.SaleHisDetail;
 import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
 import com.inventory.model.VPurchase;
@@ -974,34 +973,33 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         String batchNo = g.getBatchNo();
         Integer deptId = g.getKey().getDeptId();
         boolean detail = Util1.getBoolean(ProUtil.getProperty(ProUtil.P_BATCH_DETAIL));
-        Flux<SaleHisDetail> result = inventoryRepo.getSaleByBatch(batchNo, detail);
-        result.subscribe((sd) -> {
-            PurHisDetail pd = new PurHisDetail();
-            pd.setStockCode(sd.getStockCode());
-            pd.setUserCode(sd.getUserCode());
-            pd.setStockName(sd.getStockName());
-            pd.setRelName(sd.getRelName());
-            pd.setAvgQty(0.0f);
-            pd.setQty(sd.getQty());
-            pd.setUnitCode(sd.getUnitCode());
-            pd.setPrice(sd.getPrice());
-            pd.setAmount(sd.getAmount());
-            pd.setLocCode(sd.getLocCode());
-            pd.setLocName(sd.getLocName());
-            purTableModel.addPurchase(pd);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        }, () -> {
+        inventoryRepo.getSaleByBatch(batchNo, detail).subscribe((t) -> {
+            t.forEach((sd) -> {
+                PurHisDetail pd = new PurHisDetail();
+                pd.setStockCode(sd.getStockCode());
+                pd.setUserCode(sd.getUserCode());
+                pd.setStockName(sd.getStockName());
+                pd.setRelName(sd.getRelName());
+                pd.setAvgQty(0.0f);
+                pd.setQty(sd.getQty());
+                pd.setUnitCode(sd.getUnitCode());
+                pd.setPrice(sd.getPrice());
+                pd.setAmount(sd.getAmount());
+                pd.setLocCode(sd.getLocCode());
+                pd.setLocName(sd.getLocName());
+                purTableModel.addPurchase(pd);
+            });
             purTableModel.addNewRow();
             calculateTotalAmount(false);
             Mono<Trader> trader = inventoryRepo.findTrader(g.getTraderCode(), g.getKey().getDeptId());
-            trader.subscribe((t) -> {
-                traderAutoCompleter.setTrader(t);
+            trader.subscribe((tt) -> {
+                traderAutoCompleter.setTrader(tt);
             });
             txtBatchNo.setText(batchNo);
             txtBatchNo.setEditable(false);
             searchGRN(batchNo, deptId);
         });
+
     }
 
     private void calComission() {

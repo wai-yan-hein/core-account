@@ -18,5 +18,7 @@ public interface MenuService {
 
     String getMaxDate();
 
-    List<VRoleMenu> getMenuTree(String roleCode, String compCode);
+    List<VRoleMenu> getRoleMenuTree(String roleCode, String compCode);
+
+    List<Menu> getMenuTree(String compCode);
 }

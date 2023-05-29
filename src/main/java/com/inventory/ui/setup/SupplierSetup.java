@@ -148,18 +148,15 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private void searchSupplier() {
         progress.setIndeterminate(true);
-        List<Trader> list = new ArrayList<>();
-        Flux<Trader> result = inventoryRepo.getSupplier();
-        result.subscribe((t) -> {
-            list.add(t);
-            lblRecord.setText(String.valueOf(list.size()));
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-            progress.setIndeterminate(false);
-        }, () -> {
-            supplierTabelModel.setListCustomer(list);
-            progress.setIndeterminate(false);
-        });
+        inventoryRepo.getSupplier()
+                .subscribe((t) -> {
+                    supplierTabelModel.setListCustomer(t);
+                    lblRecord.setText(String.valueOf(t.size()));
+                    progress.setIndeterminate(false);
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                    progress.setIndeterminate(false);
+                });
 
     }
 

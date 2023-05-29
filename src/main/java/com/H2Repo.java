@@ -13,6 +13,7 @@ import com.h2.service.CompanyInfoService;
 import com.h2.service.CurrencyService;
 import com.h2.service.ExchangeRateService;
 import com.h2.service.LocationService;
+import com.h2.service.MacPropertyService;
 import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
 import com.h2.service.PrivilegeCompanyService;
@@ -54,6 +55,9 @@ import com.inventory.model.VouStatusKey;
 import com.user.model.CompanyInfo;
 import com.user.model.Currency;
 import com.user.model.ExchangeRate;
+import com.user.model.MachineProperty;
+import com.user.model.Menu;
+import com.user.model.PrivilegeCompany;
 import com.user.model.Project;
 import com.user.model.RoleProperty;
 import com.user.model.SysProperty;
@@ -114,6 +118,10 @@ public class H2Repo {
     private ProjectService projectService;
     @Autowired
     private ExchangeRateService exchangeRateService;
+    @Autowired
+    private RolePropertyService rolePropertyService;
+    @Autowired
+    private MacPropertyService macPropertyService;
 
     public Mono<List<Location>> getLocation() {
         return Mono.justOrEmpty(locationService.findAll(Global.compCode));
@@ -207,8 +215,8 @@ public class H2Repo {
         return Mono.justOrEmpty(pcService.getPrivilegeCompany(roleCode));
     }
 
-    public Mono<List<VRoleMenu>> getMenuTree(String roleCode, String compCode) {
-        List<VRoleMenu> menus = menuService.getMenuTree(roleCode, compCode);
+    public Mono<List<VRoleMenu>> getRoleMenuTree(String roleCode, String compCode) {
+        List<VRoleMenu> menus = menuService.getRoleMenuTree(roleCode, compCode);
         menus.removeIf(m -> !m.isAllow());
         return Mono.justOrEmpty(menus);
     }
@@ -252,4 +260,21 @@ public class H2Repo {
     public Mono<List<ExchangeRate>> search(String startDate, String endDate, String targetCur, String compCode) {
         return Mono.justOrEmpty(exchangeRateService.searchExchange(startDate, endDate, targetCur, compCode));
     }
+
+    public Mono<List<Menu>> getMenuTree(String compCode) {
+        return Mono.justOrEmpty(menuService.getMenuTree(compCode));
+    }
+
+    public Mono<List<PrivilegeCompany>> searchCompany(String roleCode) {
+        return Mono.justOrEmpty(pcService.getPC(roleCode));
+    }
+    
+    public List<RoleProperty> getRoleProperty(String roleCode) {
+        return rolePropertyService.getRoleProperty(roleCode);
+    }
+
+    public List<MachineProperty> getMacProperty(Integer macId) {
+        return macPropertyService.getMacProperty(macId);
+    }
+
 }

@@ -86,7 +86,6 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         tblCompany.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
             if (e.getValueIsAdjusting()) {
                 if (tblCompany.getSelectedRow() >= 0) {
-                    txtBusType.setEditable(false);
                     selectRow = tblCompany.convertRowIndexToModel(tblCompany.getSelectedRow());
                     CompanyInfo com = tableModel.getCompany(selectRow);
                     setCompanyInfo(com);
@@ -135,6 +134,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         txtToDate.setDate(companyInfo.getEndDate());
         chkActive.setSelected(companyInfo.isActive());
         lblStatus.setText("EDIT");
+        txtBusType.setEditable(companyInfo.getBusId() == null);
     }
 
     private void saveCompany() {

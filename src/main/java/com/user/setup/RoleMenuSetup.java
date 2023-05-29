@@ -11,6 +11,7 @@ import com.inventory.model.VRoleMenu;
 import com.inventory.tree.MyAbstractTreeTableModel;
 import com.inventory.tree.MyDataModel;
 import com.inventory.tree.MyTreeTable;
+import com.user.common.UserRepo;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JOptionPane;
@@ -32,6 +33,8 @@ public class RoleMenuSetup extends javax.swing.JPanel implements KeyListener, Se
     private WebClient userApi;
     private SelectionObserver observer;
     private JProgressBar progress;
+    @Autowired
+    private UserRepo uerRepo;
 
     public JProgressBar getProgress() {
         return progress;
@@ -57,14 +60,7 @@ public class RoleMenuSetup extends javax.swing.JPanel implements KeyListener, Se
     }
 
     public void createMenuTree(String roleCode) {
-        userApi.get()
-                .uri(builder -> builder.path("/user/get-role-menu-tree")
-                .queryParam("compCode", Global.compCode)
-                .queryParam("roleCode", roleCode)
-                .build())
-                .retrieve()
-                .bodyToFlux(VRoleMenu.class)
-                .collectList()
+        uerRepo.getRoleMenuTree(roleCode)
                 .subscribe((t) -> {
                     VRoleMenu vRoleMenu = new VRoleMenu("Best-System", "System", true, t);
                     MyAbstractTreeTableModel treeTableModel = new MyDataModel(vRoleMenu, userApi, this);

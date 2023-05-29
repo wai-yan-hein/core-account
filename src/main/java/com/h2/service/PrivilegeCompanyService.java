@@ -19,4 +19,6 @@ public interface PrivilegeCompanyService {
     String getMaxDate();
 
     List<VRoleCompany> getPrivilegeCompany(String roleCode);
+
+    List<PrivilegeCompany> getPC(String roleCode);
 }

@@ -36,7 +36,7 @@ public class MenuDaoImpl extends AbstractDao<MenuKey, Menu> implements MenuDao {
     }
 
     @Override
-    public List<VRoleMenu> getMenuTree(String roleCode, String compCode) {
+    public List<VRoleMenu> getRoleMenuTree(String roleCode, String compCode) {
         List<VRoleMenu> roles = getMenuChild(roleCode, "1", compCode);
         if (!roles.isEmpty()) {
             for (VRoleMenu role : roles) {
@@ -95,6 +95,33 @@ public class MenuDaoImpl extends AbstractDao<MenuKey, Menu> implements MenuDao {
             }
         }
         return vList;
+    }
+
+    @Override
+    public List<Menu> getMenuTree(String compCode) {
+        List<Menu> menus = getMenuChild("1", compCode);
+        if (!menus.isEmpty()) {
+            for (Menu m : menus) {
+                getMenu(m);
+            }
+        }
+        return menus;
+    }
+    
+    private void getMenu(Menu parent) {
+        List<Menu> menus = getMenuChild(parent.getKey().getMenuCode(), parent.getKey().getCompCode());
+        parent.setChild(menus);
+        if (!menus.isEmpty()) {
+            for (Menu m : menus) {
+                getMenu(m);
+            }
+        }
+    }
+    
+    private List<Menu> getMenuChild(String parentCode, String compCode) {        
+        String sql = "select o from Menu o where o.parentMenuCode = '" + parentCode
+                + "' and o.key.compCode = '" + compCode + "' order by o.orderBy";
+        return findHSQL(sql);
     }
 
 }

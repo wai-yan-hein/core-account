@@ -119,7 +119,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(PriceOption.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
 
     }
 
@@ -130,7 +134,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(PriceOption.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<Category>> getCategory() {
@@ -144,7 +152,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(Category.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<Category>> getUpdateCategory(String updatedDate) {
@@ -154,7 +166,12 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(Category.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+
     }
 
     public Mono<List<SaleMan>> getSaleMan() {
@@ -168,7 +185,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(SaleMan.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<SaleMan>> getUpdateSaleMan(String updatedDate) {
@@ -178,7 +199,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(SaleMan.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<SaleMan> findSaleMan(String code, Integer deptId) {
@@ -193,7 +218,11 @@ public class InventoryRepo {
                 .uri("/setup/find-saleman")
                 .body(Mono.just(key), SaleManKey.class)
                 .retrieve()
-                .bodyToMono(SaleMan.class);
+                .bodyToMono(SaleMan.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<StockBrand>> getStockBrand() {
@@ -207,7 +236,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(StockBrand.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<StockBrand>> getUpdateBrand(String updatedDate) {
@@ -217,7 +250,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(StockBrand.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<StockType>> getStockType() {
@@ -231,7 +268,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(StockType.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<StockType>> getUpdateStockType(String updatedDate) {
@@ -241,7 +282,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(StockType.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<StockUnit>> getStockUnit() {
@@ -255,7 +300,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(StockUnit.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<StockUnit>> getUpdateUnit(String updatedDate) {
@@ -265,17 +314,27 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(StockUnit.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
-    public Flux<StockUnit> getUnit(String relCode, Integer deptId) {
+    public Mono<List<StockUnit>> getUnit(String relCode, Integer deptId) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-relation")
                 .queryParam("relCode", relCode)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", deptId)
                 .build())
-                .retrieve().bodyToFlux(StockUnit.class);
+                .retrieve()
+                .bodyToFlux(StockUnit.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Trader> findTrader(String code, Integer deptId) {
@@ -290,7 +349,12 @@ public class InventoryRepo {
                 .uri("/setup/find-trader")
                 .body(Mono.just(key), TraderKey.class)
                 .retrieve()
-                .bodyToMono(Trader.class);
+                .bodyToMono(Trader.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+
     }
 
     public Mono<TraderGroup> findTraderGroup(String code, Integer deptId) {
@@ -302,7 +366,11 @@ public class InventoryRepo {
                 .uri("/setup/find-trader-group")
                 .body(Mono.just(key), TraderGroupKey.class)
                 .retrieve()
-                .bodyToMono(TraderGroup.class);
+                .bodyToMono(TraderGroup.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Region> findRegion(String code) {
@@ -314,27 +382,40 @@ public class InventoryRepo {
                 .uri("/setup/find-region")
                 .body(Mono.just(key), RegionKey.class)
                 .retrieve()
-                .bodyToMono(Region.class);
+                .bodyToMono(Region.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
-    public Flux<Trader> getCustomer() {
-        Flux<Trader> result = inventoryApi.get()
+    public Mono<List<Trader>> getCustomer() {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-customer")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
-                .retrieve().bodyToFlux(Trader.class);
-        return result;
+                .retrieve().bodyToFlux(Trader.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
-    public Flux<Trader> getSupplier() {
-        Flux<Trader> result = inventoryApi.get()
+    public Mono<List<Trader>> getSupplier() {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-supplier")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
-                .retrieve().bodyToFlux(Trader.class);
-        return result;
+                .retrieve()
+                .bodyToFlux(Trader.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<Trader>> getTraderList(String text, String type) {
@@ -347,7 +428,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(Trader.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getTraderList :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<Trader>> getUpdateTrader(String updatedDate) {
@@ -357,7 +442,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(Trader.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<GRN>> getBatchList(String batchNo) {
@@ -368,7 +457,11 @@ public class InventoryRepo {
                 .queryParam("batchNo", batchNo)
                 .build())
                 .retrieve().bodyToFlux(GRN.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<Expense>> getExpense() {
@@ -377,7 +470,11 @@ public class InventoryRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve().bodyToFlux(Expense.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Trader> findTraderRFID(String rfId) {
@@ -388,7 +485,11 @@ public class InventoryRepo {
                 .queryParam("rfId", rfId)
                 .build())
                 .retrieve()
-                .bodyToMono(Trader.class);
+                .bodyToMono(Trader.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<Region>> getRegion() {
@@ -399,7 +500,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(Region.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Location> findLocation(String locCode, Integer deptId) {
@@ -414,7 +519,11 @@ public class InventoryRepo {
                 .uri("/setup/find-location")
                 .body(Mono.just(key), LocationKey.class)
                 .retrieve()
-                .bodyToMono(Location.class).cache();
+                .bodyToMono(Location.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<StockBrand> findBrand(String brandCode, Integer deptId) {
@@ -429,7 +538,11 @@ public class InventoryRepo {
                 .uri("/setup/find-brand")
                 .body(Mono.just(key), StockBrandKey.class)
                 .retrieve()
-                .bodyToMono(StockBrand.class);
+                .bodyToMono(StockBrand.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<VouStatus> findVouStatus(String code, Integer deptId) {
@@ -442,7 +555,11 @@ public class InventoryRepo {
                 .uri("/setup/find-voucher-status")
                 .body(Mono.just(key), VouStatusKey.class)
                 .retrieve()
-                .bodyToMono(VouStatus.class);
+                .bodyToMono(VouStatus.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<StockUnit> findUnit(String unitCode, Integer deptId) {
@@ -454,7 +571,11 @@ public class InventoryRepo {
                 .uri("/setup/find-unit")
                 .body(Mono.just(key), StockUnitKey.class)
                 .retrieve()
-                .bodyToMono(StockUnit.class);
+                .bodyToMono(StockUnit.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<UnitRelation> findRelation(String relCode, Integer deptId) {
@@ -466,7 +587,11 @@ public class InventoryRepo {
                 .uri("/setup/find-unit-relation")
                 .body(Mono.just(key), RelationKey.class)
                 .retrieve()
-                .bodyToMono(UnitRelation.class);
+                .bodyToMono(UnitRelation.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Category> findCategory(String catCode, Integer deptId) {
@@ -478,7 +603,11 @@ public class InventoryRepo {
                 .uri("/setup/find-category")
                 .body(Mono.just(key), CategoryKey.class)
                 .retrieve()
-                .bodyToMono(Category.class);
+                .bodyToMono(Category.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Stock> findStock(String stockCode) {
@@ -496,7 +625,7 @@ public class InventoryRepo {
                 .bodyToMono(Stock.class)
                 .onErrorResume((e) -> {
                     log.error("findStock : " + e.getMessage());
-                    return null;
+                    return Mono.empty();
                 });
     }
 
@@ -509,7 +638,11 @@ public class InventoryRepo {
                 .uri("/setup/find-type")
                 .body(Mono.just(key), StockTypeKey.class)
                 .retrieve()
-                .bodyToMono(StockType.class);
+                .bodyToMono(StockType.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<WeightLossHis> findWeightLoss(String vouNo, Integer deptId) {
@@ -521,7 +654,11 @@ public class InventoryRepo {
                 .uri("/weight/find-weight-loss")
                 .body(Mono.just(key), StockTypeKey.class)
                 .retrieve()
-                .bodyToMono(WeightLossHis.class);
+                .bodyToMono(WeightLossHis.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<ProcessHis> findProcess(ProcessHisKey key) {
@@ -529,7 +666,11 @@ public class InventoryRepo {
                 .uri("/process/find-process")
                 .body(Mono.just(key), ProcessHisKey.class)
                 .retrieve()
-                .bodyToMono(ProcessHis.class);
+                .bodyToMono(ProcessHis.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<Location>> getLocation() {
@@ -543,7 +684,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(Location.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<Location>> getUpdateLocation(String updatedDate) {
@@ -553,7 +698,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(Location.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<Stock>> getStock(boolean active) {
@@ -565,7 +714,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(Stock.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<Stock>> getUpdateStock(String updatedDate) {
@@ -575,7 +728,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(Stock.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<Stock>> getStock(String str) {
@@ -590,7 +747,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(Stock.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<Stock>> getService() {
@@ -601,7 +762,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(Stock.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<String>> deleteStock(StockKey key) {
@@ -610,7 +775,11 @@ public class InventoryRepo {
                 .body(Mono.just(key), StockKey.class)
                 .retrieve()
                 .bodyToFlux(String.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<VouStatus>> getVoucherStatus() {
@@ -621,7 +790,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(VouStatus.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<VouStatus>> getUpdateVouStatus(String updatedDate) {
@@ -631,7 +804,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(VouStatus.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<UnitRelation>> getUnitRelation() {
@@ -642,7 +819,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(UnitRelation.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<UnitRelation>> getUpdateRelation(String updatedDate) {
@@ -652,7 +833,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(UnitRelation.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Trader> saveTrader(Trader t) {
@@ -660,7 +845,11 @@ public class InventoryRepo {
                 .uri("/setup/save-trader")
                 .body(Mono.just(t), Trader.class)
                 .retrieve()
-                .bodyToMono(Trader.class);
+                .bodyToMono(Trader.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Stock> saveStock(Stock s) {
@@ -668,7 +857,11 @@ public class InventoryRepo {
                 .uri("/setup/save-stock")
                 .body(Mono.just(s), Stock.class)
                 .retrieve()
-                .bodyToMono(Stock.class);
+                .bodyToMono(Stock.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Currency> saveCurrency(Currency c) {
@@ -676,7 +869,11 @@ public class InventoryRepo {
                 .uri("/setup/save-currency")
                 .body(Mono.just(c), Currency.class)
                 .retrieve()
-                .bodyToMono(Currency.class);
+                .bodyToMono(Currency.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Location> saveLocaiton(Location loc) {
@@ -684,7 +881,11 @@ public class InventoryRepo {
                 .uri("/setup/save-location")
                 .body(Mono.just(loc), Location.class)
                 .retrieve()
-                .bodyToMono(Location.class);
+                .bodyToMono(Location.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Region> saveRegion(Region reg) {
@@ -692,7 +893,11 @@ public class InventoryRepo {
                 .uri("/setup/save-region")
                 .body(Mono.just(reg), Region.class)
                 .retrieve()
-                .bodyToMono(Region.class);
+                .bodyToMono(Region.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<SaleMan> saveSaleMan(SaleMan s) {
@@ -700,7 +905,11 @@ public class InventoryRepo {
                 .uri("/setup/save-saleman")
                 .body(Mono.just(s), SaleMan.class)
                 .retrieve()
-                .bodyToMono(SaleMan.class);
+                .bodyToMono(SaleMan.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<StockBrand> saveBrand(StockBrand s) {
@@ -708,7 +917,11 @@ public class InventoryRepo {
                 .uri("/setup/save-brand")
                 .body(Mono.just(s), StockBrand.class)
                 .retrieve()
-                .bodyToMono(StockBrand.class);
+                .bodyToMono(StockBrand.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Expense> saveExpense(Expense s) {
@@ -716,7 +929,11 @@ public class InventoryRepo {
                 .uri("/expense/save-expense")
                 .body(Mono.just(s), Expense.class)
                 .retrieve()
-                .bodyToMono(Expense.class);
+                .bodyToMono(Expense.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<StockType> saveStockType(StockType t) {
@@ -724,7 +941,11 @@ public class InventoryRepo {
                 .uri("/setup/save-type")
                 .body(Mono.just(t), StockType.class)
                 .retrieve()
-                .bodyToMono(StockType.class);
+                .bodyToMono(StockType.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<StockUnit> saveStockUnit(StockUnit unit) {
@@ -732,7 +953,11 @@ public class InventoryRepo {
                 .uri("/setup/save-unit")
                 .body(Mono.just(unit), StockUnit.class)
                 .retrieve()
-                .bodyToMono(StockUnit.class);
+                .bodyToMono(StockUnit.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<VouStatus> saveVouStatus(VouStatus vou) {
@@ -740,7 +965,11 @@ public class InventoryRepo {
                 .uri("/setup/save-voucher-status")
                 .body(Mono.just(vou), VouStatus.class)
                 .retrieve()
-                .bodyToMono(VouStatus.class);
+                .bodyToMono(VouStatus.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<ProcessType> saveProcessType(ProcessType vou) {
@@ -748,7 +977,11 @@ public class InventoryRepo {
                 .uri("/setup/save-process-type")
                 .body(Mono.just(vou), ProcessType.class)
                 .retrieve()
-                .bodyToMono(ProcessType.class);
+                .bodyToMono(ProcessType.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Category> saveCategory(Category category) {
@@ -756,7 +989,11 @@ public class InventoryRepo {
                 .uri("/setup/save-category")
                 .body(Mono.just(category), Category.class)
                 .retrieve()
-                .bodyToMono(Category.class);
+                .bodyToMono(Category.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Pattern> savePattern(Pattern pattern) {
@@ -764,7 +1001,11 @@ public class InventoryRepo {
                 .uri("/setup/save-pattern")
                 .body(Mono.just(pattern), Pattern.class)
                 .retrieve()
-                .bodyToMono(Pattern.class);
+                .bodyToMono(Pattern.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<WeightLossHis> saveWeightLoss(WeightLossHis loss) {
@@ -772,7 +1013,11 @@ public class InventoryRepo {
                 .uri("/weight/save-weight-loss")
                 .body(Mono.just(loss), WeightLossHis.class)
                 .retrieve()
-                .bodyToMono(WeightLossHis.class);
+                .bodyToMono(WeightLossHis.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> delete(Pattern p) {
@@ -780,7 +1025,11 @@ public class InventoryRepo {
                 .uri("/setup/delete-pattern")
                 .body(Mono.just(p), Pattern.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<UnitRelation> saveUnitRelation(UnitRelation rel) {
@@ -788,7 +1037,11 @@ public class InventoryRepo {
                 .uri("/setup/save-unit-relation")
                 .body(Mono.just(rel), UnitRelation.class)
                 .retrieve()
-                .bodyToMono(UnitRelation.class);
+                .bodyToMono(UnitRelation.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<General> getPrice(String stockCode, String vouDate, String unit, String type) {
@@ -815,7 +1068,12 @@ public class InventoryRepo {
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", Global.deptId)
                 .build())
-                .retrieve().bodyToMono(General.class);
+                .retrieve()
+                .bodyToMono(General.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<General> getWeightLossRecentPrice(String stockCode, String vouDate, String unit) {
@@ -827,7 +1085,11 @@ public class InventoryRepo {
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", Global.deptId)
                 .build())
-                .retrieve().bodyToMono(General.class);
+                .retrieve().bodyToMono(General.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<General> getPurAvgPrice(String stockCode, String vouDate, String unit) {
@@ -839,7 +1101,12 @@ public class InventoryRepo {
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", Global.deptId)
                 .build())
-                .retrieve().bodyToMono(General.class);
+                .retrieve()
+                .bodyToMono(General.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<General> getProductionRecentPrice(String stockCode, String vouDate, String unit) {
@@ -851,7 +1118,12 @@ public class InventoryRepo {
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", Global.deptId)
                 .build())
-                .retrieve().bodyToMono(General.class);
+                .retrieve()
+                .bodyToMono(General.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<General> getSaleRecentPrice(String stockCode, String vouDate, String unit) {
@@ -862,7 +1134,12 @@ public class InventoryRepo {
                 .queryParam("unit", unit)
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().bodyToMono(General.class);
+                .retrieve()
+                .bodyToMono(General.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<General> getStockIORecentPrice(String stockCode, String vouDate, String unit) {
@@ -872,7 +1149,12 @@ public class InventoryRepo {
                 .queryParam("vouDate", vouDate)
                 .queryParam("unit", unit)
                 .build())
-                .retrieve().bodyToMono(General.class);
+                .retrieve()
+                .bodyToMono(General.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<UnitRelationDetail>> getRelationDetail(String code, Integer deptId) {
@@ -884,7 +1166,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(UnitRelationDetail.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<ProcessType>> getProcessType() {
@@ -894,7 +1180,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(ProcessType.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<CFont>> getFont() {
@@ -904,7 +1194,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(CFont.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<StockInOut> findStockIO(String vouNo, Integer deptId) {
@@ -916,7 +1210,11 @@ public class InventoryRepo {
                 .uri("/stockio/find-stockio")
                 .body(Mono.just(key), StockIOKey.class)
                 .retrieve()
-                .bodyToMono(StockInOut.class);
+                .bodyToMono(StockInOut.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<TransferHis> findTransfer(String vouNo, Integer deptId) {
@@ -928,7 +1226,11 @@ public class InventoryRepo {
                 .uri("/transfer/find-transfer")
                 .body(Mono.just(key), TransferHisKey.class)
                 .retrieve()
-                .bodyToMono(TransferHis.class);
+                .bodyToMono(TransferHis.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<SaleHis> findSale(String vouNo, Integer deptId) {
@@ -940,7 +1242,11 @@ public class InventoryRepo {
                 .uri("/sale/find-sale")
                 .body(Mono.just(key), SaleHisKey.class)
                 .retrieve()
-                .bodyToMono(SaleHis.class);
+                .bodyToMono(SaleHis.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<OrderHis> findOrder(String vouNo, Integer deptId) {
@@ -952,7 +1258,11 @@ public class InventoryRepo {
                 .uri("/order/find-order")
                 .body(Mono.just(key), OrderHisKey.class)
                 .retrieve()
-                .bodyToMono(OrderHis.class);
+                .bodyToMono(OrderHis.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<OPHis> findOpening(OPHisKey key) {
@@ -960,7 +1270,11 @@ public class InventoryRepo {
                 .uri("/setup/find-opening")
                 .body(Mono.just(key), OPHisKey.class)
                 .retrieve()
-                .bodyToMono(OPHis.class);
+                .bodyToMono(OPHis.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<PurHis> findPurchase(String vouNo, Integer deptId) {
@@ -972,7 +1286,11 @@ public class InventoryRepo {
                 .uri("/pur/find-pur")
                 .body(Mono.just(key), PurHisKey.class)
                 .retrieve()
-                .bodyToMono(PurHis.class);
+                .bodyToMono(PurHis.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<RetInHis> findReturnIn(String vouNo, Integer deptId) {
@@ -984,7 +1302,11 @@ public class InventoryRepo {
                 .uri("/retin/find-retin")
                 .body(Mono.just(key), RetInHisKey.class)
                 .retrieve()
-                .bodyToMono(RetInHis.class);
+                .bodyToMono(RetInHis.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<RetOutHis> findReturnOut(String vouNo, Integer deptId) {
@@ -996,7 +1318,11 @@ public class InventoryRepo {
                 .uri("/retout/find-retout")
                 .body(Mono.just(key), RetOutHisKey.class)
                 .retrieve()
-                .bodyToMono(RetOutHis.class);
+                .bodyToMono(RetOutHis.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<General> getSmallQty(String stockCode, String unit) {
@@ -1007,7 +1333,11 @@ public class InventoryRepo {
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", Global.deptId)
                 .build())
-                .retrieve().bodyToMono(General.class);
+                .retrieve().bodyToMono(General.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<ReorderLevel> saveReorder(ReorderLevel rl) {
@@ -1015,7 +1345,11 @@ public class InventoryRepo {
                 .uri("/setup/save-reorder")
                 .body(Mono.just(rl), ReorderLevel.class)
                 .retrieve()
-                .bodyToMono(ReorderLevel.class);
+                .bodyToMono(ReorderLevel.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<String>> deleteTrader(TraderKey key) {
@@ -1024,7 +1358,11 @@ public class InventoryRepo {
                 .body(Mono.just(key), TraderKey.class)
                 .retrieve()
                 .bodyToFlux(String.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<TraderGroup> saveTraderGroup(TraderGroup rl) {
@@ -1032,7 +1370,11 @@ public class InventoryRepo {
                 .uri("/setup/save-trader-group")
                 .body(Mono.just(rl), TraderGroup.class)
                 .retrieve()
-                .bodyToMono(TraderGroup.class);
+                .bodyToMono(TraderGroup.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<TraderGroup>> getTraderGroup() {
@@ -1043,7 +1385,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(TraderGroup.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<Pattern>> getPattern(String stockCode, Integer deptId, String vouDate) {
@@ -1056,7 +1402,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(Pattern.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> delete(OPHisKey key) {
@@ -1064,7 +1414,11 @@ public class InventoryRepo {
                 .uri("/setup/delete-opening")
                 .body(Mono.just(key), OPHisKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> delete(SaleHisKey key) {
@@ -1072,7 +1426,11 @@ public class InventoryRepo {
                 .uri("/sale/delete-sale")
                 .body(Mono.just(key), SaleHisKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> delete(OrderHisKey key) {
@@ -1080,7 +1438,11 @@ public class InventoryRepo {
                 .uri("/order/delete-order")
                 .body(Mono.just(key), OrderHisKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> restore(SaleHisKey key) {
@@ -1088,7 +1450,11 @@ public class InventoryRepo {
                 .uri("/sale/restore-sale")
                 .body(Mono.just(key), SaleHisKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> restore(OrderHisKey key) {
@@ -1096,7 +1462,11 @@ public class InventoryRepo {
                 .uri("/sale/restore-sale")
                 .body(Mono.just(key), OrderHisKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> restore(RetInHisKey key) {
@@ -1104,7 +1474,11 @@ public class InventoryRepo {
                 .uri("/retin/restore-retin")
                 .body(Mono.just(key), RetInHisKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> restore(RetOutHisKey key) {
@@ -1112,7 +1486,11 @@ public class InventoryRepo {
                 .uri("/retout/restore-retout")
                 .body(Mono.just(key), RetOutHisKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> delete(PurHisKey key) {
@@ -1120,7 +1498,11 @@ public class InventoryRepo {
                 .uri("/pur/delete-pur")
                 .body(Mono.just(key), PurHisKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> restore(PurHisKey key) {
@@ -1128,7 +1510,11 @@ public class InventoryRepo {
                 .uri("/pur/restore-pur")
                 .body(Mono.just(key), PurHisKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> delete(RetInHisKey key) {
@@ -1136,7 +1522,11 @@ public class InventoryRepo {
                 .uri("/retin/delete-retin")
                 .body(Mono.just(key), RetInHisKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> delete(RetOutHisKey key) {
@@ -1144,7 +1534,11 @@ public class InventoryRepo {
                 .uri("/retout/delete-retout")
                 .body(Mono.just(key), RetOutHisKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> delete(StockIOKey key) {
@@ -1152,7 +1546,11 @@ public class InventoryRepo {
                 .uri("/stockio/delete-stockio")
                 .body(Mono.just(key), StockIOKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> restore(StockIOKey key) {
@@ -1160,7 +1558,11 @@ public class InventoryRepo {
                 .uri("/stockio/restore-stockio")
                 .body(Mono.just(key), StockIOKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> delete(TransferHisKey key) {
@@ -1168,7 +1570,11 @@ public class InventoryRepo {
                 .uri("/transfer/delete-transfer")
                 .body(Mono.just(key), TransferHisKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> restore(TransferHisKey key) {
@@ -1176,7 +1582,11 @@ public class InventoryRepo {
                 .uri("/transfer/restore-transfer")
                 .body(Mono.just(key), TransferHisKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> delete(ProcessHisKey key) {
@@ -1192,7 +1602,11 @@ public class InventoryRepo {
                 .uri("/grn/delete-grn")
                 .body(Mono.just(key), GRNKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> open(GRNKey key) {
@@ -1200,7 +1614,11 @@ public class InventoryRepo {
                 .uri("/grn/open-grn")
                 .body(Mono.just(key), GRNKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> delete(ProcessHisDetailKey key) {
@@ -1208,7 +1626,11 @@ public class InventoryRepo {
                 .uri("/process/delete-process-detail")
                 .body(Mono.just(key), ProcessHisDetailKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> restore(ProcessHisKey key) {
@@ -1216,7 +1638,11 @@ public class InventoryRepo {
                 .uri("/process/restore-process")
                 .body(Mono.just(key), StockIOKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> delete(WeightLossHisKey key) {
@@ -1224,7 +1650,11 @@ public class InventoryRepo {
                 .uri("/weight/delete-weight-loss")
                 .body(Mono.just(key), WeightLossHisKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> restore(WeightLossHisKey key) {
@@ -1232,7 +1662,11 @@ public class InventoryRepo {
                 .uri("/weight/restore-weight-loss")
                 .body(Mono.just(key), WeightLossHisKey.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<ProcessHis> saveProcess(ProcessHis his) {
@@ -1240,7 +1674,11 @@ public class InventoryRepo {
                 .uri("/process/save-process")
                 .body(Mono.just(his), ProcessHis.class)
                 .retrieve()
-                .bodyToMono(ProcessHis.class);
+                .bodyToMono(ProcessHis.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<ProcessHisDetail> saveProcessDetail(ProcessHisDetail his) {
@@ -1248,7 +1686,11 @@ public class InventoryRepo {
                 .uri("/process/save-process-detail")
                 .body(Mono.just(his), ProcessHisDetail.class)
                 .retrieve()
-                .bodyToMono(ProcessHisDetail.class);
+                .bodyToMono(ProcessHisDetail.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<ProcessHisDetail>> getProcessDetail(String vouNo, Integer deptId) {
@@ -1260,7 +1702,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(ProcessHisDetail.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<ProcessHis>> getProcess(FilterObject f) {
@@ -1280,7 +1726,11 @@ public class InventoryRepo {
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", Global.deptId)
                 .build())
-                .retrieve().bodyToMono(General.class);
+                .retrieve().bodyToMono(General.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<GRN> saveGRN(GRN grn) {
@@ -1288,29 +1738,41 @@ public class InventoryRepo {
                 .uri("/grn")
                 .body(Mono.just(grn), GRN.class)
                 .retrieve()
-                .bodyToMono(GRN.class);
+                .bodyToMono(GRN.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
-    public Flux<GRN> getGRNHistory(FilterObject filter) {
-        Flux<GRN> result = inventoryApi
+    public Mono<List<GRN>> getGRNHistory(FilterObject filter) {
+        return inventoryApi
                 .post()
                 .uri("/grn/history")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
-                .bodyToFlux(GRN.class);
-        return result;
+                .bodyToFlux(GRN.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
-    public Flux<SaleHisDetail> getSaleByBatch(String batchNo, boolean detail) {
-        Flux<SaleHisDetail> result = inventoryApi.get()
+    public Mono<List<SaleHisDetail>> getSaleByBatch(String batchNo, boolean detail) {
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/sale/get-sale-by-batch")
                 .queryParam("batchNo", batchNo)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", Global.deptId)
                 .queryParam("detail", detail)
                 .build())
-                .retrieve().bodyToFlux(SaleHisDetail.class);
-        return result;
+                .retrieve().bodyToFlux(SaleHisDetail.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<PurHis> save(PurHis ph) {
@@ -1318,7 +1780,11 @@ public class InventoryRepo {
                 .uri("/pur/save-pur")
                 .body(Mono.just(ph), PurHis.class)
                 .retrieve()
-                .bodyToMono(PurHis.class);
+                .bodyToMono(PurHis.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<SaleHis> save(SaleHis sh) {
@@ -1340,7 +1806,11 @@ public class InventoryRepo {
                 .uri("/order/save-order")
                 .body(Mono.just(sh), OrderHis.class)
                 .retrieve()
-                .bodyToMono(OrderHis.class);
+                .bodyToMono(OrderHis.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<AccSetting> save(AccSetting sh) {
@@ -1348,7 +1818,11 @@ public class InventoryRepo {
                 .uri("/setup/saveAccSetting")
                 .body(Mono.just(sh), AccSetting.class)
                 .retrieve()
-                .bodyToMono(AccSetting.class);
+                .bodyToMono(AccSetting.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<AccSetting>> getAccSetting() {
@@ -1357,7 +1831,11 @@ public class InventoryRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve().bodyToFlux(AccSetting.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<VStockBalance>> getStockBalance(String stockCode, boolean summary) {
@@ -1374,7 +1852,11 @@ public class InventoryRepo {
                 .queryParam("summary", summary)
                 .build())
                 .retrieve().bodyToFlux(VStockBalance.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<SaleHisDetail>> getSaleDetail(String vouNo, int deptId) {
@@ -1385,7 +1867,11 @@ public class InventoryRepo {
                 .queryParam("deptId", deptId)
                 .build())
                 .retrieve().bodyToFlux(SaleHisDetail.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<byte[]> getSaleReport(String vouNo) {
@@ -1396,7 +1882,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToMono(ByteArrayResource.class)
-                .map(ByteArrayResource::getByteArray);
+                .map(ByteArrayResource::getByteArray)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<byte[]> getOrderReport(String vouNo) {
@@ -1407,7 +1897,11 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToMono(ByteArrayResource.class)
-                .map(ByteArrayResource::getByteArray);
+                .map(ByteArrayResource::getByteArray)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<VSale>> getOrder(FilterObject filter) {
@@ -1416,7 +1910,11 @@ public class InventoryRepo {
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(VSale.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<OrderHisDetail>> getOrderDetail(String vouNo, int deptId) {
@@ -1427,7 +1925,11 @@ public class InventoryRepo {
                 .queryParam("deptId", deptId)
                 .build())
                 .retrieve().bodyToFlux(OrderHisDetail.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
 
     }
 
@@ -1437,6 +1939,10 @@ public class InventoryRepo {
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(VSale.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 }

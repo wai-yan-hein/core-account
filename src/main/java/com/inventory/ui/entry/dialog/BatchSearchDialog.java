@@ -13,7 +13,6 @@ import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.GRNSearchTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -23,7 +22,6 @@ import javax.swing.RowFilter;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Flux;
 
 /**
  *
@@ -73,16 +71,11 @@ public class BatchSearchDialog extends javax.swing.JDialog {
         filter.setDeleted(false);
         filter.setClose(false);
         filter.setOrderByBatch(true);
-        Flux<GRN> result = inventoryRepo.getGRNHistory(filter);
-        result.subscribe((t) -> {
-            tableModel.addObject(t);
-            lblRecord.setText(String.valueOf(tableModel.getSize()));
-        }, (e) -> {
-        }, () -> {
-            tableModel.fireTableDataChanged();
+        inventoryRepo.getGRNHistory(filter).subscribe((t) -> {
+            tableModel.setListDetail(t);
+            lblRecord.setText(String.valueOf(t.size()));
             txtFilter.requestFocus();
         });
-
     }
 
     private void initTable() {

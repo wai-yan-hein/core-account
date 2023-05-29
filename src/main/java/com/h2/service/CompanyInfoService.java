@@ -16,6 +16,8 @@ public interface CompanyInfoService {
     CompanyInfo save(CompanyInfo comp);
 
     String getMaxDate();
-    
+
     List<CompanyInfo> findAll(boolean active);
+
+    CompanyInfo findById(String id);
 }
