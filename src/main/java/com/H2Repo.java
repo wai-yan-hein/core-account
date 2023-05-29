@@ -38,6 +38,8 @@ import com.h2.service.SystemPropertyService;
 import com.h2.service.TraderAService;
 import com.h2.service.TraderInvService;
 import com.h2.service.UserService;
+import com.h2.service.VRoleCompanyService;
+import com.h2.service.VRoleMenuService;
 import com.h2.service.VouStatusService;
 import com.inventory.model.AppRole;
 import com.inventory.model.AppUser;
@@ -137,7 +139,11 @@ public class H2Repo {
     @Autowired
     private TraderAService traderAccService;
     @Autowired
-    private COAService coaService;    
+    private COAService coaService;  
+    @Autowired
+    private VRoleCompanyService vRoleCompanyService;
+    @Autowired
+    private VRoleMenuService vRoleMenuService;
 
     public Mono<List<Location>> getLocation() {
         return Mono.justOrEmpty(locationService.findAll(Global.compCode));
@@ -228,13 +234,57 @@ public class H2Repo {
     }
 
     public Mono<List<VRoleCompany>> getPrivilegeCompany(String roleCode) {
-        return Mono.justOrEmpty(pcService.getPrivilegeCompany(roleCode));
+        return Mono.justOrEmpty(vRoleCompanyService.getPrivilegeCompany(roleCode));
     }
 
-    public Mono<List<VRoleMenu>> getRoleMenuTree(String roleCode, String compCode) {
-        List<VRoleMenu> menus = menuService.getRoleMenuTree(roleCode, compCode);
+    public Mono<List<VRoleMenu>> getPRoleMenu(String roleCode, String compCode) {
+        List<VRoleMenu> menus = getRoleMenuTree(roleCode, compCode);
         menus.removeIf(m -> !m.isAllow());
         return Mono.justOrEmpty(menus);
+    }
+
+    private List<VRoleMenu> getRoleMenuTree(String roleCode, String compCode) {
+        List<VRoleMenu> roles = vRoleMenuService.getMenuChild(roleCode, "1", compCode);
+        if (!roles.isEmpty()) {
+            for (VRoleMenu role : roles) {
+                getRoleMenuChild(role);
+            }
+        }
+        return roles;
+    }
+
+    private void getRoleMenuChild(VRoleMenu parent) {
+        List<VRoleMenu> roles = vRoleMenuService.getMenuChild(parent.getRoleCode(), parent.getMenuCode(), parent.getCompCode());
+        parent.setChild(roles);
+        if (!roles.isEmpty()) {
+            for (VRoleMenu role : roles) {
+                getRoleMenuChild(role);
+            }
+        }
+    }
+
+    public Mono<List<VRoleMenu>> getRoleMenu(String roleCode, String compCode) {
+        List<VRoleMenu> roles = vRoleMenuService.getMenu(roleCode, "1", compCode);
+        if (!roles.isEmpty()) {
+            for (VRoleMenu role : roles) {
+                getMenuChild(role);
+            }
+        }
+        return Mono.justOrEmpty(roles);
+    }
+
+    private void getMenuChild(VRoleMenu parent) {
+        List<VRoleMenu> roles = vRoleMenuService.getMenu(parent.getRoleCode(), parent.getMenuCode(), parent.getCompCode());
+        parent.setChild(roles);
+        if (!roles.isEmpty()) {
+            for (VRoleMenu role : roles) {
+                getMenuChild(role);
+            }
+        }
+    }
+    
+    public Mono<List<VRoleMenu>> getReport(String roleCode, String menuClass, String compCode) {
+        return Mono.justOrEmpty(vRoleMenuService.getReport(roleCode, menuClass, compCode));
     }
 
     public HashMap<String, String> getProperty(String compCode, String roleCode, Integer macId) {
@@ -284,7 +334,7 @@ public class H2Repo {
     public Mono<List<PrivilegeCompany>> searchCompany(String roleCode) {
         return Mono.justOrEmpty(pcService.getPC(roleCode));
     }
-    
+
     public List<RoleProperty> getRoleProperty(String roleCode) {
         return rolePropertyService.getRoleProperty(roleCode);
     }

@@ -34,11 +34,6 @@ public class MenuServiceimpl implements MenuService {
     }
 
     @Override
-    public List<VRoleMenu> getRoleMenuTree(String roleCode, String compCode) {
-        return dao.getRoleMenuTree(roleCode, compCode);
-    }
-
-    @Override
     public List<Menu> getMenuTree(String compCode) {
         return dao.getMenuTree(compCode);
     }

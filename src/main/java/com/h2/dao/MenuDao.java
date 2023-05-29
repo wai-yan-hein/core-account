@@ -17,8 +17,6 @@ public interface MenuDao {
     Menu save(Menu menu);
 
     String getMaxDate();
-    
-    List<VRoleMenu> getRoleMenuTree(String roleCode, String compCode);
-    
+
     List<Menu> getMenuTree(String compCode);
 }
