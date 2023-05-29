@@ -11,6 +11,7 @@ import com.h2.service.BusinessTypeService;
 import com.h2.service.CategoryService;
 import com.h2.service.CompanyInfoService;
 import com.h2.service.CurrencyService;
+import com.h2.service.DepartmentUserService;
 import com.h2.service.ExchangeRateService;
 import com.h2.service.LocationService;
 import com.h2.service.MacPropertyService;
@@ -56,11 +57,13 @@ import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
 import com.user.model.CompanyInfo;
 import com.user.model.Currency;
+import com.user.model.DepartmentUser;
 import com.user.model.ExchangeRate;
 import com.user.model.MachineProperty;
 import com.user.model.Menu;
 import com.user.model.PrivilegeCompany;
 import com.user.model.Project;
+import com.user.model.ProjectKey;
 import com.user.model.RoleProperty;
 import com.user.model.SysProperty;
 import com.user.model.VRoleCompany;
@@ -128,6 +131,8 @@ public class H2Repo {
     private VRoleCompanyService vRoleCompanyService;
     @Autowired
     private VRoleMenuService vRoleMenuService;
+    @Autowired
+    private DepartmentUserService deptUserService;
 
     public Mono<List<Location>> getLocation() {
         return Mono.justOrEmpty(locationService.findAll(Global.compCode));
@@ -266,7 +271,7 @@ public class H2Repo {
             }
         }
     }
-    
+
     public Mono<List<VRoleMenu>> getReport(String roleCode, String menuClass, String compCode) {
         return Mono.justOrEmpty(vRoleMenuService.getReport(roleCode, menuClass, compCode));
     }
@@ -327,4 +332,35 @@ public class H2Repo {
         return macPropertyService.getMacProperty(macId);
     }
 
+    public Mono<CompanyInfo> findCompany(String compCode) {
+        return Mono.justOrEmpty(companyInfoService.findById(compCode));
+    }
+
+    public Mono<AppRole> finRole(String roleCode) {
+        return Mono.justOrEmpty(roleService.findById(roleCode));
+    }
+
+    public Mono<DepartmentUser> findDepartment(Integer deptId) {
+        return Mono.justOrEmpty(deptUserService.findById(deptId));
+    }
+
+    public Mono<List<DepartmentUser>> getDeparment() {
+        return Mono.justOrEmpty(deptUserService.findAll());
+    }
+
+    public Mono<BusinessType> find(Integer id) {
+        return Mono.justOrEmpty(businessTypeService.findById(id));
+    }
+
+    public Mono<List<Menu>> getMenuParent(String compCode) {
+        return Mono.justOrEmpty(menuService.getMenuDynamic(compCode));
+    }
+
+    public Mono<Project> find(ProjectKey key) {
+        return Mono.justOrEmpty(projectService.findById(key));
+    }
+
+    public Mono<List<Project>> searchProjectByCode(String code, String compCode) {
+        return Mono.justOrEmpty(projectService.search(code, compCode));
+    }
 }

@@ -5,12 +5,8 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.VRoleMenu;
 import com.user.model.Menu;
 import com.user.model.MenuKey;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.springframework.stereotype.Repository;
@@ -34,7 +30,7 @@ public class MenuDaoImpl extends AbstractDao<MenuKey, Menu> implements MenuDao {
         Date date = getDate(sql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
-    
+
     @Override
     public List<Menu> getMenuTree(String compCode) {
         List<Menu> menus = getMenuChild("1", compCode);
@@ -59,6 +55,13 @@ public class MenuDaoImpl extends AbstractDao<MenuKey, Menu> implements MenuDao {
     private List<Menu> getMenuChild(String parentCode, String compCode) {
         String sql = "select o from Menu o where o.parentMenuCode = '" + parentCode
                 + "' and o.key.compCode = '" + compCode + "' order by o.orderBy";
+        return findHSQL(sql);
+    }
+
+    @Override
+    public List<Menu> getMenuDynamic(String compCode) {
+        String sql = "select o from Menu o where (o.menuClass='AllCash' or o.menuClass='DayBook') "
+                + "and (o.account is null or o.account ='') and o.key.compCode = '" + compCode + "'";
         return findHSQL(sql);
     }
 

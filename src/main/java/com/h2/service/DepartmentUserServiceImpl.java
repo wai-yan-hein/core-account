@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.h2.dao.DepartmentUserDao;
 import com.user.model.DepartmentUser;
+import java.util.List;
 
 /**
  *
@@ -29,6 +30,16 @@ public class DepartmentUserServiceImpl implements DepartmentUserService {
     @Override
     public String getMaxDate() {
         return deptDao.getMaxDate();
+    }
+
+    @Override
+    public DepartmentUser findById(Integer id) {
+        return deptDao.findById(id);
+    }
+
+    @Override
+    public List<DepartmentUser> findAll() {
+        return deptDao.findAll();
     }
 
 }

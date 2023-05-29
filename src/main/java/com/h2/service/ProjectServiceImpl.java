@@ -6,6 +6,7 @@ package com.h2.service;
 
 import com.h2.dao.ProjectDao;
 import com.user.model.Project;
+import com.user.model.ProjectKey;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,16 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public List<Project> searchProject(String compCode) {
         return dao.searchProject(compCode);
+    }
+
+    @Override
+    public Project findById(ProjectKey key) {
+        return dao.findById(key);
+    }
+
+    @Override
+    public List<Project> search(String str, String compCode) {
+        return dao.search(str, compCode);
     }
 
 }

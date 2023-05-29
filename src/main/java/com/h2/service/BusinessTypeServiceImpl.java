@@ -37,4 +37,9 @@ public class BusinessTypeServiceImpl implements BusinessTypeService {
         return bDao.findAll();
     }
 
+    @Override
+    public BusinessType findById(Integer id) {
+        return bDao.findById(id);
+    }
+
 }

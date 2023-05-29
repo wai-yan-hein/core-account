@@ -7,6 +7,7 @@ package com.h2.dao;
 import com.common.Util1;
 import com.user.model.DepartmentUser;
 import java.util.Date;
+import java.util.List;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -27,6 +28,17 @@ public class DepartmentUserDaoImpl extends AbstractDao<Integer, DepartmentUser> 
         String jpql = "select max(o.updatedDate) from DepartmentUser o";
         Date date = getDate(jpql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
+    }
+
+    @Override
+    public DepartmentUser findById(Integer id) {
+        return getByKey(id);
+    }
+
+    @Override
+    public List<DepartmentUser> findAll() {
+        String sql = "select o from DepartmentUser o";
+        return findHSQL(sql);
     }
 
 }

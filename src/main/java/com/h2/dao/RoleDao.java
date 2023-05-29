@@ -18,4 +18,6 @@ public interface RoleDao {
     String getMaxDate();
     
     List<AppRole> findAll(String compCode);
+    
+    AppRole findById(String roleCode);
 }

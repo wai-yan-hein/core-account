@@ -18,4 +18,6 @@ public interface BusinessTypeDao {
     String getMaxDate();
     
     List<BusinessType> findAll();
+    
+    BusinessType findById(Integer id);
 }

@@ -5,6 +5,7 @@
 package com.h2.dao;
 
 import com.user.model.Project;
+import com.user.model.ProjectKey;
 import java.util.List;
 
 /**
@@ -16,6 +17,10 @@ public interface ProjectDao {
     Project save(Project p);
 
     String getMaxDate();
-    
+
     List<Project> searchProject(String compCode);
+
+    Project findById(ProjectKey key);
+
+    List<Project> search(String str, String compCode);
 }

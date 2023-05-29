@@ -19,4 +19,6 @@ public interface MenuService {
     String getMaxDate();
 
     List<Menu> getMenuTree(String compCode);
+
+    List<Menu> getMenuDynamic(String compCode);
 }
