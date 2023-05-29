@@ -148,16 +148,10 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
 
     private void getReport() {
         progress.setIndeterminate(true);
-        Mono<ResponseEntity<List<VRoleMenu>>> result = userApi.get()
-                .uri(builder -> builder.path("/user/get-report")
-                .queryParam("roleCode", Global.roleCode)
-                .queryParam("compCode", Global.compCode)
-                .queryParam("menuClass", "Inventory")
-                .build())
-                .retrieve().toEntityList(VRoleMenu.class);
+        Mono<List<VRoleMenu>> result = userRepo.getReport("Inventory");
         result.subscribe((t) -> {
-            tableModel.setListReport(t.getBody());
-            lblRecord.setText(String.valueOf(t.getBody().size()));
+            tableModel.setListReport(t);
+            lblRecord.setText(String.valueOf(t.size()));
             progress.setIndeterminate(false);
         }, (e) -> {
             progress.setIndeterminate(false);

@@ -350,6 +350,9 @@ public class UserRepo {
     }
 
     public Mono<List<VRoleMenu>> getReport(String menuClass) {
+        if (localdatabase) {
+            return h2Repo.getReport(Global.roleCode, menuClass, Global.compCode);
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-report")
                 .queryParam("roleCode", Global.roleCode)
@@ -709,7 +712,7 @@ public class UserRepo {
                 .collectList()
                 .onErrorResume((e) -> {
                     if (localdatabase) {
-                        return h2Repo.getRoleMenuTree(roleCode, Global.compCode);
+                        return h2Repo.getPRoleMenu(roleCode, Global.compCode);
                     }
                     return Mono.error(e);
                 });
@@ -717,7 +720,7 @@ public class UserRepo {
 
     public Mono<List<VRoleMenu>> getRoleMenuTree(String roleCode) {
         if (localdatabase) {
-            return h2Repo.getRoleMenuTree(roleCode, Global.compCode);
+            return h2Repo.getRoleMenu(roleCode, Global.compCode);
         }
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-role-menu-tree")
