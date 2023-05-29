@@ -154,6 +154,8 @@ public class ProjectSetup extends javax.swing.JPanel implements SelectionObserve
                     projectTableModel.set(tblProject.getSelectedRow(), t);
                 }
                 clear();
+            },(e)->{
+                JOptionPane.showMessageDialog(this, e.getMessage());
             });
         }
     }

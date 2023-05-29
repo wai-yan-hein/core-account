@@ -508,6 +508,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 }
             }, (e) -> {
                 JOptionPane.showMessageDialog(this, e.getMessage());
+                progress.setIndeterminate(false);
             });
         }
     }

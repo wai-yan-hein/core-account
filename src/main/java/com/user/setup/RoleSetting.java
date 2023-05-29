@@ -123,12 +123,7 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl, Sel
     }
 
     private void searchRole() {
-       Mono<List<AppRole>> result = userRepo.getAppRole();
-//                userApi.get()
-//                .uri(builder -> builder.path("/user/get-role")
-//                .build())
-//                .retrieve().toEntityList(AppRole.class);
-        result.subscribe((t) -> {
+       userRepo.getAppRole().subscribe((t) -> {
             userRoleTableModel.setListRole(t);
         }, (e) -> {
             JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
