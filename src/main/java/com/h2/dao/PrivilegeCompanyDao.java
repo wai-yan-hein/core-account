@@ -19,4 +19,6 @@ public interface PrivilegeCompanyDao {
     String getMaxDate();
     
     List<VRoleCompany> getPrivilegeCompany(String roleCode);
+    
+    List<PrivilegeCompany> getPC(String roleCode);
 }

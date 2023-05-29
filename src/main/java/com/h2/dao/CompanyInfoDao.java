@@ -18,5 +18,7 @@ public interface CompanyInfoDao {
     String getMaxDate();
     
     List<CompanyInfo> findAll(boolean active);
+    
+    CompanyInfo findById(String id);
 
 }

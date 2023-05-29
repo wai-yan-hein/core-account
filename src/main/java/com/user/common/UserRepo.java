@@ -29,8 +29,10 @@ import com.user.model.Project;
 import com.user.model.ProjectKey;
 import com.user.model.VRoleCompany;
 import com.user.model.YearEnd;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import javax.swing.JOptionPane;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -265,12 +267,17 @@ public class UserRepo {
 
     public HashMap<String, String> getRoleProperty(String roleCode) {
         HashMap<String, String> hm = new HashMap<>();
-        Mono<ResponseEntity<List<RoleProperty>>> result = userApi.get()
-                .uri(builder -> builder.path("/user/get-role-property")
-                .queryParam("roleCode", roleCode)
-                .build())
-                .retrieve().toEntityList(RoleProperty.class);
-        List<RoleProperty> prop = result.block().getBody();
+        List<RoleProperty> prop = new ArrayList<>();
+        if (localdatabase) {
+            prop = h2Repo.getRoleProperty(roleCode);
+        } else {
+            Mono<ResponseEntity<List<RoleProperty>>> result = userApi.get()
+                    .uri(builder -> builder.path("/user/get-role-property")
+                    .queryParam("roleCode", roleCode)
+                    .build())
+                    .retrieve().toEntityList(RoleProperty.class);
+            prop = result.block().getBody();
+        }
         prop.forEach((t) -> {
             hm.put(t.getKey().getPropKey(), t.getPropValue());
         });
@@ -279,15 +286,20 @@ public class UserRepo {
 
     public HashMap<String, String> getMachineProperty(Integer macId) {
         HashMap<String, String> hm = new HashMap<>();
+        List<MachineProperty> prop = new ArrayList<>();
         if (macId == null) {
             return hm;
         }
-        Mono<ResponseEntity<List<MachineProperty>>> result = userApi.get()
-                .uri(builder -> builder.path("/user/get-mac-property")
-                .queryParam("macId", macId)
-                .build())
-                .retrieve().toEntityList(MachineProperty.class);
-        List<MachineProperty> prop = result.block().getBody();
+        if (localdatabase) {
+            prop = h2Repo.getMacProperty(macId);
+        } else {
+            Mono<ResponseEntity<List<MachineProperty>>> result = userApi.get()
+                    .uri(builder -> builder.path("/user/get-mac-property")
+                    .queryParam("macId", macId)
+                    .build())
+                    .retrieve().toEntityList(MachineProperty.class);
+            prop = result.block().getBody();
+        }
         prop.forEach((t) -> {
             hm.put(t.getKey().getPropKey(), t.getPropValue());
         });
@@ -381,6 +393,9 @@ public class UserRepo {
     }
 
     public Mono<List<Menu>> getMenuTree() {
+        if (localdatabase) {
+            return h2Repo.getMenuTree(Global.compCode);
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-menu-tree")
                 .queryParam("compCode", Global.compCode)
@@ -477,8 +492,8 @@ public class UserRepo {
     public Mono<List<ExchangeRate>> searchExchange(String startDate, String endDate, String targetCur) {
         String fromDate = Util1.toDateStrMYSQL(startDate, Global.dateFormat);
         String toDate = Util1.toDateStrMYSQL(endDate, Global.dateFormat);
-        if(localdatabase) {
-            return h2Repo.search(fromDate, toDate, targetCur,Global.compCode);
+        if (localdatabase) {
+            return h2Repo.search(fromDate, toDate, targetCur, Global.compCode);
         }
         return userApi.get()
                 .uri(builder -> builder.path("/user/searchExchange")
@@ -678,9 +693,37 @@ public class UserRepo {
                 .collectList()
                 .onErrorResume((e) -> {
                     if (localdatabase) {
-                        return h2Repo.getMenuTree(roleCode, Global.compCode);
+                        return h2Repo.getRoleMenuTree(roleCode, Global.compCode);
                     }
                     return Mono.error(e);
                 });
+    }
+
+    public Mono<List<VRoleMenu>> getRoleMenuTree(String roleCode) {
+        if (localdatabase) {
+            return h2Repo.getRoleMenuTree(roleCode, Global.compCode);
+        }
+        return userApi.get()
+                .uri(builder -> builder.path("/user/get-role-menu-tree")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("roleCode", roleCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(VRoleMenu.class)
+                .collectList();
+    }
+
+    public Mono<List<PrivilegeCompany>> searchCompany(String roleCode) {
+        if (localdatabase) {
+            return h2Repo.searchCompany(roleCode);
+        }
+        return userApi.get()
+                .uri(builder -> builder.path("/user/get-privilege-company")
+                .queryParam("roleCode", roleCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(PrivilegeCompany.class)
+                .collectList();
+
     }
 }

@@ -80,13 +80,7 @@ public class RoleCompany extends javax.swing.JPanel {
 
     public void searchCompany(String roleCode) {
         tableModel.clear();
-        userApi.get()
-                .uri(builder -> builder.path("/user/get-privilege-company")
-                .queryParam("roleCode", roleCode)
-                .build())
-                .retrieve()
-                .bodyToFlux(PrivilegeCompany.class)
-                .collectList()
+        userRepo.searchCompany(roleCode)
                 .subscribe((t) -> {
                     tableModel.setRoleCode(roleCode);
                     tableModel.setListProperty(t);

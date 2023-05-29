@@ -37,4 +37,9 @@ public class CompanyInfoServiceImpl implements CompanyInfoService {
         return compDao.findAll(active);
     }
 
+    @Override
+    public CompanyInfo findById(String id) {
+        return compDao.findById(id);
+    }
+
 }

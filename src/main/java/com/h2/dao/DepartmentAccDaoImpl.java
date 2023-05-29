@@ -26,7 +26,7 @@ public class DepartmentAccDaoImpl extends AbstractDao<DepartmentAKey, Department
 
     @Override
     public String getMaxDate() {
-        String jpql = "select max(o.updatedDate) from DepartmentA o";
+        String jpql = "select max(o.updatedDt) from DepartmentA o";
         Date date = getDate(jpql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
