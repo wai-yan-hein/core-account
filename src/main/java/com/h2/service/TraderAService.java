@@ -17,5 +17,7 @@ public interface TraderAService {
     List<TraderA> findAll(String compCode);
 
     String getMaxDate();
+    
+    List<TraderA> getTrader(String text,String compCode);
 
 }

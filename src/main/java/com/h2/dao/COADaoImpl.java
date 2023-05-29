@@ -36,4 +36,9 @@ public class COADaoImpl extends AbstractDao<COAKey, ChartOfAccount> implements C
         String hsql = "select o from ChartOfAccount o where o.key.compCode ='" + compCode + "'";
         return findHSQL(hsql);
     }
+    
+    @Override
+    public ChartOfAccount findById(COAKey key) {
+        return getByKey(key);
+    }
 }
