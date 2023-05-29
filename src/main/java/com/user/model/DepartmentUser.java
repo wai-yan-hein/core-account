@@ -21,7 +21,7 @@ import lombok.Data;
 @Data
 @Entity
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Table(name = "department")
+@Table(name = "department_user")
 public class DepartmentUser {
 
     @Id

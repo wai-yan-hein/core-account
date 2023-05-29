@@ -42,7 +42,7 @@ public class DepartmentA {
     @Column(name = "updated_by")
     private String updatedBy;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_dt")
+    @Column(name = "updated_date")
     private Date updatedDt;
     @Column(name = "usr_code")
     private String userCode;
@@ -59,6 +59,11 @@ public class DepartmentA {
        this.key = new DepartmentAKey();
        this.key.setDeptCode(deptCode);
        this.deptName = deptName;
+    }
+   
+   public DepartmentA(DepartmentAKey key, String deptName) {
+        this.key = key;
+        this.deptName = deptName;
     }
 
     public DepartmentA() {
