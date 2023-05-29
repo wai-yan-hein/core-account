@@ -27,8 +27,6 @@ import com.inventory.ui.setup.dialog.RegionSetup;
 import com.inventory.ui.setup.dialog.TraderGroupDialog;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.ArrayList;
-import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -47,7 +45,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
 
 /**
  *
@@ -151,18 +148,15 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private void searchCustomer() {
         progress.setIndeterminate(true);
-        List<Trader> list = new ArrayList<>();
-        Flux<Trader> result = inventoryRepo.getCustomer();
-        result.subscribe((t) -> {
-            list.add(t);
-            lblRecord.setText(String.valueOf(list.size()));
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-            progress.setIndeterminate(false);
-        }, () -> {
-            customerTabelModel.setListCustomer(list);
-            progress.setIndeterminate(false);
-        });
+        inventoryRepo.getCustomer()
+                .subscribe((t) -> {
+                    customerTabelModel.setListCustomer(t);
+                    lblRecord.setText(String.valueOf(t.size()));
+                    progress.setIndeterminate(false);
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                    progress.setIndeterminate(false);
+                });
 
     }
 

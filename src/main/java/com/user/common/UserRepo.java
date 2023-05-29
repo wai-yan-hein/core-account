@@ -62,7 +62,14 @@ public class UserRepo {
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-currency")
                 .build())
-                .retrieve().bodyToFlux(Currency.class).collectList();
+                .retrieve()
+                .bodyToFlux(Currency.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getCurrency :" + e.getMessage());
+                    return Mono.empty();
+                });
+
     }
 
     public Mono<List<CompanyInfo>> getCompany(boolean active) {
@@ -191,7 +198,12 @@ public class UserRepo {
                 .uri(builder -> builder.path("/user/find-currency")
                 .queryParam("curCode", curCode)
                 .build())
-                .retrieve().bodyToMono(Currency.class);
+                .retrieve()
+                .bodyToMono(Currency.class)
+                .onErrorResume((e) -> {
+                    log.error("findCurrency :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<CompanyInfo> findCompany(String compCode) {
@@ -486,7 +498,11 @@ public class UserRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(Project.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("searchProjectByCode :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<ExchangeRate>> searchExchange(String startDate, String endDate, String targetCur) {

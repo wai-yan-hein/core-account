@@ -298,13 +298,15 @@ public class AccountRepo {
                 .retrieve().bodyToFlux(ChartOfAccount.class);
     }
 
-    public Flux<ChartOfAccount> getCOA3(String headCode) {
+    public Mono<List<ChartOfAccount>> getCOA3(String headCode) {
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-coa3")
                 .queryParam("headCode", headCode)
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().bodyToFlux(ChartOfAccount.class);
+                .retrieve()
+                .bodyToFlux(ChartOfAccount.class)
+                .collectList();
     }
 
     public Flux<Gl> getJournal(String vouNo) {

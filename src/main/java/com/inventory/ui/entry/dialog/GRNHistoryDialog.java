@@ -177,7 +177,6 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
         filter.setClose(chkClose.isSelected());
         filter.setBatchNo(txtBatchNo.getText());
         inventoryRepo.getGRNHistory(filter)
-                .collectList()
                 .subscribe((t) -> {
                     tableModel.setListDetail(t);
                     txtTotalRecord.setValue(t.size());
