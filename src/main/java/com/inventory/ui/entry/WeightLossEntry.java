@@ -57,7 +57,7 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
     @Autowired
     private UserRepo userRepo;
     private final WeightLossTableModel tableModel = new WeightLossTableModel();
-    private final WeightLossHistoryDialog dialog = new WeightLossHistoryDialog(Global.parentForm);
+    private WeightLossHistoryDialog dialog;
     private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
     private LocationAutoCompleter locationAutoCompleter;
     private StockAutoCompleter stockAutoCompleter;
@@ -258,15 +258,18 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
     }
 
     public void historyWeight() {
-        dialog.setInventoryApi(inventoryApi);
-        dialog.setInventoryRepo(inventoryRepo);
-        dialog.setUserRepo(userRepo);
-        dialog.setIconImage(searchIcon);
-        dialog.setObserver(this);
-        dialog.initMain();
-        dialog.setSize(Global.width - 100, Global.height - 100);
-        dialog.setLocationRelativeTo(null);
-        dialog.setVisible(true);
+        if (dialog == null) {
+            dialog = new WeightLossHistoryDialog(Global.parentForm);
+            dialog.setInventoryApi(inventoryApi);
+            dialog.setInventoryRepo(inventoryRepo);
+            dialog.setUserRepo(userRepo);
+            dialog.setIconImage(searchIcon);
+            dialog.setObserver(this);
+            dialog.initMain();
+            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setLocationRelativeTo(null);
+        }
+        dialog.search();
     }
 
     private void setVoucher(WeightLossHis his) {

@@ -6,6 +6,7 @@ package com.acc.common;
 
 import com.acc.model.ChartOfAccount;
 import java.util.List;
+import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
 import javax.swing.event.ListDataListener;
 
@@ -13,7 +14,7 @@ import javax.swing.event.ListDataListener;
  *
  * @author Lenovo
  */
-public class COAComboBoxModel implements ComboBoxModel<ChartOfAccount> {
+public class COAComboBoxModel extends AbstractListModel<ChartOfAccount> implements ComboBoxModel<ChartOfAccount> {
 
     private List<ChartOfAccount> data;
     private ChartOfAccount selected;
@@ -25,7 +26,6 @@ public class COAComboBoxModel implements ComboBoxModel<ChartOfAccount> {
     public void setData(List<ChartOfAccount> data) {
         this.data = data;
     }
-    
 
     public COAComboBoxModel(List<ChartOfAccount> data) {
         this.data = data;
@@ -33,7 +33,14 @@ public class COAComboBoxModel implements ComboBoxModel<ChartOfAccount> {
 
     @Override
     public void setSelectedItem(Object anItem) {
-        selected = (ChartOfAccount) anItem;
+        if (anItem == null) {
+            this.selected = null;
+            fireContentsChanged(this, -1, -1);
+        } else if (anItem instanceof ChartOfAccount coa) {
+            this.selected = coa;
+            fireContentsChanged(this, -1, -1);
+        }
+
     }
 
     @Override
@@ -53,7 +60,7 @@ public class COAComboBoxModel implements ComboBoxModel<ChartOfAccount> {
 
     @Override
     public void addListDataListener(ListDataListener l) {
-       
+
         // Not implemented
     }
 

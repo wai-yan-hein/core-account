@@ -353,7 +353,6 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             dialog.setLocationRelativeTo(null);
         }
         dialog.search();
-        dialog.setVisible(true);
     }
 
     public void setVoucher(GRN g) {

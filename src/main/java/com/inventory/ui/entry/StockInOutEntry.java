@@ -747,7 +747,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             dialog.setLocationRelativeTo(null);
         }
         dialog.search();
-        dialog.setVisible(true);
     }
 
     @Override

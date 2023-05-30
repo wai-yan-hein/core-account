@@ -188,10 +188,12 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
                     tableModel.setListDetail(t);
                     calAmount();
                     progess.setIndeterminate(false);
-                    log.info("trader test" ,t);
+                    log.info("trader test", t);
                 }, (e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
                     progess.setIndeterminate(false);
+                }, () -> {
+                    setVisible(true);
                 });
     }
 

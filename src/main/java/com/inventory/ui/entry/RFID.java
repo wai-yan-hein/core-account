@@ -357,7 +357,6 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             dialog.setLocationRelativeTo(null);
         }
         dialog.search();
-        dialog.setVisible(true);
     }
 
     public void setSaleVoucher(SaleHis sh) {

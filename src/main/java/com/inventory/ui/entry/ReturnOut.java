@@ -487,8 +487,6 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             dialog.setLocationRelativeTo(null);
         }
         dialog.search();
-        dialog.setVisible(true);
-
     }
 
     public void setVoucher(RetOutHis ro) {

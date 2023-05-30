@@ -555,7 +555,6 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
             dialog.setLocationRelativeTo(null);
         }
         dialog.search();
-        dialog.setVisible(true);
     }
 
     public void setSaleVoucher(SaleHis sh) {

@@ -53,7 +53,7 @@ public class Util1 {
     /**
      *
      */
-    public static final String DECIMAL_FORMAT = "###,##0.##;(###,##0.##)";
+    public static final String DECIMAL_FORMAT = "###,###.##;(###,###.##)";
     private static final DecimalFormat df2 = new DecimalFormat("0");
     public static final Gson gson = new GsonBuilder()
             .setDateFormat(DateFormat.FULL, DateFormat.FULL)
@@ -509,7 +509,7 @@ public class Util1 {
     public static String getString(Object obj) {
         return obj == null ? null : obj.toString().strip();
     }
-    
+
     public static boolean getBoolean(Object obj) {
         return obj != null && (obj.toString().equals("1") || obj.toString().equalsIgnoreCase("true"));
 

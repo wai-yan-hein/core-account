@@ -264,6 +264,8 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
             progress.setIndeterminate(false);
+        }, () -> {
+            setVisible(true);
         });
     }
 

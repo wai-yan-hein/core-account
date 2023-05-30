@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import javax.swing.JFrame;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -44,8 +45,9 @@ public class ServerThread extends Thread {
                         Global.dialog.toFront();
                     }
                     if (Global.parentForm != null) {
+                        Global.parentForm.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                        Global.parentForm.setVisible(true);
                         Global.parentForm.toFront();
-                        Global.parentForm.requestFocus();
                     }
                 });
             }

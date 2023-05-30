@@ -35,7 +35,6 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -53,7 +52,6 @@ import javax.swing.text.JTextComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -139,6 +137,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtPurUnit.addFocusListener(fa);
         txtWeightUnit.addFocusListener(fa);
         txtWt.addFocusListener(fa);
+        txtPurPrice.addFocusListener(fa);
         txtSaleUnit.addFocusListener(fa);
         txtSalePriceA.addFocusListener(fa);
         txtSalePriceB.addFocusListener(fa);
@@ -209,6 +208,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             relationAutoCompleter.setRelation(t);
         });
         txtWt.setText(Util1.getString(stock.getWeight()));
+        txtPurPrice.setText(Util1.getString(stock.getPurPrice()));
         txtSalePrice.setText(Util1.getString(stock.getSalePriceN()));
         txtSalePriceA.setText(Util1.getString(stock.getSalePriceA()));
         txtSalePriceB.setText((Util1.getString(stock.getSalePriceB())));
@@ -314,6 +314,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             if (unit != null) {
                 stock.setWeightUnit(unit.getKey().getUnitCode());
             }
+            stock.setPurPrice(Util1.getFloat(txtPurPrice.getText()));
             stock.setSalePriceN(Util1.getFloat(txtSalePrice.getText()));
             stock.setSalePriceA(Util1.getFloat(txtSalePriceA.getText()));
             stock.setSalePriceB(Util1.getFloat(txtSalePriceB.getText()));
@@ -375,6 +376,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         chkActive.setSelected(true);
         chkCal.setSelected(true);
         txtWt.setText(null);
+        txtPurPrice.setText(null);
         txtSalePriceE.setText(null);
         txtSalePrice.setText(null);
         txtSalePriceA.setText(null);
@@ -486,6 +488,8 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtWeightUnit = new javax.swing.JTextField();
         jLabel21 = new javax.swing.JLabel();
         txtWt = new javax.swing.JTextField();
+        jLabel13 = new javax.swing.JLabel();
+        txtPurPrice = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
         txtStockCode = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
@@ -885,6 +889,23 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             }
         });
 
+        jLabel13.setFont(Global.lableFont);
+        jLabel13.setText("Purchase Price");
+
+        txtPurPrice.setFont(Global.textFont);
+        txtPurPrice.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtPurPrice.setName("txtSalePrice"); // NOI18N
+        txtPurPrice.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtPurPriceFocusGained(evt);
+            }
+        });
+        txtPurPrice.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtPurPriceActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -898,7 +919,11 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(txtPurUnit, javax.swing.GroupLayout.DEFAULT_SIZE, 544, Short.MAX_VALUE)
+                        .addComponent(txtPurUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel13)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtPurPrice)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnUnit, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(txtWeightUnit)
@@ -912,7 +937,9 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel10)
                     .addComponent(txtPurUnit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnUnit))
+                    .addComponent(btnUnit)
+                    .addComponent(jLabel13)
+                    .addComponent(txtPurPrice, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel20)
@@ -1306,6 +1333,14 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         // TODO add your handling code here:
     }//GEN-LAST:event_txtWtFocusGained
 
+    private void txtPurPriceFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtPurPriceFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtPurPriceFocusGained
+
+    private void txtPurPriceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPurPriceActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtPurPriceActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddBrand;
@@ -1321,6 +1356,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
@@ -1348,6 +1384,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private javax.swing.JTextField txtBrand;
     private javax.swing.JTextField txtCat;
     private javax.swing.JTextField txtFilter;
+    private javax.swing.JTextField txtPurPrice;
     private javax.swing.JTextField txtPurUnit;
     private javax.swing.JTextField txtRelation;
     private javax.swing.JTextField txtSalePrice;
