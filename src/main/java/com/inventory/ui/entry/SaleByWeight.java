@@ -568,7 +568,6 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             dialog.setLocationRelativeTo(null);
         }
         dialog.search();
-        dialog.setVisible(true);
     }
 
     public void setSaleVoucher(SaleHis sh) {

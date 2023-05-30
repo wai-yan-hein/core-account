@@ -99,12 +99,14 @@ import java.util.TimerTask;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
 @Slf4j
+@Component
 public class ApplicationMainFrame extends javax.swing.JFrame implements SelectionObserver {
 
     @Autowired

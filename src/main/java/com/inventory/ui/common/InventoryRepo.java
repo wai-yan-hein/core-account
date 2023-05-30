@@ -26,6 +26,9 @@ import com.inventory.model.OrderHis;
 import com.inventory.model.OrderHisDetail;
 import com.inventory.model.OrderHisKey;
 import com.inventory.model.Pattern;
+import com.inventory.model.PaymentHis;
+import com.inventory.model.PaymentHisDetail;
+import com.inventory.model.PaymentHisKey;
 import com.inventory.model.PriceOption;
 import com.inventory.model.ProcessHis;
 import com.inventory.model.ProcessHisDetail;
@@ -1763,6 +1766,16 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<List<PaymentHis>> getPaymentHistory(FilterObject filter) {
+        return inventoryApi
+                .post()
+                .uri("/payment/getPaymentHistory")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToFlux(PaymentHis.class)
+                .collectList();
+    }
+
     public Mono<List<SaleHisDetail>> getSaleByBatch(String batchNo, boolean detail) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/sale/get-sale-by-batch")
@@ -1887,6 +1900,18 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<PaymentHis> savePayment(PaymentHis ph) {
+        return inventoryApi.post()
+                .uri("/payment/savePayment")
+                .body(Mono.just(ph), PaymentHis.class)
+                .retrieve()
+                .bodyToMono(PaymentHis.class)
+                .onErrorResume((e) -> {
+                    log.error("savePayment :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<List<AccSetting>> getAccSetting() {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getAccSetting")
@@ -1932,6 +1957,22 @@ public class InventoryRepo {
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<PaymentHisDetail>> getPaymentDetail(String vouNo, int deptId) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/payment/getPaymentDetail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", deptId)
+                .build())
+                .retrieve()
+                .bodyToFlux(PaymentHisDetail.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getPaymentDetail :" + e.getMessage());
                     return Mono.empty();
                 });
     }
@@ -2005,6 +2046,55 @@ public class InventoryRepo {
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
+                });
+    }
+
+    public Mono<List<PaymentHisDetail>> getCustomerBalance(String traderCode) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/payment/getCustomerBalance")
+                .queryParam("traderCode", traderCode)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(PaymentHisDetail.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getCustomerBalance :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<WeightLossHis>> getWeightLoss(FilterObject filter) {
+        return inventoryApi
+                .post()
+                .uri("/weight/get-weight-loss")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToFlux(WeightLossHis.class)
+                .collectList();
+    }
+
+    public Mono<Boolean> delete(PaymentHisKey key) {
+        return inventoryApi.post()
+                .uri("/payment/deletePayment")
+                .body(Mono.just(key), PaymentHisKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.just(false);
+                });
+    }
+
+    public Mono<Boolean> restore(PaymentHisKey key) {
+        return inventoryApi.post()
+                .uri("/payment/restorePayment")
+                .body(Mono.just(key), PaymentHisKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.just(false);
                 });
     }
 }

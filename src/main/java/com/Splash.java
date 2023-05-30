@@ -6,6 +6,7 @@ package com;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.geom.RoundRectangle2D;
 
 /**
@@ -16,9 +17,11 @@ public class Splash extends javax.swing.JFrame {
 
     /**
      * Creates new form Splash
+     * @param image
      */
-    public Splash() {
+    public Splash(Image image) {
         initComponents();
+        setIconImage(image);
     }
 
     @Override

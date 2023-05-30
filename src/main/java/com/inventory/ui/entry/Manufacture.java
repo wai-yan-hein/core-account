@@ -436,7 +436,6 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             dialog.setLocationRelativeTo(null);
         }
         dialog.searchProcess();
-        dialog.setVisible(true);
     }
 
     private void getPattern() {

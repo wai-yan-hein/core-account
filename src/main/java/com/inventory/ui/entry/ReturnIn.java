@@ -455,7 +455,6 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             dialog.setLocationRelativeTo(null);
         }
         dialog.search();
-        dialog.setVisible(true);
     }
     
     public void setVoucher(RetInHis retin) {

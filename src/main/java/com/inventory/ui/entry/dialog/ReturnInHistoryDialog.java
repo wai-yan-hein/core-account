@@ -226,6 +226,8 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
                 }, (e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
                     progress.setIndeterminate(false);
+                }, () -> {
+                    setVisible(true);
                 });
     }
 
@@ -311,7 +313,6 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         btnSearch = new javax.swing.JButton();
         progress = new javax.swing.JProgressBar();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Return In Voucher Search");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));

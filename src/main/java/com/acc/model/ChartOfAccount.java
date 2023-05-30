@@ -11,12 +11,14 @@ import jakarta.persistence.Transient;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  *
  * @author dell
  */
 @Data
+@EqualsAndHashCode
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "chart_of_account")

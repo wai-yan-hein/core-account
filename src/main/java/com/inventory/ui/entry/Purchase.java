@@ -283,6 +283,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 expenseTableModel.addObject(p);
             }
             expenseTableModel.addNewRow();
+            expProgress.setIndeterminate(false);
         });
 
     }
@@ -614,42 +615,43 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         List<PurHisDetail> list = purTableModel.getListDetail();
         calQty(list);
         calComission();
-        float totalVouBalance;
-        float totalAmount = Util1.getFloat(list.stream().mapToDouble(sd -> Util1.getFloat(sd.getAmount())).sum());
+        double totalVouBalance;
+        double ttl = list.stream().mapToDouble((obj) -> Util1.getDouble(obj.getAmount())).sum();
+        double totalAmount = Math.round(ttl);
         txtVouTotal.setValue(totalAmount);
         //cal discAmt
         float discp = Util1.getFloat(txtVouDiscP.getValue());
         if (discp > 0) {
-            float discountAmt = (totalAmount * (discp / 100));
+            double discountAmt = (totalAmount * (discp / 100));
             txtVouDiscount.setValue(Util1.getFloat(discountAmt));
         }
         //cal Commission
         float comp = Util1.getFloat(txtComPercent.getValue());
         if (comp > 0) {
-            float amt = (totalAmount * (comp / 100));
+            double amt = (totalAmount * (comp / 100));
             txtComAmt.setValue(amt);
         }
 
         //calculate taxAmt
-        float taxp = Util1.getFloat(txtVouTaxP.getValue());
-        float taxAmt = Util1.getFloat(txtTax.getValue());
+        double taxp = Util1.getFloat(txtVouTaxP.getValue());
+        double taxAmt = Util1.getFloat(txtTax.getValue());
         if (taxp > 0) {
-            float afterDiscountAmt = totalAmount - Util1.getFloat(txtVouDiscount.getValue());
-            float totalTax = (afterDiscountAmt * taxp) / 100;
+            double afterDiscountAmt = totalAmount - Util1.getDouble(txtVouDiscount.getValue());
+            double totalTax = (afterDiscountAmt * taxp) / 100;
             txtTax.setValue(Util1.getFloat(totalTax));
         } else if (taxAmt > 0) {
-            float afterDiscountAmt = totalAmount - Util1.getFloat(txtVouDiscount.getValue());
+            double afterDiscountAmt = totalAmount - Util1.getDouble(txtVouDiscount.getValue());
             taxp = (taxAmt / afterDiscountAmt) * 100;
             txtVouTaxP.setValue(Util1.getFloat(taxp));
         }
-        float ttlExp = Util1.getFloat(txtExpense.getValue());
+        double ttlExp = Util1.getDouble(txtExpense.getValue());
         txtGrandTotal.setValue(totalAmount
-                + Util1.getFloat(txtTax.getValue())
-                - Util1.getFloat(txtVouDiscount.getValue())
+                + Util1.getDouble(txtTax.getValue())
+                - Util1.getDouble(txtVouDiscount.getValue())
                 - ttlExp);
-        float grandTotal = Util1.getFloat(txtGrandTotal.getValue());
+        double grandTotal = Util1.getDouble(txtGrandTotal.getValue());
 
-        float paid = Util1.getFloat(txtVouPaid.getText());
+        double paid = Util1.getDouble(txtVouPaid.getValue());
         if (!partial) {
             if (paid == 0 || paid != grandTotal) {
                 if (chkPaid.isSelected()) {
@@ -660,9 +662,9 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             }
         }
 
-        paid = Util1.getFloat(txtVouPaid.getText());
+        paid = Util1.getDouble(txtVouPaid.getValue());
         totalVouBalance = grandTotal - paid;
-        txtVouBalance.setValue(Util1.getFloat(totalVouBalance));
+        txtVouBalance.setValue(totalVouBalance);
     }
 
     public void historyPur() {
@@ -678,7 +680,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             dialog.setLocationRelativeTo(null);
         }
         dialog.search();
-        dialog.setVisible(true);
     }
 
     public void setVoucher(PurHis pur) {
@@ -781,28 +782,33 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     private void searchExpense(String vouNo) {
-        expProgress.setIndeterminate(true);
-        inventoryApi.get()
-                .uri(builder -> builder.path("/purExpense/get-pur-expense")
-                .queryParam("vouNo", vouNo)
-                .queryParam("compCode", Global.compCode)
-                .build())
-                .retrieve()
-                .bodyToFlux(PurExpense.class)
-                .collectList()
-                .subscribe((t) -> {
-                    expenseTableModel.setListDetail(t);
-                    expenseTableModel.addNewRow();
-                    expProgress.setIndeterminate(false);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                    expProgress.setIndeterminate(false);
-                });
+        if (panelExpense.isVisible()) {
+            expProgress.setIndeterminate(true);
+            inventoryApi.get()
+                    .uri(builder -> builder.path("/purExpense/get-pur-expense")
+                    .queryParam("vouNo", vouNo)
+                    .queryParam("compCode", Global.compCode)
+                    .build())
+                    .retrieve()
+                    .bodyToFlux(PurExpense.class)
+                    .collectList()
+                    .subscribe((t) -> {
+                        if (t.isEmpty()) {
+                            getExpense();
+                        } else {
+                            expenseTableModel.setListDetail(t);
+                            expenseTableModel.addNewRow();
+                            expProgress.setIndeterminate(false);
+                        }
+                    }, (e) -> {
+                        JOptionPane.showMessageDialog(this, e.getMessage());
+                        expProgress.setIndeterminate(false);
+                    });
+        }
     }
 
     private void searchGRN(String batchNo, Integer deptId) {
-        boolean status = Util1.getBoolean(ProUtil.getProperty(ProUtil.P_SHOW_GRN));
-        if (status) {
+        if (panelGRN.isVisible()) {
             grnTableModel.clear();
             if (!batchNo.isEmpty()) {
                 grnProgress.setIndeterminate(true);

@@ -192,8 +192,6 @@ public class PatternTableModel extends AbstractTableModel {
                     case 5 -> {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             p.setPrice(Util1.getFloat(value));
-                            table.setColumnSelectionInterval(0, 0);
-                            table.setRowSelectionInterval(row + 1, row + 1);
                         } else {
                             JOptionPane.showMessageDialog(panel, String.format("Invalid %s", value));
                         }

@@ -48,7 +48,7 @@ public class CoreAccountApplication {
         applayTheme();
         loadProperty();
         //splash
-        Splash splash = new Splash();
+        Splash splash = new Splash(appIcon);
         splash.setLocationRelativeTo(null);
         splash.setVisible(true);
         //create context
@@ -63,7 +63,7 @@ public class CoreAccountApplication {
         LoginDialog lg = context.getBean(LoginDialog.class);
         URL imgUrl = CoreAccountApplication.class.getResource("/images/male_user_16px.png");
         lg.setIconImage(new ImageIcon(imgUrl).getImage());
-        lg.setIconImage(appIcon);
+        lg.setAppIcon(appIcon);
         lg.checkMachineRegister();
     }
 

@@ -40,6 +40,7 @@ public class FilterObject {
     private boolean orderByBatch;
     private String projectNo;
     private String curCode;
+    private String account;
     public FilterObject(String compCode, Integer deptId) {
         this.compCode = compCode;
         this.deptId = deptId;

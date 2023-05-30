@@ -184,12 +184,12 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
     private Integer getDepId() {
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
-    
-    private String getProjectNo(){
-        return projectAutoCompleter==null? "-": projectAutoCompleter.getProject().getKey().getProjectNo();
+
+    private String getProjectNo() {
+        return projectAutoCompleter == null ? "-" : projectAutoCompleter.getProject().getKey().getProjectNo();
     }
-    
-     private String getCurCode() {
+
+    private String getCurCode() {
         if (currAutoCompleter == null || currAutoCompleter.getCurrency() == null) {
             return Global.currency;
         }
@@ -224,6 +224,8 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
                 }, (e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
                     progress.setIndeterminate(false);
+                }, () -> {
+                    setVisible(true);
                 });
     }
 
@@ -309,7 +311,6 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
         txtTotalAmt = new javax.swing.JFormattedTextField();
         progress = new javax.swing.JProgressBar();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Return Out Voucher Search");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));

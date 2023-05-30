@@ -25,7 +25,6 @@ import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.StockIOVouSearchTableModel;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.time.Duration;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -33,9 +32,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -198,6 +195,8 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
                 }, (e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
                     progess.setIndeterminate(false);
+                }, () -> {
+                    setVisible(true);
                 });
     }
 

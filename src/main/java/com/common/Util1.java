@@ -53,7 +53,7 @@ public class Util1 {
     /**
      *
      */
-    public static final String DECIMAL_FORMAT = "###,##0.##;(###,##0.##)";
+    public static final String DECIMAL_FORMAT = "###,###.##;(###,###.##)";
     private static final DecimalFormat df2 = new DecimalFormat("0");
     public static String SYNC_DATE;
     public static final Gson gson = new GsonBuilder()

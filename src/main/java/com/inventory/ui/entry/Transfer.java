@@ -616,7 +616,6 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             dialog.setLocationRelativeTo(null);
         }
         dialog.search();
-        dialog.setVisible(true);
     }
 
     @Override

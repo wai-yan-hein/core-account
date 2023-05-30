@@ -78,6 +78,10 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
         initFocusListener();
     }
 
+    public void focus() {
+        txtLoginName.requestFocus();
+    }
+
     public void checkMachineRegister() {
         Global.dialog = this;
         Global.machineName = Util1.getComputerName();
@@ -115,6 +119,8 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
                 Global.macId = macId;
                 setLocationRelativeTo(null);
                 setVisible(true);
+                toFront();
+                requestFocus();
             }
         }, (e) -> {
             JOptionPane.showMessageDialog(this, "Core User Api is not running.", "Connection Error", JOptionPane.ERROR_MESSAGE);
