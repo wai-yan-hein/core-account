@@ -5,12 +5,22 @@
 package com;
 
 import com.acc.model.BusinessType;
+import com.acc.model.COAKey;
+import com.acc.model.ChartOfAccount;
+import com.acc.model.DepartmentA;
+import com.acc.model.DepartmentAKey;
+import com.acc.model.Gl;
+import com.acc.model.TraderA;
+import com.acc.model.TraderAKey;
 import com.common.Global;
 import com.h2.service.BrandService;
 import com.h2.service.BusinessTypeService;
+import com.h2.service.COAService;
 import com.h2.service.CategoryService;
 import com.h2.service.CompanyInfoService;
 import com.h2.service.CurrencyService;
+import com.h2.service.DepartmentUserService;
+import com.h2.service.DepartmentAccService;
 import com.h2.service.ExchangeRateService;
 import com.h2.service.LocationService;
 import com.h2.service.MacPropertyService;
@@ -26,8 +36,11 @@ import com.h2.service.StockService;
 import com.h2.service.StockTypeService;
 import com.h2.service.StockUnitService;
 import com.h2.service.SystemPropertyService;
+import com.h2.service.TraderAService;
 import com.h2.service.TraderInvService;
 import com.h2.service.UserService;
+import com.h2.service.VRoleCompanyService;
+import com.h2.service.VRoleMenuService;
 import com.h2.service.VouStatusService;
 import com.inventory.model.AppRole;
 import com.inventory.model.AppUser;
@@ -54,19 +67,21 @@ import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
 import com.user.model.CompanyInfo;
 import com.user.model.Currency;
+import com.user.model.DepartmentUser;
 import com.user.model.ExchangeRate;
 import com.user.model.MachineProperty;
 import com.user.model.Menu;
 import com.user.model.PrivilegeCompany;
 import com.user.model.Project;
+import com.user.model.ProjectKey;
 import com.user.model.RoleProperty;
 import com.user.model.SysProperty;
 import com.user.model.VRoleCompany;
 import java.util.HashMap;
 import java.util.List;
-import org.apache.commons.collections4.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -122,6 +137,18 @@ public class H2Repo {
     private RolePropertyService rolePropertyService;
     @Autowired
     private MacPropertyService macPropertyService;
+    @Autowired
+    private DepartmentAccService departmentAccService;
+    @Autowired
+    private TraderAService traderAccService;
+    @Autowired
+    private COAService coaService;  
+    @Autowired
+    private VRoleCompanyService vRoleCompanyService;
+    @Autowired
+    private VRoleMenuService vRoleMenuService;
+    @Autowired
+    private DepartmentUserService deptUserService;
 
     public Mono<List<Location>> getLocation() {
         return Mono.justOrEmpty(locationService.findAll(Global.compCode));
@@ -212,13 +239,57 @@ public class H2Repo {
     }
 
     public Mono<List<VRoleCompany>> getPrivilegeCompany(String roleCode) {
-        return Mono.justOrEmpty(pcService.getPrivilegeCompany(roleCode));
+        return Mono.justOrEmpty(vRoleCompanyService.getPrivilegeCompany(roleCode));
     }
 
-    public Mono<List<VRoleMenu>> getRoleMenuTree(String roleCode, String compCode) {
-        List<VRoleMenu> menus = menuService.getRoleMenuTree(roleCode, compCode);
+    public Mono<List<VRoleMenu>> getPRoleMenu(String roleCode, String compCode) {
+        List<VRoleMenu> menus = getRoleMenuTree(roleCode, compCode);
         menus.removeIf(m -> !m.isAllow());
         return Mono.justOrEmpty(menus);
+    }
+
+    private List<VRoleMenu> getRoleMenuTree(String roleCode, String compCode) {
+        List<VRoleMenu> roles = vRoleMenuService.getMenuChild(roleCode, "1", compCode);
+        if (!roles.isEmpty()) {
+            for (VRoleMenu role : roles) {
+                getRoleMenuChild(role);
+            }
+        }
+        return roles;
+    }
+
+    private void getRoleMenuChild(VRoleMenu parent) {
+        List<VRoleMenu> roles = vRoleMenuService.getMenuChild(parent.getRoleCode(), parent.getMenuCode(), parent.getCompCode());
+        parent.setChild(roles);
+        if (!roles.isEmpty()) {
+            for (VRoleMenu role : roles) {
+                getRoleMenuChild(role);
+            }
+        }
+    }
+
+    public Mono<List<VRoleMenu>> getRoleMenu(String roleCode, String compCode) {
+        List<VRoleMenu> roles = vRoleMenuService.getMenu(roleCode, "1", compCode);
+        if (!roles.isEmpty()) {
+            for (VRoleMenu role : roles) {
+                getMenuChild(role);
+            }
+        }
+        return Mono.justOrEmpty(roles);
+    }
+
+    private void getMenuChild(VRoleMenu parent) {
+        List<VRoleMenu> roles = vRoleMenuService.getMenu(parent.getRoleCode(), parent.getMenuCode(), parent.getCompCode());
+        parent.setChild(roles);
+        if (!roles.isEmpty()) {
+            for (VRoleMenu role : roles) {
+                getMenuChild(role);
+            }
+        }
+    }
+
+    public Mono<List<VRoleMenu>> getReport(String roleCode, String menuClass, String compCode) {
+        return Mono.justOrEmpty(vRoleMenuService.getReport(roleCode, menuClass, compCode));
     }
 
     public HashMap<String, String> getProperty(String compCode, String roleCode, Integer macId) {
@@ -268,7 +339,7 @@ public class H2Repo {
     public Mono<List<PrivilegeCompany>> searchCompany(String roleCode) {
         return Mono.justOrEmpty(pcService.getPC(roleCode));
     }
-    
+
     public List<RoleProperty> getRoleProperty(String roleCode) {
         return rolePropertyService.getRoleProperty(roleCode);
     }
@@ -276,5 +347,63 @@ public class H2Repo {
     public List<MachineProperty> getMacProperty(Integer macId) {
         return macPropertyService.getMacProperty(macId);
     }
+    
+    public Mono<List<DepartmentA>> getDepartmentAccount() {
+        return Mono.justOrEmpty(departmentAccService.findAll(Global.compCode));
+    }
 
+    public Mono<CompanyInfo> findCompany(String compCode) {
+        return Mono.justOrEmpty(companyInfoService.findById(compCode));
+    }
+
+    public Mono<AppRole> finRole(String roleCode) {
+        return Mono.justOrEmpty(roleService.findById(roleCode));
+    }
+
+    public Mono<DepartmentUser> findDepartment(Integer deptId) {
+        return Mono.justOrEmpty(deptUserService.findById(deptId));
+    }
+
+    public Mono<List<DepartmentUser>> getDeparment() {
+        return Mono.justOrEmpty(deptUserService.findAll());
+    }
+
+    public Mono<BusinessType> find(Integer id) {
+        return Mono.justOrEmpty(businessTypeService.findById(id));
+    }
+
+    public Mono<List<Menu>> getMenuParent(String compCode) {
+        return Mono.justOrEmpty(menuService.getMenuDynamic(compCode));
+    }
+
+    public Mono<Project> find(ProjectKey key) {
+        return Mono.justOrEmpty(projectService.findById(key));
+    }
+
+    public Mono<List<Project>> searchProjectByCode(String code, String compCode) {
+        return Mono.justOrEmpty(projectService.search(code, compCode));
+    }
+    public Mono<DepartmentA> find(DepartmentAKey key) {
+        return Mono.justOrEmpty(departmentAccService.find(key));
+    }
+    
+    public  Flux<TraderA> getTraderAccount() {
+        return Flux.fromIterable(traderAccService.findAll(Global.compCode));
+    }
+
+    public Flux<TraderA> findTraderAccount(String str) {
+        return Flux.fromIterable(traderAccService.getTrader(str,Global.compCode));
+    }
+    
+    public Flux<ChartOfAccount> getChartofAccount() {
+        return Flux.fromIterable(coaService.findAll(Global.compCode));
+    }
+
+    public Mono<ChartOfAccount> find(COAKey key) {
+        return Mono.justOrEmpty(coaService.findById(key));
+    }
+    
+//    public Mono<Gl> save(Gl sh) {
+//        return Mono.justOrEmpty(saleHisService.save(sh));
+//    }
 }

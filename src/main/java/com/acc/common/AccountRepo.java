@@ -4,6 +4,7 @@
  */
 package com.acc.common;
 
+import com.H2Repo;
 import com.acc.model.COAKey;
 import com.acc.model.COATemplate;
 import com.acc.model.COATemplateKey;
@@ -29,7 +30,6 @@ import com.common.FilterObject;
 import com.common.Global;
 import com.common.ReturnObject;
 import com.common.Util1;
-import com.inventory.model.StockBrand;
 import com.user.model.YearEnd;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +50,10 @@ public class AccountRepo {
 
     @Autowired
     private WebClient accountApi;
+    @Autowired
+    private boolean localDatabase;
+    @Autowired
+    private H2Repo h2Repo;
 
     public Mono<DepartmentA> getDefaultDepartment() {
         String deptCode = Global.hmRoleProperty.get("default.department");
@@ -65,7 +69,9 @@ public class AccountRepo {
         DepartmentAKey key = new DepartmentAKey();
         key.setDeptCode(Util1.isNull(deptCode, "-"));
         key.setCompCode(Global.compCode);
-        
+        if (localDatabase) {
+            return h2Repo.find(key);
+        }
         return accountApi.post()
                 .uri("/account/find-department")
                 .body(Mono.just(key), DepartmentAKey.class)
@@ -74,6 +80,9 @@ public class AccountRepo {
     }
 
     public Mono<List<DepartmentA>> getDepartment() {
+        if (localDatabase) {
+            return h2Repo.getDepartmentAccount();
+        }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-department")
                 .queryParam("compCode", Global.compCode)
@@ -83,14 +92,21 @@ public class AccountRepo {
     }
 
     public Flux<TraderA> getTrader() {
+        if (localDatabase) {
+            return h2Repo.getTraderAccount();
+        }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-trader")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().bodyToFlux(TraderA.class);
+                .retrieve()
+                .bodyToFlux(TraderA.class);
     }
 
     public Flux<TraderA> getTrader(String text) {
+         if (localDatabase) {
+            return h2Repo.findTraderAccount(text);
+        }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/search-trader")
                 .queryParam("compCode", Global.compCode)
@@ -100,6 +116,9 @@ public class AccountRepo {
     }
 
     public Flux<ChartOfAccount> getChartOfAccount() {
+        if (localDatabase) {
+           return h2Repo.getChartofAccount();
+        }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-coa")
                 .queryParam("compCode", Global.compCode)
@@ -211,7 +230,7 @@ public class AccountRepo {
                 .retrieve()
                 .bodyToMono(ChartOfAccount.class);
     }
-    
+
     public Mono<List<ChartOfAccount>> saveCOAFromTemplate(Integer busId, String compCode) {
         return accountApi.get()
                 .uri(builder -> builder.path("/account/save-coa-from-template")
@@ -222,7 +241,7 @@ public class AccountRepo {
                 .bodyToFlux(ChartOfAccount.class)
                 .collectList();
     }
-    
+
     public Mono<List<ChartOfAccount>> getUpdateChartOfAccountByDate(String updatedDate) {
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-COAByDate")
@@ -232,7 +251,7 @@ public class AccountRepo {
                 .bodyToFlux(ChartOfAccount.class)
                 .collectList();
     }
-    
+
     public Mono<List<TraderA>> getUpdateTraderByDate(String updatedDate) {
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-TraderByDate")
@@ -242,7 +261,7 @@ public class AccountRepo {
                 .bodyToFlux(TraderA.class)
                 .collectList();
     }
-    
+
     public Mono<List<DepartmentA>> getUpdateDepartmentAByDate(String updatedDate) {
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-DepartmentByDate")
@@ -252,7 +271,7 @@ public class AccountRepo {
                 .bodyToFlux(DepartmentA.class)
                 .collectList();
     }
-    
+
     public Mono<List<ChartOfAccount>> getUpdateCOAOpeningByDate(String updatedDate) {
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-COAOpeningByDate")
@@ -326,7 +345,7 @@ public class AccountRepo {
                 .build())
                 .retrieve().bodyToFlux(Gl.class);
     }
-    
+
     public Mono<COATemplate> findCOATemplate(COATemplateKey key) {
         return accountApi.post()
                 .uri("/template/find-coa-template")
@@ -340,6 +359,9 @@ public class AccountRepo {
         COAKey key = new COAKey();
         key.setCoaCode(coaCode);
         key.setCompCode(Global.compCode);
+        if (localDatabase) {
+            return h2Repo.find(key);
+        }
         return accountApi.post()
                 .uri("/account/find-coa")
                 .body(Mono.just(key), COAKey.class)

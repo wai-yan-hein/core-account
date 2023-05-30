@@ -5,9 +5,6 @@
  */
 package com.user.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import java.util.Date;
 import lombok.Data;
 

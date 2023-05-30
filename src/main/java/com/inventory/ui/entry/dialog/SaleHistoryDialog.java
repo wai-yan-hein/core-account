@@ -267,6 +267,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         }, () -> {
             setVisible(true);
         });
+        
     }
 
     private void calAmount() {

@@ -4,6 +4,9 @@
  */
 package com.acc.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import java.io.Serializable;
 import lombok.Data;
 
 /**
@@ -11,9 +14,13 @@ import lombok.Data;
  * @author DELL
  */
 @Data
-public class GlKey {
+@Embeddable
+public class GlKey implements Serializable{
 
+    @Column(name = "gl_code")
     private String glCode;
+    @Column(name = "comp_code")
     private String compCode;
+    @Column(name = "dept_id")
     private Integer deptId;
 }

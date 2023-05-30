@@ -35,5 +35,10 @@ public class TraderAServiceImpl implements TraderAService {
     public String getMaxDate() {
         return dao.getMaxDate();
     }
+    
+    @Override
+    public List<TraderA> getTrader(String text, String compCode) {
+        return dao.getTrader(text,compCode);
+    }
 
 }

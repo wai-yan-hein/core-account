@@ -5,7 +5,6 @@
 package com.h2.service;
 
 import com.h2.dao.MenuDao;
-import com.inventory.model.VRoleMenu;
 import com.user.model.Menu;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,13 +33,13 @@ public class MenuServiceimpl implements MenuService {
     }
 
     @Override
-    public List<VRoleMenu> getRoleMenuTree(String roleCode, String compCode) {
-        return dao.getRoleMenuTree(roleCode, compCode);
+    public List<Menu> getMenuTree(String compCode) {
+        return dao.getMenuTree(compCode);
     }
 
     @Override
-    public List<Menu> getMenuTree(String compCode) {
-        return dao.getMenuTree(compCode);
+    public List<Menu> getMenuDynamic(String compCode) {
+        return dao.getMenuDynamic(compCode);
     }
 
 }

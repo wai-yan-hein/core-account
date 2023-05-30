@@ -34,11 +34,6 @@ public class PrivilegeCompanyServiceImpl implements PrivilegeCompanyService {
     }
 
     @Override
-    public List<VRoleCompany> getPrivilegeCompany(String roleCode) {
-        return dao.getPrivilegeCompany(roleCode);
-    }
-
-    @Override
     public List<PrivilegeCompany> getPC(String roleCode) {
         return dao.getPC(roleCode);
     }

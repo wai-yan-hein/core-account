@@ -4,7 +4,6 @@
  */
 package com.h2.dao;
 
-import com.inventory.model.VRoleMenu;
 import com.user.model.Menu;
 import java.util.List;
 
@@ -17,8 +16,8 @@ public interface MenuDao {
     Menu save(Menu menu);
 
     String getMaxDate();
-    
-    List<VRoleMenu> getRoleMenuTree(String roleCode, String compCode);
-    
+
     List<Menu> getMenuTree(String compCode);
+    
+    List<Menu> getMenuDynamic(String compCode);
 }

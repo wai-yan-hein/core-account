@@ -75,6 +75,7 @@ import com.inventory.model.VouStatusKey;
 import com.inventory.model.WeightLossHis;
 import com.inventory.model.WeightLossHisKey;
 import java.util.List;
+import javax.swing.JOptionPane;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -1808,7 +1809,14 @@ public class InventoryRepo {
                 .bodyToMono(SaleHis.class)
                 .onErrorResume(e -> {
                     if (localDatabase) {
-                        return h2Repo.save(sh);
+                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
+                                "Can't save voucher to cloud. Do you want save local?",
+                                "Offline", JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                        if (status == JOptionPane.YES_OPTION) {
+                            return h2Repo.save(sh);
+                        }
+                        return Mono.error(e);
                     }
                     return Mono.error(e);
                 });

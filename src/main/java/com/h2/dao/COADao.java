@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.h2.dao;
+import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import java.util.List;
 
@@ -18,4 +19,5 @@ public interface COADao {
 
     List<ChartOfAccount> findAll(String compCode);
 
+    ChartOfAccount findById(COAKey key);
 }

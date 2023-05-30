@@ -207,6 +207,9 @@ public class UserRepo {
     }
 
     public Mono<CompanyInfo> findCompany(String compCode) {
+        if (localdatabase) {
+            return h2Repo.findCompany(compCode);
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/findCompany")
                 .queryParam("compCode", compCode)
@@ -215,6 +218,9 @@ public class UserRepo {
     }
 
     public Mono<AppRole> finRole(String roleCode) {
+        if (localdatabase) {
+            return h2Repo.finRole(roleCode);
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/find-role")
                 .queryParam("roleCode", roleCode)
@@ -223,6 +229,9 @@ public class UserRepo {
     }
 
     public Mono<DepartmentUser> findDepartment(Integer deptId) {
+        if (localdatabase) {
+            return h2Repo.findDepartment(deptId);
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/find-department")
                 .queryParam("deptId", deptId)
@@ -343,6 +352,9 @@ public class UserRepo {
     }
 
     public Mono<List<DepartmentUser>> getDeparment() {
+        if (localdatabase) {
+            return h2Repo.getDeparment();
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-department")
                 .build())
@@ -350,6 +362,9 @@ public class UserRepo {
     }
 
     public Mono<List<VRoleMenu>> getReport(String menuClass) {
+        if (localdatabase) {
+            return h2Repo.getReport(Global.roleCode, menuClass, Global.compCode);
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-report")
                 .queryParam("roleCode", Global.roleCode)
@@ -380,6 +395,9 @@ public class UserRepo {
     }
 
     public Mono<BusinessType> find(Integer id) {
+        if (localdatabase) {
+            return h2Repo.find(id);
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/findBusinessType")
                 .queryParam("id", id)
@@ -426,6 +444,9 @@ public class UserRepo {
     }
 
     public Mono<List<Menu>> getMenuParent() {
+        if (localdatabase) {
+            return h2Repo.getMenuParent(Global.compCode);
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-menu-parent")
                 .queryParam("compCode", Global.compCode)
@@ -467,6 +488,9 @@ public class UserRepo {
     }
 
     public Mono<Project> find(ProjectKey key) {
+        if (localdatabase) {
+            return h2Repo.find(key);
+        }
         return userApi.post()
                 .uri("/user/findProject")
                 .body(Mono.just(key), ProjectKey.class)
@@ -491,6 +515,9 @@ public class UserRepo {
     }
 
     public Mono<List<Project>> searchProjectByCode(String code) {
+        if (localdatabase) {
+            return h2Repo.searchProjectByCode(code, Global.compCode);
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/searchProjectByCode")
                 .queryParam("compCode", Global.compCode)
@@ -709,7 +736,7 @@ public class UserRepo {
                 .collectList()
                 .onErrorResume((e) -> {
                     if (localdatabase) {
-                        return h2Repo.getRoleMenuTree(roleCode, Global.compCode);
+                        return h2Repo.getPRoleMenu(roleCode, Global.compCode);
                     }
                     return Mono.error(e);
                 });
@@ -717,7 +744,7 @@ public class UserRepo {
 
     public Mono<List<VRoleMenu>> getRoleMenuTree(String roleCode) {
         if (localdatabase) {
-            return h2Repo.getRoleMenuTree(roleCode, Global.compCode);
+            return h2Repo.getRoleMenu(roleCode, Global.compCode);
         }
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-role-menu-tree")

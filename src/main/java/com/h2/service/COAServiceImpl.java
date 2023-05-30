@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.h2.service;
+import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import com.h2.dao.COADao;
 import java.util.List;
@@ -34,6 +35,11 @@ public class COAServiceImpl implements COAService {
     @Override
     public String getMaxDate() {
         return dao.getMaxDate();
+    }
+    
+    @Override
+    public ChartOfAccount findById(COAKey key) {
+        return dao.findById(key);
     }
 
 }
