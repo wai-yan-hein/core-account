@@ -293,11 +293,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             progress.setIndeterminate(true);
             ri.setListRD(roTableModel.getListDetail());
             ri.setListDel(roTableModel.getDelList());
-            inventoryApi.post()
-                    .uri("/retout/save-retout")
-                    .body(Mono.just(ri), RetInHis.class)
-                    .retrieve()
-                    .bodyToMono(RetInHis.class)
+            inventoryRepo.save(ri)
                     .subscribe((t) -> {
                         progress.setIndeterminate(false);
                         clear();
@@ -306,6 +302,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                         }
                     }, (e) -> {
                         JOptionPane.showMessageDialog(this, e.getMessage());
+                        progress.setIndeterminate(false);
                     });
         }
     }
@@ -381,7 +378,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             ri.setDeleted(Util1.getNullTo(ri.getDeleted()));
             ri.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             Project p = projectAutoCompleter.getProject();
-            ri.setProjectNo(p==null?null:p.getKey().getProjectNo());
+            ri.setProjectNo(p == null ? null : p.getKey().getProjectNo());
             ri.setVouDate(vouDate.getDate());
             ri.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
             ri.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
@@ -506,7 +503,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             userRepo.findCurrency(ri.getCurCode()).subscribe((t) -> {
                 currAutoCompleter.setCurrency(t);
             });
-            if(ro.getProjectNo() !=null) {
+            if (ro.getProjectNo() != null) {
                 userRepo.find(new ProjectKey(ro.getProjectNo(), Global.compCode)).subscribe(t -> {
                     projectAutoCompleter.setProject(t);
                 }, (err) -> {

@@ -4,6 +4,7 @@
  */
 package com.inventory.model;
 
+import java.io.Serializable;
 import lombok.Data;
 
 /**
@@ -11,7 +12,7 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
-public class PurExpenseKey {
+public class PurExpenseKey implements Serializable{
     
     private String expenseCode;
     private String vouNo;

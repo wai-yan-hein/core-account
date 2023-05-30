@@ -8,6 +8,7 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.common.Util1;
 import com.inventory.model.Trader;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.TraderTableModel;
@@ -335,7 +336,7 @@ public class TraderAutoCompleter implements KeyListener {
      */
     @Override
     public void keyReleased(KeyEvent e) {
-        String str = textComp.getText();
+        String str = Util1.cleanString(textComp.getText());
         if (!str.isEmpty()) {
             if (!containKey(e)) {
                 inventoryRepo.getTraderList(str, traderType).subscribe((t) -> {

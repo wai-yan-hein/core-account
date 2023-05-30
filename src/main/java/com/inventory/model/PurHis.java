@@ -4,57 +4,101 @@
  */
 package com.inventory.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
-import lombok.NonNull;
 
 /**
  *
  * @author wai yan
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
+@Entity
+@Table(name = "pur_his")
 public class PurHis implements java.io.Serializable {
 
-    @NonNull
+    @EmbeddedId
     private PurHisKey key;
+    @Column(name = "trader_code")
     private String traderCode;
-    @NonNull
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "vou_date")
     private Date vouDate;
+    @Temporal(TemporalType.DATE)
+    @Column(name = "due_date")
     private Date dueDate;
-    @NonNull
+    @Column(name = "loc_code")
     private String locCode;
+    @Column(name = "deleted")
     private Boolean deleted;
-    @NonNull
+    @Column(name = "vou_total")
     private Float vouTotal;
+    @Column(name = "paid")
     private Float paid;
+    @Column(name = "discount")
     private Float discount;
+    @Column(name = "balance")
     private Float balance;
-    @NonNull
+    @Column(name = "created_by")
     private String createdBy;
-    @NonNull
+    @Column(name = "created_date")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date createdDate;
+    @Column(name = "updated_by")
     private String updatedBy;
+    @Column(name = "updated_date")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedDate;
+    @Column(name = "remark")
     private String remark;
+    @Column(name = "session_id")
     private Integer session;
-    @NonNull
+    @Column(name = "cur_code")
     private String curCode;
+    @Column(name = "disc_p")
     private Float discP;
+    @Column(name = "tax_p")
     private Float taxP;
+    @Column(name = "tax_amt")
     private Float taxAmt;
+    @Column(name = "reference")
     private String reference;
+    @Column(name = "intg_upd_status")
+    private String intgUpdStatus;
+    @Column(name = "mac_id")
     private Integer macId;
+    @Column(name = "vou_lock")
     private boolean vouLock;
+    @Column(name = "batch_no")
     private String batchNo;
-    @NonNull
-    private String status = "STATUS";
-    private List<PurHisDetail> listPD;
-    private List<PurDetailKey> listDel;
+    @Column(name = "comm_p")
     private Float commP;
+    @Column(name = "comm_amt")
     private Float commAmt;
+    @Column(name = "expense")
     private Float expense;
-    private List<PurExpense> listExpense;
+    @Column(name = "project_no")
     private String projectNo;
+    @Transient
+    private String status = "STATUS";
+    @Transient
+    private List<PurHisDetail> listPD;
+    @Transient
+    private List<PurDetailKey> listDel;
+    @Transient
+    private List<String> location;
+    @Transient
+    private List<PurExpense> listExpense;
+
     public PurHis() {
     }
 

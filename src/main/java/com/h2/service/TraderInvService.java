@@ -21,5 +21,7 @@ public interface TraderInvService {
     List<Trader> findAll(String compCode);
 
     String getMaxDate();
+    
+    List<Trader> searchTrader(String str, String type, String compCode, Integer deptId);
 
 }
