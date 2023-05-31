@@ -1882,9 +1882,18 @@ public class InventoryRepo {
                 .body(Mono.just(sh), OrderHis.class)
                 .retrieve()
                 .bodyToMono(OrderHis.class)
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
+                .onErrorResume(e -> {
+                    if (localDatabase) {
+                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
+                                "Can't save voucher to cloud. Do you want save local?",
+                                "Offline", JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                        if (status == JOptionPane.YES_OPTION) {
+                            return h2Repo.save(sh);
+                        }
+                        return Mono.error(e);
+                    }
+                    return Mono.error(e);
                 });
     }
 

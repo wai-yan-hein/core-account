@@ -380,7 +380,7 @@ public class SaleTableModel extends AbstractTableModel {
         for (OrderHisDetail ld : listDetail) {
             SaleHisDetail sdl = new SaleHisDetail();
             sdl.setAmount(ld.getAmount());
-            sdl.setBatchNo(ld.getBatchNo());
+//            sdl.setBatchNo(ld.getBatchNo());
             sdl.setBrandName(ld.getBrandName());
             sdl.setCatName(ld.getCatName());
             sdl.setGroupName(ld.getGroupName());
@@ -390,7 +390,7 @@ public class SaleTableModel extends AbstractTableModel {
             sdl.setQty(ld.getQty());
             sdl.setRelName(ld.getRelName());
             sdl.setStdWeight(ld.getStdWeight());
-            sdl.setStock(ld.getStock());
+//            sdl.setStock(ld.getStock());
             sdl.setStockCode(ld.getStockCode());
             sdl.setStockName(ld.getStockName());
             sdl.setTraderName(ld.getTraderName());

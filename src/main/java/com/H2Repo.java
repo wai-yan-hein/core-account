@@ -52,6 +52,7 @@ import com.inventory.model.CategoryKey;
 import com.inventory.model.Location;
 import com.inventory.model.LocationKey;
 import com.inventory.model.MachineInfo;
+import com.inventory.model.OrderHis;
 import com.inventory.model.PurHis;
 import com.inventory.model.RetInHis;
 import com.inventory.model.RetOutHis;
@@ -83,6 +84,7 @@ import com.user.model.ProjectKey;
 import com.user.model.RoleProperty;
 import com.user.model.SysProperty;
 import com.user.model.VRoleCompany;
+import com.h2.service.OrderHisService;
 import java.util.HashMap;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,6 +119,8 @@ public class H2Repo {
     private VouStatusService vouStatusService;
     @Autowired
     private SaleHisService saleHisService;
+    @Autowired
+    private OrderHisService orderHisService;
     @Autowired
     private PurHisService purHisService;
     @Autowired
@@ -240,6 +244,10 @@ public class H2Repo {
 
     public Mono<SaleHis> save(SaleHis sh) {
         return Mono.justOrEmpty(saleHisService.save(sh));
+    }
+
+    public Mono<OrderHis> save(OrderHis oh) {
+        return Mono.justOrEmpty(orderHisService.save(oh));
     }
 
     public Mono<PurHis> save(PurHis purHis) {
