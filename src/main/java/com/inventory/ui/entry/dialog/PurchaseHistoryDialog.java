@@ -175,7 +175,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
     private Integer getDepId() {
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
-    
+
     private String getCurCode() {
         if (currAutoCompleter == null || currAutoCompleter.getCurrency() == null) {
             return Global.currency;
@@ -213,6 +213,8 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
                 }, (e) -> {
                     progess.setIndeterminate(false);
                     JOptionPane.showMessageDialog(this, e.getMessage());
+                }, () -> {
+                    setVisible(true);
                 });
     }
 
@@ -315,7 +317,6 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         btnSearch = new javax.swing.JButton();
         lblTtlAmount1 = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Purchase Voucher Search");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
@@ -800,7 +801,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
     }//GEN-LAST:event_txtCusFocusGained
 
     private void txtCurrencyFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCurrencyFocusGained
-       txtCurrency.selectAll(); // TODO add your handling code here:
+        txtCurrency.selectAll(); // TODO add your handling code here:
     }//GEN-LAST:event_txtCurrencyFocusGained
 
     /**

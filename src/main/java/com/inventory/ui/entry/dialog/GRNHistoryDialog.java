@@ -180,6 +180,10 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
                 .subscribe((t) -> {
                     tableModel.setListDetail(t);
                     txtTotalRecord.setValue(t.size());
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                }, () -> {
+                    setVisible(true);
                 });
 
     }
@@ -259,7 +263,6 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
         lblTtlRecord = new javax.swing.JLabel();
         txtTotalRecord = new javax.swing.JFormattedTextField();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("GRN Search Dialog");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));

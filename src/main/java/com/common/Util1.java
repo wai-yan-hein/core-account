@@ -53,8 +53,9 @@ public class Util1 {
     /**
      *
      */
-    public static final String DECIMAL_FORMAT = "###,##0.##;(###,##0.##)";
+    public static final String DECIMAL_FORMAT = "###,###.##;(###,###.##)";
     private static final DecimalFormat df2 = new DecimalFormat("0");
+    public static String SYNC_DATE;
     public static final Gson gson = new GsonBuilder()
             .setDateFormat(DateFormat.FULL, DateFormat.FULL)
             .create();
@@ -509,7 +510,7 @@ public class Util1 {
     public static String getString(Object obj) {
         return obj == null ? null : obj.toString().strip();
     }
-    
+
     public static boolean getBoolean(Object obj) {
         return obj != null && (obj.toString().equals("1") || obj.toString().equalsIgnoreCase("true"));
 
@@ -852,4 +853,13 @@ public class Util1 {
         }
         return null;
     }
+
+    public static Date getSyncDate() {
+        return Util1.toDate(SYNC_DATE);
+    }
+
+    public static String cleanString(String str) {
+        return str == null ? "" : str.replace(" ", "").toLowerCase();
+    }
+
 }

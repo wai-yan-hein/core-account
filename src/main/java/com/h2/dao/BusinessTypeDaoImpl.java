@@ -36,4 +36,9 @@ public class BusinessTypeDaoImpl extends AbstractDao<Integer, BusinessType> impl
         return findHSQL(sql);
     }
 
+    @Override
+    public BusinessType findById(Integer id) {
+        return getByKey(id);
+    }
+
 }

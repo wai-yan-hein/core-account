@@ -60,7 +60,6 @@ public class WeightLossHistoryDialog extends javax.swing.JDialog implements KeyL
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
-    private boolean status = false;
 
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
@@ -126,13 +125,9 @@ public class WeightLossHistoryDialog extends javax.swing.JDialog implements KeyL
     }
 
     public void initMain() {
-        if (!status) {
-            initTableVoucher();
-            setTodayDate();
-            initCombo();
-            status = true;
-        }
-        search();
+        initTableVoucher();
+        setTodayDate();
+        initCombo();
     }
 
     private void initCombo() {
@@ -176,29 +171,42 @@ public class WeightLossHistoryDialog extends javax.swing.JDialog implements KeyL
         }
     }
 
-    private void search() {
+    private String getUserCode() {
+        return appUserAutoCompleter == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
+    }
+
+    private String getLocCode() {
+        return locationAutoCompleter == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
+    }
+
+    private Integer getDepId() {
+        return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
+    }
+
+    public void search() {
         progess.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
-        filter.setUserCode(appUserAutoCompleter.getAppUser().getUserCode());
+        filter.setUserCode(getUserCode());
         filter.setVouNo(txtVouNo.getText());
         filter.setRemark(Util1.isNull(txtRemark.getText(), "-"));
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
-        filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
+        filter.setLocCode(getLocCode());
         filter.setDeleted(chkDel.isSelected());
-        filter.setDeptId(departmentAutoCompleter.getDepartment().getDeptId());
+        filter.setDeptId(getDepId());
         //
-        Mono<ResponseEntity<List<WeightLossHis>>> result = inventoryApi
-                .post()
-                .uri("/weight/get-weight-loss")
-                .body(Mono.just(filter), FilterObject.class)
-                .retrieve()
-                .toEntityList(WeightLossHis.class);
-        List<WeightLossHis> listOP = result.block(Duration.ofMinutes(1)).getBody();
-        tableModel.setListDetail(listOP);
-        progess.setIndeterminate(false);
-        calAmount();
+        inventoryRepo.getWeightLoss(filter).subscribe((t) -> {
+            tableModel.setListDetail(t);
+            progess.setIndeterminate(false);
+            calAmount();
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+            progess.setIndeterminate(false);
+        }, () -> {
+            setVisible(true);
+        });
+
     }
 
     private void calAmount() {

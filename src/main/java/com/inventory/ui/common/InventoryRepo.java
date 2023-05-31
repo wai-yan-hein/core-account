@@ -26,6 +26,9 @@ import com.inventory.model.OrderHis;
 import com.inventory.model.OrderHisDetail;
 import com.inventory.model.OrderHisKey;
 import com.inventory.model.Pattern;
+import com.inventory.model.PaymentHis;
+import com.inventory.model.PaymentHisDetail;
+import com.inventory.model.PaymentHisKey;
 import com.inventory.model.PriceOption;
 import com.inventory.model.ProcessHis;
 import com.inventory.model.ProcessHisDetail;
@@ -72,6 +75,7 @@ import com.inventory.model.VouStatusKey;
 import com.inventory.model.WeightLossHis;
 import com.inventory.model.WeightLossHisKey;
 import java.util.List;
+import javax.swing.JOptionPane;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -419,6 +423,9 @@ public class InventoryRepo {
     }
 
     public Mono<List<Trader>> getTraderList(String text, String type) {
+        if (localDatabase) {
+            return h2Repo.searchTrader(text, type, Global.compCode, ProUtil.getDepId());
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-trader-list")
                 .queryParam("compCode", Global.compCode)
@@ -1759,6 +1766,16 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<List<PaymentHis>> getPaymentHistory(FilterObject filter) {
+        return inventoryApi
+                .post()
+                .uri("/payment/getPaymentHistory")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToFlux(PaymentHis.class)
+                .collectList();
+    }
+
     public Mono<List<SaleHisDetail>> getSaleByBatch(String batchNo, boolean detail) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/sale/get-sale-by-batch")
@@ -1782,8 +1799,59 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToMono(PurHis.class)
                 .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
+                    if (localDatabase) {
+                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
+                                "Can't save voucher to cloud. Do you want save local?",
+                                "Offline", JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                        if (status == JOptionPane.YES_OPTION) {
+                            return h2Repo.save(ph);
+                        }
+                        return Mono.error(e);
+                    }
+                    return Mono.error(e);
+                });
+    }
+
+    public Mono<RetInHis> save(RetInHis rh) {
+        return inventoryApi.post()
+                .uri("/retin/save-retin")
+                .body(Mono.just(rh), RetInHis.class)
+                .retrieve()
+                .bodyToMono(RetInHis.class)
+                .onErrorResume((e) -> {
+                    if (localDatabase) {
+                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
+                                "Can't save voucher to cloud. Do you want save local?",
+                                "Offline", JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                        if (status == JOptionPane.YES_OPTION) {
+                            return h2Repo.save(rh);
+                        }
+                        return Mono.error(e);
+                    }
+                    return Mono.error(e);
+                });
+    }
+
+    public Mono<RetOutHis> save(RetOutHis ro) {
+        return inventoryApi.post()
+                .uri("/retout/save-retout")
+                .body(Mono.just(ro), RetInHis.class)
+                .retrieve()
+                .bodyToMono(RetOutHis.class)
+                .onErrorResume((e) -> {
+                    if (localDatabase) {
+                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
+                                "Can't save voucher to cloud. Do you want save local?",
+                                "Offline", JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                        if (status == JOptionPane.YES_OPTION) {
+                            return h2Repo.save(ro);
+                        }
+                        return Mono.error(e);
+                    }
+                    return Mono.error(e);
                 });
     }
 
@@ -1795,7 +1863,14 @@ public class InventoryRepo {
                 .bodyToMono(SaleHis.class)
                 .onErrorResume(e -> {
                     if (localDatabase) {
-                        return h2Repo.save(sh);
+                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
+                                "Can't save voucher to cloud. Do you want save local?",
+                                "Offline", JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                        if (status == JOptionPane.YES_OPTION) {
+                            return h2Repo.save(sh);
+                        }
+                        return Mono.error(e);
                     }
                     return Mono.error(e);
                 });
@@ -1807,9 +1882,18 @@ public class InventoryRepo {
                 .body(Mono.just(sh), OrderHis.class)
                 .retrieve()
                 .bodyToMono(OrderHis.class)
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
+                .onErrorResume(e -> {
+                    if (localDatabase) {
+                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
+                                "Can't save voucher to cloud. Do you want save local?",
+                                "Offline", JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                        if (status == JOptionPane.YES_OPTION) {
+                            return h2Repo.save(sh);
+                        }
+                        return Mono.error(e);
+                    }
+                    return Mono.error(e);
                 });
     }
 
@@ -1821,6 +1905,18 @@ public class InventoryRepo {
                 .bodyToMono(AccSetting.class)
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<PaymentHis> savePayment(PaymentHis ph) {
+        return inventoryApi.post()
+                .uri("/payment/savePayment")
+                .body(Mono.just(ph), PaymentHis.class)
+                .retrieve()
+                .bodyToMono(PaymentHis.class)
+                .onErrorResume((e) -> {
+                    log.error("savePayment :" + e.getMessage());
                     return Mono.empty();
                 });
     }
@@ -1870,6 +1966,22 @@ public class InventoryRepo {
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<PaymentHisDetail>> getPaymentDetail(String vouNo, int deptId) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/payment/getPaymentDetail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", deptId)
+                .build())
+                .retrieve()
+                .bodyToFlux(PaymentHisDetail.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getPaymentDetail :" + e.getMessage());
                     return Mono.empty();
                 });
     }
@@ -1943,6 +2055,55 @@ public class InventoryRepo {
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
+                });
+    }
+
+    public Mono<List<PaymentHisDetail>> getCustomerBalance(String traderCode) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/payment/getCustomerBalance")
+                .queryParam("traderCode", traderCode)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(PaymentHisDetail.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getCustomerBalance :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<WeightLossHis>> getWeightLoss(FilterObject filter) {
+        return inventoryApi
+                .post()
+                .uri("/weight/get-weight-loss")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToFlux(WeightLossHis.class)
+                .collectList();
+    }
+
+    public Mono<Boolean> delete(PaymentHisKey key) {
+        return inventoryApi.post()
+                .uri("/payment/deletePayment")
+                .body(Mono.just(key), PaymentHisKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.just(false);
+                });
+    }
+
+    public Mono<Boolean> restore(PaymentHisKey key) {
+        return inventoryApi.post()
+                .uri("/payment/restorePayment")
+                .body(Mono.just(key), PaymentHisKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.just(false);
                 });
     }
 }

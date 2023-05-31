@@ -5,6 +5,9 @@
  */
 package com.inventory.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import java.io.Serializable;
 import lombok.Data;
 
 /**
@@ -12,11 +15,16 @@ import lombok.Data;
  * @author lenovo
  */
 @Data
-public class RetInKey {
+@Embeddable
+public class RetInKey implements Serializable{
 
-    private String compCode;
-    private String vouNo;
-    private Integer deptId;
+    @Column(name = "unique_id")
     private Integer uniqueId;
+    @Column(name = "comp_code")
+    private String compCode;
+    @Column(name = "vou_no")
+    private String vouNo;
+    @Column(name = "dept_id")
+    private Integer deptId;
 
 }

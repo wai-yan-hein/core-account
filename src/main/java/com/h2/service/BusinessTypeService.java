@@ -16,6 +16,8 @@ public interface BusinessTypeService {
     BusinessType save(BusinessType bus);
 
     String getMaxDate();
-    
+
     List<BusinessType> findAll();
+
+    BusinessType findById(Integer id);
 }

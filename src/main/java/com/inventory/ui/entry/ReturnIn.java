@@ -314,11 +314,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             progress.setIndeterminate(true);
             ri.setListRD(retInTableModel.getListDetail());
             ri.setListDel(retInTableModel.getDelList());
-            inventoryApi.post()
-                    .uri("/retin/save-retin")
-                    .body(Mono.just(ri), RetInHis.class)
-                    .retrieve()
-                    .bodyToMono(RetInHis.class)
+            inventoryRepo.save(ri)
                     .subscribe((t) -> {
                         progress.setIndeterminate(false);
                         clear();
@@ -327,6 +323,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                         }
                     }, (e) -> {
                         JOptionPane.showMessageDialog(this, e.getMessage());
+                        progress.setIndeterminate(false);
                     });
             
         }
@@ -458,7 +455,6 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             dialog.setLocationRelativeTo(null);
         }
         dialog.search();
-        dialog.setVisible(true);
     }
     
     public void setVoucher(RetInHis retin) {
@@ -476,7 +472,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             userRepo.findCurrency(ri.getCurCode()).subscribe((t) -> {
                 currAutoCompleter.setCurrency(t);
             });
-            if(retin.getProjectNo() != null) {
+            if (retin.getProjectNo() != null) {
                 userRepo.find(new ProjectKey(retin.getProjectNo(), Global.compCode)).subscribe(t -> {
                     projectAutoCompleter.setProject(t);
                 }, (err) -> {

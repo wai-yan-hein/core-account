@@ -38,9 +38,7 @@ public class CompanyInfoDaoImpl extends AbstractDao<String, CompanyInfo> impleme
 
     @Override
     public CompanyInfo findById(String id) {
-        String sql = "select o from CompanyInfo o where o.compCode = '" + id + "'";
-        List<CompanyInfo> list = findHSQL(sql);
-        return list.isEmpty() ? null : list.get(0);
+        return getByKey(id);
     }
 
 }

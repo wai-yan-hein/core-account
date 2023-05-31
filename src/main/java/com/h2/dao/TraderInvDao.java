@@ -22,4 +22,6 @@ public interface TraderInvDao {
 
     List<Trader> findAll(String compCode);
 
+    List<Trader> searchTrader(String str, String type, String compCode, Integer deptId);
+
 }

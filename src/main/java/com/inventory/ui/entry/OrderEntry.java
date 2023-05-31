@@ -383,6 +383,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 }
             }, (e) -> {
                 JOptionPane.showMessageDialog(this, e.getMessage());
+                progress.setIndeterminate(false);
             });
 
         }
@@ -428,9 +429,9 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             orderHis.setPaid(Util1.getFloat(txtVouPaid.getValue()));
             orderHis.setBalance(Util1.getFloat(txtVouBalance.getValue()));
             orderHis.setCurCode(currAutoCompleter.getCurrency().getCurCode());
-            orderHis.setDeleted(Util1.getNullTo(orderHis.getDeleted()));
-            orderHis.setOrderCode(orderCode);
-            orderHis.setRegion(region);
+            orderHis.setDeleted(orderHis.isDeleted());
+//            orderHis.setOrderCode(orderCode);
+//            orderHis.setRegion(region);
             orderHis.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             orderHis.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
             orderHis.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
@@ -448,7 +449,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 orderHis.setKey(key);
                 orderHis.setCreatedDate(Util1.getTodayDate());
                 orderHis.setCreatedBy(Global.loginUser.getUserCode());
-                orderHis.setSession(Global.sessionId);
+//                orderHis.setSession(Global.sessionId);
             } else {
                 orderHis.setUpdatedBy(Global.loginUser.getUserCode());
             }
@@ -559,7 +560,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             dialog.setLocationRelativeTo(null);
         }
         dialog.search();
-        dialog.setVisible(true);
     }
 
     public void setOrderVoucher(OrderHis sh) {
@@ -601,7 +601,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                             lblStatus.setForeground(Color.RED);
                             disableForm(false);
                             observer.selected("print", true);
-                        } else if (Util1.getBoolean(sh.getDeleted())) {
+                        } else if (sh.isDeleted()) {
                             lblStatus.setText("DELETED");
                             lblStatus.setForeground(Color.RED);
                             disableForm(false);

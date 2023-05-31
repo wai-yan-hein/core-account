@@ -43,4 +43,9 @@ public class TraderInvServiceImpl implements TraderInvService {
         return dao.find(key);
     }
 
+    @Override
+    public List<Trader> searchTrader(String str, String type, String compCode, Integer deptId) {
+        return dao.searchTrader(str, type, compCode, deptId);
+    }
+
 }

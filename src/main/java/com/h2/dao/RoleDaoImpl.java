@@ -36,4 +36,9 @@ public class RoleDaoImpl extends AbstractDao<String, AppRole> implements RoleDao
         return findHSQL(sql);
     }
 
+    @Override
+    public AppRole findById(String roleCode) {
+        return getByKey(roleCode);
+    }
+
 }

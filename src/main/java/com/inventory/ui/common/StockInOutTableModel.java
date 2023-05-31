@@ -333,6 +333,7 @@ public class StockInOutTableModel extends AbstractTableModel {
                         iod.setCostPrice(totalPrice);
                     }
                 }
+                observer.selected("CAL-TOTAL", "CAL-TOTAL");
             }, (e) -> {
                 JOptionPane.showMessageDialog(parent, e.getMessage());
             }, () -> {

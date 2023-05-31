@@ -5,6 +5,7 @@
 package com.h2.dao;
 
 import com.user.model.DepartmentUser;
+import java.util.List;
 
 /**
  *
@@ -15,4 +16,8 @@ public interface DepartmentUserDao {
     DepartmentUser save(DepartmentUser dept);
 
     String getMaxDate();
+    
+    DepartmentUser findById(Integer id);
+    
+    List<DepartmentUser> findAll();
 }

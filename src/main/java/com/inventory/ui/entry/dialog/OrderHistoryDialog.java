@@ -199,7 +199,8 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
     private Integer getDepId() {
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
-     private String getCurCode() {
+
+    private String getCurCode() {
         if (currAutoCompleter == null || currAutoCompleter.getCurrency() == null) {
             return Global.currency;
         }
@@ -236,6 +237,8 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
             progress.setIndeterminate(false);
+        }, () -> {
+            setVisible(true);
         });
 
     }
@@ -283,7 +286,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         saleManAutoCompleter.setSaleMan(new SaleMan("-", "All"));
         batchAutoCompeter.setBatch(new GRN());
         currAutoCompleter.setCurrency(null);
-    }   
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -343,7 +346,6 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         lblTtlAmount = new javax.swing.JLabel();
         progress = new javax.swing.JProgressBar();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Order Voucher Search");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
@@ -889,7 +891,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
     }//GEN-LAST:event_txtCurrencyActionPerformed
 
     private void txtCurrencyFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCurrencyFocusGained
-           txtCurrency.selectAll(); // TODO add your handling code here:
+        txtCurrency.selectAll(); // TODO add your handling code here:
     }//GEN-LAST:event_txtCurrencyFocusGained
 
     /**

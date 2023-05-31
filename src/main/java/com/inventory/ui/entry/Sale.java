@@ -508,6 +508,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 }
             }, (e) -> {
                 JOptionPane.showMessageDialog(this, e.getMessage());
+                progress.setIndeterminate(false);
             });
         }
     }
@@ -583,7 +584,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         switch (status) {
             case "EDIT" -> {
                 int yes_no = JOptionPane.showConfirmDialog(this,
-                        "Are you sure to delete?", "Save Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+                        "Are you sure to delete?", "Sale Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
                     inventoryRepo.delete(saleHis.getKey()).subscribe((t) -> {
                         clear();
@@ -592,7 +593,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
             case "DELETED" -> {
                 int yes_no = JOptionPane.showConfirmDialog(this,
-                        "Are you sure to restore?", "Purchase Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                        "Are you sure to restore?", "Sale Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
                     saleHis.setDeleted(false);
                     inventoryRepo.restore(saleHis.getKey()).subscribe((t) -> {
@@ -682,7 +683,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             dialog.setLocationRelativeTo(null);
         }
         dialog.search();
-        dialog.setVisible(true);
     }
 
     public void setSaleVoucher(SaleHis sh) {

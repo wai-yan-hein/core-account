@@ -4,11 +4,14 @@
  */
 package com;
 
+import com.common.Global;
 import com.common.ui.ApplicationMainFrame;
+import com.common.ui.LoginDialog;
 import java.awt.*;
 import java.awt.TrayIcon.MessageType;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import javax.swing.JFrame;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,7 +26,7 @@ public class Tray {
 
     private TrayIcon trayIcon;
     @Autowired
-    private ApplicationMainFrame mainFrame;
+    private LoginDialog loginDialog;
     private SystemTray tray;
 
     public SystemTray getTray() {
@@ -65,14 +68,21 @@ public class Tray {
     }
 
     public void openMF() {
-        mainFrame.setVisible(true);
-        mainFrame.toFront();
-        mainFrame.requestFocus();
+        if (loginDialog.isVisible()) {
+            loginDialog.toFront();
+            loginDialog.focus();
+        } else {
+            if (Global.parentForm != null) {
+                Global.parentForm.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                Global.parentForm.setVisible(true);
+                Global.parentForm.toFront();
+            }
+        }
     }
 
     public void removeTray() {
-        mainFrame.setVisible(false);
         tray.remove(trayIcon);
+        Global.parentForm.setVisible(false);
     }
 
     public void showMessage(String message) {

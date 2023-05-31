@@ -5,6 +5,12 @@
  */
 package com.inventory.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import java.io.Serializable;
 import lombok.Data;
 
@@ -12,26 +18,49 @@ import lombok.Data;
  *
  * @author Lenovo
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
+@Entity
+@Table(name = "pur_his_detail")
 public class PurHisDetail implements Serializable {
 
+    @EmbeddedId
     private PurDetailKey key;
+    @Column(name = "stock_code")
     private String stockCode;
-    private String userCode;
-    private String stockName;
-    private String groupName;
-    private String brandName;
-    private String catName;
-    private String relName;
+    @Column(name = "qty")
     private Float qty;
-    private String unitCode;
-    private Float price;
-    private Float orgPrice;
-    private Float amount;
-    private String locCode;
-    private String locName;
-    private Float weight;
-    private String weightUnit;
+    @Column(name = "avg_qty")
     private Float avgQty;
+    @Column(name = "pur_unit")
+    private String unitCode;
+    @Column(name = "org_price")
+    private Float orgPrice;
+    @Column(name = "pur_price")
+    private Float price;
+    @Column(name = "pur_amt")
+    private Float amount;
+    @Column(name = "loc_code")
+    private String locCode;
+    @Column(name = "weight")
+    private Float weight;
+    @Column(name = "weight_unit")
+    private String weightUnit;
+    @Column(name = "std_weight")
     private Float stdWeight;
+
+    @Transient
+    private String userCode;
+    @Transient
+    private String stockName;
+    @Transient
+    private String groupName;
+    @Transient
+    private String brandName;
+    @Transient
+    private String catName;
+    @Transient
+    private String relName;
+    @Transient
+    private String locName;
 }
