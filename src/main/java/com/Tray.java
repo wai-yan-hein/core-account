@@ -5,7 +5,6 @@
 package com;
 
 import com.common.Global;
-import com.common.ui.ApplicationMainFrame;
 import com.common.ui.LoginDialog;
 import java.awt.*;
 import java.awt.TrayIcon.MessageType;

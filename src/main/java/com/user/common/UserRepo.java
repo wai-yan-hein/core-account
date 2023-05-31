@@ -128,7 +128,7 @@ public class UserRepo {
                     if (localdatabase) {
                         return h2Repo.getMachineInfo(macName);
                     }
-                    return Mono.error(e);
+                    return Mono.empty();
                 });
 
     }

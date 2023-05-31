@@ -25,7 +25,7 @@ public class PaymentTableModel extends AbstractTableModel {
 
     private List<PaymentHisDetail> listDetail = new ArrayList<>();
     private List<PaymentHisDetailKey> listDelete = new ArrayList<>();
-    private final String[] columnNames = {"Date", "Vou No", "Remark", "Currency", "Vou Total", "Outstanding", "Payment", "Full Paid"};
+    private final String[] columnNames = {"Date", "Vou No", "Remark", "Reference", "Currency", "Vou Total", "Outstanding", "Partial Payment", "Single Payment"};
     private JTable table;
     private SelectionObserver observer;
 
@@ -64,7 +64,7 @@ public class PaymentTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 6, 7 -> {
+            case 7, 8 -> {
                 return true;
             }
         }
@@ -74,10 +74,10 @@ public class PaymentTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         switch (column) {
-            case 4, 5, 6 -> {
+            case 5, 6, 7 -> {
                 return Float.class;
             }
-            case 7 -> {
+            case 8 -> {
                 return Boolean.class;
             }
         }
@@ -113,15 +113,17 @@ public class PaymentTableModel extends AbstractTableModel {
                     b.getSaleVouNo();
                 case 2 ->
                     b.getRemark();
-                case 3 ->
-                    b.getCurCode();
+                case 3->
+                    b.getReference();
                 case 4 ->
-                    b.getVouTotal();
+                    b.getCurCode();
                 case 5 ->
-                    b.getVouBalance();
+                    b.getVouTotal();
                 case 6 ->
-                    b.getPayAmt();
+                    b.getVouBalance();
                 case 7 ->
+                    b.getPayAmt();
+                case 8 ->
                     b.isFullPaid();
                 default ->
                     null;
@@ -140,13 +142,13 @@ public class PaymentTableModel extends AbstractTableModel {
             if (value != null) {
                 PaymentHisDetail obj = listDetail.get(row);
                 switch (column) {
-                    case 6 -> {
+                    case 7 -> {
                         float amt = Util1.getFloat(value);
                         float out = Util1.getFloat(obj.getVouBalance());
                         obj.setPayAmt(amt);
                         obj.setFullPaid(amt == out);
                     }
-                    case 7 -> {
+                    case 8 -> {
                         if (value instanceof Boolean paid) {
                             obj.setFullPaid(paid);
                             obj.setPayAmt(paid ? obj.getVouBalance() : 0.0f);

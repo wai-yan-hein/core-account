@@ -84,6 +84,8 @@ public class Trader {
     private String account;
     @Column(name = "deleted")
     private boolean deleted;
+    @Column(name = "credit_amt")
+    private Float creditAmt;
 
     public Trader(String code, String traderName) {
         this.key = new TraderKey();

@@ -16,4 +16,5 @@ public class PurExpense {
     private PurExpenseKey key;
     private String expenseName;
     private Float amount;
+    private Float percent;
 }

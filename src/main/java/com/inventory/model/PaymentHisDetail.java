@@ -29,6 +29,8 @@ public class PaymentHisDetail {
     private String curCode;
     @Column(name = "remark")
     private String remark;
+    @Column(name = "reference")
+    private String reference;
     @Temporal(TemporalType.DATE)
     @Column(name = "sale_vou_date")
     private Date saleDate;
