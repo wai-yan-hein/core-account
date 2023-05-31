@@ -20,4 +20,12 @@ public interface COADao {
     List<ChartOfAccount> findAll(String compCode);
 
     ChartOfAccount findById(COAKey key);
+    
+    List<ChartOfAccount> getCOA(String headCode, String compCode);
+    
+    List<ChartOfAccount> getCOAChild(String parentCode, String compCode);
+    
+    List<ChartOfAccount> getCOATree(String compCode);
+
+    List<ChartOfAccount> getTraderCOA(String compCode);
 }

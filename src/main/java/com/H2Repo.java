@@ -367,6 +367,23 @@ public class H2Repo {
         return Mono.justOrEmpty(coaService.findById(key));
     }
     
+    public Flux<ChartOfAccount> getCOATree() {
+        return Flux.fromIterable(coaService.getCOATree(Global.compCode));
+    }
+    
+    public Flux<ChartOfAccount> getTraderCOA() {
+        return Flux.fromIterable(coaService.getTraderCOA(Global.compCode));
+    }
+
+    public Mono<List<ChartOfAccount>> getCOA3(String headCode) {
+        return Mono.justOrEmpty(coaService.getCOA(headCode,Global.compCode));
+    }
+    
+    public Flux<ChartOfAccount> getCOAChild(String coaCode) {
+        return Flux.fromIterable(coaService.getCOAChild(coaCode,Global.compCode));
+    }
+
+    
 //    public Mono<Gl> save(Gl sh) {
 //        return Mono.justOrEmpty(saleHisService.save(sh));
 //    }
