@@ -126,6 +126,9 @@ public class AccountRepo {
     }
 
     public Flux<ChartOfAccount> getCOATree() {
+        if (localDatabase) {
+            return h2Repo.getCOATree();
+        }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-coa-tree")
                 .queryParam("compCode", Global.compCode)
@@ -134,6 +137,9 @@ public class AccountRepo {
     }
 
     public Flux<ChartOfAccount> getTraderAccount() {
+        if (localDatabase) {
+            return h2Repo.getTraderCOA();
+        }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-trader-coa")
                 .queryParam("compCode", Global.compCode)
@@ -308,6 +314,9 @@ public class AccountRepo {
     }
 
     public Flux<ChartOfAccount> getCOAChild(String coaCode) {
+        if (localDatabase) {
+            return h2Repo.getCOAChild(coaCode);
+        }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-coa-child")
                 .queryParam("coaCode", coaCode)
@@ -317,6 +326,9 @@ public class AccountRepo {
     }
 
     public Mono<List<ChartOfAccount>> getCOAByGroup(String groupCode) {
+        if (localDatabase) {
+            return h2Repo.getCOA3(groupCode);
+        }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/getCOAByGroup")
                 .queryParam("groupCode", groupCode)

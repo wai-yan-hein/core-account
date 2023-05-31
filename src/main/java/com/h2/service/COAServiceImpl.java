@@ -41,5 +41,23 @@ public class COAServiceImpl implements COAService {
     public ChartOfAccount findById(COAKey key) {
         return dao.findById(key);
     }
+    @Override
+    public List<ChartOfAccount> getCOA(String headCode, String compCode) {
+        return dao.getCOA(headCode, compCode);
+    }
+    
+    @Override
+    public List<ChartOfAccount> getCOAChild(String parentCode, String compCode) {
+        return dao.getCOAChild(parentCode, compCode);
+    }
 
+    @Override
+    public List<ChartOfAccount> getCOATree(String compCode) {
+        return dao.getCOATree(compCode);
+    }
+    
+    @Override
+    public List<ChartOfAccount> getTraderCOA(String compCode) {
+        return dao.getTraderCOA(compCode);
+    }
 }

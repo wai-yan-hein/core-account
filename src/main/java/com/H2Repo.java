@@ -28,6 +28,9 @@ import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
 import com.h2.service.PrivilegeCompanyService;
 import com.h2.service.ProjectService;
+import com.h2.service.PurHisService;
+import com.h2.service.RetInService;
+import com.h2.service.RetOutService;
 import com.h2.service.RolePropertyService;
 import com.h2.service.RoleService;
 import com.h2.service.SaleHisService;
@@ -49,6 +52,10 @@ import com.inventory.model.CategoryKey;
 import com.inventory.model.Location;
 import com.inventory.model.LocationKey;
 import com.inventory.model.MachineInfo;
+import com.inventory.model.OrderHis;
+import com.inventory.model.PurHis;
+import com.inventory.model.RetInHis;
+import com.inventory.model.RetOutHis;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleMan;
 import com.inventory.model.SaleManKey;
@@ -77,6 +84,7 @@ import com.user.model.ProjectKey;
 import com.user.model.RoleProperty;
 import com.user.model.SysProperty;
 import com.user.model.VRoleCompany;
+import com.h2.service.OrderHisService;
 import java.util.HashMap;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,6 +120,14 @@ public class H2Repo {
     @Autowired
     private SaleHisService saleHisService;
     @Autowired
+    private OrderHisService orderHisService;
+    @Autowired
+    private PurHisService purHisService;
+    @Autowired
+    private RetInService retInService;
+    @Autowired
+    private RetOutService retOutService;
+    @Autowired
     private UserService userService;
     @Autowired
     private MachineInfoService machineInfoService;
@@ -142,7 +158,7 @@ public class H2Repo {
     @Autowired
     private TraderAService traderAccService;
     @Autowired
-    private COAService coaService;  
+    private COAService coaService;
     @Autowired
     private VRoleCompanyService vRoleCompanyService;
     @Autowired
@@ -214,6 +230,10 @@ public class H2Repo {
         return Mono.justOrEmpty(traderInvService.find(key));
     }
 
+    public Mono<List<Trader>> searchTrader(String str, String type, String compCode, Integer deptId) {
+        return Mono.justOrEmpty(traderInvService.searchTrader(str, type, compCode, deptId));
+    }
+
     public Mono<List<VouStatus>> getVouStatus() {
         return Mono.justOrEmpty(vouStatusService.findAll(Global.compCode));
     }
@@ -224,6 +244,22 @@ public class H2Repo {
 
     public Mono<SaleHis> save(SaleHis sh) {
         return Mono.justOrEmpty(saleHisService.save(sh));
+    }
+
+    public Mono<OrderHis> save(OrderHis oh) {
+        return Mono.justOrEmpty(orderHisService.save(oh));
+    }
+
+    public Mono<PurHis> save(PurHis purHis) {
+        return Mono.justOrEmpty(purHisService.save(purHis));
+    }
+
+    public Mono<RetInHis> save(RetInHis rh) {
+        return Mono.justOrEmpty(retInService.save(rh));
+    }
+
+    public Mono<RetOutHis> save(RetOutHis rh) {
+        return Mono.justOrEmpty(retOutService.save(rh));
     }
 
     public Mono<AppUser> login(String userName, String password) {
@@ -347,7 +383,7 @@ public class H2Repo {
     public List<MachineProperty> getMacProperty(Integer macId) {
         return macPropertyService.getMacProperty(macId);
     }
-    
+
     public Mono<List<DepartmentA>> getDepartmentAccount() {
         return Mono.justOrEmpty(departmentAccService.findAll(Global.compCode));
     }
@@ -383,18 +419,19 @@ public class H2Repo {
     public Mono<List<Project>> searchProjectByCode(String code, String compCode) {
         return Mono.justOrEmpty(projectService.search(code, compCode));
     }
+
     public Mono<DepartmentA> find(DepartmentAKey key) {
         return Mono.justOrEmpty(departmentAccService.find(key));
     }
-    
-    public  Flux<TraderA> getTraderAccount() {
+
+    public Flux<TraderA> getTraderAccount() {
         return Flux.fromIterable(traderAccService.findAll(Global.compCode));
     }
 
     public Flux<TraderA> findTraderAccount(String str) {
-        return Flux.fromIterable(traderAccService.getTrader(str,Global.compCode));
+        return Flux.fromIterable(traderAccService.getTrader(str, Global.compCode));
     }
-    
+
     public Flux<ChartOfAccount> getChartofAccount() {
         return Flux.fromIterable(coaService.findAll(Global.compCode));
     }
@@ -402,7 +439,23 @@ public class H2Repo {
     public Mono<ChartOfAccount> find(COAKey key) {
         return Mono.justOrEmpty(coaService.findById(key));
     }
+
     
+    public Flux<ChartOfAccount> getCOATree() {
+        return Flux.fromIterable(coaService.getCOATree(Global.compCode));
+    }
+    
+    public Flux<ChartOfAccount> getTraderCOA() {
+        return Flux.fromIterable(coaService.getTraderCOA(Global.compCode));
+    }
+
+    public Mono<List<ChartOfAccount>> getCOA3(String headCode) {
+        return Mono.justOrEmpty(coaService.getCOA(headCode,Global.compCode));
+    }
+    
+    public Flux<ChartOfAccount> getCOAChild(String coaCode) {
+        return Flux.fromIterable(coaService.getCOAChild(coaCode,Global.compCode));
+    }
 //    public Mono<Gl> save(Gl sh) {
 //        return Mono.justOrEmpty(saleHisService.save(sh));
 //    }

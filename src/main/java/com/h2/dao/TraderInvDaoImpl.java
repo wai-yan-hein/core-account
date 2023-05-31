@@ -7,8 +7,11 @@ package com.h2.dao;
 import com.common.Util1;
 import com.inventory.model.Trader;
 import com.inventory.model.TraderKey;
+import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -16,6 +19,7 @@ import org.springframework.stereotype.Repository;
  * @author Lenovo
  */
 @Repository
+@Slf4j
 public class TraderInvDaoImpl extends AbstractDao<TraderKey, Trader> implements TraderInvDao {
 
     @Override
@@ -40,6 +44,45 @@ public class TraderInvDaoImpl extends AbstractDao<TraderKey, Trader> implements 
     @Override
     public Trader find(TraderKey key) {
         return getByKey(key);
+    }
+
+    @Override
+    public List<Trader> searchTrader(String str, String type, String compCode, Integer deptId) {
+        String filter = "where active = TRUE\n"
+                + "and deleted = FALSE\n"
+                + "and comp_code ='" + compCode + "'\n"
+                + "and (dept_id =" + deptId + " or 0 =" + deptId + ")\n"
+                + "and (LOWER(REPLACE(user_code, ' ', '')) like '" + str + "%' or LOWER(REPLACE(trader_name, ' ', '')) like '" + str + "%') \n";
+        if (!type.equals("-")) {
+            filter += "and (multi = TRUE or type ='" + type + "')";
+        }
+        String sql = "select code,user_code,trader_name,price_type,type,address\n"
+                + "from trader\n" + filter + "\n"
+                + "order by user_code,trader_name\n"
+                + "limit 100\n";
+        ResultSet rs = getResult(sql);
+        List<Trader> list = new ArrayList<>();
+        try {
+            if (rs != null) {
+                while (rs.next()) {
+                    Trader t = new Trader();
+                    TraderKey key = new TraderKey();
+                    key.setCompCode(compCode);
+                    key.setCode(rs.getString("code"));
+                    key.setDeptId(deptId);
+                    t.setKey(key);
+                    t.setUserCode(rs.getString("user_code"));
+                    t.setTraderName(rs.getString("trader_name"));
+                    t.setPriceType(rs.getString("price_type"));
+                    t.setType(rs.getString("type"));
+                    t.setAddress(rs.getString("address"));
+                    list.add(t);
+                }
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return list;
     }
 
 }

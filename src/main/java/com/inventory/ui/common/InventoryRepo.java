@@ -423,6 +423,9 @@ public class InventoryRepo {
     }
 
     public Mono<List<Trader>> getTraderList(String text, String type) {
+        if (localDatabase) {
+            return h2Repo.searchTrader(text, type, Global.compCode, ProUtil.getDepId());
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-trader-list")
                 .queryParam("compCode", Global.compCode)
@@ -1796,8 +1799,59 @@ public class InventoryRepo {
                 .retrieve()
                 .bodyToMono(PurHis.class)
                 .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
+                    if (localDatabase) {
+                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
+                                "Can't save voucher to cloud. Do you want save local?",
+                                "Offline", JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                        if (status == JOptionPane.YES_OPTION) {
+                            return h2Repo.save(ph);
+                        }
+                        return Mono.error(e);
+                    }
+                    return Mono.error(e);
+                });
+    }
+
+    public Mono<RetInHis> save(RetInHis rh) {
+        return inventoryApi.post()
+                .uri("/retin/save-retin")
+                .body(Mono.just(rh), RetInHis.class)
+                .retrieve()
+                .bodyToMono(RetInHis.class)
+                .onErrorResume((e) -> {
+                    if (localDatabase) {
+                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
+                                "Can't save voucher to cloud. Do you want save local?",
+                                "Offline", JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                        if (status == JOptionPane.YES_OPTION) {
+                            return h2Repo.save(rh);
+                        }
+                        return Mono.error(e);
+                    }
+                    return Mono.error(e);
+                });
+    }
+
+    public Mono<RetOutHis> save(RetOutHis ro) {
+        return inventoryApi.post()
+                .uri("/retout/save-retout")
+                .body(Mono.just(ro), RetInHis.class)
+                .retrieve()
+                .bodyToMono(RetOutHis.class)
+                .onErrorResume((e) -> {
+                    if (localDatabase) {
+                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
+                                "Can't save voucher to cloud. Do you want save local?",
+                                "Offline", JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                        if (status == JOptionPane.YES_OPTION) {
+                            return h2Repo.save(ro);
+                        }
+                        return Mono.error(e);
+                    }
+                    return Mono.error(e);
                 });
     }
 
@@ -1828,9 +1882,18 @@ public class InventoryRepo {
                 .body(Mono.just(sh), OrderHis.class)
                 .retrieve()
                 .bodyToMono(OrderHis.class)
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
+                .onErrorResume(e -> {
+                    if (localDatabase) {
+                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
+                                "Can't save voucher to cloud. Do you want save local?",
+                                "Offline", JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                        if (status == JOptionPane.YES_OPTION) {
+                            return h2Repo.save(sh);
+                        }
+                        return Mono.error(e);
+                    }
+                    return Mono.error(e);
                 });
     }
 

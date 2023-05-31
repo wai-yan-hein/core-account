@@ -255,7 +255,7 @@ public class OrderTableModel extends AbstractTableModel {
                             sd.setWeightUnit(s.getWeightUnit());
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setPrice(getTraderPrice(s));
-                            sd.setStock(s);
+//                            sd.setStock(s);
                             sd.setPrice(sd.getPrice() == 0 ? s.getSalePriceN() : sd.getPrice());
                             parent.setColumnSelectionInterval(4, 4);
                             addNewRow();
