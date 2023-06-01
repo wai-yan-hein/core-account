@@ -46,6 +46,8 @@ public class PaymentHis {
     private String account;
     @Column(name = "project_no")
     private String projectNo;
+    @Column(name = "cur_code")
+    private String curCode;
     @Transient
     private List<PaymentHisDetail> listDetail;
     @Transient

@@ -12,6 +12,7 @@ import com.inventory.model.PurExpense;
 import com.inventory.model.PurExpenseKey;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JFormattedTextField;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
@@ -24,9 +25,18 @@ import lombok.extern.slf4j.Slf4j;
 public class PurExpenseTableModel extends AbstractTableModel {
 
     private List<PurExpense> listDetail = new ArrayList<>();
-    private final String[] columnNames = {"Name", "Amount"};
+    private final String[] columnNames = {"Name", "Amount", "%"};
     private JTable table;
     private SelectionObserver observer;
+    private JFormattedTextField txtVouTotal;
+
+    public JFormattedTextField getTxtVouTotal() {
+        return txtVouTotal;
+    }
+
+    public void setTxtVouTotal(JFormattedTextField txtVouTotal) {
+        this.txtVouTotal = txtVouTotal;
+    }
 
     public SelectionObserver getObserver() {
         return observer;
@@ -59,7 +69,20 @@ public class PurExpenseTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        return column == 0 ? String.class : Float.class;
+        switch (column) {
+            case 0 -> {
+                return String.class;
+            }
+            case 1, 2 -> {
+                return Float.class;
+            }
+        }
+        return null;
+    }
+
+    public List<PurExpense> getExpenseList() {
+        listDetail.removeIf((e) -> Util1.getFloat(e.getAmount()) == 0);
+        return listDetail;
     }
 
     public List<PurExpense> getListDetail() {
@@ -83,6 +106,8 @@ public class PurExpenseTableModel extends AbstractTableModel {
                     b.getExpenseName();
                 case 1 ->
                     b.getAmount();
+                case 2 ->
+                    b.getPercent();
                 default ->
                     null;
             }; //Code
@@ -115,7 +140,22 @@ public class PurExpenseTableModel extends AbstractTableModel {
                         case 1 -> {
                             if (Util1.isNumber(value)) {
                                 e.setAmount(Util1.getFloat(value));
+                                e.setPercent(null);
                                 checkAndFocus(row + 1);
+                            }
+                        }
+                        case 2 -> {
+                            if (Util1.isNumber(value)) {
+                                float percent = Util1.getFloat(value);
+                                if (percent <= 100) {
+                                    e.setPercent(percent);
+                                    if (percent > 0) {
+                                        float vouTotal = Util1.getFloat(txtVouTotal.getValue());
+                                        e.setAmount(vouTotal * (percent / 100));
+                                    } else {
+                                        e.setAmount(0.0f);
+                                    }
+                                }
                             }
                         }
                     }

@@ -27,10 +27,6 @@ public class COAComboBoxModel extends AbstractListModel<ChartOfAccount> implemen
         this.data = data;
     }
 
-    public COAComboBoxModel(List<ChartOfAccount> data) {
-        this.data = data;
-    }
-
     @Override
     public void setSelectedItem(Object anItem) {
         if (anItem == null) {

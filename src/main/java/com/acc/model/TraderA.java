@@ -21,7 +21,7 @@ import lombok.Data;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
-@Table(name = "trader")
+@Table(name = "trader_acco")
 public class TraderA {
 
     @EmbeddedId

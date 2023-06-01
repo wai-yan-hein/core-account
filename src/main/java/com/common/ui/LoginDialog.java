@@ -90,42 +90,42 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
             d.setLocationRelativeTo(null);
             d.setVisible(true);
         });
-        userRepo.register(Global.machineName).subscribe((t) -> {
-            d.setVisible(false);
-            int macId = t.getMacId();
-            if (macId == 0) {
-                SecurityDialog dialog = new SecurityDialog();
-                dialog.setLocationRelativeTo(null);
-                dialog.setVisible(true);
-                String inputKey = dialog.getKey();
-                String toDayKey = Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd");
-                toDayKey = toDayKey.replaceAll("-", "");
-                if (inputKey.equals(toDayKey)) {
-                    register().subscribe((info) -> {
-                        if (info != null) {
-                            Global.macId = info.getMacId();
-                            log.info("Mac Id : " + Global.machineName);
-                            setLocationRelativeTo(null);
-                            setVisible(true);
-                        }
-                    });
-
-                } else {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Security Key.");
-                    System.exit(0);
-                }
-            } else {
-                lblStatus.setText("Latest version.");
-                Global.macId = macId;
-                setLocationRelativeTo(null);
-                setVisible(true);
-                toFront();
-                requestFocus();
-            }
-        }, (e) -> {
+        MachineInfo t = userRepo.register(Global.machineName).block();
+        if (t == null) {
             JOptionPane.showMessageDialog(this, "Core User Api is not running.", "Connection Error", JOptionPane.ERROR_MESSAGE);
             System.exit(0);
-        });
+        }
+        d.setVisible(false);
+        int macId = t.getMacId();
+        if (macId == 0) {
+            SecurityDialog dialog = new SecurityDialog();
+            dialog.setLocationRelativeTo(null);
+            dialog.setVisible(true);
+            String inputKey = dialog.getKey();
+            String toDayKey = Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd");
+            toDayKey = toDayKey.replaceAll("-", "");
+            if (inputKey.equals(toDayKey)) {
+                register().subscribe((info) -> {
+                    if (info != null) {
+                        Global.macId = info.getMacId();
+                        log.info("Mac Id : " + Global.machineName);
+                        setLocationRelativeTo(null);
+                        setVisible(true);
+                    }
+                });
+
+            } else {
+                JOptionPane.showMessageDialog(Global.parentForm, "Invalid Security Key.");
+                System.exit(0);
+            }
+        } else {
+            lblStatus.setText("Latest version.");
+            Global.macId = macId;
+            setLocationRelativeTo(null);
+            setVisible(true);
+            toFront();
+            requestFocus();
+        }
 
     }
 

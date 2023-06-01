@@ -244,6 +244,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         boolean status = Util1.getBoolean(ProUtil.getProperty(ProUtil.P_SHOW_EXPENSE));
         if (status) {
             expenseTableModel.setObserver(this);
+            expenseTableModel.setTxtVouTotal(txtVouTotal);
             expenseTableModel.setTable(tblExpense);
             tblExpense.setModel(expenseTableModel);
             tblExpense.getTableHeader().setFont(Global.tblHeaderFont);
@@ -255,11 +256,13 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                     .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
             tblExpense.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             tblExpense.getColumnModel().getColumn(0).setPreferredWidth(100);
-            tblExpense.getColumnModel().getColumn(1).setPreferredWidth(40);
+            tblExpense.getColumnModel().getColumn(1).setPreferredWidth(50);
+            tblExpense.getColumnModel().getColumn(2).setPreferredWidth(20);
             inventoryRepo.getExpense().subscribe((t) -> {
                 tblExpense.getColumnModel().getColumn(0).setCellEditor(new ExpenseEditor(t));
             });
             tblExpense.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
+            tblExpense.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
             txtExpense.setFormatterFactory(Util1.getDecimalFormat());
             txtExpense.setFont(Global.amtFont);
             txtExpense.setHorizontalAlignment(JTextField.RIGHT);
@@ -279,6 +282,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 key.setCompCode(e.getKey().getCompCode());
                 p.setKey(key);
                 p.setExpenseName(e.getExpenseName());
+                p.setPercent(e.getPercent());
                 p.setAmount(0.0f);
                 expenseTableModel.addObject(p);
             }
@@ -470,7 +474,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             progress.setIndeterminate(true);
             ph.setListPD(purTableModel.getListDetail());
             ph.setListDel(purTableModel.getDelList());
-            ph.setListExpense(expenseTableModel.getListDetail());
+            ph.setListExpense(expenseTableModel.getExpenseList());
             inventoryRepo.save(ph).subscribe((t) -> {
                 clear();
                 progress.setIndeterminate(false);
@@ -596,7 +600,18 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     private void calExpense() {
         float ttlExp = 0.0f;
         List<PurExpense> list = expenseTableModel.getListDetail();
-        for (PurExpense p : list) {
+        for (int i = 0; i < list.size(); i++) {
+            PurExpense p = list.get(i);
+            if (p.getPercent() != null) {
+                float percent = Util1.getFloat(p.getPercent());
+                if (percent > 0) {
+                    float vouTotal = Util1.getFloat(txtVouTotal.getValue());
+                    p.setAmount(vouTotal * (percent / 100));
+                } else {
+                    p.setAmount(0.0f);
+                }
+            }
+            expenseTableModel.fireTableRowsUpdated(i, i);
             ttlExp += Util1.getFloat(p.getAmount());
         }
         txtExpense.setValue(ttlExp);
@@ -611,7 +626,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     private void calculateTotalAmount(boolean partial) {
-        calExpense();
         List<PurHisDetail> list = purTableModel.getListDetail();
         calQty(list);
         calComission();
@@ -619,6 +633,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         double ttl = list.stream().mapToDouble((obj) -> Util1.getDouble(obj.getAmount())).sum();
         double totalAmount = Math.round(ttl);
         txtVouTotal.setValue(totalAmount);
+        calExpense();
         //cal discAmt
         float discp = Util1.getFloat(txtVouDiscP.getValue());
         if (discp > 0) {

@@ -26,8 +26,6 @@ import com.inventory.ui.setup.dialog.RegionSetup;
 import com.inventory.ui.setup.dialog.TraderGroupDialog;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.ArrayList;
-import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -45,7 +43,6 @@ import javax.swing.text.JTextComponent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
 
 /**
  *
@@ -109,8 +106,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
             traderGroupAutoCompleter.setGroup(null);
         });
 
-        accountRepo.getCOAChild(ProUtil.getProperty(ProUtil.CREDITOR_GROUP))
-                .collectList()
+        accountRepo.getCOAByGroup(ProUtil.getProperty(ProUtil.CREDITOR_GROUP))
                 .subscribe((t) -> {
                     cOAAutoCompleter = new COAAutoCompleter(txtAccount, t, null, false);
                     accountRepo.findCOA(ProUtil.getProperty(ProUtil.CREDITOR_ACC)).subscribe((tt) -> {
@@ -278,7 +274,9 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         supplierTabelModel.refresh();
         lblRecord.setText(String.valueOf(supplierTabelModel.getListCustomer().size()));
         traderGroupAutoCompleter.setGroup(null);
-        cOAAutoCompleter.setCoa(null);
+        if (cOAAutoCompleter != null) {
+            cOAAutoCompleter.setCoa(null);
+        }
     }
 
     private void initKeyListener() {

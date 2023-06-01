@@ -7,9 +7,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
 @Repository
 public class VRoleCompanyDaoImpl extends AbstractDao<String, VRoleCompany> implements VRoleCompanyDao {
+
     @Override
     public List<VRoleCompany> getPrivilegeCompany(String roleCode) {
         String sql = """
@@ -44,7 +46,7 @@ public class VRoleCompanyDaoImpl extends AbstractDao<String, VRoleCompany> imple
                     vList.add(vRole);
                 }
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
         }
         return vList;

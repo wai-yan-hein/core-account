@@ -11,7 +11,6 @@ import com.acc.model.COATemplateKey;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.DateModel;
 import com.acc.model.DeleteObj;
-import com.user.model.Currency;
 import com.acc.model.DepartmentA;
 import com.acc.model.DepartmentAKey;
 import com.acc.model.Gl;
@@ -104,7 +103,7 @@ public class AccountRepo {
     }
 
     public Flux<TraderA> getTrader(String text) {
-         if (localDatabase) {
+        if (localDatabase) {
             return h2Repo.findTraderAccount(text);
         }
         return accountApi.get()
@@ -117,7 +116,7 @@ public class AccountRepo {
 
     public Flux<ChartOfAccount> getChartOfAccount() {
         if (localDatabase) {
-           return h2Repo.getChartofAccount();
+            return h2Repo.getChartofAccount();
         }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-coa")
@@ -127,6 +126,9 @@ public class AccountRepo {
     }
 
     public Flux<ChartOfAccount> getCOATree() {
+        if (localDatabase) {
+            return h2Repo.getCOATree();
+        }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-coa-tree")
                 .queryParam("compCode", Global.compCode)
@@ -135,6 +137,9 @@ public class AccountRepo {
     }
 
     public Flux<ChartOfAccount> getTraderAccount() {
+        if (localDatabase) {
+            return h2Repo.getTraderCOA();
+        }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-trader-coa")
                 .queryParam("compCode", Global.compCode)
@@ -309,6 +314,9 @@ public class AccountRepo {
     }
 
     public Flux<ChartOfAccount> getCOAChild(String coaCode) {
+        if (localDatabase) {
+            return h2Repo.getCOAChild(coaCode);
+        }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-coa-child")
                 .queryParam("coaCode", coaCode)
@@ -317,9 +325,23 @@ public class AccountRepo {
                 .retrieve().bodyToFlux(ChartOfAccount.class);
     }
 
-    public Mono<List<ChartOfAccount>> getCOA3(String headCode) {
+    public Mono<List<ChartOfAccount>> getCOAByGroup(String groupCode) {
+        if (localDatabase) {
+            return h2Repo.getCOA3(groupCode);
+        }
         return accountApi.get()
-                .uri(builder -> builder.path("/account/get-coa3")
+                .uri(builder -> builder.path("/account/getCOAByGroup")
+                .queryParam("groupCode", groupCode)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(ChartOfAccount.class)
+                .collectList();
+    }
+
+    public Mono<List<ChartOfAccount>> getCOAByHead(String headCode) {
+        return accountApi.get()
+                .uri(builder -> builder.path("/account/getCOAByHead")
                 .queryParam("headCode", headCode)
                 .queryParam("compCode", Global.compCode)
                 .build())
@@ -367,7 +389,11 @@ public class AccountRepo {
                 .body(Mono.just(key), COAKey.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono(ChartOfAccount.class);
+                .bodyToMono(ChartOfAccount.class)
+                .onErrorResume((e) -> {
+                    log.error("findCOA :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<DepartmentA> saveDepartment(DepartmentA dep) {
@@ -383,7 +409,8 @@ public class AccountRepo {
                 .uri(builder -> builder.path("/account/get-department-tree")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().bodyToFlux(DepartmentA.class);
+                .retrieve()
+                .bodyToFlux(DepartmentA.class);
     }
 
     public Mono<OpeningBalance> saveCOAOpening(OpeningBalance opening) {
