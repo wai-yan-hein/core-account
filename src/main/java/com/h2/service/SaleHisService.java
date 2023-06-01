@@ -18,7 +18,11 @@ public interface SaleHisService {
 
     SaleHis find(SaleHisKey key);
 
+    SaleHis updateACK(SaleHisKey key);
+
     List<SaleHis> findAll(String compCode);
+
+    List<SaleHis> unUploadVoucher(String compCode);
 
     String getMaxDate();
 

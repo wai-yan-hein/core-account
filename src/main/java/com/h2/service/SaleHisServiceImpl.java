@@ -95,4 +95,14 @@ public class SaleHisServiceImpl implements SaleHisService {
         return deptCode + String.format("%0" + 2 + "d", macId) + String.format("%0" + 5 + "d", seqNo) + "-" + period;
     }
 
+    @Override
+    public List<SaleHis> unUploadVoucher(String compCode) {
+        return dao.unUploadVoucher(compCode);
+    }
+
+    @Override
+    public SaleHis updateACK(SaleHisKey key) {
+        return dao.updateACK(key);
+    }
+
 }

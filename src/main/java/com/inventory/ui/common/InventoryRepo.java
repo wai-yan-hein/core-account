@@ -1044,9 +1044,18 @@ public class InventoryRepo {
                 .body(Mono.just(loss), WeightLossHis.class)
                 .retrieve()
                 .bodyToMono(WeightLossHis.class)
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
+                .onErrorResume(e -> {
+                    if (localDatabase) {
+                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
+                                "Can't save voucher to cloud. Do you want save local?",
+                                "Offline", JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                        if (status == JOptionPane.YES_OPTION) {
+                            return h2Repo.save(loss);
+                        }
+                        return Mono.error(e);
+                    }
+                    return Mono.error(e);
                 });
     }
 
@@ -1090,6 +1099,12 @@ public class InventoryRepo {
     }
 
     public Mono<General> getPurRecentPrice(String stockCode, String vouDate, String unit) {
+        if (localDatabase) {
+//            return h2Repo.getPurRecentPrice(stockCode, vouDate, unit, Global.compCode, Global.deptId);G
+            General general = new General();
+            general.setAmount(0.0F);
+            return Mono.justOrEmpty(general);
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/report/get-purchase-recent-price")
                 .queryParam("stockCode", stockCode)
@@ -1362,6 +1377,9 @@ public class InventoryRepo {
     }
 
     public Mono<General> getSmallQty(String stockCode, String unit) {
+        if (localDatabase) {
+            return h2Repo.getSmallQty(stockCode, unit, Global.compCode, Global.deptId);
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/report/get-smallest_qty")
                 .queryParam("stockCode", stockCode)
@@ -1711,9 +1729,18 @@ public class InventoryRepo {
                 .body(Mono.just(his), ProcessHis.class)
                 .retrieve()
                 .bodyToMono(ProcessHis.class)
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
+                .onErrorResume(e -> {
+                    if (localDatabase) {
+                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
+                                "Can't save voucher to cloud. Do you want save local?",
+                                "Offline", JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                        if (status == JOptionPane.YES_OPTION) {
+                            return h2Repo.save(his);
+                        }
+                        return Mono.error(e);
+                    }
+                    return Mono.error(e);
                 });
     }
 
@@ -1898,6 +1925,28 @@ public class InventoryRepo {
                                 JOptionPane.WARNING_MESSAGE);
                         if (status == JOptionPane.YES_OPTION) {
                             return h2Repo.save(sh);
+                        }
+                        return Mono.error(e);
+                    }
+                    return Mono.error(e);
+                });
+    }
+
+    public Mono<TransferHis> save(TransferHis th) {
+
+        return inventoryApi.post()
+                .uri("/transfer/save-transsfer")
+                .body(Mono.just(th), TransferHis.class)
+                .retrieve()
+                .bodyToMono(TransferHis.class)
+                .onErrorResume(e -> {
+                    if (localDatabase) {
+                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
+                                "Can't save voucher to cloud. Do you want save local?",
+                                "Offline", JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                        if (status == JOptionPane.YES_OPTION) {
+                            return h2Repo.save(th);
                         }
                         return Mono.error(e);
                     }

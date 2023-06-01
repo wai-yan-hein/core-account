@@ -47,4 +47,9 @@ public class SaleHisDetailDaoImpl extends AbstractDao<SaleDetailKey, SaleHisDeta
         remove(key);
     }
 
+    @Override
+    public List<SaleHisDetail> search(String vouNo, String compCode, Integer deptId) {
+        return null;
+    }
+
 }

@@ -22,6 +22,8 @@ public interface SaleHisDetailDao {
 
     String getMaxDate();
 
+    List<SaleHisDetail> search(String vouNo, String compCode, Integer deptId);
+
     List<SaleHisDetail> findAll(String compCode);
 
 }

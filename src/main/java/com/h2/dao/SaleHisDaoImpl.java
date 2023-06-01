@@ -42,4 +42,21 @@ public class SaleHisDaoImpl extends AbstractDao<SaleHisKey, SaleHis> implements 
         return getByKey(key);
     }
 
+    @Override
+    public List<SaleHis> unUploadVoucher(String compCode) {
+        String hsql = "select o from SaleHis o where o.intgUpdStatus is null";
+        List<SaleHis> list = findHSQL(hsql);
+        list.forEach((s) -> {
+        });
+        return list;
+    }
+
+    @Override
+    public SaleHis updateACK(SaleHisKey key) {
+        SaleHis sh = getByKey(key);
+        sh.setIntgUpdStatus("ACK");
+        saveOrUpdate(sh, sh.getKey());
+        return sh;
+    }
+
 }

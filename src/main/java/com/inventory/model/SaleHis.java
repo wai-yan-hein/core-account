@@ -12,6 +12,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
@@ -92,6 +93,10 @@ public class SaleHis {
     private String orderNo;
     @Column(name = "project_no")
     private String projectNo;
+    @Column(name = "tmp_vou_no")
+    private String tmpVouNo;
+    @Transient
+    private String localVouNo;
     private transient String status = "STATUS";
     private transient List<SaleHisDetail> listSH;
     private transient List<SaleDetailKey> listDel;
