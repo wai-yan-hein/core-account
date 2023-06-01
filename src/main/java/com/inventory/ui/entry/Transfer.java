@@ -224,16 +224,13 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             progress.setIndeterminate(true);
             io.setListTD(tranTableModel.getListTransfer());
             io.setDelList(tranTableModel.getDeleteList());
-            inventoryApi.post()
-                    .uri("/transfer/save-transfer")
-                    .body(Mono.just(io), TransferHis.class)
-                    .retrieve()
-                    .bodyToMono(TransferHis.class)
+            inventoryRepo.save(io)
                     .subscribe((t) -> {
                         clear();
                         focusOnTable();
                     }, (e) -> {
                         JOptionPane.showMessageDialog(this, e.getMessage());
+                        progress.setIndeterminate(false);
                     });
         }
         return status;

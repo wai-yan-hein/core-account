@@ -178,8 +178,12 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
         if (isValidEntry() && tableModel.isValidEntry()) {
             his.setListDetail(tableModel.getListDetail());
             his.setDelKeys(tableModel.getDelKeys());
-            inventoryRepo.saveWeightLoss(his);
-            clear();
+            inventoryRepo.saveWeightLoss(his).subscribe((t) -> {
+                        clear();
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
+                progress.setIndeterminate(false);
+            });
         }
     }
 

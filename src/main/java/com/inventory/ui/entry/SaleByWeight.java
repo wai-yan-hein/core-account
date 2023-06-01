@@ -314,6 +314,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         if (ProUtil.isCalStock()) {
             tblStockBalance.setModel(stockBalanceTableModel);
             stockBalanceTableModel.setProgress(sbProgress);
+            stockBalanceTableModel.setInventoryRepo(inventoryRepo);
             tblStockBalance.getColumnModel().getColumn(0).setPreferredWidth(100);//Unit
             tblStockBalance.getColumnModel().getColumn(1).setPreferredWidth(140);//Cost Price
             tblStockBalance.getTableHeader().setFont(Global.tblHeaderFont);
@@ -391,6 +392,9 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                         String reportName = getReportName();
                         printVoucher(t.getKey().getVouNo(), reportName, chkVou.isSelected());
                     }
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                    progress.setIndeterminate(false);
                 });
             }
         } catch (HeadlessException ex) {

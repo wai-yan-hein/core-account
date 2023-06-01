@@ -5,25 +5,48 @@
  */
 package com.inventory.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Data;
 
 /**
  *
  * @author Lenovo
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
+@Entity
+@Table(name = "op_his_detail")
 public class OPHisDetail {
+
+    @EmbeddedId
     private OPHisDetailKey key;
+    @Column(name = "stock_code")
     private String stockCode;
-    private String userCode;
-    private String stockName;
-    private String groupName;
-    private String brandName;
-    private String catName;
-    private String relName;
+    @Column(name = "qty")
     private Float qty;
+    @Column(name = "price")
     private Float price;
+    @Column(name = "amount")
     private Float amount;
+    @Column(name = "loc_code")
     private String locCode;
+    @Column(name = "unit")
     private String unitCode;
+    @Transient
+    private String userCode;
+    @Transient
+    private String stockName;
+    @Transient
+    private String groupName;
+    @Transient
+    private String brandName;
+    @Transient
+    private String catName;
+    @Transient
+    private String relName;
 }

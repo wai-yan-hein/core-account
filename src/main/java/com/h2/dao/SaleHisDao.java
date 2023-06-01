@@ -18,6 +18,10 @@ public interface SaleHisDao {
 
     SaleHis find(SaleHisKey key);
 
+    List<SaleHis> unUploadVoucher(String compCode);
+
+    SaleHis updateACK(SaleHisKey key);
+
     String getMaxDate();
 
     List<SaleHis> findAll(String compCode);

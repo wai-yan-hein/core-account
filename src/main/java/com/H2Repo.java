@@ -9,9 +9,7 @@ import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.DepartmentA;
 import com.acc.model.DepartmentAKey;
-import com.acc.model.Gl;
 import com.acc.model.TraderA;
-import com.acc.model.TraderAKey;
 import com.common.Global;
 import com.h2.service.BrandService;
 import com.h2.service.BusinessTypeService;
@@ -26,6 +24,7 @@ import com.h2.service.LocationService;
 import com.h2.service.MacPropertyService;
 import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
+import com.h2.service.OPHisService;
 import com.h2.service.PrivilegeCompanyService;
 import com.h2.service.ProjectService;
 import com.h2.service.PurHisService;
@@ -85,6 +84,21 @@ import com.user.model.RoleProperty;
 import com.user.model.SysProperty;
 import com.user.model.VRoleCompany;
 import com.h2.service.OrderHisService;
+import com.h2.service.ProcessHisService;
+import com.h2.service.ReportService;
+import com.h2.service.StockInOutDetailService;
+import com.h2.service.StockInOutService;
+import com.h2.service.TransferHisService;
+import com.h2.service.WeightLossService;
+import com.inventory.model.General;
+import com.inventory.model.OPHis;
+import com.inventory.model.OPHisKey;
+import com.inventory.model.ProcessHis;
+import com.inventory.model.StockIOKey;
+import com.inventory.model.StockInOut;
+import com.inventory.model.StockInOutDetail;
+import com.inventory.model.TransferHis;
+import com.inventory.model.WeightLossHis;
 import java.util.HashMap;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -128,6 +142,14 @@ public class H2Repo {
     @Autowired
     private RetOutService retOutService;
     @Autowired
+    private StockInOutService stockInOutService;
+    @Autowired
+    private StockInOutDetailService stkIODetailService;
+    @Autowired
+    private TransferHisService transferHisService;
+    @Autowired
+    private OPHisService opHisService;
+    @Autowired
     private UserService userService;
     @Autowired
     private MachineInfoService machineInfoService;
@@ -165,6 +187,12 @@ public class H2Repo {
     private VRoleMenuService vRoleMenuService;
     @Autowired
     private DepartmentUserService deptUserService;
+    @Autowired
+    private ProcessHisService processHisService;
+    @Autowired
+    private WeightLossService weightLossService;
+    @Autowired
+    private ReportService reportService;
 
     public Mono<List<Location>> getLocation() {
         return Mono.justOrEmpty(locationService.findAll(Global.compCode));
@@ -242,6 +270,18 @@ public class H2Repo {
         return Mono.justOrEmpty(vouStatusService.find(key));
     }
 
+    public Mono<List<StockInOutDetail>> searchStkIODetail(String vouNo, String compCode, Integer deptId) {
+        return Mono.justOrEmpty(stkIODetailService.search(vouNo, compCode, deptId));
+    }
+
+    public Mono<StockInOut> findStkIO(StockIOKey key) {
+        return Mono.justOrEmpty(stockInOutService.findById(key));
+    }
+
+    public Mono<OPHis> findOpening(OPHisKey key) {
+        return Mono.justOrEmpty(opHisService.findByCode(key));
+    }
+
     public Mono<SaleHis> save(SaleHis sh) {
         return Mono.justOrEmpty(saleHisService.save(sh));
     }
@@ -260,6 +300,30 @@ public class H2Repo {
 
     public Mono<RetOutHis> save(RetOutHis rh) {
         return Mono.justOrEmpty(retOutService.save(rh));
+    }
+
+    public Mono<StockInOut> save(StockInOut sio) {
+        return Mono.justOrEmpty(stockInOutService.save(sio));
+    }
+
+    public Mono<TransferHis> save(TransferHis th) {
+        return Mono.justOrEmpty(transferHisService.save(th));
+    }
+
+    public Mono<ProcessHis> save(ProcessHis ph) {
+        return Mono.justOrEmpty(processHisService.save(ph));
+    }
+
+    public Mono<WeightLossHis> save(WeightLossHis wh) {
+        return Mono.justOrEmpty(weightLossService.save(wh));
+    }
+
+    public Mono<General> getPurRecentPrice(String stockCode, String vouDate, String unit, String compCode, Integer deptId) {
+        return Mono.justOrEmpty(reportService.getPurchaseRecentPrice(stockCode, vouDate, unit, compCode, deptId));
+    }
+
+    public Mono<General> getSmallQty(String stockCode, String unit, String compCode, Integer deptId) {
+        return Mono.justOrEmpty(reportService.getSmallestQty(stockCode, unit, compCode, deptId));
     }
 
     public Mono<AppUser> login(String userName, String password) {
@@ -440,21 +504,20 @@ public class H2Repo {
         return Mono.justOrEmpty(coaService.findById(key));
     }
 
-    
     public Flux<ChartOfAccount> getCOATree() {
         return Flux.fromIterable(coaService.getCOATree(Global.compCode));
     }
-    
+
     public Flux<ChartOfAccount> getTraderCOA() {
         return Flux.fromIterable(coaService.getTraderCOA(Global.compCode));
     }
 
     public Mono<List<ChartOfAccount>> getCOA3(String headCode) {
-        return Mono.justOrEmpty(coaService.getCOA(headCode,Global.compCode));
+        return Mono.justOrEmpty(coaService.getCOA(headCode, Global.compCode));
     }
-    
+
     public Flux<ChartOfAccount> getCOAChild(String coaCode) {
-        return Flux.fromIterable(coaService.getCOAChild(coaCode,Global.compCode));
+        return Flux.fromIterable(coaService.getCOAChild(coaCode, Global.compCode));
     }
 //    public Mono<Gl> save(Gl sh) {
 //        return Mono.justOrEmpty(saleHisService.save(sh));
