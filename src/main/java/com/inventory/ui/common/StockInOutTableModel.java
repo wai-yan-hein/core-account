@@ -187,7 +187,7 @@ public class StockInOutTableModel extends AbstractTableModel {
                             io.setStockCode(s.getKey().getStockCode());
                             io.setStockName(s.getStockName());
                             io.setUserCode(s.getUserCode());
-                            io.setRelation(s.getRelName());
+//                            io.setRelation(s.getRelName());
                             io.setCostPrice(0.0f);
                             io.setInUnitCode(s.getPurUnitCode());
                             io.setOutUnitCode(s.getPurUnitCode());

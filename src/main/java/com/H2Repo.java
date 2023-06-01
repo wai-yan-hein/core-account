@@ -26,6 +26,7 @@ import com.h2.service.LocationService;
 import com.h2.service.MacPropertyService;
 import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
+import com.h2.service.OPHisService;
 import com.h2.service.PrivilegeCompanyService;
 import com.h2.service.ProjectService;
 import com.h2.service.PurHisService;
@@ -85,6 +86,13 @@ import com.user.model.RoleProperty;
 import com.user.model.SysProperty;
 import com.user.model.VRoleCompany;
 import com.h2.service.OrderHisService;
+import com.h2.service.StockInOutDetailService;
+import com.h2.service.StockInOutService;
+import com.inventory.model.OPHis;
+import com.inventory.model.OPHisKey;
+import com.inventory.model.StockIOKey;
+import com.inventory.model.StockInOut;
+import com.inventory.model.StockInOutDetail;
 import java.util.HashMap;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,6 +135,12 @@ public class H2Repo {
     private RetInService retInService;
     @Autowired
     private RetOutService retOutService;
+    @Autowired
+    private StockInOutService stockInOutService;
+    @Autowired
+    private StockInOutDetailService stkIODetailService;
+    @Autowired
+    private OPHisService opHisService;
     @Autowired
     private UserService userService;
     @Autowired
@@ -242,6 +256,18 @@ public class H2Repo {
         return Mono.justOrEmpty(vouStatusService.find(key));
     }
 
+    public Mono<List<StockInOutDetail>> searchStkIODetail(String vouNo, String compCode, Integer deptId) {
+        return Mono.justOrEmpty(stkIODetailService.search(vouNo, compCode, deptId));
+    }
+
+    public Mono<StockInOut> findStkIO(StockIOKey key) {
+        return Mono.justOrEmpty(stockInOutService.findById(key));
+    }
+
+    public Mono<OPHis> findOpening(OPHisKey key) {
+        return Mono.justOrEmpty(opHisService.findByCode(key));
+    }
+
     public Mono<SaleHis> save(SaleHis sh) {
         return Mono.justOrEmpty(saleHisService.save(sh));
     }
@@ -260,6 +286,10 @@ public class H2Repo {
 
     public Mono<RetOutHis> save(RetOutHis rh) {
         return Mono.justOrEmpty(retOutService.save(rh));
+    }
+
+    public Mono<StockInOut> save(StockInOut sio) {
+        return Mono.justOrEmpty(stockInOutService.save(sio));
     }
 
     public Mono<AppUser> login(String userName, String password) {

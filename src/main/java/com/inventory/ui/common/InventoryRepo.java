@@ -55,6 +55,7 @@ import com.inventory.model.StockBrand;
 import com.inventory.model.StockBrandKey;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
+import com.inventory.model.StockInOutDetail;
 import com.inventory.model.StockKey;
 import com.inventory.model.StockType;
 import com.inventory.model.StockTypeKey;
@@ -558,6 +559,10 @@ public class InventoryRepo {
         key.setDeptId(deptId);
         key.setCode(code);
 
+        if (localDatabase) {
+            return h2Repo.find(key);
+        }
+
         return inventoryApi.post()
                 .uri("/setup/find-voucher-status")
                 .body(Mono.just(key), VouStatusKey.class)
@@ -567,6 +572,21 @@ public class InventoryRepo {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
                 });
+    }
+
+    public Mono<List<StockInOutDetail>> searchStkIODetail(String vouNo, Integer deptId) {
+        if (localDatabase) {
+            return h2Repo.searchStkIODetail(vouNo, Global.compCode, deptId);
+        }
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/stockio/get-stockio-detail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", deptId)
+                .build())
+                .retrieve()
+                .bodyToFlux(StockInOutDetail.class)
+                .collectList();
     }
 
     public Mono<StockUnit> findUnit(String unitCode, Integer deptId) {
@@ -790,6 +810,9 @@ public class InventoryRepo {
     }
 
     public Mono<List<VouStatus>> getVoucherStatus() {
+        if (localDatabase) {
+            return h2Repo.getVouStatus();
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-voucher-status")
                 .queryParam("compCode", Global.compCode)
@@ -1213,6 +1236,9 @@ public class InventoryRepo {
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setVouNo(vouNo);
+        if (localDatabase) {
+            return h2Repo.findStkIO(key);
+        }
         return inventoryApi.post()
                 .uri("/stockio/find-stockio")
                 .body(Mono.just(key), StockIOKey.class)
@@ -1273,6 +1299,9 @@ public class InventoryRepo {
     }
 
     public Mono<OPHis> findOpening(OPHisKey key) {
+        if (localDatabase) {
+            return h2Repo.findOpening(key);
+        }
         return inventoryApi.post()
                 .uri("/setup/find-opening")
                 .body(Mono.just(key), OPHisKey.class)
@@ -1869,6 +1898,27 @@ public class InventoryRepo {
                                 JOptionPane.WARNING_MESSAGE);
                         if (status == JOptionPane.YES_OPTION) {
                             return h2Repo.save(sh);
+                        }
+                        return Mono.error(e);
+                    }
+                    return Mono.error(e);
+                });
+    }
+
+    public Mono<StockInOut> save(StockInOut sio) {
+        return inventoryApi.post()
+                .uri("/stockio/save-stockio")
+                .body(Mono.just(sio), StockInOut.class)
+                .retrieve()
+                .bodyToMono(StockInOut.class)
+                .onErrorResume(e -> {
+                    if (localDatabase) {
+                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
+                                "Can't save voucher to cloud. Do you want save local?",
+                                "Offline", JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                        if (status == JOptionPane.YES_OPTION) {
+                            return h2Repo.save(sio);
                         }
                         return Mono.error(e);
                     }

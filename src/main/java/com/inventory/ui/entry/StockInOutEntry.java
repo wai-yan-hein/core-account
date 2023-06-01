@@ -27,6 +27,7 @@ import com.inventory.model.OPHisDetail;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
+import com.inventory.model.StockInOutKey;
 import com.inventory.model.StockUnit;
 import com.inventory.model.VStockIO;
 import com.inventory.ui.common.InventoryRepo;
@@ -243,16 +244,13 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             progress.setIndeterminate(true);
             io.setListSH(outTableModel.getListStock());
             io.setListDel(outTableModel.getDeleteList());
-            inventoryApi.post()
-                    .uri("/stockio/save-stockio")
-                    .body(Mono.just(io), StockInOut.class)
-                    .retrieve()
-                    .bodyToMono(StockInOut.class)
+            inventoryRepo.save(io)
                     .subscribe((t) -> {
                         clear();
                         focusOnTable();
                     }, (e) -> {
                         JOptionPane.showMessageDialog(this, e.getMessage());
+                        progress.setIndeterminate(false);
                     });
 
         }
@@ -352,37 +350,34 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 vouStatusAutoCompleter.setVoucher(t);
             });
             String vouNo = io.getKey().getVouNo();
-            Flux<StockInOutDetail> result = inventoryApi.get()
-                    .uri(builder -> builder.path("/stockio/get-stockio-detail")
-                    .queryParam("vouNo", vouNo)
-                    .queryParam("compCode", Global.compCode)
-                    .queryParam("deptId", io.getKey().getDeptId())
-                    .build())
-                    .retrieve().bodyToFlux(StockInOutDetail.class);
-            result.subscribe((t) -> {
-                outTableModel.addObject(t);
-            }, (e) -> {
-                progress.setIndeterminate(false);
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            }, () -> {
-                outTableModel.addNewRow();
-                txtVou.setText(vouNo);
-                txtDate.setDate(Util1.toDateFormat(io.getVouDate(), "dd/MM/yyyy"));
-                txtRemark.setText(io.getRemark());
-                txtDesp.setText(io.getDescription());
-                if (Util1.getBoolean(io.getDeleted())) {
-                    lblStatus.setText("DELETED");
-                    lblStatus.setForeground(Color.red);
-                    disableForm(false);
-                } else {
-                    lblStatus.setText("EDIT");
-                    lblStatus.setForeground(Color.blue);
-                    disableForm(true);
-                }
-                calTotalAmt();
-                focusOnTable();
-                progress.setIndeterminate(false);
-            });
+            inventoryRepo.searchStkIODetail(vouNo, io.getKey().getDeptId())
+                    .subscribe((t) -> {
+                        t.forEach((a) -> {
+                            outTableModel.addObject(a);
+                        });
+
+                    }, (e) -> {
+                        progress.setIndeterminate(false);
+                        JOptionPane.showMessageDialog(this, e.getMessage());
+                    }, () -> {
+                        outTableModel.addNewRow();
+                        txtVou.setText(vouNo);
+                        txtDate.setDate(Util1.toDateFormat(io.getVouDate(), "dd/MM/yyyy"));
+                        txtRemark.setText(io.getRemark());
+                        txtDesp.setText(io.getDescription());
+                        if (Util1.getBoolean(io.getDeleted())) {
+                            lblStatus.setText("DELETED");
+                            lblStatus.setForeground(Color.red);
+                            disableForm(false);
+                        } else {
+                            lblStatus.setText("EDIT");
+                            lblStatus.setForeground(Color.blue);
+                            disableForm(true);
+                        }
+                        calTotalAmt();
+                        focusOnTable();
+                        progress.setIndeterminate(false);
+                    });
         }
     }
 
@@ -427,6 +422,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             for (int i = 0; i < list.size(); i++) {
                 OPHisDetail his = list.get(i);
                 StockInOutDetail iod = new StockInOutDetail();
+                StockInOutKey key = new StockInOutKey();
                 iod.setStockCode(his.getStockCode());
                 iod.setStockName(his.getStockName());
                 iod.setInQty(his.getQty());
@@ -434,7 +430,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 iod.setInUnitCode(his.getUnitCode());
                 iod.setLocCode(op.getLocCode());
                 iod.setLocName(op.getLocName());
-                iod.setUniqueId(i + 1);
+                key.setUniqueId(i + 1);
+                iod.setKey(key);
+//                iod.setUniqueId(i + 1);
                 outTableModel.addObject(iod);
             }
             calTotalAmt();
