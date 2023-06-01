@@ -68,7 +68,7 @@ import reactor.core.publisher.Mono;
 @Component
 @Slf4j
 public class Reports extends javax.swing.JPanel implements PanelControl, SelectionObserver {
-
+    
     private final ReportTableModel tableModel = new ReportTableModel("Inventory Report");
     @Autowired
     private WebClient userApi;
@@ -98,19 +98,19 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private SelectionObserver observer;
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
-
+    
     public SelectionObserver getObserver() {
         return observer;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public JProgressBar getProgress() {
         return progress;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
@@ -121,18 +121,18 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     public Reports() {
         initComponents();
     }
-
+    
     public void initMain() {
         initTableReport();
         initCombo();
         initDate();
     }
-
+    
     private void initDate() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
     }
-
+    
     private void initTableReport() {
         tblReport.setModel(tableModel);
         tblReport.getTableHeader().setFont(Global.tblHeaderFont);
@@ -145,7 +145,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         tblReport.setRowSorter(sorter);
         getReport();
     }
-
+    
     private void getReport() {
         progress.setIndeterminate(true);
         Mono<List<VRoleMenu>> result = userRepo.getReport("Inventory");
@@ -158,7 +158,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             JOptionPane.showConfirmDialog(Global.parentForm, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         });
     }
-
+    
     private void initCombo() {
         inventoryRepo.getLocation().subscribe((t) -> {
             locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, true);
@@ -167,7 +167,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         inventoryRepo.getSaleMan().subscribe((t) -> {
             saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, t, null, true, false);
         });
-
+        
         inventoryRepo.getStockType().subscribe((t) -> {
             stockTypeAutoCompleter = new StockTypeAutoCompleter(txtStockType, t, null, true, false);
         });
@@ -188,7 +188,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             });
         });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
-
+        
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, inventoryRepo, null, true);
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
@@ -197,7 +197,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
         projectAutoCompleter.setObserver(this);
     }
-
+    
     private void report() {
         int row = tblReport.getSelectedRow();
         if (row >= 0) {
@@ -231,12 +231,12 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     filter.setCalPur(Util1.getBoolean(ProUtil.getProperty("disable.calculate.purchase.stock")));
                     filter.setCalRI(Util1.getBoolean(ProUtil.getProperty("disable.calculate.returin.stock")));
                     filter.setCalRO(Util1.getBoolean(ProUtil.getProperty("disable.calculate.retunout.stock")));
+                    filter.setCreditAmt(Util1.getFloat(ProUtil.getProperty(ProUtil.C_CREDIT_AMT)));
                     String batchNo = batchAutoCompeter.getBatch().getBatchNo();
                     filter.setBatchNo(batchNo.equals("All") ? "-" : batchNo);
                     Project p = projectAutoCompleter.getProject();
                     String projectNo = p == null ? null : p.getKey().getProjectNo();
                     filter.setProjectNo(projectNo);
-                    log.info("Report Date : " + stDate + " - " + enDate);
                     Map<String, Object> param = new HashMap<>();
                     param.put("p_report_name", reportName);
                     param.put("p_date", String.format("Between %s and %s",
@@ -259,7 +259,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             JOptionPane.showMessageDialog(Global.parentForm, "Choose Report.");
         }
     }
-
+    
     private boolean isValidReport(String url) {
         if (url.equals("StockInOutDetail")) {
             if (stockAutoCompleter.getStock().getKey().getStockCode().equals("-")) {
@@ -270,58 +270,55 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         }
         return true;
     }
-
+    
     private void printReport(String reportUrl, String reportName, Map<String, Object> param) {
         filter.setReportName(reportName);
-        Mono<ReturnObject> result = inventoryApi
+        inventoryApi
                 .post()
                 .uri("/report/get-report")
-                .body(Mono.just(filter), FilterObject.class
-                )
+                .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class
-                );
-        result.subscribe((t) -> {
-            try {
-                if (t != null) {
-                    log.info(String.format("printReport %s", t.getMessage()));
-                    String filePath = String.format("%s%s%s", Global.reportPath, File.separator, reportUrl.concat(".jasper"));
-                    if (t.getFile().length > 0) {
-                        JasperReportsContext jc = DefaultJasperReportsContext.getInstance();
-                        jc.setProperty("net.sf.jasperreports.default.font.name", Global.fontName.concat(".ttf"));
-                        jc.setProperty("net.sf.jasperreports.default.pdf.font.name", Global.fontName.concat(".ttf"));
-                        jc.setProperty("net.sf.jasperreports.default.pdf.encoding", "Identity-H");
-                        jc.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
-                        jc.setProperty("net.sf.jasperreports.viewer.zoom", "1");
-                        jc.setProperty("net.sf.jasperreports.export.xlsx.detect.cell.type", "true");
-                        jc.setProperty("net.sf.jasperreports.export.xlsx.white.page.background", "false");
-                        jc.setProperty("net.sf.jasperreports.export.xlsx.auto.fit.page.width", "true");
-                        jc.setProperty("net.sf.jasperreports.export.xlsx.ignore.graphics", "false");
-                        InputStream input = new ByteArrayInputStream(t.getFile());
-                        JsonDataSource ds = new JsonDataSource(input);
-                        JasperPrint js = JasperFillManager.fillReport(filePath, param, ds);
-                        JRViewer viwer = new JRViewer(js);
-                        JFrame frame = new JFrame("Core Value Report");
-                        frame.setIconImage(Global.parentForm.getIconImage());
-                        frame.getContentPane().add(viwer);
-                        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-                        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                        frame.setVisible(true);
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Report Does Not Exists.");
+                .bodyToMono(ReturnObject.class)
+                .subscribe((t) -> {
+                    try {
+                        if (t != null) {
+                            String filePath = String.format("%s%s%s", Global.reportPath, File.separator, reportUrl.concat(".jasper"));
+                            if (t.getFile().length > 0) {
+                                JasperReportsContext jc = DefaultJasperReportsContext.getInstance();
+                                jc.setProperty("net.sf.jasperreports.default.font.name", Global.fontName.concat(".ttf"));
+                                jc.setProperty("net.sf.jasperreports.default.pdf.font.name", Global.fontName.concat(".ttf"));
+                                jc.setProperty("net.sf.jasperreports.default.pdf.encoding", "Identity-H");
+                                jc.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
+                                jc.setProperty("net.sf.jasperreports.viewer.zoom", "1");
+                                jc.setProperty("net.sf.jasperreports.export.xlsx.detect.cell.type", "true");
+                                jc.setProperty("net.sf.jasperreports.export.xlsx.white.page.background", "false");
+                                jc.setProperty("net.sf.jasperreports.export.xlsx.auto.fit.page.width", "true");
+                                jc.setProperty("net.sf.jasperreports.export.xlsx.ignore.graphics", "false");
+                                InputStream input = new ByteArrayInputStream(t.getFile());
+                                JsonDataSource ds = new JsonDataSource(input);
+                                JasperPrint js = JasperFillManager.fillReport(filePath, param, ds);
+                                JRViewer viwer = new JRViewer(js);
+                                JFrame frame = new JFrame("Core Value Report");
+                                frame.setIconImage(Global.parentForm.getIconImage());
+                                frame.getContentPane().add(viwer);
+                                frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                                frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                                frame.setVisible(true);
+                            } else {
+                                JOptionPane.showMessageDialog(this, "Report Does Not Exists.");
+                            }
+                        }
+                        progress.setIndeterminate(false);
+                    } catch (JRException ex) {
+                        log.error("printVoucher : " + ex.getMessage());
+                        progress.setIndeterminate(false);
+                        JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
                     }
-                }
-                progress.setIndeterminate(false);
-            } catch (JRException ex) {
-                log.error("printVoucher : " + ex.getMessage());
-                progress.setIndeterminate(false);
-                JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
-            }
-        }, (e) -> {
-            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-            progress.setIndeterminate(false);
-        });
-
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+                    progress.setIndeterminate(false);
+                });
+        
     }
     private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
         @Override
@@ -936,38 +933,38 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     @Override
     public void save() {
     }
-
+    
     @Override
     public void delete() {
     }
-
+    
     @Override
     public void newForm() {
     }
-
+    
     @Override
     public void history() {
     }
-
+    
     @Override
     public void print() {
         report();
     }
-
+    
     @Override
     public void refresh() {
         getReport();
     }
-
+    
     @Override
     public void filter() {
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
     @Override
     public void selected(Object source, Object selectObj) {
         if (source.equals("Date")) {
@@ -975,5 +972,5 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             txtToDate.setDate(Util1.toDate(dateAutoCompleter.getEndDate(), "dd/MM/yyyy"));
         }
     }
-
+    
 }

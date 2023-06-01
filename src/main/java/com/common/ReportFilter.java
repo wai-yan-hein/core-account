@@ -55,7 +55,7 @@ public class ReportFilter {
     private String coaCode;
     private String srcAcc;
     private String cashGroup;
-    
+
     private String fixedAcc;
     private String currentAcc;
     private String capitalAcc;
@@ -68,7 +68,7 @@ public class ReportFilter {
     private String reAcc;
     private String batchNo;
     private String projectNo;
-
+    private float creditAmt;
     public ReportFilter(Integer macId, String compCode, Integer deptId) {
         this.macId = macId;
         this.compCode = compCode;

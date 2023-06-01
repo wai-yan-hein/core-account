@@ -128,7 +128,7 @@ public class CoreAccountApplication {
             System.exit(0);
         } catch (IOException e) {
             // Server is not running, so we can start a new instance of the program
-            System.out.println("Starting new instance of program...");
+            log.info("Starting new instance of program...");
         }
     }
 

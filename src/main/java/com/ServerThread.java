@@ -31,28 +31,26 @@ public class ServerThread extends Thread {
     public void run() {
         try {
             server = new ServerSocket(port);
-            System.out.println("Server started, listening for connections...");
             while (!isInterrupted()) {
+                log.info("inter : " + isInterrupted());
                 try (Socket client = server.accept(); OutputStream out = client.getOutputStream()) {
                     out.write("ok\n".getBytes());
                     out.flush();
                 }
-                System.out.println("Received request to bring main window to front and give it focus.");
-                EventQueue.invokeLater(() -> {
-                    log.info("hi");
-                    log.info("dialog" + Global.dialog);
-                    if (Global.dialog != null) {
-                        Global.dialog.toFront();
-                    }
+                log.info("Received request to bring main window to front and give it focus.");
+                if (Global.dialog.isVisible()) {
+                    Global.dialog.toFront();
+                    Global.dialog.focus();
+                } else {
                     if (Global.parentForm != null) {
                         Global.parentForm.setExtendedState(JFrame.MAXIMIZED_BOTH);
                         Global.parentForm.setVisible(true);
                         Global.parentForm.toFront();
                     }
-                });
+                }
             }
         } catch (IOException e) {
-            System.err.println("Error starting server: " + e.getMessage());
+            log.error("Error starting server: " + e.getMessage());
         }
     }
 

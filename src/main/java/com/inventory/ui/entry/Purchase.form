@@ -202,9 +202,6 @@
               <Connection code="Global.textFont" type="code"/>
             </Property>
             <Property name="name" type="java.lang.String" value="txtCus" noResource="true"/>
-            <Property name="nextFocusableComponent" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
-              <ComponentRef name="txtLocation"/>
-            </Property>
           </Properties>
           <Events>
             <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtCusFocusGained"/>

@@ -14,10 +14,12 @@ import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Writer;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
@@ -36,6 +38,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
 import lombok.extern.slf4j.Slf4j;
@@ -852,6 +855,43 @@ public class Util1 {
             log.error(e.getMessage());
         }
         return null;
+    }
+
+    public static String getBaseboardSerialNumber() {
+        String os = System.getProperty("os.name").toLowerCase();
+        String command = "";
+        if (os.contains("win")) {
+            command = "wmic baseboard get serialnumber";
+        } else if (os.contains("nix") || os.contains("nux") || os.contains("mac")) {
+            command = "dmidecode -t baseboard | grep 'Serial Number'";
+        } else {
+            JOptionPane.showMessageDialog(new JFrame(), "Unsupported operating system.");
+            System.exit(0);
+        }
+        try {
+            ProcessBuilder processBuilder;
+            if (os.contains("win")) {
+                processBuilder = new ProcessBuilder("cmd.exe", "/c", command);
+            } else {
+                processBuilder = new ProcessBuilder("bash", "-c", command);
+            }
+            Process process = processBuilder.start();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String no = line.trim();
+                    if (!no.isEmpty()) {
+                        if (!no.startsWith("Serial")) {
+                            return no;
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            log.error("getBaseboardSerialNumber :" + e.getMessage());
+        }
+        return null;
+
     }
 
     public static Date getSyncDate() {

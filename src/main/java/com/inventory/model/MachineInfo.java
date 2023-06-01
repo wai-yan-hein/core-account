@@ -39,4 +39,6 @@ public class MachineInfo {
     private boolean proUpdate;
     @Column(name = "mac_address")
     private String macAddress;
+    @Column(name = "serial_no")
+    private String serialNo;
 }

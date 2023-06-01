@@ -117,16 +117,16 @@ public class UserRepo {
                 .retrieve().bodyToFlux(AppRole.class).collectList();
     }
 
-    public Mono<MachineInfo> register(String macName) {
+    public Mono<MachineInfo> register(String serialNo) {
         return userApi.get()
-                .uri(builder -> builder.path("/user/get-mac-info")
-                .queryParam("macName", macName)
+                .uri(builder -> builder.path("/user/registerMac")
+                .queryParam("serialNo", serialNo)
                 .build())
                 .retrieve()
                 .bodyToMono(MachineInfo.class)
                 .onErrorResume((e) -> {
                     if (localdatabase) {
-                        return h2Repo.getMachineInfo(macName);
+                        return h2Repo.getMachineInfo(serialNo);
                     }
                     return Mono.empty();
                 });

@@ -415,6 +415,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         txtGrandTotal.setValue(0.00);
         txtComPercent.setValue(0.00);
         txtComAmt.setValue(0.00);
+        txtExpense.setValue(0);
         txtQty.setText("0");
     }
 
@@ -1121,7 +1122,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
 
         txtCus.setFont(Global.textFont);
         txtCus.setName("txtCus"); // NOI18N
-        txtCus.setNextFocusableComponent(txtLocation);
         txtCus.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 txtCusFocusGained(evt);

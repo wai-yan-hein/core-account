@@ -83,6 +83,11 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
     }
 
     public void checkMachineRegister() {
+        String serialNo = Util1.getBaseboardSerialNumber();
+        if (serialNo == null) {
+            JOptionPane.showMessageDialog(this, "Something went wrong.");
+            System.exit(0);
+        }
         Global.dialog = this;
         Global.machineName = Util1.getComputerName();
         ConnectionDialog d = new ConnectionDialog();
@@ -90,14 +95,13 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
             d.setLocationRelativeTo(null);
             d.setVisible(true);
         });
-        MachineInfo t = userRepo.register(Global.machineName).block();
+        MachineInfo t = userRepo.register(serialNo).block();
         if (t == null) {
             JOptionPane.showMessageDialog(this, "Core User Api is not running.", "Connection Error", JOptionPane.ERROR_MESSAGE);
             System.exit(0);
         }
         d.setVisible(false);
-        int macId = t.getMacId();
-        if (macId == 0) {
+        if (t.getMacId() == null) {
             SecurityDialog dialog = new SecurityDialog();
             dialog.setLocationRelativeTo(null);
             dialog.setVisible(true);
@@ -105,7 +109,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
             String toDayKey = Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd");
             toDayKey = toDayKey.replaceAll("-", "");
             if (inputKey.equals(toDayKey)) {
-                register().subscribe((info) -> {
+                register(serialNo).subscribe((info) -> {
                     if (info != null) {
                         Global.macId = info.getMacId();
                         log.info("Mac Id : " + Global.machineName);
@@ -120,7 +124,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
             }
         } else {
             lblStatus.setText("Latest version.");
-            Global.macId = macId;
+            Global.macId = t.getMacId();
             setLocationRelativeTo(null);
             setVisible(true);
             toFront();
@@ -129,7 +133,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
 
     }
 
-    private Mono<MachineInfo> register() {
+    private Mono<MachineInfo> register(String serialNo) {
         String machineName = Util1.getComputerName();
         String ipAddress = Util1.getIPAddress();
         String macAddress = Util1.getMacAddress();
@@ -138,6 +142,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
         machine.setMachineName(machineName);
         machine.setMacAddress(macAddress);
         machine.setProUpdate(true);
+        machine.setSerialNo(serialNo);
         return userRepo.register(machine);
 
     }
@@ -389,8 +394,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
 
     private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
         // TODO add your handling code here:
-        Global.dialog = null;
-        //System.exit(0);
+        System.exit(0);
     }//GEN-LAST:event_formWindowClosed
 
     private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed

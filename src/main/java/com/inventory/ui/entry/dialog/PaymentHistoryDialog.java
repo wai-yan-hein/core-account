@@ -204,6 +204,7 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
                     progress.setIndeterminate(false);
                     JOptionPane.showMessageDialog(this, e.getMessage());
                 }, () -> {
+                    progress.setIndeterminate(false);
                     setVisible(true);
                 });
 
