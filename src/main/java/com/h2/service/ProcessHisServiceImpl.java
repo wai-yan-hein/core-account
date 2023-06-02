@@ -72,7 +72,7 @@ public class ProcessHisServiceImpl implements ProcessHisService {
 
     private String getVoucherNo(Integer macId, String compCode) {
         String period = Util1.toDateStr(Util1.getTodayDate(), "MMyy");
-        int seqNo = seqDao.getSequence("PROCESS", period, compCode);
+        int seqNo = seqDao.getSequence(macId, "PROCESS", period, compCode);
         return String.format("%0" + 2 + "d", macId) + String.format("%0" + 5 + "d", seqNo) + "-" + period;
     }
 }

@@ -9,8 +9,10 @@ import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.DepartmentA;
 import com.acc.model.DepartmentAKey;
+import com.acc.model.Gl;
 import com.acc.model.TraderA;
 import com.common.Global;
+import com.common.ReturnObject;
 import com.h2.service.BrandService;
 import com.h2.service.BusinessTypeService;
 import com.h2.service.COAService;
@@ -20,6 +22,7 @@ import com.h2.service.CurrencyService;
 import com.h2.service.DepartmentUserService;
 import com.h2.service.DepartmentAccService;
 import com.h2.service.ExchangeRateService;
+import com.h2.service.GlService;
 import com.h2.service.LocationService;
 import com.h2.service.MacPropertyService;
 import com.h2.service.MachineInfoService;
@@ -193,6 +196,8 @@ public class H2Repo {
     private WeightLossService weightLossService;
     @Autowired
     private ReportService reportService;
+    @Autowired
+    private GlService glService;
 
     public Mono<List<Location>> getLocation() {
         return Mono.justOrEmpty(locationService.findAll(Global.compCode));
@@ -503,6 +508,10 @@ public class H2Repo {
     public Mono<ChartOfAccount> find(COAKey key) {
         return Mono.justOrEmpty(coaService.findById(key));
     }
+    
+    public Mono<List<ChartOfAccount>> searchCOA(String str, int level) {
+        return Mono.justOrEmpty(coaService.searchCOA(str, level, Global.compCode));
+    }
 
     public Flux<ChartOfAccount> getCOATree() {
         return Flux.fromIterable(coaService.getCOATree(Global.compCode));
@@ -519,7 +528,12 @@ public class H2Repo {
     public Flux<ChartOfAccount> getCOAChild(String coaCode) {
         return Flux.fromIterable(coaService.getCOAChild(coaCode, Global.compCode));
     }
-//    public Mono<Gl> save(Gl sh) {
-//        return Mono.justOrEmpty(saleHisService.save(sh));
-//    }
+    
+    public Mono<Gl> save(Gl gl) {
+        return Mono.justOrEmpty(glService.save(gl,false));
+    }
+    
+    public Mono<ReturnObject> save(List<Gl> glList) {
+        return Mono.justOrEmpty(glService.save(glList));
+    }
 }

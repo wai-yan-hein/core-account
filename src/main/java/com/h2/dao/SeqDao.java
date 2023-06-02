@@ -4,11 +4,20 @@
  */
 package com.h2.dao;
 
+import com.inventory.model.SeqKey;
+import com.inventory.model.SeqTable;
+
 /**
  *
  * @author Lenovo
  */
 public interface SeqDao {
 
-    int getSequence(String option, String period, String compCode);
+    SeqTable save(SeqTable st);
+
+    SeqTable findById(SeqKey id);
+
+//    int getSequence(String option, String period, String compCode);
+
+    int getSequence(Integer macId, String option, String period, String compCode);
 }

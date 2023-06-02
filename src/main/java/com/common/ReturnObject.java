@@ -5,6 +5,7 @@
  */
 package com.common;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
 import lombok.Data;
 
@@ -13,6 +14,7 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReturnObject {
 
     private Double openInv;
@@ -39,7 +41,9 @@ public class ReturnObject {
     private byte[] file;
     private double opAmt;
     private double clAmt;
+    private String vouNo;
     private String glVouNo;
     private String tranSource;
     private String opDate;
+    private String compCode;
 }

@@ -113,4 +113,47 @@ public class COADaoImpl extends AbstractDao<COAKey, ChartOfAccount> implements C
             }
         }
     }
+    
+    @Override
+    public List<ChartOfAccount> searchCOA(String str, Integer level, String compCode) {
+        List<ChartOfAccount> list = new ArrayList<>();
+        String sql = "select a.*,c1.coa_code group_code,c1.coa_code_usr group_usr_code,c1.coa_name_eng group_name,c2.coa_code head_code,"
+                + "c2.coa_code_usr head_usr_code,c2.coa_name_eng head_name\n" +
+                "from (\n" +
+                "select coa_code,coa_code_usr,coa_name_eng,coa_parent,comp_code,coa_level\n" +
+                "from chart_of_account\n" +
+                "where active = TRUE\n" +
+                "and deleted = FALSE\n" +
+                "and (coa_level =" + level + " or 0 =" + level + ")\n" +
+                "and comp_code ='" + compCode + "'\n" +
+                "and (coa_code_usr like '" + str + "%' or coa_name_eng like '" + str + "%')\n" +
+                "limit 20\n" + ")a\n" +
+                "left join chart_of_account c1\n" +
+                "on a.coa_parent = c1.coa_code\n" +
+                "and a.comp_code = c1.comp_code\n" +
+                "left join chart_of_account c2\n" +
+                "on c1.coa_parent = c2.coa_code\n" +
+                "and c1.comp_code = c2.comp_code";
+        List<Map<String, Object>> result = getList(sql);
+        result.forEach((rs) -> {
+            ChartOfAccount coa = new ChartOfAccount();
+            //coa_code, coa_code_usr, coa_name_eng, group_code, group_usr_code, group_name, head_code, head_usr_code, head_name
+            COAKey key = new COAKey();
+            key.setCoaCode(Util1.getString(rs.get("coa_code")));
+            key.setCompCode(compCode);
+            coa.setKey(key);
+            coa.setCoaCodeUsr(Util1.getString(rs.get("coa_code_usr")));
+            coa.setCoaNameEng(Util1.getString(rs.get("coa_name_eng")));
+            coa.setGroupCode(Util1.getString(rs.get("group_code")));
+            coa.setGroupUsrCode(Util1.getString(rs.get("group_usr_code")));
+            coa.setGroupName(Util1.getString(rs.get("group_name")));
+            coa.setHeadCode(Util1.getString(rs.get("head_code")));
+            coa.setHeadUsrCode(Util1.getString(rs.get("head_usr_code")));
+            coa.setHeadName(Util1.getString(rs.get("head_name")));
+            coa.setCoaLevel(Util1.getInteger(rs.get("coa_level")));
+            list.add(coa);
+
+        });
+        return list;
+    }
 }

@@ -5,6 +5,7 @@
 package com;
 
 import com.acc.common.AccountRepo;
+import com.acc.model.Gl;
 import com.common.Global;
 import com.h2.dao.SaleHisDetailDao;
 import com.h2.service.BrandService;
@@ -21,6 +22,7 @@ import com.h2.service.RelationService;
 import com.h2.service.SaleHisService;
 import com.h2.service.SaleManService;
 import com.h2.service.ExchangeRateService;
+import com.h2.service.GlService;
 import com.h2.service.MacPropertyService;
 import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
@@ -130,6 +132,8 @@ public class CloudIntegration {
     private TaskScheduler taskScheduler;
     @Autowired
     private DepartmentAccService departmentAService;
+    @Autowired
+    private GlService glService;
 
     public void startDownload() {
         if (localDatabase) {
@@ -149,6 +153,22 @@ public class CloudIntegration {
             if (!listD.isEmpty()) {
                 log.info("need to upload sale his detail : " + listD.size());
             }
+
+            uploadAccountData();
+        }
+    }
+
+    public void uploadAccountData() {
+        uploadGL();
+    }
+
+    public void uploadGL() {
+        List<Gl> list = glService.findAll(Global.compCode);
+        if (!list.isEmpty()) {
+            log.info("need to upload Gl list : " + list.size());
+            list.forEach((l) -> {
+                accounRepo.uploadGL(l).subscribe();
+            });
         }
     }
 

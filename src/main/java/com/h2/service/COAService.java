@@ -29,4 +29,6 @@ public interface COAService {
     List<ChartOfAccount> getCOAChild(String parentCode, String compCode);
 
     List<ChartOfAccount> getTraderCOA(String compCode);
+
+    List<ChartOfAccount> searchCOA(String str, Integer level, String compCode);
 }

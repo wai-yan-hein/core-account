@@ -31,6 +31,7 @@ import com.common.ReturnObject;
 import com.common.Util1;
 import com.user.model.YearEnd;
 import java.util.List;
+import javax.swing.JOptionPane;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -160,6 +161,27 @@ public class AccountRepo {
                 .uri("/account/save-gl")
                 .body(Mono.just(gl), Gl.class)
                 .retrieve()
+                .bodyToMono(Gl.class)
+                .onErrorResume(e -> {
+                    if (localDatabase) {
+                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
+                                "Can't save voucher to cloud. Do you want save local?",
+                                "Offline", JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                        if (status == JOptionPane.YES_OPTION) {
+                            return h2Repo.save(gl);
+                        }
+                        return Mono.error(e);
+                    }
+                    return Mono.error(e);
+                });
+    }
+
+    public Mono<Gl> uploadGL(Gl gl) {
+        return accountApi.post()
+                .uri("/account/save-gl")
+                .body(Mono.just(gl), Gl.class)
+                .retrieve()
                 .bodyToMono(Gl.class);
     }
 
@@ -168,7 +190,20 @@ public class AccountRepo {
                 .uri("/account/save-gl-list")
                 .body(Mono.just(gl), List.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
+                .bodyToMono(ReturnObject.class)
+                .onErrorResume(e -> {
+                    if (localDatabase) {
+                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
+                                "Can't save voucher to cloud. Do you want save local?",
+                                "Offline", JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                        if (status == JOptionPane.YES_OPTION) {
+                            return h2Repo.save(gl);
+                        }
+                        return Mono.error(e);
+                    }
+                    return Mono.error(e);
+                });
     }
 
     public Mono<Boolean> delete(COATemplateKey obj) {
@@ -422,12 +457,15 @@ public class AccountRepo {
     }
 
     public Mono<TmpOpening> getOpening(ReportFilter filter) {
-        Mono<TmpOpening> result = accountApi.post()
+        return accountApi.post()
                 .uri("/account/get-coa-opening")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToMono(TmpOpening.class);
-        return result;
+                .bodyToMono(TmpOpening.class)
+                .onErrorResume((e) -> {
+                    log.info("getOpening " + e);
+                    return Mono.empty();
+                });
     }
 
     public Mono<StockOP> save(StockOP op) {
@@ -477,6 +515,9 @@ public class AccountRepo {
     }
 
     public Mono<List<ChartOfAccount>> searchCOA(String str, int level) {
+        if (localDatabase) {
+            return h2Repo.searchCOA(str, level);
+        }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/search-coa")
                 .queryParam("str", str)
