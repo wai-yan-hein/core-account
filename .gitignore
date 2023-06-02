@@ -37,3 +37,5 @@ build/
 database.mv.db
 database.trace.db
 log.txt
+**/log.txt
+

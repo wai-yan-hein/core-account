@@ -275,9 +275,15 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
             int y = JOptionPane.showConfirmDialog(this, "Are you sure to delete?");
             if (y == JOptionPane.YES_OPTION) {
                 Pattern p = patternTableModel.getPattern(row);
-                inventoryRepo.delete(p);
-                patternTableModel.remove(row);
-                focusOnPD();
+                inventoryRepo.delete(p).subscribe((t) -> {
+                    if (t) {
+                        patternTableModel.remove(row);
+                        focusOnPD();
+                    }
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                }
+                );
             }
         }
     }
@@ -309,7 +315,6 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         lblStockName = new javax.swing.JLabel();
         chkEx = new javax.swing.JCheckBox();
         lblRec = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -353,8 +358,6 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         tblPD.setShowHorizontalLines(true);
         tblPD.setShowVerticalLines(true);
         jScrollPane2.setViewportView(tblPD);
-
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Filter", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, Global.lableFont));
 
         jLabel1.setFont(Global.lableFont);
         jLabel1.setText("Group");
@@ -415,8 +418,6 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
-
         lblStockName.setFont(Global.menuFont);
         lblStockName.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblStockName.setText("Stock Name");
@@ -444,14 +445,6 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         lblRec.setFont(Global.lableFont);
         lblRec.setText("Records");
 
-        jButton1.setFont(Global.lableFont);
-        jButton1.setText("Delete");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -465,14 +458,13 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 559, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 567, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(chkEx)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(lblRec)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton1)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -485,10 +477,9 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(chkEx)
-                            .addComponent(jButton1))
+                            .addComponent(chkEx))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE))
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 219, Short.MAX_VALUE))
                     .addComponent(jSeparator1)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -508,11 +499,6 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         // TODO add your handling code here:
         observer.selected("control", this);
     }//GEN-LAST:event_formComponentShown
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-        deleteTran();
-    }//GEN-LAST:event_jButton1ActionPerformed
     @Override
     public void delete() {
     }
@@ -550,7 +536,6 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkEx;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

@@ -32,7 +32,7 @@ public class TableCellRender extends DefaultTableCellRenderer {
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         c.setBackground(row % 2 == 0 ? Global.BG_COLOR : Color.WHITE);
         if (isSelected) {
-            c.setBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
+            c.setBackground(Global.selectionColor);
         }
         String s;
         if (value instanceof Double d) {

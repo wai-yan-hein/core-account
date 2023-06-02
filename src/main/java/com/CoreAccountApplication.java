@@ -4,6 +4,8 @@ import com.common.Global;
 import com.common.Util1;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.common.ui.LoginDialog;
+import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontFormatException;
@@ -45,7 +47,6 @@ public class CoreAccountApplication {
     private static ServerThread serverThread;
 
     public static void main(String[] args) {
-        applayTheme();
         loadProperty();
         //splash
         Splash splash = new Splash(appIcon);
@@ -109,6 +110,7 @@ public class CoreAccountApplication {
             Properties p = new Properties();
             p.load(reader);
             initFont(Util1.getInteger(p.getProperty("font.size")));
+            applayTheme(Util1.getBoolean(p.getProperty("dark.mode", "0")));
             int port = getPort(p.get("program.id"));
             checkRun(port);
             serverThread = new ServerThread(port);
@@ -139,29 +141,30 @@ public class CoreAccountApplication {
         return 100;
     }
 
-    private static void applayTheme() {
+    private static void applayTheme(boolean darkMode) {
         try {
             log.info("theme start.");
-            UIManager.setLookAndFeel(new FlatLightLaf());
-            Global.selectionColor = UIManager.getDefaults().getColor("Table.selectionBackground");
             System.setProperty("flatlaf.useWindowDecorations", "true");
             System.setProperty("flatlaf.menuBarEmbedded", "true");
             System.setProperty("flatlaf.animation", "true");
             System.setProperty("flatlaf.uiScale.enabled", "true");
-            UIManager.put("Button.arc", 10);
-            UIManager.put("Table.arc", 10);
-            UIManager.put("Component.arc", 10);
-            UIManager.put("ProgressBar.arc", 10);
-            UIManager.put("TextComponent.arc", 10);
+            UIManager.put("Button.arc", 20);
+            UIManager.put("Table.arc", 20);
+            UIManager.put("Component.arc", 20);
+            UIManager.put("ProgressBar.arc", 20);
+            UIManager.put("TextComponent.arc", 20);
             UIManager.put("TabbedPane.showTabSeparators", true);
-            UIManager.put("TableHeader.background", Global.selectionColor);
             UIManager.put("TableHeader.foreground", Color.white);
+            UIManager.put("TabbedPane.tabSeparatorsFullHeight", true);
+            if (darkMode) {
+                UIManager.setLookAndFeel(new FlatMacDarkLaf());
+            } else {
+                UIManager.setLookAndFeel(new FlatMacLightLaf());
+            }
+            Global.selectionColor = UIManager.getColor("MenuItem.selectionBackground");
+            UIManager.put("TableHeader.background", Global.selectionColor);
+            UIManager.put("Table.selectionBackground", Global.selectionColor);
             log.info("theme end.");
-            //UIManager.put("TableHeader.separatorColor", Color.black);
-            //UIManager.put("TableHeader.bottomSeparatorColor", Color.black);
-            //UIManager.put("Table.gridColor", UIManager.getDefaults().getColor("Table.selectionBackground"));
-            //UIManager.put("Table.gridColor", new Color(213, 235, 226));
-            //FlatSolarizedLightIJTheme.setup();
         } catch (UnsupportedLookAndFeelException ex) {
             System.err.println("Failed to initialize LaF");
         }
