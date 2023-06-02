@@ -62,7 +62,7 @@ public class Util1 {
     public static final Gson gson = new GsonBuilder()
             .setDateFormat(DateFormat.FULL, DateFormat.FULL)
             .create();
-
+    public static HashMap<String, String> hmSysProp = new HashMap<>();
     public static void print(String pName) {
 
     }
@@ -95,6 +95,10 @@ public class Util1 {
     public static String getPropValue(String key) {
         return Global.hmRoleProperty.get(key);
     }
+    
+    public static String getProperty(String key) {
+        return hmSysProp.get(key);
+    }
 
     public static boolean isProperValid(String key) {
         return Util1.getBoolean(Global.hmRoleProperty.get(key));
@@ -113,6 +117,10 @@ public class Util1 {
         }
 
         return date;
+    }
+    
+    public static boolean isMultiCur() {
+        return Util1.getBoolean(hmSysProp.get("system.multi.currency.flag"));
     }
 
     public static Date toDateTime(Object objDate) {

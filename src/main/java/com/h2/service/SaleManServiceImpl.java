@@ -3,8 +3,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.h2.service;
-
-import com.h2.dao.BrandDao;
 import com.h2.dao.SaleManDao;
 import com.inventory.model.SaleMan;
 import com.inventory.model.SaleManKey;

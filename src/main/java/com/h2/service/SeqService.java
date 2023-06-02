@@ -4,11 +4,18 @@
  */
 package com.h2.service;
 
+import com.inventory.model.SeqKey;
+import com.inventory.model.SeqTable;
+
 /**
  *
  * @author Lenovo
  */
 public interface SeqService {
 
-    int getSequence(String option, String period, String compCode);
+    SeqTable save(SeqTable st);
+
+    SeqTable findById(SeqKey id);
+
+    int getSequence(Integer macId, String option, String period, String compCode);
 }

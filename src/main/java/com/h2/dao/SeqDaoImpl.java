@@ -16,12 +16,41 @@ import org.springframework.stereotype.Repository;
 public class SeqDaoImpl extends AbstractDao<SeqKey, SeqTable> implements SeqDao {
 
     @Override
-    public int getSequence(String option, String period, String compCode) {
+    public SeqTable save(SeqTable st) {
+        saveOrUpdate(st, st.getKey());
+        return st;
+    }
+
+    @Override
+    public SeqTable findById(SeqKey id) {
+        return getByKey(id);
+    }
+
+//    @Override
+//    public int getSequence(String option, String period, String compCode) {
+//        SeqKey key = new SeqKey();
+//        key.setCompCode(compCode);
+//        key.setPeriod(period);
+//        key.setSeqOption(option);
+//        SeqTable st = getByKey(key);
+//        if (st == null) {
+//            st = new SeqTable();
+//            st.setKey(key);
+//            st.setSeqNo(1);
+//        } else {
+//            st.setSeqNo(st.getSeqNo() + 1);
+//        }
+//        saveOrUpdate(st, st.getKey());
+//        return st.getSeqNo();
+//    }
+    @Override
+    public int getSequence(Integer macId, String option, String period, String compCode) {
         SeqKey key = new SeqKey();
         key.setCompCode(compCode);
+        key.setMacId(macId);
         key.setPeriod(period);
         key.setSeqOption(option);
-        SeqTable st = getByKey(key);
+        SeqTable st = findById(key);
         if (st == null) {
             st = new SeqTable();
             st.setKey(key);
@@ -32,5 +61,4 @@ public class SeqDaoImpl extends AbstractDao<SeqKey, SeqTable> implements SeqDao 
         saveOrUpdate(st, st.getKey());
         return st.getSeqNo();
     }
-
 }
