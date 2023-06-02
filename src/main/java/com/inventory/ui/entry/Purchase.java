@@ -927,6 +927,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                         param.put("p_exp", Util1.getFloat(p.getExpense()) * -1);
                         param.put("p_vou_paid", p.getPaid());
                         param.put("p_vou_balance", p.getBalance());
+                        param.put("p_batch_no", p.getBatchNo());
                         param.put("SUBREPORT_DIR", "report/");
                         String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
                         ObjectMapper mapper = new ObjectMapper();

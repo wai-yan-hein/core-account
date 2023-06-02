@@ -890,8 +890,30 @@ public class Util1 {
         } catch (IOException e) {
             log.error("getBaseboardSerialNumber :" + e.getMessage());
         }
-        return null;
+        return getProcessId();
 
+    }
+
+    private static String getProcessId() {
+        try {
+            String command = "wmic cpu get processorid";
+            ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/c", command);
+            Process process = processBuilder.start();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String no = line.trim();
+                    if (!no.isEmpty()) {
+                        if (!no.startsWith("ProcessorId")) {
+                            return no;
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+        return null;
     }
 
     public static Date getSyncDate() {

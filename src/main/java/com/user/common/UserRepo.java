@@ -128,6 +128,7 @@ public class UserRepo {
                     if (localdatabase) {
                         return h2Repo.getMachineInfo(serialNo);
                     }
+                    log.error("register : " + e.getMessage());
                     return Mono.empty();
                 });
 
