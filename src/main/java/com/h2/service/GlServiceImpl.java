@@ -201,5 +201,15 @@ public class GlServiceImpl implements GlService {
             }
         }
     }
+    
+    @Override
+    public List<Gl> unUploadVoucher(String compCode) {
+        return dao.unUploadVoucher(compCode);
+    }
+
+    @Override
+    public Gl updateACK(GlKey key) {
+        return dao.updateACK(key);
+    }
 
 }

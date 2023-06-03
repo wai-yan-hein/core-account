@@ -8,6 +8,8 @@ import com.acc.model.COAKey;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
 import com.common.Util1;
+import com.inventory.model.SaleHis;
+import com.inventory.model.SaleHisKey;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -107,5 +109,22 @@ public class GlDaoImpl extends AbstractDao<GlKey, Gl> implements GlDao {
             log.error(e.getMessage());
         }
         return null;
+    }
+    
+    @Override
+    public List<Gl> unUploadVoucher(String compCode) {
+        String hsql = "select o from Gl o where o.intgUpdStatus is null";
+        List<Gl> list = findHSQL(hsql);
+        list.forEach((s) -> {
+        });
+        return list;
+    }
+
+    @Override
+    public Gl updateACK(GlKey key) {
+        Gl sh = getByKey(key);
+        sh.setIntgUpdStatus("ACK");
+        saveOrUpdate(sh, sh.getKey());
+        return sh;
     }
 }

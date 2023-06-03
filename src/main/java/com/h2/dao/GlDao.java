@@ -5,6 +5,8 @@
 package com.h2.dao;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
+import com.inventory.model.SaleHis;
+import com.inventory.model.SaleHisKey;
 import java.util.List;
 
 /**
@@ -30,4 +32,8 @@ public interface GlDao {
     boolean deleteInvVoucher(String refNo, String tranSource, String compCode);
 
     boolean deleteVoucher(String glVouNo, String compCode);
+    
+    List<Gl> unUploadVoucher(String compCode);
+    
+    Gl updateACK(GlKey key);
 }
