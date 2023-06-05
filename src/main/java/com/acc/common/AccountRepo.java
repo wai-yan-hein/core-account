@@ -633,7 +633,11 @@ public class AccountRepo {
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(Gl.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.info("searchGl " + e);
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<Gl>> searchVoucher(ReportFilter filter) {

@@ -6,6 +6,7 @@ package com;
 
 import com.acc.common.AccountRepo;
 import com.acc.model.Gl;
+import com.acc.model.GlKey;
 import com.common.Global;
 import com.h2.dao.SaleHisDetailDao;
 import com.h2.service.BrandService;
@@ -163,11 +164,17 @@ public class CloudIntegration {
     }
 
     public void uploadGL() {
-        List<Gl> list = glService.findAll(Global.compCode);
+        List<Gl> list = glService.unUploadVoucher(Global.compCode);
         if (!list.isEmpty()) {
             log.info("need to upload Gl list : " + list.size());
             list.forEach((l) -> {
-                accounRepo.uploadGL(l).subscribe();
+                accounRepo.uploadGL(l).subscribe((gl) ->{  
+                    GlKey key = gl.getKey();
+                    //key.setGlCode(glCode);
+                   glService.updateACK(key);
+                        },(e)->{
+                        log.error("uploadGl : " + e.getMessage());
+                        });
             });
         }
     }

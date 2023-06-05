@@ -26,5 +26,9 @@ public interface GlService {
     String getMaxDate();
     
     Gl findByCode(GlKey key);
+    
+    Gl updateACK(GlKey key);
+    
+    List<Gl> unUploadVoucher(String compCode);
 
 }
