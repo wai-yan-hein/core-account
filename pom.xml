@@ -12,7 +12,7 @@
     <artifactId>core-account</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>core-account</name>
-    <description>Core Account Cloud </description>
+    <description>Core Account Cloud</description>
     <properties>
         <java.version>19</java.version>
     </properties>

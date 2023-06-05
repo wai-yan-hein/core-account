@@ -83,7 +83,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-    
 
     public List<String> getDepartment() {
         return department;
@@ -255,6 +254,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
             crAmtTableModel.fireTableDataChanged();
             calOpening();
             progress.setIndeterminate(false);
+            setVisible(true);
         });
     }
 

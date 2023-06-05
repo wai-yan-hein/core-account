@@ -148,12 +148,14 @@ public class AccountRepo {
                 .retrieve().bodyToFlux(ChartOfAccount.class);
     }
 
-    public Flux<Gl> getTranSource() {
+    public Mono<List<Gl>> getTranSource() {
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-tran-source")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().bodyToFlux(Gl.class);
+                .retrieve()
+                .bodyToFlux(Gl.class)
+                .collectList();
     }
 
     public Mono<Gl> save(Gl gl) {

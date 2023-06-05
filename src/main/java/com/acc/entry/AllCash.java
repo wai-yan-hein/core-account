@@ -304,7 +304,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         }, (e) -> {
             log.error(e.getMessage());
         });
-        accountRepo.getTranSource().collectList().subscribe((t) -> {
+        accountRepo.getTranSource().subscribe((t) -> {
             tranSourceAutoCompleter = new TranSourceAutoCompleter(txtOption, t, null, true);
             tranSourceAutoCompleter.setSelectionObserver(this);
         }, (e) -> {
