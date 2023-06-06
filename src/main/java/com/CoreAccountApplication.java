@@ -2,14 +2,16 @@ package com;
 
 import com.common.Global;
 import com.common.Util1;
-import com.formdev.flatlaf.FlatLightLaf;
 import com.common.ui.LoginDialog;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontFormatException;
+import java.awt.GraphicsEnvironment;
+import java.awt.HeadlessException;
 import java.awt.Image;
+import java.awt.SystemColor;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -110,7 +112,7 @@ public class CoreAccountApplication {
             Properties p = new Properties();
             p.load(reader);
             initFont(Util1.getInteger(p.getProperty("font.size")));
-            applayTheme(Util1.getBoolean(p.getProperty("dark.mode", "0")));
+            applayTheme();
             int port = getPort(p.get("program.id"));
             checkRun(port);
             serverThread = new ServerThread(port);
@@ -141,7 +143,7 @@ public class CoreAccountApplication {
         return 100;
     }
 
-    private static void applayTheme(boolean darkMode) {
+    private static void applayTheme() {
         try {
             log.info("theme start.");
             System.setProperty("flatlaf.useWindowDecorations", "true");
@@ -156,6 +158,7 @@ public class CoreAccountApplication {
             UIManager.put("TabbedPane.showTabSeparators", true);
             UIManager.put("TableHeader.foreground", Color.white);
             UIManager.put("TabbedPane.tabSeparatorsFullHeight", true);
+            boolean darkMode = isDarkModeEnabled();
             if (darkMode) {
                 UIManager.setLookAndFeel(new FlatMacDarkLaf());
             } else {
@@ -164,11 +167,14 @@ public class CoreAccountApplication {
             Global.selectionColor = UIManager.getColor("MenuItem.selectionBackground");
             UIManager.put("TableHeader.background", Global.selectionColor);
             UIManager.put("Table.selectionBackground", Global.selectionColor);
+            Util1.DARK_MODE = darkMode;
             log.info("theme end.");
         } catch (UnsupportedLookAndFeelException ex) {
             System.err.println("Failed to initialize LaF");
         }
-
     }
 
+    private static boolean isDarkModeEnabled() {
+        return false;
+    }
 }

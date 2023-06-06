@@ -158,4 +158,12 @@ public class PurHisDaoImpl extends AbstractDao<PurHisKey, PurHis> implements Pur
         });
         return list;
     }
+
+    @Override
+    public PurHis updateACK(PurHisKey key) {
+        PurHis ph = getByKey(key);
+        ph.setIntgUpdStatus("ACK");
+        saveOrUpdate(ph, key);
+        return ph;
+    }
 }

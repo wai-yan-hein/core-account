@@ -81,4 +81,9 @@ public class WeightLossServiceImpl implements WeightLossService {
         String deptCode = String.format("%0" + 2 + "d", deptId) + "-";
         return deptCode + String.format("%0" + 2 + "d", macId) + String.format("%0" + 5 + "d", seqNo) + "-" + period;
     }
+
+    @Override
+    public WeightLossHis updateACK(WeightLossHisKey key) {
+        return dao.updateACK(key);
+    }
 }

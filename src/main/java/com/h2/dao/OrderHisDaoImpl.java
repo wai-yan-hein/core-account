@@ -235,4 +235,12 @@ public class OrderHisDaoImpl extends AbstractDao<OrderHisKey, OrderHis> implemen
         }
         return g;
     }
+
+    @Override
+    public OrderHis updateACK(OrderHisKey key) {
+        OrderHis oh = getByKey(key);
+        oh.setIntgUpdStatus("ACK");
+        saveOrUpdate(oh, key);
+        return oh;
+    }
 }

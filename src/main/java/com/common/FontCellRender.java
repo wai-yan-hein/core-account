@@ -24,7 +24,11 @@ public class FontCellRender extends DefaultTableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        c.setBackground(row % 2 == 0 ? Global.BG_COLOR : Color.WHITE);
+        if (Util1.DARK_MODE) {
+            c.setBackground(row % 2 == 0 ? Color.DARK_GRAY : UIManager.getColor("background"));
+        } else {
+            c.setBackground(row % 2 == 0 ? Global.BG_COLOR : Color.WHITE);
+        }
         if (isSelected) {
             c.setBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
         }

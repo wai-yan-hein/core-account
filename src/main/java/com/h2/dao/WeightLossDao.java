@@ -15,4 +15,6 @@ public interface WeightLossDao {
     void restore(WeightLossHisKey key);
 
     List<WeightLossHis> search(String fromDate, String toDate, String locCode, String compCode, Integer deptId);
+
+    WeightLossHis updateACK(WeightLossHisKey key);
 }

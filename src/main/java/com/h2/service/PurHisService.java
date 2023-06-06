@@ -36,4 +36,6 @@ public interface PurHisService {
 
     List<PurHis> search(String updatedDate, List<String> keys);
 
+    PurHis updateACK(PurHisKey key);
+
 }

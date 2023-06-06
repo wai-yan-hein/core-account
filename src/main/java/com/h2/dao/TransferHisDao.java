@@ -23,4 +23,6 @@ public interface TransferHisDao {
 
     void truncate(TransferHisKey key);
 
+    TransferHis updateACK(TransferHisKey key);
+
 }

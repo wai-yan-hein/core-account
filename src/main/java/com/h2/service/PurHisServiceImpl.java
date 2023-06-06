@@ -151,4 +151,9 @@ public class PurHisServiceImpl implements PurHisService {
         return deptCode + String.format("%0" + 2 + "d", macId) + String.format("%0" + 5 + "d", seqNo) + "-" + period;
     }
 
+    @Override
+    public PurHis updateACK(PurHisKey key) {
+        return phDao.updateACK(key);
+    }
+
 }

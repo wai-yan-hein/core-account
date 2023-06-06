@@ -36,4 +36,6 @@ public interface RetOutService {
 
     List<RetOutHis> search(String updatedDate, List<String> keys);
 
+    RetOutHis updateACK(RetOutHisKey key);
+
 }

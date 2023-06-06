@@ -33,4 +33,6 @@ public interface StockInOutService {
 
     List<StockInOut> search(String updatedDate, List<LocationKey> keys);
 
+    StockInOut updateACK(StockIOKey key);
+
 }

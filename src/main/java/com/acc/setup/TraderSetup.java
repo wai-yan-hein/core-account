@@ -83,7 +83,9 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusGained(FocusEvent e) {
-            ((JTextField) e.getSource()).selectAll();
+            if (e.getSource() instanceof JTextField txt) {
+                txt.selectAll();
+            }
         }
 
     };

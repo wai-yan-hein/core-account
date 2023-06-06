@@ -18,14 +18,13 @@ public interface PurHisDao {
     PurHis save(PurHis ph);
 
     List<PurHis> search(String fromDate, String toDate, String cusCode,
-                        String vouNo, String remark, String userCode);
+            String vouNo, String remark, String userCode);
 
     PurHis findById(PurHisKey id);
 
     void delete(PurHisKey key);
 
     void restore(PurHisKey key) throws Exception;
-
 
     List<PurHis> unUploadVoucher(String syncDate);
 
@@ -34,5 +33,7 @@ public interface PurHisDao {
     Date getMaxDate();
 
     List<PurHis> search(String updatedDate, List<String> keys);
+
+    PurHis updateACK(PurHisKey key);
 
 }
