@@ -4,7 +4,10 @@
  */
 package com.h2.service;
 
+import com.acc.model.Gl;
 import com.inventory.model.General;
+import java.sql.SQLException;
+import java.util.List;
 
 /**
  *
@@ -15,5 +18,12 @@ public interface ReportService {
     General getPurchaseRecentPrice(String stockCode, String purDate, String unit, String compCode, Integer deptId);
 
     General getSmallestQty(String stockCode, String unit, String compCode, Integer deptId);
+    
+    List<Gl> getIndividualLedger(String fromDate, String toDate, String desp, String srcAcc,
+                                 String acc, String curCode, String reference,
+                                 String compCode, String tranSource, String traderCode, String traderType,
+                                 String coaLv2, String coaLv1, String batchNo,String projectNo,
+                                 boolean summary, Integer macId) throws SQLException;
+
 
 }

@@ -5,8 +5,6 @@
 package com.h2.dao;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
-import com.inventory.model.SaleHis;
-import com.inventory.model.SaleHisKey;
 import java.util.List;
 
 /**

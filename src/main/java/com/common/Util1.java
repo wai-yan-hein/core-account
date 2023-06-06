@@ -932,4 +932,16 @@ public class Util1 {
         return str == null ? "" : str.replace(" ", "").toLowerCase();
     }
 
+    public static Double toNull(double value) {
+        return value == 0 ? null : value;
+    }
+    
+    public static String isAll(String value) {
+        if (value != null) {
+            if (value.equals("All")) {
+                return "-";
+            }
+        }
+        return Util1.isNull(value, "-");
+    }
 }
