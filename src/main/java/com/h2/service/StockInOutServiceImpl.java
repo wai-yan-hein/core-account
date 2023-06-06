@@ -119,4 +119,9 @@ public class StockInOutServiceImpl implements StockInOutService {
         return deptCode + String.format("%0" + 2 + "d", macId) + String.format("%0" + 5 + "d", seqNo) + "-" + period;
     }
 
+    @Override
+    public StockInOut updateACK(StockIOKey key) {
+        return ioDao.updateACK(key);
+    }
+
 }

@@ -134,4 +134,12 @@ public class TransferHisDaoImpl extends AbstractDao<TransferHisKey, TransferHis>
         String sql2 = "delete from transfer_his where vou_no ='" + vouNo + "' and comp_code ='" + compCode + "' and " + deptId + "";
         execSql(sql1, sql2);
     }
+
+    @Override
+    public TransferHis updateACK(TransferHisKey key) {
+        TransferHis th = getByKey(key);
+        th.setIntgUpdStatus("ACK");
+        saveOrUpdate(th, key);
+        return th;
+    }
 }

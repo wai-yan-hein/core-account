@@ -33,4 +33,6 @@ public interface RetOutDao {
     Date getMaxDate();
 
     List<RetOutHis> search(String updatedDate, List<String> keys);
+
+    RetOutHis updateACK(RetOutHisKey key);
 }

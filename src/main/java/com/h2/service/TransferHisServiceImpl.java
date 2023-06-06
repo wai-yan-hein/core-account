@@ -106,4 +106,9 @@ public class TransferHisServiceImpl implements TransferHisService {
     public void truncate(TransferHisKey key) {
         dao.truncate(key);
     }
+
+    @Override
+    public TransferHis updateACK(TransferHisKey key) {
+        return dao.updateACK(key);
+    }
 }

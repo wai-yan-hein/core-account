@@ -161,4 +161,12 @@ public class StockInOutDaoImpl extends AbstractDao<StockIOKey, StockInOut> imple
         return list;
     }
 
+    @Override
+    public StockInOut updateACK(StockIOKey key) {
+        StockInOut so = getByKey(key);
+        so.setIntgUpdStatus("ACK");
+        saveOrUpdate(so, key);
+        return so;
+    }
+
 }

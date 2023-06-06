@@ -29,13 +29,13 @@ public class RetInDaoImpl extends AbstractDao<RetInHisKey, RetInHis> implements 
 
     @Override
     public RetInHis save(RetInHis sh) {
-        saveOrUpdate(sh,sh.getKey());
+        saveOrUpdate(sh, sh.getKey());
         return sh;
     }
 
     @Override
     public List<RetInHis> search(String fromDate, String toDate, String cusCode,
-                                 String vouNo, String remark, String userCode) {
+            String vouNo, String remark, String userCode) {
         String strFilter = "";
 
         if (!fromDate.equals("-") && !toDate.equals("-")) {
@@ -167,5 +167,13 @@ public class RetInDaoImpl extends AbstractDao<RetInHisKey, RetInHis> implements 
         String sql1 = "delete from ret_in_his where vou_no ='" + vouNo + "' and comp_code ='" + compCode + "' and " + deptId + "";
         String sql2 = "delete from ret_in_his_detail where vou_no ='" + vouNo + "' and comp_code ='" + compCode + "' and " + deptId + "";
         execSql(sql1, sql2);
+    }
+
+    @Override
+    public RetInHis updateACK(RetInHisKey key) {
+        RetInHis rh = getByKey(key);
+        rh.setIntgUpdStatus("ACK");
+        saveOrUpdate(rh, key);
+        return rh;
     }
 }

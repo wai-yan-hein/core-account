@@ -46,6 +46,8 @@ public class WeightLossHis {
     private Date updatedDate;
     @Column(name = "deleted")
     private boolean deleted;
+    @Column(name = "intg_upd_status")
+    private String intgUpdStatus;
     @Transient
     private List<WeightLossDetail> listDetail;
     @Transient

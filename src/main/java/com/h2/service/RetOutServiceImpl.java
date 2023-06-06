@@ -127,4 +127,9 @@ public class RetOutServiceImpl implements RetOutService {
         return deptCode + String.format("%0" + 2 + "d", macId) + String.format("%0" + 5 + "d", seqNo) + "-" + period;
     }
 
+    @Override
+    public RetOutHis updateACK(RetOutHisKey key) {
+        return rDao.updateACK(key);
+    }
+
 }

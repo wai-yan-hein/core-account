@@ -36,4 +36,12 @@ public class WeightLossDaoImpl extends AbstractDao<WeightLossHisKey, WeightLossH
     public List<WeightLossHis> search(String fromDate, String toDate, String locCode, String compCode, Integer deptId) {
         return null;
     }
+
+    @Override
+    public WeightLossHis updateACK(WeightLossHisKey key) {
+        WeightLossHis wh = getByKey(key);
+        wh.setIntgUpdStatus("ACK");
+        saveOrUpdate(wh, key);
+        return wh;
+    }
 }

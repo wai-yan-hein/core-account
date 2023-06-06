@@ -146,17 +146,34 @@ public class CloudIntegration {
 
     public void startUpload() {
         if (localDatabase) {
-            List<SaleHis> list = saleHisService.findAll(Global.compCode);
-            if (!list.isEmpty()) {
-                log.info("need to upload sale his : " + list.size());
-            }
-            List<SaleHisDetail> listD = saleHisDetailDao.findAll(Global.compCode);
-            if (!listD.isEmpty()) {
-                log.info("need to upload sale his detail : " + listD.size());
-            }
-
+            uploadInvData();
             uploadAccountData();
         }
+    }
+
+    public void uploadInvData() {
+        uploadSale();
+    }
+
+    public void uploadSale() {
+        List<SaleHis> list = saleHisService.findAll(Global.compCode);
+        if (!list.isEmpty()) {
+            log.info("need to upload sale his : " + list.size());
+            list.forEach((h) -> {
+                List<SaleHisDetail> listD = saleHisDetailDao.search(h.getKey().getVouNo(),
+                        h.getKey().getCompCode(), h.getKey().getDeptId());
+                if (!listD.isEmpty()) {
+                    h.setListSH(listD);
+                    log.info("need to upload sale his detail : " + listD.size());
+                    inventoryRepo.uploadSale(h).subscribe((r) -> {
+                        r.setIntgUpdStatus("ACK");
+                        saleHisService.updateACK(r.getKey());
+                    });
+                }
+            });
+
+        }
+
     }
 
     public void uploadAccountData() {
@@ -168,13 +185,13 @@ public class CloudIntegration {
         if (!list.isEmpty()) {
             log.info("need to upload Gl list : " + list.size());
             list.forEach((l) -> {
-                accounRepo.uploadGL(l).subscribe((gl) ->{  
+                accounRepo.uploadGL(l).subscribe((gl) -> {
                     GlKey key = gl.getKey();
                     //key.setGlCode(glCode);
-                   glService.updateACK(key);
-                        },(e)->{
-                        log.error("uploadGl : " + e.getMessage());
-                        });
+                    glService.updateACK(key);
+                }, (e) -> {
+                    log.error("uploadGl : " + e.getMessage());
+                });
             });
         }
     }

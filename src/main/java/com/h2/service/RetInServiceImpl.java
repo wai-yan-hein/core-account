@@ -132,4 +132,9 @@ public class RetInServiceImpl implements RetInService {
         rDao.truncate(key);
     }
 
+    @Override
+    public RetInHis updateACK(RetInHisKey key) {
+        return rDao.updateACK(key);
+    }
+
 }

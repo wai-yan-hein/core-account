@@ -40,5 +40,7 @@ public interface OrderHisService {
     void truncate(OrderHisKey key);
 
     General getVoucherInfo(String vouDate, String compCode, Integer depId);
+    
+    OrderHis updateACK(OrderHisKey key);
 
 }

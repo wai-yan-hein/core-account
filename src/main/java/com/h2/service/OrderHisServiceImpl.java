@@ -139,4 +139,9 @@ public class OrderHisServiceImpl implements OrderHisService {
         return shDao.getVoucherInfo(vouDate, compCode, depId);
     }
 
+    @Override
+    public OrderHis updateACK(OrderHisKey key) {
+        return shDao.updateACK(key);
+    }
+
 }
