@@ -29,6 +29,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -216,7 +217,8 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         return departmentAutoCompleter == null ? department : departmentAutoCompleter.getListOption();
     }
 
-    public void searchTriBalDetail() {
+    public void searchTriBalDetail(){
+        try{
         clear();
         progress.setIndeterminate(true);
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
@@ -256,6 +258,9 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
             calOpening();
             progress.setIndeterminate(false);
         });
+        }catch (Exception ex){
+            ex.getMessage();
+        }
     }
 
     private String getCurrency() {
@@ -862,10 +867,17 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     // End of variables declaration//GEN-END:variables
 
     @Override
-    public void selected(Object source, Object selectObj) {
+    public void selected(Object source, Object selectObj){
+       try{
         if (source != null) {
             searchTriBalDetail();
         }
+       }catch(Exception ex){
+        ex.getMessage();
+       }
+      
+        
+        
     }
 
 }

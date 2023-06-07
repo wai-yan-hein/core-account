@@ -33,6 +33,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -274,7 +275,8 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
 
     }
 
-    private void openTBDDialog(String coaCode, String curCode, String coaName) {
+    private void openTBDDialog (String coaCode, String curCode, String coaName) {
+        try{
         if (dialog == null) {
             dialog = new TrialBalanceDetailDialog(Global.parentForm);
             dialog.setAccountRepo(accountRepo);
@@ -293,6 +295,10 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         dialog.initData();
         dialog.searchTriBalDetail();
         dialog.setVisible(true);
+        }catch (Exception ex)
+        {
+            ex.getMessage();
+        }
     }
 
     private void calGLTotlaAmount() {

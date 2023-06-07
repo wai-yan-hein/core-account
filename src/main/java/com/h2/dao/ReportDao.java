@@ -15,5 +15,7 @@ public interface ReportDao {
     void executeSql(String... sql);
 
     ResultSet executeSql(String sql);
+    
+    ResultSet executeAndResult(String sql);
 
 }

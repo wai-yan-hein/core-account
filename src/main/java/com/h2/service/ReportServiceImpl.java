@@ -4,9 +4,16 @@
  */
 package com.h2.service;
 
+import com.acc.model.Gl;
+import com.acc.model.GlKey;
+import com.common.Util1;
 import com.h2.dao.ReportDao;
 import com.inventory.model.General;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -67,5 +74,130 @@ public class ReportServiceImpl implements ReportService {
             log.error(String.format("getSmallestQty: %s", e.getMessage()));
         }
         return g;
+    }
+    
+    //gl
+    @Override
+    public List<Gl> getIndividualLedger(String fromDate, String toDate, String desp, String srcAcc, String acc, String curCode, String reference, String compCode, String tranSource, String traderCode, String traderType, String coaLv2, String coaLv1, String batchNo, String projectNo, boolean summary, Integer macId) throws SQLException {
+        String coaFilter = "";
+        if (!coaLv2.equals("-")) {
+            coaFilter += "where coa3.coa_parent = '" + coaLv2 + "'\n";
+        }
+        if (!coaLv1.equals("-")) {
+            if (coaFilter.isEmpty()) {
+                coaFilter += "where coa2.coa_parent = '" + coaLv1 + "'\n";
+            } else {
+                coaFilter += "and coa2.coa_parent = '" + coaLv1 + "'\n";
+            }
+        }
+        String filter = "";
+        if (!traderCode.equals("-")) {
+            filter += "and trader_code = '" + traderCode + "'\n";
+        }
+        if (!tranSource.equals("-")) {
+            filter += "and tran_source = '" + tranSource + "'\n";
+        }
+        if (!reference.equals("-")) {
+            filter += "and reference like '" + reference + "%'\n";
+        }
+        if (!desp.equals("-")) {
+            filter += "and description like '" + desp + "%'\n";
+        }
+        if (!acc.equals("-")) {
+            filter += "and (account_id = '" + acc + "' or source_ac_id ='" + acc + "')";
+        }
+        if (!traderType.equals("-")) {
+            filter += "and  discriminator ='" + traderType + "' \n";
+        }
+        if (!curCode.equals("-")) {
+            filter += "and cur_code ='" + curCode + "'\n";
+        }
+        if (!batchNo.equals("-")) {
+            filter += "and batch_no ='" + batchNo + "'\n";
+        }
+        if (!projectNo.equals("-")) {
+            filter += "and project_no ='" + projectNo + "'\n";
+        }
+        List<Gl> list = new ArrayList<>();
+        if (summary) {
+            String sql = "select a.*,dep.usr_code d_user_code,coa.coa_name_eng src_acc_name,coa3.coa_name_eng acc_name\n" + "from (\n" + "select gl_date,gl_code,dept_id,cur_code,source_ac_id,account_id,dept_code,trader_code,comp_code,sum(dr_amt) dr_amt,sum(cr_amt) cr_amt\n" + "from gl \n" + "where date(gl_date) between '" + fromDate + "' and '" + toDate + "'\n" + "and comp_code = '" + compCode + "'\n" + "and deleted =0\n" + "and dept_code in (select dept_code from tmp_dep_filter where mac_id =" + macId + ")\n" + "and (account_id = '" + srcAcc + "' or source_ac_id ='" + srcAcc + "')\n" + filter + "\n" + "group by source_ac_id,account_id,dept_code\n" + ")a\n" + "join department dep\n" + "on a.dept_code = dep.dept_code\n" + "and a.comp_code = dep.comp_code\n" + "join chart_of_account coa\n" + "on a.source_ac_id = coa.coa_code\n" + "and a.comp_code = coa.comp_code\n" + "left join chart_of_account coa3\n" + "on a.account_id = coa3.coa_code\n" + "and a.comp_code = coa3.comp_code\n" + "left join chart_of_account coa2\n" + "on coa3.coa_parent = coa2.coa_code\n" + "and coa3.comp_code = coa2.comp_code\n" + coaFilter + "\n" + "order by coa.coa_code_usr\n";
+            ResultSet rs = reportDao.executeAndResult(sql);
+            if (!Objects.isNull(rs)) {
+                while (rs.next()) {
+                    Gl v = new Gl();
+                    GlKey key = new GlKey();
+                    key.setCompCode(compCode);
+                    key.setGlCode(rs.getString("gl_code"));
+                    key.setDeptId(rs.getInt("dept_id"));
+                    v.setKey(key);
+                    v.setGlDate(rs.getDate("gl_date"));
+                    v.setVouDate(Util1.toDateStr(v.getGlDate(), "dd/MM/yyyy"));
+                    v.setCurCode(rs.getString("cur_code"));
+                    v.setSrcAccCode(rs.getString("source_ac_id"));
+                    v.setAccCode(rs.getString("account_id"));
+                    v.setDrAmt(rs.getDouble("dr_amt"));
+                    v.setCrAmt(rs.getDouble("cr_amt"));
+                    v.setDeptUsrCode(rs.getString("d_user_code"));
+                    v.setSrcAccName(rs.getString("src_acc_name"));
+                    v.setAccName(rs.getString("acc_name"));
+                    v.setTranSource("Report");
+                    list.add(v);
+                }
+            }
+        } else {
+            String sql = "select a.*,dep.usr_code d_user_code,t.user_code t_user_code,t.discriminator,t.trader_name,coa.coa_name_eng src_acc_name,coa3.coa_name_eng acc_name\n" + "from (\n" + "select gl_code, gl_date, created_date, description, source_ac_id, account_id, \n" + "cur_code, dr_amt, cr_amt, reference, dept_code, voucher_no, trader_code, comp_code, tran_source, gl_vou_no,\n" + "remark, mac_id, ref_no,dept_id,batch_no,project_no\n" + "from gl \n" + "where date(gl_date) between '" + fromDate + "' and '" + toDate + "'\n" + "and comp_code = '" + compCode + "'\n" + "and deleted =0\n" + "and dept_code in (select dept_code from tmp_dep_filter where mac_id =" + macId + ")\n" + "and (account_id = '" + srcAcc + "' or source_ac_id ='" + srcAcc + "')\n" + "" + filter + "\n" + "order by gl_date,tran_source,gl_code\n" + ")a\n" + "join department dep\n" + "on a.dept_code = dep.dept_code\n" + "and a.comp_code = dep.comp_code\n" + "left join trader t on \n" + "a.trader_code = t.code\n" + "and a.comp_code = t.comp_code\n" + "join chart_of_account coa\n" + "on a.source_ac_id = coa.coa_code\n" + "and a.comp_code = coa.comp_code\n" + "left join chart_of_account coa3\n" + "on a.account_id = coa3.coa_code\n" + "and a.comp_code = coa3.comp_code\n" + "left join chart_of_account coa2\n" + "on coa3.coa_parent = coa2.coa_code\n" + "and coa3.comp_code = coa2.comp_code\n" + "" + coaFilter + "\n" + "order by a.gl_date,a.tran_source,a.gl_code\n";
+            ResultSet rs = reportDao.executeAndResult(sql);
+            while (rs.next()) {
+                Gl v = new Gl();
+                GlKey key = new GlKey();
+                key.setCompCode(rs.getString("comp_code"));
+                key.setGlCode(rs.getString("gl_code"));
+                key.setDeptId(rs.getInt("dept_id"));
+                v.setKey(key);
+                v.setGlDate(rs.getTimestamp("gl_date"));
+                v.setCreatedDate(rs.getTimestamp("created_date"));
+                v.setVouDate(Util1.toDateStr(v.getGlDate(), "dd/MM/yyyy"));
+                v.setDescription(rs.getString("description"));
+                v.setSrcAccCode(rs.getString("source_ac_id"));
+                v.setAccCode(rs.getString("account_id"));
+                v.setCurCode(rs.getString("cur_code"));
+                v.setDrAmt(rs.getDouble("dr_amt"));
+                v.setCrAmt(rs.getDouble("cr_amt"));
+                v.setReference(rs.getString("reference"));
+                v.setRefNo(rs.getString("ref_no"));
+                v.setDeptCode(rs.getString("dept_code"));
+                v.setVouNo(rs.getString("voucher_no"));
+                v.setDeptUsrCode(rs.getString("d_user_code"));
+                v.setTraderCode(rs.getString("trader_code"));
+                v.setTraderName(rs.getString("trader_name"));
+                v.setTranSource(rs.getString("tran_source"));
+                v.setGlVouNo(rs.getString("gl_vou_no"));
+                v.setSrcAccName(rs.getString("src_acc_name"));
+                v.setAccName(rs.getString("acc_name"));
+                v.setMacId(rs.getInt("mac_id"));
+                v.setBatchNo(rs.getString("batch_no"));
+                v.setProjectNo(rs.getString("project_no"));
+                list.add(v);
+            }
+
+        }
+        if (!list.isEmpty()) {
+            list.forEach(gl -> {
+                String account = Util1.isNull(gl.getAccCode(), "-");
+                if (account.equals(srcAcc)) {
+                    //swap amt
+                    double tmpDrAmt = Util1.getDouble(gl.getDrAmt());
+                    gl.setDrAmt(gl.getCrAmt());
+                    gl.setCrAmt(tmpDrAmt);
+                    //swap acc
+                    String tmpStr = gl.getAccName();
+                    gl.setAccName(gl.getSrcAccName());
+                    gl.setSrcAccName(tmpStr);
+                }
+                gl.setDrAmt(Util1.toNull(gl.getDrAmt()));
+                gl.setCrAmt(Util1.toNull(gl.getCrAmt()));
+            });
+        }
+        return list;
     }
 }

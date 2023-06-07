@@ -202,13 +202,15 @@ public class CloudIntegration {
         if (!list.isEmpty()) {
             log.info("need to upload Gl list : " + list.size());
             list.forEach((l) -> {
-                accounRepo.uploadGL(l).subscribe((gl) -> {
+                accounRepo.uploadGL(l).subscribe((gl) ->{           
                     GlKey key = gl.getKey();
-                    //key.setGlCode(glCode);
-                    glService.updateACK(key);
-                }, (e) -> {
-                    log.error("uploadGl : " + e.getMessage());
-                });
+                    key.setGlCode(gl.getKey().getGlCode());
+                    key.setCompCode(gl.getKey().getCompCode());
+                    key.setDeptId(gl.getKey().getDeptId());
+                   glService.updateACK(key);
+                        },(e)->{
+                        log.error("to uploadGl : " + e.getMessage());
+                        });
             });
         }
     }
