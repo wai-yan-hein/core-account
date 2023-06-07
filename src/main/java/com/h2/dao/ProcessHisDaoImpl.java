@@ -8,10 +8,14 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Repository
 @Slf4j
 public class ProcessHisDaoImpl extends AbstractDao<ProcessHisKey, ProcessHis> implements ProcessHisDao {
+
+    @Autowired
+    private ProcessHisDetailDao dao;
 
     @Override
     public ProcessHis save(ProcessHis ph) {
@@ -116,5 +120,24 @@ public class ProcessHisDaoImpl extends AbstractDao<ProcessHisKey, ProcessHis> im
     public void restore(ProcessHisKey key) {
         String sql = "update process_his set deleted =0 where vou_no ='" + key.getVouNo() + "' and comp_code ='" + key.getCompCode() + "' and dept_id =" + key.getDeptId() + "";
         execSql(sql);
+    }
+
+    @Override
+    public List<ProcessHis> unUpload(String compCode) {
+        String hsql = "select o from ProcessHis o where compCode = '" + compCode + "' and o.intgUpdStatus is null";
+        List<ProcessHis> list = findHSQL(hsql);
+        list.forEach((s) -> {
+            s.setListDetail(dao.search(s.getKey().getVouNo(),
+                    s.getKey().getCompCode(), s.getKey().getDeptId()));
+        });
+        return list;
+    }
+
+    @Override
+    public ProcessHis updateACK(ProcessHisKey key) {
+        ProcessHis oh = getByKey(key);
+        oh.setIntgUpdStatus("ACK");
+        saveOrUpdate(oh, key);
+        return oh;
     }
 }
