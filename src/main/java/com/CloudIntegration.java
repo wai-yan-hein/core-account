@@ -158,6 +158,7 @@ public class CloudIntegration {
     RetInService retInService;
     @Autowired
     RetOutService retOutService;
+    @Autowired
     private StockInOutService stockInOutService;
     @Autowired
     private TransferHisService transferHisService;
