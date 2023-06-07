@@ -107,7 +107,7 @@ public class PurHisDaoImpl extends AbstractDao<PurHisKey, PurHis> implements Pur
 
     @Override
     public List<PurHis> unUploadVoucher(String compCode) {
-        String hsql = "select o from OrderHis o where compCode = '" + compCode + "' and o.intgUpdStatus is null";
+        String hsql = "select o from PurHis o where o.key.compCode = '" + compCode + "' and o.intgUpdStatus is null";
         List<PurHis> list = findHSQL(hsql);
         list.forEach((s) -> {
             s.setListPD(dao.search(s.getKey().getVouNo(),

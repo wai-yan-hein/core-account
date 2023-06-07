@@ -106,11 +106,6 @@ public class RetOutServiceImpl implements RetOutService {
     }
 
     @Override
-    public List<RetOutHis> unUpload(String syncDate) {
-        return rDao.unUpload(syncDate);
-    }
-
-    @Override
     public Date getMaxDate() {
         return rDao.getMaxDate();
     }
