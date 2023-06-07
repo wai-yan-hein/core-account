@@ -48,7 +48,7 @@ public class SaleHisDaoImpl extends AbstractDao<SaleHisKey, SaleHis> implements 
     
     @Override
     public List<SaleHis> unUploadVoucher(String compCode) {
-        String hsql = "select o from SaleHis o where compCode = '" + compCode + "' and o.intgUpdStatus is null";
+        String hsql = "select o from SaleHis o where o.key.compCode = '" + compCode + "' and o.intgUpdStatus is null";
         List<SaleHis> list = findHSQL(hsql);
         list.forEach((s) -> {
             s.setListSH(dao.search(s.getKey().getVouNo(),

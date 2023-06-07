@@ -32,13 +32,13 @@ public class TransferHisDaoImpl extends AbstractDao<TransferHisKey, TransferHis>
 
     @Override
     public List<TransferHis> unUpload(String compCode) {
-        String hsql = "select o from TransferHis o where compCode = '" + compCode + "' and o.intgUpdStatus is null";
+        String hsql = "select o from TransferHis o where o.key.compCode = '" + compCode + "' and o.intgUpdStatus is null";
         List<TransferHis> list = findHSQL(hsql);
         list.forEach((o) -> {
             String vouNo = o.getKey().getVouNo();
-            String compCode1 = o.getKey().getCompCode();
+//            String compCode1 = o.getKey().getCompCode();
             Integer depId = o.getKey().getDeptId();
-            o.setListTD(dao.search(vouNo, compCode1, depId));
+            o.setListTD(dao.search(vouNo, compCode, depId));
         });
         return list;
     }

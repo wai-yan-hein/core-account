@@ -86,4 +86,9 @@ public class WeightLossServiceImpl implements WeightLossService {
     public WeightLossHis updateACK(WeightLossHisKey key) {
         return dao.updateACK(key);
     }
+
+    @Override
+    public List<WeightLossHis> unUpload(String compCode) {
+        return dao.unUpload(compCode);
+    }
 }

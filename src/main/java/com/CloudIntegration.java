@@ -36,20 +36,26 @@ import com.h2.service.RetInService;
 import com.h2.service.RetOutService;
 import com.h2.service.RolePropertyService;
 import com.h2.service.RoleService;
+import com.h2.service.StockInOutService;
 import com.h2.service.StockService;
 import com.h2.service.StockTypeService;
 import com.h2.service.StockUnitService;
 import com.h2.service.SystemPropertyService;
 import com.h2.service.TraderAService;
 import com.h2.service.TraderInvService;
+import com.h2.service.TransferHisService;
 import com.h2.service.UserService;
 import com.h2.service.VouStatusService;
+import com.h2.service.WeightLossService;
 import com.inventory.model.OrderHis;
 import com.inventory.model.PurHis;
 import com.inventory.model.RetInHis;
 import com.inventory.model.RetOutHis;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
+import com.inventory.model.StockInOut;
+import com.inventory.model.TransferHis;
+import com.inventory.model.WeightLossHis;
 import com.inventory.ui.common.InventoryRepo;
 import com.user.common.UserRepo;
 import java.time.Duration;
@@ -151,6 +157,11 @@ public class CloudIntegration {
     RetInService retInService;
     @Autowired
     RetOutService retOutService;
+    private StockInOutService stockInOutService;
+    @Autowired
+    private TransferHisService transferHisService;
+    @Autowired
+    private WeightLossService weightLossService;
 
     public void startDownload() {
         if (localDatabase) {
@@ -176,20 +187,14 @@ public class CloudIntegration {
     }
 
     public void uploadSale() {
-        List<SaleHis> list = saleHisService.findAll(Global.compCode);
+        List<SaleHis> list = saleHisService.unUploadVoucher(Global.compCode);
         if (!list.isEmpty()) {
             log.info("need to upload sale his : " + list.size());
             list.forEach((h) -> {
-                List<SaleHisDetail> listD = saleHisDetailDao.search(h.getKey().getVouNo(),
-                        h.getKey().getCompCode(), h.getKey().getDeptId());
-                if (!listD.isEmpty()) {
-                    h.setListSH(listD);
-                    log.info("need to upload sale his detail : " + listD.size());
-                    inventoryRepo.uploadSale(h).subscribe((r) -> {
-                        r.setIntgUpdStatus("ACK");
-                        saleHisService.updateACK(r.getKey());
-                    });
-                }
+                inventoryRepo.uploadSale(h).subscribe((r) -> {
+                    r.setIntgUpdStatus("ACK");
+                    saleHisService.updateACK(r.getKey());
+                });
             });
 
         }
@@ -247,6 +252,45 @@ public class CloudIntegration {
         }
     }
 
+    public void uploadStockInOut() {
+        List<StockInOut> list = stockInOutService.unUpload(Global.compCode);
+        if (!list.isEmpty()) {
+            list.forEach((l) -> {
+                inventoryRepo.uploadStockInOut(l).subscribe((r) -> {
+                    r.setIntgUpdStatus("ACK");
+                    stockInOutService.updateACK(r.getKey());
+                });
+            });
+
+        }
+    }
+
+    public void uploadTransfer() {
+        List<TransferHis> list = transferHisService.unUpload(Global.compCode);
+        if (!list.isEmpty()) {
+            list.forEach((l) -> {
+                inventoryRepo.uploadTransfer(l).subscribe((r) -> {
+                    r.setIntgUpdStatus("ACK");
+                    transferHisService.updateACK(r.getKey());
+                });
+            });
+
+        }
+    }
+
+    public void uploadWeightLoss() {
+        List<WeightLossHis> list = weightLossService.unUpload(Global.compCode);
+        if (!list.isEmpty()) {
+            list.forEach((l) -> {
+                inventoryRepo.uploadWeightLoss(l).subscribe((r) -> {
+                    r.setIntgUpdStatus("ACK");
+                    weightLossService.updateACK(r.getKey());
+                });
+            });
+
+        }
+    }
+
     public void uploadAccountData() {
         uploadGL();
     }
@@ -256,15 +300,15 @@ public class CloudIntegration {
         if (!list.isEmpty()) {
             log.info("need to upload Gl list : " + list.size());
             list.forEach((l) -> {
-                accounRepo.uploadGL(l).subscribe((gl) ->{           
+                accounRepo.uploadGL(l).subscribe((gl) -> {
                     GlKey key = gl.getKey();
                     key.setGlCode(gl.getKey().getGlCode());
                     key.setCompCode(gl.getKey().getCompCode());
                     key.setDeptId(gl.getKey().getDeptId());
-                   glService.updateACK(key);
-                        },(e)->{
-                        log.error("to uploadGl : " + e.getMessage());
-                        });
+                    glService.updateACK(key);
+                }, (e) -> {
+                    log.error("to uploadGl : " + e.getMessage());
+                });
             });
         }
     }
