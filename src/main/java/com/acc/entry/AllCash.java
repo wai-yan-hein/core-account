@@ -125,6 +125,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private final boolean single;
     private final AllCashTableModel allCashTableModel = new AllCashTableModel();
     private final DayBookTableModel dayBookTableModel = new DayBookTableModel();
+    private ColumnHeaderListener listener;
 
     public UserRepo getUserRepo() {
         return userRepo;
@@ -192,7 +193,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         this.single = single;
         initComponents();
         initFocus();
-        initListener();
         initPopup();
         initTableCashInOut();
         initTableCashOP();
@@ -219,8 +219,13 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         }
     };
 
-    private void initListener() {
-        tblCash.addMouseListener(new ColumnHeaderListener(tblCash));
+    private void tableListener(boolean status) {
+        if (status) {
+            listener = new ColumnHeaderListener(tblCash);
+            tblCash.addMouseListener(listener);
+        } else {
+            tblCash.removeMouseListener(listener);
+        }
     }
 
     private void batchLock(boolean lock) {
@@ -799,6 +804,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         jLabel9 = new javax.swing.JLabel();
         chkSummary = new javax.swing.JCheckBox();
         txtRecord = new javax.swing.JFormattedTextField();
+        chkAdjust = new javax.swing.JCheckBox();
 
         jMenuItem1.setText("jMenuItem1");
 
@@ -1152,6 +1158,13 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         txtRecord.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
         txtRecord.setHorizontalAlignment(javax.swing.JTextField.LEFT);
 
+        chkAdjust.setText("Adjust Column");
+        chkAdjust.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkAdjustActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -1159,6 +1172,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(chkSummary)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkAdjust)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel9)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1172,7 +1187,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkSummary)
                     .addComponent(jLabel9)
-                    .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(chkAdjust))
                 .addContainerGap())
         );
 
@@ -1346,8 +1362,14 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         // TODO add your handling code here:
     }//GEN-LAST:event_txtProjectNoActionPerformed
 
+    private void chkAdjustActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkAdjustActionPerformed
+        // TODO add your handling code here:
+        tableListener(chkAdjust.isSelected());
+    }//GEN-LAST:event_chkAdjustActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox chkAdjust;
     private javax.swing.JCheckBox chkSummary;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

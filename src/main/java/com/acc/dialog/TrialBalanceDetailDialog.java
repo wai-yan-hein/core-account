@@ -246,13 +246,13 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
                 txtDrAmt.setValue(drAmtTableModel.getDrAmt());
                 txtCrAmt.setValue(crAmtTableModel.getCrAmt());
             });
+            calOpening();
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
             progress.setIndeterminate(false);
         }, () -> {
             drAmtTableModel.fireTableDataChanged();
             crAmtTableModel.fireTableDataChanged();
-            calOpening();
             progress.setIndeterminate(false);
             setVisible(true);
         });
@@ -283,14 +283,13 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
             } else {
                 txtOpening.setValue(t.getOpening());
             }
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        }, () -> {
             double opAmt = Util1.getDouble(txtOpening.getValue());
             double drAmt = Util1.getDouble(txtDrAmt.getValue());
             double crAmt = Util1.getDouble(txtCrAmt.getValue());
             double closingAmt = opAmt + drAmt - crAmt;
             txtClosing.setValue(closingAmt);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
         });
     }
 
