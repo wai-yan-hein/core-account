@@ -31,6 +31,9 @@ import com.h2.service.OrderHisService;
 import com.h2.service.PrivilegeCompanyService;
 import com.h2.service.PrivilegeMenuService;
 import com.h2.service.ProjectService;
+import com.h2.service.PurHisService;
+import com.h2.service.RetInService;
+import com.h2.service.RetOutService;
 import com.h2.service.RolePropertyService;
 import com.h2.service.RoleService;
 import com.h2.service.StockService;
@@ -42,6 +45,9 @@ import com.h2.service.TraderInvService;
 import com.h2.service.UserService;
 import com.h2.service.VouStatusService;
 import com.inventory.model.OrderHis;
+import com.inventory.model.PurHis;
+import com.inventory.model.RetInHis;
+import com.inventory.model.RetOutHis;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.ui.common.InventoryRepo;
@@ -139,6 +145,12 @@ public class CloudIntegration {
     private GlService glService;
     @Autowired
     OrderHisService orderHisService;
+    @Autowired
+    PurHisService purHisService;
+    @Autowired
+    RetInService retInService;
+    @Autowired
+    RetOutService retOutService;
 
     public void startDownload() {
         if (localDatabase) {
@@ -158,6 +170,9 @@ public class CloudIntegration {
     public void uploadInvData() {
         uploadSale();
         uploadOrder();
+        uploadPurchase();
+        uploadReturnIn();
+        uploadReturnOut();
     }
 
     public void uploadSale() {
@@ -187,6 +202,45 @@ public class CloudIntegration {
                 inventoryRepo.uploadOrder(l).subscribe((r) -> {
                     r.setIntgUpdStatus("ACK");
                     orderHisService.updateACK(r.getKey());
+                });
+            });
+
+        }
+    }
+    
+    public void uploadPurchase() {
+        List<PurHis> list = purHisService.unUploadVoucher(Global.compCode);
+        if (!list.isEmpty()) {
+            list.forEach((pur) -> {
+                inventoryRepo.uploadPurchase(pur).subscribe((p) -> {
+                    p.setIntgUpdStatus("ACK");
+                    purHisService.updateACK(p.getKey());
+                });
+            });
+
+        }
+    }
+    
+    public void uploadReturnIn() {
+        List<RetInHis> list = retInService.unUploadVoucher(Global.compCode);
+        if (!list.isEmpty()) {
+            list.forEach((in) -> {
+                inventoryRepo.uploadRetIn(in).subscribe((n) -> {
+                    n.setIntgUpdStatus("ACK");
+                    retInService.updateACK(n.getKey());
+                });
+            });
+
+        }
+    }
+    
+    public void uploadReturnOut() {
+        List<RetOutHis> list = retOutService.unUploadVoucher(Global.compCode);
+        if (!list.isEmpty()) {
+            list.forEach((out) -> {
+                inventoryRepo.uploadRetOut(out).subscribe((o) -> {
+                    o.setIntgUpdStatus("ACK");
+                    retOutService.updateACK(o.getKey());
                 });
             });
 
