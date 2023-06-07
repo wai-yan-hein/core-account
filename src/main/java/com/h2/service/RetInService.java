@@ -5,7 +5,6 @@
  */
 package com.h2.service;
 
-
 import com.inventory.model.RetInHis;
 import com.inventory.model.RetInHisKey;
 import java.util.Date;
@@ -21,7 +20,7 @@ public interface RetInService {
     RetInHis update(RetInHis ri);
 
     List<RetInHis> search(String fromDate, String toDate, String cusCode,
-                          String vouNo, String remark, String userCode);
+            String vouNo, String remark, String userCode);
 
     RetInHis findById(RetInHisKey id);
 
@@ -29,14 +28,13 @@ public interface RetInService {
 
     void restore(RetInHisKey key) throws Exception;
 
-
     List<RetInHis> unUploadVoucher(String syncDate);
-
-    List<RetInHis> unUpload(String syncDate);
 
     Date getMaxDate();
 
     List<RetInHis> search(String updatedDate, List<String> keys);
 
     void truncate(RetInHisKey key);
+
+    RetInHis updateACK(RetInHisKey key);
 }

@@ -30,6 +30,7 @@ import com.common.Global;
 import com.common.ReturnObject;
 import com.common.Util1;
 import com.user.model.YearEnd;
+import java.sql.SQLException;
 import java.util.List;
 import javax.swing.JOptionPane;
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +55,7 @@ public class AccountRepo {
     private boolean localDatabase;
     @Autowired
     private H2Repo h2Repo;
+    
 
     public Mono<DepartmentA> getDefaultDepartment() {
         String deptCode = Global.hmRoleProperty.get("default.department");
@@ -629,7 +631,10 @@ public class AccountRepo {
                 .collectList();
     }
 
-    public Mono<List<Gl>> searchGl(ReportFilter filter) {
+    public Mono<List<Gl>> searchGl(ReportFilter filter)throws SQLException {
+        if (localDatabase) {
+            return h2Repo.searchGL(filter);
+        }        
         return accountApi.post()
                 .uri("/account/search-gl")
                 .body(Mono.just(filter), ReportFilter.class)

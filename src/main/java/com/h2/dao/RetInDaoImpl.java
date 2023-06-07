@@ -29,13 +29,13 @@ public class RetInDaoImpl extends AbstractDao<RetInHisKey, RetInHis> implements 
 
     @Override
     public RetInHis save(RetInHis sh) {
-        saveOrUpdate(sh,sh.getKey());
+        saveOrUpdate(sh, sh.getKey());
         return sh;
     }
 
     @Override
     public List<RetInHis> search(String fromDate, String toDate, String cusCode,
-                                 String vouNo, String remark, String userCode) {
+            String vouNo, String remark, String userCode) {
         String strFilter = "";
 
         if (!fromDate.equals("-") && !toDate.equals("-")) {
@@ -106,20 +106,12 @@ public class RetInDaoImpl extends AbstractDao<RetInHisKey, RetInHis> implements 
     }
 
     @Override
-    public List<RetInHis> unUploadVoucher(String syncDate) {
-        String hsql = "select o from RetInHis o where o.intgUpdStatus is null and date(o.vouDate) >= '" + syncDate + "'";
-        return findHSQL(hsql);
-    }
-
-    @Override
-    public List<RetInHis> unUpload(String syncDate) {
-        String hsql = "select o from RetInHis o where (o.intgUpdStatus ='ACK' or o.intgUpdStatus is null) and date(o.vouDate) >= '" + syncDate + "'";
+    public List<RetInHis> unUploadVoucher(String compCode) {
+        String hsql = "select o from OrderHis o where o.key.compCode = '" + compCode + "' and o.intgUpdStatus is null";
         List<RetInHis> list = findHSQL(hsql);
-        list.forEach((o) -> {
-            String vouNo = o.getKey().getVouNo();
-            String compCode = o.getKey().getCompCode();
-            Integer deptId = o.getKey().getDeptId();
-            o.setListRD(dao.search(vouNo, compCode, deptId));
+        list.forEach((s) -> {
+            s.setListRD(dao.search(s.getKey().getVouNo(),
+                    s.getKey().getCompCode(), s.getKey().getDeptId()));
         });
         return list;
     }
@@ -167,5 +159,13 @@ public class RetInDaoImpl extends AbstractDao<RetInHisKey, RetInHis> implements 
         String sql1 = "delete from ret_in_his where vou_no ='" + vouNo + "' and comp_code ='" + compCode + "' and " + deptId + "";
         String sql2 = "delete from ret_in_his_detail where vou_no ='" + vouNo + "' and comp_code ='" + compCode + "' and " + deptId + "";
         execSql(sql1, sql2);
+    }
+
+    @Override
+    public RetInHis updateACK(RetInHisKey key) {
+        RetInHis rh = getByKey(key);
+        rh.setIntgUpdStatus("ACK");
+        saveOrUpdate(rh, key);
+        return rh;
     }
 }

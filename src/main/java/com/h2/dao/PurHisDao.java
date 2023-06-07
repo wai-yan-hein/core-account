@@ -5,6 +5,7 @@
  */
 package com.h2.dao;
 
+import com.inventory.model.ProcessHis;
 import com.inventory.model.PurHis;
 import com.inventory.model.PurHisKey;
 import java.util.Date;
@@ -18,7 +19,7 @@ public interface PurHisDao {
     PurHis save(PurHis ph);
 
     List<PurHis> search(String fromDate, String toDate, String cusCode,
-                        String vouNo, String remark, String userCode);
+            String vouNo, String remark, String userCode);
 
     PurHis findById(PurHisKey id);
 
@@ -26,13 +27,12 @@ public interface PurHisDao {
 
     void restore(PurHisKey key) throws Exception;
 
-
-    List<PurHis> unUploadVoucher(String syncDate);
-
-    List<PurHis> unUpload(String syncDate);
+    List<PurHis> unUploadVoucher(String compCode);
 
     Date getMaxDate();
 
     List<PurHis> search(String updatedDate, List<String> keys);
+
+    PurHis updateACK(PurHisKey key);
 
 }

@@ -10,9 +10,11 @@ import com.acc.model.ChartOfAccount;
 import com.acc.model.DepartmentA;
 import com.acc.model.DepartmentAKey;
 import com.acc.model.Gl;
+import com.acc.model.ReportFilter;
 import com.acc.model.TraderA;
 import com.common.Global;
 import com.common.ReturnObject;
+import com.common.Util1;
 import com.h2.service.BrandService;
 import com.h2.service.BusinessTypeService;
 import com.h2.service.COAService;
@@ -102,6 +104,7 @@ import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
 import com.inventory.model.TransferHis;
 import com.inventory.model.WeightLossHis;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -536,4 +539,28 @@ public class H2Repo {
     public Mono<ReturnObject> save(List<Gl> glList) {
         return Mono.justOrEmpty(glService.save(glList));
     }
+    
+    public Mono<List<Gl>> searchGL(ReportFilter filter) throws SQLException{
+        String fromDate = filter.getFromDate();
+        String toDate = filter.getToDate();
+        String des = Util1.isNull(filter.getDesp(), "-");
+        String srcAcc = Util1.isNull(filter.getSrcAcc(), "-");
+        String acc = Util1.isNull(filter.getAcc(), "-");
+        String curCode = Util1.isNull(filter.getCurCode(), "-");
+        String reference = Util1.isNull(filter.getReference(), "-");
+        String compCode = Util1.isNull(filter.getCompCode(), "-");
+        String tranSource = Util1.isNull(filter.getTranSource(), "-");
+        String traderCode = Util1.isNull(filter.getTraderCode(), "-");
+        String traderType = Util1.isNull(filter.getTraderType(), "-");
+        String coaLv2 = Util1.isNull(filter.getCoaLv2(), "-");
+        String coaLv1 = Util1.isNull(filter.getCoaLv1(), "-");
+        String batchNo = Util1.isNull(filter.getBatchNo(), "-");
+        String projectNo = Util1.isAll("-");
+        Integer macId = filter.getMacId();
+        boolean summary = filter.isSummary();
+        return Mono.justOrEmpty(reportService.getIndividualLedger(fromDate, 
+                toDate, des,srcAcc, acc, curCode, reference, compCode, 
+                tranSource, traderCode, traderType, coaLv2,
+                coaLv1, batchNo, projectNo, summary, macId));
+    }   
 }

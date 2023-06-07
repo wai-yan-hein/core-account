@@ -114,12 +114,12 @@ public class StockInOutDaoImpl extends AbstractDao<StockIOKey, StockInOut> imple
     }
 
     @Override
-    public List<StockInOut> unUpload(String syncDate) {
-        String hsql = "select o from StockInOut o where intgUpdStatus is null and date(o.vouDate) >= '" + syncDate + "'";
+    public List<StockInOut> unUpload(String compCode) {
+        String hsql = "select o from StockInOut o where o.intgUpdStatus is null and o.key.compCode = '" + compCode + "'";
         List<StockInOut> list = findHSQL(hsql);
         list.forEach((o) -> {
             String vouNo = o.getKey().getVouNo();
-            String compCode = o.getKey().getCompCode();
+//            String compCode = o.getKey().getCompCode();
             Integer depId = o.getKey().getDeptId();
             o.setListSH(dao.search(vouNo, compCode, depId));
         });
@@ -159,6 +159,14 @@ public class StockInOutDaoImpl extends AbstractDao<StockIOKey, StockInOut> imple
             o.setListSH(dao.search(vouNo, compCode, deptId));
         });
         return list;
+    }
+
+    @Override
+    public StockInOut updateACK(StockIOKey key) {
+        StockInOut so = getByKey(key);
+        so.setIntgUpdStatus("ACK");
+        saveOrUpdate(so, key);
+        return so;
     }
 
 }

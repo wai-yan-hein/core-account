@@ -29,13 +29,13 @@ public class RetOutDaoImpl extends AbstractDao<RetOutHisKey, RetOutHis> implemen
 
     @Override
     public RetOutHis save(RetOutHis sh) {
-        saveOrUpdate(sh,sh.getKey());
+        saveOrUpdate(sh, sh.getKey());
         return sh;
     }
 
     @Override
     public List<RetOutHis> search(String fromDate, String toDate, String cusCode,
-                                  String vouNo, String remark, String userCode) {
+            String vouNo, String remark, String userCode) {
         String strFilter = "";
 
         if (!fromDate.equals("-") && !toDate.equals("-")) {
@@ -105,12 +105,15 @@ public class RetOutDaoImpl extends AbstractDao<RetOutHisKey, RetOutHis> implemen
         execSql(sql);
     }
 
-
-
     @Override
-    public List<RetOutHis> unUploadVoucher(String syncDate) {
-        String hsql = "select o from RetOutHis o where o.intgUpdStatus is null and date(o.vouDate) >= '" + syncDate + "'";
-        return findHSQL(hsql);
+    public List<RetOutHis> unUploadVoucher(String compCode) {
+        String hsql = "select o from OrderHis o where o.key.compCode = '" + compCode + "' and o.intgUpdStatus is null";
+        List<RetOutHis> list = findHSQL(hsql);
+        list.forEach((s) -> {
+            s.setListRD(dao.search(s.getKey().getVouNo(),
+                    s.getKey().getCompCode(), s.getKey().getDeptId()));
+        });
+        return list;
     }
 
     @Override
@@ -159,5 +162,13 @@ public class RetOutDaoImpl extends AbstractDao<RetOutHisKey, RetOutHis> implemen
             o.setListRD(dao.search(vouNo, compCode, deptId));
         });
         return list;
+    }
+
+    @Override
+    public RetOutHis updateACK(RetOutHisKey key) {
+        RetOutHis rh = getByKey(key);
+        rh.setIntgUpdStatus("ACK");
+        saveOrUpdate(rh, key);
+        return rh;
     }
 }

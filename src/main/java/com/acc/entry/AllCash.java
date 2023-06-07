@@ -805,6 +805,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         chkSummary = new javax.swing.JCheckBox();
         txtRecord = new javax.swing.JFormattedTextField();
         chkAdjust = new javax.swing.JCheckBox();
+        chkLocal = new javax.swing.JCheckBox();
 
         jMenuItem1.setText("jMenuItem1");
 
@@ -1165,6 +1166,13 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             }
         });
 
+        chkLocal.setText("Local");
+        chkLocal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkLocalActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -1174,6 +1182,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 .addComponent(chkSummary)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkAdjust)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkLocal)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel9)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1188,7 +1198,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                     .addComponent(chkSummary)
                     .addComponent(jLabel9)
                     .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(chkAdjust))
+                    .addComponent(chkAdjust)
+                    .addComponent(chkLocal))
                 .addContainerGap())
         );
 
@@ -1367,9 +1378,14 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         tableListener(chkAdjust.isSelected());
     }//GEN-LAST:event_chkAdjustActionPerformed
 
+    private void chkLocalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkLocalActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_chkLocalActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkAdjust;
+    private javax.swing.JCheckBox chkLocal;
     private javax.swing.JCheckBox chkSummary;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

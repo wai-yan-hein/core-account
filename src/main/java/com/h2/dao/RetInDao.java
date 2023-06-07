@@ -18,7 +18,7 @@ public interface RetInDao {
     RetInHis save(RetInHis saleHis);
 
     List<RetInHis> search(String fromDate, String toDate, String cusCode,
-                          String vouNo, String remark, String userCode);
+            String vouNo, String remark, String userCode);
 
     RetInHis findById(RetInHisKey id);
 
@@ -28,11 +28,12 @@ public interface RetInDao {
 
     List<RetInHis> unUploadVoucher(String syncDate);
 
-    List<RetInHis> unUpload(String syncDate);
-
     Date getMaxDate();
 
     List<RetInHis> search(String updatedDate, List<String> keys);
+
     void truncate(RetInHisKey key);
+
+    RetInHis updateACK(RetInHisKey key);
 
 }

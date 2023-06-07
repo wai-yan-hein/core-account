@@ -15,4 +15,8 @@ public interface WeightLossService {
     void restore(WeightLossHisKey key);
 
     List<WeightLossHis> search(String fromDate, String toDate, String locCode, String compCode, Integer deptId);
+
+    WeightLossHis updateACK(WeightLossHisKey key);
+
+    List<WeightLossHis> unUpload(String compCode);
 }

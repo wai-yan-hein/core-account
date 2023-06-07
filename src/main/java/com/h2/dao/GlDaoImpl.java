@@ -115,8 +115,6 @@ public class GlDaoImpl extends AbstractDao<GlKey, Gl> implements GlDao {
     public List<Gl> unUploadVoucher(String compCode) {
         String hsql = "select o from Gl o where o.intgUpdStatus is null";
         List<Gl> list = findHSQL(hsql);
-        list.forEach((s) -> {
-        });
         return list;
     }
 

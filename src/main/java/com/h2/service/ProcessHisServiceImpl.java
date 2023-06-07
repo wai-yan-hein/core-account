@@ -75,4 +75,14 @@ public class ProcessHisServiceImpl implements ProcessHisService {
         int seqNo = seqDao.getSequence(macId, "PROCESS", period, compCode);
         return String.format("%0" + 2 + "d", macId) + String.format("%0" + 5 + "d", seqNo) + "-" + period;
     }
+
+    @Override
+    public List<ProcessHis> unUpload(String compCode) {
+        return dao.unUpload(compCode);
+    }
+
+    @Override
+    public ProcessHis updateACK(ProcessHisKey key) {
+        return dao.updateACK(key);
+    }
 }

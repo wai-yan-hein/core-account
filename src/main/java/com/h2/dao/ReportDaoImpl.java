@@ -25,4 +25,9 @@ public class ReportDaoImpl extends AbstractDao<Serializable, Object> implements 
     public ResultSet executeSql(String sql) {
         return getResult(sql);
     }
+    
+    @Override
+    public ResultSet executeAndResult(String sql) {
+        return getResult(sql);
+    }
 }

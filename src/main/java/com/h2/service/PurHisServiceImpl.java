@@ -130,11 +130,6 @@ public class PurHisServiceImpl implements PurHisService {
     }
 
     @Override
-    public List<PurHis> unUpload(String syncDate) {
-        return phDao.unUpload(syncDate);
-    }
-
-    @Override
     public Date getMaxDate() {
         return phDao.getMaxDate();
     }
@@ -149,6 +144,11 @@ public class PurHisServiceImpl implements PurHisService {
         int seqNo = seqDao.getSequence(macId, "PURCHASE", period, compCode);
         String deptCode = String.format("%0" + 2 + "d", deptId) + "-";
         return deptCode + String.format("%0" + 2 + "d", macId) + String.format("%0" + 5 + "d", seqNo) + "-" + period;
+    }
+
+    @Override
+    public PurHis updateACK(PurHisKey key) {
+        return phDao.updateACK(key);
     }
 
 }

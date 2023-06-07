@@ -1059,6 +1059,17 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<WeightLossHis> uploadWeightLoss(WeightLossHis loss) {
+        return inventoryApi.post()
+                .uri("/weight/save-weight-loss")
+                .body(Mono.just(loss), WeightLossHis.class)
+                .retrieve()
+                .bodyToMono(WeightLossHis.class)
+                .onErrorResume(e -> {
+                    return Mono.error(e);
+                });
+    }
+
     public Mono<Boolean> delete(Pattern p) {
         return inventoryApi.post()
                 .uri("/setup/delete-pattern")
@@ -1744,6 +1755,17 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<ProcessHis> uploadProcess(ProcessHis his) {
+        return inventoryApi.post()
+                .uri("/process/save-process")
+                .body(Mono.just(his), ProcessHis.class)
+                .retrieve()
+                .bodyToMono(ProcessHis.class)
+                .onErrorResume(e -> {
+                    return Mono.error(e);
+                });
+    }
+
     public Mono<ProcessHisDetail> saveProcessDetail(ProcessHisDetail his) {
         return inventoryApi.post()
                 .uri("/process/save-process-detail")
@@ -1869,6 +1891,17 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<PurHis> uploadPurchase(PurHis ph) {
+        return inventoryApi.post()
+                .uri("/pur/save-pur")
+                .body(Mono.just(ph), PurHis.class)
+                .retrieve()
+                .bodyToMono(PurHis.class)
+                .onErrorResume((e) -> {
+                    return Mono.error(e);
+                });
+    }
+
     public Mono<RetInHis> save(RetInHis rh) {
         return inventoryApi.post()
                 .uri("/retin/save-retin")
@@ -1886,6 +1919,17 @@ public class InventoryRepo {
                         }
                         return Mono.error(e);
                     }
+                    return Mono.error(e);
+                });
+    }
+
+    public Mono<RetInHis> uploadRetIn(RetInHis rh) {
+        return inventoryApi.post()
+                .uri("/retin/save-retin")
+                .body(Mono.just(rh), RetInHis.class)
+                .retrieve()
+                .bodyToMono(RetInHis.class)
+                .onErrorResume((e) -> {
                     return Mono.error(e);
                 });
     }
@@ -1911,6 +1955,17 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<RetOutHis> uploadRetOut(RetOutHis ro) {
+        return inventoryApi.post()
+                .uri("/retout/save-retout")
+                .body(Mono.just(ro), RetInHis.class)
+                .retrieve()
+                .bodyToMono(RetOutHis.class)
+                .onErrorResume((e) -> {
+                    return Mono.error(e);
+                });
+    }
+
     public Mono<SaleHis> save(SaleHis sh) {
         return inventoryApi.post()
                 .uri("/sale/save-sale")
@@ -1932,10 +1987,21 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<SaleHis> uploadSale(SaleHis sh) {
+        return inventoryApi.post()
+                .uri("/sale/save-sale")
+                .body(Mono.just(sh), SaleHis.class)
+                .retrieve()
+                .bodyToMono(SaleHis.class)
+                .onErrorResume(e -> {
+                    return Mono.error(e);
+                });
+    }
+
     public Mono<TransferHis> save(TransferHis th) {
 
         return inventoryApi.post()
-                .uri("/transfer/save-transsfer")
+                .uri("/transfer/save-transfer")
                 .body(Mono.just(th), TransferHis.class)
                 .retrieve()
                 .bodyToMono(TransferHis.class)
@@ -1950,6 +2016,17 @@ public class InventoryRepo {
                         }
                         return Mono.error(e);
                     }
+                    return Mono.error(e);
+                });
+    }
+
+    public Mono<TransferHis> uploadTransfer(TransferHis th) {
+        return inventoryApi.post()
+                .uri("/transfer/save-transfer")
+                .body(Mono.just(th), TransferHis.class)
+                .retrieve()
+                .bodyToMono(TransferHis.class)
+                .onErrorResume(e -> {
                     return Mono.error(e);
                 });
     }
@@ -1975,6 +2052,17 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<StockInOut> uploadStockInOut(StockInOut sio) {
+        return inventoryApi.post()
+                .uri("/stockio/save-stockio")
+                .body(Mono.just(sio), StockInOut.class)
+                .retrieve()
+                .bodyToMono(StockInOut.class)
+                .onErrorResume(e -> {
+                    return Mono.error(e);
+                });
+    }
+
     public Mono<OrderHis> save(OrderHis sh) {
         return inventoryApi.post()
                 .uri("/order/save-order")
@@ -1992,6 +2080,17 @@ public class InventoryRepo {
                         }
                         return Mono.error(e);
                     }
+                    return Mono.error(e);
+                });
+    }
+    
+    public Mono<OrderHis> uploadOrder(OrderHis sh) {
+        return inventoryApi.post()
+                .uri("/order/save-order")
+                .body(Mono.just(sh), OrderHis.class)
+                .retrieve()
+                .bodyToMono(OrderHis.class)
+                .onErrorResume(e -> {
                     return Mono.error(e);
                 });
     }

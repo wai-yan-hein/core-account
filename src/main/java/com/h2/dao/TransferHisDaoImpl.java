@@ -31,12 +31,12 @@ public class TransferHisDaoImpl extends AbstractDao<TransferHisKey, TransferHis>
     }
 
     @Override
-    public List<TransferHis> unUpload(String syncDate) {
-        String hsql = "select o from TransferHis o where o.intgUpdStatus is null and date(o.vouDate) >= '" + syncDate + "'";
+    public List<TransferHis> unUpload(String compCode) {
+        String hsql = "select o from TransferHis o where o.key.compCode = '" + compCode + "' and o.intgUpdStatus is null";
         List<TransferHis> list = findHSQL(hsql);
         list.forEach((o) -> {
             String vouNo = o.getKey().getVouNo();
-            String compCode = o.getKey().getCompCode();
+//            String compCode1 = o.getKey().getCompCode();
             Integer depId = o.getKey().getDeptId();
             o.setListTD(dao.search(vouNo, compCode, depId));
         });
@@ -133,5 +133,13 @@ public class TransferHisDaoImpl extends AbstractDao<TransferHisKey, TransferHis>
         String sql1 = "delete from transfer_his where vou_no ='" + vouNo + "' and comp_code ='" + compCode + "' and " + deptId + "";
         String sql2 = "delete from transfer_his where vou_no ='" + vouNo + "' and comp_code ='" + compCode + "' and " + deptId + "";
         execSql(sql1, sql2);
+    }
+
+    @Override
+    public TransferHis updateACK(TransferHisKey key) {
+        TransferHis th = getByKey(key);
+        th.setIntgUpdStatus("ACK");
+        saveOrUpdate(th, key);
+        return th;
     }
 }

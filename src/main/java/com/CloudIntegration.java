@@ -27,21 +27,38 @@ import com.h2.service.GlService;
 import com.h2.service.MacPropertyService;
 import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
+import com.h2.service.OrderHisService;
 import com.h2.service.PrivilegeCompanyService;
 import com.h2.service.PrivilegeMenuService;
+import com.h2.service.ProcessHisDetailService;
+import com.h2.service.ProcessHisService;
 import com.h2.service.ProjectService;
+import com.h2.service.PurHisService;
+import com.h2.service.RetInService;
+import com.h2.service.RetOutService;
 import com.h2.service.RolePropertyService;
 import com.h2.service.RoleService;
+import com.h2.service.StockInOutService;
 import com.h2.service.StockService;
 import com.h2.service.StockTypeService;
 import com.h2.service.StockUnitService;
 import com.h2.service.SystemPropertyService;
 import com.h2.service.TraderAService;
 import com.h2.service.TraderInvService;
+import com.h2.service.TransferHisService;
 import com.h2.service.UserService;
 import com.h2.service.VouStatusService;
+import com.h2.service.WeightLossService;
+import com.inventory.model.OrderHis;
+import com.inventory.model.ProcessHis;
+import com.inventory.model.PurHis;
+import com.inventory.model.RetInHis;
+import com.inventory.model.RetOutHis;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
+import com.inventory.model.StockInOut;
+import com.inventory.model.TransferHis;
+import com.inventory.model.WeightLossHis;
 import com.inventory.ui.common.InventoryRepo;
 import com.user.common.UserRepo;
 import java.time.Duration;
@@ -104,8 +121,6 @@ public class CloudIntegration {
     @Autowired
     private SaleHisService saleHisService;
     @Autowired
-    private SaleHisDetailDao saleHisDetailDao;
-    @Autowired
     private ExchangeRateService exchangeRateService;
     @Autowired
     private MachineInfoService machineInfoService;
@@ -135,6 +150,21 @@ public class CloudIntegration {
     private DepartmentAccService departmentAService;
     @Autowired
     private GlService glService;
+    @Autowired
+    OrderHisService orderHisService;
+    @Autowired
+    PurHisService purHisService;
+    @Autowired
+    RetInService retInService;
+    @Autowired
+    RetOutService retOutService;
+    private StockInOutService stockInOutService;
+    @Autowired
+    private TransferHisService transferHisService;
+    @Autowired
+    private WeightLossService weightLossService;
+    @Autowired
+    private ProcessHisService processHisService;
 
     public void startDownload() {
         if (localDatabase) {
@@ -146,16 +176,138 @@ public class CloudIntegration {
 
     public void startUpload() {
         if (localDatabase) {
-            List<SaleHis> list = saleHisService.findAll(Global.compCode);
-            if (!list.isEmpty()) {
-                log.info("need to upload sale his : " + list.size());
-            }
-            List<SaleHisDetail> listD = saleHisDetailDao.findAll(Global.compCode);
-            if (!listD.isEmpty()) {
-                log.info("need to upload sale his detail : " + listD.size());
-            }
-
+            uploadInvData();
             uploadAccountData();
+        }
+    }
+
+    public void uploadInvData() {
+        uploadSale();
+        uploadOrder();
+        uploadStockInOut();
+        uploadTransfer();
+        uploadWeightLoss();
+        uploadManufacture();
+        uploadPurchase();
+        uploadReturnIn();
+        uploadReturnOut();
+    }
+
+    public void uploadSale() {
+        List<SaleHis> list = saleHisService.unUploadVoucher(Global.compCode);
+        if (!list.isEmpty()) {
+            log.info("need to upload sale his : " + list.size());
+            list.forEach((h) -> {
+                inventoryRepo.uploadSale(h).subscribe((r) -> {
+                    r.setIntgUpdStatus("ACK");
+                    saleHisService.updateACK(r.getKey());
+                });
+            });
+
+        }
+    }
+
+    public void uploadOrder() {
+        List<OrderHis> list = orderHisService.unUploadVoucher(Global.compCode);
+        if (!list.isEmpty()) {
+            list.forEach((l) -> {
+                inventoryRepo.uploadOrder(l).subscribe((r) -> {
+                    r.setIntgUpdStatus("ACK");
+                    orderHisService.updateACK(r.getKey());
+                });
+            });
+
+        }
+    }
+    
+    public void uploadPurchase() {
+        List<PurHis> list = purHisService.unUploadVoucher(Global.compCode);
+        if (!list.isEmpty()) {
+            list.forEach((pur) -> {
+                inventoryRepo.uploadPurchase(pur).subscribe((p) -> {
+                    p.setIntgUpdStatus("ACK");
+                    purHisService.updateACK(p.getKey());
+                });
+            });
+
+        }
+    }
+    
+    public void uploadReturnIn() {
+        List<RetInHis> list = retInService.unUploadVoucher(Global.compCode);
+        if (!list.isEmpty()) {
+            list.forEach((in) -> {
+                inventoryRepo.uploadRetIn(in).subscribe((n) -> {
+                    n.setIntgUpdStatus("ACK");
+                    retInService.updateACK(n.getKey());
+                });
+            });
+
+        }
+    }
+    
+    public void uploadReturnOut() {
+        List<RetOutHis> list = retOutService.unUploadVoucher(Global.compCode);
+        if (!list.isEmpty()) {
+            list.forEach((out) -> {
+                inventoryRepo.uploadRetOut(out).subscribe((o) -> {
+                    o.setIntgUpdStatus("ACK");
+                    retOutService.updateACK(o.getKey());
+                });
+            });
+
+        }
+    }
+
+    public void uploadStockInOut() {
+        List<StockInOut> list = stockInOutService.unUpload(Global.compCode);
+        if (!list.isEmpty()) {
+            list.forEach((l) -> {
+                inventoryRepo.uploadStockInOut(l).subscribe((r) -> {
+                    r.setIntgUpdStatus("ACK");
+                    stockInOutService.updateACK(r.getKey());
+                });
+            });
+
+        }
+    }
+
+    public void uploadTransfer() {
+        List<TransferHis> list = transferHisService.unUpload(Global.compCode);
+        if (!list.isEmpty()) {
+            list.forEach((l) -> {
+                inventoryRepo.uploadTransfer(l).subscribe((r) -> {
+                    r.setIntgUpdStatus("ACK");
+                    transferHisService.updateACK(r.getKey());
+                });
+            });
+
+        }
+    }
+
+    public void uploadWeightLoss() {
+        List<WeightLossHis> list = weightLossService.unUpload(Global.compCode);
+        if (!list.isEmpty()) {
+            list.forEach((l) -> {
+                inventoryRepo.uploadWeightLoss(l).subscribe((r) -> {
+                    r.setIntgUpdStatus("ACK");
+                    weightLossService.updateACK(r.getKey());
+                });
+            });
+
+        }
+    }
+
+    public void uploadManufacture() {
+        List<ProcessHis> list = processHisService.unUpload(Global.compCode);
+        if (!list.isEmpty()) {
+            list.forEach((l) -> {
+                inventoryRepo.uploadProcess(l).subscribe((r) -> {
+                    r.setIntgUpdStatus("ACK");
+                    processHisService.updateACK(r.getKey());
+                });
+            });
+
         }
     }
 
@@ -168,13 +320,15 @@ public class CloudIntegration {
         if (!list.isEmpty()) {
             log.info("need to upload Gl list : " + list.size());
             list.forEach((l) -> {
-                accounRepo.uploadGL(l).subscribe((gl) ->{  
+                accounRepo.uploadGL(l).subscribe((gl) -> {
                     GlKey key = gl.getKey();
-                    //key.setGlCode(glCode);
-                   glService.updateACK(key);
-                        },(e)->{
-                        log.error("uploadGl : " + e.getMessage());
-                        });
+                    key.setGlCode(gl.getKey().getGlCode());
+                    key.setCompCode(gl.getKey().getCompCode());
+                    key.setDeptId(gl.getKey().getDeptId());
+                    glService.updateACK(key);
+                }, (e) -> {
+                    log.error("to uploadGl : " + e.getMessage());
+                });
             });
         }
     }

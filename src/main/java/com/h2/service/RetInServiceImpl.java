@@ -113,11 +113,6 @@ public class RetInServiceImpl implements RetInService {
     }
 
     @Override
-    public List<RetInHis> unUpload(String syncDate) {
-        return rDao.unUpload(syncDate);
-    }
-
-    @Override
     public Date getMaxDate() {
         return rDao.getMaxDate();
     }
@@ -130,6 +125,11 @@ public class RetInServiceImpl implements RetInService {
     @Override
     public void truncate(RetInHisKey key) {
         rDao.truncate(key);
+    }
+
+    @Override
+    public RetInHis updateACK(RetInHisKey key) {
+        return rDao.updateACK(key);
     }
 
 }
