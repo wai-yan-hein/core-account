@@ -2001,7 +2001,7 @@ public class InventoryRepo {
     public Mono<TransferHis> save(TransferHis th) {
 
         return inventoryApi.post()
-                .uri("/transfer/save-transsfer")
+                .uri("/transfer/save-transfer")
                 .body(Mono.just(th), TransferHis.class)
                 .retrieve()
                 .bodyToMono(TransferHis.class)
@@ -2022,7 +2022,7 @@ public class InventoryRepo {
 
     public Mono<TransferHis> uploadTransfer(TransferHis th) {
         return inventoryApi.post()
-                .uri("/transfer/save-transsfer")
+                .uri("/transfer/save-transfer")
                 .body(Mono.just(th), TransferHis.class)
                 .retrieve()
                 .bodyToMono(TransferHis.class)

@@ -30,6 +30,8 @@ import com.h2.service.MenuService;
 import com.h2.service.OrderHisService;
 import com.h2.service.PrivilegeCompanyService;
 import com.h2.service.PrivilegeMenuService;
+import com.h2.service.ProcessHisDetailService;
+import com.h2.service.ProcessHisService;
 import com.h2.service.ProjectService;
 import com.h2.service.PurHisService;
 import com.h2.service.RetInService;
@@ -48,6 +50,7 @@ import com.h2.service.UserService;
 import com.h2.service.VouStatusService;
 import com.h2.service.WeightLossService;
 import com.inventory.model.OrderHis;
+import com.inventory.model.ProcessHis;
 import com.inventory.model.PurHis;
 import com.inventory.model.RetInHis;
 import com.inventory.model.RetOutHis;
@@ -118,8 +121,6 @@ public class CloudIntegration {
     @Autowired
     private SaleHisService saleHisService;
     @Autowired
-    private SaleHisDetailDao saleHisDetailDao;
-    @Autowired
     private ExchangeRateService exchangeRateService;
     @Autowired
     private MachineInfoService machineInfoService;
@@ -162,6 +163,8 @@ public class CloudIntegration {
     private TransferHisService transferHisService;
     @Autowired
     private WeightLossService weightLossService;
+    @Autowired
+    private ProcessHisService processHisService;
 
     public void startDownload() {
         if (localDatabase) {
@@ -181,6 +184,10 @@ public class CloudIntegration {
     public void uploadInvData() {
         uploadSale();
         uploadOrder();
+        uploadStockInOut();
+        uploadTransfer();
+        uploadWeightLoss();
+        uploadManufacture();
         uploadPurchase();
         uploadReturnIn();
         uploadReturnOut();
@@ -288,6 +295,19 @@ public class CloudIntegration {
                 inventoryRepo.uploadWeightLoss(l).subscribe((r) -> {
                     r.setIntgUpdStatus("ACK");
                     weightLossService.updateACK(r.getKey());
+                });
+            });
+
+        }
+    }
+
+    public void uploadManufacture() {
+        List<ProcessHis> list = processHisService.unUpload(Global.compCode);
+        if (!list.isEmpty()) {
+            list.forEach((l) -> {
+                inventoryRepo.uploadProcess(l).subscribe((r) -> {
+                    r.setIntgUpdStatus("ACK");
+                    processHisService.updateACK(r.getKey());
                 });
             });
 

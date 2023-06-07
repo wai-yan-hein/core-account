@@ -13,6 +13,7 @@ import com.acc.common.GLListingTableModel;
 import com.acc.common.GLTableCellRender;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
+import com.acc.editor.TranSourceAutoCompleter;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.ReportFilter;
 import com.acc.model.VTriBalance;
@@ -69,6 +70,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     private static final Logger log = LoggerFactory.getLogger(GLReport.class);
     private DateAutoCompleter dateAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
+    private TranSourceAutoCompleter tranSourceAutoCompleter;
     private String stDate, endDate;
     @Autowired
     private AccountRepo accountRepo;
@@ -153,6 +155,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         txtDep.addFocusListener(fa);
         txtCOA.addFocusListener(fa);
         txtProjectNo.addFocusListener(fa);
+        txtOption.addFocusListener(fa);
     }
 
     public void initMain() {
@@ -226,6 +229,14 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         return departmentAutoCompleter == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
     }
 
+    private String getTranSource() {
+        if (tranSourceAutoCompleter == null) {
+            return "-";
+        }
+        return tranSourceAutoCompleter.getAutoText().getTranSource().equals("All") ? "-"
+                : tranSourceAutoCompleter.getAutoText().getTranSource();
+    }
+
     private void searchGLListing() {
         if (!isGLCal) {
             long start = new GregorianCalendar().getTimeInMillis();
@@ -250,6 +261,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             filter.setClosing(chkClosing.isSelected());
             filter.setCurCode(getCurCode());
             filter.setListDepartment(getListDep());
+            filter.setTranSource(getTranSource());
             filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
             decorator.refreshButton(filter.getFromDate());
             accountRepo.getTri(filter).subscribe((t) -> {
@@ -275,8 +287,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
 
     }
 
-    private void openTBDDialog (String coaCode, String curCode, String coaName) {
-        try{
+    private void openTBDDialog(String coaCode, String curCode, String coaName) {
         if (dialog == null) {
             dialog = new TrialBalanceDetailDialog(Global.parentForm);
             dialog.setAccountRepo(accountRepo);
@@ -294,11 +305,6 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         dialog.setDepartment(departmentAutoCompleter.getListOption());
         dialog.initData();
         dialog.searchTriBalDetail();
-        dialog.setVisible(true);
-        }catch (Exception ex)
-        {
-            ex.getMessage();
-        }
     }
 
     private void calGLTotlaAmount() {
@@ -329,6 +335,12 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         cOAAutoCompleter.setSelectionObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
         projectAutoCompleter.setObserver(this);
+        accountRepo.getTranSource().subscribe((t) -> {
+            tranSourceAutoCompleter = new TranSourceAutoCompleter(txtOption, t, null, true);
+            tranSourceAutoCompleter.setSelectionObserver(this);
+        }, (e) -> {
+            log.error(e.getMessage());
+        });
         accountRepo.getDepartment().subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true, true);
             departmentAutoCompleter.setObserver(this);
@@ -340,6 +352,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                 currencyAutoCompleter.setCurrency(c);
             });
         });
+
     }
 
     private void printGLListing() {
@@ -406,6 +419,8 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         jLabel4 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         txtProjectNo = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
+        txtOption = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblGL = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
@@ -498,6 +513,22 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             }
         });
 
+        jLabel8.setFont(Global.lableFont);
+        jLabel8.setText("Option");
+
+        txtOption.setFont(Global.textFont);
+        txtOption.setName("txtCOA"); // NOI18N
+        txtOption.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtOptionFocusGained(evt);
+            }
+        });
+        txtOption.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtOptionActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -506,23 +537,27 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap()
                 .addComponent(jLabel1)
                 .addGap(18, 18, 18)
-                .addComponent(txtDate)
+                .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
                 .addGap(18, 18, 18)
-                .addComponent(txtDep)
+                .addComponent(txtDep, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel3)
                 .addGap(18, 18, 18)
-                .addComponent(txtCOA)
+                .addComponent(txtCOA, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel7)
                 .addGap(18, 18, 18)
-                .addComponent(txtProjectNo)
+                .addComponent(txtProjectNo, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtOption, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel4)
                 .addGap(18, 18, 18)
-                .addComponent(txtCurrency)
+                .addComponent(txtCurrency, javax.swing.GroupLayout.DEFAULT_SIZE, 122, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -539,7 +574,9 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                     .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4)
                     .addComponent(jLabel7)
-                    .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel8)
+                    .addComponent(txtOption, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -790,6 +827,14 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         // TODO add your handling code here:
     }//GEN-LAST:event_txtProjectNoActionPerformed
 
+    private void txtOptionFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtOptionFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtOptionFocusGained
+
+    private void txtOptionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtOptionActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtOptionActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkActive;
@@ -802,6 +847,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -817,6 +863,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JFormattedTextField txtFTotalCrAmt;
     private javax.swing.JFormattedTextField txtFTotalDrAmt;
     private javax.swing.JFormattedTextField txtOB;
+    private javax.swing.JTextField txtOption;
     private javax.swing.JTextField txtProjectNo;
     // End of variables declaration//GEN-END:variables
 

@@ -17,4 +17,8 @@ public interface ProcessHisService {
     void delete(ProcessHisKey key);
 
     void restore(ProcessHisKey key);
+
+    List<ProcessHis> unUpload(String compCode);
+
+    ProcessHis updateACK(ProcessHisKey key);
 }

@@ -60,6 +60,8 @@ public class ProcessHis {
     private String updatedBy;
     @Column(name = "mac_id")
     private Integer macId;
+    @Column(name = "intg_upd_status")
+    private String intgUpdStatus;
     @Transient
     private List<ProcessHisDetail> listDetail;
     @Transient

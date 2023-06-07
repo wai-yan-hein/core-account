@@ -191,7 +191,6 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         dialog.setDepartment(departmentAutoCompleter.getListOption());
         dialog.initData();
         dialog.searchTriBalDetail();
-        dialog.setVisible(true);
     }
 
     private List<String> getListDep() {

@@ -6,7 +6,6 @@
 package com.acc.dialog;
 
 import com.acc.common.AccountRepo;
-import com.acc.common.ColumnHeaderListener;
 import com.acc.common.JournalEntryTableModel;
 import com.acc.editor.COA3CellEditor;
 import com.acc.editor.CurrencyAEditor;
@@ -21,7 +20,6 @@ import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.common.UserRepo;
 import com.user.editor.ProjectAutoCompleter;
-import com.user.model.Project;
 import com.user.model.ProjectKey;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -295,7 +293,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         txtRefrence.addKeyListener(this);
         txtVouNo.addKeyListener(this);
         txtProjectNo.addKeyListener(this);
-        tblJournal.addMouseListener(new ColumnHeaderListener(tblJournal));
         tblJournal.addKeyListener(this);
         btnSave.addKeyListener(this);
     }
