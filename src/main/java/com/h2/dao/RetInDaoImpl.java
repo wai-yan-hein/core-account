@@ -106,20 +106,12 @@ public class RetInDaoImpl extends AbstractDao<RetInHisKey, RetInHis> implements 
     }
 
     @Override
-    public List<RetInHis> unUploadVoucher(String syncDate) {
-        String hsql = "select o from RetInHis o where o.intgUpdStatus is null and date(o.vouDate) >= '" + syncDate + "'";
-        return findHSQL(hsql);
-    }
-
-    @Override
-    public List<RetInHis> unUpload(String syncDate) {
-        String hsql = "select o from RetInHis o where (o.intgUpdStatus ='ACK' or o.intgUpdStatus is null) and date(o.vouDate) >= '" + syncDate + "'";
+    public List<RetInHis> unUploadVoucher(String compCode) {
+        String hsql = "select o from OrderHis o where compCode = '" + compCode + "' and o.intgUpdStatus is null";
         List<RetInHis> list = findHSQL(hsql);
-        list.forEach((o) -> {
-            String vouNo = o.getKey().getVouNo();
-            String compCode = o.getKey().getCompCode();
-            Integer deptId = o.getKey().getDeptId();
-            o.setListRD(dao.search(vouNo, compCode, deptId));
+        list.forEach((s) -> {
+            s.setListRD(dao.search(s.getKey().getVouNo(),
+                    s.getKey().getCompCode(), s.getKey().getDeptId()));
         });
         return list;
     }

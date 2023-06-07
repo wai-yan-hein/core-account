@@ -29,9 +29,7 @@ public interface OrderHisService {
 
     void restore(OrderHisKey key) throws Exception;
 
-    List<OrderHis> unUploadVoucher(String syncDate);
-
-    List<OrderHis> unUpload(String syncDate);
+    List<OrderHis> unUploadVoucher(String compCode);
 
     Date getMaxDate();
 
@@ -40,7 +38,9 @@ public interface OrderHisService {
     void truncate(OrderHisKey key);
 
     General getVoucherInfo(String vouDate, String compCode, Integer depId);
-    
+
+    List<OrderHis> findAll(String compCode);
+
     OrderHis updateACK(OrderHisKey key);
 
 }

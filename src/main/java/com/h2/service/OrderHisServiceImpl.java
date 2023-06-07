@@ -115,11 +115,6 @@ public class OrderHisServiceImpl implements OrderHisService {
     }
 
     @Override
-    public List<OrderHis> unUpload(String syncDate) {
-        return shDao.unUpload(syncDate);
-    }
-
-    @Override
     public Date getMaxDate() {
         return shDao.getMaxDate();
     }
@@ -142,6 +137,11 @@ public class OrderHisServiceImpl implements OrderHisService {
     @Override
     public OrderHis updateACK(OrderHisKey key) {
         return shDao.updateACK(key);
+    }
+
+    @Override
+    public List<OrderHis> findAll(String compCode) {
+        return shDao.findAll(compCode);
     }
 
 }

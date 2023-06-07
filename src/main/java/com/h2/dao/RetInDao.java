@@ -28,8 +28,6 @@ public interface RetInDao {
 
     List<RetInHis> unUploadVoucher(String syncDate);
 
-    List<RetInHis> unUpload(String syncDate);
-
     Date getMaxDate();
 
     List<RetInHis> search(String updatedDate, List<String> keys);

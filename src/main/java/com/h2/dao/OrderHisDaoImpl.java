@@ -107,20 +107,12 @@ public class OrderHisDaoImpl extends AbstractDao<OrderHisKey, OrderHis> implemen
     }
 
     @Override
-    public List<OrderHis> unUploadVoucher(String syncDate) {
-        String hsql = "select o from OrderHis o where o.intgUpdStatus is null and date(o.vouDate) >= '" + syncDate + "'";
-        return findHSQL(hsql);
-    }
-
-    @Override
-    public List<OrderHis> unUpload(String syncDate) {
-        String hql = "select o from OrderHis o where (o.intgUpdStatus ='ACK' or o.intgUpdStatus is null) and date(o.vouDate) >= '" + syncDate + "'";
-        List<OrderHis> list = findHSQL(hql);
-        list.forEach(o -> {
-            String vouNo = o.getKey().getVouNo();
-            String compCode = o.getKey().getCompCode();
-            Integer deptId = o.getKey().getDeptId();
-            o.setListSH(dao.search(vouNo, compCode, deptId));
+    public List<OrderHis> unUploadVoucher(String compCode) {
+        String hsql = "select o from OrderHis o where compCode = '" + compCode + "' and o.intgUpdStatus is null";
+        List<OrderHis> list = findHSQL(hsql);
+        list.forEach((s) -> {
+            s.setListSH(dao.search(s.getKey().getVouNo(),
+                    s.getKey().getCompCode(), s.getKey().getDeptId()));
         });
         return list;
     }
@@ -242,5 +234,11 @@ public class OrderHisDaoImpl extends AbstractDao<OrderHisKey, OrderHis> implemen
         oh.setIntgUpdStatus("ACK");
         saveOrUpdate(oh, key);
         return oh;
+    }
+
+    @Override
+    public List<OrderHis> findAll(String compCode) {
+        String hsql = "select o from OrderHis o where o.key.compCode ='" + compCode + "'";
+        return findHSQL(hsql);
     }
 }

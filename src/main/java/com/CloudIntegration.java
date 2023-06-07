@@ -27,6 +27,7 @@ import com.h2.service.GlService;
 import com.h2.service.MacPropertyService;
 import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
+import com.h2.service.OrderHisService;
 import com.h2.service.PrivilegeCompanyService;
 import com.h2.service.PrivilegeMenuService;
 import com.h2.service.ProjectService;
@@ -40,6 +41,7 @@ import com.h2.service.TraderAService;
 import com.h2.service.TraderInvService;
 import com.h2.service.UserService;
 import com.h2.service.VouStatusService;
+import com.inventory.model.OrderHis;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.ui.common.InventoryRepo;
@@ -135,6 +137,8 @@ public class CloudIntegration {
     private DepartmentAccService departmentAService;
     @Autowired
     private GlService glService;
+    @Autowired
+    OrderHisService orderHisService;
 
     public void startDownload() {
         if (localDatabase) {
@@ -153,6 +157,7 @@ public class CloudIntegration {
 
     public void uploadInvData() {
         uploadSale();
+        uploadOrder();
     }
 
     public void uploadSale() {
@@ -173,7 +178,19 @@ public class CloudIntegration {
             });
 
         }
+    }
 
+    public void uploadOrder() {
+        List<OrderHis> list = orderHisService.unUploadVoucher(Global.compCode);
+        if (!list.isEmpty()) {
+            list.forEach((l) -> {
+                inventoryRepo.uploadOrder(l).subscribe((r) -> {
+                    r.setIntgUpdStatus("ACK");
+                    orderHisService.updateACK(r.getKey());
+                });
+            });
+
+        }
     }
 
     public void uploadAccountData() {

@@ -26,9 +26,7 @@ public interface PurHisDao {
 
     void restore(PurHisKey key) throws Exception;
 
-    List<PurHis> unUploadVoucher(String syncDate);
-
-    List<PurHis> unUpload(String syncDate);
+    List<PurHis> unUploadVoucher(String compCode);
 
     Date getMaxDate();
 

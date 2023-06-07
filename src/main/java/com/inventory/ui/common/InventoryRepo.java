@@ -2083,6 +2083,17 @@ public class InventoryRepo {
                     return Mono.error(e);
                 });
     }
+    
+    public Mono<OrderHis> uploadOrder(OrderHis sh) {
+        return inventoryApi.post()
+                .uri("/order/save-order")
+                .body(Mono.just(sh), OrderHis.class)
+                .retrieve()
+                .bodyToMono(OrderHis.class)
+                .onErrorResume(e -> {
+                    return Mono.error(e);
+                });
+    }
 
     public Mono<AccSetting> save(AccSetting sh) {
         return inventoryApi.post()

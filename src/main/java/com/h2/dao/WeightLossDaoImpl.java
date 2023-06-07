@@ -5,9 +5,13 @@ import com.inventory.model.WeightLossHisKey;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Repository
 public class WeightLossDaoImpl extends AbstractDao<WeightLossHisKey, WeightLossHis> implements WeightLossDao {
+
+    @Autowired
+    private WeightLossHisDetailDao dao;
 
     @Override
     public WeightLossHis save(WeightLossHis l) {
@@ -43,5 +47,16 @@ public class WeightLossDaoImpl extends AbstractDao<WeightLossHisKey, WeightLossH
         wh.setIntgUpdStatus("ACK");
         saveOrUpdate(wh, key);
         return wh;
+    }
+
+    @Override
+    public List<WeightLossHis> unUpload(String compCode) {
+        String hsql = "select o from WeightLossHis o where compCode = '" + compCode + "' and o.intgUpdStatus is null";
+        List<WeightLossHis> list = findHSQL(hsql);
+        list.forEach((s) -> {
+            s.setListDetail(dao.search(s.getKey().getVouNo(),
+                    s.getKey().getCompCode(), s.getKey().getDeptId()));
+        });
+        return list;
     }
 }

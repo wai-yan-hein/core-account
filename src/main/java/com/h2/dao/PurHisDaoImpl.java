@@ -106,20 +106,12 @@ public class PurHisDaoImpl extends AbstractDao<PurHisKey, PurHis> implements Pur
     }
 
     @Override
-    public List<PurHis> unUploadVoucher(String syncDate) {
-        String hsql = "select o from PurHis o where o.intgUpdStatus is null and date(o.vouDate) >= '" + syncDate + "'";
-        return findHSQL(hsql);
-    }
-
-    @Override
-    public List<PurHis> unUpload(String syncDate) {
-        String hsql = "select o from PurHis o where o.intgUpdStatus ='ACK' and date(o.vouDate) >= '" + syncDate + "'";
+    public List<PurHis> unUploadVoucher(String compCode) {
+        String hsql = "select o from OrderHis o where compCode = '" + compCode + "' and o.intgUpdStatus is null";
         List<PurHis> list = findHSQL(hsql);
-        list.forEach((o) -> {
-            String vouNo = o.getKey().getVouNo();
-            String compCode = o.getKey().getCompCode();
-            Integer depId = o.getKey().getDeptId();
-            o.setListPD(dao.search(vouNo, compCode, depId));
+        list.forEach((s) -> {
+            s.setListPD(dao.search(s.getKey().getVouNo(),
+                    s.getKey().getCompCode(), s.getKey().getDeptId()));
         });
         return list;
     }

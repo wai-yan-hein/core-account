@@ -27,9 +27,7 @@ public interface OrderHisDao {
 
     void restore(OrderHisKey key) throws Exception;
 
-    List<OrderHis> unUploadVoucher(String syncDate);
-
-    List<OrderHis> unUpload(String syncDate);
+    List<OrderHis> unUploadVoucher(String compCode);
 
     Date getMaxDate();
 
@@ -40,5 +38,7 @@ public interface OrderHisDao {
     General getVoucherInfo(String vouDate, String compCode, Integer depId);
     
     OrderHis updateACK(OrderHisKey key);
+    
+    List<OrderHis> findAll(String compCode);
 
 }
