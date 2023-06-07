@@ -51,7 +51,7 @@ public class WeightLossDaoImpl extends AbstractDao<WeightLossHisKey, WeightLossH
 
     @Override
     public List<WeightLossHis> unUpload(String compCode) {
-        String hsql = "select o from WeightLossHis o where compCode = '" + compCode + "' and o.intgUpdStatus is null";
+        String hsql = "select o from WeightLossHis o where o.key.compCode = '" + compCode + "' and o.intgUpdStatus is null";
         List<WeightLossHis> list = findHSQL(hsql);
         list.forEach((s) -> {
             s.setListDetail(dao.search(s.getKey().getVouNo(),

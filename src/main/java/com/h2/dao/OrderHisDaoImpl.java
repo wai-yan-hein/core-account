@@ -108,7 +108,7 @@ public class OrderHisDaoImpl extends AbstractDao<OrderHisKey, OrderHis> implemen
 
     @Override
     public List<OrderHis> unUploadVoucher(String compCode) {
-        String hsql = "select o from OrderHis o where compCode = '" + compCode + "' and o.intgUpdStatus is null";
+        String hsql = "select o from OrderHis o where o.key.compCode = '" + compCode + "' and o.intgUpdStatus is null";
         List<OrderHis> list = findHSQL(hsql);
         list.forEach((s) -> {
             s.setListSH(dao.search(s.getKey().getVouNo(),
