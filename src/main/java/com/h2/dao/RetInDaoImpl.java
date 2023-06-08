@@ -107,7 +107,7 @@ public class RetInDaoImpl extends AbstractDao<RetInHisKey, RetInHis> implements 
 
     @Override
     public List<RetInHis> unUploadVoucher(String compCode) {
-        String hsql = "select o from OrderHis o where o.key.compCode = '" + compCode + "' and o.intgUpdStatus is null";
+        String hsql = "select o from RetInHis o where o.key.compCode = '" + compCode + "' and o.intgUpdStatus is null";
         List<RetInHis> list = findHSQL(hsql);
         list.forEach((s) -> {
             s.setListRD(dao.search(s.getKey().getVouNo(),

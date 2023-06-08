@@ -158,6 +158,7 @@ public class CloudIntegration {
     RetInService retInService;
     @Autowired
     RetOutService retOutService;
+    @Autowired
     private StockInOutService stockInOutService;
     @Autowired
     private TransferHisService transferHisService;
@@ -223,6 +224,7 @@ public class CloudIntegration {
     public void uploadPurchase() {
         List<PurHis> list = purHisService.unUploadVoucher(Global.compCode);
         if (!list.isEmpty()) {
+            log.info("need to upload purchase his : " + list.size());
             list.forEach((pur) -> {
                 inventoryRepo.uploadPurchase(pur).subscribe((p) -> {
                     p.setIntgUpdStatus("ACK");
@@ -236,6 +238,7 @@ public class CloudIntegration {
     public void uploadReturnIn() {
         List<RetInHis> list = retInService.unUploadVoucher(Global.compCode);
         if (!list.isEmpty()) {
+            log.info("need to upload ReturnIn his : " + list.size());
             list.forEach((in) -> {
                 inventoryRepo.uploadRetIn(in).subscribe((n) -> {
                     n.setIntgUpdStatus("ACK");
@@ -249,6 +252,7 @@ public class CloudIntegration {
     public void uploadReturnOut() {
         List<RetOutHis> list = retOutService.unUploadVoucher(Global.compCode);
         if (!list.isEmpty()) {
+            log.info("need to upload ReturnOut his : " + list.size());
             list.forEach((out) -> {
                 inventoryRepo.uploadRetOut(out).subscribe((o) -> {
                     o.setIntgUpdStatus("ACK");

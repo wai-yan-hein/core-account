@@ -29,9 +29,7 @@ public interface RetOutService {
     void restore(RetOutHisKey key) throws Exception;
 
     List<RetOutHis> unUploadVoucher(String syncDate);
-
-    List<RetOutHis> unUpload(String syncDate);
-
+    
     Date getMaxDate();
 
     List<RetOutHis> search(String updatedDate, List<String> keys);

@@ -107,24 +107,11 @@ public class RetOutDaoImpl extends AbstractDao<RetOutHisKey, RetOutHis> implemen
 
     @Override
     public List<RetOutHis> unUploadVoucher(String compCode) {
-        String hsql = "select o from OrderHis o where o.key.compCode = '" + compCode + "' and o.intgUpdStatus is null";
+        String hsql = "select o from RetOutHis o where o.key.compCode = '" + compCode + "' and o.intgUpdStatus is null";
         List<RetOutHis> list = findHSQL(hsql);
         list.forEach((s) -> {
             s.setListRD(dao.search(s.getKey().getVouNo(),
                     s.getKey().getCompCode(), s.getKey().getDeptId()));
-        });
-        return list;
-    }
-
-    @Override
-    public List<RetOutHis> unUpload(String syncDate) {
-        String hsql = "select o from RetOutHis o where o.intgUpdStatus ='ACK' and date(o.vouDate) >= '" + syncDate + "'";
-        List<RetOutHis> list = findHSQL(hsql);
-        list.forEach((o) -> {
-            String vouNo = o.getKey().getVouNo();
-            String compCode = o.getKey().getCompCode();
-            Integer deptId = o.getKey().getDeptId();
-            o.setListRD(dao.search(vouNo, compCode, deptId));
         });
         return list;
     }

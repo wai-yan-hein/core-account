@@ -3,14 +3,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.h2.dao;
-
-import com.acc.model.COAKey;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
 import com.common.Util1;
-import com.inventory.model.SaleHis;
-import com.inventory.model.SaleHisKey;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;

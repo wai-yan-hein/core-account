@@ -124,7 +124,7 @@ public class ProcessHisDaoImpl extends AbstractDao<ProcessHisKey, ProcessHis> im
 
     @Override
     public List<ProcessHis> unUpload(String compCode) {
-        String hsql = "select o from ProcessHis o where compCode = '" + compCode + "' and o.intgUpdStatus is null";
+        String hsql = "select o from ProcessHis o where o.key.compCode = '" + compCode + "' and o.intgUpdStatus is null";
         List<ProcessHis> list = findHSQL(hsql);
         list.forEach((s) -> {
             s.setListDetail(dao.search(s.getKey().getVouNo(),
