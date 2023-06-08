@@ -8,10 +8,7 @@ import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontFormatException;
-import java.awt.GraphicsEnvironment;
-import java.awt.HeadlessException;
 import java.awt.Image;
-import java.awt.SystemColor;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -175,6 +172,21 @@ public class CoreAccountApplication {
     }
 
     private static boolean isDarkModeEnabled() {
-        return false;
+        boolean isDarkModeEnabled = false;
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.contains("win")) { // Windows
+            log.info(System.getProperty("os.name"));
+            isDarkModeEnabled = System.getProperty("os.name").toLowerCase().contains("dark");
+        } else if (os.contains("mac")) { // macOS
+            isDarkModeEnabled = "dark".equals(System.getProperty("apple.awt.application.appearance"));
+        } else if (os.contains("nix") || os.contains("nux") || os.contains("bsd")) { // Unix/Linux/BSD
+            String desktopSession = System.getenv("DESKTOP_SESSION");
+            if (desktopSession != null && desktopSession.toLowerCase().contains("gnome")) {
+                isDarkModeEnabled = "dark".equals(System.getenv("GTK_THEME"));
+            } else if (desktopSession != null && desktopSession.toLowerCase().contains("kde")) {
+                isDarkModeEnabled = "breeze-dark".equals(System.getenv("KDE_FULL_SESSION"));
+            }
+        }
+        return isDarkModeEnabled;
     }
 }
