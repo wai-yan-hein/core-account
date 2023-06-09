@@ -312,7 +312,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         txtTax.setFormatterFactory(Util1.getDecimalFormat());
     }
 
-    private void initStockBalanceTable() {        
+    private void initStockBalanceTable() {
         if (ProUtil.isCalStock()) {
             stockBalanceTableModel.setInventoryRepo(inventoryRepo);
             tblStockBalance.setModel(stockBalanceTableModel);
@@ -370,12 +370,11 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
 
     public void saveOrder(boolean print) {
         if (isValidEntry() && orderTableModel.isValidEntry()) {
+            progress.setIndeterminate(true);
             orderHis.setListSH(orderTableModel.getListDetail());
             orderHis.setListDel(orderTableModel.getDelList());
             orderHis.setBackup(orderTableModel.isChange());
-            progress.setIndeterminate(true);
             inventoryRepo.save(orderHis).subscribe((t) -> {
-                progress.setIndeterminate(false);
                 clear();
                 if (print) {
                     String reportName = "OrderVoucher";
@@ -384,6 +383,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             }, (e) -> {
                 JOptionPane.showMessageDialog(this, e.getMessage());
                 progress.setIndeterminate(false);
+                observer.selected("save", true);
             });
 
         }
@@ -582,12 +582,12 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 saleManCompleter.setSaleMan(t);
             });
             if (orderHis.getProjectNo() != null) {
-                    userRepo.find(new ProjectKey(orderHis.getProjectNo(), Global.compCode)).subscribe(t1 -> {
-                        projectAutoCompleter.setProject(t1);
-                    });
-                } else {
-                    projectAutoCompleter.setProject(null);
-                }
+                userRepo.find(new ProjectKey(orderHis.getProjectNo(), Global.compCode)).subscribe(t1 -> {
+                    projectAutoCompleter.setProject(t1);
+                });
+            } else {
+                projectAutoCompleter.setProject(null);
+            }
             inventoryRepo.getOrderDetail(vouNo, sh.getKey().getDeptId())
                     .subscribe((t) -> {
                         orderTableModel.setListDetail(t);

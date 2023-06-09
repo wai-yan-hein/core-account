@@ -20,8 +20,8 @@ import lombok.Data;
  *
  * @author WSwe
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "ret_in_his")
 public class RetInHis {

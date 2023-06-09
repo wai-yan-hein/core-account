@@ -17,9 +17,9 @@ import lombok.Data;
  * @author DELL
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "weight_loss_his_detail")
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class WeightLossDetail {
 
     @EmbeddedId

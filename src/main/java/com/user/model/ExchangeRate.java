@@ -20,8 +20,8 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
-@Entity
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Entity
 @Table(name = "exchange_rate")
 public class ExchangeRate {
 

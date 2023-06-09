@@ -66,11 +66,13 @@ import com.inventory.model.TraderGroup;
 import com.inventory.model.TraderGroupKey;
 import com.inventory.model.TraderKey;
 import com.inventory.model.TransferHis;
+import com.inventory.model.TransferHisDetail;
 import com.inventory.model.TransferHisKey;
 import com.inventory.model.UnitRelation;
 import com.inventory.model.UnitRelationDetail;
 import com.inventory.model.VSale;
 import com.inventory.model.VStockBalance;
+import com.inventory.model.VTransfer;
 import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
 import com.inventory.model.WeightLossHis;
@@ -2020,6 +2022,28 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<List<TransferHisDetail>> getTrasnferDetail(String vouNo, Integer deptId) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/transfer/get-transfer-detail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", deptId)
+                .build())
+                .retrieve()
+                .bodyToFlux(TransferHisDetail.class)
+                .collectList();
+    }
+
+    public Mono<List<VTransfer>> getTrasnfer(FilterObject filter) {
+        return inventoryApi
+                .post()
+                .uri("/transfer/get-transfer")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToFlux(VTransfer.class)
+                .collectList();
+    }
+
     public Mono<TransferHis> uploadTransfer(TransferHis th) {
         return inventoryApi.post()
                 .uri("/transfer/save-transfer")
@@ -2083,7 +2107,7 @@ public class InventoryRepo {
                     return Mono.error(e);
                 });
     }
-    
+
     public Mono<OrderHis> uploadOrder(OrderHis sh) {
         return inventoryApi.post()
                 .uri("/order/save-order")

@@ -19,10 +19,10 @@ import lombok.Data;
  *
  * @author wai yan
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "sale_man")
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SaleMan {
 
     @EmbeddedId

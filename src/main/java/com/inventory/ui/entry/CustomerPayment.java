@@ -251,10 +251,16 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
 
     private void savePayment() {
         if (isValidEntry()) {
+            observer.selected("save", false);
+            progress.setIndeterminate(true);
             ph.setListDetail(tableModel.getPaymentList());
             ph.setListDelete(tableModel.getListDelete());
             inventoryRepo.savePayment(ph).subscribe((t) -> {
                 clear();
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
+                progress.setIndeterminate(false);
+                observer.selected("save", false);
             });
         }
     }
@@ -388,6 +394,7 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
         txtVouDate.setEnabled(status);
         cboCash.setEnabled(status);
         tblPayment.setEnabled(status);
+        observer.selected("save", false);
     }
 
     private void deletePayment() {

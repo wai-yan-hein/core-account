@@ -421,6 +421,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     public void savePur(boolean print) {
         if (isValidEntry() && purTableModel.isValidEntry()) {
             progress.setIndeterminate(true);
+            observer.selected("save", false);
             ph.setListPD(purTableModel.getListDetail());
             ph.setListExpense(expenseTableModel.getListDetail());
             ph.setListDel(purTableModel.getDelList());
@@ -432,6 +433,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 }
             }, (e) -> {
                 progress.setIndeterminate(false);
+                observer.selected("save", false);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             });
         }

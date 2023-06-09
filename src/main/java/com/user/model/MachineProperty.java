@@ -19,8 +19,8 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
-@Entity
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Entity
 @Table(name = "mac_prop")
 public class MachineProperty {
 

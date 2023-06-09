@@ -19,8 +19,8 @@ import lombok.Data;
  * @author WSwe
  */
 @Data
-@Entity
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Entity
 @Table(name = "machine_info")
 public class MachineInfo {
 

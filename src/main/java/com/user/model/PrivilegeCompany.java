@@ -14,15 +14,16 @@ import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import java.util.Date;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  *
  * @author Lenovo
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "privilege_company")
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PrivilegeCompany {
 
     @EmbeddedId

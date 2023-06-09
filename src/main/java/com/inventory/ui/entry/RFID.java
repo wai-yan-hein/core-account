@@ -245,13 +245,17 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             if (isValidEntry() && tableModel.isValidEntry()) {
                 saleHis.setListSH(tableModel.getListDetail());
                 saleHis.setListDel(tableModel.getDelList());
+                observer.selected("save", false);
                 inventoryRepo.save(saleHis).subscribe((t) -> {
-                    progress.setIndeterminate(false);
                     clear();
                     if (chkPrint.isSelected() || print) {
                         printVoucher(t.getKey().getVouNo());
                     }
 
+                }, (e) -> {
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                    observer.selected("save", false);
+                    progress.setIndeterminate(false);
                 });
 
             }

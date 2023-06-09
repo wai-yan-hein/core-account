@@ -6,12 +6,14 @@
 package com.acc.model;
 
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  *
  * @author wai yan
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class VApar {
 
     private String traderCode;

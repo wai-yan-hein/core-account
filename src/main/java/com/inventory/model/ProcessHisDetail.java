@@ -20,9 +20,9 @@ import lombok.Data;
  * @author DELL
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "process_his_detail")
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProcessHisDetail {
 
     @EmbeddedId

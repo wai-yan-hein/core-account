@@ -6,12 +6,14 @@ package com.acc.model;
 
 import java.util.Date;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  *
  * @author htut
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class OpeningBalance {
 
     private OpeningKey key;

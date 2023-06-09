@@ -6,12 +6,14 @@ package com.inventory.model;
 
 import java.io.Serializable;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  *
  * @author Lenovo
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PurExpenseKey implements Serializable{
     
     private String expenseCode;

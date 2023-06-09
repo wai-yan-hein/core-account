@@ -75,7 +75,7 @@ import reactor.core.publisher.Mono;
 @Component
 @Slf4j
 public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
-    
+
     private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
     private List<RetInHisDetail> listDetail = new ArrayList();
     private final ReturnInTableModel retInTableModel = new ReturnInTableModel();
@@ -94,27 +94,27 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
     private JProgressBar progress;
     private RetInHis ri = new RetInHis();
     private Mono<List<Location>> monoLoc;
-    
+
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;
     }
-    
+
     public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
         this.locationAutoCompleter = locationAutoCompleter;
     }
-    
+
     public SelectionObserver getObserver() {
         return observer;
     }
-    
+
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-    
+
     public JProgressBar getProgress() {
         return progress;
     }
-    
+
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
@@ -131,45 +131,45 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         initDateListner();
         actionMapping();
     }
-    
+
     public void initMain() {
         initCombo();
         initRetInTable();
         assignDefaultValue();
     }
-    
+
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblRet.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblRet.getActionMap().put(solve, new DeleteAction());
-        
+
     }
-    
+
     private class DeleteAction extends AbstractAction {
-        
+
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
         }
     }
-    
+
     private void initDateListner() {
         txtVouDate.getDateEditor().getUiComponent().setName("txtVouDate");
         txtVouDate.getDateEditor().getUiComponent().addKeyListener(this);
         txtVouDate.getDateEditor().getUiComponent().addFocusListener(fa);
-        
+
     }
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
         public void focusGained(FocusEvent e) {
             ((JTextFieldDateEditor) e.getSource()).selectAll();
         }
-        
+
     };
-    
+
     private void initRetInTable() {
-        
+
         tblRet.setModel(retInTableModel);
         retInTableModel.setParent(tblRet);
         retInTableModel.setReturnIn(this);
@@ -206,9 +206,9 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         tblRet.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblRet.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        
+
     }
-    
+
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
@@ -230,7 +230,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
         projectAutoCompleter.setObserver(this);
     }
-    
+
     private void initKeyListener() {
         txtVouDate.getDateEditor().getUiComponent().setName("txtVouDate");
         txtVouDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -241,7 +241,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         txtCurrency.addKeyListener(this);
         tblRet.addKeyListener(this);
     }
-    
+
     private void initTextBoxValue() {
         txtVouTotal.setValue(0.00);
         txtVouDiscount.setValue(0.00);
@@ -252,9 +252,9 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         txtVouDiscP.setValue(0.00);
         txtGrandTotal.setValue(0.00);
     }
-    
+
     private void initTextBoxFormat() {
-        
+
         txtVouBalance.setFormatterFactory(Util1.getDecimalFormat());
         txtVouDiscount.setFormatterFactory(Util1.getDecimalFormat());
         txtVouPaid.setFormatterFactory(Util1.getDecimalFormat());
@@ -263,9 +263,9 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         txtVouTaxP.setFormatterFactory(Util1.getDecimalFormat());
         txtGrandTotal.setFormatterFactory(Util1.getDecimalFormat());
         txtTax.setFormatterFactory(Util1.getDecimalFormat());
-        
+
     }
-    
+
     private void assignDefaultValue() {
         txtVouDate.setDate(Util1.getTodayDate());
         Mono<Trader> trader = inventoryRepo.findTrader(Global.hmRoleProperty.get("default.customer"), Global.deptId);
@@ -277,7 +277,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         txtCurrency.setEnabled(ProUtil.isMultiCur());
         txtVouNo.setText(null);
     }
-    
+
     private void clear() {
         disableForm(true);
         retInTableModel.clear();
@@ -293,7 +293,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         projectAutoCompleter.setProject(null);
         focusTable();
     }
-    
+
     private void deleteTran() {
         int row = tblRet.convertRowIndexToModel(tblRet.getSelectedRow());
         if (row >= 0) {
@@ -308,10 +308,11 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             }
         }
     }
-    
+
     public void saveRetIn(boolean print) {
         if (isValidEntry() && retInTableModel.isValidEntry()) {
             progress.setIndeterminate(true);
+            observer.selected("save", false);
             ri.setListRD(retInTableModel.getListDetail());
             ri.setListDel(retInTableModel.getDelList());
             inventoryRepo.save(ri)
@@ -324,11 +325,12 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                     }, (e) -> {
                         JOptionPane.showMessageDialog(this, e.getMessage());
                         progress.setIndeterminate(false);
+                        observer.selected("save", false);
                     });
-            
+
         }
     }
-    
+
     private boolean isValidEntry() {
         boolean status = true;
         if (lblStatus.getText().equals("DELETED")) {
@@ -385,7 +387,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         }
         return status;
     }
-    
+
     private void deleteRetIn() {
         String status = lblStatus.getText();
         switch (status) {
@@ -408,15 +410,15 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                         lblStatus.setForeground(Color.blue);
                         disableForm(true);
                     });
-                    
+
                 }
             }
             default ->
                 JOptionPane.showMessageDialog(Global.parentForm, "Voucher can't delete.");
         }
-        
+
     }
-    
+
     private void calculateTotalAmount() {
         float totalVouBalance;
         float totalAmount = 0.0f;
@@ -441,7 +443,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         totalVouBalance = Util1.getFloat(txtGrandTotal.getValue()) - Util1.getFloat(txtVouPaid.getValue());
         txtVouBalance.setValue(Util1.getFloat(totalVouBalance));
     }
-    
+
     public void historyRetIn() {
         if (dialog == null) {
             dialog = new ReturnInHistoryDialog(Global.parentForm);
@@ -456,7 +458,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         }
         dialog.search();
     }
-    
+
     public void setVoucher(RetInHis retin) {
         if (retin != null) {
             progress.setIndeterminate(true);
@@ -521,10 +523,10 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                 progress.setIndeterminate(false);
                 JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
             });
-            
+
         }
     }
-    
+
     private void disableForm(boolean status) {
         tblRet.setEnabled(status);
         txtVouDate.setEnabled(status);
@@ -542,7 +544,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         observer.selected("delete", status);
         observer.selected("print", status);
     }
-    
+
     private void setAllLocation() {
         List<RetInHisDetail> listRetInDetail = retInTableModel.getListDetail();
         Location loc = locationAutoCompleter.getLocation();
@@ -554,7 +556,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         }
         retInTableModel.setListDetail(listRetInDetail);
     }
-    
+
     private void printSaveVoucher(String vouNo) {
         Mono<byte[]> result = inventoryApi.get()
                 .uri(builder -> builder.path("/report/get-return-in-report")
@@ -590,7 +592,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
     }
-    
+
     private void focusTable() {
         int rc = tblRet.getRowCount();
         if (rc > 1) {
@@ -601,11 +603,11 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             txtCus.requestFocus();
         }
     }
-    
+
     public void addTrader(Trader t) {
         traderAutoCompleter.addTrader(t);
     }
-    
+
     public void setTrader(Trader t, int row) {
         traderAutoCompleter.setTrader(t, row);
     }
@@ -1191,12 +1193,12 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             }
         }
     }
-    
+
     @Override
     public void keyEvent(KeyEvent e) {
-        
+
     }
-    
+
     @Override
     public void selected(Object source, Object selectObj) {
         switch (source.toString()) {
@@ -1226,17 +1228,17 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             }
         }
     }
-    
+
     @Override
     public void keyTyped(KeyEvent e) {
-        
+
     }
-    
+
     @Override
     public void keyPressed(KeyEvent e) {
-        
+
     }
-    
+
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
@@ -1300,7 +1302,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_RIGHT) {
                     txtRemark.requestFocus();
                 }
-                
+
                 tabToTable(e);
             }
             case "txtDiscP" -> {
@@ -1376,35 +1378,35 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
     public void delete() {
         deleteRetIn();
     }
-    
+
     @Override
     public void print() {
         saveRetIn(true);
     }
-    
+
     @Override
     public void save() {
         saveRetIn(false);
     }
-    
+
     @Override
     public void newForm() {
         clear();
     }
-    
+
     @Override
     public void history() {
         historyRetIn();
     }
-    
+
     @Override
     public void refresh() {
     }
-    
+
     @Override
     public void filter() {
     }
-    
+
     @Override
     public String panelName() {
         return this.getName();

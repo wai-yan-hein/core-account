@@ -6,12 +6,14 @@ package com.user.model;
 
 import java.util.Date;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  *
  * @author Lenovo
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class YearEnd {
     private String yeCompCode;
     private String compCode;

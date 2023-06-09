@@ -19,9 +19,9 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "project")
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Project {
 
     @EmbeddedId

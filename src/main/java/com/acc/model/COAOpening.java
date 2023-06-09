@@ -15,9 +15,9 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "coa_opening")
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class COAOpening {
     @EmbeddedId
     private OpeningKey key;
