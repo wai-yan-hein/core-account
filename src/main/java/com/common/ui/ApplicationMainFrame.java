@@ -975,7 +975,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                         setNetwork(-1);
                     }
                 } catch (IOException e) {
-                    log.error("scheduleNetwork : " + e.getMessage());
+                    setNetwork(-1);
                 }
             }
         }, 0, Duration.ofSeconds(5).toMillis());
