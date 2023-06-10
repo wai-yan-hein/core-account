@@ -43,6 +43,7 @@ public class FilterObject {
     private String projectNo;
     private String curCode;
     private String account;
+    private boolean local;
     public FilterObject(String compCode, Integer deptId) {
         this.compCode = compCode;
         this.deptId = deptId;
