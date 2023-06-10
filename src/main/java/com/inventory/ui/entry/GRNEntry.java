@@ -225,14 +225,15 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         try {
             if (isValidEntry() && tableModel.isValidEntry()) {
                 progress.setIndeterminate(true);
+                observer.selected("save", false);
                 grn.setListDetail(tableModel.getListDetail());
                 grn.setListDel(tableModel.getListDel());
                 inventoryRepo.saveGRN(grn).subscribe((t) -> {
-                    progress.setIndeterminate(false);
                     clear();
                 }, (e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
                     progress.setIndeterminate(false);
+                    observer.selected("save", false);
                 });
 
             }
@@ -315,6 +316,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         traderAutoCompleter.setTrader(null);
         txtBatchNo.setText(null);
         txtRemark.setText(null);
+        progress.setIndeterminate(false);
         grn = new GRN();
         focusTable();
     }

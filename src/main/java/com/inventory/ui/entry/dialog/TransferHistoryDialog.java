@@ -46,7 +46,6 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
      * Creates new form SaleVouSearchDialog
      */
     private final TransferVouSearchTableModel tableModel = new TransferVouSearchTableModel();
-    private WebClient inventoryApi;
     private UserRepo userRepo;
     private InventoryRepo inventoryRepo;
     private AppUserAutoCompleter appUserAutoCompleter;
@@ -65,28 +64,12 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         this.inventoryRepo = inventoryRepo;
     }
 
-    public WebClient getInventoryApi() {
-        return inventoryApi;
-    }
-
-    public void setInventoryApi(WebClient inventoryApi) {
-        this.inventoryApi = inventoryApi;
-    }
-
     public UserRepo getUserRepo() {
         return userRepo;
     }
 
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
-    }
-
-    public WebClient getWebClient() {
-        return inventoryApi;
-    }
-
-    public void setWebClient(WebClient inventoryApi) {
-        this.inventoryApi = inventoryApi;
     }
 
     public SelectionObserver getObserver() {
@@ -177,24 +160,17 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(getDepId());
         tableModel.clear();
-        inventoryApi
-                .post()
-                .uri("/transfer/get-transfer")
-                .body(Mono.just(filter), FilterObject.class)
-                .retrieve()
-                .bodyToFlux(VTransfer.class)
-                .collectList()
-                .subscribe((t) -> {
-                    tableModel.setListDetail(t);
-                    calAmount();
-                    progess.setIndeterminate(false);
-                    log.info("trader test", t);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                    progess.setIndeterminate(false);
-                }, () -> {
-                    setVisible(true);
-                });
+        inventoryRepo.getTrasnfer(filter).subscribe((t) -> {
+            tableModel.setListDetail(t);
+            calAmount();
+            progess.setIndeterminate(false);
+            log.info("trader test", t);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+            progess.setIndeterminate(false);
+        }, () -> {
+            setVisible(true);
+        });
     }
 
     private void calAmount() {

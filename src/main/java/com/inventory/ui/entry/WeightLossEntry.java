@@ -176,13 +176,16 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
 
     private void saveVoucher() {
         if (isValidEntry() && tableModel.isValidEntry()) {
+            progress.setIndeterminate(true);
+            observer.selected("save", false);
             his.setListDetail(tableModel.getListDetail());
             his.setDelKeys(tableModel.getDelKeys());
             inventoryRepo.saveWeightLoss(his).subscribe((t) -> {
-                        clear();
+                clear();
             }, (e) -> {
                 JOptionPane.showMessageDialog(this, e.getMessage());
                 progress.setIndeterminate(false);
+                observer.selected("save", false);
             });
         }
     }
@@ -224,6 +227,9 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
         txtDate.setEnabled(status);
         txtRemark.setEnabled(status);
         tblWeight.setEnabled(status);
+        observer.selected("save", status);
+        observer.selected("delete", status);
+        observer.selected("print", status);
     }
 
     private void clear() {

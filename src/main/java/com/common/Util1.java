@@ -588,11 +588,10 @@ public class Util1 {
     }
 
     public static boolean getBoolean(String obj) {
-        boolean status = false;
         if (!Util1.isNull(obj)) {
-            status = obj.equals("1") || obj.equalsIgnoreCase("true");
+            return obj.equals("1") || obj.equalsIgnoreCase("true");
         }
-        return status;
+        return false;
     }
 
     public static DefaultFormatterFactory getDecimalFormat() {

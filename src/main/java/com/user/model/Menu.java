@@ -15,15 +15,16 @@ import jakarta.persistence.Transient;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  *
  * @author Lenovo
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "menu")
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Menu {
 
     @EmbeddedId

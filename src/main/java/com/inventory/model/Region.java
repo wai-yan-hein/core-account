@@ -7,12 +7,14 @@ package com.inventory.model;
 
 import java.util.Date;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  *
  * @author wai yan
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Region implements java.io.Serializable {
 
     private RegionKey key;

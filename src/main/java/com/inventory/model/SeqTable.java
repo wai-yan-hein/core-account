@@ -16,9 +16,9 @@ import lombok.Data;
  * @author Lenovo
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "seq_table_inv")
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SeqTable {
 
     @EmbeddedId

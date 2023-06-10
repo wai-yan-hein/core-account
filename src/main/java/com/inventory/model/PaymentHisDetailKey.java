@@ -5,9 +5,11 @@ import jakarta.persistence.Embeddable;
 import lombok.Data;
 
 import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Embeddable
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PaymentHisDetailKey implements Serializable {
 
     @Column(name = "vou_no")

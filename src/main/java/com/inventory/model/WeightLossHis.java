@@ -21,8 +21,8 @@ import lombok.Data;
  * @author DELL
  */
 @Data
-@Entity
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Entity
 @Table(name = "weight_loss_his")
 public class WeightLossHis {
 

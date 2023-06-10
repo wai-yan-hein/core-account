@@ -22,7 +22,6 @@ import com.inventory.editor.SaleManAutoCompleter;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
-import com.inventory.model.Region;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.SaleHisKey;
@@ -358,32 +357,32 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
     }
 
     public void saveSale(boolean print) {
-        try {
-            if (isValidEntry() && saleTableModel.isValidEntry()) {
-                if (Util1.getBoolean(ProUtil.getProperty("trader.balance"))) {
-                    String date = Util1.toDateStr(txtSaleDate.getDate(), "yyyy-MM-dd");
-                    String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
-                    balance = accountRepo.getTraderBalance(date, traderCode, Global.compCode);
-                    if (balance != 0) {
-                        prvBal = balance - Util1.getDouble(txtVouBalance.getValue());
-                    }
+        if (isValidEntry() && saleTableModel.isValidEntry()) {
+            observer.selected("save", false);
+            if (Util1.getBoolean(ProUtil.getProperty("trader.balance"))) {
+                String date = Util1.toDateStr(txtSaleDate.getDate(), "yyyy-MM-dd");
+                String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
+                balance = accountRepo.getTraderBalance(date, traderCode, Global.compCode);
+                if (balance != 0) {
+                    prvBal = balance - Util1.getDouble(txtVouBalance.getValue());
                 }
-                progress.setIndeterminate(true);
-                saleHis.setListSH(saleTableModel.getListDetail());
-                saleHis.setListDel(saleTableModel.getDelList());
-                saleHis.setBackup(saleTableModel.isChange());
-                inventoryRepo.save(saleHis).subscribe((t) -> {
-                    progress.setIndeterminate(false);
-                    clear();
-                    if (print) {
-                        String reportName = getReportName();
-                        printVoucher(t.getKey().getVouNo(), reportName, chkVou.isSelected());
-                    }
-                });
             }
-        } catch (HeadlessException ex) {
-            log.error("Save Sale :" + ex.getMessage());
-            JOptionPane.showMessageDialog(this, "Could'nt saved.");
+            progress.setIndeterminate(true);
+            saleHis.setListSH(saleTableModel.getListDetail());
+            saleHis.setListDel(saleTableModel.getDelList());
+            saleHis.setBackup(saleTableModel.isChange());
+            inventoryRepo.save(saleHis).subscribe((t) -> {
+                progress.setIndeterminate(false);
+                clear();
+                if (print) {
+                    String reportName = getReportName();
+                    printVoucher(t.getKey().getVouNo(), reportName, chkVou.isSelected());
+                }
+            }, (e) -> {
+                observer.selected("save", true);
+                JOptionPane.showMessageDialog(this, e.getMessage());
+                progress.setIndeterminate(false);
+            });
         }
     }
 

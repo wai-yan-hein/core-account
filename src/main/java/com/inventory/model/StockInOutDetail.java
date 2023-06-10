@@ -18,8 +18,8 @@ import lombok.Data;
  *
  * @author Lenovo
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "stock_in_out_detail")
 public class StockInOutDetail implements Serializable {

@@ -21,9 +21,9 @@ import lombok.Data;
  * @author wai yan
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "role")
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AppRole implements java.io.Serializable {
 
     @Id

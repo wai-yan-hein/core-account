@@ -7,12 +7,13 @@ package com.acc.model;
 
 import java.io.Serializable;
 import lombok.Data;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
 /**
  *
  * @author wai yan
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class VTriBalanceKey implements Serializable {
 
     private String coaCode;

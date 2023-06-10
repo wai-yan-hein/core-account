@@ -11,8 +11,10 @@ import lombok.Data;
 
 import java.util.Date;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "payment_his")
 public class PaymentHis {

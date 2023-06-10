@@ -13,15 +13,16 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.util.Date;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  *
  * @author Lenovo
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "privilege_menu")
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PrivilegeMenu {
 
     @EmbeddedId

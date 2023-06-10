@@ -2,11 +2,14 @@ package com.acc.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  *
  * @author DELL
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "gl_log")
 public class GlLog {
