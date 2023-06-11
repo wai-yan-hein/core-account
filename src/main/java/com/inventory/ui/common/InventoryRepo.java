@@ -21,6 +21,7 @@ import com.inventory.model.General;
 import com.inventory.model.Location;
 import com.inventory.model.LocationKey;
 import com.inventory.model.OPHis;
+import com.inventory.model.OPHisDetail;
 import com.inventory.model.OPHisKey;
 import com.inventory.model.OrderHis;
 import com.inventory.model.OrderHisDetail;
@@ -70,6 +71,7 @@ import com.inventory.model.TransferHisDetail;
 import com.inventory.model.TransferHisKey;
 import com.inventory.model.UnitRelation;
 import com.inventory.model.UnitRelationDetail;
+import com.inventory.model.VOpening;
 import com.inventory.model.VSale;
 import com.inventory.model.VStockBalance;
 import com.inventory.model.VTransfer;
@@ -2087,6 +2089,14 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<OPHis> save(OPHis op) {
+        return inventoryApi.post()
+                .uri("/setup/save-opening")
+                .body(Mono.just(op), OPHis.class)
+                .retrieve()
+                .bodyToMono(OPHis.class);
+    }
+
     public Mono<OrderHis> save(OrderHis sh) {
         return inventoryApi.post()
                 .uri("/order/save-order")
@@ -2278,6 +2288,27 @@ public class InventoryRepo {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
                 });
+    }
+
+    public Mono<List<OPHisDetail>> getOpeningDetail(String vouNo,String compCode,Integer deptId) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/get-opening-detail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", compCode)
+                .queryParam("deptId", deptId)
+                .build())
+                .retrieve()
+                .bodyToFlux(OPHisDetail.class)
+                .collectList();
+    }
+
+    public Mono<List<OPHis>> getOpeningHistory(FilterObject filter) {
+        return inventoryApi.post()
+                .uri("/setup/get-opening")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToFlux(OPHis.class)
+                .collectList();
     }
 
     public Mono<List<PaymentHisDetail>> getCustomerBalance(String traderCode) {

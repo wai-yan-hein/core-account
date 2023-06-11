@@ -114,10 +114,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     }
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
-        public void focusLost(FocusEvent e) {
-        }
-
-        @Override
         public void focusGained(FocusEvent e) {
             if (e.getSource() instanceof JTextField txt) {
                 txt.selectAll();
@@ -267,7 +263,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         }, () -> {
             setVisible(true);
         });
-        
+
     }
 
     private void calAmount() {
