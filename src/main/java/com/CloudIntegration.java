@@ -193,8 +193,8 @@ public class CloudIntegration {
 
     public void uploadSale() {
         List<SaleHis> list = saleHisService.unUploadVoucher(Global.compCode);
+        log.info("need to upload sale his : " + list.size());
         if (!list.isEmpty()) {
-            log.info("need to upload sale his : " + list.size());
             list.forEach((h) -> {
                 inventoryRepo.uploadSale(h).subscribe((r) -> {
                     r.setIntgUpdStatus("ACK");
@@ -207,6 +207,7 @@ public class CloudIntegration {
 
     public void uploadOrder() {
         List<OrderHis> list = orderHisService.unUploadVoucher(Global.compCode);
+        log.info("need to upload order his : " + list.size());
         if (!list.isEmpty()) {
             list.forEach((l) -> {
                 inventoryRepo.uploadOrder(l).subscribe((r) -> {
@@ -217,11 +218,11 @@ public class CloudIntegration {
 
         }
     }
-    
+
     public void uploadPurchase() {
         List<PurHis> list = purHisService.unUploadVoucher(Global.compCode);
+        log.info("need to upload purchase his : " + list.size());
         if (!list.isEmpty()) {
-            log.info("need to upload purchase his : " + list.size());
             list.forEach((pur) -> {
                 inventoryRepo.uploadPurchase(pur).subscribe((p) -> {
                     p.setIntgUpdStatus("ACK");
@@ -231,11 +232,11 @@ public class CloudIntegration {
 
         }
     }
-    
+
     public void uploadReturnIn() {
         List<RetInHis> list = retInService.unUploadVoucher(Global.compCode);
+        log.info("need to upload ReturnIn his : " + list.size());
         if (!list.isEmpty()) {
-            log.info("need to upload ReturnIn his : " + list.size());
             list.forEach((in) -> {
                 inventoryRepo.uploadRetIn(in).subscribe((n) -> {
                     n.setIntgUpdStatus("ACK");
@@ -245,11 +246,11 @@ public class CloudIntegration {
 
         }
     }
-    
+
     public void uploadReturnOut() {
         List<RetOutHis> list = retOutService.unUploadVoucher(Global.compCode);
+        log.info("need to upload ReturnOut his : " + list.size());
         if (!list.isEmpty()) {
-            log.info("need to upload ReturnOut his : " + list.size());
             list.forEach((out) -> {
                 inventoryRepo.uploadRetOut(out).subscribe((o) -> {
                     o.setIntgUpdStatus("ACK");
@@ -262,6 +263,7 @@ public class CloudIntegration {
 
     public void uploadStockInOut() {
         List<StockInOut> list = stockInOutService.unUpload(Global.compCode);
+        log.info("need to upload stockinout : " + list.size());
         if (!list.isEmpty()) {
             list.forEach((l) -> {
                 inventoryRepo.uploadStockInOut(l).subscribe((r) -> {
@@ -275,6 +277,7 @@ public class CloudIntegration {
 
     public void uploadTransfer() {
         List<TransferHis> list = transferHisService.unUpload(Global.compCode);
+        log.info("need to upload transfer : " + list.size());
         if (!list.isEmpty()) {
             list.forEach((l) -> {
                 inventoryRepo.uploadTransfer(l).subscribe((r) -> {
@@ -288,6 +291,7 @@ public class CloudIntegration {
 
     public void uploadWeightLoss() {
         List<WeightLossHis> list = weightLossService.unUpload(Global.compCode);
+        log.info("need to upload weight loss : " + list.size());
         if (!list.isEmpty()) {
             list.forEach((l) -> {
                 inventoryRepo.uploadWeightLoss(l).subscribe((r) -> {
@@ -301,6 +305,7 @@ public class CloudIntegration {
 
     public void uploadManufacture() {
         List<ProcessHis> list = processHisService.unUpload(Global.compCode);
+        log.info("need to upload manufacture : " + list.size());
         if (!list.isEmpty()) {
             list.forEach((l) -> {
                 inventoryRepo.uploadProcess(l).subscribe((r) -> {

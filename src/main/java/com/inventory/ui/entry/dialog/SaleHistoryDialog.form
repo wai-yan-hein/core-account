@@ -138,6 +138,7 @@
                               <Component id="txtProjectNo" alignment="0" max="32767" attributes="0"/>
                               <Component id="txtCurrency" alignment="1" max="32767" attributes="0"/>
                               <Component id="chkDel" max="32767" attributes="0"/>
+                              <Component id="chkLocal" pref="151" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -227,6 +228,8 @@
                   <Component id="chkDel" min="-2" pref="26" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="chkBatch" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="chkLocal" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="jSeparator3" min="-2" max="-2" attributes="0"/>
@@ -545,6 +548,17 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtCurrencyActionPerformed"/>
           </Events>
         </Component>
+        <Component class="javax.swing.JCheckBox" name="chkLocal">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.lableFont" type="code"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Local"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkLocalActionPerformed"/>
+          </Events>
+        </Component>
       </SubComponents>
     </Container>
     <Component class="javax.swing.JTextField" name="txtFilter">
@@ -624,6 +638,8 @@
                   <Component id="btnSearch" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="btnSelect" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
+                  <Component id="btnUpload" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -641,6 +657,7 @@
                       <Component id="btnSelect" linkSize="9" alignment="0" pref="0" max="32767" attributes="0"/>
                       <Component id="btnSearch" linkSize="9" alignment="0" pref="0" max="32767" attributes="0"/>
                       <Component id="txtTotalAmt" linkSize="9" alignment="0" max="32767" attributes="0"/>
+                      <Component id="btnUpload" alignment="0" pref="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -726,6 +743,20 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Total Amount :"/>
           </Properties>
+        </Component>
+        <Component class="javax.swing.JButton" name="btnUpload">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.lableFont" type="code"/>
+            </Property>
+            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+              <Image iconType="3" name="/images/upload.png"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Upload"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnUploadActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

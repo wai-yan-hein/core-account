@@ -42,6 +42,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -69,6 +70,8 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
+    @Autowired
+    private boolean localDatabase;
 
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
@@ -178,6 +181,13 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         batchAutoCompeter = new BatchAutoCompeter(txtBatchNo, inventoryRepo, null, true);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
+        if (inventoryRepo.localDatabase) {
+            chkLocal.setVisible(true);
+            btnUpload.setVisible(true);
+        } else {
+            chkLocal.setVisible(false);
+            btnUpload.setVisible(false);
+        }
     }
 
     private void initTableVoucher() {
@@ -250,6 +260,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         filter.setProjectNo(projectNo.equals("All") ? "-" : projectNo);
         filter.setCurCode(getCurCode());
         filter.setNullBatch(chkBatch.isSelected());
+        filter.setLocal(chkLocal.isSelected());
         saleVouTableModel.clear();
         txtRecord.setValue(0);
         //
@@ -354,6 +365,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         txtProjectNo = new javax.swing.JTextField();
         jLabel15 = new javax.swing.JLabel();
         txtCurrency = new javax.swing.JTextField();
+        chkLocal = new javax.swing.JCheckBox();
         txtFilter = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
@@ -367,6 +379,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         txtTotalAmt = new javax.swing.JFormattedTextField();
         txtRecord = new javax.swing.JFormattedTextField();
         lblTtlAmount = new javax.swing.JLabel();
+        btnUpload = new javax.swing.JButton();
         progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -547,6 +560,14 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
             }
         });
 
+        chkLocal.setFont(Global.lableFont);
+        chkLocal.setText("Local");
+        chkLocal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkLocalActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -599,7 +620,8 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                                 .addComponent(txtVouNo))
                             .addComponent(txtProjectNo)
                             .addComponent(txtCurrency, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(chkDel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(chkDel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(chkLocal, javax.swing.GroupLayout.DEFAULT_SIZE, 151, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -668,6 +690,8 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                 .addComponent(chkDel, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkBatch)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkLocal)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -748,6 +772,15 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         lblTtlAmount.setFont(Global.lableFont);
         lblTtlAmount.setText("Total Amount :");
 
+        btnUpload.setFont(Global.lableFont);
+        btnUpload.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/upload.png"))); // NOI18N
+        btnUpload.setText("Upload");
+        btnUpload.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUploadActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -769,6 +802,8 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                 .addComponent(btnSearch)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnSelect)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnUpload)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -783,7 +818,8 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                     .addComponent(txtRecord)
                     .addComponent(btnSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(txtTotalAmt))
+                    .addComponent(txtTotalAmt)
+                    .addComponent(btnUpload, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -916,6 +952,14 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private void txtCurrencyFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCurrencyFocusGained
     }//GEN-LAST:event_txtCurrencyFocusGained
 
+    private void chkLocalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkLocalActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_chkLocalActionPerformed
+
+    private void btnUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnUploadActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -923,8 +967,10 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnSelect;
+    private javax.swing.JButton btnUpload;
     private javax.swing.JCheckBox chkBatch;
     private javax.swing.JCheckBox chkDel;
+    private javax.swing.JCheckBox chkLocal;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

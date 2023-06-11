@@ -100,7 +100,7 @@ public class InventoryRepo {
     @Autowired
     private WebClient inventoryApi;
     @Autowired
-    private boolean localDatabase;
+    public boolean localDatabase;
     @Autowired
     private H2Repo h2Repo;
 
@@ -2278,6 +2278,9 @@ public class InventoryRepo {
     }
 
     public Mono<List<VSale>> getSaleHistory(FilterObject filter) {
+        if(filter.isLocal()) {
+            return null;
+        }
         return inventoryApi.post()
                 .uri("/sale/get-sale")
                 .body(Mono.just(filter), FilterObject.class)
