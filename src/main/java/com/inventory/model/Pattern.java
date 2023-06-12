@@ -31,4 +31,5 @@ public class Pattern {
     private Integer deptId;
     private String priceTypeCode;
     private String priceTypeName;
+    private Float amount;
 }

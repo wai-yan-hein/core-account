@@ -16,6 +16,7 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.editor.RegionAutoCompleter;
 import com.inventory.editor.TraderGroupAutoCompleter;
+import com.inventory.model.General;
 import com.inventory.model.Region;
 import com.inventory.model.Trader;
 import com.inventory.model.TraderGroup;
@@ -26,6 +27,7 @@ import com.inventory.ui.setup.dialog.RegionSetup;
 import com.inventory.ui.setup.dialog.TraderGroupDialog;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.stream.Collectors;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -930,12 +932,15 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     public void delete() {
         if (selectRow >= 0) {
             Trader t = supplierTabelModel.getCustomer(selectRow);
-            inventoryRepo.deleteTrader(t.getKey()).subscribe((str) -> {
-                if (str.isEmpty()) {
+            inventoryRepo.deleteTrader(t.getKey()).subscribe((list) -> {
+                if (list.isEmpty()) {
                     supplierTabelModel.deleteCustomer(selectRow);
                     clear();
                     JOptionPane.showMessageDialog(this, "Deleted.");
                 } else {
+                    String str = list.stream()
+                            .map(General::getMessage) // Extract the message field from each General object
+                            .collect(Collectors.joining()); // Concatenate the messages
                     JOptionPane.showMessageDialog(this, str);
                 }
             });

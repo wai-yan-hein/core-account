@@ -1421,12 +1421,12 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<String>> deleteTrader(TraderKey key) {
+    public Mono<List<General>> deleteTrader(TraderKey key) {
         return inventoryApi.post()
                 .uri("/setup/delete-trader")
                 .body(Mono.just(key), TraderKey.class)
                 .retrieve()
-                .bodyToFlux(String.class)
+                .bodyToFlux(General.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
@@ -2278,7 +2278,7 @@ public class InventoryRepo {
     }
 
     public Mono<List<VSale>> getSaleHistory(FilterObject filter) {
-        if(filter.isLocal()) {
+        if (filter.isLocal()) {
             return null;
         }
         return inventoryApi.post()
@@ -2293,7 +2293,7 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<OPHisDetail>> getOpeningDetail(String vouNo,String compCode,Integer deptId) {
+    public Mono<List<OPHisDetail>> getOpeningDetail(String vouNo, String compCode, Integer deptId) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/get-opening-detail")
                 .queryParam("vouNo", vouNo)

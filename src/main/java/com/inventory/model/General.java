@@ -16,7 +16,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class General {
 
     private Float amount;
-    private float qty;
-    private float smallQty;
+    private Float qty;
+    private Float smallQty;
+    private String message;
 
 }
