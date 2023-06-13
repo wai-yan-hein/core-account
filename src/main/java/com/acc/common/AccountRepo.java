@@ -631,7 +631,7 @@ public class AccountRepo {
                 .collectList();
     }
 
-    public Mono<List<Gl>> searchGl(ReportFilter filter)throws SQLException {
+    public Mono<List<Gl>> searchGl(ReportFilter filter){
         if (localDatabase) {
             return h2Repo.searchGL(filter);
         }        

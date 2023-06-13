@@ -733,15 +733,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 }
 
                 String vouNo = ph.getKey().getVouNo();
-                inventoryApi.get()
-                        .uri(builder -> builder.path("/pur/get-pur-detail")
-                        .queryParam("vouNo", vouNo)
-                        .queryParam("compCode", Global.compCode)
-                        .queryParam("deptId", ph.getKey().getDeptId())
-                        .build())
-                        .retrieve()
-                        .bodyToFlux(PurHisDetail.class)
-                        .collectList()
+                inventoryRepo.getPurDetail(vouNo)
                         .subscribe((t) -> {
                             purTableModel.setListDetail(t);
                             purTableModel.addNewRow();
@@ -1932,7 +1924,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             }
             case "PUR-HISTORY" -> {
                 if (selectObj instanceof VPurchase v) {
-                    inventoryRepo.findPurchase(v.getVouNo(), v.getDeptId()).subscribe((t) -> {
+                    inventoryRepo.findPurchase(v.getVouNo(), v.getDeptId(),v.getIntgUpdStatus()).subscribe((t) -> {
                         setVoucher(t);
                     }, (e) -> {
                         JOptionPane.showMessageDialog(this, e.getMessage());
