@@ -719,7 +719,7 @@ public class CloudIntegration {
         if (localDatabase) {
             taskScheduler.scheduleAtFixedRate(() -> {
                 startDownload();
-                startUpload();
+//                startUpload();
             }, Duration.ofMinutes(5));
         }
 

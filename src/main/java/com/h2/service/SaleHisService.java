@@ -4,9 +4,12 @@
  */
 package com.h2.service;
 
+import com.common.FilterObject;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisKey;
+import com.inventory.model.VSale;
 import java.util.List;
+import reactor.core.publisher.Flux;
 
 /**
  *
@@ -25,5 +28,7 @@ public interface SaleHisService {
     List<SaleHis> unUploadVoucher(String compCode);
 
     String getMaxDate();
+
+    List<VSale> getSale(FilterObject filter);
 
 }

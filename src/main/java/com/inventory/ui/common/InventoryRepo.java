@@ -1299,6 +1299,9 @@ public class InventoryRepo {
         key.setVouNo(vouNo);
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
+        if (localDatabase) {
+            return h2Repo.findSale(key);
+        }
         return inventoryApi.post()
                 .uri("/sale/find-sale")
                 .body(Mono.just(key), SaleHisKey.class)
@@ -2173,11 +2176,14 @@ public class InventoryRepo {
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
-                    return Mono.empty();
+                    return Mono.error(e);
                 });
     }
 
-    public Mono<List<SaleHisDetail>> getSaleDetail(String vouNo, int deptId) {
+    public Mono<List<SaleHisDetail>> getSaleDetail(String vouNo, int deptId, String intgUpdateStatus) {
+        if (intgUpdateStatus == null) {
+            return h2Repo.getSaleDetail(vouNo, deptId);
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/sale/get-sale-detail")
                 .queryParam("vouNo", vouNo)
@@ -2268,8 +2274,8 @@ public class InventoryRepo {
     }
 
     public Mono<List<VSale>> getSaleHistory(FilterObject filter) {
-        if(filter.isLocal()) {
-            return null;
+        if (filter.isLocal()) {
+            return h2Repo.getSaleHistory(filter);
         }
         return inventoryApi.post()
                 .uri("/sale/get-sale")

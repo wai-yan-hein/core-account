@@ -6,17 +6,25 @@ package com.inventory.model;
 
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import java.io.Serializable;
 
 /**
  *
  * @author DELL
  */
 @Data
+@Embeddable
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class GRNDetailKey {
+public class GRNDetailKey implements Serializable {
 
+    @Column(name = "vou_no")
     private String vouNo;
+    @Column(name = "unique_id")
     private Integer uniqueId;
+    @Column(name = "comp_code")
     private String compCode;
+    @Column(name = "dept_id")
     private Integer deptId;
 }
