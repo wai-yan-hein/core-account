@@ -4,8 +4,6 @@
  * and open the template in the editor.
  */
 package com.h2.service;
-
-import com.inventory.model.OrderHis;
 import com.inventory.model.PurHis;
 import com.inventory.model.PurHisKey;
 import java.util.Date;

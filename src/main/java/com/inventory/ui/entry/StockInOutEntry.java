@@ -284,7 +284,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             for (StockInOutDetail s : listIO) {
                 ttlInQty += Util1.getFloat(s.getInQty());
                 ttlOutQty += Util1.getFloat(s.getOutQty());
-                ttlPrice += Util1.getFloat(s.getCostPrice());
+                ttlPrice += Util1.getFloat(s.getCostPrice()) * (Util1.getFloat(s.getInQty()) + Util1.getFloat(s.getOutQty()));
             }
         }
         txtInQty.setValue(ttlInQty);

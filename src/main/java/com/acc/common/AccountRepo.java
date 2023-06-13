@@ -55,7 +55,6 @@ public class AccountRepo {
     private boolean localDatabase;
     @Autowired
     private H2Repo h2Repo;
-    
 
     public Mono<DepartmentA> getDefaultDepartment() {
         String deptCode = Global.hmRoleProperty.get("default.department");
@@ -375,6 +374,10 @@ public class AccountRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(ChartOfAccount.class)
+                .onErrorResume((e) -> {
+                    log.error("getCOAByGroup : " + e.getMessage());
+                    return Mono.empty();
+                })
                 .collectList();
     }
 
@@ -386,6 +389,10 @@ public class AccountRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(ChartOfAccount.class)
+                .onErrorResume((e) -> {
+                    log.error("getCOAByHead : " + e.getMessage());
+                    return Mono.empty();
+                })
                 .collectList();
     }
 
@@ -395,7 +402,8 @@ public class AccountRepo {
                 .queryParam("glVouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().bodyToFlux(Gl.class);
+                .retrieve()
+                .bodyToFlux(Gl.class);
     }
 
     public Flux<Gl> getVoucher(String vouNo) {
@@ -631,10 +639,10 @@ public class AccountRepo {
                 .collectList();
     }
 
-    public Mono<List<Gl>> searchGl(ReportFilter filter)throws SQLException {
+    public Mono<List<Gl>> searchGl(ReportFilter filter){
         if (localDatabase) {
             return h2Repo.searchGL(filter);
-        }        
+        }
         return accountApi.post()
                 .uri("/account/search-gl")
                 .body(Mono.just(filter), ReportFilter.class)

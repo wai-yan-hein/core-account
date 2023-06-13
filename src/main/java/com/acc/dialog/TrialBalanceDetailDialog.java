@@ -217,7 +217,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     }
 
     public void searchTriBalDetail(){
-        try{
         clear();
         progress.setIndeterminate(true);
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
@@ -258,9 +257,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
             progress.setIndeterminate(false);
             setVisible(true);
         });
-        }catch (Exception ex){
-            ex.getMessage();
-        }
     }
 
     private String getCurrency() {

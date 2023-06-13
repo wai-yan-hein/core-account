@@ -30,7 +30,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.List;
 import javax.swing.AbstractAction;
-import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -38,7 +37,6 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -61,7 +59,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     private InventoryRepo inventoryRepo;
     @Autowired
     private UserRepo userRepo;
-    private final OPHistoryDialog vouSearchDialog = new OPHistoryDialog(Global.parentForm);
+    private OPHistoryDialog vouSearchDialog;
     private OPHis oPHis = new OPHis();
     private JProgressBar progress;
     private SelectionObserver observer;
@@ -181,12 +179,15 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         userRepo.getDefaultCurrency().subscribe((t) -> {
             currencyAAutoCompleter.setCurrency(t);
         });
+        progress.setIndeterminate(false);
+        disableForm(true);
         calculatAmount();
     }
 
     private void saveOpening() {
         if (isValidEntry() && openingTableModel.isValidEntry()) {
             progress.setIndeterminate(true);
+            observer.selected("save", false);
             if (lblStatus.getText().equals("NEW")) {
                 OPHisKey key = new OPHisKey();
                 key.setCompCode(Global.compCode);
@@ -206,17 +207,13 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
             oPHis.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             oPHis.setDetailList(openingTableModel.getListDetail());
             oPHis.setListDel(openingTableModel.getDelList());
-            inventoryApi.post()
-                    .uri("/setup/save-opening")
-                    .body(Mono.just(oPHis), OPHis.class)
-                    .retrieve()
-                    .bodyToMono(OPHis.class)
-                    .subscribe((t) -> {
-                        clear();
-                        progress.setIndeterminate(false);
-                    }, (e) -> {
-                        JOptionPane.showMessageDialog(this, e.getMessage());
-                    });
+            inventoryRepo.save(oPHis).subscribe((t) -> {
+                clear();
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
+                progress.setIndeterminate(false);
+                observer.selected("save", true);
+            });
         }
     }
 
@@ -243,15 +240,17 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     public void historyOP() {
         try {
-            vouSearchDialog.setUserRepo(userRepo);
-            vouSearchDialog.setInventoryRepo(inventoryRepo);
-            vouSearchDialog.setWebClient(inventoryApi);
-            vouSearchDialog.setObserver(this);
-            vouSearchDialog.initMain();
-            vouSearchDialog.setSize(Global.width - 200, Global.height - 200);
-            vouSearchDialog.setLocationRelativeTo(null);
-            vouSearchDialog.setIconImage(new ImageIcon(getClass().getResource("/images/search.png")).getImage());
-            vouSearchDialog.setVisible(true);
+            if (vouSearchDialog == null) {
+                vouSearchDialog = new OPHistoryDialog(Global.parentForm);
+                vouSearchDialog.setUserRepo(userRepo);
+                vouSearchDialog.setInventoryRepo(inventoryRepo);
+                vouSearchDialog.setWebClient(inventoryApi);
+                vouSearchDialog.setObserver(this);
+                vouSearchDialog.initMain();
+                vouSearchDialog.setSize(Global.width - 200, Global.height - 200);
+                vouSearchDialog.setLocationRelativeTo(null);
+            }
+            vouSearchDialog.search();
         } catch (Exception e) {
             log.error(String.format("historyOPhistoryOP: %s", e.getMessage()));
         }
@@ -271,22 +270,18 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     private void setVoucher(OPHis op) {
         if (op != null) {
             oPHis = op;
-            inventoryRepo.findLocation(oPHis.getLocCode(), oPHis.getKey().getDeptId()).subscribe((t) -> {
+            String vouNo = op.getKey().getVouNo();
+            String compCode = op.getKey().getCompCode();
+            Integer deptId = op.getKey().getDeptId();
+            inventoryRepo.findLocation(oPHis.getLocCode(), deptId).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
             userRepo.findCurrency(oPHis.getCurCode()).subscribe((t) -> {
                 currencyAAutoCompleter.setCurrency(t);
             });
             progress.setIndeterminate(true);
-            Mono<ResponseEntity<List<OPHisDetail>>> result = inventoryApi.get()
-                    .uri(builder -> builder.path("/setup/get-opening-detail")
-                    .queryParam("vouNo", op.getKey().getVouNo())
-                    .queryParam("compCode", op.getKey().getCompCode())
-                    .queryParam("deptId", op.getKey().getDeptId())
-                    .build())
-                    .retrieve().toEntityList(OPHisDetail.class);
-            result.subscribe((t) -> {
-                txtVouNo.setText(oPHis.getKey().getVouNo());
+            inventoryRepo.getOpeningDetail(vouNo, compCode, deptId).subscribe((t) -> {
+                txtVouNo.setText(vouNo);
                 txtOPDate.setDate(oPHis.getVouDate());
                 txtRemark.setText(oPHis.getRemark());
                 if (oPHis.isDeleted()) {
@@ -298,7 +293,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                     lblStatus.setForeground(Color.blue);
                     disableForm(true);
                 }
-                openingTableModel.setListDetail(t.getBody());
+                openingTableModel.setListDetail(t);
                 openingTableModel.addNewRow();
                 calculatAmount();
                 focusOnTable();

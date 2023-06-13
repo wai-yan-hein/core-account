@@ -10,11 +10,13 @@ import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Image;
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
@@ -175,8 +177,25 @@ public class CoreAccountApplication {
         boolean isDarkModeEnabled = false;
         String os = System.getProperty("os.name").toLowerCase();
         if (os.contains("win")) { // Windows
-            log.info(System.getProperty("os.name"));
-            isDarkModeEnabled = System.getProperty("os.name").toLowerCase().contains("dark");
+            try {
+                ProcessBuilder processBuilder = new ProcessBuilder("reg", "query", "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "/v", "AppsUseLightTheme");
+                Process process = processBuilder.start();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.contains("AppsUseLightTheme")) {
+                        String[] parts = line.split("\\s+");
+                        if (parts.length >= 3) {
+                            String value = parts[parts.length - 1];
+                            log.info(value);
+                            return value.equals("0x0");
+                        }
+                    }
+                }
+                process.waitFor();
+            } catch (IOException | InterruptedException e) {
+                log.error("win : " + e.getMessage());
+            }
         } else if (os.contains("mac")) { // macOS
             isDarkModeEnabled = "dark".equals(System.getProperty("apple.awt.application.appearance"));
         } else if (os.contains("nix") || os.contains("nux") || os.contains("bsd")) { // Unix/Linux/BSD
