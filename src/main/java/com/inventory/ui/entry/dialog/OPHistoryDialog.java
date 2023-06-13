@@ -13,19 +13,23 @@ import com.user.common.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
 import com.inventory.editor.DepartmentAutoCompleter;
+import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.model.OPHis;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.OPVouSearchTableModel;
+import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.editor.CurrencyAutoCompleter;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -46,7 +50,7 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
     private StockAutoCompleter stockAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
     private CurrencyAutoCompleter currAutoCompleter;
-    private boolean status = false;
+    private LocationAutoCompleter locationAutoCompleter;
 
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
@@ -84,23 +88,48 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
         super(frame, true);
         initComponents();
         initKeyListener();
+        initFocous();
         txtTotalAmt.setFormatterFactory(Util1.getDecimalFormat());
         progess.setIndeterminate(false);
     }
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            if (e.getSource() instanceof JTextField txt) {
+                txt.selectAll();
+            } else if (e.getSource() instanceof JTextFieldDateEditor txt) {
+                txt.selectAll();
+            }
+        }
+
+    };
+
+    private void initFocous() {
+        txtStock.addFocusListener(fa);
+        txtVouNo.addFocusListener(fa);
+        txtFromDate.addFocusListener(fa);
+        txtToDate.addFocusListener(fa);
+        txtRemark.addFocusListener(fa);
+        txtStock.addFocusListener(fa);
+        txtUser.addFocusListener(fa);
+        txtDep.addFocusListener(fa);
+        txtCurrency.addFocusListener(fa);
+    }
 
     public void initMain() {
-        if (!status) {
-            initCombo();
-            initTableVoucher();
-            setTodayDate();
-            status = true;
-        }
-        search();
+        initCombo();
+        initTableVoucher();
+        setTodayDate();
     }
 
     private void initCombo() {
         userRepo.getAppUser().subscribe((t) -> {
             appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
+        });
+        inventoryRepo.getLocation().subscribe((t) -> {
+            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, false);
+        }, (e) -> {
+            log.error(e.getMessage());
         });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         userRepo.getDeparment().subscribe((t) -> {
@@ -148,6 +177,10 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
 
+    private String getLocCode() {
+        return locationAutoCompleter == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
+    }
+
     private String getCurCode() {
         if (currAutoCompleter == null || currAutoCompleter.getCurrency() == null) {
             return Global.currency;
@@ -155,7 +188,7 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
         return currAutoCompleter.getCurrency().getCurCode();
     }
 
-    private void search() {
+    public void search() {
         progess.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
         filter.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));
@@ -166,20 +199,17 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         filter.setDeptId(getDepId());
         filter.setCurCode(getCurCode());
-        inventoryApi.post()
-                .uri("/setup/get-opening")
-                .body(Mono.just(filter), FilterObject.class)
-                .retrieve()
-                .bodyToFlux(OPHis.class)
-                .collectList()
-                .subscribe((t) -> {
-                    tableModel.setListDetail(t);
-                    calAmt();
-                    progess.setIndeterminate(false);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                    progess.setIndeterminate(false);
-                });
+        filter.setLocCode(getLocCode());
+        inventoryRepo.getOpeningHistory(filter).subscribe((t) -> {
+            tableModel.setListDetail(t);
+            calAmt();
+            progess.setIndeterminate(false);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+            progess.setIndeterminate(false);
+        }, () -> {
+            setVisible(true);
+        });
     }
 
     private void calAmt() {
@@ -237,6 +267,8 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
         txtDep = new javax.swing.JTextField();
         jLabel15 = new javax.swing.JLabel();
         txtCurrency = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
+        txtLocation = new javax.swing.JTextField();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
         progess = new javax.swing.JProgressBar();
@@ -259,7 +291,7 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
         jLabel8.setText("User");
 
         jLabel11.setFont(Global.lableFont);
-        jLabel11.setText("Date");
+        jLabel11.setText("From");
 
         txtFromDate.setDateFormatString("dd/MM/yyyy");
         txtFromDate.setFont(Global.lableFont);
@@ -338,6 +370,17 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
             }
         });
 
+        jLabel7.setFont(Global.lableFont);
+        jLabel7.setText("Location");
+
+        txtLocation.setFont(Global.textFont);
+        txtLocation.setName("txtVouNo"); // NOI18N
+        txtLocation.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtLocationFocusGained(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -351,24 +394,23 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
                     .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
-                    .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 3, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(37, 37, 37)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(txtFromDate, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel3)
-                        .addGap(18, 18, 18)
-                        .addComponent(txtToDate, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(txtVouNo)
-                    .addComponent(txtUser)
-                    .addComponent(txtStock)
-                    .addComponent(txtRemark)
-                    .addComponent(txtDep)
-                    .addComponent(txtCurrency))
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(txtDep, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtUser, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtStock, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtRemark, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtVouNo, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtFromDate, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtToDate, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtCurrency)
+                    .addComponent(txtLocation, javax.swing.GroupLayout.Alignment.LEADING))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -379,9 +421,11 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(txtFromDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtToDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel11, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtToDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel4)
@@ -396,6 +440,10 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
                             .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel7)
+                            .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel8)
                             .addComponent(txtUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -408,6 +456,8 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
                             .addComponent(jLabel15))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {txtFromDate, txtToDate});
 
         tblVoucher.setFont(Global.textFont);
         tblVoucher.setModel(new javax.swing.table.DefaultTableModel(
@@ -471,11 +521,11 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
                 .addContainerGap()
                 .addComponent(lblTtlRecord)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtTotalRecord)
+                .addComponent(txtTotalRecord, javax.swing.GroupLayout.DEFAULT_SIZE, 79, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblTtlAmount)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtTotalAmt)
+                .addComponent(txtTotalAmt, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnSearch)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -578,6 +628,10 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
         // TODO add your handling code here:
     }//GEN-LAST:event_txtCurrencyActionPerformed
 
+    private void txtLocationFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtLocationFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtLocationFocusGained
+
     /**
      * @param args the command line arguments
      */
@@ -591,6 +645,7 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
@@ -604,6 +659,7 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
     private javax.swing.JTextField txtCurrency;
     private javax.swing.JTextField txtDep;
     private com.toedter.calendar.JDateChooser txtFromDate;
+    private javax.swing.JTextField txtLocation;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtStock;
     private com.toedter.calendar.JDateChooser txtToDate;

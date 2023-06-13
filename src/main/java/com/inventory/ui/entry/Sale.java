@@ -488,8 +488,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             saleHis.setListSH(saleTableModel.getListDetail());
             saleHis.setListDel(saleTableModel.getDelList());
             saleHis.setBackup(saleTableModel.isChange());
+            observer.selected("save", false);
             progress.setIndeterminate(true);
             if (print) {
+                observer.selected("print", false);
                 if (Util1.getBoolean(ProUtil.getProperty("trader.balance"))) {
                     String date = Util1.toDateStr(txtSaleDate.getDate(), "yyyy-MM-dd");
                     String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
@@ -507,6 +509,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     printVoucher(t.getKey().getVouNo(), reportName, chkVou.isSelected());
                 }
             }, (e) -> {
+                observer.selected("save", true);
                 JOptionPane.showMessageDialog(this, e.getMessage());
                 progress.setIndeterminate(false);
             });

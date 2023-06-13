@@ -38,7 +38,6 @@ import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Color;
-import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -51,7 +50,6 @@ import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -241,6 +239,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     public boolean saveVoucher() {
         boolean status = false;
         if (isValidEntry() && outTableModel.isValidEntry()) {
+            observer.selected("save", true);
             progress.setIndeterminate(true);
             io.setListSH(outTableModel.getListStock());
             io.setListDel(outTableModel.getDeleteList());
@@ -249,6 +248,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                         clear();
                         focusOnTable();
                     }, (e) -> {
+                        observer.selected("save", true);
                         JOptionPane.showMessageDialog(this, e.getMessage());
                         progress.setIndeterminate(false);
                     });
@@ -284,7 +284,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             for (StockInOutDetail s : listIO) {
                 ttlInQty += Util1.getFloat(s.getInQty());
                 ttlOutQty += Util1.getFloat(s.getOutQty());
-                ttlPrice += Util1.getFloat(s.getCostPrice());
+                ttlPrice += Util1.getFloat(s.getCostPrice()) * (Util1.getFloat(s.getInQty()) + Util1.getFloat(s.getOutQty()));
             }
         }
         txtInQty.setValue(ttlInQty);
@@ -387,6 +387,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         txtDesp.setEnabled(status);
         tblStock.setEnabled(status);
         txtVouType.setEnabled(status);
+        observer.selected("save", status);
+        observer.selected("delete", status);
+        observer.selected("print", status);
 
     }
 

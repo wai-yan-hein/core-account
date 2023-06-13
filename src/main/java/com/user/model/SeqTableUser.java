@@ -5,20 +5,20 @@
  */
 package com.user.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * @author winswe
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "seq_table_user")
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SeqTableUser implements java.io.Serializable {
 
     @EmbeddedId

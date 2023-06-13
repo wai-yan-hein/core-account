@@ -5,12 +5,14 @@
 package com.common;
 
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  *
  * @author Lenovo
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Resolution {
 
     private int width;

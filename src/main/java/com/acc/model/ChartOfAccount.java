@@ -18,8 +18,8 @@ import lombok.EqualsAndHashCode;
  * @author dell
  */
 @Data
-@EqualsAndHashCode
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@EqualsAndHashCode
 @Entity
 @Table(name = "chart_of_account")
 public class ChartOfAccount {

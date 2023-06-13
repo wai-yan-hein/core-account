@@ -5,12 +5,14 @@
 package com.acc.model;
 
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  *
  * @author myoht
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class OpeningKey {
 
     private String opId;

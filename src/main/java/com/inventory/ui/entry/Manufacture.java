@@ -297,6 +297,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         txtPt.setEnabled(status);
         txtStock.setEnabled(status);
         txtLocation.setEnabled(status);
+        observer.selected("save", status);
     }
 
     private void vouStatusSetup() {
@@ -317,12 +318,13 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         if (isValidProcess() && processHisDetailTableModel.validEntry()) {
             ph.setListDetail(processHisDetailTableModel.getListDetail());
             progress.setIndeterminate(true);
+            observer.selected("save", false);
             inventoryRepo.saveProcess(ph).subscribe((t) -> {
-                progress.setIndeterminate(false);
                 clear();
             }, (e) -> {
                 JOptionPane.showMessageDialog(this, e.getMessage());
                 progress.setIndeterminate(false);
+                observer.selected("save", false);
             });
 
         }
@@ -340,6 +342,8 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         txtPrice.setValue(null);
         txtAmt.setValue(null);
         processHisDetailTableModel.clear();
+        progress.setIndeterminate(false);
+        enableProcess(true);
         txtStartDate.requestFocusInWindow();
     }
 

@@ -7,12 +7,14 @@ package com.acc.model;
 import jakarta.persistence.Column;
 import java.io.Serializable;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  *
  * @author Lenovo
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TraderAKey implements Serializable{
 
     @Column(name = "code")

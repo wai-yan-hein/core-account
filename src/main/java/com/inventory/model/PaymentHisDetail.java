@@ -5,12 +5,13 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import jakarta.persistence.Transient;
 import java.util.Date;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Data
-@Table(name = "receive_his_detail")
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Table(name = "payment_his_detail")
 public class PaymentHisDetail {
 
     @EmbeddedId

@@ -8,12 +8,14 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  *
  * @author DELL
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Embeddable
 public class ExchangeKey implements Serializable{
 

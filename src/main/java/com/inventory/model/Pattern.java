@@ -5,12 +5,15 @@
 package com.inventory.model;
 
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 
 /**
  *
  * @author Lenovo
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Pattern {
 
     private PatternKey key;
@@ -28,4 +31,5 @@ public class Pattern {
     private Integer deptId;
     private String priceTypeCode;
     private String priceTypeName;
+    private Float amount;
 }

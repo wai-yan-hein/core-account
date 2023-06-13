@@ -311,14 +311,14 @@ public class StockInOutTableModel extends AbstractTableModel {
                                 io.setOutQty(qty * p.getQty());
                                 io.setOutUnitCode(p.getUnitCode());
                             }
-                            float costPrice = Util1.getFloat(p.getPrice());
-                            io.setCostPrice(costPrice);
+                            float pPrice = Util1.getFloat(p.getPrice());
+                            io.setCostPrice(pPrice);
                             io.setStockCode(p.getKey().getStockCode());
                             io.setLocCode(p.getLocCode());
                             io.setLocName(p.getLocName());
                             io.setStockName(p.getStockName());
                             addStockIO(io);
-                            totalPrice += costPrice;
+                            totalPrice += Util1.getFloat(p.getAmount());
                         }
                         if (explode) {
                             iod.setOutQty(qty);

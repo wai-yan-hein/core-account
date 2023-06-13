@@ -17,8 +17,8 @@ import lombok.Data;
  *
  * @author Lenovo
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "op_his_detail")
 public class OPHisDetail {

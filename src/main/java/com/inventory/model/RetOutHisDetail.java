@@ -17,8 +17,8 @@ import lombok.Data;
  *
  * @author lenovo
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "ret_out_his_detail")
 public class RetOutHisDetail {

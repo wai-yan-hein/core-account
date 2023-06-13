@@ -473,6 +473,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     public void savePur(boolean print) {
         if (isValidEntry() && purTableModel.isValidEntry()) {
             progress.setIndeterminate(true);
+            observer.selected("save", false);
             ph.setListPD(purTableModel.getListDetail());
             ph.setListDel(purTableModel.getDelList());
             ph.setListExpense(expenseTableModel.getExpenseList());
@@ -484,6 +485,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 }
             }, (e) -> {
                 progress.setIndeterminate(false);
+                observer.selected("save", false);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             });
         }

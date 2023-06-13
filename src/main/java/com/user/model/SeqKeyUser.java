@@ -9,11 +9,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.Data;
 import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * @author SAI
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Embeddable
 public class SeqKeyUser implements Serializable {
     @Column(name = "option")

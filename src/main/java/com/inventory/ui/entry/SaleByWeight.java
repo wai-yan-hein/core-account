@@ -98,7 +98,6 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
     private LocationAutoCompleter locationAutoCompleter;
     private SelectionObserver observer;
     private SaleHis saleHis = new SaleHis();
-    private Region region;
     private JProgressBar progress;
     private Mono<List<Location>> monoLoc;
     private double prvBal = 0;
@@ -371,35 +370,32 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
     }
 
     public void saveSale(boolean print) {
-        try {
-            if (isValidEntry() && saleTableModel.isValidEntry()) {
-                if (Util1.getBoolean(ProUtil.getProperty("trader.balance"))) {
-                    String date = Util1.toDateStr(txtSaleDate.getDate(), "yyyy-MM-dd");
-                    String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
-                    balance = accountRepo.getTraderBalance(date, traderCode, Global.compCode);
-                    if (balance != 0) {
-                        prvBal = balance - Util1.getDouble(txtVouBalance.getValue());
-                    }
+        if (isValidEntry() && saleTableModel.isValidEntry()) {
+            observer.selected("save", false);
+            if (Util1.getBoolean(ProUtil.getProperty("trader.balance"))) {
+                String date = Util1.toDateStr(txtSaleDate.getDate(), "yyyy-MM-dd");
+                String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
+                balance = accountRepo.getTraderBalance(date, traderCode, Global.compCode);
+                if (balance != 0) {
+                    prvBal = balance - Util1.getDouble(txtVouBalance.getValue());
                 }
-                progress.setIndeterminate(true);
-                saleHis.setListSH(saleTableModel.getListDetail());
-                saleHis.setListDel(saleTableModel.getDelList());
-                saleHis.setBackup(saleTableModel.isChange());
-                inventoryRepo.save(saleHis).subscribe((t) -> {
-                    progress.setIndeterminate(false);
-                    clear();
-                    if (print) {
-                        String reportName = getReportName();
-                        printVoucher(t.getKey().getVouNo(), reportName, chkVou.isSelected());
-                    }
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                    progress.setIndeterminate(false);
-                });
             }
-        } catch (HeadlessException ex) {
-            log.error("Save Sale :" + ex.getMessage());
-            JOptionPane.showMessageDialog(this, "Could'nt saved.");
+            progress.setIndeterminate(true);
+            saleHis.setListSH(saleTableModel.getListDetail());
+            saleHis.setListDel(saleTableModel.getDelList());
+            saleHis.setBackup(saleTableModel.isChange());
+            inventoryRepo.save(saleHis).subscribe((t) -> {
+                progress.setIndeterminate(false);
+                clear();
+                if (print) {
+                    String reportName = getReportName();
+                    printVoucher(t.getKey().getVouNo(), reportName, chkVou.isSelected());
+                }
+            }, (e) -> {
+                observer.selected("save", true);
+                JOptionPane.showMessageDialog(this, e.getMessage());
+                progress.setIndeterminate(false);
+            });
         }
     }
 

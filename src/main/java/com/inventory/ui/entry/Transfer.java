@@ -9,8 +9,6 @@ import com.common.DecimalFormatRender;
 import java.awt.event.KeyEvent;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.common.Global;
@@ -22,7 +20,6 @@ import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.model.Location;
 import com.inventory.model.TransferHis;
-import com.inventory.model.TransferHisDetail;
 import com.inventory.model.TransferHisKey;
 import com.inventory.model.VTransfer;
 import com.inventory.ui.common.InventoryRepo;
@@ -32,20 +29,15 @@ import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Color;
-import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyListener;
-import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -54,11 +46,8 @@ import reactor.core.publisher.Mono;
 @Component
 public class Transfer extends javax.swing.JPanel implements PanelControl, SelectionObserver, KeyListener {
 
-    private static final Logger log = LoggerFactory.getLogger(Transfer.class);
     private final TransferTableModel tranTableModel = new TransferTableModel();
     private TransferHistoryDialog dialog;
-    @Autowired
-    private WebClient inventoryApi;
     @Autowired
     private InventoryRepo inventoryRepo;
     @Autowired
@@ -221,6 +210,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     public boolean saveVoucher() {
         boolean status = false;
         if (isValidEntry() && tranTableModel.isValidEntry()) {
+            observer.selected("save", false);
             progress.setIndeterminate(true);
             io.setListTD(tranTableModel.getListTransfer());
             io.setDelList(tranTableModel.getDeleteList());
@@ -229,6 +219,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                         clear();
                         focusOnTable();
                     }, (e) -> {
+                        observer.selected("save", true);
                         JOptionPane.showMessageDialog(this, e.getMessage());
                         progress.setIndeterminate(false);
                     });
@@ -315,15 +306,8 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             toLocaitonCompleter.setLocation(t);
         });
         String vouNo = io.getKey().getVouNo();
-        Mono<ResponseEntity<List<TransferHisDetail>>> result = inventoryApi.get()
-                .uri(builder -> builder.path("/transfer/get-transfer-detail")
-                .queryParam("vouNo", vouNo)
-                .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", io.getKey().getDeptId())
-                .build())
-                .retrieve().toEntityList(TransferHisDetail.class);
-        result.subscribe((t) -> {
-            tranTableModel.setListTransfer(t.getBody());
+        inventoryRepo.getTrasnferDetail(vouNo, deptId).subscribe((t) -> {
+            tranTableModel.setListTransfer(t);
             tranTableModel.addNewRow();
             txtVou.setText(vouNo);
             txtDate.setDate(Util1.toDateFormat(io.getVouDate(), "dd/MM/yyyy"));
@@ -606,7 +590,6 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setUserRepo(userRepo);
             dialog.setIconImage(new ImageIcon(getClass().getResource("/images/search.png")).getImage());
-            dialog.setWebClient(inventoryApi);
             dialog.setObserver(this);
             dialog.initMain();
             dialog.setSize(Global.width - 100, Global.height - 100);

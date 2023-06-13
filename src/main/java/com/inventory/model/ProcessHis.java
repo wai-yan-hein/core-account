@@ -21,9 +21,9 @@ import lombok.Data;
  * @author DELL
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "process_his")
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProcessHis {
 
     @EmbeddedId

@@ -291,6 +291,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     public void saveRetIn(boolean print) {
         if (isValidEntry() && roTableModel.isValidEntry()) {
             progress.setIndeterminate(true);
+            observer.selected("save", false);
             ri.setListRD(roTableModel.getListDetail());
             ri.setListDel(roTableModel.getDelList());
             inventoryRepo.save(ri)
@@ -303,6 +304,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                     }, (e) -> {
                         JOptionPane.showMessageDialog(this, e.getMessage());
                         progress.setIndeterminate(false);
+                        observer.selected("save", false);
                     });
         }
     }

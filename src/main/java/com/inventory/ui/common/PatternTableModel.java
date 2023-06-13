@@ -7,6 +7,7 @@ package com.inventory.ui.common;
 
 import com.common.Global;
 import com.common.ProUtil;
+import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.model.Location;
 import com.inventory.model.Pattern;
@@ -32,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PatternTableModel extends AbstractTableModel {
 
-    private final String[] columnNames = {"Stock Code", "Stock Name", "Location", "Qty", "Unit", "Price", "Price Method"};
+    private final String[] columnNames = {"Stock Code", "Stock Name", "Location", "Qty", "Unit", "Price", "Amount", "Price Method"};
     private List<Pattern> listPattern = new ArrayList<>();
     private JLabel lblRecord;
     private InventoryRepo inventoryRepo;
@@ -40,6 +41,16 @@ public class PatternTableModel extends AbstractTableModel {
     private JPanel panel;
     private JTable table;
     private Location location;
+    private SelectionObserver observer;
+
+    public SelectionObserver getObserver() {
+        return observer;
+    }
+
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
+    }
+    
 
     public JLabel getLblRecord() {
         return lblRecord;
@@ -137,6 +148,9 @@ public class PatternTableModel extends AbstractTableModel {
                 return p.getPrice();
             }
             case 6 -> {
+                return p.getAmount();
+            }
+            case 7 -> {
                 return p.getPriceTypeName();
             }
         }
@@ -196,7 +210,7 @@ public class PatternTableModel extends AbstractTableModel {
                             JOptionPane.showMessageDialog(panel, String.format("Invalid %s", value));
                         }
                     }
-                    case 6 -> {
+                    case 7 -> {
                         if (value instanceof PriceOption op) {
                             p.setPriceTypeCode(op.getKey().getPriceType());
                             p.setPriceTypeName(op.getDescription());
@@ -209,6 +223,7 @@ public class PatternTableModel extends AbstractTableModel {
                 if (p.getKey().getUniqueId() == null) {
                     p.getKey().setUniqueId(row + 1);
                 }
+                calAmt(p);
                 save(p, row);
                 fireTableRowsUpdated(row, row);
                 table.requestFocus();
@@ -216,6 +231,12 @@ public class PatternTableModel extends AbstractTableModel {
         } catch (HeadlessException e) {
             log.error(String.format("setValueAt : %s", e.getMessage()));
         }
+    }
+
+    private void calAmt(Pattern p) {
+        float qty = Util1.getFloat(p.getQty());
+        float price = Util1.getFloat(p.getPrice());
+        p.setAmount(qty * price);
     }
 
     private boolean isValidEntry(Pattern pd) {
@@ -241,20 +262,25 @@ public class PatternTableModel extends AbstractTableModel {
                 addNewRow();
                 table.setRowSelectionInterval(row + 1, row + 1);
                 table.setColumnSelectionInterval(0, 0);
+                observer.selected("CAL_PRICE", "-");
             });
 
         }
     }
 
     @Override
-    public Class<?> getColumnClass(int columnIndex) {
-        return String.class;
+    public Class<?> getColumnClass(int column) {
+        return switch (column) {
+            case 3, 5, 6 ->
+                Float.class;
+            default ->
+                String.class;
+        };
     }
 
     @Override
-    public boolean isCellEditable(int rowIndex, int columnIndex
-    ) {
-        return true;
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return columnIndex != 6;
     }
 
     public List<Pattern> getListPattern() {
