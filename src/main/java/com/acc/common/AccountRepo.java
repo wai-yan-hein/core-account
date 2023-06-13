@@ -475,7 +475,7 @@ public class AccountRepo {
                 .retrieve()
                 .bodyToMono(TmpOpening.class)
                 .onErrorResume((e) -> {
-                    log.info("getOpening " + e);
+                    log.info("getOpening " + e.getMessage());
                     return Mono.empty();
                 });
     }
@@ -639,7 +639,7 @@ public class AccountRepo {
                 .collectList();
     }
 
-    public Mono<List<Gl>> searchGl(ReportFilter filter) throws SQLException {
+    public Mono<List<Gl>> searchGl(ReportFilter filter) {
         if (localDatabase) {
             return h2Repo.searchGL(filter);
         }
@@ -650,7 +650,7 @@ public class AccountRepo {
                 .bodyToFlux(Gl.class)
                 .collectList()
                 .onErrorResume((e) -> {
-                    log.info("searchGl " + e);
+                    log.info("searchGl " + e.getMessage());
                     return Mono.empty();
                 });
     }

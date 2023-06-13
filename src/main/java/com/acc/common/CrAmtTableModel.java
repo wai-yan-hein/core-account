@@ -20,15 +20,6 @@ public class CrAmtTableModel extends AbstractTableModel {
 
     private List<Gl> listVGl = new ArrayList();
     private String[] columnNames = {"Date", "Dep :", "Description", "Ref", "No :", "Cr-Amt"};
-    private double crAmt;
-
-    public double getCrAmt() {
-        return crAmt;
-    }
-
-    public void setCrAmt(double crAmt) {
-        this.crAmt = crAmt;
-    }
 
     @Override
     public String getColumnName(int column) {
@@ -131,8 +122,6 @@ public class CrAmtTableModel extends AbstractTableModel {
 
     public void addVGl(Gl apar) {
         listVGl.add(apar);
-        crAmt += Util1.getDouble(apar.getCrAmt());
-        //fireTableRowsInserted(listVGl.size() - 1, listVGl.size() - 1);
     }
 
     public void setVGl(int row, Gl apar) {
@@ -145,7 +134,6 @@ public class CrAmtTableModel extends AbstractTableModel {
     public void clear() {
         if (listVGl != null) {
             listVGl.clear();
-            crAmt = 0;
             fireTableDataChanged();
         }
     }

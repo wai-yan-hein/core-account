@@ -57,6 +57,7 @@ public class Util1 {
      *
      */
     public static final String DECIMAL_FORMAT = "###,###.##;(###,###.##)";
+    public static final String DECIMAL_FORMAT1 = "###,##0;(###,##0)";
     private static final DecimalFormat df2 = new DecimalFormat("0");
     public static String SYNC_DATE;
     public static final Gson gson = new GsonBuilder()
@@ -503,21 +504,16 @@ public class Util1 {
     }
 
     public static Double getDouble(Object number) {
-        double value = 0.0;
-        try {
-            if (number != null) {
-                String str = number.toString();
-                if (!str.isEmpty()) {
-                    if (str.contains(",")) {
-                        str = str.replaceAll(",", "");
-                    }
-                    value = Double.parseDouble(str);
+        if (number != null) {
+            String str = number.toString();
+            if (!str.isEmpty()) {
+                if (str.contains(",")) {
+                    str = str.replaceAll(",", "");
                 }
+                return Double.valueOf(str);
             }
-        } catch (NumberFormatException e) {
-            log.error(String.format("getDouble: %s", e.getMessage()));
         }
-        return value;
+        return 0.0;
     }
 
     public static String getString(Object obj) {
@@ -596,6 +592,10 @@ public class Util1 {
 
     public static DefaultFormatterFactory getDecimalFormat() {
         return new DefaultFormatterFactory(new NumberFormatter(new DecimalFormat(DECIMAL_FORMAT)));
+    }
+
+    public static DefaultFormatterFactory getDecimalFormat1() {
+        return new DefaultFormatterFactory(new NumberFormatter(new DecimalFormat(DECIMAL_FORMAT1)));
     }
 
     public static int getCurrentMonth() {
@@ -936,7 +936,7 @@ public class Util1 {
     public static Double toNull(double value) {
         return value == 0 ? null : value;
     }
-    
+
     public static String isAll(String value) {
         if (value != null) {
             if (value.equals("All")) {

@@ -511,7 +511,7 @@ public class H2Repo {
     public Mono<ChartOfAccount> find(COAKey key) {
         return Mono.justOrEmpty(coaService.findById(key));
     }
-    
+
     public Mono<List<ChartOfAccount>> searchCOA(String str, int level) {
         return Mono.justOrEmpty(coaService.searchCOA(str, level, Global.compCode));
     }
@@ -531,16 +531,16 @@ public class H2Repo {
     public Flux<ChartOfAccount> getCOAChild(String coaCode) {
         return Flux.fromIterable(coaService.getCOAChild(coaCode, Global.compCode));
     }
-    
+
     public Mono<Gl> save(Gl gl) {
-        return Mono.justOrEmpty(glService.save(gl,false));
+        return Mono.justOrEmpty(glService.save(gl, false));
     }
-    
+
     public Mono<ReturnObject> save(List<Gl> glList) {
         return Mono.justOrEmpty(glService.save(glList));
     }
-    
-    public Mono<List<Gl>> searchGL(ReportFilter filter) throws SQLException{
+
+    public Mono<List<Gl>> searchGL(ReportFilter filter) {
         String fromDate = filter.getFromDate();
         String toDate = filter.getToDate();
         String des = Util1.isNull(filter.getDesp(), "-");
@@ -558,9 +558,9 @@ public class H2Repo {
         String projectNo = Util1.isAll("-");
         Integer macId = filter.getMacId();
         boolean summary = filter.isSummary();
-        return Mono.justOrEmpty(reportService.getIndividualLedger(fromDate, 
-                toDate, des,srcAcc, acc, curCode, reference, compCode, 
+        return Mono.justOrEmpty(reportService.getIndividualLedger(fromDate,
+                toDate, des, srcAcc, acc, curCode, reference, compCode,
                 tranSource, traderCode, traderType, coaLv2,
                 coaLv1, batchNo, projectNo, summary, macId));
-    }   
+    }
 }
