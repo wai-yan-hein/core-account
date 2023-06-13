@@ -30,7 +30,7 @@ public class PurHis implements java.io.Serializable {
     private PurHisKey key;
     @Column(name = "trader_code")
     private String traderCode;
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
     @Column(name = "vou_date")
     private Date vouDate;
     @Temporal(TemporalType.DATE)
@@ -51,12 +51,12 @@ public class PurHis implements java.io.Serializable {
     @Column(name = "created_by")
     private String createdBy;
     @Column(name = "created_date")
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
     private Date createdDate;
     @Column(name = "updated_by")
     private String updatedBy;
     @Column(name = "updated_date")
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
     private Date updatedDate;
     @Column(name = "remark")
     private String remark;

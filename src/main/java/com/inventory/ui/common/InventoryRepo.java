@@ -37,6 +37,7 @@ import com.inventory.model.ProcessHisDetailKey;
 import com.inventory.model.ProcessHisKey;
 import com.inventory.model.ProcessType;
 import com.inventory.model.PurHis;
+import com.inventory.model.PurHisDetail;
 import com.inventory.model.PurHisKey;
 import com.inventory.model.Region;
 import com.inventory.model.RegionKey;
@@ -71,6 +72,7 @@ import com.inventory.model.TransferHisDetail;
 import com.inventory.model.TransferHisKey;
 import com.inventory.model.UnitRelation;
 import com.inventory.model.UnitRelationDetail;
+import com.inventory.model.VPurchase;
 import com.inventory.model.VOpening;
 import com.inventory.model.VSale;
 import com.inventory.model.VStockBalance;
@@ -86,7 +88,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -1301,6 +1302,9 @@ public class InventoryRepo {
         key.setVouNo(vouNo);
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
+        if (localDatabase) {
+            return h2Repo.findSale(key);
+        }
         return inventoryApi.post()
                 .uri("/sale/find-sale")
                 .body(Mono.just(key), SaleHisKey.class)
@@ -1343,11 +1347,14 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<PurHis> findPurchase(String vouNo, Integer deptId) {
+    public Mono<PurHis> findPurchase(String vouNo, Integer deptId, String intStatus) {
         PurHisKey key = new PurHisKey();
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setVouNo(vouNo);
+        if (intStatus == null) {
+            return h2Repo.findPurchase(key);
+        }
         return inventoryApi.post()
                 .uri("/pur/find-pur")
                 .body(Mono.just(key), PurHisKey.class)
@@ -1808,6 +1815,41 @@ public class InventoryRepo {
                 .collectList();
     }
 
+    public Mono<List<VPurchase>> getPurchaseVoucher(FilterObject filter) {
+        if (filter.isLocal()) {
+            return h2Repo.searchPurchaseVoucher(filter);
+        }
+        return inventoryApi.post()
+                .uri("/pur/get-pur")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToFlux(VPurchase.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<PurHisDetail>> getPurDetail(String vouNo) {
+        if (localDatabase) {
+            return h2Repo.searchPurchaseDetail(vouNo);
+        }
+       return  inventoryApi.get()
+                .uri(builder -> builder.path("/pur/get-pur-detail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
+                .build())
+                .retrieve()
+                .bodyToFlux(PurHisDetail.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<General> getSaleVoucherInfo(String vouDate) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/sale/get-sale-voucher-info")
@@ -2183,11 +2225,14 @@ public class InventoryRepo {
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
-                    return Mono.empty();
+                    return Mono.error(e);
                 });
     }
 
-    public Mono<List<SaleHisDetail>> getSaleDetail(String vouNo, int deptId) {
+    public Mono<List<SaleHisDetail>> getSaleDetail(String vouNo, int deptId, String intgUpdateStatus) {
+        if (intgUpdateStatus == null) {
+            return h2Repo.getSaleDetail(vouNo, deptId);
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/sale/get-sale-detail")
                 .queryParam("vouNo", vouNo)
@@ -2279,7 +2324,7 @@ public class InventoryRepo {
 
     public Mono<List<VSale>> getSaleHistory(FilterObject filter) {
         if (filter.isLocal()) {
-            return null;
+            return h2Repo.getSaleHistory(filter);
         }
         return inventoryApi.post()
                 .uri("/sale/get-sale")

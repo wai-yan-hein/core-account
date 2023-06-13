@@ -6,6 +6,7 @@ package com.h2.dao;
 
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisKey;
+import com.inventory.model.VSale;
 import java.util.List;
 
 /**
@@ -25,5 +26,10 @@ public interface SaleHisDao {
     String getMaxDate();
 
     List<SaleHis> findAll(String compCode);
+
+    List<VSale> getSaleHistory(String fromDate, String toDate, String traderCode, String saleManCode, String vouNo,
+                               String remark, String reference, String userCode, String stockCode, String locCode,
+                               String compCode, Integer deptId, String deleted, String nullBatch, String batchNo,
+                               String projectNo, String curCode);
 
 }

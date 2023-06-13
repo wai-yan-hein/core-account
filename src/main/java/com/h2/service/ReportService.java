@@ -6,6 +6,8 @@ package com.h2.service;
 
 import com.acc.model.Gl;
 import com.inventory.model.General;
+import com.inventory.model.PurHis;
+import com.inventory.model.VPurchase;
 import java.sql.SQLException;
 import java.util.List;
 

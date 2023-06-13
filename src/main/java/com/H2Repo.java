@@ -12,6 +12,7 @@ import com.acc.model.DepartmentAKey;
 import com.acc.model.Gl;
 import com.acc.model.ReportFilter;
 import com.acc.model.TraderA;
+import com.common.FilterObject;
 import com.common.Global;
 import com.common.ReturnObject;
 import com.common.Util1;
@@ -90,7 +91,9 @@ import com.user.model.SysProperty;
 import com.user.model.VRoleCompany;
 import com.h2.service.OrderHisService;
 import com.h2.service.ProcessHisService;
+import com.h2.service.PurHisDetailService;
 import com.h2.service.ReportService;
+import com.h2.service.SaleHisDetailService;
 import com.h2.service.StockInOutDetailService;
 import com.h2.service.StockInOutService;
 import com.h2.service.TransferHisService;
@@ -99,12 +102,21 @@ import com.inventory.model.General;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisKey;
 import com.inventory.model.ProcessHis;
+import com.inventory.model.SaleDetailKey;
+import com.inventory.model.SaleHisDetail;
+import com.inventory.model.SaleHisKey;
+import com.inventory.model.PurHisDetail;
+import com.inventory.model.PurHisKey;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
 import com.inventory.model.TransferHis;
+import com.inventory.model.VSale;
 import com.inventory.model.WeightLossHis;
+import com.inventory.ui.entry.Sale;
 import java.sql.SQLException;
+import com.inventory.model.VPurchase;
+import com.inventory.model.WeightLossHis;
 import java.util.HashMap;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -143,6 +155,8 @@ public class H2Repo {
     private OrderHisService orderHisService;
     @Autowired
     private PurHisService purHisService;
+    @Autowired
+    private PurHisDetailService purDetailService;
     @Autowired
     private RetInService retInService;
     @Autowired
@@ -201,6 +215,8 @@ public class H2Repo {
     private ReportService reportService;
     @Autowired
     private GlService glService;
+    @Autowired
+    private SaleHisDetailService saleHisDetailService;
 
     public Mono<List<Location>> getLocation() {
         return Mono.justOrEmpty(locationService.findAll(Global.compCode));
@@ -540,6 +556,28 @@ public class H2Repo {
         return Mono.justOrEmpty(glService.save(glList));
     }
 
+    public Mono<List<VPurchase>> searchPurchaseVoucher(FilterObject filter) {
+        String fromDate = Util1.isNull(filter.getFromDate(), "-");
+        String toDate = Util1.isNull(filter.getToDate(), "-");
+        String vouNo = Util1.isNull(filter.getVouNo(), "-");
+        String userCode = Util1.isNull(filter.getUserCode(), "-");
+        String cusCode = Util1.isNull(filter.getCusCode(), "-");
+        String locCode = Util1.isNull(filter.getLocCode(), "-");
+        String compCode = filter.getCompCode();
+        String deleted = String.valueOf(filter.isDeleted());
+        Integer deptId = filter.getDeptId();
+        return Mono.justOrEmpty(reportService.getPurchaseHistory(fromDate, toDate, cusCode, vouNo, userCode,
+                locCode, compCode, deptId, deleted));
+    }
+
+    public Mono<PurHis> findPurchase(PurHisKey key) {
+        return Mono.justOrEmpty(purHisService.findById(key));
+    }
+
+    public Mono<List<PurHisDetail>> searchPurchaseDetail(String vouNo) {
+        return Mono.justOrEmpty(purDetailService.search(vouNo, Global.compCode, Global.deptId));
+    }
+
     public Mono<List<Gl>> searchGL(ReportFilter filter) {
         String fromDate = filter.getFromDate();
         String toDate = filter.getToDate();
@@ -562,5 +600,17 @@ public class H2Repo {
                 toDate, des, srcAcc, acc, curCode, reference, compCode,
                 tranSource, traderCode, traderType, coaLv2,
                 coaLv1, batchNo, projectNo, summary, macId));
+    }
+
+    public Mono<List<VSale>> getSaleHistory(FilterObject filter) {
+        return Mono.just(saleHisService.getSale(filter));
+    }
+
+    public Mono<SaleHis> findSale(SaleHisKey key) {
+        return Mono.justOrEmpty(saleHisService.find(key));
+    }
+
+    public Mono<List<SaleHisDetail>> getSaleDetail(String vouNo, int deptId) {
+        return Mono.justOrEmpty(saleHisDetailService.searchDetail(vouNo, Global.compCode, deptId));
     }
 }

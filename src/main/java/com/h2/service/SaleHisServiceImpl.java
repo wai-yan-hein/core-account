@@ -4,6 +4,7 @@
  */
 package com.h2.service;
 
+import com.common.FilterObject;
 import com.common.Util1;
 import com.h2.dao.SaleHisDao;
 import com.h2.dao.SaleHisDetailDao;
@@ -12,10 +13,12 @@ import com.inventory.model.SaleDetailKey;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.SaleHisKey;
+import com.inventory.model.VSale;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 
 /**
  *
@@ -103,6 +106,30 @@ public class SaleHisServiceImpl implements SaleHisService {
     @Override
     public SaleHis updateACK(SaleHisKey key) {
         return dao.updateACK(key);
+    }
+    
+    @Override
+    public List<VSale> getSale(FilterObject filter) {
+        String fromDate = Util1.isNull(filter.getFromDate(), "-");
+        String toDate = Util1.isNull(filter.getToDate(), "-");
+        String vouNo = Util1.isNull(filter.getVouNo(), "-");
+        String userCode = Util1.isNull(filter.getUserCode(), "-");
+        String cusCode = Util1.isNull(filter.getCusCode(), "-");
+        String remark = Util1.isNull(filter.getRemark(), "-");
+        String stockCode = Util1.isNull(filter.getStockCode(), "-");
+        String saleManCode = Util1.isNull(filter.getSaleManCode(), "-");
+        String reference = Util1.isNull(filter.getReference(), "-");
+        String compCode = filter.getCompCode();
+        String locCode = Util1.isNull(filter.getLocCode(), "-");
+        Integer deptId = filter.getDeptId();
+        String deleted = String.valueOf(filter.isDeleted());
+        String nullBatch = String.valueOf(filter.isNullBatch());
+        String batchNo = Util1.isNull(filter.getBatchNo(), "-");
+        String projectNo = Util1.isAll(filter.getProjectNo());
+        String curCode = Util1.isAll(filter.getCurCode());
+        List<VSale> saleList = dao.getSaleHistory(fromDate, toDate, cusCode, saleManCode, vouNo, remark,
+                reference, userCode, stockCode, locCode, compCode, deptId, deleted, nullBatch, batchNo, projectNo,curCode);
+        return saleList;
     }
 
 }
