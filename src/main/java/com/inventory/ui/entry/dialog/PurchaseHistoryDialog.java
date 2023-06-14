@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry.dialog;
 
+import com.CloudIntegration;
 import com.inventory.editor.DepartmentAutoCompleter;
 import com.common.FilterObject;
 import com.common.Global;
@@ -13,11 +14,13 @@ import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.user.common.UserRepo;
 import com.common.Util1;
+import com.h2.service.PurHisService;
 import com.inventory.editor.AppUserAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.AppUser;
+import com.inventory.model.PurHis;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;
 import com.inventory.model.VPurchase;
@@ -35,6 +38,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
@@ -61,6 +65,15 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
     private SelectionObserver observer;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
+    private CloudIntegration integration;
+
+    public void setCloudIntegration(CloudIntegration integration) {
+        this.integration = integration;
+    }
+
+    public CloudIntegration getCloudIntegration() {
+        return integration;
+    }
 
     public WebClient getInventoryApi() {
         return inventoryApi;
@@ -93,6 +106,8 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
+    
+    
 
     public PurchaseHistoryDialog(JFrame frame) {
         super(frame, true);
@@ -134,6 +149,13 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
             log.error(e.getMessage());
         });
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
+        if (inventoryRepo.localDatabase) {
+            chkLocal.setVisible(true);
+            btnUpload.setVisible(true);
+        } else {
+            chkLocal.setVisible(false);
+            btnUpload.setVisible(false);
+        }
     }
 
     private void initTableVoucher() {
@@ -258,7 +280,6 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         txtCurrency.addKeyListener(this);
         //tblStock.addKeyListener(this);
     }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -298,6 +319,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         txtCurrency = new javax.swing.JTextField();
         jLabel15 = new javax.swing.JLabel();
         chkLocal = new javax.swing.JCheckBox();
+        btnUpload = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
         progess = new javax.swing.JProgressBar();
@@ -312,7 +334,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         txtTotalAmt = new javax.swing.JFormattedTextField();
         btnSearch = new javax.swing.JButton();
         lblTtlAmount1 = new javax.swing.JLabel();
-        btnUpload = new javax.swing.JButton();
+        btnSelect1 = new javax.swing.JButton();
 
         setTitle("Purchase Voucher Search");
 
@@ -467,6 +489,16 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
             }
         });
 
+        btnUpload.setFont(Global.lableFont);
+        btnUpload.setText("Upload");
+        btnUpload.setIconTextGap(2);
+        btnUpload.setInheritsPopupMenu(true);
+        btnUpload.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUploadActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -474,7 +506,8 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                    .addComponent(jSeparator3)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -484,7 +517,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
                             .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, 88, Short.MAX_VALUE)
+                            .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, 85, Short.MAX_VALUE)
                             .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -505,17 +538,16 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jLabel3)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(txtToDate, javax.swing.GroupLayout.DEFAULT_SIZE, 112, Short.MAX_VALUE))
-                            .addComponent(txtCurrency)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(jSeparator3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(chkLocal, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(chkDel, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(txtToDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(txtCurrency)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(chkDel, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(chkLocal, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(btnUpload, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jButton1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE))))))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -571,14 +603,18 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
                             .addComponent(jLabel15)))
                     .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 302, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkDel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(chkLocal))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(12, Short.MAX_VALUE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(chkDel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(chkLocal))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnUpload)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         tblVoucher.setFont(Global.textFont);
@@ -655,15 +691,9 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         lblTtlAmount1.setFont(Global.lableFont);
         lblTtlAmount1.setText("Total Paid :");
 
-        btnUpload.setFont(Global.lableFont);
-        btnUpload.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/checked_20px.png"))); // NOI18N
-        btnUpload.setText("Upload");
-        btnUpload.setEnabled(false);
-        btnUpload.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnUploadActionPerformed(evt);
-            }
-        });
+        btnSelect1.setFont(Global.lableFont);
+        btnSelect1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/checked_20px.png"))); // NOI18N
+        btnSelect1.setText("Select");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -682,13 +712,16 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
                 .addComponent(lblTtlAmount)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtTotalAmt)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnSearch)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnSelect)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnUpload)
-                .addContainerGap())
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(198, 198, 198)
+                        .addComponent(btnSelect))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnSearch)
+                        .addGap(12, 12, 12)
+                        .addComponent(btnSelect1)
+                        .addContainerGap())))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -701,10 +734,10 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
                         .addComponent(txtTotalRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(txtTotalAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(lblTtlAmount1)
-                        .addComponent(txtPaid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(btnSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(btnSearch, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(btnUpload, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                        .addComponent(txtPaid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnSearch, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnSelect1))
+                    .addComponent(btnSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 0, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -720,11 +753,11 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane2)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addComponent(jLabel1)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(txtFilter))
+                            .addComponent(jScrollPane2)
                             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
@@ -740,7 +773,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
                             .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel1))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 333, Short.MAX_VALUE)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -831,7 +864,9 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
     }//GEN-LAST:event_chkLocalActionPerformed
 
     private void btnUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadActionPerformed
-        // TODO add your handling code here:
+        if(inventoryRepo.localDatabase){
+            integration.uploadPurchase();
+        }
     }//GEN-LAST:event_btnUploadActionPerformed
 
     /**
@@ -841,6 +876,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnSelect;
+    private javax.swing.JButton btnSelect1;
     private javax.swing.JButton btnUpload;
     private javax.swing.JCheckBox chkDel;
     private javax.swing.JCheckBox chkLocal;
