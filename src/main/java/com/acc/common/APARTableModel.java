@@ -52,7 +52,6 @@ public class APARTableModel extends AbstractTableModel {
 
         try {
             VApar apar = listAPAR.get(row);
-
             return switch (column) {
                 case 0 ->
                     getCode(apar);

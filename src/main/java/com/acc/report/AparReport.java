@@ -133,13 +133,14 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void initTextBoxFormat() {
-        txtFTotalCrAmt.setFormatterFactory(Util1.getDecimalFormat());
-        txtFTotalDrAmt.setFormatterFactory(Util1.getDecimalFormat());
+        txtFTotalCrAmt.setFormatterFactory(Util1.getDecimalFormat1());
+        txtFTotalDrAmt.setFormatterFactory(Util1.getDecimalFormat1());
+        txtFOFB.setFormatterFactory(Util1.getDecimalFormat1());
     }
 
     private void initTable() {
         tblAPAR.setModel(aPARTableModel);
-        tblAPAR.getTableHeader().setFont(Global.lableFont);
+        tblAPAR.getTableHeader().setFont(Global.amtFont);
         tblAPAR.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblAPAR.getColumnModel().getColumn(0).setPreferredWidth(20);
         tblAPAR.getColumnModel().getColumn(1).setPreferredWidth(400);
@@ -155,7 +156,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             public void mousePressed(MouseEvent e) {
                 if (e.getClickCount() == 2) {
                     if (tblAPAR.getSelectedRow() >= 0) {
-                        selectRow = tblAPAR.convertRowIndexToModel(tblAPAR.getSelectedRow());
+                        selectRow = tblAPAR.getSelectedRow();
                         VApar apar = aPARTableModel.getAPAR(selectRow);
                         String traderCode = apar.getTraderCode();
                         String traderName = apar.getTraderName();
@@ -234,7 +235,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
             accountRepo.getArAp(filter).subscribe((t) -> {
                 aPARTableModel.setListAPAR(t);
-                calAPARTotalAmount();
+                calTotal(t);
                 if (chkZero.isSelected()) {
                     removeZero();
                 }
@@ -260,23 +261,12 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         }
     }
 
-    private void calAPARTotalAmount() {
-        List<VApar> listApar = aPARTableModel.getListAPAR();
-        double ttlDrAmt = 0.0;
-        double ttlCrAmt = 0.0;
-        double outBal;
-        for (VApar apar : listApar) {
-            ttlDrAmt += Util1.getDouble(apar.getDrAmt());
-            ttlCrAmt += Util1.getDouble(apar.getCrAmt());
-        }
-        txtFTotalCrAmt.setValue(ttlCrAmt);
-        txtFTotalDrAmt.setValue(ttlDrAmt);
-        if (ttlDrAmt > ttlCrAmt) {
-            outBal = ttlDrAmt - ttlCrAmt;
-        } else {
-            outBal = ttlCrAmt - ttlDrAmt;
-        }
-        txtFOFB.setValue(outBal);
+    private void calTotal(List<VApar> list) {
+        double drAmt = list.stream().mapToDouble((value) -> Util1.getDouble(value.getDrAmt())).sum();
+        double crAmt = list.stream().mapToDouble((value) -> Util1.getDouble(value.getCrAmt())).sum();
+        txtFTotalCrAmt.setValue(drAmt);
+        txtFTotalDrAmt.setValue(crAmt);
+        txtFOFB.setValue(drAmt - crAmt);
     }
 
     private void initCombo() {
@@ -518,6 +508,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        tblAPAR.setAutoCreateRowSorter(true);
         tblAPAR.setFont(Global.textFont);
         tblAPAR.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {

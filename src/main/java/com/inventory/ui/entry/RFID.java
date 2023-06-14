@@ -373,7 +373,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 traderAutoCompleter.setTrader(t);
             });
             String vouNo = sh.getKey().getVouNo();
-            inventoryRepo.getSaleDetail(vouNo, sh.getKey().getDeptId()).subscribe((t) -> {
+            inventoryRepo.getSaleDetail(vouNo, sh.getKey().getDeptId(), sh.getIntgUpdStatus()).subscribe((t) -> {
                 tableModel.setListDetail(t);
                 tableModel.addNewRow();
                 if (sh.isVouLock()) {

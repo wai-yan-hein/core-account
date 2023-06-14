@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.CloudIntegration;
 import com.H2Repo;
 import com.acc.common.AccountRepo;
 import com.common.DecimalFormatRender;
@@ -90,6 +91,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private InventoryRepo inventoryRepo;
     @Autowired
     private H2Repo h2Repo;
+    @Autowired
+    private CloudIntegration integration;
     @Autowired
     private AccountRepo accountRepo;
     @Autowired
@@ -679,6 +682,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         if (dialog == null) {
             dialog = new SaleHistoryDialog(Global.parentForm);
             dialog.setInventoryRepo(inventoryRepo);
+            dialog.setIntegration(integration);
             dialog.setUserRepo(userRepo);
             dialog.setObserver(this);
             dialog.initMain();
@@ -709,7 +713,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 saleManCompleter.setSaleMan(t);
             });
             String vouNo = sh.getKey().getVouNo();
-            inventoryRepo.getSaleDetail(vouNo, sh.getKey().getDeptId()).subscribe((t) -> {
+            inventoryRepo.getSaleDetail(vouNo, sh.getKey().getDeptId(), sh.getIntgUpdStatus()).subscribe((t) -> {
                 saleTableModel.setListDetail(t);
                 saleTableModel.addNewRow();
                 if (sh.isVouLock()) {

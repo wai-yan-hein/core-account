@@ -29,7 +29,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +48,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 /**
  *
@@ -61,7 +61,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private final DrAmtTableModel drAmtTableModel = new DrAmtTableModel();
     private TableRowSorter<TableModel> sorter;
     private String desp;
-    private Double openingAmt = 0.0;
     private String coaCode;
     private String traderCode;
     private String stDate;
@@ -142,14 +141,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         this.coaCode = coaCode;
     }
 
-    public Double getOpeningAmt() {
-        return openingAmt;
-    }
-
-    public void setOpeningAmt(Double openingAmt) {
-        this.openingAmt = openingAmt;
-    }
-
     public void setDesp(String desp) {
         this.desp = desp;
         lblName.setText(this.desp);
@@ -206,19 +197,61 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     }
 
     private void initFormat() {
-        txtOpening.setFormatterFactory(Util1.getDecimalFormat());
-        txtClosing.setFormatterFactory(Util1.getDecimalFormat());
-        txtDrAmt.setFormatterFactory(Util1.getDecimalFormat());
-        txtCrAmt.setFormatterFactory(Util1.getDecimalFormat());
+        txtOpening.setFormatterFactory(Util1.getDecimalFormat1());
+        txtClosing.setFormatterFactory(Util1.getDecimalFormat1());
+        txtDrAmt.setFormatterFactory(Util1.getDecimalFormat1());
+        txtCrAmt.setFormatterFactory(Util1.getDecimalFormat1());
+        txtNetChange.setFormatterFactory(Util1.getDecimalFormat1());
     }
 
     private List<String> getListDep() {
         return departmentAutoCompleter == null ? department : departmentAutoCompleter.getListOption();
     }
 
-    public void searchTriBalDetail(){
-        clear();
+    public void searchTriBalDetail() {
+        log.info("search detail.");
         progress.setIndeterminate(true);
+        list = new ArrayList<>();
+        Mono<TmpOpening> m1 = getOpening();
+        Mono<List<Gl>> m2 = accountRepo.searchGl(getFilter());
+        Mono<Tuple2<TmpOpening, List<Gl>>> zip = m1.zipWith(m2);
+        zip.subscribe((t) -> {
+            TmpOpening op = t.getT1();
+            list = t.getT2();
+            list.forEach((gl) -> {
+                double drAmt = Util1.getDouble(gl.getDrAmt());
+                double crAmt = Util1.getDouble(gl.getCrAmt());
+                if (drAmt > 0) {
+                    drAmtTableModel.addVGl(gl);
+                }
+                if (crAmt > 0) {
+                    crAmtTableModel.addVGl(gl);
+                }
+            });
+            double opAmt = Util1.getDouble(op.getOpening());
+            double drAmt = list.stream().mapToDouble((value) -> Util1.getDouble(value.getDrAmt())).sum();
+            double crAmt = list.stream().mapToDouble((value) -> Util1.getDouble(value.getCrAmt())).sum();
+            double closingAmt = opAmt + drAmt - crAmt;
+            double netChange = drAmt - crAmt;
+            txtOpening.setValue(opAmt);
+            txtDrAmt.setValue(drAmt);
+            txtCrAmt.setValue(crAmt);
+            txtClosing.setValue(closingAmt);
+            txtNetChange.setValue(netChange);
+            drAmtTableModel.fireTableDataChanged();
+            crAmtTableModel.fireTableDataChanged();
+            progress.setIndeterminate(false);
+            log.info("process.");
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+            progress.setIndeterminate(false);
+        }, () -> {
+            log.info("finished.");
+            setVisible(true);
+        });
+    }
+
+    private ReportFilter getFilter() {
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
         filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
         filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
@@ -230,33 +263,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
                 : despAutoCompleter.getAutoText().getDescription());
         filter.setReference(refAutoCompleter.getAutoText().getDescription().equals("All") ? "-"
                 : refAutoCompleter.getAutoText().getDescription());
-        list = new ArrayList<>();
-        accountRepo.searchGl(filter).subscribe((gl) -> {
-            list = gl;
-            gl.forEach((t) -> {
-                double drAmt = Util1.getDouble(t.getDrAmt());
-                double crAmt = Util1.getDouble(t.getCrAmt());
-                if (drAmt > 0) {
-                    drAmtTableModel.addVGl(t);
-                }
-                if (crAmt > 0) {
-                    crAmtTableModel.addVGl(t);
-                }
-                txtDrCount.setValue(drAmtTableModel.getListVGl().size());
-                txtCrCount.setValue(crAmtTableModel.getListVGl().size());
-                txtDrAmt.setValue(drAmtTableModel.getDrAmt());
-                txtCrAmt.setValue(crAmtTableModel.getCrAmt());
-            });
-            calOpening();
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-            progress.setIndeterminate(false);
-        }, () -> {
-            drAmtTableModel.fireTableDataChanged();
-            crAmtTableModel.fireTableDataChanged();
-            progress.setIndeterminate(false);
-            setVisible(true);
-        });
+        return filter;
     }
 
     private String getCurrency() {
@@ -266,32 +273,17 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         return currencyAAutoCompleter.getCurrency() == null ? curCode : currencyAAutoCompleter.getCurrency().getCurCode();
     }
 
-    private void calOpening() {
+    private Mono<TmpOpening> getOpening() {
+        log.info("calulate opening.");
         String startDate = Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat);
-        String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
-        String clDate = Util1.toDateStrMYSQL(startDate, "dd/MM/yyyy");
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
-        filter.setOpeningDate(opDate);
-        filter.setFromDate(clDate);
+        filter.setFromDate(startDate);
         filter.setCurCode(getCurrency());
         filter.setListDepartment(getListDep());
         filter.setCoaCode(coaCode);
         filter.setTraderCode(traderCode);
-        Mono<TmpOpening> result = accountRepo.getOpening(filter);
-        result.subscribe((t) -> {
-            if (t.equals(new TmpOpening())) {
-                txtOpening.setValue(0);
-            } else {
-                txtOpening.setValue(t.getOpening());
-            }
-            double opAmt = Util1.getDouble(txtOpening.getValue());
-            double drAmt = Util1.getDouble(txtDrAmt.getValue());
-            double crAmt = Util1.getDouble(txtCrAmt.getValue());
-            double closingAmt = opAmt + drAmt - crAmt;
-            txtClosing.setValue(closingAmt);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
+        return accountRepo.getOpening(filter);
+
     }
 
     public void initMain() {
@@ -426,6 +418,8 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         jLabel2 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         txtCrCount = new javax.swing.JFormattedTextField();
+        txtNetChange = new javax.swing.JFormattedTextField();
+        jLabel3 = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
         jLabel8 = new javax.swing.JLabel();
@@ -451,9 +445,9 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
             .addGap(0, 100, Short.MAX_VALUE)
         );
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Trial Balance");
         setBackground(new java.awt.Color(255, 255, 255));
+        setFont(Global.textFont);
         addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 formFocusLost(evt);
@@ -515,17 +509,17 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         tblDr.setRowHeight(Global.tblRowHeight);
         jScrollPane1.setViewportView(tblDr);
 
+        txtClosing.setEditable(false);
         txtClosing.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtClosing.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-        txtClosing.setEnabled(false);
         txtClosing.setFont(Global.amtFont);
 
         jLabel5.setFont(Global.lableFont);
         jLabel5.setText("Opening Amt");
 
+        txtOpening.setEditable(false);
         txtOpening.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtOpening.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-        txtOpening.setEnabled(false);
         txtOpening.setFont(Global.amtFont);
         txtOpening.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -533,9 +527,9 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
             }
         });
 
+        txtDrAmt.setEditable(false);
         txtDrAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtDrAmt.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-        txtDrAmt.setEnabled(false);
         txtDrAmt.setFont(Global.amtFont);
         txtDrAmt.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -625,9 +619,9 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         tblCr.setRowHeight(Global.tblRowHeight);
         jScrollPane2.setViewportView(tblCr);
 
+        txtCrAmt.setEditable(false);
         txtCrAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtCrAmt.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-        txtCrAmt.setEnabled(false);
         txtCrAmt.setFont(Global.amtFont);
 
         jLabel2.setFont(Global.lableFont);
@@ -640,6 +634,14 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         txtCrCount.setBorder(null);
         txtCrCount.setFont(Global.lableFont);
 
+        txtNetChange.setEditable(false);
+        txtNetChange.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtNetChange.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+        txtNetChange.setFont(Global.amtFont);
+
+        jLabel3.setFont(Global.lableFont);
+        jLabel3.setText("Net Change");
+
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
@@ -649,13 +651,20 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 436, Short.MAX_VALUE)
                     .addGroup(jPanel5Layout.createSequentialGroup()
-                        .addComponent(jLabel7)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtCrCount)
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel5Layout.createSequentialGroup()
+                                .addComponent(jLabel7)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(txtCrCount)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel2))
+                            .addGroup(jPanel5Layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(jLabel3)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtCrAmt)))
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtNetChange)
+                            .addComponent(txtCrAmt))))
                 .addContainerGap())
         );
         jPanel5Layout.setVerticalGroup(
@@ -670,7 +679,11 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
                         .addComponent(txtCrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(txtCrCount)
                     .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(37, 37, 37))
+                .addGap(9, 9, 9)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(txtNetChange, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
@@ -831,6 +844,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
@@ -857,22 +871,21 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private javax.swing.JTextField txtDesp;
     private javax.swing.JFormattedTextField txtDrAmt;
     private javax.swing.JFormattedTextField txtDrCount;
+    private javax.swing.JFormattedTextField txtNetChange;
     private javax.swing.JFormattedTextField txtOpening;
     private javax.swing.JTextField txtReference;
     // End of variables declaration//GEN-END:variables
 
     @Override
-    public void selected(Object source, Object selectObj){
-       try{
-        if (source != null) {
-            searchTriBalDetail();
+    public void selected(Object source, Object selectObj) {
+        try {
+            if (source != null) {
+                searchTriBalDetail();
+            }
+        } catch (Exception ex) {
+            ex.getMessage();
         }
-       }catch(Exception ex){
-        ex.getMessage();
-       }
-      
-        
-        
+
     }
 
 }
