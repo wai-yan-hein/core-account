@@ -33,12 +33,13 @@ public class ProcessHisDaoImpl extends AbstractDao<ProcessHisKey, ProcessHis> im
     public List<ProcessHis> search(String fromDate, String toDate, String vouNo, String processNo, String remark,
             String stockCode, String pt, String locCode, boolean finish, boolean deleted, String compCode, Integer deptId) {
         List<ProcessHis> list = new ArrayList<>();
-        String filter = "where comp_code ='" + compCode + "'\n"
+        String filter = "where intg_upd_status is null \n"
+                + "and comp_code ='" + compCode + "'\n"
                 + "and (dept_id =" + deptId + " or 0=" + deptId + ")\n"
                 + "and finished =" + finish + "\n"
                 + "and deleted =" + deleted + "\n"
-                + "and date(vou_date)>='" + fromDate + "'\n"
-                + "and date(vou_date)<='" + toDate + "'\n";
+                + "and CAST(vou_date as DATE)>='" + fromDate + "'\n"
+                + "and CAST(vou_date as DATE)<='" + toDate + "'\n";
         if (!vouNo.equals("-")) {
             filter += "and vou_no ='" + vouNo + "'\n";
         }

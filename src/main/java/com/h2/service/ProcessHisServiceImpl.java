@@ -1,5 +1,6 @@
 package com.h2.service;
 
+import com.common.FilterObject;
 import com.common.Util1;
 import com.h2.dao.ProcessHisDao;
 import com.h2.dao.ProcessHisDetailDao;
@@ -84,5 +85,22 @@ public class ProcessHisServiceImpl implements ProcessHisService {
     @Override
     public ProcessHis updateACK(ProcessHisKey key) {
         return dao.updateACK(key);
+    }
+    
+    @Override
+    public List<ProcessHis> getProcess(FilterObject filter) {
+        String fromDate = Util1.isNull(filter.getFromDate(), "-");
+        String toDate = Util1.isNull(filter.getToDate(), "-");
+        String vouNo = Util1.isNull(filter.getVouNo(), "-");
+        String remark = Util1.isNull(filter.getRemark(), "-");
+        String stockCode = Util1.isNull(filter.getStockCode(), "-");
+        String compCode = filter.getCompCode();
+        String locCode = Util1.isNull(filter.getLocCode(), "-");
+        Integer deptId = filter.getDeptId();
+        boolean deleted = filter.isDeleted();
+        boolean finished = filter.isFinished();
+        String processNo = Util1.isNull(filter.getProcessNo(), "-");
+        String pt = filter.getVouStatus();
+        return dao.search(fromDate, toDate, vouNo, processNo, remark, stockCode, pt, locCode, finished, deleted, compCode, deptId);
     }
 }

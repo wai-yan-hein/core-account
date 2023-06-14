@@ -605,6 +605,10 @@ public class H2Repo {
     public Mono<List<VSale>> getSaleHistory(FilterObject filter) {
         return Mono.just(saleHisService.getSale(filter));
     }
+    
+    public Mono<List<ProcessHis>> getProcessHistory(FilterObject filter) {
+        return Mono.just(processHisService.getProcess(filter));
+    }
 
     public Mono<SaleHis> findSale(SaleHisKey key) {
         return Mono.justOrEmpty(saleHisService.find(key));

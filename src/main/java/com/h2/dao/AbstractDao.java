@@ -19,6 +19,7 @@ import java.util.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import javax.sql.DataSource;
 
 /**
@@ -47,7 +48,7 @@ public abstract class AbstractDao<PK extends Serializable, T> {
     public T getByKey(PK key) {
         return entityManager.find(persistentClass, key);
     }
-    
+
     public void persist(T entity) {
         entityManager.persist(entity);
     }
@@ -90,8 +91,6 @@ public abstract class AbstractDao<PK extends Serializable, T> {
     public Date getDate(String jpql) {
         return entityManager.createQuery(jpql, Date.class).getSingleResult();
     }
-
-   
 
     public ResultSet getResult(String sql) {
         return jdbcTemplate.execute((ConnectionCallback<ResultSet>) con -> {

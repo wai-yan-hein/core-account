@@ -4,6 +4,7 @@
  */
 package com.inventory.ui.entry.dialog;
 
+import com.CloudIntegration;
 import com.common.DecimalFormatRender;
 import com.common.FilterObject;
 import com.common.Global;
@@ -44,6 +45,15 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
     private VouStatusAutoCompleter vouStatusAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
     private SelectionObserver observer;
+    private CloudIntegration integration;
+
+    public CloudIntegration getIntegration() {
+        return integration;
+    }
+
+    public void setIntegration(CloudIntegration integration) {
+        this.integration = integration;
+    }
 
     public UserRepo getUserRepo() {
         return userRepo;
@@ -132,7 +142,13 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
                 departmentAutoCompleter.setDepartment(tt);
             });
         });
-
+        if (inventoryRepo.localDatabase) {
+            chkLocal.setVisible(true);
+            btnUpload.setVisible(true);
+        } else {
+            chkLocal.setVisible(false);
+            btnUpload.setVisible(false);
+        }
     }
 
     private void initDate() {
@@ -189,6 +205,7 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         f.setFinished(chkFinish.isSelected());
         f.setDeleted(chkDel.isSelected());
         f.setDeptId(getDepId());
+        f.setLocal(chkLocal.isSelected());
         progress.setIndeterminate(true);
         inventoryRepo.getProcess(f).subscribe((t) -> {
             processHisTableModel.setListDetail(t);
@@ -198,6 +215,7 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
             progress.setIndeterminate(false);
         }, () -> {
             setVisible(true);
+            progress.setIndeterminate(false);
         });
     }
 
@@ -234,6 +252,8 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         jButton5 = new javax.swing.JButton();
         jLabel23 = new javax.swing.JLabel();
         txtDep = new javax.swing.JTextField();
+        chkLocal = new javax.swing.JCheckBox();
+        btnUpload = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblProcess = new javax.swing.JTable();
         progress = new javax.swing.JProgressBar();
@@ -314,6 +334,16 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
 
         txtDep.setFont(Global.textFont);
 
+        chkLocal.setText("Local");
+
+        btnUpload.setFont(Global.lableFont);
+        btnUpload.setText("Upload");
+        btnUpload.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUploadActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -338,23 +368,27 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
                             .addComponent(txtVouNo)
                             .addComponent(txtPT)
                             .addComponent(txtLoc)
+                            .addComponent(txtDep)
                             .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(chkFinish)
+                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(chkFinish, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(chkLocal, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(chkDel)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 32, Short.MAX_VALUE)
                                 .addComponent(jButton5)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton4))
-                            .addComponent(txtDep)))
+                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(btnUpload, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtFromDate, javax.swing.GroupLayout.DEFAULT_SIZE, 135, Short.MAX_VALUE)
+                        .addComponent(txtFromDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jLabel19)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtToDate, javax.swing.GroupLayout.DEFAULT_SIZE, 135, Short.MAX_VALUE))
+                        .addComponent(txtToDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -403,13 +437,23 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
                     .addComponent(jLabel23)
                     .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel4)
-                    .addComponent(chkDel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkFinish, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(chkDel)
+                                .addGap(11, 11, 11))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                                .addGap(6, 6, 6)))
+                        .addComponent(btnUpload))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(chkFinish)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(chkLocal))
+                    .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(191, Short.MAX_VALUE))
         );
 
         tblProcess.setModel(new javax.swing.table.DefaultTableModel(
@@ -461,11 +505,6 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        // TODO add your handling code here:
-        searchProcess();
-    }//GEN-LAST:event_jButton4ActionPerformed
-
     private void tblProcessMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblProcessMouseClicked
         // TODO add your handling code here:
         if (evt.getClickCount() == 2) {
@@ -473,17 +512,28 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         }
     }//GEN-LAST:event_tblProcessMouseClicked
 
+    private void btnUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadActionPerformed
+        integration.uploadManufacture();
+    }//GEN-LAST:event_btnUploadActionPerformed
+
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
         // TODO add your handling code here:
         clear();
     }//GEN-LAST:event_jButton5ActionPerformed
 
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        // TODO add your handling code here:
+        searchProcess();
+    }//GEN-LAST:event_jButton4ActionPerformed
+
     /**
      * @param args the command line arguments
      */
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnUpload;
     private javax.swing.JCheckBox chkDel;
     private javax.swing.JCheckBox chkFinish;
+    private javax.swing.JCheckBox chkLocal;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JLabel jLabel1;
