@@ -8,7 +8,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
-import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +16,8 @@ import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import java.util.Date;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
 import javax.sql.DataSource;
 
 /**
@@ -47,7 +46,7 @@ public abstract class AbstractDao<PK extends Serializable, T> {
     public T getByKey(PK key) {
         return entityManager.find(persistentClass, key);
     }
-    
+
     public void persist(T entity) {
         entityManager.persist(entity);
     }
@@ -87,11 +86,9 @@ public abstract class AbstractDao<PK extends Serializable, T> {
         return jdbcTemplate.queryForList(sql);
     }
 
-    public Date getDate(String jpql) {
-        return entityManager.createQuery(jpql, Date.class).getSingleResult();
+    public LocalDateTime getDate(String jpql) {
+        return entityManager.createQuery(jpql, LocalDateTime.class).getSingleResult();
     }
-
-   
 
     public ResultSet getResult(String sql) {
         return jdbcTemplate.execute((ConnectionCallback<ResultSet>) con -> {

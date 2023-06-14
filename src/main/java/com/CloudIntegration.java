@@ -166,9 +166,9 @@ public class CloudIntegration {
 
     public void startDownload() {
         if (localDatabase) {
-            downloadUser();
+            //downloadUser();
             downloadInventory();
-            downloadAccount();
+            //downloadAccount();
         }
     }
 
@@ -567,16 +567,16 @@ public class CloudIntegration {
     }
 
     private void downloadInventory() {
-        downloadPriceOption();
-        downloadVouStatus();
-        downloadInvTrader();
-        downloadSaleMan();
-        downloadLocation();
-        downloadRelation();
-        downloadUnit();
-        downloadBrand();
-        downloadStockType();
-        downloadCategory();
+        //downloadPriceOption();
+        //downloadVouStatus();
+        //downloadInvTrader();
+        //downloadSaleMan();
+        //downloadLocation();
+        //downloadRelation();
+        //downloadUnit();
+        //downloadBrand();
+        //downloadStockType();
+        //downloadCategory();
         downloadStock();
     }
 
@@ -701,9 +701,12 @@ public class CloudIntegration {
     }
 
     private void downloadStock() {
-        inventoryRepo.getUpdateStock(stockService.getMaxDate()).subscribe((t) -> {
+        String maxDate = stockService.getMaxDate();
+        log.info("downloadStock : max date " + maxDate);
+        inventoryRepo.getUpdateStock(maxDate).subscribe((t) -> {
             log.info("downloadStock list : " + t.size());
             t.forEach((s) -> {
+                log.info(s.getKey().getStockCode() + " : " + s.getUpdatedDate());
                 stockService.save(s);
             });
             log.info("downloadStock done.");

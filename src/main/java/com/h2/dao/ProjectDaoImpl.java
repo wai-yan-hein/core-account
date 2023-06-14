@@ -7,6 +7,7 @@ package com.h2.dao;
 import com.common.Util1;
 import com.user.model.Project;
 import com.user.model.ProjectKey;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -29,7 +30,7 @@ public class ProjectDaoImpl extends AbstractDao<ProjectKey, Project> implements 
     @Override
     public String getMaxDate() {
         String sql = "select max(o.updatedDate) from Project o";
-        Date date = getDate(sql);
+        LocalDateTime date = getDate(sql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 

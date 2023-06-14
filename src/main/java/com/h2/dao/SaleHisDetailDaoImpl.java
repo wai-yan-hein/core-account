@@ -9,6 +9,7 @@ import com.inventory.model.SaleDetailKey;
 import com.inventory.model.SaleHisDetail;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,7 +33,7 @@ public class SaleHisDetailDaoImpl extends AbstractDao<SaleDetailKey, SaleHisDeta
     @Override
     public String getMaxDate() {
         String jpql = "select max(o.updatedDate) from SaleHisDetail o";
-        Date date = getDate(jpql);
+        LocalDateTime date = getDate(jpql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 

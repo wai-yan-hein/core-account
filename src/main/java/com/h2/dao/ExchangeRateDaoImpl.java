@@ -7,6 +7,7 @@ package com.h2.dao;
 import com.common.Util1;
 import com.user.model.ExchangeKey;
 import com.user.model.ExchangeRate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import org.springframework.stereotype.Repository;
@@ -27,7 +28,7 @@ public class ExchangeRateDaoImpl extends AbstractDao<ExchangeKey, ExchangeRate> 
     @Override
     public String getMaxDate() {
         String sql = "select max(o.updatedDate) from ExchangeRate o";
-        Date date = getDate(sql);
+        LocalDateTime date = getDate(sql);
         return date == null? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 

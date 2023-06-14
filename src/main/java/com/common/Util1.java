@@ -33,6 +33,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
@@ -198,6 +199,11 @@ public class Util1 {
 
     public static String toDateTimeStrMYSQL(Date date) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return date == null ? null : formatter.format(date);
+    }
+
+    public static String toDateTimeStrMYSQL(LocalDateTime date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return date == null ? null : formatter.format(date);
     }
 

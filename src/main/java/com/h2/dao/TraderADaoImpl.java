@@ -8,6 +8,8 @@ import com.acc.model.TraderA;
 import com.acc.model.TraderAKey;
 import com.common.Util1;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -29,7 +31,7 @@ public class TraderADaoImpl extends AbstractDao<TraderAKey, TraderA> implements 
     @Override
     public String getMaxDate() {
         String jpql = "select max(o.updatedDate) from TraderA o";
-        Date date = getDate(jpql);
+        LocalDateTime date = getDate(jpql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 
@@ -38,7 +40,7 @@ public class TraderADaoImpl extends AbstractDao<TraderAKey, TraderA> implements 
         String hsql = "select o from TraderA o where o.key.compCode ='" + compCode + "'";
         return findHSQL(hsql);
     }
-    
+
     @Override
     public List<TraderA> getTrader(String text, String compCode) {
         String filter = "where active =1\n" + "and deleted =0\n" + "and comp_code ='" + compCode + "'\n" + "and (user_code like '" + text + "%' or trader_name like '" + text + "%') \n";
@@ -60,7 +62,7 @@ public class TraderADaoImpl extends AbstractDao<TraderAKey, TraderA> implements 
                     list.add(t);
                 }
             }
-        } catch (Exception ignored) {
+        } catch (SQLException ignored) {
         }
         return list;
     }

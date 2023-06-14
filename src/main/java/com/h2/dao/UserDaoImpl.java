@@ -12,6 +12,7 @@ import com.inventory.model.AppUser;
 import com.user.model.MachineProperty;
 import com.user.model.RoleProperty;
 import com.user.model.SysProperty;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +24,8 @@ import org.springframework.stereotype.Repository;
  * @author Athu Sint
  */
 @Repository
-public class UserDaoImpl extends AbstractDao<String, AppUser> implements UserDao {   
+public class UserDaoImpl extends AbstractDao<String, AppUser> implements UserDao {
+
     @Autowired
     private RolePropertyService rpService;
     @Autowired
@@ -46,7 +48,7 @@ public class UserDaoImpl extends AbstractDao<String, AppUser> implements UserDao
     @Override
     public String getMaxDate() {
         String jpql = "select max(o.updatedDate) from AppUser o";
-        Date date = getDate(jpql);
+        LocalDateTime date = getDate(jpql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 

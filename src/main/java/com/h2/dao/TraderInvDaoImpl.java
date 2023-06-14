@@ -8,6 +8,7 @@ import com.common.Util1;
 import com.inventory.model.Trader;
 import com.inventory.model.TraderKey;
 import java.sql.ResultSet;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -31,7 +32,7 @@ public class TraderInvDaoImpl extends AbstractDao<TraderKey, Trader> implements 
     @Override
     public String getMaxDate() {
         String jpql = "select max(o.updatedDate) from Trader o";
-        Date date = getDate(jpql);
+        LocalDateTime date = getDate(jpql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 

@@ -7,6 +7,7 @@ package com.h2.dao;
 import com.common.Util1;
 import com.inventory.model.SaleMan;
 import com.inventory.model.SaleManKey;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import org.springframework.stereotype.Repository;
@@ -27,7 +28,7 @@ public class SaleManDaoImpl extends AbstractDao<SaleManKey, SaleMan> implements 
     @Override
     public String getMaxDate() {
         String jpql = "select max(o.updatedDate) from SaleMan o";
-        Date date = getDate(jpql);
+        LocalDateTime date = getDate(jpql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 
