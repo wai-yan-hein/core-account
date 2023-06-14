@@ -6,9 +6,7 @@ package com.h2.service;
 
 import com.acc.model.Gl;
 import com.inventory.model.General;
-import com.inventory.model.PurHis;
 import com.inventory.model.VPurchase;
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -26,5 +24,9 @@ public interface ReportService {
             String compCode, String tranSource, String traderCode, String traderType,
             String coaLv2, String coaLv1, String batchNo, String projectNo,
             boolean summary, Integer macId);
+    
+    List<VPurchase> getPurchaseHistory(String fromDate, String toDate, String traderCode, String vouNo,
+                                       String userCode,  String locCode, String compCode,
+                                       Integer deptId, String deleted);
 
 }

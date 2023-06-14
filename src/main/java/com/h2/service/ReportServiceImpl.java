@@ -218,11 +218,11 @@ public class ReportServiceImpl implements ReportService {
                 gl.setCrAmt(Util1.toNull(gl.getCrAmt()));
             });
         }
-        }catch (SQLException e)
-        {
+         
+        }catch(Exception e) {
             e.printStackTrace();
         }
-        return list;
+       return list;
     }
     
     @Override
