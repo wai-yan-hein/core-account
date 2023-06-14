@@ -87,6 +87,7 @@ public class ReportServiceImpl implements ReportService {
             String projectNo, boolean summary, Integer macId) {
         String coaFilter = "";
         List<Gl> list = new ArrayList<>();
+        try{
         if (!coaLv2.equals("-")) {
             coaFilter += "where coa3.coa_parent = '" + coaLv2 + "'\n";
         }
@@ -216,7 +217,10 @@ public class ReportServiceImpl implements ReportService {
                 gl.setCrAmt(Util1.toNull(gl.getCrAmt()));
             });
         }
-        return list;
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+       return list;
     }
 
     @Override

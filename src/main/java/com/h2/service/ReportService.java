@@ -24,8 +24,9 @@ public interface ReportService {
             String compCode, String tranSource, String traderCode, String traderType,
             String coaLv2, String coaLv1, String batchNo, String projectNo,
             boolean summary, Integer macId);
-
-    List<VPurchase> getPurchaseHistory(String fromDate, String toDate, String traderCode, String vouNo, String userCode, String locCode,
-            String compCode, Integer deptId, String deleted);
+    
+    List<VPurchase> getPurchaseHistory(String fromDate, String toDate, String traderCode, String vouNo,
+                                       String userCode,  String locCode, String compCode,
+                                       Integer deptId, String deleted);
 
 }
