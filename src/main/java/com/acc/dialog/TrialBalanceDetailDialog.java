@@ -216,6 +216,8 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         Mono<List<Gl>> m2 = accountRepo.searchGl(getFilter());
         Mono<Tuple2<TmpOpening, List<Gl>>> zip = m1.zipWith(m2);
         zip.subscribe((t) -> {
+            drAmtTableModel.clear();
+            crAmtTableModel.clear();
             TmpOpening op = t.getT1();
             list = t.getT2();
             list.forEach((gl) -> {
