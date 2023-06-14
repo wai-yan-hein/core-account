@@ -4,8 +4,6 @@
  * and open the template in the editor.
  */
 package com.h2.dao;
-
-import com.inventory.model.ProcessHis;
 import com.inventory.model.PurHis;
 import com.inventory.model.PurHisKey;
 import java.util.Date;
