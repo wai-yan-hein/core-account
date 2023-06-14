@@ -159,6 +159,7 @@ public class CoreAccountApplication {
             UIManager.put("TabbedPane.tabSeparatorsFullHeight", true);
             boolean darkMode = isDarkModeEnabled();
             if (darkMode) {
+                UIManager.put("TextField.disabledForeground", Color.white);
                 UIManager.setLookAndFeel(new FlatMacDarkLaf());
             } else {
                 UIManager.setLookAndFeel(new FlatMacLightLaf());

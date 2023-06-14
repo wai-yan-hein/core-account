@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.CloudIntegration;
 import com.acc.common.AccountRepo;
 import com.common.DecimalFormatRender;
 import com.common.Global;
@@ -107,6 +108,8 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     private AccountRepo accountRepo;
     @Autowired
     private UserRepo userRepo;
+    @Autowired 
+    private CloudIntegration integration;
     private CurrencyAutoCompleter currAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
     private LocationAutoCompleter locationAutoCompleter;
@@ -692,6 +695,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setUserRepo(userRepo);
             dialog.setIconImage(searchIcon);
+            dialog.setCloudIntegration(integration);
             dialog.setObserver(this);
             dialog.initMain();
             dialog.setSize(Global.width - 100, Global.height - 100);

@@ -27,7 +27,7 @@ public class GLTableCellRender extends DefaultTableCellRenderer {
     private double crAmt = 0.0;
     private int row1;
     private int row2;
-    private final DecimalFormat formatter = new DecimalFormat(Util1.DECIMAL_FORMAT);
+    private final DecimalFormat formatter = new DecimalFormat(Util1.DECIMAL_FORMAT1);
 
     public GLTableCellRender() {
     }
