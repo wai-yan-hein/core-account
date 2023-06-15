@@ -10,6 +10,8 @@ import com.common.Util1;
 import com.h2.dao.ReportDao;
 import com.inventory.model.General;
 import com.inventory.model.VPurchase;
+import com.inventory.model.VReturnIn;
+import com.inventory.model.VReturnOut;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -266,5 +268,96 @@ public class ReportServiceImpl implements ReportService {
         }
 
         return purchaseList;
+    }
+    
+    @Override
+    public List<VReturnIn> getReturnInHistory(String fromDate, String toDate, String traderCode, String vouNo,
+                                               String userCode,String locCode, String compCode, Integer deptId,
+                                              String deleted){
+        List<VReturnIn> returnInList = new ArrayList<>();
+        try{        
+        String sql = "select a.*,t.trader_name\n" +
+                "from (\n" + "select cast(vou_date as date) vou_date,vou_no,remark,created_by,paid,vou_total,deleted,trader_code,comp_code,dept_id \n" +
+                "from v_return_in \n" + "where comp_code = '" + compCode + "'\n" +
+                "and deleted = " + deleted + "\n" +
+                //"and cur_code = '" + curCode + "'\n" +
+                "and (dept_id = " + deptId + " or 0 =" + deptId + ")\n" +
+                "and cast(vou_date as date) between '" + fromDate + "' and '" + toDate + "'\n" +
+                "and (vou_no = '" + vouNo + "' or '-' = '" + vouNo + "')\n" + 
+               // "and (remark like '" + remark + "%' or '-%'= '" + remark + "%')\n" + 
+                "and (trader_code = '" + traderCode + "' or '-'= '" + traderCode + "')\n" +
+                "and (created_by = '" + userCode + "' or '-'='" + userCode + "')\n" + 
+                //"and (stock_code ='" + stockCode + "' or '-' ='" + stockCode + "')\n" + 
+                "and (loc_code ='" + locCode + "' or '-' ='" + locCode + "')\n" + 
+                //"and (project_no ='" + projectNo + "' or '-' ='" + projectNo + "')\n" +
+                "group by vou_no\n" + ")a\n" + "join trader t on a.trader_code = t.code\n" + 
+                "and a.comp_code = t.comp_code\n" + 
+                "order by cast(vou_date as date),vou_no";
+        ResultSet rs = reportDao.executeSql(sql);
+        
+        if (!Objects.isNull(rs)) {
+            while (rs.next()) {
+                VReturnIn s = new VReturnIn();
+                s.setVouDate(Util1.toDateStr(rs.getDate("vou_date"), "dd/MM/yyyy"));
+                s.setVouNo(rs.getString("vou_no"));
+                s.setTraderName(rs.getString("trader_name"));
+                //s.setRemark(rs.getString("remark"));
+                s.setCreatedBy(rs.getString("created_by"));
+                s.setPaid(rs.getFloat("paid"));
+                s.setVouTotal(rs.getFloat("vou_total"));
+                s.setDeleted(rs.getBoolean("deleted"));
+                s.setDeptId(rs.getInt("dept_id"));
+                returnInList.add(s);
+            }
+        }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return returnInList;
+    }
+
+    @Override
+    public List<VReturnOut> getReturnOutHistory(String fromDate, String toDate, String traderCode, String vouNo, 
+                                                String userCode, String locCode, String compCode, Integer deptId,
+                                                String deleted) {
+        List<VReturnOut> returnOutList = new ArrayList<>();
+        try{
+        String sql = "select a.*,t.trader_name\n" +
+                "from (\n" + "select cast(vou_date as date) vou_date,vou_no,remark,created_by,paid,vou_total,deleted,trader_code,comp_code,dept_id \n" +
+                "from v_return_out \n" + "where comp_code = '" + compCode + "'\n" +
+                "and deleted = " + deleted + "\n" +
+                //"and cur_code = '" + curCode + "'\n" +
+                "and (dept_id = " + deptId + " or 0 =" + deptId + ")\n" +
+                "and cast(vou_date as date) between '" + fromDate + "' and '" + toDate + "'\n" +
+                "and (vou_no = '" + vouNo + "' or '-' = '" + vouNo + "')\n" +
+               // "and (remark like '" + remark + "%' or '-%'= '" + remark + "%')\n" +
+                "and (trader_code = '" + traderCode + "' or '-'= '" + traderCode + "')\n" + 
+                "and (created_by = '" + userCode + "' or '-'='" + userCode + "')\n" + 
+                //"and (stock_code ='" + stockCode + "' or '-' ='" + stockCode + "')\n" + 
+                "and (loc_code ='" + locCode + "' or '-' ='" + locCode + "')\n" + 
+                //"and (project_no ='" + projectNo + "' or '-' ='" + projectNo + "')\n" +
+                "group by vou_no\n" + ")a\n" + "join trader t on a.trader_code = t.code\n" + 
+                "and a.comp_code= t.comp_code\n" + 
+                "order by cast(vou_date as date),vou_no";
+        ResultSet rs = reportDao.executeSql(sql);        
+        if (!Objects.isNull(rs)) {
+            while (rs.next()) {
+                VReturnOut s = new VReturnOut();
+                s.setVouDate(Util1.toDateStr(rs.getDate("vou_date"), "dd/MM/yyyy"));
+                s.setVouNo(rs.getString("vou_no"));
+                s.setTraderName(rs.getString("trader_name"));
+                s.setRemark(rs.getString("remark"));
+                s.setCreatedBy(rs.getString("created_by"));
+                s.setPaid(rs.getFloat("paid"));
+                s.setVouTotal(rs.getFloat("vou_total"));
+                s.setDeleted(rs.getBoolean("deleted"));
+                s.setDeptId(rs.getInt("dept_id"));
+                returnOutList.add(s);
+            }
+        }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return returnOutList;
     }
 }

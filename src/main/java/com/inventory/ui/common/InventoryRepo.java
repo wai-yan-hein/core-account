@@ -44,8 +44,10 @@ import com.inventory.model.RegionKey;
 import com.inventory.model.RelationKey;
 import com.inventory.model.ReorderLevel;
 import com.inventory.model.RetInHis;
+import com.inventory.model.RetInHisDetail;
 import com.inventory.model.RetInHisKey;
 import com.inventory.model.RetOutHis;
+import com.inventory.model.RetOutHisDetail;
 import com.inventory.model.RetOutHisKey;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
@@ -74,6 +76,8 @@ import com.inventory.model.UnitRelation;
 import com.inventory.model.UnitRelationDetail;
 import com.inventory.model.VPurchase;
 import com.inventory.model.VOpening;
+import com.inventory.model.VReturnIn;
+import com.inventory.model.VReturnOut;
 import com.inventory.model.VSale;
 import com.inventory.model.VStockBalance;
 import com.inventory.model.VTransfer;
@@ -86,6 +90,7 @@ import javax.swing.JOptionPane;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -1347,12 +1352,12 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<PurHis> findPurchase(String vouNo, Integer deptId, String intStatus) {
+    public Mono<PurHis> findPurchase(String vouNo, Integer deptId, boolean local) {
         PurHisKey key = new PurHisKey();
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setVouNo(vouNo);
-        if (intStatus == null) {
+        if (local) {
             return h2Repo.findPurchase(key);
         }
         return inventoryApi.post()
@@ -1366,11 +1371,14 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<RetInHis> findReturnIn(String vouNo, Integer deptId) {
+    public Mono<RetInHis> findReturnIn(String vouNo, Integer deptId,boolean local) {
         RetInHisKey key = new RetInHisKey();
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setVouNo(vouNo);
+        if (local) {
+            //return h2Repo.(key);
+        }
         return inventoryApi.post()
                 .uri("/retin/find-retin")
                 .body(Mono.just(key), RetInHisKey.class)
@@ -1382,7 +1390,43 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<RetOutHis> findReturnOut(String vouNo, Integer deptId) {
+    public Mono<List<VReturnIn>> getReturnInVoucher(FilterObject filter) {
+        if (filter.isLocal()) {
+            return h2Repo.searchReturnInVoucher(filter);
+        }
+        return inventoryApi
+                .post()
+                .uri("/retin/get-retin")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToFlux(VReturnIn.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<RetInHisDetail>> getReturnInDetail(String vouNo) {
+        if (localDatabase) {
+            //return h2Repo.searchReturnInDetail(vouNo);
+        }
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/retin/get-retin-detail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
+                .build())
+                .retrieve()
+                .bodyToFlux(RetInHisDetail.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<RetOutHis> findReturnOut(String vouNo, Integer deptId,boolean local) {
         RetOutHisKey key = new RetOutHisKey();
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
@@ -1392,6 +1436,41 @@ public class InventoryRepo {
                 .body(Mono.just(key), RetOutHisKey.class)
                 .retrieve()
                 .bodyToMono(RetOutHis.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<VReturnOut>> getReturnOutVoucher(FilterObject filter) {
+        if (filter.isLocal()) {
+            return h2Repo.searchReturnOutVoucher(filter);
+        }
+        return inventoryApi.post()
+                .uri("/retout/get-retout")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToFlux(VReturnOut.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<RetOutHisDetail>> getReturnOutDetail(String vouNo) {
+        if (localDatabase) {
+            //return h2Repo.searchReturnInDetail(vouNo);
+        }
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/retout/get-retout-detail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", Global.deptId)
+                .build())
+                .retrieve()
+                .bodyToFlux(RetOutHisDetail.class)
+                .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -1831,15 +1910,15 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<PurHisDetail>> getPurDetail(String vouNo) {
+    public Mono<List<PurHisDetail>> getPurDetail(String vouNo, Integer deptId) {
         if (localDatabase) {
             return h2Repo.searchPurchaseDetail(vouNo);
         }
-       return  inventoryApi.get()
+        return inventoryApi.get()
                 .uri(builder -> builder.path("/pur/get-pur-detail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", Global.deptId)
+                .queryParam("deptId", deptId)
                 .build())
                 .retrieve()
                 .bodyToFlux(PurHisDetail.class)

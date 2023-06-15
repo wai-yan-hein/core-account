@@ -8,11 +8,9 @@ package com.h2.dao;
 import com.inventory.model.RetInHisDetail;
 import com.inventory.model.RetInKey;
 import org.springframework.stereotype.Repository;
-
-import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 
 /**
  * @author wai yan

@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry.dialog;
 
+import com.CloudIntegration;
 import com.common.FilterObject;
 import com.common.Global;
 import com.common.SelectionObserver;
@@ -35,7 +36,6 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -61,6 +61,15 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     private StartWithRowFilter tblFilter;
     private TableRowSorter<TableModel> sorter;
     private LocationAutoCompleter locationAutoCompleter;
+    private CloudIntegration integration;
+
+    public void setCloudIntegration(CloudIntegration integration) {
+        this.integration = integration;
+    }
+
+    public CloudIntegration getCloudIntegration() {
+        return integration;
+    }
 
     public WebClient getInventoryApi() {
         return inventoryApi;
@@ -134,6 +143,13 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "CUS");
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
+        if (inventoryRepo.localDatabase) {
+            chkLocal.setVisible(true);
+            btnUpload.setVisible(true);
+        } else {
+            chkLocal.setVisible(false);
+            btnUpload.setVisible(false);
+        }
     }
 
     private void initTableVoucher() {
@@ -208,17 +224,12 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         filter.setLocCode(getLocCode());
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         filter.setDeleted(chkDel.isSelected());
+        filter.setLocal(chkLocal.isSelected());
         filter.setDeptId(getDepId());
         filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
         filter.setCurCode(getCurCode());
         tableModel.clear();
-        inventoryApi
-                .post()
-                .uri("/retin/get-retin")
-                .body(Mono.just(filter), FilterObject.class)
-                .retrieve()
-                .bodyToFlux(VReturnIn.class)
-                .collectList()
+        inventoryRepo.getReturnInVoucher(filter)
                 .subscribe((t) -> {
                     tableModel.setListDetail(t);
                     calAmount();
@@ -298,6 +309,8 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         jLabel15 = new javax.swing.JLabel();
         txtCurrency = new javax.swing.JTextField();
         jSeparator1 = new javax.swing.JSeparator();
+        chkLocal = new javax.swing.JCheckBox();
+        btnUpload = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
         txtFilter = new javax.swing.JTextField();
@@ -447,6 +460,19 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
             }
         });
 
+        chkLocal.setFont(Global.lableFont);
+        chkLocal.setText("Local");
+
+        btnUpload.setFont(Global.lableFont);
+        btnUpload.setText("Upload");
+        btnUpload.setIconTextGap(2);
+        btnUpload.setInheritsPopupMenu(true);
+        btnUpload.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUploadActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -477,7 +503,10 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
                             .addComponent(txtStock)
                             .addComponent(txtLocation)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(186, 186, 186)
+                                .addComponent(btnUpload, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(chkLocal, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(chkDel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addComponent(txtDep)
                             .addGroup(jPanel1Layout.createSequentialGroup()
@@ -543,7 +572,10 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(chkDel))
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(chkDel)
+                                    .addComponent(chkLocal)
+                                    .addComponent(btnUpload)))
                             .addComponent(jLabel15)))
                     .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 268, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -780,6 +812,12 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         txtCus.selectAll();
     }//GEN-LAST:event_txtCusFocusGained
 
+    private void btnUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadActionPerformed
+        if(inventoryRepo.localDatabase){
+            integration.uploadReturnIn();
+        }
+    }//GEN-LAST:event_btnUploadActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -787,7 +825,9 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnSelect;
+    private javax.swing.JButton btnUpload;
     private javax.swing.JCheckBox chkDel;
+    private javax.swing.JCheckBox chkLocal;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

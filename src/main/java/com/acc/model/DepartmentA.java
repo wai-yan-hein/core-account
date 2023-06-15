@@ -4,6 +4,7 @@
  */
 package com.acc.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
@@ -12,6 +13,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
@@ -41,9 +43,10 @@ public class DepartmentA {
     private Date createdDt;
     @Column(name = "updated_by")
     private String updatedBy;
-    @Temporal(TemporalType.TIMESTAMP)
+   @Temporal(TemporalType.TIMESTAMP)
+//    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd'T'HH:mm:ss")    
     @Column(name = "updated_date")
-    private Date updatedDt;
+    private Date  updatedDt;
     @Column(name = "usr_code")
     private String userCode;
     @Column(name = "mac_id")

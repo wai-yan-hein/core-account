@@ -67,4 +67,5 @@ public class VPurchase {
     private Float weight;
     private String weightUnit;
     private Float totalQty;
+    private boolean local;
 }

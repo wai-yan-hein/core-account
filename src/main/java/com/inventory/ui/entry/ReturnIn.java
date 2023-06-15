@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.CloudIntegration;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.KeyPropagate;
@@ -63,6 +64,7 @@ import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -86,6 +88,8 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
     private InventoryRepo inventoryRepo;
     @Autowired
     private UserRepo userRepo;
+    @Autowired
+    private CloudIntegration integration;
     private CurrencyAutoCompleter currAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
     private LocationAutoCompleter locationAutoCompleter;
@@ -451,6 +455,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             dialog.setInventoryApi(inventoryApi);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setIconImage(searchIcon);
+            dialog.setCloudIntegration(integration);
             dialog.setObserver(this);
             dialog.initMain();
             dialog.setSize(Global.width - 100, Global.height - 100);
@@ -484,46 +489,39 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                 projectAutoCompleter.setProject(null);
             }
             String vouNo = ri.getKey().getVouNo();
-            Mono<ResponseEntity<List<RetInHisDetail>>> result = inventoryApi.get()
-                    .uri(builder -> builder.path("/retin/get-retin-detail")
-                    .queryParam("vouNo", vouNo)
-                    .queryParam("compCode", Global.compCode)
-                    .queryParam("deptId", ri.getKey().getDeptId())
-                    .build())
-                    .retrieve().toEntityList(RetInHisDetail.class);
-            result.subscribe((t) -> {
-                retInTableModel.setListDetail(t.getBody());
-                retInTableModel.addNewRow();
-                if (ri.isVouLock()) {
-                    lblStatus.setText("Voucher is locked.");
-                    lblStatus.setForeground(Color.RED);
-                    disableForm(false);
-                } else if (Util1.getBoolean(ri.getDeleted())) {
-                    lblStatus.setText("DELETED");
-                    lblStatus.setForeground(Color.RED);
-                    disableForm(false);
-                } else {
-                    lblStatus.setText("EDIT");
-                    lblStatus.setForeground(Color.blue);
-                    disableForm(true);
-                }
-                txtVouNo.setText(ri.getKey().getVouNo());
-                txtRemark.setText(ri.getRemark());
-                txtVouDate.setDate(ri.getVouDate());
-                txtVouTotal.setValue(Util1.getFloat(ri.getVouTotal()));
-                txtVouDiscP.setValue(Util1.getFloat(ri.getDiscP()));
-                txtVouDiscount.setValue(Util1.getFloat(ri.getDiscount()));
-                txtVouPaid.setValue(Util1.getFloat(ri.getPaid()));
-                txtVouBalance.setValue(Util1.getFloat(ri.getBalance()));
-                txtGrandTotal.setValue(Util1.getFloat(txtGrandTotal.getValue()));
-                chkPaid.setSelected(Util1.getFloat(ri.getPaid()) > 0);
-                focusTable();
-                progress.setIndeterminate(false);
-            }, (e) -> {
-                progress.setIndeterminate(false);
-                JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-            });
-
+            inventoryRepo.getReturnInDetail(vouNo)
+                    .subscribe((t) -> {
+                        retInTableModel.setListDetail(t);
+                        retInTableModel.addNewRow();
+                        if (ri.isVouLock()) {
+                            lblStatus.setText("Voucher is locked.");
+                            lblStatus.setForeground(Color.RED);
+                            disableForm(false);
+                        } else if (Util1.getBoolean(ri.getDeleted())) {
+                            lblStatus.setText("DELETED");
+                            lblStatus.setForeground(Color.RED);
+                            disableForm(false);
+                        } else {
+                            lblStatus.setText("EDIT");
+                            lblStatus.setForeground(Color.blue);
+                            disableForm(true);
+                        }
+                        txtVouNo.setText(ri.getKey().getVouNo());
+                        txtRemark.setText(ri.getRemark());
+                        txtVouDate.setDate(ri.getVouDate());
+                        txtVouTotal.setValue(Util1.getFloat(ri.getVouTotal()));
+                        txtVouDiscP.setValue(Util1.getFloat(ri.getDiscP()));
+                        txtVouDiscount.setValue(Util1.getFloat(ri.getDiscount()));
+                        txtVouPaid.setValue(Util1.getFloat(ri.getPaid()));
+                        txtVouBalance.setValue(Util1.getFloat(ri.getBalance()));
+                        txtGrandTotal.setValue(Util1.getFloat(txtGrandTotal.getValue()));
+                        chkPaid.setSelected(Util1.getFloat(ri.getPaid()) > 0);
+                        focusTable();
+                        progress.setIndeterminate(false);
+                    }, (e) -> {
+                        progress.setIndeterminate(false);
+                        JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+                    });
         }
     }
 
@@ -1221,7 +1219,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             }
             case "RI-HISTORY" -> {
                 if (selectObj instanceof VReturnIn v) {
-                    inventoryRepo.findReturnIn(v.getVouNo(), v.getDeptId()).subscribe((t) -> {
+                    inventoryRepo.findReturnIn(v.getVouNo(), v.getDeptId(),v.isLocal()).subscribe((t) -> {
                         setVoucher(t);
                     });
                 }

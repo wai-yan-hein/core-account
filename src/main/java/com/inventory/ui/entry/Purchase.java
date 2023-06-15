@@ -108,7 +108,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     private AccountRepo accountRepo;
     @Autowired
     private UserRepo userRepo;
-    @Autowired 
+    @Autowired
     private CloudIntegration integration;
     private CurrencyAutoCompleter currAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
@@ -739,7 +739,8 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 }
 
                 String vouNo = ph.getKey().getVouNo();
-                inventoryRepo.getPurDetail(vouNo)
+                
+                inventoryRepo.getPurDetail(vouNo,deptId)
                         .subscribe((t) -> {
                             purTableModel.setListDetail(t);
                             purTableModel.addNewRow();
@@ -1930,7 +1931,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             }
             case "PUR-HISTORY" -> {
                 if (selectObj instanceof VPurchase v) {
-                    inventoryRepo.findPurchase(v.getVouNo(), v.getDeptId(),v.getIntgUpdStatus()).subscribe((t) -> {
+                    inventoryRepo.findPurchase(v.getVouNo(), v.getDeptId(), v.isLocal()).subscribe((t) -> {
                         setVoucher(t);
                     }, (e) -> {
                         JOptionPane.showMessageDialog(this, e.getMessage());

@@ -44,4 +44,5 @@ public class VReturnOut {
     private String stockName;
     private String locationName;
     private Integer deptId;
+    private boolean local;
 }

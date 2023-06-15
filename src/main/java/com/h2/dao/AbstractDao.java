@@ -4,6 +4,7 @@
  */
 package com.h2.dao;
 
+import com.inventory.model.RetOutHisDetail;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.io.Serializable;
@@ -20,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import javax.sql.DataSource;
+import org.springframework.http.ResponseEntity;
 
 /**
  *
@@ -69,7 +71,7 @@ public abstract class AbstractDao<PK extends Serializable, T> {
     public List<T> findHSQL(String hsql) {
         return entityManager.createQuery(hsql, persistentClass).getResultList();
     }
-
+    
     public void execSql(String... sql) {
         for (String s : sql) {
             jdbcTemplate.execute(s);
@@ -90,9 +92,6 @@ public abstract class AbstractDao<PK extends Serializable, T> {
     public Date getDate(String jpql) {
         return entityManager.createQuery(jpql, Date.class).getSingleResult();
     }
-
-   
-
     public ResultSet getResult(String sql) {
         return jdbcTemplate.execute((ConnectionCallback<ResultSet>) con -> {
             Statement stmt = con.createStatement();

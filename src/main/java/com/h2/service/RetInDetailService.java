@@ -10,7 +10,7 @@ import com.inventory.model.RetInKey;
 import java.util.List;
 
 /**
- * @author wai yan
+ * @author dell
  */
 public interface RetInDetailService {
 

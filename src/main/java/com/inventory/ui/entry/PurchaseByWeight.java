@@ -1680,7 +1680,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             }
             case "PUR-HISTORY" -> {
                 if (selectObj instanceof VPurchase v) {
-                    inventoryRepo.findPurchase(v.getVouNo(), v.getDeptId(),v.getIntgUpdStatus()).subscribe((t) -> {
+                    inventoryRepo.findPurchase(v.getVouNo(), v.getDeptId(),v.isLocal()).subscribe((t) -> {
                         setVoucher(t);
                     });
                 }

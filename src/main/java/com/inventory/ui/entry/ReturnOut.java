@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.CloudIntegration;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.KeyPropagate;
@@ -18,7 +19,6 @@ import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.Order;
-import com.inventory.model.RetInHis;
 import com.inventory.model.RetOutHis;
 import com.inventory.model.RetOutHisDetail;
 import com.inventory.model.RetOutHisKey;
@@ -64,7 +64,6 @@ import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -87,6 +86,8 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     private InventoryRepo inventoryRepo;
     @Autowired
     private UserRepo userRepo;
+    @Autowired
+    private CloudIntegration integration;
     private CurrencyAutoCompleter currAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
     private LocationAutoCompleter locationAutoCompleter;
@@ -480,6 +481,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             dialog.setInventoryApi(inventoryApi);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setIconImage(searchIcon);
+            dialog.setCloudIntegration(integration);
             dialog.setObserver(this);
             dialog.initMain();
             dialog.setSize(Global.width - 100, Global.height - 100);
@@ -513,45 +515,39 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                 projectAutoCompleter.setProject(null);
             }
             String vouNo = ri.getKey().getVouNo();
-            Mono<ResponseEntity<List<RetOutHisDetail>>> result = inventoryApi.get()
-                    .uri(builder -> builder.path("/retout/get-retout-detail")
-                    .queryParam("vouNo", vouNo)
-                    .queryParam("compCode", Global.compCode)
-                    .queryParam("deptId", ri.getKey().getDeptId())
-                    .build())
-                    .retrieve().toEntityList(RetOutHisDetail.class);
-            result.subscribe((t) -> {
-                roTableModel.setListDetail(t.getBody());
-                roTableModel.addNewRow();
-                if (ri.isVouLock()) {
-                    lblStatus.setText("Voucher is locked.");
-                    lblStatus.setForeground(Color.RED);
-                    disableForm(false);
-                } else if (Util1.getBoolean(ri.getDeleted())) {
-                    lblStatus.setText("DELETED");
-                    lblStatus.setForeground(Color.RED);
-                    disableForm(false);
-                } else {
-                    lblStatus.setText("EDIT");
-                    lblStatus.setForeground(Color.blue);
-                    disableForm(true);
-                }
-                txtVouNo.setText(ri.getKey().getVouNo());
-                txtRemark.setText(ri.getRemark());
-                vouDate.setDate(ri.getVouDate());
-                txtVouTotal.setValue(Util1.getFloat(ri.getVouTotal()));
-                txtVouDiscP.setValue(Util1.getFloat(ri.getDiscP()));
-                txtVouDiscount.setValue(Util1.getFloat(ri.getDiscount()));
-                txtVouPaid.setValue(Util1.getFloat(ri.getPaid()));
-                txtVouBalance.setValue(Util1.getFloat(ri.getBalance()));
-                txtGrandTotal.setValue(Util1.getFloat(txtGrandTotal.getValue()));
-                chkPaid.setSelected(Util1.getFloat(ri.getPaid()) > 0);
-                progress.setIndeterminate(false);
-                focusTable();
-            }, (e) -> {
-                progress.setIndeterminate(false);
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+            inventoryRepo.getReturnOutDetail(vouNo)
+                    .subscribe((t) -> {
+                        roTableModel.setListDetail(t);
+                        roTableModel.addNewRow();
+                        if (ri.isVouLock()) {
+                            lblStatus.setText("Voucher is locked.");
+                            lblStatus.setForeground(Color.RED);
+                            disableForm(false);
+                        } else if (Util1.getBoolean(ri.getDeleted())) {
+                            lblStatus.setText("DELETED");
+                            lblStatus.setForeground(Color.RED);
+                            disableForm(false);
+                        } else {
+                            lblStatus.setText("EDIT");
+                            lblStatus.setForeground(Color.blue);
+                            disableForm(true);
+                        }
+                        txtVouNo.setText(ri.getKey().getVouNo());
+                        txtRemark.setText(ri.getRemark());
+                        vouDate.setDate(ri.getVouDate());
+                        txtVouTotal.setValue(Util1.getFloat(ri.getVouTotal()));
+                        txtVouDiscP.setValue(Util1.getFloat(ri.getDiscP()));
+                        txtVouDiscount.setValue(Util1.getFloat(ri.getDiscount()));
+                        txtVouPaid.setValue(Util1.getFloat(ri.getPaid()));
+                        txtVouBalance.setValue(Util1.getFloat(ri.getBalance()));
+                        txtGrandTotal.setValue(Util1.getFloat(txtGrandTotal.getValue()));
+                        chkPaid.setSelected(Util1.getFloat(ri.getPaid()) > 0);
+                        progress.setIndeterminate(false);
+                        focusTable();
+                    }, (e) -> {
+                        progress.setIndeterminate(false);
+                        JOptionPane.showMessageDialog(this, e.getMessage());
+                    });
 
         }
     }
@@ -1215,7 +1211,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             }
             case "RO-HISTORY" -> {
                 if (selectObj instanceof VReturnOut v) {
-                    inventoryRepo.findReturnOut(v.getVouNo(), v.getDeptId()).subscribe((t) -> {
+                    inventoryRepo.findReturnOut(v.getVouNo(), v.getDeptId(),v.isLocal()).subscribe((t) -> {
                         setVoucher(t);
                     });
                 }
