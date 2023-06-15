@@ -7,6 +7,7 @@ package com.h2.dao;
 import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import com.common.Util1;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -31,7 +32,7 @@ public class COADaoImpl extends AbstractDao<COAKey, ChartOfAccount> implements C
     @Override
     public String getMaxDate() {
         String jpql = "select max(o.modifiedDate) from ChartOfAccount o";
-        Date date = getDate(jpql);
+        LocalDateTime date = getDate(jpql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 

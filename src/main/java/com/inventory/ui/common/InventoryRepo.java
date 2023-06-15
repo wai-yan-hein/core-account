@@ -1885,13 +1885,20 @@ public class InventoryRepo {
     }
 
     public Mono<List<ProcessHis>> getProcess(FilterObject f) {
+        if (f.isLocal()) {
+            return h2Repo.getProcessHistory(f);
+        }
         return inventoryApi
                 .post()
                 .uri("/process/get-process")
                 .body(Mono.just(f), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(ProcessHis.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<List<VPurchase>> getPurchaseVoucher(FilterObject filter) {

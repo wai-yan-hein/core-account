@@ -6,6 +6,7 @@ package com.h2.dao;
 
 import com.acc.model.BusinessType;
 import com.common.Util1;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import org.springframework.stereotype.Repository;
@@ -26,7 +27,7 @@ public class BusinessTypeDaoImpl extends AbstractDao<Integer, BusinessType> impl
     @Override
     public String getMaxDate() {
         String jpql = "select max(o.updatedDate) from BusinessType o";
-        Date date = getDate(jpql);
+        LocalDateTime date = getDate(jpql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 

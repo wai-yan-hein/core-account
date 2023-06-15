@@ -9,14 +9,9 @@ import com.h2.service.CompanyInfoService;
 import com.user.model.CompanyInfo;
 import com.user.model.PCKey;
 import com.user.model.PrivilegeCompany;
-import com.user.model.VRoleCompany;
-import java.io.Serial;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -39,7 +34,7 @@ public class PrivilegeCompanyDaoImpl extends AbstractDao<PCKey, PrivilegeCompany
     @Override
     public String getMaxDate() {
         String sql = "select max(o.updatedDate) from PrivilegeCompany o";
-        Date date = getDate(sql);
+        LocalDateTime date = getDate(sql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 

@@ -4,6 +4,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.CloudIntegration;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.PanelControl;
@@ -62,6 +63,8 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
     private InventoryRepo inventoryRepo;
     @Autowired
     private UserRepo userRepo;
+    @Autowired
+    private CloudIntegration integration;
     private JProgressBar progress;
     private SelectionObserver observer;
     private final ProcessHisDetailTableModel processHisDetailTableModel = new ProcessHisDetailTableModel();
@@ -434,6 +437,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             dialog.setIconImage(searchIcon);
             dialog.setObserver(this);
             dialog.setInventoryRepo(inventoryRepo);
+            dialog.setIntegration(integration);
             dialog.setUserRepo(userRepo);
             dialog.initMain();
             dialog.setSize(Global.width - 100, Global.height - 100);

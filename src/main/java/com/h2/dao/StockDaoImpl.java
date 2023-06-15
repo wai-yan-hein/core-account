@@ -9,6 +9,8 @@ import com.inventory.model.Stock;
 import com.inventory.model.StockKey;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -44,7 +46,7 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
     @Override
     public String getMaxDate() {
         String jpql = "select max(o.updatedDate) from Stock o";
-        Date date = getDate(jpql);
+        LocalDateTime date = getDate(jpql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 

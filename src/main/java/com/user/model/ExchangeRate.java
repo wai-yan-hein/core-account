@@ -12,6 +12,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
+import java.time.LocalDateTime;
 import java.util.Date;
 import lombok.Data;
 
@@ -40,14 +41,12 @@ public class ExchangeRate {
     private String targetCur;
     @Transient
     private Double exRate;
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_date")
+    @Column(name = "created_date", columnDefinition = "TIMESTAMP")
     private Date createdDate;
     @Column(name = "created_by")
     private String createdBy;
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_date")
-    private Date updatedDate;
+    @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime updatedDate;
     @Column(name = "updated_by")
     private String updatedBy;
     @Column(name = "deleted")

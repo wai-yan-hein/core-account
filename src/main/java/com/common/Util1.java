@@ -33,6 +33,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
@@ -201,6 +203,11 @@ public class Util1 {
         return date == null ? null : formatter.format(date);
     }
 
+    public static String toDateTimeStrMYSQL(LocalDateTime date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return date == null ? null : formatter.format(date);
+    }
+
     public static String getTodayDateTimeStrMySql() {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String date = null;
@@ -305,6 +312,11 @@ public class Util1 {
 
     public static Date getTodayDate() {
         return Calendar.getInstance(TimeZone.getTimeZone("Asia/Yangon")).getTime();
+    }
+
+    public static LocalDateTime getTodayLocalDateTime() {
+        long currentTimeMillis = Calendar.getInstance(TimeZone.getTimeZone("Asia/Yangon")).getTimeInMillis();
+        return LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(currentTimeMillis), ZoneId.of("Asia/Yangon"));
     }
 
     public static String getTodayDateTime() {

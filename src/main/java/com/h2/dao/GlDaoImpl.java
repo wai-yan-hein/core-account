@@ -6,6 +6,7 @@ package com.h2.dao;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
 import com.common.Util1;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,7 @@ public class GlDaoImpl extends AbstractDao<GlKey, Gl> implements GlDao {
     @Override
     public String getMaxDate() {
         String jpql = "select max(o.modifyDate) from Gl o";
-        Date date = getDate(jpql);
+        LocalDateTime date = getDate(jpql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 

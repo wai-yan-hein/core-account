@@ -7,6 +7,7 @@ package com.h2.dao;
 import com.common.Util1;
 import com.inventory.model.PriceOption;
 import com.inventory.model.PriceOptionKey;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import org.springframework.stereotype.Repository;
@@ -27,7 +28,7 @@ public class PriceOptionDaoImpl extends AbstractDao<PriceOptionKey, PriceOption>
     @Override
     public String getMaxDate() {
         String jpql = "select max(o.updatedDate) from PriceOption o";
-        Date date = getDate(jpql);
+        LocalDateTime date = getDate(jpql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
 
