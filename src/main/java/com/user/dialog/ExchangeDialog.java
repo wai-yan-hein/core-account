@@ -205,7 +205,7 @@ public class ExchangeDialog extends javax.swing.JDialog {
                 exchange.setDeleted(false);
             } else {
                 exchange.setUpdatedBy(Global.loginUser.getUserCode());
-                exchange.setUpdatedDate(Util1.getTodayDate());
+                exchange.setUpdatedDate(Util1.getTodayLocalDateTime());
             }
         }
         return true;

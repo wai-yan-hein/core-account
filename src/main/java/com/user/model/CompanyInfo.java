@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import java.time.LocalDateTime;
 import java.util.Date;
 import lombok.Data;
 
@@ -57,9 +58,8 @@ public class CompanyInfo {
     private boolean batchLock;
     @Column(name = "year_end_date")
     private Date yearEndDate;
-    @Column(name = "updated_date")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedDate;
+    @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime updatedDate;
 
     @Override
     public String toString() {

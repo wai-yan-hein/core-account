@@ -33,6 +33,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javax.swing.ImageIcon;
@@ -311,6 +312,11 @@ public class Util1 {
 
     public static Date getTodayDate() {
         return Calendar.getInstance(TimeZone.getTimeZone("Asia/Yangon")).getTime();
+    }
+
+    public static LocalDateTime getTodayLocalDateTime() {
+        long currentTimeMillis = Calendar.getInstance(TimeZone.getTimeZone("Asia/Yangon")).getTimeInMillis();
+        return LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(currentTimeMillis), ZoneId.of("Asia/Yangon"));
     }
 
     public static String getTodayDateTime() {

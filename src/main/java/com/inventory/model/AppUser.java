@@ -10,9 +10,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import java.util.Date;
+import java.time.LocalDateTime;
 import lombok.Data;
 
 /**
@@ -41,9 +39,8 @@ public class AppUser implements java.io.Serializable {
     private String roleCode;
     @Column(name = "doctor_id")
     private String doctorId;
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_date")
-    private Date updatedDate;
+    @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime updatedDate;
 
     public AppUser(String userCode, String userName) {
         this.userCode = userCode;

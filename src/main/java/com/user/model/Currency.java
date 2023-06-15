@@ -9,9 +9,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import java.util.Date;
+import java.time.LocalDateTime;
 import lombok.Data;
 
 /**
@@ -37,9 +35,8 @@ public class Currency {
     private String curGainAcc;
     @Column(name = "cur_lost_acc")
     private String curLostAcc;
-    @Column(name = "updated_date")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedDate;
+    @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime updatedDate;
 
     public Currency(String curCode, String currencyName) {
         this.curCode = curCode;

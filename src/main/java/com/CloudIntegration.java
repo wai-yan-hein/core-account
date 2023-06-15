@@ -166,7 +166,7 @@ public class CloudIntegration {
 
     public void startDownload() {
         if (localDatabase) {
-            //downloadUser();
+            downloadUser();
             downloadInventory();
             //downloadAccount();
         }

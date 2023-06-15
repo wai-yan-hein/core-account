@@ -10,10 +10,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
-import java.util.Date;
+import java.time.LocalDateTime;
 import lombok.Data;
 
 /**
@@ -31,9 +29,8 @@ public class AppRole implements java.io.Serializable {
     private String roleCode;
     @Column(name = "role_name")
     private String roleName;
-    @Column(name = "updated_date")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedDate;
+    @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime updatedDate;
     @Transient
     private String exampleRole;
 

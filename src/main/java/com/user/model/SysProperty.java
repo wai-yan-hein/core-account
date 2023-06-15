@@ -9,11 +9,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import java.util.Date;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.time.LocalDateTime;
 
 /**
  *
@@ -31,7 +29,6 @@ public class SysProperty {
     private String propValue;
     @Column(name = "remark")
     private String remark;
-    @Column(name = "updated_date")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedDate;
+    @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime updatedDate;
 }

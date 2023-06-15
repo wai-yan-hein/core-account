@@ -9,9 +9,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import java.util.Date;
+import java.time.LocalDateTime;
 import lombok.Data;
 
 /**
@@ -35,9 +33,8 @@ public class DepartmentUser {
     private String inventoryQ;
     @Column(name = "acc_queue")
     private String accountQ;
-    @Column(name = "updated_date")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedDate;
+    @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime updatedDate;
 
     public DepartmentUser(Integer deptId) {
         this.deptId = deptId;

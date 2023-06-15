@@ -9,9 +9,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import java.util.Date;
+import java.time.LocalDateTime;
 import lombok.Data;
 
 /**
@@ -29,9 +27,8 @@ public class BusinessType {
     private Integer busId;
     @Column(name = "bus_name")
     private String busName;
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_date")
-    private Date updatedDate;
+    @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime updatedDate;
 
     @Override
     public String toString() {
