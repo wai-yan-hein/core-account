@@ -1407,15 +1407,15 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<RetInHisDetail>> getReturnInDetail(String vouNo) {
+    public Mono<List<RetInHisDetail>> getReturnInDetail(String vouNo, Integer depId) {
         if (localDatabase) {
-            //return h2Repo.searchReturnInDetail(vouNo);
+            return h2Repo.searchReturnInDetail(vouNo,depId);
         }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/retin/get-retin-detail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", Global.deptId)
+                .queryParam("deptId", depId)
                 .build())
                 .retrieve()
                 .bodyToFlux(RetInHisDetail.class)
@@ -1458,15 +1458,15 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<RetOutHisDetail>> getReturnOutDetail(String vouNo) {
+    public Mono<List<RetOutHisDetail>> getReturnOutDetail(String vouNo, Integer depId) {
         if (localDatabase) {
-            //return h2Repo.searchReturnInDetail(vouNo);
+            return h2Repo.searchReturnOutDetail(vouNo,depId);
         }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/retout/get-retout-detail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", Global.deptId)
+                .queryParam("deptId", depId)
                 .build())
                 .retrieve()
                 .bodyToFlux(RetOutHisDetail.class)

@@ -489,7 +489,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                 projectAutoCompleter.setProject(null);
             }
             String vouNo = ri.getKey().getVouNo();
-            inventoryRepo.getReturnInDetail(vouNo)
+            inventoryRepo.getReturnInDetail(vouNo,deptId)
                     .subscribe((t) -> {
                         retInTableModel.setListDetail(t);
                         retInTableModel.addNewRow();

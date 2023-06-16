@@ -226,8 +226,9 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<VPurchase> getPurchaseHistory(String fromDate, String toDate, String traderCode, String vouNo, String userCode, String locCode,
-            String compCode, Integer deptId, String deleted) {
+    public List<VPurchase> getPurchaseHistory(String fromDate, String toDate, String traderCode, String vouNo,
+            String userCode, String remark,String stockCode, String locCode, String compCode,
+            Integer deptId, String deleted, String projectNo, String curCode){
         List<VPurchase> purchaseList = new ArrayList<>();
         try {
             String sql = "select a.*,t.trader_name\n"
@@ -236,12 +237,16 @@ public class ReportServiceImpl implements ReportService {
                     + "where comp_code = '" + compCode + "'\n"
                     + "and (dept_id = " + deptId + " or 0 =" + deptId + ")\n"
                     + "and deleted =" + deleted + "\n"
-                    + "and intg_upd_status is null\n"
+                    + "and cur_code = '" + curCode + "'\n"                     
+                    + "and intg_upd_status is null\n" 
                     + "and cast(vou_date as date) between '" + fromDate + "' and '" + toDate + "'\n"
+                    + "and (stock_code ='" + stockCode + "' or '-' ='" + stockCode + "')\n"  
                     + "and (vou_no = '" + vouNo + "' or '-' = '" + vouNo + "')\n"
+                    + "and (remark like '" + remark + "%' or '-%'= '" + remark + "%')\n" 
                     + "and (trader_code = '" + traderCode + "' or '-'= '" + traderCode + "')\n"
                     + "and (created_by = '" + userCode + "' or '-'='" + userCode + "')\n"
                     + "and (loc_code ='" + locCode + "' or '-' ='" + locCode + "')\n"
+                    + "and (project_no ='" + projectNo + "' or '-' ='" + projectNo + "')\n" 
                     + "group by vou_no)a\n"
                     + "join trader t on a.trader_code = t.code\n"
                     + "and a.comp_code = t.comp_code\n"
@@ -272,25 +277,27 @@ public class ReportServiceImpl implements ReportService {
     
     @Override
     public List<VReturnIn> getReturnInHistory(String fromDate, String toDate, String traderCode, String vouNo,
-                                               String userCode,String locCode, String compCode, Integer deptId,
-                                              String deleted){
+                                               String userCode,String remark,String locCode, String compCode, Integer deptId,
+                                              String deleted,String projectNo, String curCode){
         List<VReturnIn> returnInList = new ArrayList<>();
         try{        
         String sql = "select a.*,t.trader_name\n" +
                 "from (\n" + "select cast(vou_date as date) vou_date,vou_no,remark,created_by,paid,vou_total,deleted,trader_code,comp_code,dept_id \n" +
-                "from v_return_in \n" + "where comp_code = '" + compCode + "'\n" +
+                "from ret_in_his \n" + "where comp_code = '" + compCode + "'\n" +
                 "and deleted = " + deleted + "\n" +
-                //"and cur_code = '" + curCode + "'\n" +
+                "and cur_code = '" + curCode + "'\n" +
+                "and intg_upd_status is null\n" +
                 "and (dept_id = " + deptId + " or 0 =" + deptId + ")\n" +
                 "and cast(vou_date as date) between '" + fromDate + "' and '" + toDate + "'\n" +
                 "and (vou_no = '" + vouNo + "' or '-' = '" + vouNo + "')\n" + 
-               // "and (remark like '" + remark + "%' or '-%'= '" + remark + "%')\n" + 
+                "and (remark like '" + remark + "%' or '-%'= '" + remark + "%')\n" + 
                 "and (trader_code = '" + traderCode + "' or '-'= '" + traderCode + "')\n" +
                 "and (created_by = '" + userCode + "' or '-'='" + userCode + "')\n" + 
                 //"and (stock_code ='" + stockCode + "' or '-' ='" + stockCode + "')\n" + 
                 "and (loc_code ='" + locCode + "' or '-' ='" + locCode + "')\n" + 
-                //"and (project_no ='" + projectNo + "' or '-' ='" + projectNo + "')\n" +
-                "group by vou_no\n" + ")a\n" + "join trader t on a.trader_code = t.code\n" + 
+                "and (project_no ='" + projectNo + "' or '-' ='" + projectNo + "')\n" +
+                "group by vou_no\n" + ")a\n" +
+                "join trader t on a.trader_code = t.code\n" + 
                 "and a.comp_code = t.comp_code\n" + 
                 "order by cast(vou_date as date),vou_no";
         ResultSet rs = reportDao.executeSql(sql);
@@ -317,25 +324,26 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<VReturnOut> getReturnOutHistory(String fromDate, String toDate, String traderCode, String vouNo, 
-                                                String userCode, String locCode, String compCode, Integer deptId,
-                                                String deleted) {
+    public List<VReturnOut> getReturnOutHistory(String fromDate, String toDate, String traderCode, String vouNo,
+                                               String userCode,String remark,String locCode, String compCode, Integer deptId,
+                                              String deleted,String projectNo, String curCode) {
         List<VReturnOut> returnOutList = new ArrayList<>();
         try{
         String sql = "select a.*,t.trader_name\n" +
                 "from (\n" + "select cast(vou_date as date) vou_date,vou_no,remark,created_by,paid,vou_total,deleted,trader_code,comp_code,dept_id \n" +
-                "from v_return_out \n" + "where comp_code = '" + compCode + "'\n" +
+                "from ret_out_his \n" + "where comp_code = '" + compCode + "'\n" +
                 "and deleted = " + deleted + "\n" +
-                //"and cur_code = '" + curCode + "'\n" +
+                "and cur_code = '" + curCode + "'\n" +
                 "and (dept_id = " + deptId + " or 0 =" + deptId + ")\n" +
+                "and intg_upd_status is null\n"+
                 "and cast(vou_date as date) between '" + fromDate + "' and '" + toDate + "'\n" +
                 "and (vou_no = '" + vouNo + "' or '-' = '" + vouNo + "')\n" +
-               // "and (remark like '" + remark + "%' or '-%'= '" + remark + "%')\n" +
+                "and (remark like '" + remark + "%' or '-%'= '" + remark + "%')\n" +
                 "and (trader_code = '" + traderCode + "' or '-'= '" + traderCode + "')\n" + 
                 "and (created_by = '" + userCode + "' or '-'='" + userCode + "')\n" + 
                 //"and (stock_code ='" + stockCode + "' or '-' ='" + stockCode + "')\n" + 
                 "and (loc_code ='" + locCode + "' or '-' ='" + locCode + "')\n" + 
-                //"and (project_no ='" + projectNo + "' or '-' ='" + projectNo + "')\n" +
+                "and (project_no ='" + projectNo + "' or '-' ='" + projectNo + "')\n" +
                 "group by vou_no\n" + ")a\n" + "join trader t on a.trader_code = t.code\n" + 
                 "and a.comp_code= t.comp_code\n" + 
                 "order by cast(vou_date as date),vou_no";
