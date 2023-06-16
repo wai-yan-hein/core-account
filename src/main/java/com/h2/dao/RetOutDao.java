@@ -7,7 +7,6 @@ package com.h2.dao;
 
 import com.inventory.model.RetOutHis;
 import com.inventory.model.RetOutHisKey;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -28,7 +27,6 @@ public interface RetOutDao {
 
     List<RetOutHis> unUploadVoucher(String syncDate);
 
-    Date getMaxDate();
 
     List<RetOutHis> search(String updatedDate, List<String> keys);
 

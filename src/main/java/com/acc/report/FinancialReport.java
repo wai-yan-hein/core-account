@@ -175,8 +175,8 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                 if (!isReport) {
                     progress.setIndeterminate(true);
                     isReport = true;
-                    String stDate = dateAutoCompleter.getStDate();
-                    String enDate = dateAutoCompleter.getEndDate();
+                    String stDate = dateAutoCompleter.getDateModel().getStartDate();
+                    String enDate = dateAutoCompleter.getDateModel().getEndDate();
                     filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
                     filter.setOpDate(Util1.toDateStr(Global.startDate, "dd/MM/yyyy", "yyyy-MM-dd"));
                     filter.setFromDate(Util1.toDateStr(stDate, "dd/MM/yyyy", "yyyy-MM-dd"));

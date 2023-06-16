@@ -136,7 +136,7 @@ public class ProUtil {
             String today = Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd");
             value = Util1.toDateStr(Util1.minusDay(today, day), "yyyy-MM-dd", Global.dateFormat);
         }
-        return value == null ? Util1.toDate(Global.startDate, Global.dateFormat) : Util1.toDate(value, Global.dateFormat);
+        return value == null ? Util1.parseDate(Global.startDate, Global.dateFormat) : Util1.parseDate(value, Global.dateFormat);
     }
 
     public static int lockDay() {
@@ -149,7 +149,7 @@ public class ProUtil {
             JOptionPane.showMessageDialog(Global.parentForm, "Date is due.", "Invalid Date", JOptionPane.ERROR_MESSAGE);
             return false;
         }
-        if (date.before(Util1.toDate(Global.startDate, Global.dateFormat))) {
+        if (date.before(Util1.parseDate(Global.startDate, Global.dateFormat))) {
             JOptionPane.showMessageDialog(Global.parentForm, "Date is not in finacial period.", "Invalid Date", JOptionPane.ERROR_MESSAGE);
             return false;
         }

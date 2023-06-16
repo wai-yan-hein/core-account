@@ -8,7 +8,6 @@ package com.h2.service;
 import com.inventory.model.General;
 import com.inventory.model.OrderHis;
 import com.inventory.model.OrderHisKey;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,7 +30,6 @@ public interface OrderHisService {
 
     List<OrderHis> unUploadVoucher(String compCode);
 
-    Date getMaxDate();
 
     List<OrderHis> search(String updatedDate, List<String> keys);
 

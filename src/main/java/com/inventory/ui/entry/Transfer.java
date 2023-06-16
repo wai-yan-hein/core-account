@@ -274,7 +274,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         } else {
             io.setRefNo(txtRefNo.getText());
             io.setRemark(txtRemark.getText());
-            io.setVouDate(txtDate.getDate());
+            io.setVouDate(Util1.convertToLocalDateTime(txtDate.getDate()));
             io.setLocCodeFrom(fromLocaitonCompleter.getLocation().getKey().getLocCode());
             io.setLocCodeTo(toLocaitonCompleter.getLocation().getKey().getLocCode());
             io.setStatus(lblStatus.getText());
@@ -310,7 +310,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             tranTableModel.setListTransfer(t);
             tranTableModel.addNewRow();
             txtVou.setText(vouNo);
-            txtDate.setDate(Util1.toDateFormat(io.getVouDate(), "dd/MM/yyyy"));
+            txtDate.setDate(Util1.convertToDate(io.getVouDate()));
             txtRemark.setText(io.getRemark());
             txtRefNo.setText(io.getRefNo());
             if (io.isVouLock()) {
@@ -649,7 +649,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
                     if (date.length() == 8 || date.length() == 6) {
-                        txtDate.setDate(Util1.formatDate(date));
+                        txtDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
                     }
                     txtFrom.requestFocus();
                 }

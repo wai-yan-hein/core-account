@@ -3,7 +3,6 @@ package com.h2.dao;
 import com.inventory.model.LocationKey;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisKey;
-import java.util.Date;
 import java.util.List;
 
 public interface OPHisDao {
@@ -20,6 +19,5 @@ public interface OPHisDao {
 
     List<OPHis> search(String updatedDate, List<LocationKey> keys);
 
-    Date getMaxDate();
 
 }

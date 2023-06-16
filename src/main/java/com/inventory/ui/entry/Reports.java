@@ -968,8 +968,8 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     @Override
     public void selected(Object source, Object selectObj) {
         if (source.equals("Date")) {
-            txtFromDate.setDate(Util1.toDate(dateAutoCompleter.getStDate(), "dd/MM/yyyy"));
-            txtToDate.setDate(Util1.toDate(dateAutoCompleter.getEndDate(), "dd/MM/yyyy"));
+            txtFromDate.setDate(Util1.parseDate(dateAutoCompleter.getDateModel().getStartDate(), "dd/MM/yyyy"));
+            txtToDate.setDate(Util1.parseDate(dateAutoCompleter.getDateModel().getEndDate(), "dd/MM/yyyy"));
         }
     }
 

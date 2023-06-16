@@ -55,11 +55,12 @@ public class DateTableModel extends AbstractTableModel {
             DateModel coa = listDate.get(row);
 
             switch (column) {
-                case 0: //Code
-                    return coa.getText();
+                case 0 -> {
+                    //Code
+                    return coa.getDescription();
+                }
             }
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
 

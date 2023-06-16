@@ -140,7 +140,7 @@ public class ReportServiceImpl implements ReportService {
                         key.setGlCode(rs.getString("gl_code"));
                         key.setDeptId(rs.getInt("dept_id"));
                         v.setKey(key);
-                        v.setGlDate(rs.getDate("gl_date"));
+                        v.setGlDate(rs.getTimestamp("gl_date").toLocalDateTime());
                         v.setVouDate(Util1.toDateStr(v.getGlDate(), "dd/MM/yyyy"));
                         v.setCurCode(rs.getString("cur_code"));
                         v.setSrcAccCode(rs.getString("source_ac_id"));
@@ -172,8 +172,8 @@ public class ReportServiceImpl implements ReportService {
                     key.setGlCode(rs.getString("gl_code"));
                     key.setDeptId(rs.getInt("dept_id"));
                     v.setKey(key);
-                    v.setGlDate(rs.getTimestamp("gl_date"));
-                    v.setCreatedDate(rs.getTimestamp("created_date"));
+                    v.setGlDate(rs.getTimestamp("gl_date").toLocalDateTime());
+                    v.setCreatedDate(rs.getTimestamp("created_date").toLocalDateTime());
                     v.setVouDate(Util1.toDateStr(v.getGlDate(), "dd/MM/yyyy"));
                     v.setDescription(rs.getString("description"));
                     v.setSrcAccCode(rs.getString("source_ac_id"));

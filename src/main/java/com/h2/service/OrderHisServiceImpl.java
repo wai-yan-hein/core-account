@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -114,10 +113,6 @@ public class OrderHisServiceImpl implements OrderHisService {
         return shDao.unUploadVoucher(syncDate);
     }
 
-    @Override
-    public Date getMaxDate() {
-        return shDao.getMaxDate();
-    }
 
     @Override
     public List<OrderHis> search(String updatedDate, List<String> location) {

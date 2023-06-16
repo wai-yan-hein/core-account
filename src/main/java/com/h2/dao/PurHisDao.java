@@ -6,7 +6,6 @@
 package com.h2.dao;
 import com.inventory.model.PurHis;
 import com.inventory.model.PurHisKey;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -27,7 +26,6 @@ public interface PurHisDao {
 
     List<PurHis> unUploadVoucher(String compCode);
 
-    Date getMaxDate();
 
     List<PurHis> search(String updatedDate, List<String> keys);
 

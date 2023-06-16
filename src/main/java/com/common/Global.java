@@ -5,11 +5,12 @@
  */
 package com.common;
 
+import com.acc.model.DateModel;
 import com.inventory.model.AppUser;
 import java.awt.Color;
 import java.awt.Font;
-import java.net.ServerSocket;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -60,4 +61,5 @@ public class Global {
     public static Map<String, String> hmRoleProperty = new HashMap<>();
     public static Map<String, String> hmUser = new HashMap<>();
     public static String currency;
+    public static List<DateModel> listDate;
 }

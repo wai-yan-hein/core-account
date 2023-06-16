@@ -30,7 +30,6 @@ import com.common.Global;
 import com.common.ReturnObject;
 import com.common.Util1;
 import com.user.model.YearEnd;
-import java.sql.SQLException;
 import java.util.List;
 import javax.swing.JOptionPane;
 import lombok.extern.slf4j.Slf4j;
@@ -517,15 +516,6 @@ public class AccountRepo {
                 .bodyToMono(YearEnd.class);
     }
 
-    public Flux<DateModel> getDate() {
-        return accountApi.get()
-                .uri(builder -> builder.path("/account/getDate")
-                .queryParam("startDate", Global.startDate)
-                .queryParam("endDate", Global.endate)
-                .build())
-                .retrieve().bodyToFlux(DateModel.class);
-    }
-
     public Mono<List<ChartOfAccount>> searchCOA(String str, int level) {
         if (localDatabase) {
             return h2Repo.searchCOA(str, level);
@@ -662,6 +652,18 @@ public class AccountRepo {
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(Gl.class)
+                .collectList();
+    }
+
+    public Mono<List<DateModel>> getDate() {
+        return accountApi.get()
+                .uri(builder -> builder.path("/account/getDate")
+                .queryParam("startDate", Global.startDate)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("isAll", Boolean.TRUE)
+                .build())
+                .retrieve()
+                .bodyToFlux(DateModel.class)
                 .collectList();
     }
 }

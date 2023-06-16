@@ -1,5 +1,6 @@
 package com.acc.common;
 
+import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import javax.swing.*;
@@ -143,7 +144,7 @@ public class DateTableDecorator {
 
     private String getDate(int index) {
         String date = hmData.get(index);
-        return Util1.toDateStr(date, "yyyy-MM-dd", "dd/MM/yy");
+        return Util1.toDateStr(date, "yyyy-MM-dd", Global.dateFormat);
     }
 
     private void search(int index) {

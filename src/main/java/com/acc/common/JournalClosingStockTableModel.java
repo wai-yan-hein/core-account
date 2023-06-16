@@ -106,12 +106,12 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
                 switch (column) {
                     case 0 -> {
                         if (Util1.isValidDateFormat(value.toString(), "dd/MM/yyyy")) {
-                            op.setTranDate(Util1.toDate(value, "dd/MM/yyyy"));
+                            op.setTranDate(Util1.parseDate(value.toString(), "dd/MM/yyyy"));
                         } else {
                             int length = value.toString().length();
                             if (length == 8 || length == 6) {
                                 String toFormatDate = Util1.toFormatDate(value.toString(), length);
-                                op.setTranDate(Util1.toDate(toFormatDate, "dd/MM/yyyy"));
+                                op.setTranDate(Util1.parseDate(toFormatDate, "dd/MM/yyyy"));
                             } else {
                                 op.setTranDate(Util1.getTodayDate());
                                 JOptionPane.showMessageDialog(Global.parentForm, "Invalid Date");

@@ -72,7 +72,6 @@ import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.core.publisher.Mono;
 
 /**
@@ -216,7 +215,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         txtDueDate.setDate(oh.getCreditTerm());
                         txtRemark.setText(oh.getRemark());
                         txtReference.setText(oh.getReference());
-                        txtSaleDate.setDate(oh.getVouDate());
+                        txtSaleDate.setDate(Util1.convertToDate(oh.getVouDate()));
                         txtVouTotal.setValue(Util1.getFloat(oh.getVouTotal()));
                         txtVouDiscP.setValue(Util1.getFloat(oh.getDiscP()));
                         txtVouDiscount.setValue(Util1.getFloat(oh.getDiscount()));
@@ -564,7 +563,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             saleHis.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
             saleHis.setGrandTotal(Util1.getFloat(txtGrandTotal.getValue()));
             saleHis.setStatus(lblStatus.getText());
-            saleHis.setVouDate(txtSaleDate.getDate());
+            saleHis.setVouDate(Util1.convertToLocalDateTime(txtSaleDate.getDate()));
             saleHis.setMacId(Global.macId);
             saleHis.setOrderNo(txtOrderNo.getText());
             Project p = projectAutoCompleter.getProject();
@@ -739,7 +738,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 txtDueDate.setDate(saleHis.getCreditTerm());
                 txtRemark.setText(saleHis.getRemark());
                 txtReference.setText(saleHis.getReference());
-                txtSaleDate.setDate(saleHis.getVouDate());
+                txtSaleDate.setDate(Util1.convertToDate(saleHis.getVouDate()));
                 txtVouTotal.setValue(Util1.getFloat(saleHis.getVouTotal()));
                 txtVouDiscP.setValue(Util1.getFloat(saleHis.getDiscP()));
                 txtVouDiscount.setValue(Util1.getFloat(saleHis.getDiscount()));
@@ -1818,7 +1817,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
                     if (date.length() == 8 || date.length() == 6) {
-                        txtSaleDate.setDate(Util1.formatDate(date));
+                        txtSaleDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
                     }
                     txtCus.requestFocus();
                 }
@@ -1827,7 +1826,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
                     if (date.length() == 8 || date.length() == 6) {
-                        txtDueDate.setDate(Util1.formatDate(date));
+                        txtDueDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
                     }
                     txtReference.requestFocus();
                 }

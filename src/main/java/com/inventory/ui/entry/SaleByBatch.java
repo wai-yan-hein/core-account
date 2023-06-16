@@ -431,7 +431,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
             saleHis.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
             saleHis.setGrandTotal(Util1.getFloat(txtGrandTotal.getValue()));
             saleHis.setStatus(lblStatus.getText());
-            saleHis.setVouDate(txtSaleDate.getDate());
+            saleHis.setVouDate(Util1.convertToLocalDateTime(txtSaleDate.getDate()));
             saleHis.setMacId(Global.macId);
             if (lblStatus.getText().equals("NEW")) {
                 SaleHisKey key = new SaleHisKey();
@@ -608,7 +608,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
                 txtDueDate.setDate(saleHis.getCreditTerm());
                 txtRemark.setText(saleHis.getRemark());
                 txtReference.setText(saleHis.getReference());
-                txtSaleDate.setDate(saleHis.getVouDate());
+                txtSaleDate.setDate(Util1.convertToDate(saleHis.getVouDate()));
                 txtVouTotal.setValue(Util1.getFloat(saleHis.getVouTotal()));
                 txtVouDiscP.setValue(Util1.getFloat(saleHis.getDiscP()));
                 txtVouDiscount.setValue(Util1.getFloat(saleHis.getDiscount()));
@@ -1631,7 +1631,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
                     if (date.length() == 8 || date.length() == 6) {
-                        txtSaleDate.setDate(Util1.formatDate(date));
+                        txtSaleDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
                     }
                     txtCus.requestFocus();
                 }
@@ -1640,7 +1640,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
                     if (date.length() == 8 || date.length() == 6) {
-                        txtDueDate.setDate(Util1.formatDate(date));
+                        txtDueDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
                     }
                     txtReference.requestFocus();
                 }

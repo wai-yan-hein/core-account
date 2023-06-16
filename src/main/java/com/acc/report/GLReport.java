@@ -34,9 +34,8 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
@@ -132,7 +131,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     private void createDateFilter() {
         HashMap<Integer, String> hmDate = new HashMap<>();
         HashMap<String, Integer> hmPage = new HashMap<>();
-        List<Date> date = Util1.getDaysBetweenDates(Util1.toDate(Global.startDate, "dd/MM/yyyy"), Util1.getTodayDate());
+        List<LocalDate> date = Util1.getDaysBetweenDates(Util1.parseLocalDate(Global.startDate, "dd/MM/yyyy"), LocalDate.now());
         for (int i = 0; i < date.size(); i++) {
             String str = Util1.toDateStr(date.get(i), "yyyy-MM-dd");
             int z = i + 1;
@@ -141,7 +140,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         }
         decorator.setHmPage(hmPage);
         decorator.setHmData(hmDate);
-        decorator.refreshButton(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
+        decorator.refreshButton(Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), Global.dateFormat));
     }
 
     private void initTextBox() {
@@ -245,8 +244,8 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             initTableModel();
             glListingTableModel.clear();
             String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
-            stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), "dd/MM/yyyy");
-            endDate = Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), "dd/MM/yyyy");
+            stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), "dd/MM/yyyy");
+            endDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getEndDate(), "dd/MM/yyyy");
             ChartOfAccount coa = cOAAutoCompleter.getCOA();
             String coaLv1 = Util1.getInteger(coa.getCoaLevel()) == 1 ? coa.getKey().getCoaCode() : "-";
             String coaLv2 = Util1.getInteger(coa.getCoaLevel()) == 2 ? coa.getKey().getCoaCode() : "-";
@@ -297,13 +296,11 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             dialog.setLocationRelativeTo(null);
         }
         dialog.setCoaCode(coaCode);
-        dialog.setStDate(dateAutoCompleter.getStDate());
-        dialog.setEndDate(dateAutoCompleter.getEndDate());
         dialog.setCurCode(curCode);
         dialog.setDesp(coaName);
         dialog.setTraderCode(null);
         dialog.setDepartment(departmentAutoCompleter.getListOption());
-        dialog.initData();
+        dialog.setDateModel(dateAutoCompleter.getDateModel());
         dialog.searchTriBalDetail();
     }
 
@@ -362,7 +359,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             Util1.writeJsonFile(glListingTableModel.getListTBAL(), path);
             Map<String, Object> p = new HashMap();
             p.put("p_report_name", "Trial Balance");
-            p.put("p_date", String.format("Between %s and %s", dateAutoCompleter.getStDate(), dateAutoCompleter.getEndDate()));
+            p.put("p_date", String.format("Between %s and %s", dateAutoCompleter.getDateModel().getStartDate(), dateAutoCompleter.getDateModel().getEndDate()));
             p.put("p_print_date", Util1.getTodayDateTime());
             p.put("p_comp_name", Global.companyName);
             p.put("p_comp_address", Global.companyAddress);
@@ -871,9 +868,9 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     public void selected(Object source, Object selectObj) {
         if (source != null) {
             if (source.equals("Date-Search")) {
-                String date = Util1.toDateStr(selectObj.toString(), "yyyy-MM-dd", Global.dateFormat);
-                dateAutoCompleter.setStDate(date);
-                dateAutoCompleter.setEndDate(date);
+                String date = selectObj.toString();
+                dateAutoCompleter.getDateModel().setStartDate(date);
+                dateAutoCompleter.getDateModel().setEndDate(date);
                 txtDate.setText(date);
             }
             searchGLListing();

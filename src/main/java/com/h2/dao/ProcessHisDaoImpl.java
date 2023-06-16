@@ -86,7 +86,7 @@ public class ProcessHisDaoImpl extends AbstractDao<ProcessHisKey, ProcessHis> im
                     p.setKey(key);
                     p.setStockCode(rs.getString("stock_code"));
                     p.setLocCode(rs.getString("loc_code"));
-                    p.setVouDate(rs.getDate("vou_date"));
+                    p.setVouDate(rs.getTimestamp("vou_date").toLocalDateTime());
                     p.setEndDate(rs.getDate("end_date"));
                     p.setQty(rs.getFloat("qty"));
                     p.setUnit(rs.getString("unit"));

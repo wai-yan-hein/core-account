@@ -18,6 +18,7 @@ import com.common.Util1;
 import com.google.gson.JsonSyntaxException;
 import com.user.model.Currency;
 import java.awt.HeadlessException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -224,7 +225,7 @@ public class TraderAdjustmentTableModel extends AbstractTableModel {
                                 String toFormatDate = Util1.toFormatDate(value.toString(), length);
                                 gl.setGlDate(Util1.toDate(toFormatDate, "dd/MM/yyyy"));
                             } else {
-                                gl.setGlDate(Util1.getTodayDate());
+                                gl.setGlDate(LocalDateTime.now());
                                 JOptionPane.showMessageDialog(Global.parentForm, "Invalid Date");
                             }
                         }
@@ -444,7 +445,7 @@ public class TraderAdjustmentTableModel extends AbstractTableModel {
                 gl.setDeptCode(department.getKey().getDeptCode());
                 gl.setDeptUsrCode(department.getUserCode());
             }
-            gl.setGlDate(glDate == null ? Util1.getTodayDate() : Util1.toDate(glDate, "dd/MM/yyyy"));
+            gl.setGlDate(glDate == null ?LocalDateTime.now() : Util1.toDate(glDate));
             gl.setSrcAccCode(sourceAccId);
             listVGl.add(gl);
             fireTableRowsInserted(listVGl.size() - 1, listVGl.size() - 1);

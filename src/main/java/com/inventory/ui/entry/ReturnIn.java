@@ -371,7 +371,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             ri.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             Project p = projectAutoCompleter.getProject();
             ri.setProjectNo(p == null ? null : p.getKey().getProjectNo());
-            ri.setVouDate(txtVouDate.getDate());
+            ri.setVouDate(Util1.convertToLocalDateTime(txtVouDate.getDate()));
             ri.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
             ri.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
             ri.setStatus(lblStatus.getText());
@@ -508,7 +508,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                         }
                         txtVouNo.setText(ri.getKey().getVouNo());
                         txtRemark.setText(ri.getRemark());
-                        txtVouDate.setDate(ri.getVouDate());
+                        txtVouDate.setDate(Util1.convertToDate(ri.getVouDate()));
                         txtVouTotal.setValue(Util1.getFloat(ri.getVouTotal()));
                         txtVouDiscP.setValue(Util1.getFloat(ri.getDiscP()));
                         txtVouDiscount.setValue(Util1.getFloat(ri.getDiscount()));
@@ -1290,7 +1290,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
                     if (date.length() == 8 || date.length() == 6) {
-                        txtVouDate.setDate(Util1.formatDate(date));
+                        txtVouDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
                     }
                     txtCus.requestFocus();
                 }

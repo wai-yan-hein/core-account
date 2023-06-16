@@ -164,7 +164,7 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
 
     private void setTodayDate() {
         if (txtFromDate.getDate() == null) {
-            txtFromDate.setDate(Util1.toDate(Global.startDate, "dd/MM/yyyy"));
+            txtFromDate.setDate(Util1.parseDate(Global.startDate, "dd/MM/yyyy"));
             txtToDate.setDate(Util1.getTodayDate());
         }
     }

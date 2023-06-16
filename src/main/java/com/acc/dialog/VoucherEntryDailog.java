@@ -109,7 +109,6 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         txtVouNo.setEditable(status.equals("NEW"));
     }
 
-
     /**
      * Creates new form JournalEntryDialog
      */
@@ -212,7 +211,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         if (this.listVGl != null) {
             if (!this.listVGl.isEmpty()) {
                 Gl vgl = listVGl.get(0);
-                txtVouDate.setDate(vgl.getGlDate());
+                txtVouDate.setDate(Util1.convertToDate(vgl.getGlDate()));
                 txtRefrence.setText(vgl.getReference());
                 txtVouNo.setText(vgl.getGlVouNo());
                 txtFrom.setText(vgl.getFromDes());
@@ -262,7 +261,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
     public boolean isValidData() {
         for (Gl g : tableModel.getListVGl()) {
             g.setSrcAccCode(srcAcc);
-            g.setGlDate(txtVouDate.getDate());
+            g.setGlDate(Util1.convertToLocalDateTime(txtVouDate.getDate()));
             g.setReference(txtRefrence.getText());
             g.setFromDes(txtFrom.getText());
             g.setForDes(txtFor.getText());
@@ -765,7 +764,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
                     if (e.getSource() instanceof JTextFieldDateEditor txt) {
                         String date = ((JTextFieldDateEditor) txt).getText();
                         if (date.length() == 8 || date.length() == 6) {
-                            txtVouDate.setDate(Util1.formatDate(date));
+                            txtVouDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
                         }
                         if (txtVouDate.getDate() != null) {
                             if (!ProUtil.isValidDate(txtVouDate.getDate())) {

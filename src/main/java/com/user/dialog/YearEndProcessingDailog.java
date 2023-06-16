@@ -13,6 +13,7 @@ import com.user.common.UserRepo;
 import com.user.model.CompanyInfo;
 import com.user.model.YearEnd;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import javax.swing.JDialog;
@@ -83,7 +84,7 @@ public class YearEndProcessingDailog extends javax.swing.JDialog {
                 end.setEndDate(txtEndDate.getDate());
                 end.setOpening(chkOpening.isSelected());
                 end.setBatchLock(chkLock.isSelected());
-                end.setCratedDate(Util1.getTodayDate());
+                end.setCreatedDate(LocalDateTime.now());
                 end.setCreateBy(Global.loginUser.getUserCode());
                 userRepo.yearEnd(end).subscribe((t) -> {
                     lblLog.setText(t.getMessage());

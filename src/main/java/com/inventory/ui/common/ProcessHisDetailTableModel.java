@@ -383,7 +383,7 @@ public class ProcessHisDetailTableModel extends AbstractTableModel {
             key.setDeptId(Global.deptId);
             key.setVouNo(txtVouNo.getText());
             pd.setKey(key);
-            pd.setVouDate(txtVouDate.getDate());
+            pd.setVouDate(Util1.convertToLocalDateTime(txtVouDate.getDate()));
             ProcessHisDetail a = aboveObject();
             if (a != null) {
                 pd.setVouDate(a.getVouDate());

@@ -184,13 +184,11 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             dialog.setLocationRelativeTo(null);
         }
         dialog.setCoaCode(coaCode);
-        dialog.setStDate(dateAutoCompleter.getStDate());
-        dialog.setEndDate(dateAutoCompleter.getEndDate());
         dialog.setCurCode(curCode);
         dialog.setDesp(traderName);
         dialog.setTraderCode(traderCode);
         dialog.setDepartment(departmentAutoCompleter.getListOption());
-        dialog.initData();
+        dialog.setDateModel(dateAutoCompleter.getDateModel());
         dialog.searchTriBalDetail();
     }
 
@@ -218,8 +216,8 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             isApPrCal = true;
             aPARTableModel.clear();
             String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
-            String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), "dd/MM/yyyy");
-            String endDate = Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), "dd/MM/yyyy");
+            String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), "dd/MM/yyyy");
+            String endDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getEndDate(), "dd/MM/yyyy");
             TraderA trader = traderAutoCompleter.getTrader();
             String traderType = trader.getTraderType();
             String traderCode = trader.getKey().getCode();
@@ -303,7 +301,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             Util1.writeJsonFile(aPARTableModel.getListAPAR(), path);
             Map<String, Object> p = new HashMap();
             p.put("p_report_name", "Account Receivable & Payable");
-            p.put("p_date", String.format("Between %s and %s", dateAutoCompleter.getStDate(), dateAutoCompleter.getEndDate()));
+            p.put("p_date", String.format("Between %s and %s", dateAutoCompleter.getDateModel().getStartDate(), dateAutoCompleter.getDateModel().getEndDate()));
             p.put("p_print_date", Util1.getTodayDateTime());
             p.put("p_comp_name", Global.companyName);
             p.put("p_comp_address", Global.companyAddress);

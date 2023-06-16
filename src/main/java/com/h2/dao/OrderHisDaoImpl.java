@@ -118,23 +118,6 @@ public class OrderHisDaoImpl extends AbstractDao<OrderHisKey, OrderHis> implemen
     }
 
     @Override
-    public Date getMaxDate() {
-        String sql = "select max(updated_date) date from order_his";
-        ResultSet rs = getResult(sql);
-        try {
-            if (rs.next()) {
-                Date date = rs.getTimestamp("date");
-                if (date != null) {
-                    return date;
-                }
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-        return Util1.getSyncDate();
-    }
-
-    @Override
     public List<OrderHis> search(String updatedDate, List<String> location) {
         List<OrderHis> list = new ArrayList<>();
         if (location != null) {
@@ -157,7 +140,7 @@ public class OrderHisDaoImpl extends AbstractDao<OrderHisKey, OrderHis> implemen
                             sh.setKey(k);
                             sh.setTraderCode(rs.getString("trader_code"));
                             sh.setSaleManCode(rs.getString("saleman_code"));
-                            sh.setVouDate(rs.getDate("vou_date"));
+                            sh.setVouDate(rs.getTimestamp("vou_date").toLocalDateTime());
                             sh.setCreditTerm(rs.getDate("credit_term"));
                             sh.setCurCode(rs.getString("cur_code"));
                             sh.setRemark(rs.getString("remark"));

@@ -5,16 +5,13 @@
  */
 package com.h2.dao;
 
-import com.common.Util1;
 import com.inventory.model.RetInHis;
 import com.inventory.model.RetInHisKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -114,23 +111,6 @@ public class RetInDaoImpl extends AbstractDao<RetInHisKey, RetInHis> implements 
                     s.getKey().getCompCode(), s.getKey().getDeptId()));
         });
         return list;
-    }
-
-    @Override
-    public Date getMaxDate() {
-        String sql = "select max(updated_date) date from ret_in_his";
-        ResultSet rs = getResult(sql);
-        try {
-            if (rs.next()) {
-                Date date = rs.getTimestamp("date");
-                if (date != null) {
-                    return date;
-                }
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-        return Util1.getSyncDate();
     }
 
     @Override

@@ -319,7 +319,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         } else {
             io.setDescription(txtDesp.getText());
             io.setRemark(txtRemark.getText());
-            io.setVouDate(txtDate.getDate());
+            io.setVouDate(Util1.convertToLocalDateTime(txtDate.getDate()));
             io.setVouStatusCode(vouStatusAutoCompleter.getVouStatus().getKey().getCode());
             if (lblStatus.getText().equals("NEW")) {
                 StockIOKey key = new StockIOKey();
@@ -362,7 +362,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                     }, () -> {
                         outTableModel.addNewRow();
                         txtVou.setText(vouNo);
-                        txtDate.setDate(Util1.toDateFormat(io.getVouDate(), "dd/MM/yyyy"));
+                        txtDate.setDate(Util1.convertToDate(io.getVouDate()));
                         txtRemark.setText(io.getRemark());
                         txtDesp.setText(io.getDescription());
                         if (Util1.getBoolean(io.getDeleted())) {
@@ -811,7 +811,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
                     if (date.length() == 8 || date.length() == 6) {
-                        txtDate.setDate(Util1.formatDate(date));
+                        txtDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
                     }
                     txtVouType.requestFocus();
                 }

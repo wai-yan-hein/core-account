@@ -277,7 +277,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             saleHis.setGrandTotal(saleHis.getVouTotal());
             saleHis.setPaid(saleHis.getVouTotal());
             saleHis.setStatus(lblStatus.getText());
-            saleHis.setVouDate(txtSaleDate.getDate());
+            saleHis.setVouDate(Util1.convertToLocalDateTime(txtSaleDate.getDate()));
             saleHis.setMacId(Global.macId);
             saleHis.setCurCode(Global.currency);
             saleHis.setLocCode(locCode);
@@ -395,7 +395,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     disableForm(true);
                 }
                 txtVouNo.setText(saleHis.getKey().getVouNo());
-                txtSaleDate.setDate(saleHis.getVouDate());
+                txtSaleDate.setDate(Util1.convertToDate(saleHis.getVouDate()));
                 txtVouTotal.setValue(Util1.getFloat(saleHis.getVouTotal()));
                 focusTable();
                 progress.setIndeterminate(false);

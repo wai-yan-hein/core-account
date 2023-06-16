@@ -52,6 +52,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -232,7 +233,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
     private void createDateFilter() {
         HashMap<Integer, String> hmDate = new HashMap<>();
         HashMap<String, Integer> hmPage = new HashMap<>();
-        List<Date> date = Util1.getDaysBetweenDates(Util1.toDate(Global.startDate, "dd/MM/yyyy"), Util1.getTodayDate());
+        List<LocalDate> date = Util1.getDaysBetweenDates(Util1.parseLocalDate(Global.startDate, "dd/MM/yyyy"), LocalDate.now());
         for (int i = 0; i < date.size(); i++) {
             String str = Util1.toDateStr(date.get(i), "yyyy-MM-dd");
             int z = i + 1;
@@ -241,7 +242,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         }
         decorator.setHmPage(hmPage);
         decorator.setHmData(hmDate);
-        decorator.refreshButton(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
+        decorator.refreshButton(dateAutoCompleter.getDateModel().getEndDate());
     }
 
     private void initFilter() {
@@ -434,8 +435,8 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
 
     public void printVoucher() {
         String currency = currencyAutoCompleter.getCurrency().getCurCode();
-        String stDate = dateAutoCompleter.getStDate();
-        String endDate = dateAutoCompleter.getEndDate();
+        String stDate = dateAutoCompleter.getDateModel().getStartDate();
+        String endDate = dateAutoCompleter.getDateModel().getEndDate();
         TraderA trader = traderAutoCompleter.getTrader();
         if (!currency.equals("-") || !ProUtil.isMultiCur()) {
             progress.setIndeterminate(true);
@@ -495,9 +496,8 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
     }
 
     private ReportFilter getOPFilter() {
-        String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat);
         String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
-        String clDate = Util1.toDateStrMYSQL(stDate, "dd/MM/yyyy");
+        String clDate = dateAutoCompleter.getDateModel().getStartDate();
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
         filter.setOpeningDate(opDate);
         filter.setFromDate(clDate);
@@ -510,8 +510,8 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
 
     private ReportFilter getFilter() {
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
-        filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
-        filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
+        filter.setFromDate(dateAutoCompleter.getDateModel().getStartDate());
+        filter.setToDate(dateAutoCompleter.getDateModel().getEndDate());
         filter.setDesp(despAutoCompleter.getAutoText().getDescription().equals("All") ? "-" : despAutoCompleter.getAutoText().getDescription());
         filter.setSrcAcc(traderAutoCompleter.getTrader().getAccount());
         filter.setReference(refAutoCompleter.getAutoText().getDescription().equals("All") ? "-"
@@ -1204,9 +1204,9 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
             if (source.equals("Date")) {
                 searchCash();
             } else if (source.equals("Date-Search")) {
-                String date = Util1.toDateStr(selectObj.toString(), "yyyy-MM-dd", Global.dateFormat);
-                dateAutoCompleter.setStDate(date);
-                dateAutoCompleter.setEndDate(date);
+                String date = selectObj.toString();
+                dateAutoCompleter.getDateModel().setStartDate(date);
+                dateAutoCompleter.getDateModel().setEndDate(date);
                 txtDate.setText(date);
                 searchCash();
             } else if (source.equals("CAL-TOTAL")) {

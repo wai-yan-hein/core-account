@@ -12,6 +12,7 @@ import lombok.Data;
 import java.util.Date;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.time.LocalDateTime;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -21,9 +22,8 @@ public class PaymentHis {
 
     @EmbeddedId
     private PaymentHisKey key;
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "vou_date")
-    private Date vouDate;
+    @Column(name = "vou_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime vouDate;
     @Column(name = "trader_code")
     private String traderCode;
     @Column(name = "remark")

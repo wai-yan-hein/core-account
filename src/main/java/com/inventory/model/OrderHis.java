@@ -12,6 +12,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
@@ -32,9 +34,8 @@ public class OrderHis implements java.io.Serializable {
     private String traderCode;
     @Column(name = "saleman_code")
     private String saleManCode;
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "vou_date")
-    private Date vouDate;
+    @Column(name = "vou_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime vouDate;
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "credit_term")
     private Date creditTerm;

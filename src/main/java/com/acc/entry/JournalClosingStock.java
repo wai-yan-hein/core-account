@@ -166,8 +166,8 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
     private void searchJournal() {
         progress.setIndeterminate(true);
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
-        filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
-        filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
+        filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), Global.dateFormat));
+        filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getEndDate(), Global.dateFormat));
         filter.setDeptCode(getDeptCode());
         filter.setCurCode(getCurCode());
         filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());

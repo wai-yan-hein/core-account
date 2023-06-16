@@ -47,9 +47,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
@@ -192,8 +190,8 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
             progress.setIndeterminate(true);
             calOpening();
             ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
-            filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
-            filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
+            filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), Global.dateFormat));
+            filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getEndDate(), Global.dateFormat));
             filter.setListDepartment(getListDep());
             filter.setDesp(txtDesp.getText());
             filter.setGlVouNo(txtVouNo.getText());
@@ -224,7 +222,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     private void calOpening() {
         accountRepo.getDefaultCash().subscribe((coa) -> {
             if (coa != null) {
-                String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat);
+                String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), Global.dateFormat);
                 String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
                 String clDate = Util1.toDateStrMYSQL(stDate, "dd/MM/yyyy");
                 ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
@@ -307,7 +305,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
             String rpPath = Global.accountRP + "DrCrVoucherA5.jasper";
             Map<String, Object> p = new HashMap();
             p.put("p_report_name", rpName);
-            p.put("p_date", String.format("Between %s and %s", dateAutoCompleter.getStDate(), dateAutoCompleter.getEndDate()));
+            p.put("p_date", String.format("Between %s and %s", dateAutoCompleter.getDateModel().getStartDate(), dateAutoCompleter.getDateModel().getEndDate()));
             p.put("p_print_date", Util1.getTodayDateTime());
             p.put("p_comp_name", Global.companyName);
             p.put("p_comp_address", Global.companyAddress);

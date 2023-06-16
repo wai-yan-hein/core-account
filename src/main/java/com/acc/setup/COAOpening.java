@@ -155,7 +155,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
 
     public void initMain() {
         batchLock(!Global.batchLock);
-        txtDate.setDate(Util1.toDate(Global.startDate, "dd/MM/yyyy"));
+        txtDate.setDate(Util1.parseDate(Global.startDate, "dd/MM/yyyy"));
         initComboBox();
         initTable();
         searchOpening();

@@ -10,7 +10,6 @@ import com.acc.model.DateModel;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.common.Util1;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.Rectangle;
@@ -20,12 +19,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.LocalDate;
-import java.time.Month;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
 import javax.swing.Action;
@@ -48,7 +42,7 @@ import javax.swing.text.JTextComponent;
  *
  * @author Lenovo
  */
-public class DateAutoCompleter implements KeyListener, SelectionObserver {
+public final class DateAutoCompleter implements KeyListener, SelectionObserver {
 
     private final JTable table = new JTable();
     private JPopupMenu popup = new JPopupMenu();
@@ -59,9 +53,7 @@ public class DateAutoCompleter implements KeyListener, SelectionObserver {
     public AbstractCellEditor editor;
     private int x = 0;
     private boolean popupOpen = true;
-    private final DatePickerDialog datePickerDialog = new DatePickerDialog();
-    private String stDate;
-    private String endDate;
+    private final DatePickerDialog dialog = new DatePickerDialog();
     private SelectionObserver selectionObserver;
     private final Image image = new ImageIcon(this.getClass().getResource("/images/date.png")).getImage();
 
@@ -69,34 +61,15 @@ public class DateAutoCompleter implements KeyListener, SelectionObserver {
         this.selectionObserver = selectionObserver;
     }
 
-    public String getStDate() {
-        return stDate;
-    }
-
-    public void setStDate(String stDate) {
-        this.stDate = stDate;
-    }
-
-    public String getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(String endDate) {
-        this.endDate = endDate;
-    }
-
     public DateAutoCompleter() {
     }
 
     public DateAutoCompleter(JTextComponent comp) {
         this.textComp = comp;
-        List<DateModel> list = generateDate();
-        this.textComp.setText("Today");
-        stDate = Util1.toDateStr(Util1.getTodayDate(), Global.dateFormat);
-        endDate = stDate;
+        setTodayDate();
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
-        dateTableModel = new DateTableModel(list);
+        dateTableModel = new DateTableModel(Global.listDate);
         table.setModel(dateTableModel);
         table.setFont(Global.textFont); // NOI18N
         table.getTableHeader().setFont(Global.tblHeaderFont);
@@ -105,7 +78,6 @@ public class DateAutoCompleter implements KeyListener, SelectionObserver {
         table.setSelectionForeground(Color.white);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane scroll = new JScrollPane(table);
-
         scroll.setBorder(null);
         table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(40);//Code
@@ -175,7 +147,7 @@ public class DateAutoCompleter implements KeyListener, SelectionObserver {
 
         table.setRequestFocusEnabled(false);
 
-        if (!list.isEmpty()) {
+        if (!Global.listDate.isEmpty()) {
             table.setRowSelectionInterval(0, 0);
         }
     }
@@ -184,7 +156,7 @@ public class DateAutoCompleter implements KeyListener, SelectionObserver {
         if (table.getSelectedRow() != -1) {
             int row = table.convertRowIndexToModel(table.getSelectedRow());
             dateModel = dateTableModel.getDate(row);
-            ((JTextField) textComp).setText(dateModel.getText());
+            ((JTextField) textComp).setText(dateModel.getDescription());
             generateDate(dateModel, row);
         }
         popupOpen = false;
@@ -196,43 +168,19 @@ public class DateAutoCompleter implements KeyListener, SelectionObserver {
     }
 
     private void generateDate(DateModel date, int row) {
-        String text = date.getText();
-        LocalDate localDate = LocalDate.now();
-
-        switch (text) {
-            case "Today", "-" -> {
-                stDate = Util1.toDateStr(Util1.getTodayDate(), Global.dateFormat);
-                endDate = stDate;
-            }
-            case "Yesterday" -> {
-                LocalDate minusDays = localDate.minusDays(1);
-                Date yesterday = java.sql.Date.valueOf(minusDays);
-                stDate = Util1.toDateStr(yesterday, Global.dateFormat);
-                endDate = stDate;
-            }
-            case "All" -> {
-                stDate = Global.startDate;
-                endDate = Util1.toDateStr(Util1.getTodayDate(), Global.dateFormat);
-            }
-            default -> {
-                stDate = date.getStartDate();
-                endDate = date.getEndDate();
-            }
-        }
-        if (date.getText().equals("Custom")) {
-            datePickerDialog.setIconImage(image);
-            datePickerDialog.setLocationRelativeTo(null);
-            datePickerDialog.setVisible(true);
-            stDate = datePickerDialog.getStartDate();
-            endDate = datePickerDialog.getEndDate();
+        if (date.getDescription().equals("Custom")) {
+            dialog.setIconImage(image);
+            dialog.setLocationRelativeTo(null);
+            dialog.setVisible(true);
+            date.setStartDate(dialog.getStartDate());
+            date.setEndDate(dialog.getEndDate());
             this.textComp.setText(
-                    String.format("%s%s%s", stDate, " to ", endDate));
+                    String.format("%s%s%s", dialog.getStartDate(), " to ", dialog.getEndDate()));
         }
-        date.setStartDate(stDate);
-        date.setEndDate(endDate);
+
         dateTableModel.setDateModel(date, row);
         if (selectionObserver != null) {
-            selectionObserver.selected("Date", stDate + "to" + endDate);
+            selectionObserver.selected("Date", "Date");
         }
     }
 
@@ -367,9 +315,20 @@ public class DateAutoCompleter implements KeyListener, SelectionObserver {
 
     public void setDateModel(DateModel dateModel) {
         this.dateModel = dateModel;
-        textComp.setText(dateModel == null ? null : dateModel.getText());
+        textComp.setText(dateModel == null ? null : dateModel.getDescription());
     }
 
+    private void setTodayDate() {
+        LocalDate todayDate = LocalDate.now();
+        DateModel today = new DateModel();
+        String todayDateStr = todayDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        today.setDescription("Today");
+        today.setMonth(todayDate.getMonthValue());
+        today.setYear(todayDate.getYear());
+        today.setStartDate(todayDateStr);
+        today.setEndDate(todayDateStr);
+        setDateModel(today);
+    }
 
     /*
      * KeyListener implementation
@@ -411,66 +370,6 @@ public class DateAutoCompleter implements KeyListener, SelectionObserver {
 
             }
         }
-    }
-
-    private List<DateModel> generateDate() {
-        Date finDate = Util1.toDate(Global.startDate, Global.dateFormat);
-        String stDateMysql = Util1.toDateStr(Global.startDate, "dd/MM/yyyy", "yyyy-MM-dd");
-        Date toDay = new Date();
-        LocalDate now = toDay.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate fin = finDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        List<DateModel> listDateModel = new ArrayList<>();
-        DateModel all = new DateModel();
-        all.setText("All");
-        all.setStartDate(Global.startDate);
-        all.setEndDate(Global.endate);
-        listDateModel.add(all);
-        DateModel today = new DateModel(getMonthShortName(now.getMonth()), now.getMonthValue(), now.getYear(), "Today");
-        today.setStartDate(Util1.toDateStr(Util1.getTodayDate(), Global.dateFormat));
-        today.setEndDate(today.getStartDate());
-        listDateModel.add(today);
-        DateModel date = new DateModel(getMonthShortName(now.getMonth()), now.getMonthValue(), now.getYear(), "Yesterday");
-        date.setDay(now.getDayOfMonth() - 1);
-        listDateModel.add(date);
-        listDateModel.add(new DateModel(getMonthShortName(now.getMonth()), now.getMonthValue(), now.getYear(), "Custom"));
-        long monthsBetween = ChronoUnit.MONTHS.between(
-                LocalDate.parse(stDateMysql).withDayOfMonth(1),
-                LocalDate.parse(Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd")).withDayOfMonth(1));
-        for (int i = 0; i < monthsBetween; i++) {
-            LocalDate next = fin.plusMonths(i);
-            LocalDate monthBegin = next.withDayOfMonth(1);
-            LocalDate monthEnd = next.plusMonths(1).withDayOfMonth(1).minusDays(1);
-            Month month = next.getMonth();
-            int value = next.getMonth().getValue();
-            int year = next.getYear();
-            DateModel d = new DateModel(getMonthShortName(month), value, year, "-");
-            d.setStartDate(Util1.toDateStr(monthBegin.toString(), "yyyy-MM-dd", Global.dateFormat));
-            d.setEndDate(Util1.toDateStr(monthEnd.toString(), "yyyy-MM-dd", Global.dateFormat));
-            listDateModel.add(d);
-        }
-
-        int oddMonth = 4;
-        for (int i = 0; i < oddMonth; i++) {
-            LocalDate next = now.plusMonths(i);
-            LocalDate monthBegin = next.withDayOfMonth(1);
-            LocalDate monthEnd = next.plusMonths(1).withDayOfMonth(1).minusDays(1);
-            Month month = next.getMonth();
-            int value = next.getMonth().getValue();
-            int year = next.getYear();
-            DateModel d = new DateModel(getMonthShortName(month), value, year, "-");
-            d.setStartDate(Util1.toDateStr(monthBegin.toString(), "yyyy-MM-dd", Global.dateFormat));
-            d.setEndDate(Util1.toDateStr(monthEnd.toString(), "yyyy-MM-dd", Global.dateFormat));
-            listDateModel.add(d);
-        }
-        return listDateModel;
-    }
-
-    private String getMonthShortName(Month month) {
-        String strMonth = month.toString();
-        if (strMonth.length() >= 4) {
-            strMonth = strMonth.substring(0, 3);
-        }
-        return strMonth;
     }
 
 }

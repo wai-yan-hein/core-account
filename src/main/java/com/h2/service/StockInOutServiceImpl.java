@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -102,10 +101,6 @@ public class StockInOutServiceImpl implements StockInOutService {
         return ioDao.unUpload(syncDate);
     }
 
-    @Override
-    public Date getMaxDate() {
-        return ioDao.getMaxDate();
-    }
 
     @Override
     public List<StockInOut> search(String updatedDate, List<LocationKey> keys) {

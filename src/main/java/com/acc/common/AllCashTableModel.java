@@ -18,6 +18,7 @@ import com.google.gson.JsonSyntaxException;
 import com.user.model.Currency;
 import com.user.model.Project;
 import java.awt.HeadlessException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -205,7 +206,7 @@ public class AllCashTableModel extends AbstractTableModel {
                                 String toFormatDate = Util1.toFormatDate(value.toString(), length);
                                 gl.setGlDate(Util1.toDate(toFormatDate, "dd/MM/yyyy"));
                             } else {
-                                gl.setGlDate(Util1.getTodayDate());
+                                gl.setGlDate(LocalDateTime.now());
                                 JOptionPane.showMessageDialog(Global.parentForm, "Invalid Date");
                             }
                         }
@@ -438,7 +439,7 @@ public class AllCashTableModel extends AbstractTableModel {
                 gl.setDeptCode(department.getKey().getDeptCode());
                 gl.setDeptUsrCode(department.getUserCode());
             }
-            gl.setGlDate(glDate == null ? Util1.getTodayDate() : Util1.toDate(glDate, "dd/MM/yyyy"));
+            gl.setGlDate(glDate == null ? LocalDateTime.now() : Util1.toDate(glDate));
             gl.setSrcAccCode(sourceAccId);
             gl.setCurCode(curCode);
             listVGl.add(gl);

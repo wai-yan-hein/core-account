@@ -81,7 +81,7 @@ public class DatePickerDialog extends javax.swing.JDialog implements KeyListener
 
     private void setDate() {
         if (txtFromDate.getDate() == null) {
-            txtFromDate.setDate(Util1.toDate(Global.startDate, "dd/MM/yyyy"));
+            txtFromDate.setDate(Util1.parseDate(Global.startDate, "dd/MM/yyyy"));
             txtToDate.setDate(Util1.getTodayDate());
         }
     }
@@ -274,57 +274,48 @@ public class DatePickerDialog extends javax.swing.JDialog implements KeyListener
             ctrlName = ((JButton) sourceObj).getName();
         }
         switch (ctrlName) {
-            case "txtFromDate":
+            case "txtFromDate" -> {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_ENTER:
+                    case KeyEvent.VK_ENTER -> {
                         if (sourceObj != null) {
                             String date = ((JTextFieldDateEditor) sourceObj).getText();
                             if (date.length() == 8) {
-                                String toFormatDate = Util1.toFormatDate(date,date.length());
-                                txtFromDate.setDate(Util1.toDate(toFormatDate, "dd/MM/yyyy"));
+                                String toFormatDate = Util1.toFormatDate(date, date.length());
+                                txtFromDate.setDate(Util1.parseDate(toFormatDate, "dd/MM/yyyy"));
                             }
                         }
                         txtToDate.requestFocusInWindow();
-                        break;
-                    case KeyEvent.VK_DOWN:
+                    }
+                    case KeyEvent.VK_DOWN ->
                         txtToDate.requestFocus();
-                        break;
-                    case KeyEvent.VK_UP:
+                    case KeyEvent.VK_UP ->
                         btnOK.requestFocus();
-                        break;
 
                 }
-
-                break;
-            case "txtToDate":
+            }
+            case "txtToDate" -> {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_ENTER:
+                    case KeyEvent.VK_ENTER -> {
                         if (sourceObj != null) {
                             String date = ((JTextFieldDateEditor) sourceObj).getText();
                             if (date.length() == 8) {
-                                String toFormatDate = Util1.toFormatDate(date,date.length());
-                                txtToDate.setDate(Util1.toDate(toFormatDate, "dd/MM/yyyy"));
+                                String toFormatDate = Util1.toFormatDate(date, date.length());
+                                txtToDate.setDate(Util1.parseDate(toFormatDate, "dd/MM/yyyy"));
                             }
                         }
                         btnOK.requestFocus();
-                        break;
-                    case KeyEvent.VK_UP:
+                    }
+                    case KeyEvent.VK_UP ->
                         btnOK.requestFocus();
-                        break;
                 }
-                break;
+            }
 
-            case "btnOK":
+            case "btnOK" -> {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_ENTER:
-                        sendDate();
-                        break;
-                    case KeyEvent.VK_UP:
-                        txtFromDate.getDateEditor().getUiComponent().requestFocusInWindow();
-                        break;
+                    case KeyEvent.VK_ENTER -> sendDate();
+                    case KeyEvent.VK_UP -> txtFromDate.getDateEditor().getUiComponent().requestFocusInWindow();
                 }
-
-                break;
+            }
 
         }
 

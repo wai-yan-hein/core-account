@@ -25,7 +25,6 @@ public interface GlDao {
   
     Gl findByCode(GlKey key);
     
-    Gl findWithSql(GlKey key);
     
     boolean deleteInvVoucher(String refNo, String tranSource, String compCode);
 

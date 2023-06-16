@@ -27,7 +27,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import javax.swing.AbstractAction;
@@ -209,7 +209,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         lblStatus.setForeground(status.equals("NEW") ? Color.GREEN : Color.BLUE);
         if (status.equals("EDIT")) {
             accountRepo.getJournal(vouNo).collectList().subscribe((t) -> {
-                Date glDate = t.get(0).getGlDate();
+                LocalDateTime glDate = t.get(0).getGlDate();
                 String ref = t.get(0).getReference();
                 String projectNo = t.get(0).getProjectNo();
                 userRepo.find(new ProjectKey(projectNo, Global.compCode)).subscribe((p) -> {
@@ -217,7 +217,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                 }, (e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
                 });
-                txtVouDate.setDate(glDate);
+                txtVouDate.setDate(Util1.convertToDate(glDate));
                 txtRefrence.setText(ref);
                 txtVouNo.setText(vouNo);
                 journalTablModel.setListGV(t);
@@ -259,7 +259,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         for (Gl g : journalTablModel.getListGV()) {
             g.setReference(txtRefrence.getText());
             g.setProjectNo(projectNo);
-            g.setGlDate(txtVouDate.getDate());
+            g.setGlDate(Util1.convertToLocalDateTime(txtVouDate.getDate()));
             g.setMacId(Global.macId);
             if (lblStatus.getText().equals("EDIT")) {
                 g.setModifyBy(Global.loginUser.getUserCode());
@@ -715,7 +715,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
                     if (date.length() == 8 || date.length() == 6) {
-                        txtVouDate.setDate(Util1.formatDate(date));
+                        txtVouDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
                     }
                     if (txtVouDate.getDate() != null) {
                         if (!ProUtil.isValidDate(txtVouDate.getDate())) {

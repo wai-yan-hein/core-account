@@ -58,6 +58,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.text.DateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -475,7 +476,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             ph.setCurCode(currAutoCompleter.getCurrency().getCurCode());
             ph.setDeleted(Util1.getNullTo(ph.getDeleted()));
             ph.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
-            ph.setVouDate(txtPurDate.getDate());
+            ph.setVouDate(Util1.convertToLocalDateTime(txtPurDate.getDate()));
             ph.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
             ph.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
             ph.setStatus(lblStatus.getText());
@@ -490,7 +491,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 key.setDeptId(Global.deptId);
                 key.setVouNo(null);
                 ph.setKey(key);
-                ph.setCreatedDate(Util1.getTodayDate());
+                ph.setCreatedDate(LocalDateTime.now());
                 ph.setCreatedBy(Global.loginUser.getUserCode());
                 ph.setSession(Global.sessionId);
                 ph.setMacId(Global.macId);
@@ -686,7 +687,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             txtVouNo.setText(ph.getKey().getVouNo());
             txtDueDate.setDate(ph.getDueDate());
             txtRemark.setText(ph.getRemark());
-            txtPurDate.setDate(ph.getVouDate());
+            txtPurDate.setDate(Util1.convertToDate(ph.getVouDate()));
             txtVouTotal.setValue(Util1.getFloat(ph.getVouTotal()));
             txtVouDiscP.setValue(Util1.getFloat(ph.getDiscP()));
             txtVouDiscount.setValue(Util1.getFloat(ph.getDiscount()));
@@ -1760,7 +1761,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
                     if (date.length() == 8 || date.length() == 6) {
-                        txtPurDate.setDate(Util1.formatDate(date));
+                        txtPurDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
                     }
                     txtCus.requestFocus();
                 }
@@ -1770,7 +1771,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
                     if (date.length() == 8 || date.length() == 6) {
-                        txtDueDate.setDate(Util1.formatDate(date));
+                        txtDueDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
                     }
                     txtReference.requestFocus();
                 }

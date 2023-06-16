@@ -12,6 +12,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
@@ -30,9 +32,8 @@ public class PurHis implements java.io.Serializable {
     private PurHisKey key;
     @Column(name = "trader_code")
     private String traderCode;
-    @Temporal(TemporalType.DATE)
-    @Column(name = "vou_date")
-    private Date vouDate;
+    @Column(name = "vou_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime vouDate;
     @Temporal(TemporalType.DATE)
     @Column(name = "due_date")
     private Date dueDate;
@@ -50,14 +51,12 @@ public class PurHis implements java.io.Serializable {
     private Float balance;
     @Column(name = "created_by")
     private String createdBy;
-    @Column(name = "created_date")
-    @Temporal(TemporalType.DATE)
-    private Date createdDate;
+    @Column(name = "created_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime createdDate;
     @Column(name = "updated_by")
     private String updatedBy;
-    @Column(name = "updated_date")
-    @Temporal(TemporalType.DATE)
-    private Date updatedDate;
+    @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime updatedDate;
     @Column(name = "remark")
     private String remark;
     @Column(name = "session_id")

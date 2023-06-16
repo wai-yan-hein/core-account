@@ -35,7 +35,7 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Date;
+import java.time.LocalDateTime;
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
@@ -250,7 +250,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         ph = p;
         Integer deptId = ph.getKey().getDeptId();
         txtVouNo.setText(ph.getKey().getVouNo());
-        txtStartDate.setDate(ph.getVouDate());
+        txtStartDate.setDate(Util1.convertToDate(ph.getVouDate()));
         txtEndDate.setDate(ph.getEndDate());
         txtRemark.setText(ph.getRemark());
         txtProNo.setText(ph.getProcessNo());
@@ -387,7 +387,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             ph.setKey(key);
             ph.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
             ph.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
-            ph.setVouDate(txtStartDate.getDate());
+            ph.setVouDate(Util1.convertToLocalDateTime(txtStartDate.getDate()));
             ph.setEndDate(txtEndDate.getDate());
             ph.setRemark(txtRemark.getText());
             ph.setProcessNo(txtProNo.getText());
@@ -468,7 +468,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
     }
 
     private void generatePattern(String code, Integer deptId) {
-        Date vouDate = txtStartDate.getDate();
+        LocalDateTime vouDate = Util1.convertToLocalDateTime(txtStartDate.getDate());
         inventoryRepo.getPattern(code, deptId, Util1.toDateStr(vouDate, "yyyy-MM-dd")).subscribe((t) -> {
             if (!t.isEmpty()) {
                 String input = JOptionPane.showInputDialog("Enter Qty.");

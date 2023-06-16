@@ -5,7 +5,6 @@
  */
 package com.h2.dao;
 
-import com.common.Util1;
 import com.inventory.model.LocationKey;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
@@ -13,9 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -124,23 +121,6 @@ public class StockInOutDaoImpl extends AbstractDao<StockIOKey, StockInOut> imple
             o.setListSH(dao.search(vouNo, compCode, depId));
         });
         return list;
-    }
-
-    @Override
-    public Date getMaxDate() {
-        String sql = "select max(updated_date) date from stock_in_out";
-        ResultSet rs = getResult(sql);
-        try {
-            if (rs.next()) {
-                Date date = rs.getTimestamp("date");
-                if (date != null) {
-                    return date;
-                }
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-        return Util1.getSyncDate();
     }
 
     @Override

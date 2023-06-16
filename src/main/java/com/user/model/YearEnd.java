@@ -7,6 +7,7 @@ package com.user.model;
 import java.util.Date;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.time.LocalDateTime;
 
 /**
  *
@@ -23,6 +24,6 @@ public class YearEnd {
     private boolean batchLock;
     private boolean opening;
     private String createBy;
-    private Date cratedDate;
+    private LocalDateTime createdDate;
     private String message;
 }

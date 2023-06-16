@@ -2,7 +2,6 @@ package com.h2.service;
 
 import com.inventory.model.TransferHis;
 import com.inventory.model.TransferHisKey;
-import java.util.Date;
 import java.util.List;
 
 public interface TransferHisService {
@@ -17,7 +16,6 @@ public interface TransferHisService {
 
     void restore(TransferHisKey key);
 
-    Date getMaxDate();
 
     List<TransferHis> search(String updatedDate, List<String> keys);
 

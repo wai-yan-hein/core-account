@@ -8,7 +8,6 @@ package com.h2.dao;
 import com.inventory.model.LocationKey;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,7 +28,6 @@ public interface StockInOutDao {
 
     List<StockInOut> unUpload(String syncDate);
 
-    Date getMaxDate();
 
     List<StockInOut> search(String updatedDate, List<LocationKey> keys);
 

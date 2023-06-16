@@ -13,6 +13,7 @@ import com.user.editor.CurrencyAutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.DespAutoCompleter;
 import com.acc.editor.RefAutoCompleter;
+import com.acc.model.DateModel;
 import com.acc.model.ReportFilter;
 import com.acc.model.Gl;
 import com.acc.model.TmpOpening;
@@ -63,8 +64,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private String desp;
     private String coaCode;
     private String traderCode;
-    private String stDate;
-    private String endDate;
+    private DateModel dateModel;
     private String curCode;
     private List<String> department;
     private AccountRepo accountRepo;
@@ -75,6 +75,14 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private DespAutoCompleter despAutoCompleter;
     private RefAutoCompleter refAutoCompleter;
     private List<Gl> list;
+
+    public DateModel getDateModel() {
+        return dateModel;
+    }
+
+    public void setDateModel(DateModel dateModel) {
+        this.dateModel = dateModel;
+    }
 
     public UserRepo getUserRepo() {
         return userRepo;
@@ -98,22 +106,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
-    }
-
-    public String getStDate() {
-        return stDate;
-    }
-
-    public void setStDate(String stDate) {
-        this.stDate = stDate;
-    }
-
-    public String getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(String endDate) {
-        this.endDate = endDate;
     }
 
     public String getCurCode() {
@@ -255,8 +247,8 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
     private ReportFilter getFilter() {
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
-        filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat));
-        filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getEndDate(), Global.dateFormat));
+        filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), Global.dateFormat));
+        filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getEndDate(), Global.dateFormat));
         filter.setSrcAcc(coaCode);
         filter.setCurCode(getCurrency());
         filter.setListDepartment(getListDep());
@@ -277,7 +269,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
     private Mono<TmpOpening> getOpening() {
         log.info("calulate opening.");
-        String startDate = Util1.toDateStrMYSQL(dateAutoCompleter.getStDate(), Global.dateFormat);
+        String startDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), Global.dateFormat);
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
         filter.setFromDate(startDate);
         filter.setCurCode(getCurrency());
@@ -291,12 +283,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     public void initMain() {
         initTable();
         initCombo();
-    }
-
-    public void initData() {
-        dateAutoCompleter.setStDate(stDate);
-        dateAutoCompleter.setEndDate(endDate);
-        txtDate.setText(String.format("%s to %s", stDate, endDate));
     }
 
     private void initTable() {
@@ -355,8 +341,8 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     public void printVoucher() {
         setVisible(false);
         String currency = currencyAAutoCompleter.getCurrency().getCurCode();
-        String fromDate = dateAutoCompleter.getStDate();
-        String toDate = dateAutoCompleter.getEndDate();
+        String fromDate = dateAutoCompleter.getDateModel().getStartDate();
+        String toDate = dateAutoCompleter.getDateModel().getEndDate();
         if (!currency.equals("-") || !ProUtil.isMultiCur()) {
             try {
                 String path = "temp/Ledger" + Global.macId + ".json";

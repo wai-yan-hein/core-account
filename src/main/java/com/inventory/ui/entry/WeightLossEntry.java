@@ -259,7 +259,7 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
             } else {
                 his.setUpdatedBy(userCode);
             }
-            his.setVouDate(txtDate.getDate());
+            his.setVouDate(Util1.convertToLocalDateTime(txtDate.getDate()));
             his.setRemark(txtRemark.getText());
             his.setRefNo(txtRefNo.getText());
             his.setMacId(Global.macId);
@@ -298,7 +298,7 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
             tableModel.setListDetail(list);
             tableModel.addNewRow();
             txtVouNo.setText(his.getKey().getVouNo());
-            txtDate.setDate(his.getVouDate());
+            txtDate.setDate(Util1.convertToDate(his.getVouDate()));
             txtRefNo.setText(his.getRefNo());
             txtRemark.setText(his.getRefNo());
             if (his.isDeleted()) {

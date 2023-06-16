@@ -49,6 +49,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -430,14 +431,12 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             orderHis.setBalance(Util1.getFloat(txtVouBalance.getValue()));
             orderHis.setCurCode(currAutoCompleter.getCurrency().getCurCode());
             orderHis.setDeleted(orderHis.isDeleted());
-//            orderHis.setOrderCode(orderCode);
-//            orderHis.setRegion(region);
             orderHis.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             orderHis.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
             orderHis.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
             orderHis.setGrandTotal(Util1.getFloat(txtGrandTotal.getValue()));
             orderHis.setStatus(lblStatus.getText());
-            orderHis.setVouDate(txtOrderDate.getDate());
+            orderHis.setVouDate(Util1.convertToLocalDateTime(txtOrderDate.getDate()));
             orderHis.setMacId(Global.macId);
             Project p = projectAutoCompleter.getProject();
             orderHis.setProjectNo(p == null ? null : p.getKey().getProjectNo());
@@ -615,7 +614,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                         txtDueDate.setDate(orderHis.getCreditTerm());
                         txtRemark.setText(orderHis.getRemark());
                         txtReference.setText(orderHis.getReference());
-                        txtOrderDate.setDate(orderHis.getVouDate());
+                        txtOrderDate.setDate(Util1.convertToDate(orderHis.getVouDate()));
                         txtVouTotal.setValue(Util1.getFloat(orderHis.getVouTotal()));
                         txtVouDiscP.setValue(Util1.getFloat(orderHis.getDiscP()));
                         txtVouDiscount.setValue(Util1.getFloat(orderHis.getDiscount()));
@@ -1675,7 +1674,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
                     if (date.length() == 8 || date.length() == 6) {
-                        txtOrderDate.setDate(Util1.formatDate(date));
+                        txtOrderDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
                     }
                     txtCus.requestFocus();
                 }
@@ -1684,7 +1683,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
                     if (date.length() == 8 || date.length() == 6) {
-                        txtDueDate.setDate(Util1.formatDate(date));
+                        txtDueDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
                     }
                     txtReference.requestFocus();
                 }

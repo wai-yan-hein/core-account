@@ -1371,7 +1371,7 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<RetInHis> findReturnIn(String vouNo, Integer deptId,boolean local) {
+    public Mono<RetInHis> findReturnIn(String vouNo, Integer deptId, boolean local) {
         RetInHisKey key = new RetInHisKey();
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
@@ -1426,7 +1426,7 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<RetOutHis> findReturnOut(String vouNo, Integer deptId,boolean local) {
+    public Mono<RetOutHis> findReturnOut(String vouNo, Integer deptId, boolean local) {
         RetOutHisKey key = new RetOutHisKey();
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
@@ -2017,9 +2017,9 @@ public class InventoryRepo {
                         if (status == JOptionPane.YES_OPTION) {
                             return h2Repo.save(ph);
                         }
-                        return Mono.error(e);
+                        return Mono.error(new RuntimeException(e.getMessage()));
                     }
-                    return Mono.error(e);
+                    return Mono.error(new RuntimeException(e.getMessage()));
                 });
     }
 

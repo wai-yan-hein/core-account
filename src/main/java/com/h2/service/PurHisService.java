@@ -6,7 +6,6 @@
 package com.h2.service;
 import com.inventory.model.PurHis;
 import com.inventory.model.PurHisKey;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,7 +28,6 @@ public interface PurHisService {
 
     List<PurHis> unUploadVoucher(String syncDate);
 
-    Date getMaxDate();
 
     List<PurHis> search(String updatedDate, List<String> keys);
 

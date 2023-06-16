@@ -60,24 +60,6 @@ public class TransferHisDaoImpl extends AbstractDao<TransferHisKey, TransferHis>
         String sql = "update transfer_his set deleted =0 where vou_no ='" + vouNo + "' and comp_code='" + compCode + "' and dept_id =" + deptId + "";
         execSql(sql);
     }
-
-    @Override
-    public Date getMaxDate() {
-        String sql = "select max(updated_date) date from transfer_his";
-        ResultSet rs = getResult(sql);
-        try {
-            if (rs.next()) {
-                Date date = rs.getTimestamp("date");
-                if (date != null) {
-                    return date;
-                }
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-        return Util1.getSyncDate();
-    }
-
     @Override
     public List<TransferHis> search(String updatedDate, List<String> location) {
         List<TransferHis> list = new ArrayList<>();
@@ -99,7 +81,7 @@ public class TransferHisDaoImpl extends AbstractDao<TransferHisKey, TransferHis>
                             th.setCreatedBy(rs.getString("created_by"));
                             th.setCreatedDate(rs.getTimestamp("created_date"));
                             th.setDeleted(rs.getBoolean("deleted"));
-                            th.setVouDate(rs.getDate("vou_date"));
+                            th.setVouDate(rs.getTimestamp("vou_date").toLocalDateTime());
                             th.setRefNo(rs.getString("ref_no"));
                             th.setRemark(rs.getString("remark"));
                             th.setUpdatedBy(rs.getString("updated_by"));

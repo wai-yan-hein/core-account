@@ -8,7 +8,6 @@ package com.user.setup;
 import com.acc.common.CurExchangeRateTableModel;
 import com.acc.common.DateAutoCompleter;
 import com.user.dialog.ExchangeDialog;
-import com.acc.model.ReportFilter;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
@@ -100,8 +99,8 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
     }
 
     private void searchExchange() {
-        String fromDate = dateAutoCompleter.getStDate();
-        String toDate = dateAutoCompleter.getEndDate();
+        String fromDate = dateAutoCompleter.getDateModel().getStartDate();
+        String toDate = dateAutoCompleter.getDateModel().getEndDate();
         String targetCur = getCurCode();
         userRepo.searchExchange(fromDate, toDate, targetCur).subscribe((t) -> {
             exchangeTableModel.setListEx(t);
@@ -158,7 +157,7 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
             }
         }
     }
-    
+
     private String getCurCode() {
         if (currAutoCompleter == null || currAutoCompleter.getCurrency() == null) {
             return Global.currency;

@@ -9,10 +9,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Data;
 
@@ -28,9 +26,8 @@ public class Gl {
 
     @EmbeddedId
     private GlKey key;
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "gl_date")
-    private Date glDate;
+    @Column(name = "gl_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime glDate;
     @Column(name = "description")
     private String description;
     @Column(name = "source_ac_id")
@@ -38,7 +35,7 @@ public class Gl {
     @Column(name = "account_id")
     private String accCode;
     @Column(name = "cur_code")
-    private String curCode;    
+    private String curCode;
     @Column(name = "dr_amt")
     private Double drAmt;
     @Column(name = "cr_amt")
@@ -51,12 +48,10 @@ public class Gl {
     private String vouNo;
     @Column(name = "trader_code")
     private String traderCode;
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_date")
-    private Date createdDate;
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "modify_date")
-    private Date modifyDate;
+    @Column(name = "created_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime createdDate;
+    @Column(name = "modify_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime modifyDate;
     @Column(name = "modify_by")
     private String modifyBy;
     @Column(name = "user_code")
@@ -87,7 +82,7 @@ public class Gl {
     private String projectNo;
     @Transient
     private String glDateStr;
-     @Transient
+    @Transient
     private List<GlKey> delList;
     @Transient
     private boolean cash = false;

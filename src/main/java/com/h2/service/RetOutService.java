@@ -7,7 +7,6 @@ package com.h2.service;
 
 import com.inventory.model.RetOutHis;
 import com.inventory.model.RetOutHisKey;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -30,7 +29,6 @@ public interface RetOutService {
 
     List<RetOutHis> unUploadVoucher(String syncDate);
     
-    Date getMaxDate();
 
     List<RetOutHis> search(String updatedDate, List<String> keys);
 

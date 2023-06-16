@@ -295,7 +295,7 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
             }
             ph.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
             ph.setTraderCode(t.getKey().getCode());
-            ph.setVouDate(txtVouDate.getDate());
+            ph.setVouDate(Util1.convertToLocalDateTime(txtVouDate.getDate()));
             ph.setAmount(Util1.gerFloatOne(txtAmount.getValue()));
             ph.setDeleted(false);
             ph.setRemark(txtRemark.getText());
@@ -365,7 +365,7 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
             currencyAutoCompleter.setCurrency(t);
         });
         txtVouNo.setText(vouNo);
-        txtVouDate.setDate(ph.getVouDate());
+        txtVouDate.setDate(Util1.convertToDate(ph.getVouDate()));
         txtRemark.setText(ph.getRemark());
         txtAmount.setValue(Util1.getFloat(ph.getAmount()));
         if (ph.isDeleted()) {

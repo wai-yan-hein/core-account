@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -112,10 +111,6 @@ public class RetInServiceImpl implements RetInService {
         return rDao.unUploadVoucher(syncDate);
     }
 
-    @Override
-    public Date getMaxDate() {
-        return rDao.getMaxDate();
-    }
 
     @Override
     public List<RetInHis> search(String updatedDate, List<String> keys) {

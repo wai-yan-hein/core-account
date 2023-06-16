@@ -789,6 +789,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 assignCompany(t.get(0));
             }
             integration.start();
+            initDate();
             departmentAssign();
             initMenu();
             lblCompName.setText(Global.companyName);
@@ -798,6 +799,11 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
 
+    }
+    private void initDate(){
+        accounRepo.getDate().subscribe((t) -> {
+            Global.listDate =t;
+        });
     }
 
     private void assignCompany(VRoleCompany vuca) {

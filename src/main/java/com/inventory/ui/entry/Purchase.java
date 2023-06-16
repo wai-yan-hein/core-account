@@ -64,6 +64,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.text.DateFormat;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -459,6 +460,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
 
     private void clear() {
         disableForm(true);
+        btnBatch.setEnabled(true);
         purTableModel.clear();
         purTableModel.addNewRow();
         purTableModel.clearDelList();
@@ -532,7 +534,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             ph.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             Project p = projectAutoCompleter.getProject();
             ph.setProjectNo(p == null ? null : p.getKey().getProjectNo());
-            ph.setVouDate(txtPurDate.getDate());
+            ph.setVouDate(Util1.convertToLocalDateTime(txtPurDate.getDate()));
             ph.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
             ph.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
             ph.setStatus(lblStatus.getText());
@@ -547,7 +549,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 key.setDeptId(Global.deptId);
                 key.setVouNo(null);
                 ph.setKey(key);
-                ph.setCreatedDate(Util1.getTodayDate());
+                ph.setCreatedDate(LocalDateTime.now());
                 ph.setCreatedBy(Global.loginUser.getUserCode());
                 ph.setSession(Global.sessionId);
                 ph.setMacId(Global.macId);
@@ -739,8 +741,8 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 }
 
                 String vouNo = ph.getKey().getVouNo();
-                
-                inventoryRepo.getPurDetail(vouNo,deptId)
+
+                inventoryRepo.getPurDetail(vouNo, deptId)
                         .subscribe((t) -> {
                             purTableModel.setListDetail(t);
                             purTableModel.addNewRow();
@@ -760,11 +762,12 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                                 lblStatus.setText("EDIT");
                                 lblStatus.setForeground(Color.blue);
                                 disableForm(true);
+                                btnBatch.setEnabled(false);
                             }
                             txtVouNo.setText(ph.getKey().getVouNo());
                             txtDueDate.setDate(ph.getDueDate());
                             txtRemark.setText(ph.getRemark());
-                            txtPurDate.setDate(ph.getVouDate());
+                            txtPurDate.setDate(Util1.convertToDate(ph.getVouDate()));
                             txtVouTotal.setValue(Util1.getFloat(ph.getVouTotal()));
                             txtVouDiscP.setValue(Util1.getFloat(ph.getDiscP()));
                             txtVouDiscount.setValue(Util1.getFloat(ph.getDiscount()));
@@ -1063,7 +1066,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         jPanel2 = new javax.swing.JPanel();
         lblStatus = new javax.swing.JLabel();
         lblRec = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        btnBatch = new javax.swing.JButton();
         panelExpense = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblExpense = new javax.swing.JTable();
@@ -1326,11 +1329,11 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         lblRec.setFont(Global.lableFont);
         lblRec.setText("Records");
 
-        jButton1.setFont(Global.lableFont);
-        jButton1.setText("Batch");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnBatch.setFont(Global.lableFont);
+        btnBatch.setText("Batch");
+        btnBatch.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnBatchActionPerformed(evt);
             }
         });
 
@@ -1449,7 +1452,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jButton1))
+                    .addComponent(btnBatch))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panelGRN, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1464,7 +1467,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(lblRec)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton1)
+                        .addComponent(btnBatch)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(panelExpense, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1862,10 +1865,10 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         // TODO add your handling code here:
     }//GEN-LAST:event_txtReferenceActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnBatchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBatchActionPerformed
         // TODO add your handling code here:
         batchDialog();
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnBatchActionPerformed
 
     private void txtBatchNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBatchNoActionPerformed
         // TODO add your handling code here:
@@ -2004,7 +2007,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
                     if (date.length() == 8 || date.length() == 6) {
-                        txtPurDate.setDate(Util1.formatDate(date));
+                        txtPurDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
                     }
                     txtCus.requestFocus();
                 }
@@ -2014,7 +2017,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
                     if (date.length() == 8 || date.length() == 6) {
-                        txtDueDate.setDate(Util1.formatDate(date));
+                        txtDueDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
                     }
                     txtReference.requestFocus();
                 }
@@ -2091,10 +2094,10 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnBatch;
     private javax.swing.JCheckBox chkPaid;
     private javax.swing.JProgressBar expProgress;
     private javax.swing.JProgressBar grnProgress;
-    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

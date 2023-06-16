@@ -12,6 +12,8 @@ import com.common.ReturnObject;
 import com.common.Util1;
 import com.h2.dao.GlDao;
 import com.h2.dao.GlLogDao;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -39,19 +41,16 @@ public class GlServiceImpl implements GlService {
     private GlLogDao logDao;
 
     @Override
-    public ReturnObject save(List<Gl> glList){
+    public ReturnObject save(List<Gl> glList) {
         ReturnObject ro = new ReturnObject();
         if (!glList.isEmpty()) {
             Gl tmp = glList.get(0);
             String vouNo = tmp.getRefNo();
             String tranSource = tmp.getTranSource();
             String compCode = tmp.getKey().getCompCode();
-            Date glDate = tmp.getGlDate();
+            LocalDateTime glDate = tmp.getGlDate();
             boolean delete = tmp.isDeleted();
             String glVouNo = tmp.getGlVouNo();
-            if (tmp.isEdit()) {
-                backupGl(tmp.getKey(), tmp.getModifyBy(), false);
-            }
             switch (tranSource) {
                 case "GV", "DR", "CR" -> {
                     if (Util1.isNullOrEmpty(glVouNo)) {
@@ -90,11 +89,11 @@ public class GlServiceImpl implements GlService {
     }
 
     @Override
-    public Gl save(Gl gl, boolean backup){
+    public Gl save(Gl gl, boolean backup) {
         String updatedBy = gl.getModifyBy();
         gl.setGlDate(Util1.toDateTime(gl.getGlDate()));
         if (Util1.isNull(gl.getKey().getGlCode())) {
-            gl.setCreatedDate(Util1.toDateTime(Util1.getTodayDate()));
+            gl.setCreatedDate(LocalDateTime.now());
             Integer macId = gl.getMacId();
             String compCode = gl.getKey().getCompCode();
             String glCode = getGLCode(gl.getGlDate(), gl.getKey().getDeptId(), macId, compCode);
@@ -106,10 +105,6 @@ public class GlServiceImpl implements GlService {
             } else {
                 log.info(valid.getKey().getGlCode());
                 throw new IllegalStateException("Duplication Occur in Gl");
-            }
-        } else {
-            if (backup) {
-                backupGl(gl.getKey(), updatedBy, false);
             }
         }
         if (gl.getDelList() != null) {
@@ -141,67 +136,20 @@ public class GlServiceImpl implements GlService {
         return dao.findByCode(key);
     }
 
-    private String getGLCode(Date date, Integer deptId, Integer macId, String compCode) {
+    private String getGLCode(LocalDateTime date, Integer deptId, Integer macId, String compCode) {
         String period = Util1.toDateStr(date, "ddMMyy");
         int seqNo = seqService.getSequence(macId, "GL", period, compCode);
         String deptCode = String.format("%0" + 2 + "d", deptId) + "-";
         return deptCode + String.format("%0" + 2 + "d", macId) + period + String.format("%0" + 5 + "d", seqNo);
     }
 
-    private String getGlLogCode(Integer deptId, Integer macId, String compCode) {
-        String period = Util1.toDateStr(Util1.getTodayDate(), "MMyy");
-        int seqNo = seqService.getSequence(macId, "GL-LOG", period, compCode);
-        String deptCode = String.format("%0" + 2 + "d", deptId) + "-";
-        return "L-" + deptCode + String.format("%0" + 2 + "d", macId) + period + String.format("%0" + 5 + "d", seqNo);
-    }
-
-    private String getVouNo(Date glDate, Integer deptId, Integer macId, String compCode, String type) {
+    private String getVouNo(LocalDateTime glDate, Integer deptId, Integer macId, String compCode, String type) {
         String period = Util1.toDateStr(glDate, "MMyy");
         int seqNo = seqService.getSequence(macId, type, period, compCode);
         String deptCode = String.format("%0" + 2 + "d", deptId);
         return type + deptCode + String.format("%0" + 2 + "d", macId) + "-" + period + "-" + String.format("%0" + 5 + "d", seqNo);
     }
 
-    private void backupGl(GlKey key, String updatedBy, boolean del) {
-        if (key != null) {
-            Gl gl = dao.findWithSql(key);
-            if (gl != null) {
-                Integer deptId = gl.getKey().getDeptId();
-                String compCode = gl.getKey().getCompCode();
-                Integer macId = gl.getMacId();
-                String type = gl.getTranSource();
-                GlLog l = new GlLog();
-                GlLogKey logKey = new GlLogKey();
-                logKey.setLogGlCode(getGlLogCode(deptId, macId, compCode));
-                logKey.setDeptId(deptId);
-                logKey.setCompCode(compCode);
-                l.setKey(logKey);
-                l.setTraderCode(gl.getTraderCode());
-                l.setTranSource(gl.getTranSource());
-                l.setSrcAccCode(gl.getSrcAccCode());
-                l.setAccCode(gl.getAccCode());
-                l.setCrAmt(gl.getCrAmt());
-                l.setDrAmt(gl.getDrAmt());
-                l.setCreatedBy(gl.getCreatedBy());
-                l.setCreatedDate(gl.getCreatedDate());
-                l.setCurCode(gl.getCurCode());
-                l.setDeptCode(gl.getDeptCode());
-                l.setDescription(gl.getDescription());
-                l.setGlCode(gl.getKey().getGlCode());
-                l.setGlDate(gl.getGlDate());
-                l.setGlVouNo(gl.getGlVouNo());
-                l.setReference(gl.getReference());
-                l.setRefNo(gl.getRefNo());
-                l.setLogDate(Util1.getTodayDate());
-                l.setLogMac(macId);
-                l.setMacId(gl.getMacId());
-                l.setLogStatus(del ? "DEL-" + type : "EDIT-" + type);
-                l.setLogUser(updatedBy);
-                logDao.save(l);
-            }
-        }
-    }
-    
     @Override
     public List<Gl> unUploadVoucher(String compCode) {
         return dao.unUploadVoucher(compCode);

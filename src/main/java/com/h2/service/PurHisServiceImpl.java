@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -129,10 +128,6 @@ public class PurHisServiceImpl implements PurHisService {
         return phDao.unUploadVoucher(syncDate);
     }
 
-    @Override
-    public Date getMaxDate() {
-        return phDao.getMaxDate();
-    }
 
     @Override
     public List<PurHis> search(String updatedDate, List<String> keys) {

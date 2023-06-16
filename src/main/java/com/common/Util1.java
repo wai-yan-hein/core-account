@@ -31,10 +31,13 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
@@ -128,19 +131,9 @@ public class Util1 {
         return Util1.getBoolean(hmSysProp.get("system.multi.currency.flag"));
     }
 
-    public static Date toDateTime(Object objDate) {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date date = null;
-
-        try {
-            if (objDate != null) {
-                date = formatter.parse(objDate.toString());
-            }
-        } catch (ParseException ex) {
-            log.info("toDateStr Error : " + ex.getMessage());
-        }
-
-        return date;
+    public static LocalDateTime toDateTime(LocalDateTime date) {
+        LocalDateTime now = LocalDateTime.now();
+        return LocalDateTime.of(date.toLocalDate(), LocalTime.of(now.getHour(), now.getMinute(), now.getSecond()));
     }
 
     public static Date toJavaDate(Object objDate) {
@@ -170,19 +163,6 @@ public class Util1 {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         return sdf.format(d1).equals(sdf.format(d2));
-    }
-
-    public static String toDateStrMYSQL(String strDate) {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        String date = null;
-
-        try {
-            date = formatter.format(toDate(strDate));
-        } catch (Exception ex) {
-            log.info("toDateTimeStrMYSQL : " + ex.getMessage());
-        }
-
-        return date;
     }
 
     public static boolean isMySqLDate(String strDate) {
@@ -221,23 +201,6 @@ public class Util1 {
         return date;
     }
 
-    public static String toDateStr(String strDate, String inFormat, String outFormat) {
-        SimpleDateFormat formatter = new SimpleDateFormat(outFormat);
-        String date = null;
-
-        try {
-            date = formatter.format(toDate(strDate, inFormat));
-        } catch (Exception ex) {
-            try {
-                date = formatter.format(toDate(strDate, outFormat));
-            } catch (Exception ex1) {
-                log.info("toDateStr : " + ex1.getMessage());
-            }
-        }
-
-        return date;
-    }
-
     public static String toDateStrMYSQLEnd(String strDate) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         String date = null;
@@ -251,22 +214,30 @@ public class Util1 {
         return date;
     }
 
-    public static Date toDate(Object objDate, String format) {
-        SimpleDateFormat formatter = new SimpleDateFormat(format);
-        Date date = null;
+    public static LocalDateTime toDate(String mysql) {
+        LocalDate localDate = LocalDate.parse(mysql);
+        return localDate.atStartOfDay();
+    }
 
-        try {
-            date = formatter.parse(objDate.toString());
-        } catch (ParseException ex) {
-            try {
-                formatter = new SimpleDateFormat("yyyy-MM-dd");
-                date = formatter.parse(objDate.toString());
-            } catch (ParseException ex1) {
-                log.info("toDateStr Error : " + ex1.getMessage());
-            }
-        }
+    public static LocalDateTime toDate(Object date, String format) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+        return LocalDateTime.parse(date.toString(), formatter);
+    }
 
-        return date;
+    public static Date convertToDate(LocalDateTime localDateTime) {
+        ZoneId zoneId = ZoneId.systemDefault();
+        return Date.from(localDateTime.atZone(zoneId).toInstant());
+    }
+
+    public static LocalDateTime convertToLocalDateTime(Date date) {
+        Instant instant = date.toInstant();
+        ZoneId zoneId = ZoneId.systemDefault();
+        return instant.atZone(zoneId).toLocalDateTime();
+    }
+
+    public static Date getTodayDate() {
+        Calendar calendar = Calendar.getInstance();
+        return calendar.getTime();
     }
 
     public static Date toDateFormat(Date date, String format) {
@@ -297,6 +268,23 @@ public class Util1 {
         return extension;
     }
 
+    public static String toDateStr(String dateStr, String inFormat, String outFormat) {
+        DateFormat inputFormat = new SimpleDateFormat(inFormat);
+        DateFormat outputFormat = new SimpleDateFormat(outFormat);
+        try {
+            Date date = inputFormat.parse(dateStr);
+            return outputFormat.format(date);
+        } catch (ParseException e) {
+            log.error("toDateStr : " + e.getMessage());
+            return null;
+        }
+    }
+
+    public static String toDateStr(LocalDate date, String format) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+        return date.format(formatter);
+    }
+
     public static String toDateStr(Date date, String format) {
         SimpleDateFormat formatter = new SimpleDateFormat(format);
         String strDate = null;
@@ -310,8 +298,10 @@ public class Util1 {
         return strDate;
     }
 
-    public static Date getTodayDate() {
-        return Calendar.getInstance(TimeZone.getTimeZone("Asia/Yangon")).getTime();
+    public static String toDateStr(LocalDateTime dateTime, String format) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+        // Format the LocalDateTime
+        return dateTime.format(formatter);
     }
 
     public static LocalDateTime getTodayLocalDateTime() {
@@ -326,33 +316,15 @@ public class Util1 {
         return strDateTime;
     }
 
-    public static String toDateStrMYSQL(String strDate, String format) {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        String date = null;
-
+    public static String toDateStrMYSQL(String dateStr, String format) {
+        DateFormat inputFormat = new SimpleDateFormat(format);
+        DateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
-            date = formatter.format(toDate(strDate, format));
-        } catch (Exception ex) {
-            log.info("toDateTimeStrMYSQL : " + ex.getMessage());
+            Date date = inputFormat.parse(dateStr);
+            return outputFormat.format(date);
+        } catch (ParseException e) {
+            return null;
         }
-
-        return date;
-    }
-
-    public static String addDateTo(String date, int ttlDay) {
-        String output = null;
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-        Calendar c = Calendar.getInstance();
-
-        try {
-            c.setTime(toDate(date, "dd/MM/yyyy")); // Now use today date.
-            c.add(Calendar.DATE, ttlDay);
-            output = formatter.format(c.getTime());
-        } catch (Exception ex) {
-            log.info("addDateTo : " + ex.getMessage());
-        }
-
-        return output;
     }
 
     public static Date addDateTo(Date date, int ttlDay) {
@@ -412,18 +384,6 @@ public class Util1 {
         }
     }
 
-    public static Date getLastDayOfMonth(String strDate, String format) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(toDate(strDate, format));
-
-        calendar.add(Calendar.MONTH, 1);
-        calendar.set(Calendar.DAY_OF_MONTH, 1);
-        calendar.add(Calendar.DATE, -1);
-
-        Date lastDayOfMonth = calendar.getTime();
-        return lastDayOfMonth;
-    }
-
     public static int getDatePart(Date d, String format) {
         int intValue = 0;
 
@@ -458,18 +418,6 @@ public class Util1 {
 
     public static boolean getNullTo(Boolean value) {
         return Objects.requireNonNullElse(value, false);
-    }
-
-    public static String getPeriod(String strDate, String format) {
-        SimpleDateFormat formatter = new SimpleDateFormat("MMyyyy");
-        String strPeriod = null;
-        Date date = toDate(strDate, format);
-
-        if (date != null) {
-            strPeriod = formatter.format(date);
-        }
-
-        return strPeriod;
     }
 
     public static String getPeriod(Date date) {
@@ -765,20 +713,20 @@ public class Util1 {
         return r;
     }
 
-    public static Date formatDate(Object obj) {
+    public static LocalDateTime formatDate(Object obj) {
         if (obj != null) {
-            DateFormat f1 = new SimpleDateFormat("dd/MM/yyyy");
+            String dateString = obj.toString();
+
             try {
-                return f1.parse(obj.toString());
-            } catch (ParseException ex) {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                return LocalDateTime.parse(dateString, formatter);
+            } catch (DateTimeParseException ex) {
             }
             try {
-                f1 = new SimpleDateFormat("dd/MM/yy");
-                return f1.parse(obj.toString());
-            } catch (ParseException ex) {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yy");
+                return LocalDateTime.parse(dateString, formatter);
+            } catch (DateTimeParseException ex) {
             }
-            int length = obj.toString().length();
-            return Util1.toDate(toFormatDate(obj.toString(), length), "dd/MM/yyyy");
         }
         return null;
     }
@@ -793,16 +741,29 @@ public class Util1 {
 
     }
 
-    public static List<Date> getDaysBetweenDates(Date startdate, Date endate) {
-        List<Date> dates = new ArrayList<>();
-        Calendar calendar = new GregorianCalendar();
-        calendar.setTime(startdate);
-
-        while (!calendar.getTime().after(endate)) {
-            Date result = calendar.getTime();
-            dates.add(result);
-            calendar.add(Calendar.DATE, 1);
+    public static Date parseDate(String date, String dateFormat) {
+        DateFormat format = new SimpleDateFormat(dateFormat);
+        try {
+            return format.parse(date);
+        } catch (ParseException e) {
+            return null;
         }
+    }
+
+    public static LocalDate parseLocalDate(String date, String format) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+        return LocalDate.parse(date, formatter);
+    }
+
+    public static List<LocalDate> getDaysBetweenDates(LocalDate startDate, LocalDate endDate) {
+        List<LocalDate> dates = new ArrayList<>();
+        LocalDate currentDate = startDate;
+
+        while (!currentDate.isAfter(endDate)) {
+            dates.add(currentDate);
+            currentDate = currentDate.plusDays(1);
+        }
+
         return dates;
     }
 
@@ -935,10 +896,6 @@ public class Util1 {
             log.error(e.getMessage());
         }
         return null;
-    }
-
-    public static Date getSyncDate() {
-        return Util1.toDate(SYNC_DATE);
     }
 
     public static String cleanString(String str) {
