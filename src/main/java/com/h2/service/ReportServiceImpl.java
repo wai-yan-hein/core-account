@@ -227,7 +227,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<VPurchase> getPurchaseHistory(String fromDate, String toDate, String traderCode, String vouNo,
-            String userCode, String remark,String stockCode, String locCode, String compCode,
+            String userCode, String remark, String locCode, String compCode,
             Integer deptId, String deleted, String projectNo, String curCode){
         List<VPurchase> purchaseList = new ArrayList<>();
         try {
@@ -240,7 +240,7 @@ public class ReportServiceImpl implements ReportService {
                     + "and cur_code = '" + curCode + "'\n"                     
                     + "and intg_upd_status is null\n" 
                     + "and cast(vou_date as date) between '" + fromDate + "' and '" + toDate + "'\n"
-                    + "and (stock_code ='" + stockCode + "' or '-' ='" + stockCode + "')\n"  
+                    // "and (stock_code ='" + stockCode + "' or '-' ='" + stockCode + "')\n"  
                     + "and (vou_no = '" + vouNo + "' or '-' = '" + vouNo + "')\n"
                     + "and (remark like '" + remark + "%' or '-%'= '" + remark + "%')\n" 
                     + "and (trader_code = '" + traderCode + "' or '-'= '" + traderCode + "')\n"

@@ -1377,7 +1377,7 @@ public class InventoryRepo {
         key.setDeptId(deptId);
         key.setVouNo(vouNo);
         if (local) {
-            //return h2Repo.(key);
+            return h2Repo.findRetInHis(key);
         }
         return inventoryApi.post()
                 .uri("/retin/find-retin")
@@ -1431,6 +1431,9 @@ public class InventoryRepo {
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setVouNo(vouNo);
+        if (local) {
+            return h2Repo.findRetOutHis(key);
+        }
         return inventoryApi.post()
                 .uri("/retout/find-retout")
                 .body(Mono.just(key), RetOutHisKey.class)
