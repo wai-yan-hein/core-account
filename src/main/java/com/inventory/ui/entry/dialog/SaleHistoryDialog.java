@@ -299,6 +299,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
             VSale his = saleVouTableModel.getSelectVou(row);
+            his.setLocal(chkLocal.isSelected());
             observer.selected("SALE-HISTORY", his);
             setVisible(false);
         } else {

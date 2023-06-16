@@ -69,4 +69,5 @@ public class VSale {
     private String refNo;
     private Integer deptId;
     private String reference;
+    private boolean local;
 }

@@ -1553,7 +1553,7 @@ public class InventoryRepo {
                 .queryParam("stockCode", stockCode)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", deptId)
-                .queryParam("vouDate", vouDate)
+                .queryParam("vouDate", vouDate == null ? "" : vouDate)
                 .build())
                 .retrieve()
                 .bodyToFlux(Pattern.class)
@@ -2315,8 +2315,8 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<SaleHisDetail>> getSaleDetail(String vouNo, int deptId, String intgUpdateStatus) {
-        if (intgUpdateStatus == null) {
+    public Mono<List<SaleHisDetail>> getSaleDetail(String vouNo, int deptId, boolean local) {
+        if (local) {
             return h2Repo.getSaleDetail(vouNo, deptId);
         }
         return inventoryApi.get()
