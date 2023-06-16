@@ -99,7 +99,6 @@ public class SaleHisDetailDaoImpl extends AbstractDao<SaleDetailKey, SaleHisDeta
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
             log.error(e.getMessage());
         }
         return listOP;

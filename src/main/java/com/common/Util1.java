@@ -225,14 +225,20 @@ public class Util1 {
     }
 
     public static Date convertToDate(LocalDateTime localDateTime) {
-        ZoneId zoneId = ZoneId.systemDefault();
-        return Date.from(localDateTime.atZone(zoneId).toInstant());
+        if (localDateTime != null) {
+            ZoneId zoneId = ZoneId.systemDefault();
+            return Date.from(localDateTime.atZone(zoneId).toInstant());
+        }
+        return null;
     }
 
     public static LocalDateTime convertToLocalDateTime(Date date) {
-        Instant instant = date.toInstant();
-        ZoneId zoneId = ZoneId.systemDefault();
-        return instant.atZone(zoneId).toLocalDateTime();
+        if (date != null) {
+            Instant instant = date.toInstant();
+            ZoneId zoneId = ZoneId.systemDefault();
+            return instant.atZone(zoneId).toLocalDateTime();
+        }
+        return null;
     }
 
     public static Date getTodayDate() {

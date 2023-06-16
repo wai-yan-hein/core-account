@@ -585,8 +585,8 @@ public class H2Repo {
         return Mono.justOrEmpty(purHisService.findById(key));
     }
 
-    public Mono<List<PurHisDetail>> searchPurchaseDetail(String vouNo) {
-        return Mono.justOrEmpty(purDetailService.search(vouNo, Global.compCode, Global.deptId));
+    public Mono<List<PurHisDetail>> searchPurchaseDetail(String vouNo,Integer depId) {
+        return Mono.justOrEmpty(purDetailService.search(vouNo, Global.compCode, depId));
     }
 
     public Mono<List<VReturnIn>> searchReturnInVoucher(FilterObject filter) {

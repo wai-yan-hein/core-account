@@ -1922,7 +1922,7 @@ public class InventoryRepo {
 
     public Mono<List<PurHisDetail>> getPurDetail(String vouNo, Integer deptId) {
         if (localDatabase) {
-            return h2Repo.searchPurchaseDetail(vouNo);
+            return h2Repo.searchPurchaseDetail(vouNo,deptId);
         }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/pur/get-pur-detail")
