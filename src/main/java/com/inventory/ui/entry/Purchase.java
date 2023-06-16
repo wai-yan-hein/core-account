@@ -490,7 +490,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 }
             }, (e) -> {
                 progress.setIndeterminate(false);
-                observer.selected("save", false);
+                observer.selected("save", true);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             });
         }

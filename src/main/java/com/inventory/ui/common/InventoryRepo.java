@@ -1766,6 +1766,17 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
+     public Mono<Boolean> restore(GRNKey key) {
+        return inventoryApi.post()
+                .uri("/grn/restore-grn")
+                .body(Mono.just(key), GRNKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
 
     public Mono<Boolean> open(GRNKey key) {
         return inventoryApi.post()

@@ -286,7 +286,7 @@ public class AccountRepo {
 
     public Mono<List<ChartOfAccount>> getUpdateChartOfAccountByDate(String updatedDate) {
         return accountApi.get()
-                .uri(builder -> builder.path("/account/get-COAByDate")
+                .uri(builder -> builder.path("/account/getUpdatedCOA")
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve()
@@ -296,7 +296,7 @@ public class AccountRepo {
 
     public Mono<List<TraderA>> getUpdateTraderByDate(String updatedDate) {
         return accountApi.get()
-                .uri(builder -> builder.path("/account/get-TraderByDate")
+                .uri(builder -> builder.path("/account/getUpdatedTrader")
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve()
@@ -306,21 +306,11 @@ public class AccountRepo {
 
     public Mono<List<DepartmentA>> getUpdateDepartmentAByDate(String updatedDate) {
         return accountApi.get()
-                .uri(builder -> builder.path("/account/get-DepartmentByDate")
+                .uri(builder -> builder.path("/account/getUpdatedDepartment")
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve()
                 .bodyToFlux(DepartmentA.class)
-                .collectList();
-    }
-
-    public Mono<List<ChartOfAccount>> getUpdateCOAOpeningByDate(String updatedDate) {
-        return accountApi.get()
-                .uri(builder -> builder.path("/account/get-COAOpeningByDate")
-                .queryParam("updatedDate", updatedDate)
-                .build())
-                .retrieve()
-                .bodyToFlux(ChartOfAccount.class)
                 .collectList();
     }
 

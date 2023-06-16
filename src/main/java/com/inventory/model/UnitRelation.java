@@ -10,6 +10,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
@@ -21,16 +22,16 @@ import lombok.Data;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
-@Table(name = "unit_relation")public class UnitRelation {
-
+@Table(name = "unit_relation")
+public class UnitRelation {
     @EmbeddedId
     private RelationKey key;
     @Column(name = "rel_name")
     private String relName;
     @Column(name = "intg_upd_status")
     private String intgUpdStatus;
-    @Column(name = "updated_date")
-    private Date updatedDate;
+    @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime updatedDate;
     private transient List<UnitRelationDetail> detailList;
 
     public UnitRelation() {

@@ -445,6 +445,21 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                     });
                 }
             }
+            case "DELETED" -> {
+                int yes_no = JOptionPane.showConfirmDialog(this,
+                        "Are you sure to restore?", "Purchase Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (yes_no == 0) {
+                    grn.setDeleted(false);
+                    inventoryRepo.restore(grn.getKey()).subscribe((t) -> {
+                        if (t) {
+                            lblStatus.setText("EDIT");
+                            lblStatus.setForeground(Color.blue);
+                            disableForm(true);
+                        }
+                    });
+
+                }
+            }
             default ->
                 JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }
