@@ -35,9 +35,8 @@ public class ProcessHis {
     private LocalDateTime vouDate;
     @Column(name = "loc_code")
     private String locCode;
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "end_date")
-    private Date endDate;
+    private LocalDateTime endDate;
     @Column(name = "pt_code")
     private String ptCode;
     @Column(name = "remark")

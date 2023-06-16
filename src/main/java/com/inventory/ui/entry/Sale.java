@@ -53,6 +53,7 @@ import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -211,8 +212,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         } else {
                             projectAutoCompleter.setProject(null);
                         }
-
-                        txtDueDate.setDate(oh.getCreditTerm());
+                        
+                        txtDueDate.setDate(Util1.convertToDate(oh.getCreditTerm()));
                         txtRemark.setText(oh.getRemark());
                         txtReference.setText(oh.getReference());
                         txtSaleDate.setDate(Util1.convertToDate(oh.getVouDate()));
@@ -544,7 +545,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             status = false;
             txtLocation.requestFocus();
         } else {
-            saleHis.setCreditTerm(txtDueDate.getDate());
+            saleHis.setCreditTerm(Util1.convertToLocalDateTime(txtDueDate.getDate()));
             SaleMan sm = saleManCompleter.getSaleMan();
             if (sm != null) {
                 saleHis.setSaleManCode(sm.getKey().getSaleManCode());
@@ -735,7 +736,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     disableForm(true);
                 }
                 txtVouNo.setText(saleHis.getKey().getVouNo());
-                txtDueDate.setDate(saleHis.getCreditTerm());
+                txtDueDate.setDate(Util1.convertToDate(saleHis.getCreditTerm()));
                 txtRemark.setText(saleHis.getRemark());
                 txtReference.setText(saleHis.getReference());
                 txtSaleDate.setDate(Util1.convertToDate(saleHis.getVouDate()));

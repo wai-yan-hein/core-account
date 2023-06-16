@@ -42,6 +42,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyListener;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -328,7 +329,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 key.setVouNo(null);
                 io.setKey(key);
                 io.setCreatedBy(Global.loginUser.getUserCode());
-                io.setCreatedDate(Util1.getTodayDate());
+                io.setCreatedDate(LocalDateTime.now());
                 io.setMacId(Global.macId);
                 io.setDeleted(Boolean.FALSE);
             } else {

@@ -44,6 +44,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -392,7 +393,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                 key.setDeptId(Global.deptId);
                 key.setVouNo(null);
                 ri.setKey(key);
-                ri.setCreatedDate(Util1.getTodayDate());
+                ri.setCreatedDate(LocalDateTime.now());
                 ri.setCreatedBy(Global.loginUser.getUserCode());
                 ri.setSession(Global.sessionId);
                 ri.setMacId(Global.macId);

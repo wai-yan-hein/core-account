@@ -31,8 +31,8 @@ public class TransferHis {
     private TransferHisKey key;
     @Column(name = "created_by")
     private String createdBy;
-    @Column(name = "created_date")
-    private Date createdDate;
+    @Column(name = "created_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime createdDate;
     @Column(name = "deleted")
     private boolean deleted;
     @Column(name = "vou_date", columnDefinition = "TIMESTAMP")
@@ -41,9 +41,8 @@ public class TransferHis {
     private String refNo;
     @Column(name = "remark")
     private String remark;
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_date")
-    private Date updatedDate;
+    @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime updatedDate;
     @Column(name = "updated_by")
     private String updatedBy;
     @Column(name = "loc_code_from")

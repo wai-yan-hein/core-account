@@ -28,6 +28,7 @@ import com.inventory.ui.setup.dialog.RegionSetup;
 import com.inventory.ui.setup.dialog.TraderGroupDialog;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -246,7 +247,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
             if (lblStatus.getText().equals("NEW")) {
                 customer.setMacId(Global.macId);
                 customer.setCreatedBy(Global.loginUser.getUserCode());
-                customer.setCreatedDate(Util1.getTodayDate());
+                customer.setCreatedDate(LocalDateTime.now());
                 TraderKey key = new TraderKey();
                 key.setCompCode(Global.compCode);
                 key.setCode(null);

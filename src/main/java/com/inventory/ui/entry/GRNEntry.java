@@ -33,6 +33,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import javax.swing.AbstractAction;
@@ -264,7 +265,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             status = false;
         } else {
             grn.setMacId(Global.macId);
-            grn.setVouDate(txtDate.getDate());
+            grn.setVouDate(Util1.convertToLocalDateTime(txtDate.getDate()));
             grn.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
             grn.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             grn.setBatchNo(txtBatchNo.getText());
@@ -283,7 +284,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                 key.setDeptId(Global.deptId);
                 key.setVouNo(null);
                 grn.setKey(key);
-                grn.setCreatedDate(Util1.getTodayDate());
+                grn.setCreatedDate(LocalDateTime.now());
                 grn.setCreatedBy(Global.loginUser.getUserCode());
             } else {
                 grn.setUpdatedBy(Global.loginUser.getUserCode());
@@ -408,7 +409,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                         txtVouNo.setText(vouNo);
                         txtRemark.setText(grn.getRemark());
                         txtBatchNo.setText(grn.getBatchNo());
-                        txtDate.setDate(grn.getVouDate());
+                        txtDate.setDate(Util1.convertToDate(grn.getVouDate()));
                         chkClose.setSelected(grn.isClosed());
                         focusTable();
                         progress.setIndeterminate(false);

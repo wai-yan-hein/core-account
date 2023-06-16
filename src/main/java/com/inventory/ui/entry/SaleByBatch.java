@@ -412,7 +412,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
             status = false;
             txtLocation.requestFocus();
         } else {
-            saleHis.setCreditTerm(txtDueDate.getDate());
+            saleHis.setCreditTerm(Util1.convertToLocalDateTime(txtDueDate.getDate()));
             SaleMan sm = saleManCompleter.getSaleMan();
             if (sm != null) {
                 saleHis.setSaleManCode(sm.getKey().getSaleManCode());
@@ -605,7 +605,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
                     disableForm(true);
                 }
                 txtVouNo.setText(saleHis.getKey().getVouNo());
-                txtDueDate.setDate(saleHis.getCreditTerm());
+                txtDueDate.setDate(Util1.convertToDate(saleHis.getCreditTerm()));
                 txtRemark.setText(saleHis.getRemark());
                 txtReference.setText(saleHis.getReference());
                 txtSaleDate.setDate(Util1.convertToDate(saleHis.getVouDate()));

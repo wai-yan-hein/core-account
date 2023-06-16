@@ -33,6 +33,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyListener;
+import java.time.LocalDateTime;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
@@ -285,7 +286,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                 key.setVouNo(txtVou.getText());
                 io.setKey(key);
                 io.setCreatedBy(Global.loginUser.getUserCode());
-                io.setCreatedDate(Util1.getTodayDate());
+                io.setCreatedDate(LocalDateTime.now());
                 io.setMacId(Global.macId);
                 io.setDeleted(Boolean.FALSE);
             } else {

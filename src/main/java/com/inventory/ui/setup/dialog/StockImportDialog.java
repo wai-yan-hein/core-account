@@ -18,6 +18,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -154,7 +155,7 @@ public class StockImportDialog extends javax.swing.JDialog {
                         t.setSalePriceN(Util1.getFloat(price));
                         t.setTypeCode(getGroupCode(typeCode));
                         t.setActive(true);
-                        t.setCreatedDate(Util1.getTodayDate());
+                        t.setCreatedDate(LocalDateTime.now());
                         t.setCreatedBy(Global.loginUser.getUserCode());
                         t.setMacId(Global.macId);
                         t.setCalculate(true);

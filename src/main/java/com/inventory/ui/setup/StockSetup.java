@@ -35,6 +35,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -330,7 +331,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 key.setDeptId(Global.deptId);
                 stock.setKey(key);
                 stock.setMacId(Global.macId);
-                stock.setCreatedDate(Util1.getTodayDate());
+                stock.setCreatedDate(LocalDateTime.now());
                 stock.setCreatedBy(Global.loginUser.getUserCode());
             } else {
                 stock.setUpdatedBy(Global.loginUser.getUserCode());

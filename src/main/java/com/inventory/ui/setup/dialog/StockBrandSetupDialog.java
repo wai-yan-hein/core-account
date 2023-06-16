@@ -16,6 +16,7 @@ import com.inventory.ui.setup.dialog.common.StockBrandTableModel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
@@ -160,7 +161,7 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
                 key.setDeptId(Global.deptId);
                 brand.setKey(key);
                 brand.setCreatedBy(Global.loginUser.getUserCode());
-                brand.setCreatedDate(Util1.getTodayDate());
+                brand.setCreatedDate(LocalDateTime.now());
                 brand.setMacId(Global.macId);
             } else {
                 brand.setUpdatedBy(Global.loginUser.getUserCode());

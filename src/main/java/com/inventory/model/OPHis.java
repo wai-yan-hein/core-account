@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
@@ -38,9 +39,8 @@ public class OPHis {
     private String remark;
     @Column(name = "created_by")
     private String createdBy;
-    @Column(name = "created_date")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdDate;
+    @Column(name = "created_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime createdDate;
     @Column(name = "updated_by")
     private String updatedBy;
     @Column(name = "cur_code")
@@ -49,9 +49,8 @@ public class OPHis {
     private String locCode;
     @Column(name = "op_amt")
     private float opAmt;
-    @Column(name = "updated_date")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedDate;
+    @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime updatedDate;
     @Column(name = "deleted")
     private boolean deleted;
     @Column(name = "mac_id")

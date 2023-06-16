@@ -41,9 +41,8 @@ public class WeightLossHis {
     private String updatedBy;
     @Column(name = "mac_id")
     private Integer macId;
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_date")
-    private Date updatedDate;
+    @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime updatedDate;
     @Column(name = "deleted")
     private boolean deleted;
     @Column(name = "intg_upd_status")

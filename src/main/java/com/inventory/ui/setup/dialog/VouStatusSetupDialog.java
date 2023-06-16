@@ -16,6 +16,7 @@ import com.inventory.ui.setup.dialog.common.VouStatusTableModel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JButton;
@@ -160,7 +161,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
                 key.setDeptId(Global.deptId);
                 vou.setKey(key);
                 vou.setCreatedBy(Global.loginUser.getUserCode());
-                vou.setCreatedDate(Util1.getTodayDate());
+                vou.setCreatedDate(LocalDateTime.now());
                 vou.setMacId(Global.macId);
             } else {
                 vou.setUpdatedBy(Global.loginUser.getUserCode());

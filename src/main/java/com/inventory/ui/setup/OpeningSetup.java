@@ -28,6 +28,7 @@ import java.awt.Color;
 import java.awt.FileDialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
@@ -195,7 +196,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                 key.setVouNo(null);
                 oPHis.setKey(key);
                 oPHis.setCreatedBy(Global.loginUser.getUserCode());
-                oPHis.setCreatedDate(Util1.getTodayDate());
+                oPHis.setCreatedDate(LocalDateTime.now());
             } else {
                 oPHis.setCreatedBy(Global.loginUser.getUserCode());
             }

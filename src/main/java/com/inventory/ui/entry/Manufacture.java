@@ -251,7 +251,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         Integer deptId = ph.getKey().getDeptId();
         txtVouNo.setText(ph.getKey().getVouNo());
         txtStartDate.setDate(Util1.convertToDate(ph.getVouDate()));
-        txtEndDate.setDate(ph.getEndDate());
+        txtEndDate.setDate(Util1.convertToDate(ph.getEndDate()));
         txtRemark.setText(ph.getRemark());
         txtProNo.setText(ph.getProcessNo());
         txtQty.setValue(ph.getQty());
@@ -388,7 +388,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             ph.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
             ph.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             ph.setVouDate(Util1.convertToLocalDateTime(txtStartDate.getDate()));
-            ph.setEndDate(txtEndDate.getDate());
+            ph.setEndDate(Util1.convertToLocalDateTime(txtEndDate.getDate()));
             ph.setRemark(txtRemark.getText());
             ph.setProcessNo(txtProNo.getText());
             ph.setQty(Util1.getFloat(txtQty.getValue()));

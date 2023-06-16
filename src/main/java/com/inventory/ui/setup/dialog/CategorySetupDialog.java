@@ -16,6 +16,7 @@ import com.inventory.ui.setup.dialog.common.CategoryTableModel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
@@ -157,7 +158,7 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
                 key.setDeptId(Global.deptId);
                 category.setKey(key);
                 category.setCreatedBy(Global.loginUser.getUserCode());
-                category.setCreatedDate(Util1.getTodayDate());
+                category.setCreatedDate(LocalDateTime.now());
                 category.setMacId(Global.macId);
             } else {
                 category.setUpdatedBy(Global.loginUser.getUserCode());

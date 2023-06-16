@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -180,7 +181,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                     t.setAddress(address);
                     t.setActive(Boolean.TRUE);
                     t.setAddress(address);
-                    t.setCreatedDate(Util1.getTodayDate());
+                    t.setCreatedDate(LocalDateTime.now());
                     t.setCreatedBy(Global.loginUser.getUserCode());
                     t.setMacId(Global.macId);
                     t.setType("CUS");

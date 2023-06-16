@@ -49,7 +49,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -416,7 +415,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             status = false;
             txtLocation.requestFocus();
         } else {
-            orderHis.setCreditTerm(txtDueDate.getDate());
+            orderHis.setCreditTerm(Util1.convertToLocalDateTime(txtDueDate.getDate()));
             SaleMan sm = saleManCompleter.getSaleMan();
             if (sm != null) {
                 orderHis.setSaleManCode(sm.getKey().getSaleManCode());
@@ -611,7 +610,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                             disableForm(true);
                         }
                         txtVouNo.setText(orderHis.getKey().getVouNo());
-                        txtDueDate.setDate(orderHis.getCreditTerm());
+                        txtDueDate.setDate(Util1.convertToDate(orderHis.getCreditTerm()));
                         txtRemark.setText(orderHis.getRemark());
                         txtReference.setText(orderHis.getReference());
                         txtOrderDate.setDate(Util1.convertToDate(orderHis.getVouDate()));

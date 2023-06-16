@@ -567,16 +567,16 @@ public class CloudIntegration {
     }
 
     private void downloadInventory() {
-        //downloadPriceOption();
-        //downloadVouStatus();
-        //downloadInvTrader();
-        //downloadSaleMan();
-        //downloadLocation();
-        //downloadRelation();
-        //downloadUnit();
-        //downloadBrand();
-        //downloadStockType();
-        //downloadCategory();
+        downloadPriceOption();
+        downloadVouStatus();
+        downloadInvTrader();
+        downloadSaleMan();
+        downloadLocation();
+        downloadRelation();
+        downloadUnit();
+        downloadBrand();
+        downloadStockType();
+        downloadCategory();
         downloadStock();
     }
 

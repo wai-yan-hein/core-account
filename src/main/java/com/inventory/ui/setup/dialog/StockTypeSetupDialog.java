@@ -24,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -172,7 +173,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
                 key.setStockTypeCode(null);
                 stockType.setKey(key);
                 stockType.setCreatedBy(Global.loginUser.getUserCode());
-                stockType.setCreatedDate(Util1.getTodayDate());
+                stockType.setCreatedDate(LocalDateTime.now());
                 stockType.setMacId(Global.macId);
             } else {
                 stockType.setUpdatedBy(Global.loginUser.getUserCode());
@@ -219,7 +220,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
                     key.setDeptId(Global.deptId);
                     key.setStockTypeCode(null);
                     t.setKey(key);
-                    t.setCreatedDate(Util1.getTodayDate());
+                    t.setCreatedDate(LocalDateTime.now());
                     t.setCreatedBy(Global.loginUser.getUserCode());
                     t.setMacId(Global.macId);
                     stockType = inventoryRepo.saveStockType(t).block();

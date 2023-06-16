@@ -12,6 +12,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import java.time.LocalDateTime;
 import java.util.Date;
 import lombok.Data;
 
@@ -29,14 +30,12 @@ public class VouStatus {
     private VouStatusKey key;
     @Column(name = "description")
     private String description;
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_date")
-    private Date updatedDate;
+    @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime updatedDate;
     @Column(name = "updated_by")
     private String updatedBy;
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_date")
-    private Date createdDate;
+    @Column(name = "created_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime createdDate;
     @Column(name = "created_by")
     private String createdBy;
     @Column(name = "mac_id")

@@ -16,6 +16,7 @@ import com.inventory.ui.setup.dialog.common.LocationTableModel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.time.LocalDateTime;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -152,7 +153,7 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
                 key.setLocCode(null);
                 location.setKey(key);
                 location.setCreatedBy(Global.loginUser.getUserCode());
-                location.setCreatedDate(Util1.getTodayDate());
+                location.setCreatedDate(LocalDateTime.now());
                 location.setMacId(Global.macId);
             } else {
                 location.setUpdatedBy(Global.loginUser.getUserCode());

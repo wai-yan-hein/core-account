@@ -13,6 +13,7 @@ import jakarta.persistence.TemporalType;
 import java.util.Date;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.time.LocalDateTime;
 
 /**
  *
@@ -32,9 +33,8 @@ public class PriceOption {
     private Integer uniqueId;
     @Column(name = "tran_option")
     private String tranOption;
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_date")
-    private Date updatedDate;
+    @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime updatedDate;
     private transient Float price;
 
 }

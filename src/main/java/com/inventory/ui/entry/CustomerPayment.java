@@ -32,6 +32,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.JFormattedTextField;
@@ -307,7 +308,7 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
                 key.setDeptId(Global.deptId);
                 ph.setKey(key);
                 ph.setCreatedBy(Global.loginUser.getUserCode());
-                ph.setCreatedDate(Util1.getTodayDate());
+                ph.setCreatedDate(LocalDateTime.now());
             } else {
                 ph.setUpdatedBy(Global.loginUser.getUserCode());
             }

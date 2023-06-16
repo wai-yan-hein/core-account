@@ -16,6 +16,7 @@ import com.inventory.ui.setup.dialog.common.StockUnitTableModel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
@@ -160,7 +161,7 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
         } else {
             if (lblStatus.getText().equals("NEW")) {
                 stockUnit.setCreatedBy(Global.loginUser.getUserCode());
-                stockUnit.setCreatedDate(Util1.getTodayDate());
+                stockUnit.setCreatedDate(LocalDateTime.now());
                 stockUnit.setMacId(Global.macId);
                 stockUnit.setUserCode(Global.loginUser.getUserCode());
             } else {
