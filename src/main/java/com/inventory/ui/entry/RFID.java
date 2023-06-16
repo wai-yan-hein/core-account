@@ -830,7 +830,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             case "SALE-HISTORY" -> {
                 if (selectObj instanceof VSale s) {
                     inventoryRepo.findSale(s.getVouNo(), s.getDeptId()).subscribe((t) -> {
-                        setSaleVoucher(t, ((VSale) selectObj).isLocal());
+                        setSaleVoucher(t, s.isLocal());
                     });
                 }
             }
