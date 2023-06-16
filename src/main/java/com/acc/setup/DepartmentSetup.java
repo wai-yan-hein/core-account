@@ -17,6 +17,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -259,7 +260,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
             return false;
         } else {
             dept.setUpdatedBy(Global.loginUser.getUserCode());
-            dept.setUpdatedDt(Util1.getTodayDate());
+            dept.setUpdatedDt(LocalDateTime.now());
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) selectedNode.getParent();
             Object userObject = node.getUserObject();
             if (userObject.toString().equals(parentRootName)) {

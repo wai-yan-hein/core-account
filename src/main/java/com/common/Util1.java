@@ -746,6 +746,7 @@ public class Util1 {
         try {
             return format.parse(date);
         } catch (ParseException e) {
+            log.error("parseDate : " + e.getMessage());
             return null;
         }
     }

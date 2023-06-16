@@ -37,6 +37,7 @@ import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -224,7 +225,7 @@ public class COAManagment extends javax.swing.JPanel implements
                 }
                 if (isNew) {
                     coa.setCreatedBy(Global.loginUser.getUserCode());
-                    coa.setCreatedDate(Util1.getTodayDate());
+                    coa.setCreatedDate(LocalDateTime.now());
                 }
                 int level = selectedNode.getLevel();
                 COAKey key = new COAKey(txtSysCode.getText(), Global.compCode);
@@ -509,7 +510,7 @@ public class COAManagment extends javax.swing.JPanel implements
                 coa.setCoaParent(parentCode);
                 coa.setCoaNameEng(getZawgyiText(coaName));
                 coa.setActive(Boolean.TRUE);
-                coa.setCreatedDate(Util1.getTodayDate());
+                coa.setCreatedDate(LocalDateTime.now());
                 coa.setCreatedBy(Global.loginUser.getUserCode());
                 coa.setMacId(Global.macId);
                 accountRepo.saveCOA(coa);

@@ -10,6 +10,7 @@ import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.Util1;
 import java.awt.HeadlessException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -246,7 +247,7 @@ public class COAGroupChildTableModel extends AbstractTableModel {
             if (Util1.isNullOrEmpty(coa.getKey().getCoaCode())) {
                 coa.setActive(true);
                 coa.setCreatedBy(Global.loginUser.getUserCode());
-                coa.setCreatedDate(Util1.getTodayDate());
+                coa.setCreatedDate(LocalDateTime.now());
                 coa.setMacId(Global.macId);
                 coa.setOption("USR");
             } else {

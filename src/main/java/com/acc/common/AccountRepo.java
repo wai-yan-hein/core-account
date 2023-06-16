@@ -656,9 +656,10 @@ public class AccountRepo {
     }
 
     public Mono<List<DateModel>> getDate() {
+        String startDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
         return accountApi.get()
                 .uri(builder -> builder.path("/account/getDate")
-                .queryParam("startDate", Global.startDate)
+                .queryParam("startDate", startDate)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("isAll", Boolean.TRUE)
                 .build())

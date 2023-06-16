@@ -7,6 +7,7 @@ package com.acc.model;
 import java.util.Date;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.time.LocalDateTime;
 
 /**
  *
@@ -23,7 +24,7 @@ public class StockOP {
     private String curCode;
     private String remark;
     private String createdBy;
-    private Date createdDate;
+    private LocalDateTime createdDate;
     private String updatedBy;
     private boolean deleted;
     private double clAmt;

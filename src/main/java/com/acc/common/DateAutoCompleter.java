@@ -10,6 +10,7 @@ import com.acc.model.DateModel;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.common.Util1;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.Rectangle;
@@ -37,11 +38,13 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.text.JTextComponent;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public final class DateAutoCompleter implements KeyListener, SelectionObserver {
 
     private final JTable table = new JTable();
@@ -172,10 +175,13 @@ public final class DateAutoCompleter implements KeyListener, SelectionObserver {
             dialog.setIconImage(image);
             dialog.setLocationRelativeTo(null);
             dialog.setVisible(true);
-            date.setStartDate(dialog.getStartDate());
-            date.setEndDate(dialog.getEndDate());
+            String startDate = dialog.getStartDate();
+            String endDate = dialog.getEndDate();
+            date.setStartDate(startDate);
+            date.setEndDate(endDate);
             this.textComp.setText(
-                    String.format("%s%s%s", dialog.getStartDate(), " to ", dialog.getEndDate()));
+                    String.format("%s%s%s", Util1.toDateStr(startDate, "yyyy-MM-dd", Global.dateFormat),
+                            " to ", Util1.toDateStr(endDate, "yyyy-MM-dd", Global.dateFormat)));
         }
 
         dateTableModel.setDateModel(date, row);

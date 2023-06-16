@@ -16,11 +16,11 @@ import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.ui.setup.dialog.CustomerImportDialog;
-import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.time.LocalDateTime;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -189,7 +189,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
             if (lblStatus.getText().equals("NEW")) {
                 trader.setMacId(Global.macId);
                 trader.setCreatedBy(Global.loginUser.getUserCode());
-                trader.setCreatedDate(Util1.getTodayDate());
+                trader.setCreatedDate(LocalDateTime.now());
                 TraderAKey key = new TraderAKey();
                 key.setCompCode(Global.compCode);
                 key.setCode(null);

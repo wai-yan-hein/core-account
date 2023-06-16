@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
+import java.time.LocalDateTime;
 import lombok.Data;
 import java.util.Date;
 
@@ -34,9 +35,8 @@ public class COAOpening {
     private Double drAmt;
     @Column(name = "user_code")
     private String userCode;
-    @Temporal(TemporalType.DATE)
-    @Column(name = "created_date")
-    private Date createdDate;
+    @Column(name = "created_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime createdDate;
     @Column(name = "dept_code")
     private String deptCode;
     @Column(name = "trader_code")

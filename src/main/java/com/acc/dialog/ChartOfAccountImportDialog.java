@@ -18,6 +18,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -121,7 +122,7 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
                     coa.setCoaCodeUsr(userCode);
                     coa.setCoaNameEng(chkIntegra.isSelected() ? getZawgyiText(name) : name);
                     coa.setActive(Boolean.TRUE);
-                    coa.setCreatedDate(Util1.getTodayDate());
+                    coa.setCreatedDate(LocalDateTime.now());
                     coa.setCreatedBy(Global.loginUser.getUserCode());
                     coa.setMacId(Global.macId);
                     coa.setCoaLevel(Util1.getInteger(txtLevel.getText()));
