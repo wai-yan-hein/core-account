@@ -363,7 +363,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         dialog.search();
     }
 
-    public void setSaleVoucher(SaleHis sh) {
+    public void setSaleVoucher(SaleHis sh, boolean local) {
         if (sh != null) {
             progress.setIndeterminate(true);
             saleHis = sh;
@@ -373,7 +373,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 traderAutoCompleter.setTrader(t);
             });
             String vouNo = sh.getKey().getVouNo();
-            inventoryRepo.getSaleDetail(vouNo, sh.getKey().getDeptId(), sh.getIntgUpdStatus()).subscribe((t) -> {
+            inventoryRepo.getSaleDetail(vouNo, sh.getKey().getDeptId(), local).subscribe((t) -> {
                 tableModel.setListDetail(t);
                 tableModel.addNewRow();
                 if (sh.isVouLock()) {
@@ -830,7 +830,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             case "SALE-HISTORY" -> {
                 if (selectObj instanceof VSale s) {
                     inventoryRepo.findSale(s.getVouNo(), s.getDeptId()).subscribe((t) -> {
-                        setSaleVoucher(t);
+                        setSaleVoucher(t, ((VSale) selectObj).isLocal());
                     });
                 }
             }

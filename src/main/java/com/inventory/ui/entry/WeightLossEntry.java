@@ -233,6 +233,7 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
     }
 
     private void clear() {
+        progress.setIndeterminate(false);
         txtVouNo.setText(null);
         txtRemark.setText(null);
         txtRefNo.setText(null);
