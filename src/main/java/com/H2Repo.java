@@ -109,7 +109,9 @@ import com.inventory.model.SaleHisKey;
 import com.inventory.model.PurHisDetail;
 import com.inventory.model.PurHisKey;
 import com.inventory.model.RetInHisDetail;
+import com.inventory.model.RetInHisKey;
 import com.inventory.model.RetOutHisDetail;
+import com.inventory.model.RetOutHisKey;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
@@ -568,12 +570,15 @@ public class H2Repo {
         String vouNo = Util1.isNull(filter.getVouNo(), "-");
         String userCode = Util1.isNull(filter.getUserCode(), "-");
         String cusCode = Util1.isNull(filter.getCusCode(), "-");
+        String remark = Util1.isNull(filter.getRemark(), "-");
+//        String stockCode = Util1.isNull(filter.getStockCode(), "-");
         String locCode = Util1.isNull(filter.getLocCode(), "-");
         String compCode = filter.getCompCode();
-        String deleted = String.valueOf(filter.isDeleted());
         Integer deptId = filter.getDeptId();
-        return Mono.justOrEmpty(reportService.getPurchaseHistory(fromDate, toDate, cusCode, vouNo, userCode,
-                locCode, compCode, deptId, deleted));
+        String deleted = String.valueOf(filter.isDeleted());
+        String projectNo = Util1.isAll(filter.getProjectNo());
+        String curCode = Util1.isAll(filter.getCurCode());
+        return Mono.justOrEmpty(reportService.getPurchaseHistory(fromDate, toDate, cusCode, vouNo, userCode,remark, locCode, compCode, deptId, deleted,projectNo,curCode));
     }
 
     public Mono<PurHis> findPurchase(PurHisKey key) {
@@ -590,19 +595,22 @@ public class H2Repo {
         String vouNo = Util1.isNull(filter.getVouNo(), "-");
         String userCode = Util1.isNull(filter.getUserCode(), "-");
         String cusCode = Util1.isNull(filter.getCusCode(), "-");
-//        String remark = Util1.isNull(filter.getRemark(), "-");
-//        String stockCode = Util1.isNull(filter.getStockCode(), "-");
+        String remark = Util1.isNull(filter.getRemark(), "-");
         String locCode = Util1.isNull(filter.getLocCode(), "-");
         String compCode = filter.getCompCode();
         Integer deptId = filter.getDeptId();
         String deleted = String.valueOf(filter.isDeleted());
-//        String projectNo = Util1.isAll(filter.getProjectNo());
-//        String curCode = Util1.isAll(filter.getCurCode());
-        return Mono.justOrEmpty(reportService.getReturnInHistory(fromDate, toDate, cusCode, vouNo, userCode, locCode, compCode, deptId, deleted));
+        String projectNo = Util1.isAll(filter.getProjectNo());
+        String curCode = Util1.isAll(filter.getCurCode());
+        return Mono.justOrEmpty(reportService.getReturnInHistory(fromDate, toDate, cusCode, vouNo, userCode,remark, locCode, compCode, deptId, deleted,projectNo,curCode));
+    }
+    
+    public Mono<RetInHis> findRetInHis(RetInHisKey key) {
+        return Mono.justOrEmpty(retInService.findById(key));
     }
 
-    public Mono<List<RetInHisDetail>> searchReturnInDetail(String vouNo) {
-        return Mono.justOrEmpty(retInDetailService.search(vouNo, Global.compCode, Global.deptId));
+    public Mono<List<RetInHisDetail>> searchReturnInDetail(String vouNo, Integer depId) {
+        return Mono.justOrEmpty(retInDetailService.search(vouNo, Global.compCode, depId));
     }
 
     public Mono<List<VReturnOut>> searchReturnOutVoucher(FilterObject filter) {
@@ -611,19 +619,22 @@ public class H2Repo {
         String vouNo = Util1.isNull(filter.getVouNo(), "-");
         String userCode = Util1.isNull(filter.getUserCode(), "-");
         String cusCode = Util1.isNull(filter.getCusCode(), "-");
-//        String remark = Util1.isNull(filter.getRemark(), "-");
-//        String stockCode = Util1.isNull(filter.getStockCode(), "-");
+        String remark = Util1.isNull(filter.getRemark(), "-");        
         String locCode = Util1.isNull(filter.getLocCode(), "-");
         String compCode = filter.getCompCode();
         Integer deptId = filter.getDeptId();
         String deleted = String.valueOf(filter.isDeleted());
-//        String projectNo = Util1.isAll(filter.getProjectNo());
-//        String curCode = Util1.isAll(filter.getCurCode());
-        return Mono.justOrEmpty(reportService.getReturnOutHistory(fromDate, toDate, cusCode, vouNo, userCode, locCode, compCode, deptId, deleted));
+        String projectNo = Util1.isAll(filter.getProjectNo());
+        String curCode = Util1.isAll(filter.getCurCode());
+        return Mono.justOrEmpty(reportService.getReturnOutHistory(fromDate, toDate, cusCode, vouNo, userCode,remark, locCode, compCode, deptId, deleted,projectNo,curCode));
+    }
+    
+    public Mono<RetOutHis> findRetOutHis(RetOutHisKey key) {
+        return Mono.justOrEmpty(retOutService.findById(key));
     }
 
-    public Mono<List<RetOutHisDetail>> searchReturnOutDetail(String vouNo) {
-        return Mono.justOrEmpty(retOutDetailService.search(vouNo, Global.compCode, Global.deptId));
+    public Mono<List<RetOutHisDetail>> searchReturnOutDetail(String vouNo,Integer depId) {
+        return Mono.justOrEmpty(retOutDetailService.search(vouNo, Global.compCode, depId));
     }
 
     public Mono<List<Gl>> searchGL(ReportFilter filter) {

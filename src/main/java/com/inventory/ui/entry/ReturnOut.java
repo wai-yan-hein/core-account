@@ -515,7 +515,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                 projectAutoCompleter.setProject(null);
             }
             String vouNo = ri.getKey().getVouNo();
-            inventoryRepo.getReturnOutDetail(vouNo)
+            inventoryRepo.getReturnOutDetail(vouNo,deptId)
                     .subscribe((t) -> {
                         roTableModel.setListDetail(t);
                         roTableModel.addNewRow();

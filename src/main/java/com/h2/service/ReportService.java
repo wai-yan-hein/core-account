@@ -28,14 +28,14 @@ public interface ReportService {
             boolean summary, Integer macId);
 
     List<VPurchase> getPurchaseHistory(String fromDate, String toDate, String traderCode, String vouNo,
-            String userCode, String locCode, String compCode,
-            Integer deptId, String deleted);
+            String userCode, String remark, String locCode, String compCode,
+            Integer deptId, String deleted, String projectNo, String curCode);
 
     List<VReturnIn> getReturnInHistory(String fromDate, String toDate, String traderCode, String vouNo,
-            String userCode, String locCode, String compCode,
-            Integer deptId, String deleted);
+            String userCode, String remark, String locCode, String compCode,
+            Integer deptId, String deleted, String projectNo, String curCode);
 
     List<VReturnOut> getReturnOutHistory(String fromDate, String toDate, String traderCode, String vouNo,
-            String userCode, String locCode,
-            String compCode, Integer deptId, String deleted);
+            String userCode, String remark, String locCode, String compCode,
+            Integer deptId, String deleted, String projectNo, String curCode);
 }

@@ -64,8 +64,6 @@ import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -489,7 +487,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                 projectAutoCompleter.setProject(null);
             }
             String vouNo = ri.getKey().getVouNo();
-            inventoryRepo.getReturnInDetail(vouNo)
+            inventoryRepo.getReturnInDetail(vouNo,deptId)
                     .subscribe((t) -> {
                         retInTableModel.setListDetail(t);
                         retInTableModel.addNewRow();
