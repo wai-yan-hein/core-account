@@ -254,6 +254,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
             VReturnIn his = tableModel.getSelectVou(row);
+            his.setLocal(chkLocal.isSelected());
             observer.selected("RI-HISTORY", his);
             setVisible(false);
         } else {

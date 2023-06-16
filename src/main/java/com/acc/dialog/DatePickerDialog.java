@@ -56,6 +56,7 @@ public class DatePickerDialog extends javax.swing.JDialog implements KeyListener
         super(Global.parentForm, true);
         initComponents();
         initKeyListener();
+        setDate();
     }
 
     private void initKeyListener() {
@@ -87,19 +88,16 @@ public class DatePickerDialog extends javax.swing.JDialog implements KeyListener
     }
 
     public String getStartDate() {
-        return Util1.toDateStr(txtFromDate.getDate(), "dd/MM/yyyy");
+        return Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd");
     }
 
     public String getEndDate() {
-        return Util1.toDateStr(txtToDate.getDate(), "dd/MM/yyyy");
+        return Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd");
     }
 
     private void sendDate() {
         if (txtFromDate.getDate() != null && txtToDate.getDate() != null) {
-            String dateStr = Util1.toDateStr(txtFromDate.getDate(), "dd/MM/yyyy") + "to" + Util1.toDateStr(txtToDate.getDate(), "dd/MM/yyyy");
-            if (observer != null) {
-                observer.selected("DatePickerDialog", dateStr);
-            }
+            dispose();
         } else {
             JOptionPane.showMessageDialog(Global.parentForm, "Invalid Date Format.");
         }
@@ -120,7 +118,7 @@ public class DatePickerDialog extends javax.swing.JDialog implements KeyListener
         txtFromDate = new com.toedter.calendar.JDateChooser();
         txtToDate = new com.toedter.calendar.JDateChooser();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Custom Date");
         setFont(Global.textFont);
         setIconImage(null);
@@ -216,12 +214,10 @@ public class DatePickerDialog extends javax.swing.JDialog implements KeyListener
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         // TODO add your handling code here:
-        setDate();
     }//GEN-LAST:event_formComponentShown
 
     private void btnOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
         // TODO add your handling code here:
-        this.dispose();
         sendDate();
 
     }//GEN-LAST:event_btnOKActionPerformed
@@ -312,8 +308,10 @@ public class DatePickerDialog extends javax.swing.JDialog implements KeyListener
 
             case "btnOK" -> {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_ENTER -> sendDate();
-                    case KeyEvent.VK_UP -> txtFromDate.getDateEditor().getUiComponent().requestFocusInWindow();
+                    case KeyEvent.VK_ENTER ->
+                        sendDate();
+                    case KeyEvent.VK_UP ->
+                        txtFromDate.getDateEditor().getUiComponent().requestFocusInWindow();
                 }
             }
 

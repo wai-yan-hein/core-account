@@ -923,10 +923,5 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
 
     @Override
     public void keyReleased(KeyEvent e) {
-        Object source = e.getSource();
-        String ctrlName = "-";
-        if (source instanceof JTextField) {
-            ctrlName = ((JTextField) source).getName();
-        }
     }
 }

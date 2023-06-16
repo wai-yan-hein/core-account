@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
@@ -32,11 +33,9 @@ public class ChartOfAccount {
     private String coaNameMya;
     @Column(name = "active")
     private boolean active;
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_date")
-    private Date createdDate;
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "modify_date")
+    @Column(name = "created_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime createdDate;
+    @Column(name = "modify_date", columnDefinition = "TIMESTAMP")
     private Date modifiedDate;
     @Column(name = "created_by", length = 15)
     private String createdBy;
