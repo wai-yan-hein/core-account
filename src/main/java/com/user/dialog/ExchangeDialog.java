@@ -189,8 +189,8 @@ public class ExchangeDialog extends javax.swing.JDialog {
             return false;
         } else {
             if (lblStatus.getText().equals("NEW")) {
-                exchange = new ExchangeRate();
                 ExchangeKey key = new ExchangeKey();
+                exchange = new ExchangeRate();
                 key.setCompCode(Global.compCode);
                 exchange.setKey(key);
                 exchange.setCreatedBy(Global.loginUser.getUserCode());
