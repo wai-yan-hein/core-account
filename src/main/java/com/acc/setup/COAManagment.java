@@ -235,7 +235,7 @@ public class COAManagment extends javax.swing.JPanel implements
                 coa.setCoaParent(parentCode);
                 coa.setCoaLevel(level);
                 coa.setModifiedBy(Global.loginUser.getUserCode());
-                coa.setModifiedDate(Util1.getTodayDate());
+                coa.setModifiedDate(LocalDateTime.now());
                 coa.setOption(option);
                 coa.setActive(chkActive.isSelected());
                 coa.setMarked(chkDefault.isSelected());

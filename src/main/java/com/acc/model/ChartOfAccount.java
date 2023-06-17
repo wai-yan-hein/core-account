@@ -5,11 +5,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -36,14 +33,14 @@ public class ChartOfAccount {
     @Column(name = "created_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime createdDate;
     @Column(name = "modify_date", columnDefinition = "TIMESTAMP")
-    private Date modifiedDate;
-    @Column(name = "created_by", length = 15)
+    private LocalDateTime modifiedDate;
+    @Column(name = "created_by")
     private String createdBy;
-    @Column(name = "updated_by", length = 15)
+    @Column(name = "updated_by")
     private String modifiedBy;
     @Column(name = "coa_parent")
     private String coaParent;
-    @Column(name = "coa_option", length = 5)
+    @Column(name = "coa_option")
     private String option;
     @Column(name = "coa_level")
     private Integer coaLevel;

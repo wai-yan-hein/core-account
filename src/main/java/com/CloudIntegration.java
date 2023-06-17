@@ -81,7 +81,7 @@ public class CloudIntegration {
     @Autowired
     private InventoryRepo inventoryRepo;
     @Autowired
-    private AccountRepo accounRepo;
+    private AccountRepo accountRepo;
 
     @Autowired
     private StockService stockService;
@@ -168,7 +168,7 @@ public class CloudIntegration {
         if (localDatabase) {
             downloadUser();
             downloadInventory();
-            //downloadAccount();
+            downloadAccount();
         }
     }
 
@@ -326,7 +326,7 @@ public class CloudIntegration {
         if (!list.isEmpty()) {
             log.info("need to upload Gl list : " + list.size());
             list.forEach((l) -> {
-                accounRepo.uploadGL(l).subscribe((gl) -> {
+                accountRepo.uploadGL(l).subscribe((gl) -> {
                     GlKey key = gl.getKey();
                     key.setGlCode(gl.getKey().getGlCode());
                     key.setCompCode(gl.getKey().getCompCode());
@@ -364,7 +364,8 @@ public class CloudIntegration {
     }
 
     private void downloadChartofAccount() {
-        accounRepo.getUpdateChartOfAccountByDate(coaService.getMaxDate()).subscribe((t) -> {
+        log.info(coaService.getMaxDate());
+        accountRepo.getUpdateChartOfAccountByDate(coaService.getMaxDate()).subscribe((t) -> {
             log.info("downloadChartOfAccount list : " + t.size());
             t.forEach((coa) -> {
                 coaService.save(coa);
@@ -376,7 +377,7 @@ public class CloudIntegration {
     }
 
     private void downloadTraderAccount() {
-        accounRepo.getUpdateTraderByDate(traderService.getMaxDate()).subscribe((t) -> {
+        accountRepo.getUpdateTraderByDate(traderService.getMaxDate()).subscribe((t) -> {
             log.info("downloadTrader list : " + t.size());
             t.forEach((tr) -> {
                 traderService.save(tr);
@@ -388,12 +389,12 @@ public class CloudIntegration {
     }
 
     private void downloadDepartmentAccount() {
-        accounRepo.getUpdateDepartmentAByDate(departmentAService.getMaxDate()).subscribe((d) -> {
-            log.info("download Department Account list : " + d.size());
+        accountRepo.getUpdateDepartmentAByDate(departmentAService.getMaxDate()).subscribe((d) -> {
+            log.info("downloadDepartmentAccount list : " + d.size());
             d.forEach((da) -> {
                 departmentAService.save(da);
             });
-            log.info("download department account done.");
+            log.info("downloadDepartmentAccount done.");
         }, (e) -> {
             log.info(e.getMessage());
         });
@@ -401,10 +402,11 @@ public class CloudIntegration {
 
     private void downloadAppUser() {
         userRepo.getAppUserByDate(userService.getMaxDate()).subscribe((u) -> {
-            log.info("user size = " + u.size());
+            log.info("downloadAppUser list : " + u.size());
             u.forEach((a) -> {
                 userService.save(a);
             });
+            log.info("downloadAppUser done.");
         }, (err) -> {
             log.info(err.getMessage());
         });
@@ -412,23 +414,23 @@ public class CloudIntegration {
 
     private void downloadBusinessType() {
         userRepo.getBusinessTypeByDate(businessTypeService.getMaxDate()).subscribe((b) -> {
-            log.info("bus type size = " + b.size());
+            log.info("downloadAppUser list : " + b.size());
             b.forEach((a) -> {
                 businessTypeService.save(a);
             });
+            log.info("downloadAppUser done.");
         }, (err) -> {
             log.info(err.getMessage());
         });
     }
 
     private void downloadCompanyInfo() {
-        String maxDate = companyInfoService.getMaxDate();
-        log.info("comp date = " + maxDate);
         userRepo.getCompanyInfoByDate(companyInfoService.getMaxDate()).subscribe((c) -> {
-            log.info("comp info size = " + c.size());
+            log.info("downloadCompanyInfo list : " + c.size());
             c.forEach((a) -> {
                 companyInfoService.save(a);
             });
+            log.info("downloadCompanyInfo done.");
         }, (err) -> {
             log.info(err.getMessage());
         });
@@ -436,10 +438,11 @@ public class CloudIntegration {
 
     private void downloadCurrency() {
         userRepo.getCurrencyByDate(currencyService.getMaxDate()).subscribe((c) -> {
-            log.info("currency size = " + c.size());
+            log.info("downloadCurrency list : " + c.size());
             c.forEach((a) -> {
                 currencyService.save(a);
             });
+            log.info("downloadCurrency done.");
         }, (err) -> {
             log.info(err.getMessage());
         });
@@ -447,10 +450,11 @@ public class CloudIntegration {
 
     private void downloadDepartment() {
         userRepo.getDepartmentByDate(departmentService.getMaxDate()).subscribe((d) -> {
-            log.info("dept size = " + d.size());
+            log.info("downloadDepartment list : " + d.size());
             d.forEach((a) -> {
                 departmentService.save(a);
             });
+            log.info("downloadDepartment done.");
         }, (err) -> {
             log.info(err.getMessage());
         });
@@ -458,10 +462,11 @@ public class CloudIntegration {
 
     private void downloadExchangeRate() {
         userRepo.getExchangeRateByDate(exchangeRateService.getMaxDate()).subscribe((ex) -> {
-            log.info("exchange rate size = " + ex.size());
+            log.info("downloadExchangeRate list : " + ex.size());
             ex.forEach((a) -> {
                 exchangeRateService.save(a);
             });
+            log.info("downloadExchangeRate done.");
         }, (err) -> {
             log.info(err.getMessage());
         });
@@ -469,10 +474,11 @@ public class CloudIntegration {
 
     private void downloadMachineInfo() {
         userRepo.getMachineInfoByDate(machineInfoService.getMaxDate()).subscribe((m) -> {
-            log.info("machine info size = " + m.size());
+            log.info("downloadMachineInfo list : " + m.size());
             m.forEach((a) -> {
                 machineInfoService.save(a);
             });
+            log.info("downloadMachineInfo done.");
         }, (err) -> {
             log.info(err.getMessage());
         });
@@ -480,10 +486,11 @@ public class CloudIntegration {
 
     private void downloadMacProperty() {
         userRepo.getMacPropertyByDate(macPropertyService.getMaxDate()).subscribe((m) -> {
-            log.info("mac prop size = " + m.size());
+            log.info("downloadMacProperty list : " + m.size());
             m.forEach((a) -> {
                 macPropertyService.save(a);
             });
+            log.info("downloadMacProperty done.");
         }, (err) -> {
             log.info(err.getMessage());
         });
@@ -491,10 +498,11 @@ public class CloudIntegration {
 
     private void downloadMenu() {
         userRepo.getMenuByDate(menuService.getMaxDate()).subscribe((m) -> {
-            log.info("menu size = " + m.size());
+            log.info("downloadMenu list : " + m.size());
             m.forEach((a) -> {
                 menuService.save(a);
             });
+            log.info("downloadMenu done.");
         }, (err) -> {
             log.info(err.getMessage());
         });
@@ -502,10 +510,11 @@ public class CloudIntegration {
 
     private void downloadPC() {
         userRepo.getPCByDate(pcService.getMaxDate()).subscribe((p) -> {
-            log.info("pc size = " + p.size());
+            log.info("downloadPC list : " + p.size());
             p.forEach((a) -> {
                 pcService.save(a);
             });
+            log.info("downloadPC done.");
         }, (err) -> {
             log.info(err.getMessage());
         });
@@ -513,10 +522,11 @@ public class CloudIntegration {
 
     private void downloadPM() {
         userRepo.getPMByDate(pmService.getMaxDate()).subscribe((m) -> {
-            log.info("pm size = " + m.size());
+            log.info("downloadPM list : " + m.size());
             m.forEach((a) -> {
                 pmService.save(a);
             });
+            log.info("downloadPM done.");
         }, (err) -> {
             log.info(err.getMessage());
         });
@@ -524,10 +534,11 @@ public class CloudIntegration {
 
     private void downloadProject() {
         userRepo.getProjectByDate(pService.getMaxDate()).subscribe((p) -> {
-            log.info("project size = " + p.size());
+            log.info("downloadProject list : " + p.size());
             p.forEach((a) -> {
                 pService.save(a);
             });
+            log.info("downloadPM done.");
         }, (err) -> {
             log.info(err.getMessage());
         });
@@ -535,10 +546,11 @@ public class CloudIntegration {
 
     private void downloadRole() {
         userRepo.getRoleByDate(roleService.getMaxDate()).subscribe((r) -> {
-            log.info("role size = " + r.size());
+            log.info("downloadRole list : " + r.size());
             r.forEach((a) -> {
                 roleService.save(a);
             });
+            log.info("downloadRole done.");
         }, (err) -> {
             log.info(err.getMessage());
         });
@@ -546,10 +558,11 @@ public class CloudIntegration {
 
     private void downloadRoleProperty() {
         userRepo.getRolePropByDate(rpService.getMaxDate()).subscribe((r) -> {
-            log.info("role prop size = " + r.size());
+            log.info("downloadRoleProperty list : " + r.size());
             r.forEach((a) -> {
                 rpService.save(a);
             });
+            log.info("downloadRoleProperty done.");
         }, (err) -> {
             log.info(err.getMessage());
         });
@@ -557,10 +570,11 @@ public class CloudIntegration {
 
     private void downloadSystemProperty() {
         userRepo.getSystemPropertyByDate(sysPropertyService.getMaxDate()).subscribe((r) -> {
-            log.info("sys prop size = " + r.size());
+            log.info("downloadSystemProperty list : " + r.size());
             r.forEach((a) -> {
                 sysPropertyService.save(a);
             });
+            log.info("downloadSystemProperty done.");
         }, (err) -> {
             log.info(err.getMessage());
         });
@@ -702,11 +716,9 @@ public class CloudIntegration {
 
     private void downloadStock() {
         String maxDate = stockService.getMaxDate();
-        log.info("downloadStock : max date " + maxDate);
         inventoryRepo.getUpdateStock(maxDate).subscribe((t) -> {
             log.info("downloadStock list : " + t.size());
             t.forEach((s) -> {
-                log.info(s.getKey().getStockCode() + " : " + s.getUpdatedDate());
                 stockService.save(s);
             });
             log.info("downloadStock done.");
