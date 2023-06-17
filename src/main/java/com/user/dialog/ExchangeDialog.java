@@ -17,6 +17,7 @@ import com.user.model.ExchangeRate;
 import java.awt.Color;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFormattedTextField;
@@ -106,7 +107,7 @@ public class ExchangeDialog extends javax.swing.JDialog {
 
     private void setData(ExchangeRate e) {
         txtExId.setText(e.getKey().getExCode());
-        txtDate.setDate(e.getExDate());
+        txtDate.setDate(Util1.convertToDate(e.getExDate()));
         txtHome.setValue(e.getHomeFactor());
         txtTarget.setValue(e.getTargetFactor());
         userRepo.findCurrency(e.getHomeCur()).subscribe((t) -> {
@@ -187,13 +188,16 @@ public class ExchangeDialog extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(this, "Invalid Target Currency");
             return false;
         } else {
+            if(exchange == null) {
+                exchange = new ExchangeRate();
+            }
             if (cboHC.getSelectedItem() instanceof Currency cur) {
                 exchange.setHomeCur(cur.getCurCode());
             }
             if (cboTC.getSelectedItem() instanceof Currency cur) {
                 exchange.setTargetCur(cur.getCurCode());
             }
-            exchange.setExDate(txtDate.getDate());
+            exchange.setExDate(Util1.convertToLocalDateTime(txtDate.getDate()));
             exchange.setHomeFactor(Util1.getDouble(txtHome.getValue()));
             exchange.setTargetFactor(Util1.getDouble(txtTarget.getValue()));
             if (lblStatus.getText().equals("NEW")) {
@@ -201,7 +205,7 @@ public class ExchangeDialog extends javax.swing.JDialog {
                 key.setCompCode(Global.compCode);
                 exchange.setKey(key);
                 exchange.setCreatedBy(Global.loginUser.getUserCode());
-                exchange.setCreatedDate(Util1.getTodayDate());
+                exchange.setCreatedDate(Util1.getTodayLocalDateTime());
                 exchange.setDeleted(false);
             } else {
                 exchange.setUpdatedBy(Global.loginUser.getUserCode());

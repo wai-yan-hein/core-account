@@ -27,8 +27,8 @@ public class ExchangeRate {
     @EmbeddedId
     @Column(name = "ex_code")
     private ExchangeKey key;
-    @Column(name = "ex_date")
-    private Date exDate;
+    @Column(name = "ex_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime exDate;
     @Column(name = "home_factor")
     private Double homeFactor;
     @Column(name = "home_cur")
@@ -40,7 +40,7 @@ public class ExchangeRate {
     @Transient
     private Double exRate;
     @Column(name = "created_date", columnDefinition = "TIMESTAMP")
-    private Date createdDate;
+    private LocalDateTime createdDate;
     @Column(name = "created_by")
     private String createdBy;
     @Column(name = "updated_date", columnDefinition = "TIMESTAMP")

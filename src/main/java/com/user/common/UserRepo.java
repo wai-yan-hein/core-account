@@ -534,16 +534,16 @@ public class UserRepo {
     }
 
     public Mono<List<ExchangeRate>> searchExchange(String startDate, String endDate, String targetCur) {
-        String fromDate = Util1.toDateStrMYSQL(startDate, Global.dateFormat);
-        String toDate = Util1.toDateStrMYSQL(endDate, Global.dateFormat);
+//        String fromDate = Util1.toDateStrMYSQL(startDate, Global.dateFormat);
+//        String toDate = Util1.toDateStrMYSQL(endDate, Global.dateFormat);
         if (localdatabase) {
-            return h2Repo.search(fromDate, toDate, targetCur, Global.compCode);
+            return h2Repo.search(startDate, endDate, targetCur, Global.compCode);
         }
         return userApi.get()
                 .uri(builder -> builder.path("/user/searchExchange")
                 .queryParam("compCode", Global.compCode)
-                .queryParam("startDate", fromDate)
-                .queryParam("endDate", toDate)
+                .queryParam("startDate", startDate)
+                .queryParam("endDate", endDate)
                 .queryParam("targetCur", targetCur)
                 .build())
                 .retrieve()
