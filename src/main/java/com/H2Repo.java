@@ -160,7 +160,7 @@ public class H2Repo {
     @Autowired
     private PurHisService purHisService;
     @Autowired
-    private PurHisDetailService purDetailService;    
+    private PurHisDetailService purDetailService;
     @Autowired
     private RetInService retInService;
     @Autowired
@@ -578,14 +578,14 @@ public class H2Repo {
         String deleted = String.valueOf(filter.isDeleted());
         String projectNo = Util1.isAll(filter.getProjectNo());
         String curCode = Util1.isAll(filter.getCurCode());
-        return Mono.justOrEmpty(reportService.getPurchaseHistory(fromDate, toDate, cusCode, vouNo, userCode,remark, locCode, compCode, deptId, deleted,projectNo,curCode));
+        return Mono.justOrEmpty(reportService.getPurchaseHistory(fromDate, toDate, cusCode, vouNo, userCode, remark, locCode, compCode, deptId, deleted, projectNo, curCode));
     }
 
     public Mono<PurHis> findPurchase(PurHisKey key) {
         return Mono.justOrEmpty(purHisService.findById(key));
     }
 
-    public Mono<List<PurHisDetail>> searchPurchaseDetail(String vouNo,Integer depId) {
+    public Mono<List<PurHisDetail>> searchPurchaseDetail(String vouNo, Integer depId) {
         return Mono.justOrEmpty(purDetailService.search(vouNo, Global.compCode, depId));
     }
 
@@ -602,9 +602,9 @@ public class H2Repo {
         String deleted = String.valueOf(filter.isDeleted());
         String projectNo = Util1.isAll(filter.getProjectNo());
         String curCode = Util1.isAll(filter.getCurCode());
-        return Mono.justOrEmpty(reportService.getReturnInHistory(fromDate, toDate, cusCode, vouNo, userCode,remark, locCode, compCode, deptId, deleted,projectNo,curCode));
+        return Mono.justOrEmpty(reportService.getReturnInHistory(fromDate, toDate, cusCode, vouNo, userCode, remark, locCode, compCode, deptId, deleted, projectNo, curCode));
     }
-    
+
     public Mono<RetInHis> findRetInHis(RetInHisKey key) {
         return Mono.justOrEmpty(retInService.findById(key));
     }
@@ -619,21 +619,21 @@ public class H2Repo {
         String vouNo = Util1.isNull(filter.getVouNo(), "-");
         String userCode = Util1.isNull(filter.getUserCode(), "-");
         String cusCode = Util1.isNull(filter.getCusCode(), "-");
-        String remark = Util1.isNull(filter.getRemark(), "-");        
+        String remark = Util1.isNull(filter.getRemark(), "-");
         String locCode = Util1.isNull(filter.getLocCode(), "-");
         String compCode = filter.getCompCode();
         Integer deptId = filter.getDeptId();
         String deleted = String.valueOf(filter.isDeleted());
         String projectNo = Util1.isAll(filter.getProjectNo());
         String curCode = Util1.isAll(filter.getCurCode());
-        return Mono.justOrEmpty(reportService.getReturnOutHistory(fromDate, toDate, cusCode, vouNo, userCode,remark, locCode, compCode, deptId, deleted,projectNo,curCode));
+        return Mono.justOrEmpty(reportService.getReturnOutHistory(fromDate, toDate, cusCode, vouNo, userCode, remark, locCode, compCode, deptId, deleted, projectNo, curCode));
     }
-    
+
     public Mono<RetOutHis> findRetOutHis(RetOutHisKey key) {
         return Mono.justOrEmpty(retOutService.findById(key));
     }
 
-    public Mono<List<RetOutHisDetail>> searchReturnOutDetail(String vouNo,Integer depId) {
+    public Mono<List<RetOutHisDetail>> searchReturnOutDetail(String vouNo, Integer depId) {
         return Mono.justOrEmpty(retOutDetailService.search(vouNo, Global.compCode, depId));
     }
 
@@ -664,7 +664,7 @@ public class H2Repo {
     public Mono<List<VSale>> getSaleHistory(FilterObject filter) {
         return Mono.just(saleHisService.getSale(filter));
     }
-    
+
     public Mono<List<ProcessHis>> getProcessHistory(FilterObject filter) {
         return Mono.just(processHisService.getProcess(filter));
     }
@@ -675,5 +675,15 @@ public class H2Repo {
 
     public Mono<List<SaleHisDetail>> getSaleDetail(String vouNo, int deptId) {
         return Mono.justOrEmpty(saleHisDetailService.searchDetail(vouNo, Global.compCode, deptId));
+    }
+
+    public Mono<Boolean> deleteSale(SaleHisKey key) {
+        saleHisService.delete(key);
+        return Mono.just(true);
+    }
+
+    public Mono<Boolean> restoreSale(SaleHisKey key) {
+        saleHisService.restore(key);
+        return Mono.just(true);
     }
 }

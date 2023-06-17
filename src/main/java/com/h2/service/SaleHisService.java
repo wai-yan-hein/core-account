@@ -29,6 +29,10 @@ public interface SaleHisService {
 
     String getMaxDate();
 
+    void delete(SaleHisKey key);
+    
+    void restore(SaleHisKey key);
+
     List<VSale> getSale(FilterObject filter);
 
 }

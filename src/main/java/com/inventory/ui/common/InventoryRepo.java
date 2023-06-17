@@ -1580,6 +1580,9 @@ public class InventoryRepo {
     }
 
     public Mono<Boolean> delete(SaleHisKey key) {
+        if(localDatabase){
+            return h2Repo.deleteSale(key);
+        }
         return inventoryApi.post()
                 .uri("/sale/delete-sale")
                 .body(Mono.just(key), SaleHisKey.class)
