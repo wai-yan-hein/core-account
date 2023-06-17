@@ -29,20 +29,23 @@ import com.inventory.editor.VouStatusAutoCompleter;
 import com.inventory.model.VRoleMenu;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.ReportTableModel;
+import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.common.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.table.TableModel;
@@ -111,12 +114,40 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
+    private final FocusAdapter fa = new FocusAdapter() {
+        @Override
+        public void focusGained(FocusEvent e) {
+            if (e.getSource() instanceof JTextField txt) {
+                txt.selectAll();
+            } else if (e.getSource() instanceof JTextFieldDateEditor txt) {
+                txt.selectAll();
+            }
+        }
+    };
 
     /**
      * Creates new form Reports
      */
     public Reports() {
         initComponents();
+        initFocusAdapter();
+    }
+
+    private void initFocusAdapter() {
+        txtDate.addFocusListener(fa);
+        txtFromDate.addFocusListener(fa);
+        txtToDate.addFocusListener(fa);
+        txtTrader.addFocusListener(fa);
+        txtSaleMan.addFocusListener(fa);
+        txtLocation.addFocusListener(fa);
+        txtStock.addFocusListener(fa);
+        txtStockType.addFocusListener(fa);
+        txtCategory.addFocusListener(fa);
+        txtBrand.addFocusListener(fa);
+        txtVouType.addFocusListener(fa);
+        txtRegion.addFocusListener(fa);
+        txtBatchNo.addFocusListener(fa);
+        txtProjectNo.addFocusListener(fa);
     }
 
     public void initMain() {
@@ -145,15 +176,15 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
 
     private void getReport() {
         progress.setIndeterminate(true);
-        Mono<List<VRoleMenu>> result = userRepo.getReport("Inventory");
-        result.subscribe((t) -> {
-            tableModel.setListReport(t);
-            lblRecord.setText(String.valueOf(t.size()));
-            progress.setIndeterminate(false);
-        }, (e) -> {
-            progress.setIndeterminate(false);
-            JOptionPane.showConfirmDialog(Global.parentForm, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        });
+        userRepo.getReport("Inventory")
+                .subscribe((t) -> {
+                    tableModel.setListReport(t);
+                    lblRecord.setText(String.valueOf(t.size()));
+                    progress.setIndeterminate(false);
+                }, (e) -> {
+                    progress.setIndeterminate(false);
+                    JOptionPane.showConfirmDialog(Global.parentForm, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                });
     }
 
     private void initCombo() {
@@ -185,7 +216,6 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             });
         });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
-
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, inventoryRepo, null, true);
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
@@ -812,47 +842,38 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
 
     private void txtTraderFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtTraderFocusGained
         // TODO add your handling code here:
-        txtTrader.selectAll();
     }//GEN-LAST:event_txtTraderFocusGained
 
     private void txtSaleManFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSaleManFocusGained
         // TODO add your handling code here:
-        txtSaleMan.selectAll();
     }//GEN-LAST:event_txtSaleManFocusGained
 
     private void txtLocationFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtLocationFocusGained
         // TODO add your handling code here:
-        txtLocation.selectAll();
     }//GEN-LAST:event_txtLocationFocusGained
 
     private void txtStockFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtStockFocusGained
         // TODO add your handling code here:
-        txtStock.selectAll();
     }//GEN-LAST:event_txtStockFocusGained
 
     private void txtStockTypeFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtStockTypeFocusGained
         // TODO add your handling code here:
-        txtStockType.selectAll();
     }//GEN-LAST:event_txtStockTypeFocusGained
 
     private void txtCategoryFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCategoryFocusGained
         // TODO add your handling code here:
-        txtCategory.selectAll();
     }//GEN-LAST:event_txtCategoryFocusGained
 
     private void txtBrandFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtBrandFocusGained
         // TODO add your handling code here:
-        txtBrand.selectAll();
     }//GEN-LAST:event_txtBrandFocusGained
 
     private void txtRegionFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtRegionFocusGained
         // TODO add your handling code here:
-        txtRegion.selectAll();
     }//GEN-LAST:event_txtRegionFocusGained
 
     private void txtCurrencyFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCurrencyFocusGained
         // TODO add your handling code here:
-        txtCurrency.selectAll();
     }//GEN-LAST:event_txtCurrencyFocusGained
 
     private void txtVouTypeFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtVouTypeFocusGained
@@ -968,8 +989,8 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     @Override
     public void selected(Object source, Object selectObj) {
         if (source.equals("Date")) {
-            txtFromDate.setDate(Util1.parseDate(dateAutoCompleter.getDateModel().getStartDate(), "dd/MM/yyyy"));
-            txtToDate.setDate(Util1.parseDate(dateAutoCompleter.getDateModel().getEndDate(), "dd/MM/yyyy"));
+            txtFromDate.setDate(Util1.toDate(dateAutoCompleter.getDateModel().getStartDate(), "yyyy-MM-dd"));
+            txtToDate.setDate(Util1.toDate(dateAutoCompleter.getDateModel().getEndDate(), "yyyy-MM-dd"));
         }
     }
 

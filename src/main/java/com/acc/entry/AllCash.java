@@ -705,10 +705,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private ReportFilter getOPFilter() {
-        String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
         String clDate = dateAutoCompleter.getDateModel().getStartDate();
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
-        filter.setOpeningDate(opDate);
         filter.setFromDate(clDate);
         filter.setCurCode(getCurCode());
         filter.setListDepartment(getListDep());
@@ -1429,7 +1427,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 String date = selectObj.toString();
                 dateAutoCompleter.getDateModel().setStartDate(date);
                 dateAutoCompleter.getDateModel().setEndDate(date);
-                txtDate.setText(date);
+                txtDate.setText(Util1.toDateStr(date, "yyyy-MM-dd", "dd/MM/yyyy"));
                 searchCash();
             } else if (source.equals("CAL-TOTAL")) {
                 calDebitCredit();

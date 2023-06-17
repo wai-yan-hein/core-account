@@ -70,7 +70,6 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     private DateAutoCompleter dateAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
     private TranSourceAutoCompleter tranSourceAutoCompleter;
-    private String stDate, endDate;
     @Autowired
     private AccountRepo accountRepo;
     @Autowired
@@ -140,7 +139,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         }
         decorator.setHmPage(hmPage);
         decorator.setHmData(hmDate);
-        decorator.refreshButton(Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), Global.dateFormat));
+        decorator.refreshButton(dateAutoCompleter.getDateModel().getStartDate());
     }
 
     private void initTextBox() {
@@ -243,9 +242,6 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             isGLCal = true;
             initTableModel();
             glListingTableModel.clear();
-            String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
-            stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), "dd/MM/yyyy");
-            endDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getEndDate(), "dd/MM/yyyy");
             ChartOfAccount coa = cOAAutoCompleter.getCOA();
             String coaLv1 = Util1.getInteger(coa.getCoaLevel()) == 1 ? coa.getKey().getCoaCode() : "-";
             String coaLv2 = Util1.getInteger(coa.getCoaLevel()) == 2 ? coa.getKey().getCoaCode() : "-";
@@ -254,9 +250,8 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             filter.setCoaCode(coaLv3);
             filter.setCoaLv1(coaLv1);
             filter.setCoaLv2(coaLv2);
-            filter.setFromDate(stDate);
-            filter.setToDate(endDate);
-            filter.setOpeningDate(opDate);
+            filter.setFromDate(dateAutoCompleter.getDateModel().getStartDate());
+            filter.setToDate(dateAutoCompleter.getDateModel().getEndDate());
             filter.setClosing(chkClosing.isSelected());
             filter.setCurCode(getCurCode());
             filter.setListDepartment(getListDep());
@@ -871,7 +866,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                 String date = selectObj.toString();
                 dateAutoCompleter.getDateModel().setStartDate(date);
                 dateAutoCompleter.getDateModel().setEndDate(date);
-                txtDate.setText(date);
+                txtDate.setText(Util1.toDateStr(date, "yyyy-MM-dd", "dd/MM/yyyy"));
             }
             searchGLListing();
         }

@@ -209,7 +209,7 @@ public class DayBookTableModel extends AbstractTableModel {
                             int length = value.toString().length();
                             if (length == 8 || length == 6) {
                                 String toFormatDate = Util1.toFormatDate(value.toString(), length);
-                                gl.setGlDate(Util1.toDate(toFormatDate, "dd/MM/yyyy"));
+                                gl.setGlDate(Util1.parseLocalDateTime(toFormatDate, "dd/MM/yyyy"));
                             } else {
                                 gl.setGlDate(LocalDateTime.now());
                                 JOptionPane.showMessageDialog(Global.parentForm, "Invalid Date");
@@ -448,7 +448,7 @@ public class DayBookTableModel extends AbstractTableModel {
                 gl.setDeptCode(department.getKey().getDeptCode());
                 gl.setDeptUsrCode(department.getUserCode());
             }
-            gl.setGlDate(glDate == null ? LocalDateTime.now() : Util1.toDate(glDate, "dd/MM/yyyy"));
+            gl.setGlDate(glDate == null ? LocalDateTime.now() : Util1.parseLocalDateTime(glDate, "dd/MM/yyyy"));
             gl.setSrcAccCode(sourceAccId);
             gl.setCurCode(curCode);
             listVGl.add(gl);

@@ -19,7 +19,6 @@ import com.acc.model.ReportFilter;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.common.Util1;
 import com.user.common.UserRepo;
 import com.user.editor.ProjectAutoCompleter;
 import java.awt.event.ActionEvent;
@@ -159,8 +158,8 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     private void searchJournal() {
         progress.setIndeterminate(true);
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
-        filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), Global.dateFormat));
-        filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getEndDate(), Global.dateFormat));
+        filter.setFromDate(dateAutoCompleter.getDateModel().getStartDate());
+        filter.setToDate(dateAutoCompleter.getDateModel().getEndDate());
         filter.setListDepartment(getListDep());
         filter.setDesp(txtDesp.getText());
         filter.setReference(txtRefrence.getText());
