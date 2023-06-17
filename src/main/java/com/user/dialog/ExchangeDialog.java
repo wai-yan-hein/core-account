@@ -188,19 +188,8 @@ public class ExchangeDialog extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(this, "Invalid Target Currency");
             return false;
         } else {
-            if(exchange == null) {
-                exchange = new ExchangeRate();
-            }
-            if (cboHC.getSelectedItem() instanceof Currency cur) {
-                exchange.setHomeCur(cur.getCurCode());
-            }
-            if (cboTC.getSelectedItem() instanceof Currency cur) {
-                exchange.setTargetCur(cur.getCurCode());
-            }
-            exchange.setExDate(Util1.convertToLocalDateTime(txtDate.getDate()));
-            exchange.setHomeFactor(Util1.getDouble(txtHome.getValue()));
-            exchange.setTargetFactor(Util1.getDouble(txtTarget.getValue()));
             if (lblStatus.getText().equals("NEW")) {
+                exchange = new ExchangeRate();
                 ExchangeKey key = new ExchangeKey();
                 key.setCompCode(Global.compCode);
                 exchange.setKey(key);
@@ -211,6 +200,16 @@ public class ExchangeDialog extends javax.swing.JDialog {
                 exchange.setUpdatedBy(Global.loginUser.getUserCode());
                 exchange.setUpdatedDate(Util1.getTodayLocalDateTime());
             }
+            if (cboHC.getSelectedItem() instanceof Currency cur) {
+                exchange.setHomeCur(cur.getCurCode());
+            }
+            if (cboTC.getSelectedItem() instanceof Currency cur) {
+                exchange.setTargetCur(cur.getCurCode());
+            }
+            exchange.setExDate(Util1.convertToLocalDateTime(txtDate.getDate()));
+            exchange.setHomeFactor(Util1.getDouble(txtHome.getValue()));
+            exchange.setTargetFactor(Util1.getDouble(txtTarget.getValue()));
+
         }
         return true;
     }
