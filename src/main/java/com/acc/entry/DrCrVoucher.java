@@ -190,8 +190,8 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
             progress.setIndeterminate(true);
             calOpening();
             ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
-            filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), Global.dateFormat));
-            filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getEndDate(), Global.dateFormat));
+            filter.setFromDate(dateAutoCompleter.getDateModel().getStartDate());
+            filter.setToDate(dateAutoCompleter.getDateModel().getEndDate());
             filter.setListDepartment(getListDep());
             filter.setDesp(txtDesp.getText());
             filter.setGlVouNo(txtVouNo.getText());
@@ -222,12 +222,9 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     private void calOpening() {
         accountRepo.getDefaultCash().subscribe((coa) -> {
             if (coa != null) {
-                String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), Global.dateFormat);
-                String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
-                String clDate = Util1.toDateStrMYSQL(stDate, "dd/MM/yyyy");
+                String startDate = dateAutoCompleter.getDateModel().getStartDate();
                 ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
-                filter.setOpeningDate(opDate);
-                filter.setFromDate(clDate);
+                filter.setFromDate(startDate);
                 filter.setCurCode(Global.currency);
                 filter.setListDepartment(getListDep());
                 filter.setCoaCode(coa.getKey().getCoaCode());

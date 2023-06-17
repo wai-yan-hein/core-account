@@ -675,6 +675,18 @@ public class Util1 {
         return Util1.getFloat(value) > 0;
     }
 
+    public static Date toDate(String str, String format) {
+        if (str != null) {
+            DateFormat dateFormat = new SimpleDateFormat(format);
+            try {
+                return dateFormat.parse(str);
+            } catch (ParseException e) {
+                log.error("toDate : " + e.getMessage());
+            }
+        }
+        return null;
+    }
+
     public static Date toDateTime(Date date) {
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         SimpleDateFormat f2 = new SimpleDateFormat("dd/MM/yyyy");
@@ -760,6 +772,14 @@ public class Util1 {
     public static LocalDate parseLocalDate(String date, String format) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
         return LocalDate.parse(date, formatter);
+    }
+
+    public static LocalDateTime parseLocalDateTime(String date, String format) {
+        if (date != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
+            return LocalDateTime.parse(date, formatter);
+        }
+        return null;
     }
 
     public static List<LocalDate> getDaysBetweenDates(LocalDate startDate, LocalDate endDate) {

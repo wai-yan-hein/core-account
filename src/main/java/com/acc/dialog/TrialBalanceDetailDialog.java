@@ -82,6 +82,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
     public void setDateModel(DateModel dateModel) {
         this.dateModel = dateModel;
+        dateAutoCompleter.setDateModel(dateModel);
     }
 
     public UserRepo getUserRepo() {
@@ -247,8 +248,8 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
     private ReportFilter getFilter() {
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
-        filter.setFromDate(Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), Global.dateFormat));
-        filter.setToDate(Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getEndDate(), Global.dateFormat));
+        filter.setFromDate(dateAutoCompleter.getDateModel().getStartDate());
+        filter.setToDate(dateAutoCompleter.getDateModel().getEndDate());
         filter.setSrcAcc(coaCode);
         filter.setCurCode(getCurrency());
         filter.setListDepartment(getListDep());
@@ -269,7 +270,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
     private Mono<TmpOpening> getOpening() {
         log.info("calulate opening.");
-        String startDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), Global.dateFormat);
+        String startDate = dateAutoCompleter.getDateModel().getStartDate();
         ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
         filter.setFromDate(startDate);
         filter.setCurCode(getCurrency());

@@ -14,7 +14,6 @@ import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.google.gson.JsonSyntaxException;
 import com.user.model.Currency;
 import com.user.model.Project;
 import java.awt.HeadlessException;
@@ -204,7 +203,7 @@ public class AllCashTableModel extends AbstractTableModel {
                             int length = value.toString().length();
                             if (length == 8 || length == 6) {
                                 String toFormatDate = Util1.toFormatDate(value.toString(), length);
-                                gl.setGlDate(Util1.toDate(toFormatDate, "dd/MM/yyyy"));
+                                gl.setGlDate(Util1.parseLocalDateTime(toFormatDate, "dd/MM/yyyy"));
                             } else {
                                 gl.setGlDate(LocalDateTime.now());
                                 JOptionPane.showMessageDialog(Global.parentForm, "Invalid Date");

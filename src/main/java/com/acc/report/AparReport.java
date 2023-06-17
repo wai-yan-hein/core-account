@@ -215,16 +215,14 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             progress.setIndeterminate(true);
             isApPrCal = true;
             aPARTableModel.clear();
-            String opDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
-            String stDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getStartDate(), "dd/MM/yyyy");
-            String endDate = Util1.toDateStrMYSQL(dateAutoCompleter.getDateModel().getEndDate(), "dd/MM/yyyy");
+            String stDate = dateAutoCompleter.getDateModel().getStartDate();
+            String endDate = dateAutoCompleter.getDateModel().getEndDate();
             TraderA trader = traderAutoCompleter.getTrader();
             String traderType = trader.getTraderType();
             String traderCode = trader.getKey().getCode();
             ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
             filter.setFromDate(stDate);
             filter.setToDate(endDate);
-            filter.setOpeningDate(opDate);
             filter.setTraderCode(traderCode);
             filter.setCurCode(getCurCode());
             filter.setTraderType(traderType);
