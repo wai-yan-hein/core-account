@@ -228,6 +228,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         filter.setProjectNo(projectNo.equals("All") ? "-" : projectNo);
         filter.setCurCode(getCurCode());
         filter.setNullBatch(chkBatch.isSelected());
+        filter.setLocal(chkLocal.isSelected());
         orderVouTableModel.clear();
         txtRecord.setValue(0);
         inventoryRepo.getOrder(filter).subscribe((t) -> {
@@ -238,6 +239,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
             JOptionPane.showMessageDialog(this, e.getMessage());
             progress.setIndeterminate(false);
         }, () -> {
+            progress.setIndeterminate(false);
             setVisible(true);
         });
 
@@ -331,6 +333,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         txtProjectNo = new javax.swing.JTextField();
         jLabel16 = new javax.swing.JLabel();
         txtCurrency = new javax.swing.JTextField();
+        chkLocal = new javax.swing.JCheckBox();
         txtFilter = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
@@ -523,6 +526,14 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
             }
         });
 
+        chkLocal.setFont(Global.lableFont);
+        chkLocal.setText("Local");
+        chkLocal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkLocalActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -569,7 +580,8 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
                     .addComponent(chkDel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(txtProjectNo)
                     .addComponent(txtCurrency, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(txtVouNo))
+                    .addComponent(txtVouNo)
+                    .addComponent(chkLocal, javax.swing.GroupLayout.DEFAULT_SIZE, 131, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -638,6 +650,8 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
                 .addComponent(chkDel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkBatch)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkLocal)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButton1)
@@ -894,6 +908,10 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         txtCurrency.selectAll(); // TODO add your handling code here:
     }//GEN-LAST:event_txtCurrencyFocusGained
 
+    private void chkLocalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkLocalActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_chkLocalActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -903,6 +921,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
     private javax.swing.JButton btnSelect;
     private javax.swing.JCheckBox chkBatch;
     private javax.swing.JCheckBox chkDel;
+    private javax.swing.JCheckBox chkLocal;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

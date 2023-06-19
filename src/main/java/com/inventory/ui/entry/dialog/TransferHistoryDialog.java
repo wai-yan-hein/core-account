@@ -166,9 +166,9 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
             progess.setIndeterminate(false);
-        }, () -> {
-            setVisible(true);
+        }, () -> {            
             progess.setIndeterminate(false);
+            setVisible(true);
         });
     }
     
