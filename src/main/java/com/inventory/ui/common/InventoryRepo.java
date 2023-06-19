@@ -1286,11 +1286,14 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<TransferHis> findTransfer(String vouNo, Integer deptId) {
+    public Mono<TransferHis> findTransfer(String vouNo, Integer deptId, boolean local) {
         TransferHisKey key = new TransferHisKey();
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setVouNo(vouNo);
+        if (local) {
+            return h2Repo.findTransfer(key);
+        }
         return inventoryApi.post()
                 .uri("/transfer/find-transfer")
                 .body(Mono.just(key), TransferHisKey.class)
@@ -1409,7 +1412,7 @@ public class InventoryRepo {
 
     public Mono<List<RetInHisDetail>> getReturnInDetail(String vouNo, Integer depId) {
         if (localDatabase) {
-            return h2Repo.searchReturnInDetail(vouNo,depId);
+            return h2Repo.searchReturnInDetail(vouNo, depId);
         }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/retin/get-retin-detail")
@@ -1463,7 +1466,7 @@ public class InventoryRepo {
 
     public Mono<List<RetOutHisDetail>> getReturnOutDetail(String vouNo, Integer depId) {
         if (localDatabase) {
-            return h2Repo.searchReturnOutDetail(vouNo,depId);
+            return h2Repo.searchReturnOutDetail(vouNo, depId);
         }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/retout/get-retout-detail")
@@ -1580,7 +1583,7 @@ public class InventoryRepo {
     }
 
     public Mono<Boolean> delete(SaleHisKey key) {
-        if(localDatabase){
+        if (localDatabase) {
             return h2Repo.deleteSale(key);
         }
         return inventoryApi.post()
@@ -1769,7 +1772,8 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
-     public Mono<Boolean> restore(GRNKey key) {
+
+    public Mono<Boolean> restore(GRNKey key) {
         return inventoryApi.post()
                 .uri("/grn/restore-grn")
                 .body(Mono.just(key), GRNKey.class)
@@ -1936,7 +1940,7 @@ public class InventoryRepo {
 
     public Mono<List<PurHisDetail>> getPurDetail(String vouNo, Integer deptId) {
         if (localDatabase) {
-            return h2Repo.searchPurchaseDetail(vouNo,deptId);
+            return h2Repo.searchPurchaseDetail(vouNo, deptId);
         }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/pur/get-pur-detail")
@@ -2169,7 +2173,10 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<TransferHisDetail>> getTrasnferDetail(String vouNo, Integer deptId) {
+    public Mono<List<TransferHisDetail>> getTrasnferDetail(String vouNo, Integer deptId, boolean local) {
+        if (local) {
+            return h2Repo.getTransferDetail(vouNo, deptId);
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/transfer/get-transfer-detail")
                 .queryParam("vouNo", vouNo)
@@ -2182,13 +2189,20 @@ public class InventoryRepo {
     }
 
     public Mono<List<VTransfer>> getTrasnfer(FilterObject filter) {
+        if (filter.isLocal()) {
+            return h2Repo.getTransferHistory(filter);
+        }
         return inventoryApi
                 .post()
                 .uri("/transfer/get-transfer")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(VTransfer.class)
-                .collectList();
+                .collectList()
+                .onErrorResume(e -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<TransferHis> uploadTransfer(TransferHis th) {

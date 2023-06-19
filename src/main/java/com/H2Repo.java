@@ -98,6 +98,7 @@ import com.h2.service.RetOutDetailService;
 import com.h2.service.SaleHisDetailService;
 import com.h2.service.StockInOutDetailService;
 import com.h2.service.StockInOutService;
+import com.h2.service.TransferHisDetailService;
 import com.h2.service.TransferHisService;
 import com.h2.service.WeightLossService;
 import com.inventory.model.General;
@@ -116,10 +117,13 @@ import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
 import com.inventory.model.TransferHis;
+import com.inventory.model.TransferHisDetail;
+import com.inventory.model.TransferHisKey;
 import com.inventory.model.VSale;
 import com.inventory.model.VPurchase;
 import com.inventory.model.VReturnIn;
 import com.inventory.model.VReturnOut;
+import com.inventory.model.VTransfer;
 import com.inventory.model.WeightLossHis;
 import java.util.HashMap;
 import java.util.List;
@@ -225,6 +229,8 @@ public class H2Repo {
     private GlService glService;
     @Autowired
     private SaleHisDetailService saleHisDetailService;
+    @Autowired
+    private TransferHisDetailService transferHisDetailService;
 
     public Mono<List<Location>> getLocation() {
         return Mono.justOrEmpty(locationService.findAll(Global.compCode));
@@ -664,6 +670,10 @@ public class H2Repo {
     public Mono<List<VSale>> getSaleHistory(FilterObject filter) {
         return Mono.just(saleHisService.getSale(filter));
     }
+    
+    public Mono<List<VTransfer>> getTransferHistory(FilterObject filter) {
+        return Mono.just(transferHisService.getTransfer(filter));
+    }
 
     public Mono<List<ProcessHis>> getProcessHistory(FilterObject filter) {
         return Mono.just(processHisService.getProcess(filter));
@@ -672,9 +682,17 @@ public class H2Repo {
     public Mono<SaleHis> findSale(SaleHisKey key) {
         return Mono.justOrEmpty(saleHisService.find(key));
     }
+    
+    public Mono<TransferHis> findTransfer(TransferHisKey key) {
+        return Mono.justOrEmpty(transferHisService.findById(key));
+    }
 
     public Mono<List<SaleHisDetail>> getSaleDetail(String vouNo, int deptId) {
         return Mono.justOrEmpty(saleHisDetailService.searchDetail(vouNo, Global.compCode, deptId));
+    }
+    
+    public Mono<List<TransferHisDetail>> getTransferDetail(String vouNo, int deptId) {
+        return Mono.justOrEmpty(transferHisDetailService.search(vouNo, Global.compCode, deptId));
     }
 
     public Mono<Boolean> deleteSale(SaleHisKey key) {

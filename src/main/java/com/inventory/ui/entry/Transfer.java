@@ -296,7 +296,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         return status;
     }
 
-    private void setVoucher(TransferHis s) {
+    private void setVoucher(TransferHis s, boolean local) {
         progress.setIndeterminate(true);
         io = s;
         Integer deptId = io.getKey().getDeptId();
@@ -307,7 +307,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             toLocaitonCompleter.setLocation(t);
         });
         String vouNo = io.getKey().getVouNo();
-        inventoryRepo.getTrasnferDetail(vouNo, deptId).subscribe((t) -> {
+        inventoryRepo.getTrasnferDetail(vouNo, deptId, local).subscribe((t) -> {
             tranTableModel.setListTransfer(t);
             tranTableModel.addNewRow();
             txtVou.setText(vouNo);
@@ -615,8 +615,8 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     public void selected(Object source, Object selectObj) {
         if (source.toString().equals("TR-HISTORY")) {
             if (selectObj instanceof VTransfer v) {
-                inventoryRepo.findTransfer(v.getVouNo(), v.getDeptId()).subscribe((t) -> {
-                    setVoucher(t);
+                inventoryRepo.findTransfer(v.getVouNo(), v.getDeptId(), v.isLocal()).subscribe((t) -> {
+                    setVoucher(t, v.isLocal());
                 });
             }
         }

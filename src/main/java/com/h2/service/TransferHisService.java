@@ -1,7 +1,9 @@
 package com.h2.service;
 
+import com.common.FilterObject;
 import com.inventory.model.TransferHis;
 import com.inventory.model.TransferHisKey;
+import com.inventory.model.VTransfer;
 import java.util.List;
 
 public interface TransferHisService {
@@ -22,4 +24,6 @@ public interface TransferHisService {
     void truncate(TransferHisKey key);
 
     TransferHis updateACK(TransferHisKey key);
+    
+    public List<VTransfer> getTransfer(FilterObject filter);
 }
