@@ -1305,12 +1305,12 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<SaleHis> findSale(String vouNo, Integer deptId) {
+    public Mono<SaleHis> findSale(String vouNo, Integer deptId, boolean local) {
         SaleHisKey key = new SaleHisKey();
         key.setVouNo(vouNo);
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
-        if (localDatabase) {
+        if (local) {
             return h2Repo.findSale(key);
         }
         return inventoryApi.post()

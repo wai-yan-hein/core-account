@@ -1740,7 +1740,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 setAllLocation();
             case "SALE-HISTORY" -> {
                 if (selectObj instanceof VSale s) {
-                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId()).subscribe((t) -> {
+                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId(), s.isLocal()).subscribe((t) -> {
                         setSaleVoucher(t, s.isLocal());
                     }, (e) -> {
                         JOptionPane.showMessageDialog(this, e.getMessage());
