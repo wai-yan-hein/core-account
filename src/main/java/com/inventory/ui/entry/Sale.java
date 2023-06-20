@@ -164,13 +164,13 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     }
 
-    private void setSaleVoucherDetail(OrderHis oh) {
+    private void setSaleVoucherDetail(OrderHis oh, boolean local) {
         saleTableModel.clear();
         if (oh != null) {
             progress.setIndeterminate(true);
             Integer deptId = oh.getKey().getDeptId();
             String vouNo = oh.getKey().getVouNo();
-            inventoryRepo.getOrderDetail(vouNo, deptId)
+            inventoryRepo.getOrderDetail(vouNo, deptId, local)
                     .subscribe((list) -> {
                         list.forEach((od) -> {
                             SaleHisDetail sd = new SaleHisDetail();
@@ -1751,8 +1751,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 //                if (selectObj instanceof VSale s) {
                 VSale s = (VSale) selectObj;
                 //get sale
-                inventoryRepo.findOrder(s.getVouNo(), s.getDeptId()).subscribe((t) -> {
-                    setSaleVoucherDetail(t);
+                inventoryRepo.findOrder(s.getVouNo(), s.getDeptId(), s.isLocal()).subscribe((t) -> {
+                    setSaleVoucherDetail(t, s.isLocal());
                 }, (e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
                 });

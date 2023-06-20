@@ -5,6 +5,7 @@
  */
 package com.h2.service;
 
+import com.common.FilterObject;
 import com.common.Util1;
 import com.h2.dao.OrderHisDao;
 import com.h2.dao.OrderHisDetailDao;
@@ -14,6 +15,7 @@ import com.inventory.model.OrderDetailKey;
 import com.inventory.model.OrderHis;
 import com.inventory.model.OrderHisDetail;
 import com.inventory.model.OrderHisKey;
+import com.inventory.model.VOrder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -137,6 +139,30 @@ public class OrderHisServiceImpl implements OrderHisService {
     @Override
     public List<OrderHis> findAll(String compCode) {
         return shDao.findAll(compCode);
+    }
+
+    @Override
+    public List<VOrder> getOrder(FilterObject filter) {
+    String fromDate = Util1.isNull(filter.getFromDate(), "-");
+        String toDate = Util1.isNull(filter.getToDate(), "-");
+        String vouNo = Util1.isNull(filter.getVouNo(), "-");
+        String userCode = Util1.isNull(filter.getUserCode(), "-");
+        String cusCode = Util1.isNull(filter.getCusCode(), "-");
+        String remark = Util1.isNull(filter.getRemark(), "-");
+        String stockCode = Util1.isNull(filter.getStockCode(), "-");
+        String saleManCode = Util1.isNull(filter.getSaleManCode(), "-");
+        String reference = Util1.isNull(filter.getReference(), "-");
+        String compCode = filter.getCompCode();
+        String locCode = Util1.isNull(filter.getLocCode(), "-");
+        Integer deptId = filter.getDeptId();
+        String deleted = String.valueOf(filter.isDeleted());
+        String nullBatch = String.valueOf(filter.isNullBatch());
+        String batchNo = Util1.isNull(filter.getBatchNo(), "-");
+        String projectNo = Util1.isAll(filter.getProjectNo());
+        String curCode = Util1.isAll(filter.getCurCode());
+        List<VOrder> orderList = shDao.getOrderHistory(fromDate, toDate, cusCode, saleManCode, vouNo, remark,
+                reference, userCode, stockCode, locCode, compCode, deptId, deleted, nullBatch, batchNo, projectNo,curCode);
+        return orderList;
     }
 
 }

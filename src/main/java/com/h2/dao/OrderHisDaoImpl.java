@@ -9,14 +9,16 @@ import com.common.Util1;
 import com.inventory.model.General;
 import com.inventory.model.OrderHis;
 import com.inventory.model.OrderHisKey;
+import com.inventory.model.VOrder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author wai yan
@@ -224,4 +226,43 @@ public class OrderHisDaoImpl extends AbstractDao<OrderHisKey, OrderHis> implemen
         String hsql = "select o from OrderHis o where o.key.compCode ='" + compCode + "'";
         return findHSQL(hsql);
     }
+
+    @Override
+    public List<VOrder> getOrderHistory(String fromDate, String toDate, String traderCode, String saleManCode, String vouNo, String remark, String reference, String userCode, String stockCode, String locCode, String compCode, Integer deptId, String deleted, String nullBatch, String batchNo, String projectNo, String curCode) {
+        List<VOrder> saleList = new ArrayList<>();
+        String filter = "";
+        String sql = """
+                     select a.*,t.trader_name,t.user_code
+                                          from (select * 
+                                          from order_his
+                     """
+                + "\n where comp_code='" + compCode + "' and dept_id = " + deptId
+                + "\n and CAST(vou_date AS DATE) between  '" + fromDate + "' and '" + toDate + "'"
+                + "\n and deleted = " + Boolean.parseBoolean(deleted)
+                + "\n and intg_upd_status is null)a join trader t on a.trader_code = t.code";
+        try {
+            ResultSet rs = getResult(sql);
+            if (!Objects.isNull(rs)) {
+                while (rs.next()) {
+                    VOrder s = new VOrder();
+                    s.setVouDate(Util1.toDateStr(rs.getDate("vou_date"), "dd/MM/yyyy"));
+                    s.setVouNo(rs.getString("vou_no"));
+                    s.setTraderCode(rs.getString("user_code"));
+                    s.setTraderName(rs.getString("trader_name"));
+                    s.setRemark(rs.getString("remark"));
+                    s.setReference(rs.getString("reference"));
+                    s.setCreatedBy(rs.getString("created_by"));
+                    s.setPaid(rs.getFloat("paid"));
+                    s.setVouTotal(rs.getFloat("vou_total"));
+                    s.setDeleted(rs.getBoolean("deleted"));
+                    s.setDeptId(rs.getInt("dept_id"));
+                    saleList.add(s);
+                }
+            }
+        } catch (SQLException e) {
+            log.error("getOrderHistory : " + e.getMessage());
+        }
+        return saleList;
+    }
+
 }

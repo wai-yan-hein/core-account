@@ -38,4 +38,9 @@ public class OrderDetailServiceImpl implements OrderDetailService {
     public int delete(OrderDetailKey key) {
         return dao.delete(key);
     }
+
+    @Override
+    public List<OrderHisDetail> searchDetail(String vouNo, String compCode, Integer deptId) {
+        return dao.searchDetail(vouNo, compCode, deptId);
+    }
 }

@@ -18,6 +18,8 @@ public interface OrderDetailService {
 
     List<OrderHisDetail> search(String vouNo, String compCode, Integer deptId);
 
+    List<OrderHisDetail> searchDetail(String vouNo, String compCode, Integer deptId);
+
     int delete(OrderDetailKey key);
 
 }

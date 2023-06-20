@@ -76,6 +76,7 @@ import com.inventory.model.UnitRelation;
 import com.inventory.model.UnitRelationDetail;
 import com.inventory.model.VPurchase;
 import com.inventory.model.VOpening;
+import com.inventory.model.VOrder;
 import com.inventory.model.VReturnIn;
 import com.inventory.model.VReturnOut;
 import com.inventory.model.VSale;
@@ -1324,11 +1325,14 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<OrderHis> findOrder(String vouNo, Integer deptId) {
+    public Mono<OrderHis> findOrder(String vouNo, Integer deptId, boolean local) {
         OrderHisKey key = new OrderHisKey();
         key.setVouNo(vouNo);
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
+        if (local) {
+            return h2Repo.findOrder(key);
+        }
         return inventoryApi.post()
                 .uri("/order/find-order")
                 .body(Mono.just(key), OrderHisKey.class)
@@ -2410,12 +2414,15 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<VSale>> getOrder(FilterObject filter) {
+    public Mono<List<VOrder>> getOrder(FilterObject filter) {
+        if (filter.isLocal()) {
+            return h2Repo.getOrderHistory(filter);
+        }
         return inventoryApi.post()
                 .uri("/order/get-order")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
-                .bodyToFlux(VSale.class)
+                .bodyToFlux(VOrder.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
@@ -2423,7 +2430,10 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<OrderHisDetail>> getOrderDetail(String vouNo, int deptId) {
+    public Mono<List<OrderHisDetail>> getOrderDetail(String vouNo, int deptId, boolean local) {
+        if (local) {
+            return h2Repo.getOrderDetail(vouNo, deptId);
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/order/get-order-detail")
                 .queryParam("vouNo", vouNo)
