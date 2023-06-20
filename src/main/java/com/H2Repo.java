@@ -31,6 +31,7 @@ import com.h2.service.MacPropertyService;
 import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
 import com.h2.service.OPHisService;
+import com.h2.service.OrderDetailService;
 import com.h2.service.PrivilegeCompanyService;
 import com.h2.service.ProjectService;
 import com.h2.service.PurHisService;
@@ -98,11 +99,14 @@ import com.h2.service.RetOutDetailService;
 import com.h2.service.SaleHisDetailService;
 import com.h2.service.StockInOutDetailService;
 import com.h2.service.StockInOutService;
+import com.h2.service.TransferHisDetailService;
 import com.h2.service.TransferHisService;
 import com.h2.service.WeightLossService;
 import com.inventory.model.General;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisKey;
+import com.inventory.model.OrderHisDetail;
+import com.inventory.model.OrderHisKey;
 import com.inventory.model.ProcessHis;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.SaleHisKey;
@@ -116,10 +120,14 @@ import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
 import com.inventory.model.TransferHis;
+import com.inventory.model.TransferHisDetail;
+import com.inventory.model.TransferHisKey;
+import com.inventory.model.VOrder;
 import com.inventory.model.VSale;
 import com.inventory.model.VPurchase;
 import com.inventory.model.VReturnIn;
 import com.inventory.model.VReturnOut;
+import com.inventory.model.VTransfer;
 import com.inventory.model.WeightLossHis;
 import java.util.HashMap;
 import java.util.List;
@@ -160,7 +168,7 @@ public class H2Repo {
     @Autowired
     private PurHisService purHisService;
     @Autowired
-    private PurHisDetailService purDetailService;    
+    private PurHisDetailService purDetailService;
     @Autowired
     private RetInService retInService;
     @Autowired
@@ -225,6 +233,10 @@ public class H2Repo {
     private GlService glService;
     @Autowired
     private SaleHisDetailService saleHisDetailService;
+    @Autowired
+    private TransferHisDetailService transferHisDetailService;
+    @Autowired
+    private OrderDetailService orderDetailService;
 
     public Mono<List<Location>> getLocation() {
         return Mono.justOrEmpty(locationService.findAll(Global.compCode));
@@ -578,14 +590,14 @@ public class H2Repo {
         String deleted = String.valueOf(filter.isDeleted());
         String projectNo = Util1.isAll(filter.getProjectNo());
         String curCode = Util1.isAll(filter.getCurCode());
-        return Mono.justOrEmpty(reportService.getPurchaseHistory(fromDate, toDate, cusCode, vouNo, userCode,remark, locCode, compCode, deptId, deleted,projectNo,curCode));
+        return Mono.justOrEmpty(reportService.getPurchaseHistory(fromDate, toDate, cusCode, vouNo, userCode, remark, locCode, compCode, deptId, deleted, projectNo, curCode));
     }
 
     public Mono<PurHis> findPurchase(PurHisKey key) {
         return Mono.justOrEmpty(purHisService.findById(key));
     }
 
-    public Mono<List<PurHisDetail>> searchPurchaseDetail(String vouNo,Integer depId) {
+    public Mono<List<PurHisDetail>> searchPurchaseDetail(String vouNo, Integer depId) {
         return Mono.justOrEmpty(purDetailService.search(vouNo, Global.compCode, depId));
     }
 
@@ -602,9 +614,9 @@ public class H2Repo {
         String deleted = String.valueOf(filter.isDeleted());
         String projectNo = Util1.isAll(filter.getProjectNo());
         String curCode = Util1.isAll(filter.getCurCode());
-        return Mono.justOrEmpty(reportService.getReturnInHistory(fromDate, toDate, cusCode, vouNo, userCode,remark, locCode, compCode, deptId, deleted,projectNo,curCode));
+        return Mono.justOrEmpty(reportService.getReturnInHistory(fromDate, toDate, cusCode, vouNo, userCode, remark, locCode, compCode, deptId, deleted, projectNo, curCode));
     }
-    
+
     public Mono<RetInHis> findRetInHis(RetInHisKey key) {
         return Mono.justOrEmpty(retInService.findById(key));
     }
@@ -619,21 +631,21 @@ public class H2Repo {
         String vouNo = Util1.isNull(filter.getVouNo(), "-");
         String userCode = Util1.isNull(filter.getUserCode(), "-");
         String cusCode = Util1.isNull(filter.getCusCode(), "-");
-        String remark = Util1.isNull(filter.getRemark(), "-");        
+        String remark = Util1.isNull(filter.getRemark(), "-");
         String locCode = Util1.isNull(filter.getLocCode(), "-");
         String compCode = filter.getCompCode();
         Integer deptId = filter.getDeptId();
         String deleted = String.valueOf(filter.isDeleted());
         String projectNo = Util1.isAll(filter.getProjectNo());
         String curCode = Util1.isAll(filter.getCurCode());
-        return Mono.justOrEmpty(reportService.getReturnOutHistory(fromDate, toDate, cusCode, vouNo, userCode,remark, locCode, compCode, deptId, deleted,projectNo,curCode));
+        return Mono.justOrEmpty(reportService.getReturnOutHistory(fromDate, toDate, cusCode, vouNo, userCode, remark, locCode, compCode, deptId, deleted, projectNo, curCode));
     }
-    
+
     public Mono<RetOutHis> findRetOutHis(RetOutHisKey key) {
         return Mono.justOrEmpty(retOutService.findById(key));
     }
 
-    public Mono<List<RetOutHisDetail>> searchReturnOutDetail(String vouNo,Integer depId) {
+    public Mono<List<RetOutHisDetail>> searchReturnOutDetail(String vouNo, Integer depId) {
         return Mono.justOrEmpty(retOutDetailService.search(vouNo, Global.compCode, depId));
     }
 
@@ -664,7 +676,15 @@ public class H2Repo {
     public Mono<List<VSale>> getSaleHistory(FilterObject filter) {
         return Mono.just(saleHisService.getSale(filter));
     }
-    
+
+    public Mono<List<VOrder>> getOrderHistory(FilterObject filter) {
+        return Mono.just(orderHisService.getOrder(filter));
+    }
+
+    public Mono<List<VTransfer>> getTransferHistory(FilterObject filter) {
+        return Mono.just(transferHisService.getTransfer(filter));
+    }
+
     public Mono<List<ProcessHis>> getProcessHistory(FilterObject filter) {
         return Mono.just(processHisService.getProcess(filter));
     }
@@ -673,7 +693,33 @@ public class H2Repo {
         return Mono.justOrEmpty(saleHisService.find(key));
     }
 
+    public Mono<OrderHis> findOrder(OrderHisKey key) {
+        return Mono.justOrEmpty(orderHisService.findById(key));
+    }
+
+    public Mono<TransferHis> findTransfer(TransferHisKey key) {
+        return Mono.justOrEmpty(transferHisService.findById(key));
+    }
+
     public Mono<List<SaleHisDetail>> getSaleDetail(String vouNo, int deptId) {
         return Mono.justOrEmpty(saleHisDetailService.searchDetail(vouNo, Global.compCode, deptId));
+    }
+
+    public Mono<List<OrderHisDetail>> getOrderDetail(String vouNo, int deptId) {
+        return Mono.justOrEmpty(orderDetailService.searchDetail(vouNo, Global.compCode, deptId));
+    }
+
+    public Mono<List<TransferHisDetail>> getTransferDetail(String vouNo, int deptId) {
+        return Mono.justOrEmpty(transferHisDetailService.search(vouNo, Global.compCode, deptId));
+    }
+
+    public Mono<Boolean> deleteSale(SaleHisKey key) {
+        saleHisService.delete(key);
+        return Mono.just(true);
+    }
+
+    public Mono<Boolean> restoreSale(SaleHisKey key) {
+        saleHisService.restore(key);
+        return Mono.just(true);
     }
 }

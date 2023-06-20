@@ -5,9 +5,11 @@
  */
 package com.h2.service;
 
+import com.common.FilterObject;
 import com.inventory.model.General;
 import com.inventory.model.OrderHis;
 import com.inventory.model.OrderHisKey;
+import com.inventory.model.VOrder;
 import java.util.List;
 
 /**
@@ -30,7 +32,6 @@ public interface OrderHisService {
 
     List<OrderHis> unUploadVoucher(String compCode);
 
-
     List<OrderHis> search(String updatedDate, List<String> keys);
 
     void truncate(OrderHisKey key);
@@ -40,5 +41,7 @@ public interface OrderHisService {
     List<OrderHis> findAll(String compCode);
 
     OrderHis updateACK(OrderHisKey key);
+
+    public List<VOrder> getOrder(FilterObject filter);
 
 }

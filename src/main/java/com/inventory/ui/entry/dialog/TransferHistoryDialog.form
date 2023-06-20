@@ -110,21 +110,27 @@
                               <Component id="txtStock" max="32767" attributes="0"/>
                               <Component id="txtRemark" max="32767" attributes="0"/>
                               <Component id="txtLocation" max="32767" attributes="0"/>
+                              <Component id="txtDep" alignment="1" max="32767" attributes="0"/>
                               <Group type="102" attributes="0">
-                                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                      <Component id="txtVouNo" alignment="1" max="32767" attributes="0"/>
-                                      <Group type="102" alignment="0" attributes="0">
-                                          <Component id="txtFromDate" linkSize="8" min="-2" pref="126" max="-2" attributes="0"/>
-                                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                          <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
-                                          <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
-                                          <Component id="txtToDate" linkSize="8" min="-2" pref="102" max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                          <Component id="txtVouNo" alignment="1" max="32767" attributes="0"/>
+                                          <Group type="102" alignment="0" attributes="0">
+                                              <Component id="txtFromDate" linkSize="8" min="-2" pref="126" max="-2" attributes="0"/>
+                                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                              <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
+                                              <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
+                                              <Component id="txtToDate" linkSize="8" min="-2" pref="102" max="-2" attributes="0"/>
+                                          </Group>
+                                      </Group>
+                                      <Group type="102" attributes="0">
+                                          <Component id="chkDel" alignment="0" min="-2" pref="86" max="-2" attributes="0"/>
+                                          <EmptySpace max="-2" attributes="0"/>
+                                          <Component id="chkLocal" alignment="0" min="-2" pref="86" max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
                                   <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                               </Group>
-                              <Component id="chkDel" max="32767" attributes="0"/>
-                              <Component id="txtDep" alignment="1" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -182,7 +188,10 @@
                               <Component id="txtDep" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="chkDel" min="-2" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="chkDel" min="-2" max="-2" attributes="0"/>
+                              <Component id="chkLocal" min="-2" max="-2" attributes="0"/>
+                          </Group>
                       </Group>
                       <Component id="jSeparator2" min="-2" pref="246" max="-2" attributes="0"/>
                   </Group>
@@ -390,6 +399,11 @@
           <Events>
             <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtDepFocusGained"/>
           </Events>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="chkLocal">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Local"/>
+          </Properties>
         </Component>
       </SubComponents>
     </Container>

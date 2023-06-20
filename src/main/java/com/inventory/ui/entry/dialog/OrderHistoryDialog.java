@@ -24,7 +24,7 @@ import com.inventory.model.GRN;
 import com.inventory.model.SaleMan;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;
-import com.inventory.model.VSale;
+import com.inventory.model.VOrder;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.OrderVouSearchTableModel;
 import com.user.editor.CurrencyAutoCompleter;
@@ -68,31 +68,31 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
-
+    
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
     }
-
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public UserRepo getUserRepo() {
         return userRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     public SelectionObserver getObserver() {
         return observer;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public OrderHistoryDialog(JFrame frame) {
         super(frame, true);
         initComponents();
@@ -100,12 +100,12 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         initFocous();
         initFormatFactory();
     }
-
+    
     private void initFormatFactory() {
         txtTotalAmt.setFormatterFactory(Util1.getDecimalFormat());
         txtPaid.setFormatterFactory(Util1.getDecimalFormat());
     }
-
+    
     public void initMain() {
         initCombo();
         initTableVoucher();
@@ -115,19 +115,19 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         @Override
         public void focusLost(FocusEvent e) {
         }
-
+        
         @Override
         public void focusGained(FocusEvent e) {
             JTextField jtf = (JTextField) e.getSource();
             jtf.selectAll();
         }
-
+        
     };
-
+    
     private void initFocous() {
         txtStock.addFocusListener(fa);
     }
-
+    
     private void initCombo() {
         userRepo.getAppUser().subscribe((t) -> {
             appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
@@ -157,7 +157,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         batchAutoCompeter = new BatchAutoCompeter(txtBatchNo, inventoryRepo, null, true);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
     }
-
+    
     private void initTableVoucher() {
         orderVouTableModel.setParent(tblVoucher);
         tblVoucher.setModel(orderVouTableModel);
@@ -177,36 +177,36 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         tblFilter = new StartWithRowFilter(txtFilter);
         tblVoucher.setRowSorter(sorter);
     }
-
+    
     private void setTodayDate() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
     }
-
+    
     private String getUserCode() {
         return appUserAutoCompleter == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
     }
-
+    
     private String getSaleMancode() {
         return saleManAutoCompleter == null ? "-"
                 : saleManAutoCompleter.getSaleMan().getKey().getSaleManCode();
     }
-
+    
     private String getLocCode() {
         return locationAutoCompleter == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
     }
-
+    
     private Integer getDepId() {
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
-
+    
     private String getCurCode() {
         if (currAutoCompleter == null || currAutoCompleter.getCurrency() == null) {
             return Global.currency;
         }
         return currAutoCompleter.getCurrency().getCurCode();
     }
-
+    
     public void search() {
         progress.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
@@ -228,6 +228,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         filter.setProjectNo(projectNo.equals("All") ? "-" : projectNo);
         filter.setCurCode(getCurCode());
         filter.setNullBatch(chkBatch.isSelected());
+        filter.setLocal(chkLocal.isSelected());
         orderVouTableModel.clear();
         txtRecord.setValue(0);
         inventoryRepo.getOrder(filter).subscribe((t) -> {
@@ -238,23 +239,25 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
             JOptionPane.showMessageDialog(this, e.getMessage());
             progress.setIndeterminate(false);
         }, () -> {
+            progress.setIndeterminate(false);
             setVisible(true);
         });
-
+        
     }
-
+    
     private void calAmount() {
-        List<VSale> list = orderVouTableModel.getListOrderHis();
-        txtPaid.setValue(list.stream().mapToDouble(VSale::getPaid).sum());
-        txtTotalAmt.setValue(list.stream().mapToDouble(VSale::getVouTotal).sum());
+        List<VOrder> list = orderVouTableModel.getListOrderHis();
+        txtPaid.setValue(list.stream().mapToDouble(VOrder::getPaid).sum());
+        txtTotalAmt.setValue(list.stream().mapToDouble(VOrder::getVouTotal).sum());
         txtRecord.setValue(list.size());
         tblVoucher.requestFocus();
     }
-
+    
     private void select() {
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
-            VSale his = orderVouTableModel.getSelectVou(row);
+            VOrder his = orderVouTableModel.getSelectVou(row);
+            his.setLocal(chkLocal.isSelected());
             observer.selected("ORDER-HISTORY", his);
             setVisible(false);
         } else {
@@ -262,7 +265,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
                     "No Voucher Selected", JOptionPane.ERROR_MESSAGE);
         }
     }
-
+    
     private void initKeyListener() {
         txtFromDate.getDateEditor().getUiComponent().setName("txtFromDate");
         txtFromDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -273,7 +276,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         txtUser.addKeyListener(this);
         txtCurrency.addKeyListener(this);
     }
-
+    
     private void clearFilter() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
@@ -331,6 +334,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         txtProjectNo = new javax.swing.JTextField();
         jLabel16 = new javax.swing.JLabel();
         txtCurrency = new javax.swing.JTextField();
+        chkLocal = new javax.swing.JCheckBox();
         txtFilter = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
@@ -523,6 +527,14 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
             }
         });
 
+        chkLocal.setFont(Global.lableFont);
+        chkLocal.setText("Local");
+        chkLocal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkLocalActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -569,7 +581,8 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
                     .addComponent(chkDel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(txtProjectNo)
                     .addComponent(txtCurrency, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(txtVouNo))
+                    .addComponent(txtVouNo)
+                    .addComponent(chkLocal, javax.swing.GroupLayout.DEFAULT_SIZE, 131, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -638,6 +651,8 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
                 .addComponent(chkDel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkBatch)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkLocal)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButton1)
@@ -894,6 +909,10 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         txtCurrency.selectAll(); // TODO add your handling code here:
     }//GEN-LAST:event_txtCurrencyFocusGained
 
+    private void chkLocalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkLocalActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_chkLocalActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -903,6 +922,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
     private javax.swing.JButton btnSelect;
     private javax.swing.JCheckBox chkBatch;
     private javax.swing.JCheckBox chkDel;
+    private javax.swing.JCheckBox chkLocal;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
@@ -952,13 +972,13 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
     @Override
     public void keyTyped(KeyEvent e) {
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
-
+        
     }
 }

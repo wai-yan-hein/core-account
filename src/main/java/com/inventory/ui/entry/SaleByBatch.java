@@ -1566,7 +1566,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
                 setAllLocation();
             case "SALE-HISTORY" -> {
                 if (selectObj instanceof VSale s) {
-                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId()).subscribe((t) -> {
+                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId(), s.isLocal()).subscribe((t) -> {
                         setSaleVoucher(t);
                     });
                 }

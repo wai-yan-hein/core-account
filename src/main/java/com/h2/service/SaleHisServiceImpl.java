@@ -106,7 +106,17 @@ public class SaleHisServiceImpl implements SaleHisService {
     public SaleHis updateACK(SaleHisKey key) {
         return dao.updateACK(key);
     }
+
+    @Override
+    public void delete(SaleHisKey key) {
+        dao.delete(key);
+    }
     
+    @Override
+    public void restore(SaleHisKey key){
+        dao.restore(key);
+    }
+
     @Override
     public List<VSale> getSale(FilterObject filter) {
         String fromDate = Util1.isNull(filter.getFromDate(), "-");
@@ -127,7 +137,7 @@ public class SaleHisServiceImpl implements SaleHisService {
         String projectNo = Util1.isAll(filter.getProjectNo());
         String curCode = Util1.isAll(filter.getCurCode());
         List<VSale> saleList = dao.getSaleHistory(fromDate, toDate, cusCode, saleManCode, vouNo, remark,
-                reference, userCode, stockCode, locCode, compCode, deptId, deleted, nullBatch, batchNo, projectNo,curCode);
+                reference, userCode, stockCode, locCode, compCode, deptId, deleted, nullBatch, batchNo, projectNo, curCode);
         return saleList;
     }
 

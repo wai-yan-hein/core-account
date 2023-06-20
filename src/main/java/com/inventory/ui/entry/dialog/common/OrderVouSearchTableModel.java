@@ -7,6 +7,7 @@ package com.inventory.ui.entry.dialog.common;
 
 import com.common.Global;
 import com.common.Util1;
+import com.inventory.model.VOrder;
 import com.inventory.model.VSale;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class OrderVouSearchTableModel extends AbstractTableModel {
 
-    private List<VSale> listOrderHis = new ArrayList();
+    private List<VOrder> listOrderHis = new ArrayList();
     private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Ref:", "Created By", "Paid Amt", "V-Total"};
 
     private JTable parent;
@@ -71,7 +72,7 @@ public class OrderVouSearchTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
         try {
             if (!listOrderHis.isEmpty()) {
-                VSale his = listOrderHis.get(row);
+                VOrder his = listOrderHis.get(row);
                 switch (column) {
                     case 0 -> {
                         //date
@@ -118,16 +119,16 @@ public class OrderVouSearchTableModel extends AbstractTableModel {
         return null;
     }
 
-    public List<VSale> getListOrderHis() {
+    public List<VOrder> getListOrderHis() {
         return listOrderHis;
     }
 
-    public void setListOrderHis(List<VSale> listOrderHis) {
+    public void setListOrderHis(List<VOrder> listOrderHis) {
         this.listOrderHis = listOrderHis;
         fireTableDataChanged();
     }
 
-    public VSale getSelectVou(int row) {
+    public VOrder getSelectVou(int row) {
         if (listOrderHis != null) {
             if (!listOrderHis.isEmpty()) {
                 return listOrderHis.get(row);
@@ -136,7 +137,7 @@ public class OrderVouSearchTableModel extends AbstractTableModel {
         return null;
     }
 
-    public void addObject(VSale t) {
+    public void addObject(VOrder t) {
         listOrderHis.add(t);
 
     }

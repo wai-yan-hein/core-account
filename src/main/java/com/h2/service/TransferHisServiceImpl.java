@@ -1,5 +1,6 @@
 package com.h2.service;
 
+import com.common.FilterObject;
 import com.common.Util1;
 import com.h2.dao.SeqDao;
 import com.h2.dao.TransferHisDao;
@@ -8,11 +9,10 @@ import com.inventory.model.THDetailKey;
 import com.inventory.model.TransferHis;
 import com.inventory.model.TransferHisDetail;
 import com.inventory.model.TransferHisKey;
+import com.inventory.model.VTransfer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -105,5 +105,24 @@ public class TransferHisServiceImpl implements TransferHisService {
     @Override
     public TransferHis updateACK(TransferHisKey key) {
         return dao.updateACK(key);
+    }
+
+    @Override
+    public List<VTransfer> getTransfer(FilterObject filter) {
+        String fromDate = Util1.isNull(filter.getFromDate(), "-");
+        String toDate = Util1.isNull(filter.getToDate(), "-");
+        String vouNo = Util1.isNull(filter.getVouNo(), "-");
+        String userCode = Util1.isNull(filter.getUserCode(), "-");
+        String remark = Util1.isNull(filter.getRemark(), "-");
+        String refNo = Util1.isNull(filter.getRefNo(), "-");
+        String stockCode = Util1.isNull(filter.getStockCode(), "-");
+        String locCode = Util1.isNull(filter.getLocCode(), "-");
+        String compCode = filter.getCompCode();
+        Integer deptId = filter.getDeptId();
+        String deleted = String.valueOf(filter.isDeleted());
+        List<VTransfer> listStockIO = dao.getTransferHistory(fromDate, toDate, refNo,
+                vouNo, remark, userCode,
+                stockCode, locCode, compCode, deptId, deleted);
+        return listStockIO;
     }
 }

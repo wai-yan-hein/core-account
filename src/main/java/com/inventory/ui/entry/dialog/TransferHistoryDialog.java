@@ -19,7 +19,6 @@ import com.inventory.editor.StockAutoCompleter;
 import com.inventory.model.AppUser;
 import com.inventory.model.Location;
 import com.inventory.model.Stock;
-import com.inventory.model.VPurchase;
 import com.inventory.model.VTransfer;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.TransferVouSearchTableModel;
@@ -32,8 +31,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -55,43 +52,43 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
-
+    
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
     }
-
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public UserRepo getUserRepo() {
         return userRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     public SelectionObserver getObserver() {
         return observer;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public TransferHistoryDialog(JFrame frame) {
         super(frame, true);
         initComponents();
         initKeyListener();
     }
-
+    
     public void initMain() {
         initTableVoucher();
         setTodayDate();
         initCombo();
     }
-
+    
     private void initCombo() {
         inventoryRepo.getLocation().subscribe((t) -> {
             locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, false);
@@ -107,7 +104,7 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
     }
-
+    
     private void initTableVoucher() {
         tableModel.setParent(tblVoucher);
         tblVoucher.setModel(tableModel);
@@ -126,26 +123,26 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         tblFilter = new StartWithRowFilter(txtFilter);
         tblVoucher.setRowSorter(sorter);
     }
-
+    
     private void setTodayDate() {
         if (txtFromDate.getDate() == null) {
             txtFromDate.setDate(Util1.getTodayDate());
             txtToDate.setDate(Util1.getTodayDate());
         }
     }
-
+    
     private String getUserCode() {
         return appUserAutoCompleter == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
     }
-
+    
     private String getLocCode() {
         return locationAutoCompleter == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
     }
-
+    
     private Integer getDepId() {
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
-
+    
     public void search() {
         progess.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
@@ -159,6 +156,7 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         filter.setLocCode(getLocCode());
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(getDepId());
+        filter.setLocal(chkLocal.isSelected());
         tableModel.clear();
         inventoryRepo.getTrasnfer(filter).subscribe((t) -> {
             tableModel.setListDetail(t);
@@ -168,21 +166,23 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
             progess.setIndeterminate(false);
-        }, () -> {
+        }, () -> {            
+            progess.setIndeterminate(false);
             setVisible(true);
         });
     }
-
+    
     private void calAmount() {
         List<VTransfer> list = tableModel.getListDetail();
         txtTotalRecord.setValue(list.size());
         tblVoucher.requestFocus();
     }
-
+    
     private void select() {
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
             VTransfer his = tableModel.getSelectVou(row);
+            his.setLocal(chkLocal.isSelected());
             observer.selected("TR-HISTORY", his);
             setVisible(false);
         } else {
@@ -190,7 +190,7 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
                     "No Voucher Selected", JOptionPane.ERROR_MESSAGE);
         }
     }
-
+    
     private void initKeyListener() {
         txtFromDate.getDateEditor().getUiComponent().setName("txtFromDate");
         txtFromDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -199,7 +199,7 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         txtVouNo.addKeyListener(this);
         txtUser.addKeyListener(this);
     }
-
+    
     private void clearFilter() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
@@ -243,6 +243,7 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         chkDel = new javax.swing.JCheckBox();
         jLabel13 = new javax.swing.JLabel();
         txtDep = new javax.swing.JTextField();
+        chkLocal = new javax.swing.JCheckBox();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
         progess = new javax.swing.JProgressBar();
@@ -364,6 +365,8 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
             }
         });
 
+        chkLocal.setText("Local");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -394,18 +397,22 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
                             .addComponent(txtStock)
                             .addComponent(txtRemark)
                             .addComponent(txtLocation)
+                            .addComponent(txtDep, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(txtVouNo, javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(txtVouNo, javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addGroup(jPanel1Layout.createSequentialGroup()
+                                            .addComponent(txtFromDate, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                            .addComponent(jLabel3)
+                                            .addGap(18, 18, 18)
+                                            .addComponent(txtToDate, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)))
                                     .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addComponent(txtFromDate, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(jLabel3)
-                                        .addGap(18, 18, 18)
-                                        .addComponent(txtToDate, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(chkDel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtDep, javax.swing.GroupLayout.Alignment.TRAILING))))
+                                        .addComponent(chkDel, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(chkLocal, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(0, 0, Short.MAX_VALUE)))))
                 .addContainerGap())
         );
 
@@ -452,7 +459,9 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
                             .addComponent(jLabel13)
                             .addComponent(txtDep, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(chkDel))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(chkDel)
+                            .addComponent(chkLocal)))
                     .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 246, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(7, 7, 7)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -668,6 +677,7 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnSelect;
     private javax.swing.JCheckBox chkDel;
+    private javax.swing.JCheckBox chkLocal;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel11;
@@ -705,13 +715,13 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
     @Override
     public void keyTyped(KeyEvent e) {
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
-
+        
     }
 }

@@ -12,7 +12,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
@@ -71,6 +70,24 @@ public class SaleHisDaoImpl extends AbstractDao<SaleHisKey, SaleHis> implements 
         sh.setIntgUpdStatus("ACK");
         saveOrUpdate(sh, sh.getKey());
         return sh;
+    }
+    
+    @Override
+    public void delete(SaleHisKey key){
+        String vouNo = key.getVouNo();
+        String compCode = key.getCompCode();
+        Integer deptId = key.getDeptId();
+        String sql = "update sale_his set deleted = true where vou_no ='" + vouNo + "' and comp_code='" + compCode + "' and dept_id =" + deptId + "";
+        execSql(sql);
+    }
+    
+    @Override
+    public void restore(SaleHisKey key) {
+        String vouNo = key.getVouNo();
+        String compCode = key.getCompCode();
+        Integer deptId = key.getDeptId();
+        String sql = "update sale_his set deleted = false,intg_upd_status=null where vou_no ='" + vouNo + "' and comp_code='" + compCode + "' and dept_id =" + deptId + "";
+        execSql(sql);
     }
 
     @Override

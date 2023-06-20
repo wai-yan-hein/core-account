@@ -26,6 +26,10 @@ public interface SaleHisDao {
     String getMaxDate();
 
     List<SaleHis> findAll(String compCode);
+    
+    void delete(SaleHisKey key);
+    
+    void restore(SaleHisKey key);
 
     List<VSale> getSaleHistory(String fromDate, String toDate, String traderCode, String saleManCode, String vouNo,
                                String remark, String reference, String userCode, String stockCode, String locCode,

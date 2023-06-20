@@ -8,6 +8,7 @@ package com.h2.dao;
 import com.inventory.model.General;
 import com.inventory.model.OrderHis;
 import com.inventory.model.OrderHisKey;
+import com.inventory.model.VOrder;
 import java.util.List;
 
 /**
@@ -28,15 +29,19 @@ public interface OrderHisDao {
 
     List<OrderHis> unUploadVoucher(String compCode);
 
-
     List<OrderHis> search(String updatedDate, List<String> location);
 
     void truncate(OrderHisKey key);
 
     General getVoucherInfo(String vouDate, String compCode, Integer depId);
-    
+
     OrderHis updateACK(OrderHisKey key);
-    
+
     List<OrderHis> findAll(String compCode);
+
+    List<VOrder> getOrderHistory(String fromDate, String toDate, String traderCode, String saleManCode, String vouNo,
+            String remark, String reference, String userCode, String stockCode, String locCode,
+            String compCode, Integer deptId, String deleted, String nullBatch, String batchNo,
+            String projectNo, String curCode);
 
 }
