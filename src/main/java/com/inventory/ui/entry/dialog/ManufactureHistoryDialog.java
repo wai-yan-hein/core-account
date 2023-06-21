@@ -36,7 +36,7 @@ import javax.swing.ListSelectionModel;
  * @author DELL
  */
 public class ManufactureHistoryDialog extends javax.swing.JDialog implements SelectionObserver {
-
+    
     private final ProcessHisTableModel processHisTableModel = new ProcessHisTableModel();
     private InventoryRepo inventoryRepo;
     private UserRepo userRepo;
@@ -46,35 +46,35 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
     private DepartmentAutoCompleter departmentAutoCompleter;
     private SelectionObserver observer;
     private CloudIntegration integration;
-
+    
     public CloudIntegration getIntegration() {
         return integration;
     }
-
+    
     public void setIntegration(CloudIntegration integration) {
         this.integration = integration;
     }
-
+    
     public UserRepo getUserRepo() {
         return userRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     public SelectionObserver getObserver() {
         return observer;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
     }
-
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
@@ -97,7 +97,7 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         initComponents();
         initFocusAdapter();
     }
-
+    
     private void initFocusAdapter() {
         txtProNo.addFocusListener(fa);
         txtRemark.addFocusListener(fa);
@@ -105,15 +105,15 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         txtStock.addFocusListener(fa);
         txtPT.addFocusListener(fa);
         txtLoc.addFocusListener(fa);
-
+        
     }
-
+    
     public void initMain() {
         initDate();
         initCompleter();
         initTblProcess();
     }
-
+    
     private void clear() {
         initDate();
         txtProNo.setText(null);
@@ -124,9 +124,9 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         stockAutoCompleter.setStock(new Stock("-", "All"));
         chkDel.setSelected(false);
         chkFinish.setSelected(false);
-
+        
     }
-
+    
     private void initCompleter() {
         inventoryRepo.getLocation().subscribe((t) -> {
             locationAutoCompleter = new LocationAutoCompleter(txtLoc, t, null, true, false);
@@ -150,12 +150,12 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
             btnUpload.setVisible(false);
         }
     }
-
+    
     private void initDate() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
     }
-
+    
     private void initTblProcess() {
         tblProcess.setModel(processHisTableModel);
         tblProcess.getTableHeader().setFont(Global.tblHeaderFont);
@@ -173,25 +173,26 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         tblProcess.setDefaultRenderer(Object.class, new TableCellRender());
         tblProcess.setDefaultRenderer(Float.class, new TableCellRender());
     }
-
+    
     private void select() {
         if (tblProcess.getSelectedRow() >= 0) {
             int row = tblProcess.convertRowIndexToModel(tblProcess.getSelectedRow());
             if (observer != null) {
-                observer.selected("Selected", processHisTableModel.getObject(row).getKey());
+                processHisTableModel.getObject(row).setLocal(chkLocal.isSelected());
+                observer.selected("Selected", processHisTableModel.getObject(row));
                 setVisible(false);
             }
         }
     }
-
+    
     private String getLocCode() {
         return locationAutoCompleter == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
     }
-
+    
     private Integer getDepId() {
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
-
+    
     public void searchProcess() {
         FilterObject f = new FilterObject(Global.compCode, Global.deptId);
         f.setFromDate(Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd"));

@@ -605,6 +605,9 @@ public class InventoryRepo {
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setUnitCode(unitCode);
+        if (localDatabase) {
+            return h2Repo.findUnit(key);
+        }
         return inventoryApi.post()
                 .uri("/setup/find-unit")
                 .body(Mono.just(key), StockUnitKey.class)
@@ -699,7 +702,10 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<ProcessHis> findProcess(ProcessHisKey key) {
+    public Mono<ProcessHis> findProcess(ProcessHisKey key, boolean local) {
+        if (local) {
+            return h2Repo.findProcess(key);
+        }
         return inventoryApi.post()
                 .uri("/process/find-process")
                 .body(Mono.just(key), ProcessHisKey.class)
@@ -1893,7 +1899,10 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<ProcessHisDetail>> getProcessDetail(String vouNo, Integer deptId) {
+    public Mono<List<ProcessHisDetail>> getProcessDetail(String vouNo, Integer deptId, boolean local) {
+        if (local) {
+            return h2Repo.getProcessDetail(vouNo, deptId);
+        }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/process/get-process-detail")
                 .queryParam("vouNo", vouNo)

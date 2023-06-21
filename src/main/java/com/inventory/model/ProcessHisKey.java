@@ -9,6 +9,7 @@ import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Transient;
 
 /**
  *
@@ -17,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Embeddable
-public class ProcessHisKey implements Serializable{
+public class ProcessHisKey implements Serializable {
 
     @Column(name = "vou_no")
     private String vouNo;

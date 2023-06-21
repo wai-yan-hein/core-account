@@ -12,5 +12,7 @@ public interface ProcessHisDetailDao {
 
     List<ProcessHisDetail> search(String vouNo, String compCode, Integer deptId);
 
+    List<ProcessHisDetail> searchDeatil(String vouNo, String compCode, Integer deptId);
+
     void delete(ProcessHisDetailKey key);
 }

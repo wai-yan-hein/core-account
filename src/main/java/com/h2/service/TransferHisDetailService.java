@@ -11,4 +11,6 @@ public interface TransferHisDetailService {
     int delete(THDetailKey key);
 
     List<TransferHisDetail> search(String vouNo, String compCode, Integer deptId);
+
+    List<TransferHisDetail> searchDetail(String vouNo, String compCode, Integer deptId);
 }
