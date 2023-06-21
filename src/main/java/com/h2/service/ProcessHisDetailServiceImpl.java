@@ -35,4 +35,9 @@ public class ProcessHisDetailServiceImpl implements ProcessHisDetailService {
     public void delete(ProcessHisDetailKey key) {
         dao.delete(key);
     }
+
+    @Override
+    public List<ProcessHisDetail> searchDeatil(String vouNo, String compCode, Integer deptId) {
+        return dao.searchDeatil(vouNo, compCode, deptId);
+    }
 }

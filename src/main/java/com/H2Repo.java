@@ -91,6 +91,7 @@ import com.user.model.RoleProperty;
 import com.user.model.SysProperty;
 import com.user.model.VRoleCompany;
 import com.h2.service.OrderHisService;
+import com.h2.service.ProcessHisDetailService;
 import com.h2.service.ProcessHisService;
 import com.h2.service.PurHisDetailService;
 import com.h2.service.ReportService;
@@ -108,6 +109,8 @@ import com.inventory.model.OPHisKey;
 import com.inventory.model.OrderHisDetail;
 import com.inventory.model.OrderHisKey;
 import com.inventory.model.ProcessHis;
+import com.inventory.model.ProcessHisDetail;
+import com.inventory.model.ProcessHisKey;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.SaleHisKey;
 import com.inventory.model.PurHisDetail;
@@ -235,6 +238,8 @@ public class H2Repo {
     private SaleHisDetailService saleHisDetailService;
     @Autowired
     private TransferHisDetailService transferHisDetailService;
+    @Autowired
+    private ProcessHisDetailService processHIsDetailService;
     @Autowired
     private OrderDetailService orderDetailService;
 
@@ -701,6 +706,14 @@ public class H2Repo {
         return Mono.justOrEmpty(transferHisService.findById(key));
     }
 
+    public Mono<ProcessHis> findProcess(ProcessHisKey key) {
+        return Mono.justOrEmpty(processHisService.findById(key));
+    }
+
+    public Mono<StockUnit> findUnit(StockUnitKey key) {
+        return Mono.justOrEmpty(stockUnitService.find(key));
+    }
+
     public Mono<List<SaleHisDetail>> getSaleDetail(String vouNo, int deptId) {
         return Mono.justOrEmpty(saleHisDetailService.searchDetail(vouNo, Global.compCode, deptId));
     }
@@ -710,7 +723,11 @@ public class H2Repo {
     }
 
     public Mono<List<TransferHisDetail>> getTransferDetail(String vouNo, int deptId) {
-        return Mono.justOrEmpty(transferHisDetailService.search(vouNo, Global.compCode, deptId));
+        return Mono.justOrEmpty(transferHisDetailService.searchDetail(vouNo, Global.compCode, deptId));
+    }
+
+    public Mono<List<ProcessHisDetail>> getProcessDetail(String vouNo, int deptId) {
+        return Mono.justOrEmpty(processHIsDetailService.searchDeatil(vouNo, Global.compCode, deptId));
     }
 
     public Mono<Boolean> deleteSale(SaleHisKey key) {

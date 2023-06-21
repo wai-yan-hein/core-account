@@ -71,4 +71,6 @@ public class ProcessHis {
     private String ptName;
     @Transient
     private String locName;
+    @Transient
+    private boolean local;
 }
