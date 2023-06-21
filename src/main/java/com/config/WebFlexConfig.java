@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -45,7 +44,7 @@ public class WebFlexConfig {
                         .defaultCodecs()
                         .maxInMemorySize(100 * 1024 * 1024))
                         .build())
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getToken())
                 .baseUrl(getUrl(url, port))
                 .build();
     }
@@ -60,7 +59,7 @@ public class WebFlexConfig {
                         .defaultCodecs()
                         .maxInMemorySize(100 * 1024 * 1024))
                         .build())
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getToken())
                 .baseUrl(getUrl(url, port))
                 .build();
     }
@@ -75,10 +74,7 @@ public class WebFlexConfig {
                         .defaultCodecs()
                         .maxInMemorySize(100 * 1024 * 1024))
                         .build())
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getToken())
-                .defaultHeader(HttpHeaders.USER_AGENT, "Core Account")
                 .baseUrl(getUrl(url, port))
                 .build();
     }
@@ -108,7 +104,9 @@ public class WebFlexConfig {
         return url;
     }
 
-    private String getToken() {
+    @Bean
+    public String getToken() {
+        log.info("getToken.");
         String url = environment.getProperty("user.url");
         int port = Util1.getInteger(environment.getProperty("user.port"));
         String serialNo = Util1.getBaseboardSerialNumber();

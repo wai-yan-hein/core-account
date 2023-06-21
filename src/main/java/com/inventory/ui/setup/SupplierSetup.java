@@ -330,7 +330,6 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         jLabel9 = new javax.swing.JLabel();
         chkActive = new javax.swing.JCheckBox();
         lblStatus = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
         txtRegion = new javax.swing.JTextField();
         jButton2 = new javax.swing.JButton();
         jLabel7 = new javax.swing.JLabel();
@@ -407,16 +406,6 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
 
         lblStatus.setFont(Global.lableFont);
         lblStatus.setText("NEW");
-
-        jButton1.setBackground(Global.selectionColor);
-        jButton1.setFont(Global.lableFont);
-        jButton1.setForeground(new java.awt.Color(255, 255, 255));
-        jButton1.setText("Import");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
 
         txtRegion.setFont(Global.textFont);
         txtRegion.setName("txtCusEmail"); // NOI18N
@@ -504,9 +493,6 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                                 .addComponent(jButton2))
                             .addComponent(txtSysCode)
                             .addGroup(panelEntryLayout.createSequentialGroup()
-                                .addGap(0, 0, Short.MAX_VALUE)
-                                .addComponent(jButton1))
-                            .addGroup(panelEntryLayout.createSequentialGroup()
                                 .addComponent(txtGroup)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnGroup))
@@ -567,10 +553,8 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkActive)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblStatus)
-                    .addComponent(jButton1))
-                .addContainerGap(72, Short.MAX_VALUE))
+                .addComponent(lblStatus)
+                .addContainerGap(79, Short.MAX_VALUE))
         );
 
         panelEntryLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {txtCusAddress, txtCusCode, txtCusEmail, txtCusName, txtCusPhone, txtRemark});
@@ -661,11 +645,6 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     }//GEN-LAST:event_formComponentShown
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-
-    }//GEN-LAST:event_jButton1ActionPerformed
-
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
         inventoryRepo.getRegion().subscribe((t) -> {
@@ -713,7 +692,6 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     private javax.swing.JCheckBox chkActive;
     private javax.swing.JCheckBox chkCD;
     private javax.swing.JCheckBox chkMulti;
-    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

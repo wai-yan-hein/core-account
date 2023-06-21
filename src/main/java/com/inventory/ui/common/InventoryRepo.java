@@ -889,7 +889,7 @@ public class InventoryRepo {
 
     public Mono<Trader> saveTrader(Trader t) {
         return inventoryApi.post()
-                .uri("/upload/uploadCSV")
+                .uri("/setup/save-trader")
                 .body(Mono.just(t), Trader.class)
                 .retrieve()
                 .bodyToMono(Trader.class)
@@ -897,15 +897,6 @@ public class InventoryRepo {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
                 });
-//        return inventoryApi.post()
-//                .uri("/setup/save-trader")
-//                .body(Mono.just(t), Trader.class)
-//                .retrieve()
-//                .bodyToMono(Trader.class)
-//                .onErrorResume((e) -> {
-//                    log.error("error :" + e.getMessage());
-//                    return Mono.empty();
-//                });
     }
 
     public Mono<Stock> saveStock(Stock s) {
