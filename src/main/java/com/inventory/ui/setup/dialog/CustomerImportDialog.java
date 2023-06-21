@@ -7,7 +7,6 @@ package com.inventory.ui.setup.dialog;
 import com.acc.common.AccountRepo;
 import com.common.Global;
 import com.common.TableCellRender;
-import com.common.Util1;
 import com.inventory.model.Trader;
 import com.inventory.model.CFont;
 import com.inventory.model.TraderKey;
@@ -16,15 +15,18 @@ import com.inventory.ui.setup.dialog.common.TraderImportTableModel;
 import java.awt.FileDialog;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.swing.JFrame;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.core.task.TaskExecutor;
 
 /**
@@ -100,7 +102,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         btnSave.setEnabled(false);
         progress.setVisible(true);
         for (Trader trader : traders) {
-            inventoryRepo.saveTrader(trader);
+            inventoryRepo.saveTrader(trader).subscribe();
         }
         dispose();
     }
@@ -145,48 +147,62 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                 hmZG.put(f.getIntCode(), f.getFontKey().getZwKeyCode());
             });
         }
-        /*  List<ChartOfAccount> list = accountRepo.getChartOfAccount();
-        list.forEach((t) -> {
-        hmCOA.put(t.getCoaCodeUsr(), t.getKey().getCoaCode());
-        });*/
-        String line;
-        String splitBy = ",";
-        int lineCount = 0;
         List<Trader> listTrader = new ArrayList<>();
         try {
             {
                 BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(path), "UTF-8"));
-                while ((line = in.readLine()) != null) {
-                    Trader t = new Trader();
-                    String[] data = line.split(splitBy);    // use comma as separator
-                    String code = null;
-                    String name = null;
-                    String address = null;
-                    lineCount++;
-                    try {
-                        code = data[0];
-                        name = data[1];
-                        address = data[2];
-
-                    } catch (IndexOutOfBoundsException e) {
-
-                        log.error(e.getMessage() + lineCount);
-                    }
-                    t.setUserCode(code);
-                    t.setTraderName(name);
+                CSVParser csvParser = new CSVParser(new FileReader(path),
+                        CSVFormat.DEFAULT.withHeader());
+                System.out.println("Header: " + csvParser.getHeaderMap());
+                Iterable<CSVRecord> csvRecords = csvParser.getRecords();
+                for (CSVRecord csvRecord : csvRecords) {
+                    Trader t = new Trader();                    
+                    t.setTraderName(csvRecord.get("TName"));
+//                    t.setUserCode(csvRecord.get("Code"));
                     TraderKey key = new TraderKey();
                     key.setCompCode(Global.compCode);
                     key.setDeptId(Global.deptId);
                     t.setKey(key);
-                    t.setAddress(address);
+                    t.setAddress(csvRecord.get("Address"));
                     t.setActive(Boolean.TRUE);
-                    t.setAddress(address);
+                    t.setAddress(csvRecord.get("Address"));
                     t.setCreatedDate(LocalDateTime.now());
                     t.setCreatedBy(Global.loginUser.getUserCode());
                     t.setMacId(Global.macId);
                     t.setType("CUS");
                     listTrader.add(t);
                 }
+//                while ((line = in.readLine()) != null) {
+//                    Trader t = new Trader();
+//                    String[] data = line.split(splitBy);    // use comma as separator
+//                    String code = null;
+//                    String name = null;
+//                    String address = null;
+//                    lineCount++;
+//                    try {
+//                        code = data[0];
+//                        name = data[1];
+//                        address = data[2];
+//
+//                    } catch (IndexOutOfBoundsException e) {
+//
+//                        log.error(e.getMessage() + lineCount);
+//                    }
+//                    t.setUserCode(code);
+//                    t.setTraderName(name);
+//                    TraderKey key = new TraderKey();
+//                    key.setCompCode(Global.compCode);
+//                    key.setDeptId(Global.deptId);
+//                    t.setKey(key);
+//                    t.setAddress(address);
+//                    t.setActive(Boolean.TRUE);
+//                    t.setAddress(address);
+//                    t.setCreatedDate(LocalDateTime.now());
+//                    t.setCreatedBy(Global.loginUser.getUserCode());
+//                    t.setMacId(Global.macId);
+//                    t.setType("CUS");
+//                    listTrader.add(t);
+//                }
             }
             tableModel.setListTrader(listTrader);
         } catch (IOException e) {
