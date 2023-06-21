@@ -66,7 +66,7 @@ public class Util1 {
     private static final DecimalFormat df2 = new DecimalFormat("0");
     public static String SYNC_DATE;
     public static final Gson gson = new GsonBuilder()
-            .setDateFormat(DateFormat.FULL, DateFormat.FULL)
+            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
             .create();
     public static HashMap<String, String> hmSysProp = new HashMap<>();
     public static boolean DARK_MODE = false;
@@ -780,6 +780,11 @@ public class Util1 {
             return LocalDateTime.parse(date, formatter);
         }
         return null;
+    }
+
+    public static LocalDateTime parseLocalDateTime(Date date) {
+        return date == null ? null : date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+
     }
 
     public static List<LocalDate> getDaysBetweenDates(LocalDate startDate, LocalDate endDate) {

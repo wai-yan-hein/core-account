@@ -5,15 +5,10 @@
  */
 package com.config;
 
-import com.TokenPreference;
+import com.common.TokenFile;
 import com.common.Util1;
-import com.inventory.model.MachineInfo;
 import com.user.model.AuthenticationRequest;
 import com.user.model.AuthenticationResponse;
-import java.net.MalformedURLException;
-import java.net.URL;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -22,8 +17,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.client.ClientRequest;
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -40,8 +33,7 @@ public class WebFlexConfig {
 
     @Autowired
     private Environment environment;
-    @Autowired
-    private TokenPreference tokenPreference;
+    private final TokenFile<AuthenticationResponse> file = new TokenFile<>(AuthenticationResponse.class);
 
     @Bean
     public WebClient inventoryApi() {
@@ -84,7 +76,9 @@ public class WebFlexConfig {
                         .maxInMemorySize(100 * 1024 * 1024))
                         .build())
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getToken())
+                .defaultHeader(HttpHeaders.USER_AGENT, "Core Account")
                 .baseUrl(getUrl(url, port))
                 .build();
     }
@@ -119,14 +113,19 @@ public class WebFlexConfig {
         int port = Util1.getInteger(environment.getProperty("user.port"));
         String serialNo = Util1.getBaseboardSerialNumber();
         WebClient webClient = WebClient.builder().baseUrl(getUrl(url, port)).build();
-        if (tokenPreference.isTokenExpired()) {
-            log.info("token expired.");
-            authenticate(webClient, serialNo);
+        AuthenticationResponse data = file.read();
+        if (data != null) {
+            if (System.currentTimeMillis() >= data.getAccessTokenExpired()) {
+                log.info("token expired.");
+                return authenticate(webClient, serialNo);
+            } else {
+                return data.getAccessToken();
+            }
         }
-        return tokenPreference.getPreference(TokenPreference.AT, "-");
+        return authenticate(webClient, serialNo);
     }
 
-    private void authenticate(WebClient client, String seriaNo) {
+    private String authenticate(WebClient client, String seriaNo) {
         try {
             var auth = AuthenticationRequest.builder().serialNo(seriaNo).password(seriaNo).build();
             AuthenticationResponse response = client.post()
@@ -135,13 +134,12 @@ public class WebFlexConfig {
                     .retrieve()
                     .bodyToMono(AuthenticationResponse.class).block();
             if (response != null) {
-                tokenPreference.savePreference(TokenPreference.AT, response.getAccessToken());
-                tokenPreference.savePreference(TokenPreference.ATE, String.valueOf(response.getAccessTokenExpired()));
-                tokenPreference.savePreference(TokenPreference.RT, response.getRefreshToken());
-                tokenPreference.savePreference(TokenPreference.RTE, String.valueOf(response.getRefreshTokenExpired()));
+                file.write(response);
+                return response.getAccessToken();
             }
         } catch (Exception e) {
             log.error("authenticate : " + e.getMessage());
         }
+        return null;
     }
 }
