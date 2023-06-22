@@ -197,7 +197,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         chkActive.setSelected(customer.isActive());
         txtCreditLimit.setText(Util1.getString(cus.getCreditLimit()));
         //txtCreditTerm.setText(Util1.getString(cus.getCreditDays()));
-        spPercent.setValue(cus.getCreditDays().toString());
+        spPercent.setValue(Util1.getFloat(cus.getCreditDays()));
         txtCreditAmt.setValue(customer.getCreditAmt());
         chkMulti.setSelected(customer.isMulti());
         txtPrice.setText(customer.getPriceType());
