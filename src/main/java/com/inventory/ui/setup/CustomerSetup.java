@@ -372,6 +372,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtRFID = new javax.swing.JTextField();
         jLabel16 = new javax.swing.JLabel();
         txtCreditAmt = new javax.swing.JFormattedTextField();
+        btnDownload = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblCustomer = new javax.swing.JTable();
         jLabel6 = new javax.swing.JLabel();
@@ -460,9 +461,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtCreditTerm.setFont(Global.textFont);
         txtCreditTerm.setName("txtCreditTerm"); // NOI18N
 
-        jButton1.setBackground(Global.selectionColor);
         jButton1.setFont(Global.lableFont);
-        jButton1.setForeground(new java.awt.Color(255, 255, 255));
         jButton1.setText("Import");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -562,6 +561,14 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtCreditAmt.setHorizontalAlignment(javax.swing.JTextField.LEFT);
         txtCreditAmt.setFont(Global.textFont);
 
+        btnDownload.setFont(Global.lableFont);
+        btnDownload.setText("Download");
+        btnDownload.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDownloadActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelEntryLayout = new javax.swing.GroupLayout(panelEntry);
         panelEntry.setLayout(panelEntryLayout);
         panelEntryLayout.setHorizontalGroup(
@@ -610,6 +617,8 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                             .addComponent(chkActive, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelEntryLayout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(btnDownload)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jButton1))
                             .addGroup(panelEntryLayout.createSequentialGroup()
                                 .addComponent(txtGroup, javax.swing.GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE)
@@ -705,7 +714,8 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblStatus)
-                    .addComponent(jButton1))
+                    .addComponent(jButton1)
+                    .addComponent(btnDownload))
                 .addContainerGap(122, Short.MAX_VALUE))
         );
 
@@ -876,7 +886,12 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         // TODO add your handling code here:
     }//GEN-LAST:event_txtPriceActionPerformed
 
+    private void btnDownloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDownloadActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnDownloadActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnDownload;
     private javax.swing.JButton btnGroup;
     private javax.swing.JCheckBox chkActive;
     private javax.swing.JCheckBox chkMulti;

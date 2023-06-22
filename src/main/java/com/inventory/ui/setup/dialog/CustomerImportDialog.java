@@ -17,6 +17,7 @@ import java.awt.Color;
 import java.awt.FileDialog;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,7 +26,6 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.core.task.TaskExecutor;
 
@@ -79,6 +79,10 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         progress.setVisible(false);
     }
 
+    enum Headers {
+        Code, Name, Address, PhoneNo
+    }
+
     private void initTable() {
         tblTrader.setModel(tableModel);
         tblTrader.getTableHeader().setFont(Global.tblHeaderFont);
@@ -122,9 +126,14 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         List<Trader> listTrader = new ArrayList<>();
         try {
             progress.setIndeterminate(true);
-            CSVParser csvParser = new CSVParser(new FileReader(path),
-                    CSVFormat.DEFAULT.withHeader());
-            List<CSVRecord> records = csvParser.getRecords();
+//            CSVParser csvParser = new CSVParser(new FileReader(path),
+//                    CSVFormat.DEFAULT.withHeader());
+            CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
+                    .setHeader(Headers.class)
+                    .setSkipHeaderRecord(true)
+                    .build();
+            Reader in = new FileReader(path);
+            Iterable<CSVRecord> records = csvFormat.parse(in);
             records.forEach((row) -> {
                 Trader t = new Trader();
                 TraderKey key = new TraderKey();
