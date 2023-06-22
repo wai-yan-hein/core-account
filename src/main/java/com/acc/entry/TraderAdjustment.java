@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,6 +116,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
     private DateTableDecorator decorator;
     private TraderAdjustmentTableModel adjustmentTableModel = new TraderAdjustmentTableModel();
     private double opening;
+    private int selectRow = -1;
 
     public UserRepo getUserRepo() {
         return userRepo;
@@ -398,9 +398,10 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
 
     private void deleteVoucher(boolean force) {
         closeCellEditor();
-        int selectRow = tblCash.convertRowIndexToModel(tblCash.getSelectedRow());
+        selectRow = tblCash.getSelectedRow();
         int yes_no;
-        if (tblCash.getSelectedRow() >= 0) {
+        if (selectRow >= 0) {
+            selectRow = tblCash.convertRowIndexToModel(selectRow);
             Gl vgl = adjustmentTableModel.getVGl(selectRow);
             if (vgl.getTranSource().equals("Report")) {
                 return;

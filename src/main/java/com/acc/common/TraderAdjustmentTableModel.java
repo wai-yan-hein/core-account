@@ -218,12 +218,12 @@ public class TraderAdjustmentTableModel extends AbstractTableModel {
                 case 0 -> {
                     if (value != null) {
                         if (Util1.isValidDateFormat(value.toString(), "dd/MM/yyyy")) {
-                            gl.setGlDate(Util1.toDate(value, "dd/MM/yyyy"));
+                            gl.setGlDate(Util1.parseLocalDateTime(Util1.toDate(value.toString(), Global.dateFormat)));
                         } else {
                             int length = value.toString().length();
                             if (length == 8 || length == 6) {
                                 String toFormatDate = Util1.toFormatDate(value.toString(), length);
-                                gl.setGlDate(Util1.parseLocalDateTime(toFormatDate, "dd/MM/yyyy"));
+                                gl.setGlDate(Util1.parseLocalDateTime(Util1.toDate(toFormatDate, Global.dateFormat)));
                             } else {
                                 gl.setGlDate(LocalDateTime.now());
                                 JOptionPane.showMessageDialog(Global.parentForm, "Invalid Date");
@@ -445,7 +445,7 @@ public class TraderAdjustmentTableModel extends AbstractTableModel {
                 gl.setDeptCode(department.getKey().getDeptCode());
                 gl.setDeptUsrCode(department.getUserCode());
             }
-            gl.setGlDate(glDate == null ?LocalDateTime.now() : Util1.toDate(glDate));
+            gl.setGlDate(glDate == null ? LocalDateTime.now() : Util1.toDate(glDate));
             gl.setSrcAccCode(sourceAccId);
             listVGl.add(gl);
             fireTableRowsInserted(listVGl.size() - 1, listVGl.size() - 1);

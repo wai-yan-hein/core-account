@@ -341,7 +341,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
     public void printVoucher() {
         setVisible(false);
-        String currency = currencyAAutoCompleter.getCurrency().getCurCode();
+        String currency = getCurCode();
         String fromDate = dateAutoCompleter.getDateModel().getStartDate();
         String toDate = dateAutoCompleter.getDateModel().getEndDate();
         if (!currency.equals("-") || !ProUtil.isMultiCur()) {

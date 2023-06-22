@@ -19,7 +19,6 @@ import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.SaleManAutoCompleter;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
-import com.inventory.model.AccType;
 import com.inventory.model.Location;
 import com.inventory.model.Region;
 import com.inventory.model.Order;
@@ -30,7 +29,7 @@ import com.inventory.model.OrderStatusType;
 import com.inventory.model.SaleMan;
 import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
-import com.inventory.model.VSale;
+import com.inventory.model.VOrder;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.OrderTableModel;
 import com.inventory.ui.common.StockBalanceTableModel;
@@ -43,7 +42,6 @@ import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
 import com.user.model.ProjectKey;
-import com.user.model.ProjectStatus;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
@@ -567,7 +565,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         dialog.search();
     }
 
-    public void setOrderVoucher(OrderHis sh) {
+    public void setOrderVoucher(OrderHis sh, boolean local) {
         if (sh != null) {
             progress.setIndeterminate(true);
             orderHis = sh;
@@ -594,7 +592,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 projectAutoCompleter.setProject(null);
             }            
             cboOrderStatusType.setSelectedIndex(OrderStatusType.valueOf(orderHis.getOrderStatus()).ordinal());
-            inventoryRepo.getOrderDetail(vouNo, sh.getKey().getDeptId())
+            inventoryRepo.getOrderDetail(vouNo, sh.getKey().getDeptId(), local)
                     .subscribe((t) -> {
                         orderTableModel.setListDetail(t);
                         orderTableModel.addNewRow();
@@ -1631,9 +1629,9 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 searchOrder(od);
             }
             case "ORDER-HISTORY" -> {
-                if (selectObj instanceof VSale s) {
-                    inventoryRepo.findOrder(s.getVouNo(), s.getDeptId()).subscribe((t) -> {                   
-                        setOrderVoucher(t);
+                if (selectObj instanceof VOrder s) {
+                    inventoryRepo.findOrder(s.getVouNo(), s.getDeptId(), s.isLocal()).subscribe((t) -> {
+                        setOrderVoucher(t, s.isLocal());
                     });
                 }
             }

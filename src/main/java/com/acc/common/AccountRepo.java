@@ -655,6 +655,10 @@ public class AccountRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(DateModel.class)
-                .collectList();
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.info("getDate " + e.getMessage());
+                    return Mono.empty();
+                });
     }
 }

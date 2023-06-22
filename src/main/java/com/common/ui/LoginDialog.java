@@ -95,7 +95,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
             d.setLocationRelativeTo(null);
             d.setVisible(true);
         });
-        MachineInfo t = userRepo.register(serialNo).block();
+        MachineInfo t = userRepo.checkSerialNo(serialNo).block();
         if (t == null) {
             JOptionPane.showMessageDialog(this, "Core User Api is not running.", "Connection Error", JOptionPane.ERROR_MESSAGE);
             System.exit(0);

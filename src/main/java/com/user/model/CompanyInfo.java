@@ -50,8 +50,8 @@ public class CompanyInfo {
     private String curCode;
     @Column(name = "created_by")
     private String createdBy;
-    @Column(name = "created_date")
-    private Date createdDate;
+    @Column(name = "created_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime createdDate;
     @Column(name = "bus_id")
     private Integer busId;
     @Column(name = "batch_lock")

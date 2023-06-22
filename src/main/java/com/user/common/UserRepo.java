@@ -117,9 +117,9 @@ public class UserRepo {
                 .retrieve().bodyToFlux(AppRole.class).collectList();
     }
 
-    public Mono<MachineInfo> register(String serialNo) {
+    public Mono<MachineInfo> checkSerialNo(String serialNo) {
         return userApi.get()
-                .uri(builder -> builder.path("/user/registerMac")
+                .uri(builder -> builder.path("/user/checkSerialNo")
                 .queryParam("serialNo", serialNo)
                 .build())
                 .retrieve()

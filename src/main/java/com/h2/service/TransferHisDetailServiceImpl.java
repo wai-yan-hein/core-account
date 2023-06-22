@@ -28,6 +28,11 @@ public class TransferHisDetailServiceImpl implements TransferHisDetailService {
 
     @Override
     public List<TransferHisDetail> search(String vouNo, String compCode, Integer deptId) {
+        return dao.search(vouNo, compCode, deptId);
+    }
+
+    @Override
+    public List<TransferHisDetail> searchDetail(String vouNo, String compCode, Integer deptId) {
         return dao.searchDetail(vouNo, compCode, deptId);
     }
 }

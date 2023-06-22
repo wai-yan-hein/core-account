@@ -77,4 +77,9 @@ public class TraderImportTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
+    public void clear() {
+        listTrader.clear();
+        fireTableDataChanged();
+    }
+
 }

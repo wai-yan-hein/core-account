@@ -31,6 +31,7 @@ import com.h2.service.MacPropertyService;
 import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
 import com.h2.service.OPHisService;
+import com.h2.service.OrderDetailService;
 import com.h2.service.PrivilegeCompanyService;
 import com.h2.service.ProjectService;
 import com.h2.service.PurHisService;
@@ -90,6 +91,7 @@ import com.user.model.RoleProperty;
 import com.user.model.SysProperty;
 import com.user.model.VRoleCompany;
 import com.h2.service.OrderHisService;
+import com.h2.service.ProcessHisDetailService;
 import com.h2.service.ProcessHisService;
 import com.h2.service.PurHisDetailService;
 import com.h2.service.ReportService;
@@ -104,7 +106,11 @@ import com.h2.service.WeightLossService;
 import com.inventory.model.General;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisKey;
+import com.inventory.model.OrderHisDetail;
+import com.inventory.model.OrderHisKey;
 import com.inventory.model.ProcessHis;
+import com.inventory.model.ProcessHisDetail;
+import com.inventory.model.ProcessHisKey;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.SaleHisKey;
 import com.inventory.model.PurHisDetail;
@@ -119,6 +125,7 @@ import com.inventory.model.StockInOutDetail;
 import com.inventory.model.TransferHis;
 import com.inventory.model.TransferHisDetail;
 import com.inventory.model.TransferHisKey;
+import com.inventory.model.VOrder;
 import com.inventory.model.VSale;
 import com.inventory.model.VPurchase;
 import com.inventory.model.VReturnIn;
@@ -231,6 +238,10 @@ public class H2Repo {
     private SaleHisDetailService saleHisDetailService;
     @Autowired
     private TransferHisDetailService transferHisDetailService;
+    @Autowired
+    private ProcessHisDetailService processHIsDetailService;
+    @Autowired
+    private OrderDetailService orderDetailService;
 
     public Mono<List<Location>> getLocation() {
         return Mono.justOrEmpty(locationService.findAll(Global.compCode));
@@ -670,7 +681,11 @@ public class H2Repo {
     public Mono<List<VSale>> getSaleHistory(FilterObject filter) {
         return Mono.just(saleHisService.getSale(filter));
     }
-    
+
+    public Mono<List<VOrder>> getOrderHistory(FilterObject filter) {
+        return Mono.just(orderHisService.getOrder(filter));
+    }
+
     public Mono<List<VTransfer>> getTransferHistory(FilterObject filter) {
         return Mono.just(transferHisService.getTransfer(filter));
     }
@@ -682,17 +697,37 @@ public class H2Repo {
     public Mono<SaleHis> findSale(SaleHisKey key) {
         return Mono.justOrEmpty(saleHisService.find(key));
     }
-    
+
+    public Mono<OrderHis> findOrder(OrderHisKey key) {
+        return Mono.justOrEmpty(orderHisService.findById(key));
+    }
+
     public Mono<TransferHis> findTransfer(TransferHisKey key) {
         return Mono.justOrEmpty(transferHisService.findById(key));
+    }
+
+    public Mono<ProcessHis> findProcess(ProcessHisKey key) {
+        return Mono.justOrEmpty(processHisService.findById(key));
+    }
+
+    public Mono<StockUnit> findUnit(StockUnitKey key) {
+        return Mono.justOrEmpty(stockUnitService.find(key));
     }
 
     public Mono<List<SaleHisDetail>> getSaleDetail(String vouNo, int deptId) {
         return Mono.justOrEmpty(saleHisDetailService.searchDetail(vouNo, Global.compCode, deptId));
     }
-    
+
+    public Mono<List<OrderHisDetail>> getOrderDetail(String vouNo, int deptId) {
+        return Mono.justOrEmpty(orderDetailService.searchDetail(vouNo, Global.compCode, deptId));
+    }
+
     public Mono<List<TransferHisDetail>> getTransferDetail(String vouNo, int deptId) {
-        return Mono.justOrEmpty(transferHisDetailService.search(vouNo, Global.compCode, deptId));
+        return Mono.justOrEmpty(transferHisDetailService.searchDetail(vouNo, Global.compCode, deptId));
+    }
+
+    public Mono<List<ProcessHisDetail>> getProcessDetail(String vouNo, int deptId) {
+        return Mono.justOrEmpty(processHIsDetailService.searchDeatil(vouNo, Global.compCode, deptId));
     }
 
     public Mono<Boolean> deleteSale(SaleHisKey key) {

@@ -126,7 +126,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private final AllCashTableModel allCashTableModel = new AllCashTableModel();
     private final DayBookTableModel dayBookTableModel = new DayBookTableModel();
     private ColumnHeaderListener listener;
-
+    private int selectRow=-1;
     public UserRepo getUserRepo() {
         return userRepo;
     }
@@ -520,9 +520,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     private void deleteVoucher(boolean force) {
         closeCellEditor();
-        int selectRow = tblCash.getSelectedRow();
+        selectRow = tblCash.getSelectedRow();
         int yes_no;
-        if (tblCash.getSelectedRow() >= 0) {
+        if (selectRow >= 0) {
+            selectRow = tblCash.convertRowIndexToModel(selectRow);
             Gl vgl;
             if (single) {
                 vgl = dayBookTableModel.getVGl(selectRow);

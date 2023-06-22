@@ -20,6 +20,7 @@ import com.user.model.CompanyInfo;
 import java.awt.HeadlessException;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.time.LocalDateTime;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
@@ -211,7 +212,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         } else {
             companyInfo.setBusId(businessTypeAutoCompleter.getObject().getBusId());
             companyInfo.setCreatedBy(Global.loginUser.getUserCode());
-            companyInfo.setCreatedDate(Util1.getTodayDate());
+            companyInfo.setCreatedDate(LocalDateTime.now());
             companyInfo.setCompCode(txtCode.getText());
             companyInfo.setUserCode(txtUserCode.getText());
             companyInfo.setCompName(txtName.getText());

@@ -52,9 +52,9 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
 
     @Override
     public List<Stock> getStock(String str, String compCode, Integer deptId) {
-        List<Stock> list = getStockList("s.user_code like '" + str + "%'", compCode, deptId);
+        List<Stock> list = getStockList("s.user_code like '%" + str + "%'", compCode, deptId);
         if (list.isEmpty()) {
-            list = getStockList("s.stock_name like '" + str + "%'", compCode, deptId);
+            list = getStockList("s.stock_name like '%" + str + "%'", compCode, deptId);
         }
         return list;
     }

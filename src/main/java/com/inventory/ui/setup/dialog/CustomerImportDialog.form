@@ -26,20 +26,19 @@
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jScrollPane1" max="32767" attributes="0"/>
-                  <Group type="102" attributes="0">
-                      <Component id="chkIntegra" min="-2" pref="85" max="-2" attributes="0"/>
+                  <Component id="jScrollPane1" pref="612" max="32767" attributes="0"/>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="chkIntegra" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="chkCus" min="-2" pref="85" max="-2" attributes="0"/>
+                      <Component id="lblLog" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="chkSup" min="-2" pref="85" max="-2" attributes="0"/>
-                      <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
+                      <Component id="cboType" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="jButton2" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="btnSave" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="progress" max="32767" attributes="0"/>
                   </Group>
+                  <Component id="progress" alignment="0" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -49,17 +48,18 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jScrollPane1" pref="399" max="32767" attributes="0"/>
+              <Component id="progress" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                  <Group type="103" alignment="0" groupAlignment="3" attributes="0">
+              <Component id="jScrollPane1" min="-2" pref="389" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="lblLog" alignment="0" max="32767" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="jButton2" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="chkIntegra" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="chkCus" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="chkSup" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="cboType" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Component id="btnSave" min="-2" max="-2" attributes="0"/>
-                  <Component id="progress" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -87,6 +87,9 @@
                 <Column editable="true" title="Title 4" type="java.lang.Object"/>
               </Table>
             </Property>
+            <Property name="rowHeight" type="int" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.tblRowHeight" type="code"/>
+            </Property>
           </Properties>
         </Component>
       </SubComponents>
@@ -108,23 +111,34 @@
       </Events>
     </Component>
     <Component class="javax.swing.JProgressBar" name="progress">
-      <Properties>
-        <Property name="indeterminate" type="boolean" value="true"/>
-      </Properties>
     </Component>
     <Component class="javax.swing.JCheckBox" name="chkIntegra">
       <Properties>
         <Property name="text" type="java.lang.String" value="Integra Font"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JCheckBox" name="chkCus">
+    <Component class="javax.swing.JComboBox" name="cboType">
       <Properties>
-        <Property name="text" type="java.lang.String" value="CUS"/>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="Global.textFont" type="code"/>
+        </Property>
+        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+          <StringArray count="2">
+            <StringItem index="0" value="Customer"/>
+            <StringItem index="1" value="Supplier"/>
+          </StringArray>
+        </Property>
       </Properties>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+      </AuxValues>
     </Component>
-    <Component class="javax.swing.JCheckBox" name="chkSup">
+    <Component class="javax.swing.JLabel" name="lblLog">
       <Properties>
-        <Property name="text" type="java.lang.String" value="SUP"/>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="Global.lableFont" type="code"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="-"/>
       </Properties>
     </Component>
   </SubComponents>
