@@ -126,8 +126,6 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
             traderGroupAutoCompleter = new TraderGroupAutoCompleter(txtGroup, t, null, false);
             traderGroupAutoCompleter.setGroup(null);
         });
-
-        //ProUtil.DEBTOR_GROUP
         accountRepo.getCOAByGroup(ProUtil.getProperty(ProUtil.DEBTOR_GROUP)).subscribe((t) -> {
             cOAAutoCompleter = new COAAutoCompleter(txtAccount,
                     t,
@@ -191,7 +189,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         chkActive.setSelected(customer.isActive());
         txtCreditLimit.setText(Util1.getString(cus.getCreditLimit()));
         //txtCreditTerm.setText(Util1.getString(cus.getCreditDays()));
-        spPercent.setValue(cus.getCreditDays());
+        spPercent.setValue(cus.getCreditDays().toString());
         txtCreditAmt.setValue(customer.getCreditAmt());
         chkMulti.setSelected(customer.isMulti());
         txtPrice.setText(customer.getPriceType());
