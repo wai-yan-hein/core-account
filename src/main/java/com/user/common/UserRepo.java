@@ -15,6 +15,7 @@ import com.inventory.model.AppUser;
 import com.user.model.DepartmentUser;
 import com.inventory.model.MachineInfo;
 import com.inventory.model.VRoleMenu;
+import com.user.model.AuthenticationResponse;
 import com.user.model.SysProperty;
 import com.user.model.CompanyInfo;
 import com.user.model.Currency;
@@ -119,7 +120,7 @@ public class UserRepo {
 
     public Mono<MachineInfo> checkSerialNo(String serialNo) {
         return userApi.get()
-                .uri(builder -> builder.path("/user/checkSerialNo")
+                .uri(builder -> builder.path("/auth/checkSerialNo")
                 .queryParam("serialNo", serialNo)
                 .build())
                 .retrieve()
@@ -134,12 +135,12 @@ public class UserRepo {
 
     }
 
-    public Mono<MachineInfo> register(MachineInfo mac) {
+    public Mono<AuthenticationResponse> register(MachineInfo mac) {
         return userApi.post()
-                .uri("/user/save-mac")
+                .uri("/auth/registerMac")
                 .body(Mono.just(mac), MachineInfo.class)
                 .retrieve()
-                .bodyToMono(MachineInfo.class);
+                .bodyToMono(AuthenticationResponse.class);
     }
 
     public String updateProgram() {

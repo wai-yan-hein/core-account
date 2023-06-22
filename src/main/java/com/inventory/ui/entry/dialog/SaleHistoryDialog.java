@@ -6,6 +6,7 @@
 package com.inventory.ui.entry.dialog;
 
 import com.CloudIntegration;
+import com.MessageDialog;
 import com.common.FilterObject;
 import com.common.Global;
 import com.common.SelectionObserver;
@@ -43,7 +44,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.aspectj.bridge.Message;
+import org.springframework.core.task.TaskExecutor;
 
 /**
  *
@@ -72,33 +74,22 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
+    private TaskExecutor taskExecutor;
 
-    public CloudIntegration getIntegration() {
-        return integration;
+    public void setTaskExecutor(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
     }
 
     public void setIntegration(CloudIntegration integration) {
         this.integration = integration;
     }
 
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
 
-    public UserRepo getUserRepo() {
-        return userRepo;
-    }
-
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -331,6 +322,34 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         saleManAutoCompleter.setSaleMan(new SaleMan("-", "All"));
         batchAutoCompeter.setBatch(new GRN());
         currAutoCompleter.setCurrency(null);
+    }
+
+    private void upload() {
+        int count = integration.uploadSaleCount();
+        if (count > 0) {
+            MessageDialog dialog = new MessageDialog(this, "Uploading to server.");
+            int yn = JOptionPane.showConfirmDialog(this, "Are you to upload sale voucher : " + count);
+            if (yn == JOptionPane.YES_OPTION) {
+                btnUpload.setEnabled(false);
+                taskExecutor.execute(() -> {
+                    try {
+                        log.info("1");
+                        String message = integration.uploadSale();
+                        JOptionPane.showMessageDialog(this, message);
+                    } catch (Exception e) {
+                        JOptionPane.showMessageDialog(this, e.getMessage());
+                        btnUpload.setEnabled(true);
+                        dialog.setVisible(false);
+                    }
+                    btnUpload.setEnabled(true);
+                    dialog.setVisible(false);
+                });
+                dialog.setVisible(true);
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Empty.");
+        }
+
     }
 
     /**
@@ -971,7 +990,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     }//GEN-LAST:event_chkLocalActionPerformed
 
     private void btnUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadActionPerformed
-        integration.uploadSale();
+        upload();
     }//GEN-LAST:event_btnUploadActionPerformed
 
     /**

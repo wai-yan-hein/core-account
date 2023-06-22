@@ -4,10 +4,13 @@
  */
 package com.common;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.myanmartools.TransliterateZ2U;
 import com.google.myanmartools.ZawgyiDetector;
+import com.inventory.model.VSale;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -15,11 +18,13 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.io.Writer;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
@@ -949,5 +954,16 @@ public class Util1 {
 
     public static String getPassword() {
         return Util1.toDateStr(Util1.getTodayDate(), "yyyyMMdd");
+    }
+
+    public static byte[] listToByteArray(List<VSale> obj) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonString = mapper.writeValueAsString(obj);
+            return jsonString.getBytes();
+        } catch (JsonProcessingException e) {
+            log.error("Failed to convert list to byte array: " + e.getMessage());
+        }
+        return null; // Handle the failure to convert to byte array
     }
 }

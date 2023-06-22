@@ -739,4 +739,8 @@ public class H2Repo {
         saleHisService.restore(key);
         return Mono.just(true);
     }
+
+    public List<VSale> getSaleReport(String vouNo) {
+        return saleHisService.getSaleReport(vouNo, Global.compCode, Global.deptId);
+    }
 }

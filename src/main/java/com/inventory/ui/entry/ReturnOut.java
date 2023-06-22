@@ -491,7 +491,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         dialog.search();
     }
 
-    public void setVoucher(RetOutHis ro) {
+    public void setVoucher(RetOutHis ro, boolean local) {
         if (ro != null) {
             progress.setIndeterminate(true);
             ri = ro;
@@ -516,7 +516,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                 projectAutoCompleter.setProject(null);
             }
             String vouNo = ri.getKey().getVouNo();
-            inventoryRepo.getReturnOutDetail(vouNo,deptId)
+            inventoryRepo.getReturnOutDetail(vouNo, deptId, local)
                     .subscribe((t) -> {
                         roTableModel.setListDetail(t);
                         roTableModel.addNewRow();
@@ -1212,8 +1212,9 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             }
             case "RO-HISTORY" -> {
                 if (selectObj instanceof VReturnOut v) {
-                    inventoryRepo.findReturnOut(v.getVouNo(), v.getDeptId(),v.isLocal()).subscribe((t) -> {
-                        setVoucher(t);
+                    boolean local = v.isLocal();
+                    inventoryRepo.findReturnOut(v.getVouNo(), v.getDeptId(), v.isLocal()).subscribe((t) -> {
+                        setVoucher(t, local);
                     });
                 }
 

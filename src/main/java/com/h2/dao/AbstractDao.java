@@ -4,7 +4,6 @@
  */
 package com.h2.dao;
 
-import com.inventory.model.RetOutHisDetail;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.io.Serializable;
@@ -15,11 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
-import java.util.Date;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.LocalDateTime;
-import javax.sql.DataSource;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
@@ -39,19 +37,20 @@ public abstract class AbstractDao<PK extends Serializable, T> {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-    @Autowired
-    private DataSource dataSource;
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Transactional
     public T getByKey(PK key) {
         return entityManager.find(persistentClass, key);
     }
 
+    @Transactional
     public void persist(T entity) {
         entityManager.persist(entity);
     }
 
+    @Transactional
     public void saveOrUpdate(T entity, PK pk) {
         T t = entityManager.find(persistentClass, pk);
         if (t == null) {
@@ -62,20 +61,24 @@ public abstract class AbstractDao<PK extends Serializable, T> {
 
     }
 
+    @Transactional
     public void update(T entity) {
         entityManager.merge(entity);
     }
 
+    @Transactional
     public List<T> findHSQL(String hsql) {
         return entityManager.createQuery(hsql, persistentClass).getResultList();
     }
-    
+
+    @Transactional
     public void execSql(String... sql) {
         for (String s : sql) {
             jdbcTemplate.execute(s);
         }
     }
 
+    @Transactional
     public void remove(PK pk) {
         T byKey = getByKey(pk);
         if (byKey != null) {
@@ -89,7 +92,9 @@ public abstract class AbstractDao<PK extends Serializable, T> {
 
     public LocalDateTime getDate(String jpql) {
         return entityManager.createQuery(jpql, LocalDateTime.class).getSingleResult();
-    }    
+    }
+
+    @Transactional
     public ResultSet getResult(String sql) {
         return jdbcTemplate.execute((ConnectionCallback<ResultSet>) con -> {
             Statement stmt = con.createStatement();
