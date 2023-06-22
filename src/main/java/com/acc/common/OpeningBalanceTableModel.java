@@ -20,6 +20,7 @@ import com.toedter.calendar.JDateChooser;
 import com.user.model.Project;
 
 import java.awt.HeadlessException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -279,7 +280,7 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
     // save opening balance data from the grid view
     private void save(OpeningBalance opening, int row) {
         if (opening.getKey().getOpId() == null) {
-            opening.setCreatedDate(Util1.getTodayDate());
+            opening.setCreatedDate(LocalDateTime.now());
         }
         accountRepo.saveCOAOpening(opening).subscribe((t) -> {
             if (t != null) {

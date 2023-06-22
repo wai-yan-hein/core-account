@@ -125,7 +125,7 @@ public class WebFlexConfig {
 
     private String authenticate(WebClient client, String seriaNo) {
         try {
-            var auth = AuthenticationRequest.builder().serialNo(seriaNo).password(seriaNo).build();
+            var auth = AuthenticationRequest.builder().serialNo(seriaNo).password(Util1.getPassword()).build();
             AuthenticationResponse response = client.post()
                     .uri("/auth/authenticate")
                     .body(Mono.just(auth), AuthenticationRequest.class)
@@ -133,6 +133,7 @@ public class WebFlexConfig {
                     .bodyToMono(AuthenticationResponse.class).block();
             if (response != null) {
                 file.write(response);
+                log.info("new token : " + response.getAccessToken());
                 return response.getAccessToken();
             }
         } catch (Exception e) {
