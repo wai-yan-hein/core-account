@@ -7,6 +7,7 @@ package com.acc.model;
 import java.util.Date;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.time.LocalDateTime;
 
 /**
  *
@@ -24,7 +25,7 @@ public class OpeningBalance {
     private Double crAmt;
     private Double drAmt;
     private String userCode;
-    private Date createdDate;
+    private LocalDateTime createdDate;
     private String deptCode;
     private String traderCode;
     private String traderName;

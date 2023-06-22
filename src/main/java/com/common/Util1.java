@@ -946,4 +946,8 @@ public class Util1 {
         }
         return Util1.isNull(value, "-");
     }
+
+    public static String getPassword() {
+        return Util1.toDateStr(Util1.getTodayDate(), "yyyyMMdd");
+    }
 }
