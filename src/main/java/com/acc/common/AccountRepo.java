@@ -358,7 +358,7 @@ public class AccountRepo {
         }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/getCOAByGroup")
-                .queryParam("groupCode", groupCode)
+                .queryParam("groupCode", groupCode == null ? "" : groupCode)
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()

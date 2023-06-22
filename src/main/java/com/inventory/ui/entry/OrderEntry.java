@@ -25,11 +25,11 @@ import com.inventory.model.Order;
 import com.inventory.model.OrderHis;
 import com.inventory.model.OrderHisDetail;
 import com.inventory.model.OrderHisKey;
+import com.inventory.model.OrderStatusType;
 import com.inventory.model.SaleMan;
 import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
 import com.inventory.model.VOrder;
-import com.inventory.model.VSale;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.OrderTableModel;
 import com.inventory.ui.common.StockBalanceTableModel;
@@ -367,6 +367,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         txtReference.setText(null);
         txtCus.requestFocus();
         projectAutoCompleter.setProject(null);
+        cboOrderStatusType.setSelectedIndex(OrderStatusType.valueOf("Pending").ordinal());
     }
 
     public void saveOrder(boolean print) {
@@ -440,6 +441,9 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             orderHis.setMacId(Global.macId);
             Project p = projectAutoCompleter.getProject();
             orderHis.setProjectNo(p == null ? null : p.getKey().getProjectNo());
+            if (cboOrderStatusType.getSelectedItem() instanceof OrderStatusType type) {
+                orderHis.setOrderStatus(type.name());
+            }
             if (lblStatus.getText().equals("NEW")) {
                 OrderHisKey key = new OrderHisKey();
                 key.setCompCode(Global.compCode);
@@ -586,7 +590,8 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 });
             } else {
                 projectAutoCompleter.setProject(null);
-            }
+            }            
+            cboOrderStatusType.setSelectedIndex(OrderStatusType.valueOf(orderHis.getOrderStatus()).ordinal());
             inventoryRepo.getOrderDetail(vouNo, sh.getKey().getDeptId(), local)
                     .subscribe((t) -> {
                         orderTableModel.setListDetail(t);
@@ -622,7 +627,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                         txtTax.setValue(Util1.getFloat(orderHis.getTaxAmt()));
                         txtVouPaid.setValue(Util1.getFloat(orderHis.getPaid()));
                         txtVouBalance.setValue(Util1.getFloat(orderHis.getBalance()));
-                        txtGrandTotal.setValue(Util1.getFloat(orderHis.getGrandTotal()));
+                        txtGrandTotal.setValue(Util1.getFloat(orderHis.getGrandTotal()));                          
                         chkPaid.setSelected(orderHis.getPaid() > 0);
                         focusTable();
                         progress.setIndeterminate(false);
@@ -780,6 +785,8 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
         txtProjectNo = new javax.swing.JTextField();
+        cboOrderStatusType = new javax.swing.JComboBox<>(OrderStatusType.values());
+        jLabel11 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         lblStatus = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
@@ -950,6 +957,11 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             }
         });
 
+        cboOrderStatusType.setFont(Global.textFont);
+
+        jLabel11.setFont(Global.lableFont);
+        jLabel11.setText("Order Status");
+
         javax.swing.GroupLayout panelSaleLayout = new javax.swing.GroupLayout(panelSale);
         panelSale.setLayout(panelSaleLayout);
         panelSaleLayout.setHorizontalGroup(
@@ -963,7 +975,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtCus)
-                    .addComponent(txtOrderDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtOrderDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 154, Short.MAX_VALUE)
                     .addComponent(txtVouNo, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -972,7 +984,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                     .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtRemark)
+                    .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
                     .addComponent(txtSaleman)
                     .addComponent(txtLocation))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -982,13 +994,17 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                     .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(txtDueDate, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtDueDate, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 154, Short.MAX_VALUE)
                     .addComponent(txtCurrency, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtReference))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtProjectNo)
+                .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(cboOrderStatusType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtProjectNo, javax.swing.GroupLayout.DEFAULT_SIZE, 131, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -998,24 +1014,29 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelSaleLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel17)
-                    .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel22)
-                    .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel6)
-                    .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel10)
-                    .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(txtDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtOrderDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(panelSaleLayout.createSequentialGroup()
+                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel17)
+                            .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel22)
+                            .addComponent(txtLocation, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel6)
+                            .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel10)
+                            .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtOrderDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel3)
+                                .addComponent(txtSaleman, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel5))
+                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel3)
-                        .addComponent(txtSaleman, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel5))
-                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(jLabel11)
+                        .addComponent(cboOrderStatusType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1737,11 +1758,13 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox<OrderStatusType> cboOrderStatusType;
     private javax.swing.JCheckBox chkA4;
     private javax.swing.JCheckBox chkA5;
     private javax.swing.JCheckBox chkPaid;
     private javax.swing.JCheckBox chkVou;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;

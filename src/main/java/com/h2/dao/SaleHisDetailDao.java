@@ -27,5 +27,4 @@ public interface SaleHisDetailDao {
     List<SaleHisDetail> searchDetail(String vouNo, String compCode, Integer deptId);
 
     List<SaleHisDetail> findAll(String compCode);
-
 }

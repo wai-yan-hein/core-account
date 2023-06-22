@@ -17,6 +17,7 @@ import com.common.Util1;
 import com.inventory.editor.RegionAutoCompleter;
 import com.inventory.editor.TraderGroupAutoCompleter;
 import com.inventory.model.General;
+import com.inventory.model.Headers;
 import com.inventory.model.Region;
 import com.inventory.model.Trader;
 import com.inventory.model.TraderGroup;
@@ -28,6 +29,8 @@ import com.inventory.ui.setup.dialog.RegionSetup;
 import com.inventory.ui.setup.dialog.TraderGroupDialog;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 import javax.swing.JButton;
@@ -40,11 +43,15 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
@@ -56,7 +63,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class CustomerSetup extends javax.swing.JPanel implements KeyListener, PanelControl {
-
+    
     private int selectRow = -1;
     private Trader customer = new Trader();
     private final CustomerTabelModel customerTabelModel = new CustomerTabelModel();
@@ -72,19 +79,20 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     private SelectionObserver observer;
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
-
+    private static final String CSV_FILE_PATH = System.getProperty("user.home") + "/Downloads/customers.csv";
+    
     public JProgressBar getProgress() {
         return progress;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public SelectionObserver getObserver() {
         return observer;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -96,16 +104,22 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         initComponents();
         initKeyListener();
         initFormat();
+        initSpinner();
     }
-
+    
     private void initFormat() {
         txtCreditAmt.setFormatterFactory(Util1.getDecimalFormat());
     }
-
+    
     public void initMain() {
         initCombo();
         initTable();
         searchCustomer();
+    }
+
+    private void initSpinner() {
+        SpinnerModel spinnerModel = new SpinnerNumberModel(0, 0, 100, 1);
+        spPercent.setModel(spinnerModel);
     }
 
     private void initCombo() {
@@ -113,12 +127,12 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
             regionAutoCompleter = new RegionAutoCompleter(txtRegion, t, null, false, false);
             regionAutoCompleter.setRegion(null);
         });
-
+        
         inventoryRepo.getTraderGroup().subscribe((t) -> {
             traderGroupAutoCompleter = new TraderGroupAutoCompleter(txtGroup, t, null, false);
             traderGroupAutoCompleter.setGroup(null);
         });
-
+        
         accountRepo.getCOAByGroup(ProUtil.getProperty(ProUtil.DEBTOR_GROUP)).subscribe((t) -> {
             cOAAutoCompleter = new COAAutoCompleter(txtAccount,
                     t,
@@ -127,9 +141,9 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                 cOAAutoCompleter.setCoa(tt);
             });
         });
-
+        
     }
-
+    
     private void initTable() {
         tblCustomer.setModel(customerTabelModel);
         tblCustomer.getTableHeader().setFont(Global.textFont);
@@ -146,13 +160,14 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                     selectRow = tblCustomer.convertRowIndexToModel(tblCustomer.getSelectedRow());
                     setCustomer(customerTabelModel.getCustomer(selectRow));
                 }
-
+                
             }
         });
         sorter = new TableRowSorter(tblCustomer.getModel());
         tblCustomer.setRowSorter(sorter);
+        txtCreditTerm.setVisible(false);
     }
-
+    
     private void searchCustomer() {
         progress.setIndeterminate(true);
         inventoryRepo.getCustomer()
@@ -164,9 +179,9 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                     JOptionPane.showMessageDialog(this, e.getMessage());
                     progress.setIndeterminate(false);
                 });
-
+        
     }
-
+    
     private void setCustomer(Trader cus) {
         customer = cus;
         txtSysCode.setText(customer.getKey().getCode());
@@ -181,7 +196,8 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtCusAddress.setText(customer.getAddress());
         chkActive.setSelected(customer.isActive());
         txtCreditLimit.setText(Util1.getString(cus.getCreditLimit()));
-        txtCreditTerm.setText(Util1.getString(cus.getCreditDays()));
+        //txtCreditTerm.setText(Util1.getString(cus.getCreditDays()));
+        spPercent.setValue(Util1.getFloat(cus.getCreditDays()));
         txtCreditAmt.setValue(customer.getCreditAmt());
         chkMulti.setSelected(customer.isMulti());
         txtPrice.setText(customer.getPriceType());
@@ -203,7 +219,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
             log.error(e.getMessage());
         });
     }
-
+    
     private boolean isValidEntry() {
         boolean status = true;
         if (txtCusName.getText().isEmpty()) {
@@ -219,7 +235,8 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
             customer.setAddress(txtCusAddress.getText());
             customer.setActive(chkActive.isSelected());
             customer.setCreditLimit(Util1.getInteger(txtCreditLimit.getText()));
-            customer.setCreditDays(Util1.getInteger(txtCreditTerm.getText()));
+            //customer.setCreditDays(Util1.getInteger(txtCreditTerm.getText()));
+            customer.setCreditDays(Util1.getInteger(spPercent.getValue()));
             customer.setNrc(txtNRC.getText());
             customer.setRfId(txtRFID.getText());
             customer.setRemark(txtRemark.getText());
@@ -259,7 +276,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         }
         return status;
     }
-
+    
     private void saveCustomer() {
         if (isValidEntry()) {
             progress.setIndeterminate(true);
@@ -277,10 +294,10 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                 JOptionPane.showMessageDialog(this, e.getMessage());
                 progress.setIndeterminate(false);
             });
-
+            
         }
     }
-
+    
     public void clear() {
         customer = new Trader();
         txtSysCode.setText(null);
@@ -298,7 +315,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtCreditLimit.setText(null);
         lblStatus.setText("NEW");
         txtConPerson.setText(null);
-        txtCreditTerm.setText(null);
+        //txtCreditTerm.setText(null);
         txtCreditAmt.setValue(null);
         txtPrice.setText("N");
         customerTabelModel.refresh();
@@ -308,6 +325,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         if (cOAAutoCompleter != null) {
             cOAAutoCompleter.setCoa(null);
         }
+        spPercent.setValue(0);
     }
     private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
         @Override
@@ -372,6 +390,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtRFID = new javax.swing.JTextField();
         jLabel16 = new javax.swing.JLabel();
         txtCreditAmt = new javax.swing.JFormattedTextField();
+        spPercent = new javax.swing.JSpinner();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblCustomer = new javax.swing.JTable();
         jLabel6 = new javax.swing.JLabel();
@@ -455,7 +474,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         lblStatus.setText("NEW");
 
         jLabel11.setFont(Global.lableFont);
-        jLabel11.setText("Credit Term");
+        jLabel11.setText("Credit Day");
 
         txtCreditTerm.setFont(Global.textFont);
         txtCreditTerm.setName("txtCreditTerm"); // NOI18N
@@ -562,6 +581,8 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtCreditAmt.setHorizontalAlignment(javax.swing.JTextField.LEFT);
         txtCreditAmt.setFont(Global.textFont);
 
+        spPercent.setFont(Global.textFont);
+
         javax.swing.GroupLayout panelEntryLayout = new javax.swing.GroupLayout(panelEntry);
         panelEntry.setLayout(panelEntryLayout);
         panelEntryLayout.setHorizontalGroup(
@@ -592,7 +613,6 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                             .addComponent(jLabel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtCreditTerm)
                             .addComponent(txtCreditLimit)
                             .addComponent(txtCusEmail)
                             .addComponent(txtCusPhone)
@@ -606,11 +626,11 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                             .addComponent(txtCusAddress)
                             .addComponent(txtSysCode, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtPrice)
-                            .addComponent(chkMulti, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(panelEntryLayout.createSequentialGroup()
+                                .addComponent(chkMulti, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtCreditTerm, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(chkActive, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelEntryLayout.createSequentialGroup()
-                                .addGap(0, 0, Short.MAX_VALUE)
-                                .addComponent(jButton1))
                             .addGroup(panelEntryLayout.createSequentialGroup()
                                 .addComponent(txtGroup, javax.swing.GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -619,7 +639,11 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                             .addComponent(txtNRC)
                             .addComponent(txtRemark)
                             .addComponent(txtRFID)
-                            .addComponent(txtCreditAmt))))
+                            .addComponent(txtCreditAmt)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelEntryLayout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(jButton1))
+                            .addComponent(spPercent))))
                 .addContainerGap())
         );
         panelEntryLayout.setVerticalGroup(
@@ -679,10 +703,10 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                     .addComponent(jLabel7)
                     .addComponent(txtCreditLimit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(txtCreditTerm, javax.swing.GroupLayout.DEFAULT_SIZE, 23, Short.MAX_VALUE)
-                    .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel11)
+                    .addComponent(spPercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(7, 7, 7)
                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtCreditAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -699,14 +723,16 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkMulti)
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkMulti)
+                    .addComponent(txtCreditTerm, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkActive)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblStatus)
                     .addComponent(jButton1))
-                .addContainerGap(122, Short.MAX_VALUE))
+                .addContainerGap(119, Short.MAX_VALUE))
         );
 
         panelEntryLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {txtConPerson, txtCreditLimit, txtCusAddress, txtCusCode, txtCusEmail, txtCusName, txtCusPhone});
@@ -876,6 +902,10 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         // TODO add your handling code here:
     }//GEN-LAST:event_txtPriceActionPerformed
 
+    private void btnDownloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDownloadActionPerformed
+        printFile();
+    }//GEN-LAST:event_btnDownloadActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnGroup;
     private javax.swing.JCheckBox chkActive;
@@ -905,6 +935,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     private javax.swing.JLabel lblRecord;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelEntry;
+    private javax.swing.JSpinner spPercent;
     private javax.swing.JTable tblCustomer;
     private javax.swing.JTextField txtAccount;
     private javax.swing.JTextField txtConPerson;
@@ -937,25 +968,25 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtConPerson.addKeyListener(this);
         chkActive.addKeyListener(this);
         tblCustomer.addKeyListener(this);
-
+        
     }
-
+    
     @Override
     public void keyTyped(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
         String ctrlName = "-";
-
+        
         if (sourceObj instanceof JComboBox) {
             ctrlName = ((JComboBox) sourceObj).getName();
         } else if (sourceObj instanceof JFormattedTextField) {
@@ -986,7 +1017,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                     txtConPerson.requestFocus();
                 }
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
-
+                    
                 }
                 tabToTable(e);
                 break;
@@ -996,7 +1027,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                 }
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
                     txtCusName.requestFocus();
-
+                    
                 }
                 tabToTable(e);
                 break;
@@ -1006,10 +1037,10 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                 }
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
                     txtConPerson.requestFocus();
-
+                    
                 }
                 tabToTable(e);
-
+                
                 break;
             case "txtCusEmail":
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -1017,10 +1048,10 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                 }
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
                     txtCusPhone.requestFocus();
-
+                    
                 }
                 tabToTable(e);
-
+                
                 break;
             case "cboRegion":
                 switch (e.getKeyCode()) {
@@ -1039,7 +1070,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                         break;
                 }
                 tabToTable(e);
-
+                
                 break;
             case "txtCusAddress":
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -1048,7 +1079,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                     txtRegion.requestFocus();
                 }
                 tabToTable(e);
-
+                
                 break;
             case "cboAccount":
                 switch (e.getKeyCode()) {
@@ -1065,7 +1096,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                         break;
                 }
                 tabToTable(e);
-
+                
                 break;
             case "cboPriceType":
                 switch (e.getKeyCode()) {
@@ -1083,9 +1114,9 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                         break;
                 }
                 tabToTable(e);
-
+                
                 break;
-
+            
             case "txtCreditTerm":
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
                     chkActive.requestFocus();
@@ -1094,7 +1125,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                     txtCreditLimit.requestFocus();
                 }
                 tabToTable(e);
-
+                
                 break;
             case "txtCreditLimit":
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -1103,7 +1134,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
                 }
                 tabToTable(e);
-
+                
                 break;
             case "chkActive":
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -1112,7 +1143,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                     txtConPerson.requestFocus();
                 }
                 tabToTable(e);
-
+                
                 break;
             case "btnSave":
                 if (e.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -1121,7 +1152,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                     chkActive.requestFocus();
                 }
                 tabToTable(e);
-
+                
                 break;
             case "btnClear":
                 if (e.getKeyCode() == KeyEvent.VK_DOWN) {
@@ -1130,14 +1161,14 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
                 }
                 tabToTable(e);
-
+                
                 break;
             case "tblCustomer":
                 if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) {
                     selectRow = tblCustomer.convertRowIndexToModel(tblCustomer.getSelectedRow());
                     setCustomer(customerTabelModel.getCustomer(selectRow));
                 }
-
+                
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtCusName.requestFocus();
                 }
@@ -1149,7 +1180,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                 break;
         }
     }
-
+    
     private void tabToTable(KeyEvent e) {
         if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
             tblCustomer.requestFocus();
@@ -1158,12 +1189,12 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
             }
         }
     }
-
+    
     @Override
     public void save() {
         saveCustomer();
     }
-
+    
     @Override
     public void delete() {
         if (selectRow >= 0) {
@@ -1180,35 +1211,53 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                     JOptionPane.showMessageDialog(this, str);
                 }
             });
-
+            
         }
     }
-
+    
     @Override
     public void newForm() {
         clear();
     }
-
+    
     @Override
     public void history() {
     }
-
+    
     @Override
     public void print() {
     }
-
+    
     @Override
     public void refresh() {
         searchCustomer();
     }
-
+    
     @Override
     public void filter() {
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
+    private void printFile() {
+        try {
+            progress.setIndeterminate(true);
+            CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
+                    .setHeader(Headers.class)
+                    .setSkipHeaderRecord(false)
+                    .build();
+            FileWriter out = new FileWriter(CSV_FILE_PATH);
+            CSVPrinter printer = csvFormat.print(out);
+            printer.flush();
+            printer.close();
+            progress.setIndeterminate(false);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
 }

@@ -84,7 +84,6 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
     private void initSpinner() {
         SpinnerModel spinnerModel = new SpinnerNumberModel(0, 0, 100, 1);
         spPercent.setModel(spinnerModel);
-
     }
 
     public void initMain() {

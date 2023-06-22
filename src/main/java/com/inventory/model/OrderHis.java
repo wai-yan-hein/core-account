@@ -82,6 +82,8 @@ public class OrderHis implements java.io.Serializable {
     private boolean vouLock;
     @Column(name = "project_no")
     private String projectNo;
+    @Column(name = "order_status")
+    private String orderStatus;
     @Transient
     private String status = "STATUS";
     @Transient
