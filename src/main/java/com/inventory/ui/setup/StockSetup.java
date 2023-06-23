@@ -93,7 +93,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private final Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
     public enum StockHeader {
     UserCode,
-    Name,
+    StockName,
     StockGroup,
     Category,
     Brand,
@@ -533,6 +533,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         chkCal = new javax.swing.JCheckBox();
         chkEx = new javax.swing.JCheckBox();
         btnDownload = new javax.swing.JButton();
+        chkDeleted = new javax.swing.JCheckBox();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -1049,6 +1050,11 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             }
         });
 
+        chkDeleted.setFont(Global.lableFont);
+        chkDeleted.setSelected(true);
+        chkDeleted.setText("Deleted");
+        chkDeleted.setName("chkActive"); // NOI18N
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -1102,6 +1108,8 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                         .addComponent(chkCal)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(chkActive)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(chkDeleted)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnDownload)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1168,7 +1176,8 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                         .addComponent(lblStatus, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                         .addComponent(chkEx, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(btnDownload))
+                    .addComponent(btnDownload)
+                    .addComponent(chkDeleted))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1406,6 +1415,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private javax.swing.JButton btnUnit;
     private javax.swing.JCheckBox chkActive;
     private javax.swing.JCheckBox chkCal;
+    private javax.swing.JCheckBox chkDeleted;
     private javax.swing.JCheckBox chkEx;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

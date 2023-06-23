@@ -42,17 +42,6 @@ public class StockImportDialog extends javax.swing.JDialog {
     private final HashMap<Integer, Integer> hmIntToZw = new HashMap<>();
     private final HashMap<String, String> hmGroup = new HashMap<>();
     
-    public static final String[] HEADERS = {
-        "UserCode",
-        "Name",
-        "StockGroup",
-        "Category",
-        "Brand",
-        "Unit",
-        "PurchaseUnit",
-        "SaleUnit",
-        "SalePrice"};
-    
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
     }
@@ -113,7 +102,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         btnSave.setEnabled(false);
         lblLog.setText("Importing.");
         for (Stock stock : traders) {
-            inventoryRepo.saveStock(stock);
+            inventoryRepo.saveStock(stock).subscribe();
         }
         lblLog.setText("Success.");
         dispose();

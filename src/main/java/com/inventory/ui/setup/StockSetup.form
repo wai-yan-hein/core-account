@@ -191,6 +191,8 @@
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="chkActive" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="chkDeleted" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="btnDownload" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="btnAddItemType1" min="-2" max="-2" attributes="0"/>
@@ -273,6 +275,7 @@
                               <Component id="chkEx" alignment="0" max="32767" attributes="0"/>
                           </Group>
                           <Component id="btnDownload" min="-2" max="-2" attributes="0"/>
+                          <Component id="chkDeleted" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="32767" attributes="0"/>
                   </Group>
@@ -998,6 +1001,16 @@
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnDownloadActionPerformed"/>
               </Events>
+            </Component>
+            <Component class="javax.swing.JCheckBox" name="chkDeleted">
+              <Properties>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                  <Connection code="Global.lableFont" type="code"/>
+                </Property>
+                <Property name="selected" type="boolean" value="true"/>
+                <Property name="text" type="java.lang.String" value="Deleted"/>
+                <Property name="name" type="java.lang.String" value="chkActive" noResource="true"/>
+              </Properties>
             </Component>
           </SubComponents>
         </Container>
