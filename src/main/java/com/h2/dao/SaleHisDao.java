@@ -26,14 +26,18 @@ public interface SaleHisDao {
     String getMaxDate();
 
     List<SaleHis> findAll(String compCode);
-    
+
     void delete(SaleHisKey key);
-    
+
     void restore(SaleHisKey key);
 
     List<VSale> getSaleHistory(String fromDate, String toDate, String traderCode, String saleManCode, String vouNo,
-                               String remark, String reference, String userCode, String stockCode, String locCode,
-                               String compCode, Integer deptId, String deleted, String nullBatch, String batchNo,
-                               String projectNo, String curCode);
+            String remark, String reference, String userCode, String stockCode, String locCode,
+            String compCode, Integer deptId, String deleted, String nullBatch, String batchNo,
+            String projectNo, String curCode);
+
+    List<VSale> getSaleReport(String vouNo, String compCode, Integer deptId);
+
+    public int getUploadCount();
 
 }

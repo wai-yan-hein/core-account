@@ -9,7 +9,6 @@ import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisKey;
 import com.inventory.model.VSale;
 import java.util.List;
-import reactor.core.publisher.Flux;
 
 /**
  *
@@ -30,9 +29,13 @@ public interface SaleHisService {
     String getMaxDate();
 
     void delete(SaleHisKey key);
-    
+
     void restore(SaleHisKey key);
 
     List<VSale> getSale(FilterObject filter);
+
+    List<VSale> getSaleReport(String vouNo, String compCode, Integer deptId);
+
+    public int getUploadCount();
 
 }

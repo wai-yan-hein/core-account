@@ -100,6 +100,7 @@ public class SaleHis {
     private transient List<SaleDetailKey> listDel;
     private transient boolean backup;
     private transient List<String> location;
+    private transient boolean local =false;
 
     public SaleHis() {
     }

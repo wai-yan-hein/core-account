@@ -111,9 +111,9 @@ public class SaleHisServiceImpl implements SaleHisService {
     public void delete(SaleHisKey key) {
         dao.delete(key);
     }
-    
+
     @Override
-    public void restore(SaleHisKey key){
+    public void restore(SaleHisKey key) {
         dao.restore(key);
     }
 
@@ -139,6 +139,16 @@ public class SaleHisServiceImpl implements SaleHisService {
         List<VSale> saleList = dao.getSaleHistory(fromDate, toDate, cusCode, saleManCode, vouNo, remark,
                 reference, userCode, stockCode, locCode, compCode, deptId, deleted, nullBatch, batchNo, projectNo, curCode);
         return saleList;
+    }
+
+    @Override
+    public List<VSale> getSaleReport(String vouNo, String compCode, Integer deptId) {
+        return dao.getSaleReport(vouNo, compCode, deptId);
+    }
+
+    @Override
+    public int getUploadCount() {
+        return dao.getUploadCount();
     }
 
 }

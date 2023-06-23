@@ -706,7 +706,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         dialog.search();
     }
 
-    public void setVoucher(PurHis pur) {
+    public void setVoucher(PurHis pur, boolean local) {
         if (pur != null) {
             try {
                 purTableModel.clear();
@@ -742,7 +742,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
 
                 String vouNo = ph.getKey().getVouNo();
 
-                inventoryRepo.getPurDetail(vouNo, deptId)
+                inventoryRepo.getPurDetail(vouNo, deptId, local)
                         .subscribe((t) -> {
                             purTableModel.setListDetail(t);
                             purTableModel.addNewRow();
@@ -1934,8 +1934,9 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             }
             case "PUR-HISTORY" -> {
                 if (selectObj instanceof VPurchase v) {
-                    inventoryRepo.findPurchase(v.getVouNo(), v.getDeptId(), v.isLocal()).subscribe((t) -> {
-                        setVoucher(t);
+                    boolean local = v.isLocal();
+                    inventoryRepo.findPurchase(v.getVouNo(), v.getDeptId(), local).subscribe((t) -> {
+                        setVoucher(t, local);
                     }, (e) -> {
                         JOptionPane.showMessageDialog(this, e.getMessage());
                     });

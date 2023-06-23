@@ -5,12 +5,15 @@
  */
 package com.common.ui;
 
-import com.ConnectionDialog;
+import com.MessageDialog;
+import com.CoreAccountApplication;
 import com.common.Global;
+import com.common.TokenFile;
 import com.user.common.UserRepo;
 import com.common.Util1;
 import com.inventory.model.AppUser;
 import com.inventory.model.MachineInfo;
+import com.user.model.AuthenticationResponse;
 import java.awt.Image;
 import java.awt.event.FocusAdapter;
 import java.awt.event.KeyEvent;
@@ -38,6 +41,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
     private int loginAttempt = 0;
     private String APP_NAME = "Core Account";
     private Image appIcon;
+    private final TokenFile<AuthenticationResponse> file = new TokenFile<>(AuthenticationResponse.class);
 
     public Image getAppIcon() {
         return appIcon;
@@ -90,7 +94,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
         }
         Global.dialog = this;
         Global.machineName = Util1.getComputerName();
-        ConnectionDialog d = new ConnectionDialog();
+        MessageDialog d = new MessageDialog(this, "Connecting to Server.");
         taskExecutor.execute(() -> {
             d.setLocationRelativeTo(null);
             d.setVisible(true);
@@ -109,13 +113,10 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
             String toDayKey = Util1.toDateStr(Util1.getTodayDate(), "yyyy-MM-dd");
             toDayKey = toDayKey.replaceAll("-", "");
             if (inputKey.equals(toDayKey)) {
-                register(serialNo).subscribe((info) -> {
-                    if (info != null) {
-                        Global.macId = info.getMacId();
-                        log.info("Mac Id : " + Global.machineName);
-                        setLocationRelativeTo(null);
-                        setVisible(true);
-                    }
+                register(serialNo).subscribe((response) -> {
+                    file.write(response);
+                    JOptionPane.showMessageDialog(this, "Logout");
+                    logout();
                 });
 
             } else {
@@ -133,7 +134,12 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
 
     }
 
-    private Mono<MachineInfo> register(String serialNo) {
+    private void logout() {
+        dispose();
+        CoreAccountApplication.restart();
+    }
+
+    private Mono<AuthenticationResponse> register(String serialNo) {
         String machineName = Util1.getComputerName();
         String ipAddress = Util1.getIPAddress();
         String macAddress = Util1.getMacAddress();

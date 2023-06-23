@@ -30,9 +30,10 @@ public class SaleHisDaoImpl extends AbstractDao<SaleHisKey, SaleHis> implements 
     SaleHisDetailDao dao;
 
     @Override
-    public SaleHis save(SaleHis cat) {
-        saveOrUpdate(cat, cat.getKey());
-        return cat;
+    public SaleHis save(SaleHis sh) {
+        saveOrUpdate(sh, sh.getKey());
+        sh.setLocal(true);
+        return sh;
     }
 
     @Override
@@ -71,16 +72,16 @@ public class SaleHisDaoImpl extends AbstractDao<SaleHisKey, SaleHis> implements 
         saveOrUpdate(sh, sh.getKey());
         return sh;
     }
-    
+
     @Override
-    public void delete(SaleHisKey key){
+    public void delete(SaleHisKey key) {
         String vouNo = key.getVouNo();
         String compCode = key.getCompCode();
         Integer deptId = key.getDeptId();
         String sql = "update sale_his set deleted = true where vou_no ='" + vouNo + "' and comp_code='" + compCode + "' and dept_id =" + deptId + "";
         execSql(sql);
     }
-    
+
     @Override
     public void restore(SaleHisKey key) {
         String vouNo = key.getVouNo();
@@ -101,10 +102,10 @@ public class SaleHisDaoImpl extends AbstractDao<SaleHisKey, SaleHis> implements 
                      select a.*,t.trader_name,t.user_code
                                           from (select * 
                                           from sale_his
-                     """
-                + "\n where comp_code='" + compCode + "' and dept_id = " + deptId 
+                     
+                      where comp_code='""" + compCode + "' and dept_id = " + deptId
                 + "\n and CAST(vou_date AS DATE) between  '" + fromDate + "' and '" + toDate + "'"
-                + "\n and deleted = " + Boolean.parseBoolean(deleted)
+                + "\n and deleted = " + Boolean.valueOf(deleted)
                 + "\n and intg_upd_status is null)a join trader t on a.trader_code = t.code";
         try {
             ResultSet rs = getResult(sql);
@@ -129,6 +130,95 @@ public class SaleHisDaoImpl extends AbstractDao<SaleHisKey, SaleHis> implements 
             log.error("getSaleHistory : " + e.getMessage());
         }
         return saleList;
+    }
+
+    @Override
+    public List<VSale> getSaleReport(String vouNo, String compCode, Integer deptId) {
+        String sql = """
+                     select sh.vou_no,sh.trader_code,sh.saleman_code,sh.vou_date,sh.cur_code,sh.remark,
+                     sh.vou_total,sh.vou_balance,sh.grand_total,sh.discount,sh.disc_p,sh.tax_amt,sh.tax_p,sh.paid,
+                     sh.comp_code,shd.weight,shd.weight_unit,
+                     shd.stock_code,shd.qty,shd.sale_unit,shd.sale_price,shd.sale_amt,
+                     t.user_code t_user_code,t.trader_name,t.phone,t.address,t.rfid,
+                     s.user_code s_user_code,s.stock_name,l.loc_name
+                     from sale_his sh join sale_his_detail shd
+                     on sh.vou_no =shd.vou_no
+                     and sh.comp_code = shd.comp_code
+                     and sh.dept_id =shd.dept_id
+                     join trader t on sh.trader_code = t.code
+                     and sh.comp_code = t.comp_code
+                     and sh.dept_id = t.dept_id
+                     join location l on sh.loc_code = l.loc_code
+                     and sh.comp_code = l.comp_code
+                     and sh.dept_id = l.dept_id
+                     join stock s on shd.stock_code = s.stock_code
+                     and shd.comp_code = s.comp_code
+                     and shd.dept_id = s.dept_id
+                     where sh.vou_no ='""" + vouNo + "'\n"
+                + "and sh.comp_code ='" + compCode + "'\n"
+                + "and sh.dept_id =" + deptId + "";
+        List<VSale> list = new ArrayList<>();
+        ResultSet rs = getResult(sql);
+        try {
+            while (rs.next()) {
+                VSale sale = new VSale();
+                String remark = rs.getString("remark");
+                String refNo = "-";
+
+                if (remark != null) {
+                    if (remark.contains("/")) {
+                        try {
+                            String[] split = remark.split("/");
+                            remark = split[0];
+                            refNo = split[1];
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                sale.setTraderCode(rs.getString("t_user_code"));
+                sale.setTraderName(rs.getString("trader_name"));
+                sale.setRemark(remark);
+                sale.setRefNo(refNo);
+                sale.setPhoneNo(rs.getString("phone"));
+                sale.setAddress(rs.getString("address"));
+                sale.setRfId(rs.getString("rfid"));
+                sale.setVouNo(rs.getString("vou_no"));
+                sale.setVouDate(Util1.toDateStr(rs.getTimestamp("vou_date"), "dd/MM/yyyy"));
+                sale.setStockName(rs.getString("stock_name"));
+                sale.setQty(rs.getFloat("qty"));
+                sale.setSalePrice(rs.getFloat("sale_price"));
+                sale.setSaleAmount(rs.getFloat("sale_amt"));
+                sale.setVouTotal(rs.getFloat("vou_total"));
+                sale.setDiscount(rs.getFloat("discount"));
+                sale.setPaid(rs.getFloat("paid"));
+                sale.setVouBalance(rs.getFloat("vou_balance"));
+                sale.setSaleUnit(rs.getString("sale_unit"));
+                sale.setCusAddress(Util1.isNull(rs.getString("phone"), "") + "/" + Util1.isNull(rs.getString("address"), ""));
+                sale.setLocationName(rs.getString("loc_name"));
+                sale.setCompCode(rs.getString("comp_code"));
+                sale.setWeight(rs.getFloat("weight"));
+                sale.setWeightUnit(rs.getString("weight_unit"));
+                list.add(sale);
+            }
+        } catch (SQLException e) {
+            log.error("getSaleReport : " + e.getMessage());
+        }
+        return list;
+    }
+
+    @Override
+    public int getUploadCount() {
+        String sql = "select count(*) vou_count from sale_his where intg_upd_status is null";
+        ResultSet rs = getResult(sql);
+        try {
+            if (rs.next()) {
+                return rs.getInt("vou_count");
+            }
+        } catch (SQLException e) {
+            log.error("getUploadCount : " + e.getMessage());
+            return 0;
+        }
+        return 0;
     }
 
 }

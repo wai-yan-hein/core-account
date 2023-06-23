@@ -39,5 +39,6 @@ database.mv.db
 database.mv.db.mv
 database.trace.db
 log.txt
+secret.json
 **/log.txt
 
