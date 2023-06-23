@@ -5,20 +5,25 @@
 package com;
 
 import com.common.Global;
-import javax.swing.JFrame;
+import javax.swing.JDialog;
 
 /**
  *
  * @author Lenovo
  */
-public class ConnectionDialog extends javax.swing.JDialog {
+public class MessageDialog extends javax.swing.JDialog {
 
     /**
      * Creates new form ConnectionDialog
+     *
+     * @param parent
+     * @param message
      */
-    public ConnectionDialog() {
-        super(new JFrame(), true);
+    public MessageDialog(JDialog parent, String message) {
+        super(parent, true);
         initComponents();
+        setLocationRelativeTo(null);
+        lblStatus.setText(message);
     }
 
     /**
@@ -32,8 +37,8 @@ public class ConnectionDialog extends javax.swing.JDialog {
 
         lblStatus = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Connection");
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        setTitle("Message");
         setFont(Global.textFont);
 
         lblStatus.setFont(Global.textFont);

@@ -15,6 +15,7 @@ public class AuthenticationResponse {
 
     private String accessToken;
     private String refreshToken;
-    private long accessTokenExpired;
-    private long refreshTokenExpired;
+    private Long accessTokenExpired;
+    private Long refreshTokenExpired;
+    private Integer macId;
 }

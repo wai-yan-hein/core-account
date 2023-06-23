@@ -45,10 +45,12 @@ public class COADaoImpl extends AbstractDao<COAKey, ChartOfAccount> implements C
     public ChartOfAccount findById(COAKey key) {
         return getByKey(key);
     }
-    
+
     @Override
     public List<ChartOfAccount> getCOA(String headCode, String compCode) {
-        String sql = "select coa.coa_code,coa.comp_code,coa.coa_name_eng\n" + "from chart_of_account coa join(\n" + "select coa_code,comp_code\n" + "from chart_of_account\n" + "where coa_parent ='" + headCode + "'\n" + "and comp_code ='" + compCode + "'\n" + ")a\n" + "on coa.coa_parent = a.coa_code\n" + "and coa.comp_code = a.comp_code\n" + "where coa.coa_level =3";
+        String sql = "select coa.coa_code,coa.comp_code,coa.coa_name_eng\n" + "from chart_of_account coa join(\n" +
+                "select coa_code,comp_code\n" + "from chart_of_account\n" + "where coa_parent ='" + headCode + "'\n" + 
+                "and comp_code ='" + compCode + "'\n" + ")a\n" + "on coa.coa_parent = a.coa_code\n" + "and coa.comp_code = a.comp_code\n" + "where coa.coa_level =3";
         List<Map<String, Object>> result = getList(sql);
         List<ChartOfAccount> list = new ArrayList<>();
         result.forEach((row) -> {
@@ -76,7 +78,7 @@ public class COADaoImpl extends AbstractDao<COAKey, ChartOfAccount> implements C
     @Override
     public List<ChartOfAccount> getTraderCOA(String compCode) {
         List<ChartOfAccount> list = new ArrayList<>();
-        String sql = "select a.*,coa.coa_code_usr,coa.coa_name_eng,coa1.coa_name_eng group_name\n" + "from (\n" + "select distinct account_code,comp_code\n" + "from trader \n" + "where comp_code='" + compCode + "' \n" + "and account_code is not null\n" + ")a\n" + "join chart_of_account coa on a.account_code = coa.coa_code\n" + "and a.comp_code = coa.comp_code\n" + "join chart_of_account coa1 on coa.coa_parent = coa1.coa_code\n" + "and coa.comp_code = coa1.comp_code";
+        String sql = "select a.*,coa.coa_code_usr,coa.coa_name_eng,coa1.coa_name_eng group_name\n" + "from (\n" + "select distinct account_code,comp_code\n" + "from trader_acc \n" + "where comp_code='" + compCode + "' \n" + "and account_code is not null\n" + ")a\n" + "join chart_of_account coa on a.account_code = coa.coa_code\n" + "and a.comp_code = coa.comp_code\n" + "join chart_of_account coa1 on coa.coa_parent = coa1.coa_code\n" + "and coa.comp_code = coa1.comp_code";
         try {
             List<Map<String, Object>> result = getList(sql);
             result.forEach((rs) -> {
@@ -113,7 +115,7 @@ public class COADaoImpl extends AbstractDao<COAKey, ChartOfAccount> implements C
             }
         }
     }
-    
+
     @Override
     public List<ChartOfAccount> searchCOA(String str, Integer level, String compCode) {
         List<ChartOfAccount> list = new ArrayList<>();
@@ -126,7 +128,8 @@ public class COADaoImpl extends AbstractDao<COAKey, ChartOfAccount> implements C
                 "and deleted = FALSE\n" +
                 "and (coa_level =" + level + " or 0 =" + level + ")\n" +
                 "and comp_code ='" + compCode + "'\n" +
-                "and (coa_code_usr like '" + str + "%' or coa_name_eng like '" + str + "%')\n" +
+//                "and (coa_code_usr like '" + str + "%' or coa_name_eng like '" + str + "%')\n" +
+                " and (LOWER(REPLACE(coa_code_usr, ' ', '')) like '" + str + "%' or LOWER(REPLACE(coa_name_eng, ' ', '')) like '" + str + "%') \n" +
                 "limit 20\n" + ")a\n" +
                 "left join chart_of_account c1\n" +
                 "on a.coa_parent = c1.coa_code\n" +

@@ -9,6 +9,7 @@ import com.common.TokenFile;
 import com.common.Util1;
 import com.user.model.AuthenticationRequest;
 import com.user.model.AuthenticationResponse;
+import java.awt.HeadlessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -113,11 +114,13 @@ public class WebFlexConfig {
         WebClient webClient = WebClient.builder().baseUrl(getUrl(url, port)).build();
         AuthenticationResponse data = file.read();
         if (data != null) {
-            if (System.currentTimeMillis() >= data.getAccessTokenExpired()) {
-                log.info("token expired.");
-                return authenticate(webClient, serialNo);
-            } else {
-                return data.getAccessToken();
+            if (data.getAccessToken() != null) {
+                if (System.currentTimeMillis() >= data.getAccessTokenExpired()) {
+                    log.info("token expired.");
+                    return authenticate(webClient, serialNo);
+                } else {
+                    return data.getAccessToken();
+                }
             }
         }
         return authenticate(webClient, serialNo);
@@ -132,13 +135,15 @@ public class WebFlexConfig {
                     .retrieve()
                     .bodyToMono(AuthenticationResponse.class).block();
             if (response != null) {
-                file.write(response);
-                log.info("new token : " + response.getAccessToken());
-                return response.getAccessToken();
+                if (response.getAccessToken() != null) {
+                    file.write(response);
+                    log.info("new token : " + response.getAccessToken());
+                    return response.getAccessToken();
+                }
             }
-        } catch (Exception e) {
+        } catch (HeadlessException e) {
             log.error("authenticate : " + e.getMessage());
         }
-        return null;
+        return "";
     }
 }

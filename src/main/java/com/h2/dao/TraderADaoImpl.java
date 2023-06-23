@@ -43,8 +43,10 @@ public class TraderADaoImpl extends AbstractDao<TraderAKey, TraderA> implements 
 
     @Override
     public List<TraderA> getTrader(String text, String compCode) {
-        String filter = "where active =1\n" + "and deleted =0\n" + "and comp_code ='" + compCode + "'\n" + "and (user_code like '" + text + "%' or trader_name like '" + text + "%') \n";
-        String sql = "select code trader_code,user_code,trader_name,account_code,discriminator\n" + "from trader\n" + filter + "\n" + "order by user_code,trader_name\n" + "limit 100\n";
+        String filter = "where active =1\n" + "and deleted =0\n" + "and comp_code ='" + compCode + "'\n" +                
+                "and (LOWER(REPLACE(user_code, ' ', '')) like '" + text + "%' or LOWER(REPLACE(trader_name, ' ', '')) like '" + text + "%') \n";
+        String sql = "select code trader_code,user_code,trader_name,account_code,discriminator\n" + "from trader\n" + filter + 
+                "\n" + "order by user_code,trader_name\n" + "limit 100\n";
         ResultSet rs = getResult(sql);
         List<TraderA> list = new ArrayList<>();
         try {

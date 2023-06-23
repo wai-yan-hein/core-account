@@ -180,7 +180,6 @@ public class CloudIntegration {
     }
 
     public void uploadInvData() {
-        uploadSale();
         uploadOrder();
         uploadStockInOut();
         uploadTransfer();
@@ -191,18 +190,20 @@ public class CloudIntegration {
         uploadReturnOut();
     }
 
-    public void uploadSale() {
+    public int uploadSaleCount() {
+        return saleHisService.getUploadCount();
+    }
+
+    public String uploadSale() throws Exception {
         List<SaleHis> list = saleHisService.unUploadVoucher(Global.compCode);
-        log.info("need to upload sale his : " + list.size());
         if (!list.isEmpty()) {
             list.forEach((h) -> {
-                inventoryRepo.uploadSale(h).subscribe((r) -> {
-                    r.setIntgUpdStatus("ACK");
-                    saleHisService.updateACK(r.getKey());
-                });
+                SaleHis sh = inventoryRepo.uploadSale(h).block();
+                saleHisService.updateACK(sh.getKey());
             });
 
         }
+        return "Upload Success.";
     }
 
     public void uploadOrder() {
@@ -731,7 +732,6 @@ public class CloudIntegration {
         if (localDatabase) {
             taskScheduler.scheduleAtFixedRate(() -> {
                 startDownload();
-//                startUpload();
             }, Duration.ofMinutes(5));
         }
 

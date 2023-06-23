@@ -15,9 +15,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VSale {
 
-    private String sdCode;
+     private String sdCode;
     private String vouNo;
     private String traderCode;
+    private String rfId;
     private String saleManCode;
     private String vouDate;
     private String creditTerm;
@@ -46,7 +47,6 @@ public class VSale {
     private String stockCode;
     private String expiredDate;
     private Float qty;
-    private Float saleWt;
     private String saleUnit;
     private Float salePrice;
     private Float saleAmount;
@@ -67,7 +67,21 @@ public class VSale {
     private String regionName;
     private String stockTypeName;
     private String refNo;
+    private float lastBalance;
+    private String compCode;
+    private String relName;
+    private String qtyStr;
     private Integer deptId;
+    private String batchNo;
     private String reference;
+    private String supplierName;
+    private Float weight;
+    private String weightUnit;
+    private String phoneNo;
+    private String address;
+    private String projectNo;
+    private String userCode;
+    private Float creditAmt;
+    private Float diffAmt;
     private boolean local;
 }

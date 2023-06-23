@@ -9,8 +9,6 @@ import com.common.DecimalFormatRender;
 import java.awt.event.KeyEvent;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.common.Global;
@@ -49,6 +47,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -57,10 +56,10 @@ import reactor.core.publisher.Mono;
  *
  * @author Lenovo
  */
+@Slf4j
 @Component
 public class StockInOutEntry extends javax.swing.JPanel implements PanelControl, SelectionObserver, KeyListener {
 
-    private static final Logger log = LoggerFactory.getLogger(StockInOutEntry.class);
     private final StockInOutTableModel outTableModel = new StockInOutTableModel();
     private StockIOHistoryDialog dialog;
     @Autowired
@@ -339,7 +338,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         return status;
     }
 
-    private void setVoucher(StockInOut s) {
+    private void setVoucher(StockInOut s, boolean local) {
         outTableModel.clear();
         txtCost.setValue(0);
         txtInQty.setValue(0);
@@ -351,7 +350,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 vouStatusAutoCompleter.setVoucher(t);
             });
             String vouNo = io.getKey().getVouNo();
-            inventoryRepo.searchStkIODetail(vouNo, io.getKey().getDeptId())
+            inventoryRepo.searchStkIODetail(vouNo, io.getKey().getDeptId(), local)
                     .subscribe((t) -> {
                         t.forEach((a) -> {
                             outTableModel.addObject(a);
@@ -768,7 +767,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         if (source.toString().equals("IO-HISTORY")) {
             if (selectObj instanceof VStockIO v) {
                 inventoryRepo.findStockIO(v.getVouNo(), v.getDeptId()).subscribe((t) -> {
-                    setVoucher(t);
+                    setVoucher(t, false);
                 });
             }
         }

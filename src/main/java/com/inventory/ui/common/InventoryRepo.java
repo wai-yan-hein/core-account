@@ -585,8 +585,8 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<StockInOutDetail>> searchStkIODetail(String vouNo, Integer deptId) {
-        if (localDatabase) {
+    public Mono<List<StockInOutDetail>> searchStkIODetail(String vouNo, Integer deptId,boolean local) {
+        if (local) {
             return h2Repo.searchStkIODetail(vouNo, Global.compCode, deptId);
         }
         return inventoryApi.get()
@@ -1420,8 +1420,8 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<RetInHisDetail>> getReturnInDetail(String vouNo, Integer depId) {
-        if (localDatabase) {
+    public Mono<List<RetInHisDetail>> getReturnInDetail(String vouNo, Integer depId, boolean local) {
+        if (local) {
             return h2Repo.searchReturnInDetail(vouNo, depId);
         }
         return inventoryApi.get()
@@ -1474,8 +1474,8 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<RetOutHisDetail>> getReturnOutDetail(String vouNo, Integer depId) {
-        if (localDatabase) {
+    public Mono<List<RetOutHisDetail>> getReturnOutDetail(String vouNo, Integer depId,boolean local) {
+        if (local) {
             return h2Repo.searchReturnOutDetail(vouNo, depId);
         }
         return inventoryApi.get()
@@ -1951,8 +1951,8 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<PurHisDetail>> getPurDetail(String vouNo, Integer deptId) {
-        if (localDatabase) {
+    public Mono<List<PurHisDetail>> getPurDetail(String vouNo, Integer deptId, boolean local) {
+        if (local) {
             return h2Repo.searchPurchaseDetail(vouNo, deptId);
         }
         return inventoryApi.get()
@@ -2143,7 +2143,7 @@ public class InventoryRepo {
                         int status = JOptionPane.showConfirmDialog(Global.parentForm,
                                 "Can't save voucher to cloud. Do you want save local?",
                                 "Offline", JOptionPane.YES_NO_OPTION,
-                                JOptionPane.WARNING_MESSAGE);
+                                JOptionPane.ERROR_MESSAGE);
                         if (status == JOptionPane.YES_OPTION) {
                             return h2Repo.save(sh);
                         }

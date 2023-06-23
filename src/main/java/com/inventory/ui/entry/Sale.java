@@ -53,7 +53,6 @@ import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +71,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -97,6 +97,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private AccountRepo accountRepo;
     @Autowired
     private UserRepo userRepo;
+    @Autowired
+    private TaskExecutor taskExecutor;
     private OrderHistoryDialog orderDialog;
     private CurrencyAutoCompleter currAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
@@ -212,7 +214,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         } else {
                             projectAutoCompleter.setProject(null);
                         }
-                        
+
                         txtDueDate.setDate(Util1.convertToDate(oh.getCreditTerm()));
                         txtRemark.setText(oh.getRemark());
                         txtReference.setText(oh.getReference());
@@ -509,7 +511,9 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 clear();
                 if (print) {
                     String reportName = getReportName();
-                    printVoucher(t.getKey().getVouNo(), reportName, chkVou.isSelected());
+                    String vouNo = t.getKey().getVouNo();
+                    boolean local = t.isLocal();
+                    printVoucher(vouNo, reportName, local);
                 }
             }, (e) -> {
                 observer.selected("save", true);
@@ -684,6 +688,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setIntegration(integration);
             dialog.setUserRepo(userRepo);
+            dialog.setTaskExecutor(taskExecutor);
             dialog.setObserver(this);
             dialog.initMain();
             dialog.setSize(Global.width - 100, Global.height - 100);
@@ -800,17 +805,22 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         saleTableModel.setListDetail(listSaleDetail);
     }
 
-    private void printVoucher(String vouNo, String reportName, boolean print) {
-        clear();
-        inventoryRepo.getSaleReport(vouNo).subscribe((t) -> {
-            viewReport(t, reportName, print);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
-
+    private void printVoucher(String vouNo, String reportName, boolean local) {
+        if (local) {
+            List<VSale> list = h2Repo.getSaleReport(vouNo);
+            if (!list.isEmpty()) {
+                viewReport(Util1.listToByteArray(list), reportName);
+            }
+        } else {
+            inventoryRepo.getSaleReport(vouNo).subscribe((t) -> {
+                viewReport(t, reportName);
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            });
+        }
     }
 
-    private void viewReport(byte[] t, String reportName, boolean print) {
+    private void viewReport(byte[] t, String reportName) {
         if (reportName != null) {
             try {
                 String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
@@ -827,7 +837,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 JsonDataSource ds = new JsonDataSource(stream);
                 JasperPrint jp = JasperFillManager.fillReport(reportPath, param, ds);
                 log.info(ProUtil.getFontPath());
-                if (print) {
+                if (chkVou.isSelected()) {
                     JasperReportUtil.print(jp);
                 } else {
                     JasperViewer.viewReport(jp, false);
@@ -1700,7 +1710,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     private void formPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_formPropertyChange
         // TODO add your handling code here:
-        log.info("change.");
     }//GEN-LAST:event_formPropertyChange
 
     private void txtSaleDateFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSaleDateFocusGained

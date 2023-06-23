@@ -463,7 +463,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         dialog.search();
     }
 
-    public void setVoucher(RetInHis retin) {
+    public void setVoucher(RetInHis retin, boolean local) {
         if (retin != null) {
             progress.setIndeterminate(true);
             ri = retin;
@@ -488,7 +488,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                 projectAutoCompleter.setProject(null);
             }
             String vouNo = ri.getKey().getVouNo();
-            inventoryRepo.getReturnInDetail(vouNo,deptId)
+            inventoryRepo.getReturnInDetail(vouNo, deptId, local)
                     .subscribe((t) -> {
                         retInTableModel.setListDetail(t);
                         retInTableModel.addNewRow();
@@ -1218,8 +1218,9 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             }
             case "RI-HISTORY" -> {
                 if (selectObj instanceof VReturnIn v) {
-                    inventoryRepo.findReturnIn(v.getVouNo(), v.getDeptId(),v.isLocal()).subscribe((t) -> {
-                        setVoucher(t);
+                    boolean local = v.isLocal();
+                    inventoryRepo.findReturnIn(v.getVouNo(), v.getDeptId(), local).subscribe((t) -> {
+                        setVoucher(t, local);
                     });
                 }
             }
