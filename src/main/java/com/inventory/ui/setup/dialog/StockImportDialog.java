@@ -14,16 +14,17 @@ import com.inventory.model.StockType;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.StockImportTableModel;
 import java.awt.FileDialog;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.Reader;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.swing.JFrame;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -33,34 +34,34 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 @Slf4j
 public class StockImportDialog extends javax.swing.JDialog {
-
+    
     private WebClient inventoryApi;
     private final StockImportTableModel tableModel = new StockImportTableModel();
     private TaskExecutor taskExecutor;
     private InventoryRepo inventoryRepo;
     private final HashMap<Integer, Integer> hmIntToZw = new HashMap<>();
     private final HashMap<String, String> hmGroup = new HashMap<>();
-
+    
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
     }
-
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-
+    
     public TaskExecutor getTaskExecutor() {
         return taskExecutor;
     }
-
+    
     public void setTaskExecutor(TaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
     }
-
+    
     public WebClient getWebClient() {
         return inventoryApi;
     }
-
+    
     public void setWebClient(WebClient inventoryApi) {
         this.inventoryApi = inventoryApi;
     }
@@ -75,15 +76,15 @@ public class StockImportDialog extends javax.swing.JDialog {
         initComponents();
         initTable();
     }
-
+    
     private void initTable() {
         tblTrader.setModel(tableModel);
         tblTrader.getTableHeader().setFont(Global.tblHeaderFont);
         tblTrader.setDefaultRenderer(Object.class, new TableCellRender());
         tblTrader.setDefaultRenderer(Float.class, new TableCellRender());
-
+        
     }
-
+    
     private void chooseFile() {
         FileDialog dialog = new FileDialog(this, "Choose CSV File", FileDialog.LOAD);
         dialog.setDirectory("D:\\");
@@ -95,18 +96,18 @@ public class StockImportDialog extends javax.swing.JDialog {
             readFile(dialog.getDirectory() + "\\" + directory);
         }
     }
-
+    
     private void save() {
         List<Stock> traders = tableModel.getListStock();
         btnSave.setEnabled(false);
         lblLog.setText("Importing.");
         for (Stock stock : traders) {
-            inventoryRepo.saveStock(stock);
+            inventoryRepo.saveStock(stock).subscribe();
         }
         lblLog.setText("Success.");
         dispose();
     }
-
+    
     private void readFile(String path) {
         List<CFont> listFont = new ArrayList<>();
         if (listFont != null) {
@@ -114,62 +115,47 @@ public class StockImportDialog extends javax.swing.JDialog {
                 hmIntToZw.put(f.getIntCode(), f.getFontKey().getZwKeyCode());
             });
         }
-        HashMap<String, StockType> hm = new HashMap<>();
-        List<StockType> listST = inventoryRepo.getStockType().block();
-        if (!listST.isEmpty()) {
-            for (StockType st : listST) {
-                hm.put(st.getUserCode(), st);
-            }
-        }
-        String line;
-        String splitBy = ",";
-        int lineCount = 0;
+
+//        HashMap<String, StockType> hm = new HashMap<>();
+//        List<StockType> listST = inventoryRepo.getStockType().block();
+//        if (!listST.isEmpty()) {
+//            for (StockType st : listST) {
+//                hm.put(st.getUserCode(), st);
+//            }
+//        }
         List<Stock> listStock = new ArrayList<>();
         try {
-            try ( FileInputStream fis = new FileInputStream(path);  InputStreamReader isr = new InputStreamReader(fis);  BufferedReader reader = new BufferedReader(isr)) {
-                while ((line = reader.readLine()) != null) //returns a Boolean value
-                {
-                    Stock t = new Stock();
-                    String[] data = line.split(splitBy);    // use comma as separator
-                    String userCode = null;
-                    String stockName = null;
-                    String price = null;
-                    String typeCode = null;
-                    lineCount++;
-                    try {
-                        userCode = data[0];
-                        stockName = data[1];
-                        price = data[2];
-                        typeCode = data[3];
-                    } catch (IndexOutOfBoundsException e) {
-                        //JOptionPane.showMessageDialog(Global.parentForm, "FORMAT ERROR IN LINE:" + lineCount + e.getMessage());
-                    }
-                    if (true) {
-                        StockKey key = new StockKey();
-                        key.setCompCode(Global.compCode);
-                        key.setDeptId(Global.deptId);
-                        key.setStockCode(null);
-                        t.setKey(key);
-                        t.setUserCode(userCode);
-                        t.setStockName(getZawgyiText(stockName));
-                        t.setSalePriceN(Util1.getFloat(price));
-                        t.setTypeCode(getGroupCode(typeCode));
-                        t.setActive(true);
-                        t.setCreatedDate(LocalDateTime.now());
-                        t.setCreatedBy(Global.loginUser.getUserCode());
-                        t.setMacId(Global.macId);
-                        t.setCalculate(true);
-                        listStock.add(t);
-                    }
-                }
-            }
+            CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
+                    .setHeader()
+                    .setSkipHeaderRecord(true)
+                    .build();
+            Reader in = new FileReader(path);
+            Iterable<CSVRecord> records = csvFormat.parse(in);
+            records.forEach(r -> {
+                Stock t = new Stock();
+                StockKey key = new StockKey();
+                key.setCompCode(Global.compCode);
+                key.setDeptId(Global.deptId);
+                key.setStockCode(null);
+                t.setKey(key);
+                t.setUserCode(r.isMapped("UserCode") ? Util1.convertToUniCode(r.get("UserCode")) : "");
+                t.setStockName(r.isMapped("StockName") ? Util1.convertToUniCode(r.get("StockName")) : "");
+                t.setSalePriceN(r.isMapped("SalePrice") ? Util1.getFloat(r.get("SalePrice")) : Util1.getFloat("0"));
+                t.setTypeCode(r.isMapped("StockGroup") ? getGroupCode(r.get("StockGroup")) : "");
+                t.setActive(true);
+                t.setCreatedDate(LocalDateTime.now());
+                t.setCreatedBy(Global.loginUser.getUserCode());
+                t.setMacId(Global.macId);
+                t.setCalculate(true);
+                listStock.add(t);
+            });
             tableModel.setListStock(listStock);
         } catch (IOException e) {
             log.error("Read CSV File :" + e.getMessage());
-
+            
         }
     }
-
+    
     private String getZawgyiText(String text) {
         String tmpStr = "";
         if (text != null) {
@@ -196,10 +182,10 @@ public class StockImportDialog extends javax.swing.JDialog {
                 }
             }
         }
-
+        
         return tmpStr;
     }
-
+    
     private String getGroupCode(String str) {
         if (hmGroup.isEmpty()) {
             List<StockType> list = inventoryRepo.getStockType().block();

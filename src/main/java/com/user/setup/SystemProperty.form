@@ -20,7 +20,7 @@
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="panelMac" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
@@ -35,7 +35,7 @@
                       <Component id="jPanel5" max="32767" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -86,7 +86,7 @@
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="txtCustomer" pref="136" max="32767" attributes="0"/>
+                              <Component id="txtCustomer" pref="144" max="32767" attributes="0"/>
                               <Component id="txtSupplier" max="32767" attributes="0"/>
                               <Component id="txtLocation" max="32767" attributes="0"/>
                               <Component id="txtDep" max="32767" attributes="0"/>
@@ -394,7 +394,7 @@
                       <Component id="chkDisableSale" max="32767" attributes="0"/>
                       <Component id="chkDisablePur" max="32767" attributes="0"/>
                       <Component id="chkDisableRI" max="32767" attributes="0"/>
-                      <Component id="chkDisableRO" pref="332" max="32767" attributes="0"/>
+                      <Component id="chkDisableRO" max="32767" attributes="0"/>
                       <Component id="chkDisableStockIO" max="32767" attributes="0"/>
                       <Component id="chkDepFilter" alignment="1" max="32767" attributes="0"/>
                       <Component id="chkDepOption" alignment="1" max="32767" attributes="0"/>
@@ -423,7 +423,7 @@
                   <Component id="chkDisableRO" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="chkDisableStockIO" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="jSeparator2" min="-2" pref="4" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="chkDepFilter" min="-2" max="-2" attributes="0"/>
@@ -582,7 +582,7 @@
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="txtA5Report" pref="139" max="32767" attributes="0"/>
+                              <Component id="txtA5Report" pref="148" max="32767" attributes="0"/>
                               <Component id="txtVouReport" max="32767" attributes="0"/>
                               <Component id="txtA4Report" max="32767" attributes="0"/>
                               <Component id="txtCreditAmt" max="32767" attributes="0"/>
@@ -793,9 +793,9 @@
                           </Group>
                           <EmptySpace min="-2" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="txtComAmt" alignment="0" pref="145" max="32767" attributes="0"/>
-                              <Component id="txtComP" pref="145" max="32767" attributes="0"/>
-                              <Component id="txtPurReport" pref="145" max="32767" attributes="0"/>
+                              <Component id="txtComAmt" alignment="0" pref="153" max="32767" attributes="0"/>
+                              <Component id="txtComP" pref="153" max="32767" attributes="0"/>
+                              <Component id="txtPurReport" pref="153" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -961,9 +961,10 @@
               <Group type="102" attributes="0">
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="jSeparator6" alignment="0" max="32767" attributes="0"/>
-                      <Group type="102" attributes="0">
+                      <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="chkDisableAll" alignment="1" max="32767" attributes="0"/>
                               <Component id="jSeparator5" alignment="0" max="32767" attributes="0"/>
                               <Group type="102" alignment="0" attributes="0">
                                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
@@ -974,7 +975,7 @@
                                   </Group>
                                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="txtCreditor" alignment="0" pref="0" max="32767" attributes="0"/>
+                                      <Component id="txtCreditor" alignment="0" pref="105" max="32767" attributes="0"/>
                                       <Component id="txtDebtor" alignment="0" pref="0" max="32767" attributes="0"/>
                                       <Component id="txtCus" alignment="0" pref="0" max="32767" attributes="0"/>
                                       <Component id="txtSup" alignment="0" pref="0" max="32767" attributes="0"/>
@@ -1062,8 +1063,10 @@
                       <Component id="jLabel20" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="txtCash" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace min="-2" pref="261" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
                   <Component id="jSeparator6" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="235" max="-2" attributes="0"/>
+                  <Component id="chkDisableAll" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="chkDisableDep" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="32767" attributes="0"/>
@@ -1200,6 +1203,14 @@
               <Connection code="Global.textFont" type="code"/>
             </Property>
           </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="chkDisableAll">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Disable All Filter"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkDisableAllActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>
