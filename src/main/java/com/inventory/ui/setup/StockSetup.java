@@ -35,6 +35,8 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.swing.ImageIcon;
@@ -50,6 +52,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -87,6 +91,17 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private SelectionObserver observer;
     private JProgressBar progress;
     private final Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
+    public enum StockHeader {
+    UserCode,
+    Name,
+    StockGroup,
+    Category,
+    Brand,
+    Unit,
+    PurchaseUnit,
+    SaleUnit,
+    SalePrice
+}
 
     public SelectionObserver getObserver() {
         return observer;
@@ -432,6 +447,25 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
     }
 
+    private void printFile() {
+        try {
+            progress.setIndeterminate(true);
+            String CSV_FILE_PATH = "stocksetup.csv";
+            CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
+                    .setHeader(StockHeader.class)
+                    .setSkipHeaderRecord(false)
+                    .build();
+            FileWriter out = new FileWriter(CSV_FILE_PATH);
+            CSVPrinter printer = csvFormat.print(out);
+            printer.flush();
+            printer.close();
+            progress.setIndeterminate(false);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -498,6 +532,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         btnAddRelation = new javax.swing.JButton();
         chkCal = new javax.swing.JCheckBox();
         chkEx = new javax.swing.JCheckBox();
+        btnDownload = new javax.swing.JButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -1003,6 +1038,17 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         chkEx.setText("Explode");
         chkEx.setName("chkActive"); // NOI18N
 
+        btnDownload.setFont(Global.lableFont);
+        btnDownload.setText("Download");
+        btnDownload.setName("btnAddItemType"); // NOI18N
+        btnDownload.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
+        btnDownload.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        btnDownload.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDownloadActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -1057,6 +1103,8 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(chkActive)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnDownload)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnAddItemType1)))
                 .addContainerGap())
         );
@@ -1119,7 +1167,8 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                     .addComponent(chkCal)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                         .addComponent(lblStatus, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                        .addComponent(chkEx, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(chkEx, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btnDownload))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1342,6 +1391,10 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         // TODO add your handling code here:
     }//GEN-LAST:event_txtPurPriceActionPerformed
 
+    private void btnDownloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDownloadActionPerformed
+        printFile();
+    }//GEN-LAST:event_btnDownloadActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddBrand;
@@ -1349,6 +1402,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private javax.swing.JButton btnAddItemType;
     private javax.swing.JButton btnAddItemType1;
     private javax.swing.JButton btnAddRelation;
+    private javax.swing.JButton btnDownload;
     private javax.swing.JButton btnUnit;
     private javax.swing.JCheckBox chkActive;
     private javax.swing.JCheckBox chkCal;
