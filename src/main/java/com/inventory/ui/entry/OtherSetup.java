@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.acc.common.AccountRepo;
 import com.common.Global;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.LocationSetupDialog;
@@ -26,6 +27,7 @@ public class OtherSetup extends javax.swing.JPanel {
 
     private final Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
     private InventoryRepo inventoryRepo;
+    private AccountRepo accountRepo;
     private RegionSetup regionSetup;
     private LocationSetupDialog locationSetup;
     private RelationSetupDialog relationSetupDialog;
@@ -33,14 +35,13 @@ public class OtherSetup extends javax.swing.JPanel {
     private SaleManSetupDialog smDialog;
     private VouStatusSetupDialog vsDialog;
 
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
     }
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-    
 
     /**
      * Creates new form OtherSetup
@@ -62,9 +63,9 @@ public class OtherSetup extends javax.swing.JPanel {
     }
 
     private void locationSetup() {
-        locationSetup = new LocationSetupDialog();
+        locationSetup = new LocationSetupDialog(Global.parentForm);
         locationSetup.setInventoryRepo(inventoryRepo);
-        locationSetup.setIconImage(icon);
+        locationSetup.setAccountRepo(accountRepo);
         locationSetup.initMain();
         locationSetup.setSize(Global.width / 2, Global.height / 2);
         locationSetup.setLocationRelativeTo(null);

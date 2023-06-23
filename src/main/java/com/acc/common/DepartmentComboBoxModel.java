@@ -4,7 +4,7 @@
  */
 package com.acc.common;
 
-import com.acc.model.ChartOfAccount;
+import com.acc.model.DepartmentA;
 import java.util.List;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
@@ -14,16 +14,16 @@ import javax.swing.event.ListDataListener;
  *
  * @author Lenovo
  */
-public class COAComboBoxModel extends AbstractListModel<ChartOfAccount> implements ComboBoxModel<ChartOfAccount> {
+public class DepartmentComboBoxModel extends AbstractListModel<DepartmentA> implements ComboBoxModel<DepartmentA> {
 
-    private List<ChartOfAccount> data;
-    private ChartOfAccount selected;
+    private List<DepartmentA> data;
+    private DepartmentA selected;
 
-    public List<ChartOfAccount> getData() {
+    public List<DepartmentA> getData() {
         return data;
     }
 
-    public void setData(List<ChartOfAccount> data) {
+    public void setData(List<DepartmentA> data) {
         this.data = data;
     }
 
@@ -32,7 +32,7 @@ public class COAComboBoxModel extends AbstractListModel<ChartOfAccount> implemen
         if (anItem == null) {
             this.selected = null;
             fireContentsChanged(this, -1, -1);
-        } else if (anItem instanceof ChartOfAccount coa) {
+        } else if (anItem instanceof DepartmentA coa) {
             this.selected = coa;
             fireContentsChanged(this, -1, -1);
         }
@@ -50,7 +50,7 @@ public class COAComboBoxModel extends AbstractListModel<ChartOfAccount> implemen
     }
 
     @Override
-    public ChartOfAccount getElementAt(int index) {
+    public DepartmentA getElementAt(int index) {
         return data.get(index);
     }
 

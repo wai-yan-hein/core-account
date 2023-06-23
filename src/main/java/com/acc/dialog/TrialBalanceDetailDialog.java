@@ -355,7 +355,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
                 p.put("p_comp_name", Global.companyName);
                 p.put("p_comp_address", Global.companyAddress);
                 p.put("p_comp_phone", Global.companyPhone);
-                p.put("p_currency", currencyAAutoCompleter.getCurrency().getCurCode());
+                p.put("p_currency", getCurCode());
                 double opening = Util1.getDouble(txtOpening.getValue());
                 double closing = Util1.getDouble(txtClosing.getValue());
                 p.put("p_opening", opening);

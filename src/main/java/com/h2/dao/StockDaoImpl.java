@@ -50,9 +50,9 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
 
     @Override
     public List<Stock> getStock(String str, String compCode, Integer deptId) {
-        List<Stock> list = getStockList("s.user_code like '%" + str + "%'", compCode, deptId);
+        List<Stock> list = getStockList("LOWER(REPLACE(s.user_code, ' ', '')) like '" + str + "%'", compCode, deptId);
         if (list.isEmpty()) {
-            list = getStockList("s.stock_name like '%" + str + "%'", compCode, deptId);
+            list = getStockList("LOWER(REPLACE(s.stock_name, ' ', '')) like '" + str + "%'", compCode, deptId);
         }
         return list;
     }
@@ -67,7 +67,6 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
         left join category cat  on s.category_code = cat.cat_code
         left join stock_brand b on s.brand_code  = b.brand_code
         where s.comp_code ='""" + compCode + "'\n" + "and s.active =true\n"
-                + "and (s.dept_id =" + deptId + " or 0 =" + deptId + ")\n"
                 + "and " + filter + "\n"
                 + "order by s.user_code,s.stock_name\n" + "limit 100";
         ResultSet rs = getResult(sql);

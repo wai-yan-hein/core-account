@@ -64,6 +64,7 @@ public class OtherSetupMain extends javax.swing.JPanel {
         if (setup == null) {
             setup = new OtherSetup();
             setup.setInventoryRepo(inventoryRepo);
+            setup.setAccountRepo(accountRepo);
         }
         return setup;
 

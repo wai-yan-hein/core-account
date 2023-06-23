@@ -5,6 +5,10 @@
  */
 package com.inventory.ui.setup.dialog;
 
+import com.acc.common.AccountRepo;
+import com.acc.common.DepartmentComboBoxModel;
+import com.acc.model.DepartmentA;
+import com.acc.model.DepartmentAKey;
 import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
@@ -18,34 +22,34 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.RowFilter;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class LocationSetupDialog extends javax.swing.JDialog implements KeyListener {
 
-    private static final Logger log = LoggerFactory.getLogger(LocationSetupDialog.class);
     private int selectRow = - 1;
     private Location location = new Location();
     private final LocationTableModel locationTableModel = new LocationTableModel();
+    private final DepartmentComboBoxModel departmentComboBoxModel = new DepartmentComboBoxModel();
     private InventoryRepo inventoryRepo;
-
+    private AccountRepo accountRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
 
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
     }
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
@@ -54,9 +58,11 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
 
     /**
      * Creates new form ItemTypeSetupDialog
+     *
+     * @param frame
      */
-    public LocationSetupDialog() {
-        super(Global.parentForm, true);
+    public LocationSetupDialog(JFrame frame) {
+        super(frame, true);
         initComponents();
         initKeyListener();
     }
@@ -64,7 +70,7 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
     public void initMain() {
         swrf = new StartWithRowFilter(txtFilter);
         initTable();
-        searchCategory();
+        search();
         txtUserCode.requestFocus();
     }
 
@@ -77,9 +83,14 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
         lblStatus.setForeground(Color.green);
     }
 
-    private void searchCategory() {
+    private void search() {
         inventoryRepo.getLocation().subscribe((t) -> {
             locationTableModel.setListLocation(t);
+        });
+        accountRepo.getDepartment().subscribe((t) -> {
+            t.add(new DepartmentA());
+            departmentComboBoxModel.setData(t);
+            cboDepartment.setModel(departmentComboBoxModel);
         });
     }
 
@@ -110,6 +121,16 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
         txtName.requestFocus();
         lblStatus.setText("EDIT");
         lblStatus.setForeground(Color.BLUE);
+        String deptCode = loc.getDeptCode();
+        if (!Util1.isNullOrEmpty(deptCode)) {
+            accountRepo.findDepartment(deptCode).subscribe((t) -> {
+                departmentComboBoxModel.setSelectedItem(t);
+                cboDepartment.repaint();
+            });
+        } else {
+            departmentComboBoxModel.setSelectedItem(null);
+            cboDepartment.repaint();
+        }
     }
 
     private void save() {
@@ -130,6 +151,8 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
         txtUserCode.setText(null);
         txtFilter.setText(null);
         txtName.setText(null);
+        departmentComboBoxModel.setSelectedItem(null);
+        cboDepartment.repaint();
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.GREEN);
         location = new Location();
@@ -144,12 +167,16 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
             JOptionPane.showMessageDialog(this, "Invalid Name");
             txtName.requestFocus();
         } else {
+            if (cboDepartment.getSelectedItem() instanceof DepartmentA d) {
+                DepartmentAKey key = d.getKey();
+                location.setDeptCode(key == null ? null : key.getDeptCode());
+            }
             location.setUserCode(txtUserCode.getText());
             location.setLocName(txtName.getText());
+            location.setDeptId(Global.deptId);
             if (lblStatus.getText().equals("NEW")) {
                 LocationKey key = new LocationKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 key.setLocCode(null);
                 location.setKey(key);
                 location.setCreatedBy(Global.loginUser.getUserCode());
@@ -161,18 +188,6 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
         }
         return status;
     }
-    private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
-        @Override
-        public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
-            if (Util1.isNumber(txtFilter.getText())) {
-                return entry.getStringValue(0).toUpperCase().startsWith(
-                        txtFilter.getText().toUpperCase());
-            } else {
-                return entry.getStringValue(1).toUpperCase().startsWith(
-                        txtFilter.getText().toUpperCase());
-            }
-        }
-    };
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -194,6 +209,8 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
         lblStatus = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         txtUserCode = new javax.swing.JTextField();
+        jLabel4 = new javax.swing.JLabel();
+        cboDepartment = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Location Setup");
@@ -278,6 +295,11 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
             }
         });
 
+        jLabel4.setFont(Global.lableFont);
+        jLabel4.setText("Department");
+
+        cboDepartment.setFont(Global.textFont);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -285,18 +307,20 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE))
+                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(12, 12, 12)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(txtName, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 73, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtName)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addGap(0, 76, Short.MAX_VALUE)
                         .addComponent(btnSave)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnClear))
-                    .addComponent(txtUserCode, javax.swing.GroupLayout.Alignment.LEADING))
+                    .addComponent(txtUserCode)
+                    .addComponent(cboDepartment, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -306,17 +330,21 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(txtUserCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblStatus)
+                    .addComponent(jLabel4)
+                    .addComponent(cboDepartment, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(btnClear)
-                        .addComponent(btnSave)))
-                .addContainerGap(263, Short.MAX_VALUE))
+                        .addComponent(btnSave))
+                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(247, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -326,8 +354,8 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE))
+                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -396,8 +424,10 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnSave;
+    private javax.swing.JComboBox<DepartmentA> cboDepartment;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblStatus;

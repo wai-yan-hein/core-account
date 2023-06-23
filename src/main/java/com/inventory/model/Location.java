@@ -50,6 +50,10 @@ public class Location {
     private String intgUpdStatus;
     @Column(name = "map_dept_id")
     private Integer mapDeptId;
+    @Column(name = "dept_id")
+    private Integer deptId;
+    @Column(name = "dept_code")
+    private String deptCode;
 
     public Location(String locCode, String locName) {
         this.key = new LocationKey();

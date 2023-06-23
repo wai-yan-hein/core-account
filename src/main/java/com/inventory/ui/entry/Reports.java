@@ -243,7 +243,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     filter.setOpDate(Util1.toDateStr(Global.startDate, "dd/MM/yyyy", "yyyy-MM-dd"));
                     filter.setFromDate(stDate);
                     filter.setToDate(enDate);
-                    filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
+                    filter.setCurCode(getCurCode());
                     filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
                     filter.setSaleManCode(saleManAutoCompleter.getSaleMan().getKey().getSaleManCode());
                     filter.setListLocation(locationAutoCompleter.getListOption());
@@ -252,7 +252,6 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     filter.setRegCode(regionAutoCompleter.getRegion().getKey().getRegCode());
                     filter.setCatCode(categoryAutoCompleter.getCategory().getKey().getCatCode());
                     filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
-                    filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
                     filter.setVouTypeCode(vouStatusAutoCompleter.getVouStatus().getKey().getCode());
                     filter.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
                     filter.setCalSale(Util1.getBoolean(ProUtil.getProperty("disable.calculate.sale.stock")));
@@ -274,7 +273,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     param.put("p_comp_name", Global.companyName);
                     param.put("p_comp_address", Global.companyAddress);
                     param.put("p_comp_phone", Global.companyPhone);
-                    param.put("p_currency", currencyAutoCompleter.getCurrency().getCurCode());
+                    param.put("p_currency", getCurCode());
                     param.put("p_stock_type", stockTypeAutoCompleter.getStockType().getStockTypeName());
                     param.put("p_location", txtLocation.getText());
                     printReport(reportUrl, reportUrl, param);
@@ -287,6 +286,13 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             observer.selected("save", false);
             JOptionPane.showMessageDialog(Global.parentForm, "Choose Report.");
         }
+    }
+
+    private String getCurCode() {
+        if (currencyAutoCompleter == null || currencyAutoCompleter.getCurrency() == null) {
+            return Global.currency;
+        }
+        return currencyAutoCompleter.getCurrency().getCurCode();
     }
 
     private boolean isValidReport(String url) {

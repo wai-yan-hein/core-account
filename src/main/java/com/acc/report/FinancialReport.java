@@ -178,9 +178,8 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                     String stDate = dateAutoCompleter.getDateModel().getStartDate();
                     String enDate = dateAutoCompleter.getDateModel().getEndDate();
                     filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
-                    filter.setOpDate(Util1.toDateStr(Global.startDate, "dd/MM/yyyy", "yyyy-MM-dd"));
-                    filter.setFromDate(Util1.toDateStr(stDate, "dd/MM/yyyy", "yyyy-MM-dd"));
-                    filter.setToDate(Util1.toDateStr(enDate, "dd/MM/yyyy", "yyyy-MM-dd"));
+                    filter.setFromDate(stDate);
+                    filter.setToDate(enDate);
                     filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
                     filter.setListDepartment(getDepartment());
                     filter.setCurCode(Global.currency);
@@ -203,7 +202,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                     Map<String, Object> param = new HashMap<>();
                     param.put("p_report_name", reportName);
                     param.put("p_report_title", cOA3AutoCompleter.getCOA().getCoaNameEng());
-                    param.put("p_date", String.format("Between %s and %s", stDate, enDate));
+                    param.put("p_date", String.format("Between %s and %s", Util1.toDateStr(stDate, "yyyy-MM-dd", Global.dateFormat), Util1.toDateStr(stDate, "yyyy-MM-dd", Global.dateFormat)));
                     param.put("p_print_date", Util1.getTodayDateTime());
                     param.put("p_comp_name", Global.companyName);
                     param.put("p_comp_address", Global.companyAddress);
@@ -251,7 +250,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                     try {
                         if (t != null) {
                             String filePath = String.format("%s%s%s", Global.accountRP, File.separator, reportUrl.concat(".jasper"));
-                            if (t.getFile().length > 0) {
+                            if (t.getFile() != null) {
                                 long end = new GregorianCalendar().getTimeInMillis();
                                 long pt = end - start;
                                 lblTime.setText(pt / 1000 + " s");

@@ -75,7 +75,6 @@ import com.inventory.model.TransferHisKey;
 import com.inventory.model.UnitRelation;
 import com.inventory.model.UnitRelationDetail;
 import com.inventory.model.VPurchase;
-import com.inventory.model.VOpening;
 import com.inventory.model.VOrder;
 import com.inventory.model.VReturnIn;
 import com.inventory.model.VReturnOut;
@@ -91,7 +90,6 @@ import javax.swing.JOptionPane;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -529,7 +527,6 @@ public class InventoryRepo {
     public Mono<Location> findLocation(String locCode, Integer deptId) {
         LocationKey key = new LocationKey();
         key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
         key.setLocCode(locCode);
         if (localDatabase) {
             return h2Repo.find(key);
@@ -585,7 +582,7 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<StockInOutDetail>> searchStkIODetail(String vouNo, Integer deptId,boolean local) {
+    public Mono<List<StockInOutDetail>> searchStkIODetail(String vouNo, Integer deptId, boolean local) {
         if (local) {
             return h2Repo.searchStkIODetail(vouNo, Global.compCode, deptId);
         }
@@ -1474,7 +1471,7 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<RetOutHisDetail>> getReturnOutDetail(String vouNo, Integer depId,boolean local) {
+    public Mono<List<RetOutHisDetail>> getReturnOutDetail(String vouNo, Integer depId, boolean local) {
         if (local) {
             return h2Repo.searchReturnOutDetail(vouNo, depId);
         }

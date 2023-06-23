@@ -77,7 +77,11 @@ public class AccountRepo {
                 .uri("/account/find-department")
                 .body(Mono.just(key), DepartmentAKey.class)
                 .retrieve()
-                .bodyToMono(DepartmentA.class);
+                .bodyToMono(DepartmentA.class)
+                .onErrorResume((e) -> {
+                    log.error("findDepartment : " + e.getMessage());
+                    return Mono.error(e);
+                });
     }
 
     public Mono<List<DepartmentA>> getDepartment() {
@@ -89,7 +93,8 @@ public class AccountRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToFlux(DepartmentA.class).collectList();
+                .bodyToFlux(DepartmentA.class)
+                .collectList();
     }
 
     public Flux<TraderA> getTrader() {
