@@ -27,6 +27,7 @@ import com.acc.model.VDescription;
 import com.acc.model.VTriBalance;
 import com.common.FilterObject;
 import com.common.Global;
+import com.common.ProUtil;
 import com.common.ReturnObject;
 import com.common.Util1;
 import com.user.model.YearEnd;
@@ -620,7 +621,7 @@ public class AccountRepo {
     }
 
     public Mono<List<Gl>> searchGl(ReportFilter filter) {
-        if (localDatabase) {
+        if (filter.isLocal()) {
             return h2Repo.searchGL(filter);
         }
         return accountApi.post()
@@ -647,11 +648,12 @@ public class AccountRepo {
 
     public Mono<List<DateModel>> getDate() {
         String startDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
+        boolean isAll = Util1.getBoolean(ProUtil.getProperty(ProUtil.DISABLE_ALL_FILTER));
         return accountApi.get()
                 .uri(builder -> builder.path("/account/getDate")
                 .queryParam("startDate", startDate)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("isAll", Boolean.TRUE)
+                .queryParam("isAll", isAll)
                 .build())
                 .retrieve()
                 .bodyToFlux(DateModel.class)

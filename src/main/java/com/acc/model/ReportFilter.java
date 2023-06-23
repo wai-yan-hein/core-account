@@ -42,6 +42,7 @@ public class ReportFilter {
     private boolean summary;
     private String batchNo;
     private String projectNo;
+    private boolean local;
 
     public ReportFilter(String compCode, Integer macId) {
         this.compCode = compCode;
