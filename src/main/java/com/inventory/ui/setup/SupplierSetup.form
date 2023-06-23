@@ -45,7 +45,7 @@
                   <Group type="102" attributes="0">
                       <Component id="txtFilter" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
-                      <Component id="jScrollPane2" pref="422" max="32767" attributes="0"/>
+                      <Component id="jScrollPane2" pref="425" max="32767" attributes="0"/>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="jLabel6" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -74,8 +74,8 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" attributes="0">
-                  <EmptySpace max="-2" attributes="0"/>
+              <Group type="102" alignment="0" attributes="0">
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
                       <Component id="jLabel8" max="32767" attributes="0"/>
                       <Component id="lblStatus" pref="100" max="32767" attributes="0"/>
@@ -88,12 +88,16 @@
                       <Component id="jLabel7" alignment="1" max="32767" attributes="0"/>
                       <Component id="jLabel10" max="32767" attributes="0"/>
                       <Component id="jLabel11" max="32767" attributes="0"/>
+                      <Component id="jLabel12" max="32767" attributes="0"/>
                   </Group>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="chkActive" alignment="0" max="32767" attributes="0"/>
+                      <Component id="chkCD" alignment="0" max="32767" attributes="0"/>
+                      <Component id="chkMulti" alignment="0" max="32767" attributes="0"/>
                       <Group type="102" alignment="1" attributes="0">
                           <Group type="103" groupAlignment="1" attributes="0">
+                              <Component id="spPercent" alignment="0" max="32767" attributes="0"/>
                               <Component id="txtRemark" alignment="0" max="32767" attributes="0"/>
                               <Component id="txtCusAddress" alignment="0" max="32767" attributes="0"/>
                               <Component id="txtCusEmail" alignment="0" max="32767" attributes="0"/>
@@ -115,8 +119,6 @@
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
-                      <Component id="chkCD" alignment="0" max="32767" attributes="0"/>
-                      <Component id="chkMulti" alignment="0" max="32767" attributes="0"/>
                   </Group>
               </Group>
           </Group>
@@ -176,7 +178,12 @@
                       <Component id="jLabel11" alignment="3" min="-2" pref="22" max="-2" attributes="0"/>
                       <Component id="txtAccount" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="jLabel12" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="spPercent" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="chkMulti" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="chkCD" min="-2" max="-2" attributes="0"/>
@@ -184,7 +191,7 @@
                   <Component id="chkActive" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Component id="lblStatus" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace pref="79" max="32767" attributes="0"/>
+                  <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -422,6 +429,21 @@
               <Connection code="Global.textFont" type="code"/>
             </Property>
             <Property name="name" type="java.lang.String" value="txtRemark" noResource="true"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel12">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.lableFont" type="code"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Credit Day"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JSpinner" name="spPercent">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
           </Properties>
         </Component>
       </SubComponents>
