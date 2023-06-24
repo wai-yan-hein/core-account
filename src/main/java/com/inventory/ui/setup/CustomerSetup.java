@@ -585,6 +585,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtCreditAmt.setFont(Global.textFont);
 
         spPercent.setFont(Global.textFont);
+        spPercent.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         btnDownload.setFont(Global.lableFont);
         btnDownload.setText("Download");
