@@ -193,7 +193,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         progress.setIndeterminate(false);
                         JOptionPane.showMessageDialog(this, e.getMessage());
                     }, () -> {
-                        inventoryRepo.findLocation(oh.getLocCode(), deptId).subscribe((t) -> {
+                        inventoryRepo.findLocation(oh.getLocCode()).subscribe((t) -> {
                             locationAutoCompleter.setLocation(t);
                         });
                         Mono<Trader> trader = inventoryRepo.findTrader(oh.getTraderCode(), deptId);
@@ -702,7 +702,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             progress.setIndeterminate(true);
             saleHis = sh;
             Integer deptId = sh.getKey().getDeptId();
-            inventoryRepo.findLocation(saleHis.getLocCode(), deptId).subscribe((t) -> {
+            inventoryRepo.findLocation(saleHis.getLocCode()).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
             Mono<Trader> trader = inventoryRepo.findTrader(saleHis.getTraderCode(), deptId);

@@ -633,11 +633,10 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         if (pur != null) {
             progress.setIndeterminate(true);
             ph = pur;
-            Integer deptId = ph.getKey().getDeptId();
             userRepo.findCurrency(ph.getCurCode()).subscribe((t) -> {
                 currAutoCompleter.setCurrency(t);
             });
-            inventoryRepo.findLocation(ph.getLocCode(), deptId).subscribe((t) -> {
+            inventoryRepo.findLocation(ph.getLocCode()).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
             Mono<Trader> trader = inventoryRepo.findTrader(ph.getTraderCode(), ph.getKey().getDeptId());

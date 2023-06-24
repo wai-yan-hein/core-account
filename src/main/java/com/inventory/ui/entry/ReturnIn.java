@@ -468,7 +468,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             progress.setIndeterminate(true);
             ri = retin;
             Integer deptId = ri.getKey().getDeptId();
-            inventoryRepo.findLocation(ri.getLocCode(), deptId).subscribe((t) -> {
+            inventoryRepo.findLocation(ri.getLocCode()).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
             Mono<Trader> trader = inventoryRepo.findTrader(ri.getTraderCode(), ri.getKey().getDeptId());

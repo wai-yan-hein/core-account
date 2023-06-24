@@ -274,7 +274,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
             String vouNo = op.getKey().getVouNo();
             String compCode = op.getKey().getCompCode();
             Integer deptId = op.getKey().getDeptId();
-            inventoryRepo.findLocation(oPHis.getLocCode(), deptId).subscribe((t) -> {
+            inventoryRepo.findLocation(oPHis.getLocCode()).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
             userRepo.findCurrency(oPHis.getCurCode()).subscribe((t) -> {

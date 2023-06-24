@@ -719,7 +719,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 }, (e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
                 });
-                inventoryRepo.findLocation(ph.getLocCode(), deptId).subscribe((t) -> {
+                inventoryRepo.findLocation(ph.getLocCode()).subscribe((t) -> {
                     locationAutoCompleter.setLocation(t);
                 }, (e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());

@@ -295,7 +295,7 @@ public class StockInOutTableModel extends AbstractTableModel {
             String stockCode = s.getKey().getStockCode();
             boolean explode = s.isExplode();
             String date = Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd");
-            inventoryRepo.getPattern(stockCode, s.getKey().getDeptId(), date).subscribe((t) -> {
+            inventoryRepo.getPattern(stockCode, Global.deptId, date).subscribe((t) -> {
                 if (!t.isEmpty()) {
                     String input = JOptionPane.showInputDialog("Enter Qty.");
                     if (Util1.isPositive(input)) {

@@ -13,9 +13,9 @@ import com.user.model.MachineProperty;
 import com.user.model.RoleProperty;
 import com.user.model.SysProperty;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -24,6 +24,7 @@ import org.springframework.stereotype.Repository;
  * @author Athu Sint
  */
 @Repository
+@Slf4j
 public class UserDaoImpl extends AbstractDao<String, AppUser> implements UserDao {
 
     @Autowired
@@ -65,6 +66,7 @@ public class UserDaoImpl extends AbstractDao<String, AppUser> implements UserDao
         List<SysProperty> systemProperty = spService.getSystemProperty(compCode);
         if (!systemProperty.isEmpty()) {
             for (SysProperty p : systemProperty) {
+                log.info(p.getKey().getPropKey() + " : " + p.getPropValue());
                 hm.put(p.getKey().getPropKey(), p.getPropValue());
             }
         }

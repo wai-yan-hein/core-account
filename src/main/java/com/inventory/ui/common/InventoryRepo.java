@@ -111,7 +111,7 @@ public class InventoryRepo {
 
     public Mono<Location> getDefaultLocation() {
         String locCode = Global.hmRoleProperty.get("default.location");
-        return findLocation(locCode, Global.deptId);
+        return findLocation(locCode);
     }
 
     public Mono<Stock> getDefaultStock() {
@@ -524,7 +524,7 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<Location> findLocation(String locCode, Integer deptId) {
+    public Mono<Location> findLocation(String locCode) {
         LocationKey key = new LocationKey();
         key.setCompCode(Global.compCode);
         key.setLocCode(locCode);
@@ -651,7 +651,6 @@ public class InventoryRepo {
     public Mono<Stock> findStock(String stockCode) {
         StockKey key = new StockKey();
         key.setCompCode(Global.compCode);
-        key.setDeptId(Global.deptId);
         key.setStockCode(stockCode);
         if (localDatabase) {
             return h2Repo.find(key);

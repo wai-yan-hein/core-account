@@ -188,8 +188,6 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         tblGL.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (SwingUtilities.isRightMouseButton(e)) {
-                }
                 if (e.getClickCount() == 2) {
                     if (tblGL.getSelectedRow() >= 0) {
                         selectRow = tblGL.convertRowIndexToModel(tblGL.getSelectedRow());

@@ -49,15 +49,16 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
     }
 
     @Override
-    public List<Stock> getStock(String str, String compCode, Integer deptId) {
-        List<Stock> list = getStockList("LOWER(REPLACE(s.user_code, ' ', '')) like '" + str + "%'", compCode, deptId);
+    public List<Stock> getStock(String str, String compCode,Integer deptId) {
+        str = Util1.cleanString(str);
+        List<Stock> list = getStockList("LOWER(REPLACE(s.user_code, ' ', '')) like '" + str + "%'", compCode);
         if (list.isEmpty()) {
-            list = getStockList("LOWER(REPLACE(s.stock_name, ' ', '')) like '" + str + "%'", compCode, deptId);
+            list = getStockList("LOWER(REPLACE(s.stock_name, ' ', '')) like '" + str + "%'", compCode);
         }
         return list;
     }
 
-    private List<Stock> getStockList(String filter, String compCode, Integer deptId) {
+    private List<Stock> getStockList(String filter, String compCode) {
         List<Stock> listStock = new ArrayList<>();
         String sql = """
         select s.*,rel.rel_name,st.stock_type_name,cat.cat_name,b.brand_name
@@ -82,8 +83,8 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
                     StockKey key = new StockKey();
                     key.setStockCode(rs.getString("stock_code"));
                     key.setCompCode(rs.getString("comp_code"));
-                    key.setDeptId(rs.getInt("dept_id"));
                     s.setKey(key);
+                    s.setDeptId(rs.getInt("dept_id"));
                     s.setBrandCode(rs.getString("brand_code"));
                     s.setCatCode(rs.getString("category_code"));
                     s.setTypeCode(rs.getString("stock_type_code"));

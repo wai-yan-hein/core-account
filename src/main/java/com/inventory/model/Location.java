@@ -54,6 +54,8 @@ public class Location {
     private Integer deptId;
     @Column(name = "dept_code")
     private String deptCode;
+    @Column(name = "cash_acc")
+    private String cashAcc;
 
     public Location(String locCode, String locName) {
         this.key = new LocationKey();

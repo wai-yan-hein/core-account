@@ -157,7 +157,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             public void mousePressed(MouseEvent e) {
                 if (e.getClickCount() == 2) {
                     if (tblAPAR.getSelectedRow() >= 0) {
-                        selectRow = tblAPAR.getSelectedRow();
+                        selectRow = tblAPAR.convertRowIndexToModel(tblAPAR.getSelectedRow());
                         VApar apar = aPARTableModel.getAPAR(selectRow);
                         String traderCode = apar.getTraderCode();
                         String traderName = apar.getTraderName();

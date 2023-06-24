@@ -300,10 +300,10 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         progress.setIndeterminate(true);
         io = s;
         Integer deptId = io.getKey().getDeptId();
-        inventoryRepo.findLocation(io.getLocCodeFrom(), deptId).subscribe((t) -> {
+        inventoryRepo.findLocation(io.getLocCodeFrom()).subscribe((t) -> {
             fromLocaitonCompleter.setLocation(t);
         });
-        inventoryRepo.findLocation(io.getLocCodeTo(), deptId).subscribe((t) -> {
+        inventoryRepo.findLocation(io.getLocCodeTo()).subscribe((t) -> {
             toLocaitonCompleter.setLocation(t);
         });
         String vouNo = io.getKey().getVouNo();

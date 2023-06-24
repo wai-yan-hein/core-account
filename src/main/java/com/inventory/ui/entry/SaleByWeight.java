@@ -573,7 +573,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             progress.setIndeterminate(true);
             saleHis = sh;
             Integer deptId = sh.getKey().getDeptId();
-            inventoryRepo.findLocation(saleHis.getLocCode(), deptId).subscribe((t) -> {
+            inventoryRepo.findLocation(saleHis.getLocCode()).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
             Mono<Trader> trader = inventoryRepo.findTrader(saleHis.getTraderCode(), deptId);

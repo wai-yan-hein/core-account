@@ -368,7 +368,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             trader.subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);
             });
-            Mono<Location> loc = inventoryRepo.findLocation(grn.getLocCode(), deptId);
+            Mono<Location> loc = inventoryRepo.findLocation(grn.getLocCode());
             loc.hasElement().subscribe((element) -> {
                 if (element) {
                     loc.subscribe((t) -> {

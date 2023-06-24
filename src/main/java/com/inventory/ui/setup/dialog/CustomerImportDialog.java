@@ -9,7 +9,6 @@ import com.common.Global;
 import com.common.ProUtil;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.inventory.model.Headers;
 import com.inventory.model.Trader;
 import com.inventory.model.TraderKey;
 import com.inventory.ui.common.InventoryRepo;
@@ -17,7 +16,6 @@ import com.inventory.ui.setup.dialog.common.TraderImportTableModel;
 import java.awt.Color;
 import java.awt.FileDialog;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.time.LocalDateTime;
@@ -28,7 +26,6 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.core.task.TaskExecutor;
 
@@ -80,7 +77,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         initComponents();
         initTable();
         progress.setVisible(false);
-    }    
+    }
 
     private void initTable() {
         tblTrader.setModel(tableModel);
@@ -125,10 +122,8 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         List<Trader> listTrader = new ArrayList<>();
         try {
             progress.setIndeterminate(true);
-//            CSVParser csvParser = new CSVParser(new FileReader(path),
-//                    CSVFormat.DEFAULT.withHeader());
             CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
-                    .setHeader(Headers.class)
+                    .setHeader()
                     .setSkipHeaderRecord(true)
                     .build();
             Reader in = new FileReader(path);
@@ -139,8 +134,10 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                 key.setCompCode(Global.compCode);
                 key.setDeptId(Global.deptId);
                 t.setKey(key);
-                t.setTraderName(Util1.convertToUniCode(row.get("Name")));
-                t.setUserCode(Util1.convertToUniCode(row.get("Code")));
+                t.setTraderName(row.isMapped("Name") ? Util1.convertToUniCode(row.get("Name")) : "");
+                t.setUserCode(row.isMapped("UserCode") ? Util1.convertToUniCode(row.get("UserCode")) : "");
+                t.setAddress(row.isMapped("Address") ? Util1.convertToUniCode(row.get("Address")) : "");
+                t.setPhone(row.isMapped("PhoneNo") ? Util1.convertToUniCode(row.get("PhoneNo")) : "");
                 t.setActive(Boolean.TRUE);
                 t.setCreatedDate(LocalDateTime.now());
                 t.setCreatedBy(Global.loginUser.getUserCode());

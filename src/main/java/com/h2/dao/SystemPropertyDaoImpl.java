@@ -34,7 +34,7 @@ public class SystemPropertyDaoImpl extends AbstractDao<PropertyKey, SysProperty>
 
     @Override
     public List<SysProperty> getSystemProperty(String compCode) {
-        String sql = "select o from SysProperty o where o.key.compCode = '" + compCode + "' or '-' = '" + compCode + "'";
+        String sql = "select o from SysProperty o where o.key.compCode = '" + compCode + "'";
         return findHSQL(sql);
     }
 

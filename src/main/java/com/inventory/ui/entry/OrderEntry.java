@@ -571,7 +571,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             orderHis = sh;
             Integer deptId = sh.getKey().getDeptId();
             String vouNo = sh.getKey().getVouNo();
-            inventoryRepo.findLocation(orderHis.getLocCode(), deptId).subscribe((t) -> {
+            inventoryRepo.findLocation(orderHis.getLocCode()).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
             Mono<Trader> trader = inventoryRepo.findTrader(orderHis.getTraderCode(), deptId);

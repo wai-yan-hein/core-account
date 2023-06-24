@@ -10,7 +10,6 @@ import com.inventory.model.TraderKey;
 import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;

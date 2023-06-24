@@ -267,7 +267,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         inventoryRepo.findStock(ph.getStockCode()).subscribe((t) -> {
             stockAutoCompleter.setStock(t);
         });
-        inventoryRepo.findLocation(ph.getLocCode(), deptId).subscribe((t) -> {
+        inventoryRepo.findLocation(ph.getLocCode()).subscribe((t) -> {
             locationAutoCompleter.setLocation(t);
         });
         if (p.isDeleted()) {
@@ -450,16 +450,15 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         Stock s = stockAutoCompleter.getStock();
         if (s != null) {
             String stockCode = s.getKey().getStockCode();
-            Integer deptId = s.getKey().getDeptId();
             if (processHisDetailTableModel.getListDetail().size() >= 1) {
                 int status = JOptionPane.showConfirmDialog(this, "Are you sure to generate pattern.?");
                 if (status == JOptionPane.OK_OPTION) {
                     processHisDetailTableModel.clear();
-                    generatePattern(stockCode, deptId);
+                    generatePattern(stockCode, Global.deptId);
 
                 }
             } else {
-                generatePattern(stockCode, deptId);
+                generatePattern(stockCode, Global.deptId);
             }
         } else {
             JOptionPane.showMessageDialog(this, "Please select stock.");
@@ -960,7 +959,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         if (str.equals("STOCK")) {
             Stock s = stockAutoCompleter.getStock();
             if (s != null) {
-                inventoryRepo.findUnit(s.getPurUnitCode(), s.getKey().getDeptId()).subscribe((t) -> {
+                inventoryRepo.findUnit(s.getPurUnitCode(), Global.deptId).subscribe((t) -> {
                     unitAutoCompleter.setStockUnit(t);
                 });
                 getPattern();
