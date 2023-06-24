@@ -102,7 +102,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         btnSave.setEnabled(false);
         lblLog.setText("Importing.");
         for (Stock stock : traders) {
-            inventoryRepo.saveStock(stock).subscribe();
+            inventoryRepo.saveStock(stock).block();
         }
         lblLog.setText("Success.");
         dispose();
