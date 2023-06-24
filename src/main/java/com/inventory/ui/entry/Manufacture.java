@@ -450,7 +450,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         Stock s = stockAutoCompleter.getStock();
         if (s != null) {
             String stockCode = s.getKey().getStockCode();
-            Integer deptId = s.getKey().getDeptId();
+            Integer deptId = s.getDeptId();
             if (processHisDetailTableModel.getListDetail().size() >= 1) {
                 int status = JOptionPane.showConfirmDialog(this, "Are you sure to generate pattern.?");
                 if (status == JOptionPane.OK_OPTION) {
@@ -960,7 +960,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         if (str.equals("STOCK")) {
             Stock s = stockAutoCompleter.getStock();
             if (s != null) {
-                inventoryRepo.findUnit(s.getPurUnitCode(), s.getKey().getDeptId()).subscribe((t) -> {
+                inventoryRepo.findUnit(s.getPurUnitCode(), s.getDeptId()).subscribe((t) -> {
                     unitAutoCompleter.setStockUnit(t);
                 });
                 getPattern();

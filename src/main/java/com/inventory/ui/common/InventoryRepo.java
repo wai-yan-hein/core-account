@@ -654,7 +654,7 @@ public class InventoryRepo {
     public Mono<Stock> findStock(String stockCode) {
         StockKey key = new StockKey();
         key.setCompCode(Global.compCode);
-        key.setDeptId(Global.deptId);
+//        key.setDeptId(Global.deptId);
         key.setStockCode(stockCode);
         if (localDatabase) {
             return h2Repo.find(key);
