@@ -201,7 +201,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtStockName.setText(stock.getStockName());
         chkActive.setSelected(stock.isActive());
         chkEx.setSelected(stock.isExplode());
-        Integer deptId = stock.getKey().getDeptId();
+        Integer deptId = stock.getDeptId();
         inventoryRepo.findBrand(stock.getBrandCode(), deptId).subscribe((t) -> {
             brandAutoCompleter.setBrand(t);
         });
@@ -343,7 +343,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 StockKey key = new StockKey();
                 key.setStockCode(null);
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
+                stock.setDeptId(Global.deptId);
                 stock.setKey(key);
                 stock.setMacId(Global.macId);
                 stock.setCreatedDate(LocalDateTime.now());

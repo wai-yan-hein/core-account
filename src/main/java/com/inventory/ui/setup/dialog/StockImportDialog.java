@@ -137,7 +137,7 @@ public class StockImportDialog extends javax.swing.JDialog {
                 Stock t = new Stock();
                 StockKey key = new StockKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
+                t.setDeptId(Global.deptId);
                 key.setStockCode(null);
                 t.setKey(key);
                 t.setUserCode(r.isMapped("UserCode") ? Util1.convertToUniCode(r.get("UserCode")) : "");

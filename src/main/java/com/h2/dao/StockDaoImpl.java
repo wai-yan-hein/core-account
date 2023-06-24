@@ -83,7 +83,7 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
                     StockKey key = new StockKey();
                     key.setStockCode(rs.getString("stock_code"));
                     key.setCompCode(rs.getString("comp_code"));
-                    key.setDeptId(rs.getInt("dept_id"));
+                    s.setDeptId(rs.getInt("dept_id"));
                     s.setKey(key);
                     s.setBrandCode(rs.getString("brand_code"));
                     s.setCatCode(rs.getString("category_code"));
