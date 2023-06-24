@@ -87,7 +87,6 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
                 txt.selectAll();
             }
         }
-
     };
 
     private void batchLock(boolean lock) {
