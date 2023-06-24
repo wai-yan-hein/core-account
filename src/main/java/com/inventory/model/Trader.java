@@ -58,9 +58,9 @@ public class Trader {
     private Integer macId;
     @Column(name = "user_code")
     private String userCode;
-    @Column(name = "credit_days")
-    private Integer creditLimit;
     @Column(name = "credit_limit")
+    private Integer creditLimit;
+    @Column(name = "credit_days")
     private Integer creditDays;
     @Column(name = "contact_person")
     private String contactPerson;

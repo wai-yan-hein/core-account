@@ -142,7 +142,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                 t.setCreatedDate(LocalDateTime.now());
                 t.setCreatedBy(Global.loginUser.getUserCode());
                 t.setMacId(Global.macId);
-                t.setType("CUS");
+                t.setType(getImportType());
                 t.setAccount(getAccount());
                 listTrader.add(t);
             });
@@ -162,6 +162,18 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                 ProUtil.getProperty(ProUtil.DEBTOR_ACC);
             case "Supplier" ->
                 ProUtil.getProperty(ProUtil.CREDITOR_ACC);
+            default ->
+                null;
+        };
+    }
+
+    private String getImportType() {
+        String type = cboType.getSelectedItem().toString();
+        return switch (type) {
+            case "Customer" ->
+                "CUS";
+            case "Supplier" ->
+                "SUP";
             default ->
                 null;
         };

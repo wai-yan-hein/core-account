@@ -128,6 +128,8 @@ public class StockImportDialog extends javax.swing.JDialog {
             CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                     .setHeader()
                     .setSkipHeaderRecord(true)
+                    .setAllowMissingColumnNames(true)
+                    .setIgnoreEmptyLines(true)
                     .build();
             Reader in = new FileReader(path);
             Iterable<CSVRecord> records = csvFormat.parse(in);
@@ -135,6 +137,7 @@ public class StockImportDialog extends javax.swing.JDialog {
                 Stock t = new Stock();
                 StockKey key = new StockKey();
                 key.setCompCode(Global.compCode);
+                t.setDeptId(Global.deptId);
                 key.setStockCode(null);
                 t.setKey(key);
                 t.setDeptId(Global.deptId);
