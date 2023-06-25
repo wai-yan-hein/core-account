@@ -17,14 +17,12 @@ import com.acc.report.AparReport;
 import com.acc.report.FinancialReport;
 import com.acc.report.GLReport;
 import com.acc.setup.COAManagment;
-
 import com.acc.setup.COAOpening;
 import com.acc.setup.COASetup;
 import com.acc.setup.DepartmentSetup;
 import com.acc.setup.TraderSetup;
 import com.common.Global;
 import com.common.PanelControl;
-import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.user.common.UserRepo;
 import com.common.Util1;
@@ -81,11 +79,15 @@ import com.user.dialog.CompanyOptionDialog;
 import com.user.dialog.DepartmentDialog;
 import com.user.setup.SystemProperty;
 import com.user.setup.AppUserSetup;
-import com.user.setup.CloudConfig;
 import com.user.setup.CompanySetup;
 import com.user.setup.CompanyTemplate;
 import com.user.setup.CurrencyExchange;
 import com.user.setup.ProjectSetup;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -194,8 +196,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     @Autowired
     private InventoryRepo inventoryRepo;
     @Autowired
-    private CloudConfig cloudConfig;
-    @Autowired
     private AppUserSetup userSetup;
     @Autowired
     private MenuSetup menuSetup;
@@ -238,6 +238,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         initComponents();
         initKeyFoucsManager();
         initPopup();
+        adjustFrameSize();
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -541,12 +542,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 systemProperty.initMain();
                 return systemProperty;
             }
-            case "Cloud Config" -> {
-                cloudConfig.setName(menuName);
-                cloudConfig.setObserver(this);
-                cloudConfig.initMain();
-                return cloudConfig;
-            }
             case "Project" -> {
                 projectSetup.setName(menuName);
                 projectSetup.setObserver(this);
@@ -596,7 +591,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 grnEntry.initMain();
                 return grnEntry;
             }
-            case "Customer Payment"->{
+            case "Customer Payment" -> {
                 customerPayment.setName(menuName);
                 customerPayment.setObserver(this);
                 customerPayment.setProgress(progress);
@@ -800,9 +795,10 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         });
 
     }
-    private void initDate(){
+
+    private void initDate() {
         accounRepo.getDate().subscribe((t) -> {
-            Global.listDate =t;
+            Global.listDate = t;
         });
     }
 
@@ -841,9 +837,10 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void departmentAssign() {
-        userRepo.getDeparment().subscribe((t) -> {
-            DepartmentUser dep;
-            if (Util1.getBoolean(ProUtil.getProperty("department.option"))) {
+        Integer deptId = Global.loginUser.getDeptId();
+        if (Util1.isNullOrEmpty(deptId)) {
+            userRepo.getDeparment(true).subscribe((t) -> {
+                DepartmentUser dep;
                 if (t.size() > 1) {
                     DepartmentDialog dialog = new DepartmentDialog(t);
                     dialog.initMain();
@@ -853,14 +850,33 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 } else {
                     dep = t.get(0);
                 }
-            } else {
-                dep = t.get(0);
-            }
-            lblDep.setText(dep.getDeptName());
-            Global.deptId = dep.getDeptId();
-        }, (e) -> {
-            log.error(e.getMessage());
-        });
+                lblDep.setText(dep.getDeptName());
+                Global.deptId = dep.getDeptId();
+            }, (e) -> {
+                log.error(e.getMessage());
+            });
+        } else {
+            Global.deptId = deptId;
+            userRepo.findDepartment(deptId).subscribe((dep) -> {
+                if (dep != null) {
+                    String address = dep.getAddress();
+                    String phoneNo = dep.getPhoneNo();
+                    if (!Util1.isNullOrEmpty(address)) {
+                        Global.companyAddress = address;
+                    }
+                    if (!Util1.isNullOrEmpty(phoneNo)) {
+                        Global.companyPhone = phoneNo;
+                    }
+                    lblDep.setText(dep.getDeptName());
+                } else {
+                    JOptionPane.showMessageDialog(this, "Department no found.");
+                    System.exit(1);
+                }
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, "Department no found.");
+                System.exit(1);
+            });
+        }
 
     }
 
@@ -1058,6 +1074,27 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         }
     }
 
+    public void adjustFrameSize() {
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice gd = ge.getDefaultScreenDevice();
+        Rectangle bounds = gd.getDefaultConfiguration().getBounds();
+
+        // Adjust the frame size and position
+        Insets screenInsets = Toolkit.getDefaultToolkit().getScreenInsets(getGraphicsConfiguration());
+        int taskbarHeight = screenInsets.bottom;
+
+        // Set the frame size and position
+        int newHeight = bounds.height;
+        int newY = bounds.y;
+        if (screenInsets.bottom > 0) {
+            newHeight -= taskbarHeight;
+            newY += taskbarHeight;
+        }
+
+        setSize(bounds.width, newHeight);
+        setLocation(bounds.x, newY);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -1107,6 +1144,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         setTitle("Core Account  Cloud (V.2.0)");
         setAutoRequestFocus(false);
         addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                formComponentResized(evt);
+            }
             public void componentShown(java.awt.event.ComponentEvent evt) {
                 formComponentShown(evt);
             }
@@ -1449,6 +1489,11 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         // TODO add your handling code here:
     }//GEN-LAST:event_formWindowClosing
+
+    private void formComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentResized
+        // TODO add your handling code here:
+        adjustFrameSize();
+    }//GEN-LAST:event_formComponentResized
 
     /**
      * @param args the command line arguments

@@ -11,7 +11,7 @@ import com.common.Global;
 import com.user.model.RoleProperty;
 import com.common.Util1;
 import com.inventory.model.AppRole;
-import com.inventory.model.AppUser;
+import com.user.model.AppUser;
 import com.user.model.DepartmentUser;
 import com.inventory.model.MachineInfo;
 import com.inventory.model.VRoleMenu;
@@ -30,10 +30,9 @@ import com.user.model.Project;
 import com.user.model.ProjectKey;
 import com.user.model.VRoleCompany;
 import com.user.model.YearEnd;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import javax.swing.JOptionPane;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -157,7 +156,12 @@ public class UserRepo {
                 .uri("/user/save-company")
                 .body(Mono.just(app), CompanyInfo.class)
                 .retrieve()
-                .bodyToMono(CompanyInfo.class);
+                .bodyToMono(CompanyInfo.class)
+                .doOnSuccess((t) -> {
+                    if (localdatabase) {
+                        h2Repo.save(t);
+                    }
+                });
     }
 
     public Mono<Currency> saveCurrency(Currency app) {
@@ -165,7 +169,12 @@ public class UserRepo {
                 .uri("/user/save-currency")
                 .body(Mono.just(app), Currency.class)
                 .retrieve()
-                .bodyToMono(Currency.class);
+                .bodyToMono(Currency.class)
+                .doOnSuccess((t) -> {
+                    if (localdatabase) {
+                        h2Repo.save(t);
+                    }
+                });
     }
 
     public Mono<AppRole> saveAppRole(AppRole app) {
@@ -173,7 +182,12 @@ public class UserRepo {
                 .uri("/user/save-role")
                 .body(Mono.just(app), AppRole.class)
                 .retrieve()
-                .bodyToMono(AppRole.class);
+                .bodyToMono(AppRole.class)
+                .doOnSuccess((t) -> {
+                    if (localdatabase) {
+                        h2Repo.save(t);
+                    }
+                });
     }
 
     public Mono<PrivilegeCompany> saveCompRole(PrivilegeCompany app) {
@@ -181,7 +195,12 @@ public class UserRepo {
                 .uri("/user/save-privilege-company")
                 .body(Mono.just(app), PrivilegeCompany.class)
                 .retrieve()
-                .bodyToMono(PrivilegeCompany.class);
+                .bodyToMono(PrivilegeCompany.class)
+                .doOnSuccess((t) -> {
+                    if (localdatabase) {
+                        h2Repo.save(t);
+                    }
+                });
     }
 
     public Mono<AppUser> saveUser(AppUser app) {
@@ -189,7 +208,12 @@ public class UserRepo {
                 .uri("/user/save-user")
                 .body(Mono.just(app), AppUser.class)
                 .retrieve()
-                .bodyToMono(AppUser.class);
+                .bodyToMono(AppUser.class)
+                .doOnSuccess((t) -> {
+                    if (localdatabase) {
+                        h2Repo.save(t);
+                    }
+                });
     }
 
     public Mono<Currency> findCurrency(String curCode) {
@@ -239,7 +263,11 @@ public class UserRepo {
                 .queryParam("deptId", deptId)
                 .build())
                 .retrieve()
-                .bodyToMono(DepartmentUser.class);
+                .bodyToMono(DepartmentUser.class)
+                .onErrorResume((e) -> {
+                    log.error("findDepartment : " + e.getMessage());
+                    return Mono.error(e);
+                });
     }
 
     public Mono<DepartmentUser> saveDepartment(DepartmentUser d) {
@@ -247,7 +275,12 @@ public class UserRepo {
                 .uri("/user/save-department")
                 .body(Mono.just(d), DepartmentUser.class)
                 .retrieve()
-                .bodyToMono(DepartmentUser.class);
+                .bodyToMono(DepartmentUser.class)
+                .doOnSuccess((t) -> {
+                    if (localdatabase) {
+                        h2Repo.save(t);
+                    }
+                });
     }
 
     public Mono<Currency> getDefaultCurrency() {
@@ -290,7 +323,7 @@ public class UserRepo {
 
     public HashMap<String, String> getRoleProperty(String roleCode) {
         HashMap<String, String> hm = new HashMap<>();
-        List<RoleProperty> prop = new ArrayList<>();
+        List<RoleProperty> prop;
         if (localdatabase) {
             prop = h2Repo.getRoleProperty(roleCode);
         } else {
@@ -309,7 +342,7 @@ public class UserRepo {
 
     public HashMap<String, String> getMachineProperty(Integer macId) {
         HashMap<String, String> hm = new HashMap<>();
-        List<MachineProperty> prop = new ArrayList<>();
+        List<MachineProperty> prop;
         if (macId == null) {
             return hm;
         }
@@ -334,7 +367,12 @@ public class UserRepo {
                 .uri("/user/save-system-property")
                 .body(Mono.just(prop), SysProperty.class)
                 .retrieve()
-                .bodyToMono(SysProperty.class);
+                .bodyToMono(SysProperty.class)
+                .doOnSuccess((t) -> {
+                    if (localdatabase) {
+                        h2Repo.save(t);
+                    }
+                });
     }
 
     public Mono<RoleProperty> saveRoleProperty(RoleProperty prop) {
@@ -342,7 +380,12 @@ public class UserRepo {
                 .uri("/user/save-role-property")
                 .body(Mono.just(prop), RoleProperty.class)
                 .retrieve()
-                .bodyToMono(RoleProperty.class);
+                .bodyToMono(RoleProperty.class)
+                .doOnSuccess((t) -> {
+                    if (localdatabase) {
+                        h2Repo.save(t);
+                    }
+                });
     }
 
     public Mono<MachineProperty> saveMacProp(MachineProperty prop) {
@@ -350,17 +393,28 @@ public class UserRepo {
                 .uri("/user/save-mac-property")
                 .body(Mono.just(prop), MachineProperty.class)
                 .retrieve()
-                .bodyToMono(MachineProperty.class);
+                .bodyToMono(MachineProperty.class)
+                .doOnSuccess((t) -> {
+                    if (localdatabase) {
+                        h2Repo.save(t);
+                    }
+                });
     }
 
-    public Mono<List<DepartmentUser>> getDeparment() {
+    public Mono<List<DepartmentUser>> getDeparment(Boolean active) {
         if (localdatabase) {
-            return h2Repo.getDeparment();
+            return h2Repo.getDeparment(active);
         }
         return userApi.get()
                 .uri(builder -> builder.path("/user/get-department")
+                .queryParam("active", active)
                 .build())
-                .retrieve().bodyToFlux(DepartmentUser.class).collectList();
+                .retrieve().bodyToFlux(DepartmentUser.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("getDeparment :" + e.getMessage());
+                    return Mono.error(e);
+                });
     }
 
     public Mono<List<VRoleMenu>> getReport(String menuClass) {
@@ -393,7 +447,12 @@ public class UserRepo {
                 .uri("/user/saveBusinessType")
                 .body(Mono.just(type), BusinessType.class)
                 .retrieve()
-                .bodyToMono(BusinessType.class);
+                .bodyToMono(BusinessType.class)
+                .doOnSuccess((t) -> {
+                    if (localdatabase) {
+                        h2Repo.save(t);
+                    }
+                });
     }
 
     public Mono<BusinessType> find(Integer id) {
@@ -421,7 +480,12 @@ public class UserRepo {
                 .uri("/user/save-menu")
                 .body(Mono.just(menu), Menu.class)
                 .retrieve()
-                .bodyToMono(Menu.class);
+                .bodyToMono(Menu.class)
+                .doOnSuccess((t) -> {
+                    if (localdatabase) {
+                        h2Repo.save(t);
+                    }
+                });
     }
 
     public Mono<List<Menu>> getMenuTree() {
@@ -474,6 +538,7 @@ public class UserRepo {
                 .body(Mono.just(type), MenuTemplate.class)
                 .retrieve()
                 .bodyToMono(MenuTemplate.class);
+
     }
 
     public Mono<List<Project>> searchProject() {
@@ -505,7 +570,12 @@ public class UserRepo {
                 .uri("/user/saveProject")
                 .body(Mono.just(obj), Project.class)
                 .retrieve()
-                .bodyToMono(Project.class);
+                .bodyToMono(Project.class)
+                .doOnSuccess((t) -> {
+                    if (localdatabase) {
+                        h2Repo.save(t);
+                    }
+                });
     }
 
     public Mono<ExchangeRate> save(ExchangeRate obj) {
@@ -513,7 +583,12 @@ public class UserRepo {
                 .uri("/user/saveExchange")
                 .body(Mono.just(obj), ExchangeRate.class)
                 .retrieve()
-                .bodyToMono(ExchangeRate.class);
+                .bodyToMono(ExchangeRate.class)
+                .doOnSuccess((t) -> {
+                    if (localdatabase) {
+                        h2Repo.save(t);
+                    }
+                });
     }
 
     public Mono<List<Project>> searchProjectByCode(String code) {
@@ -768,5 +843,18 @@ public class UserRepo {
                 .bodyToFlux(PrivilegeCompany.class)
                 .collectList();
 
+    }
+
+    public Mono<PrivilegeMenu> savePM(PrivilegeMenu pm) {
+        return userApi.post()
+                .uri("/user/save-privilege-menu")
+                .body(Mono.just(pm), PrivilegeMenu.class)
+                .retrieve()
+                .bodyToMono(PrivilegeMenu.class)
+                .doOnSuccess((t) -> {
+                    if (localdatabase) {
+                        h2Repo.save(pm);
+                    }
+                });
     }
 }

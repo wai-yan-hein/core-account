@@ -116,16 +116,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         return traderAutoCompleter;
     }
 
-    public void setTraderAutoCompleter(TraderAutoCompleter traderAutoCompleter) {
-        this.traderAutoCompleter = traderAutoCompleter;
-    }
-
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;
-    }
-
-    public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
-        this.locationAutoCompleter = locationAutoCompleter;
     }
 
     public JProgressBar getProgress() {
@@ -345,22 +337,12 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         monoLoc.subscribe((t) -> {
             locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
             locationAutoCompleter.setObserver(this);
-            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
-                locationAutoCompleter.setLocation(tt);
-            }, (e) -> {
-                log.error(e.getMessage());
-            });
         }, (e) -> {
             log.error(e.getMessage());
         });
         userRepo.getCurrency().subscribe((t) -> {
             currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
             currAutoCompleter.setObserver(this);
-            userRepo.getDefaultCurrency().subscribe((tt) -> {
-                currAutoCompleter.setCurrency(tt);
-            }, (e) -> {
-                log.error(e.getMessage());
-            });
         }, (e) -> {
             log.error(e.getMessage());
         });
@@ -431,6 +413,18 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }
 
     private void assignDefaultValue() {
+        if (currAutoCompleter != null) {
+            userRepo.getDefaultCurrency().subscribe((t) -> {
+                currAutoCompleter.setCurrency(t);
+            });
+        }
+        if (locationAutoCompleter != null) {
+            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
+                locationAutoCompleter.setLocation(tt);
+            }, (e) -> {
+                log.error(e.getMessage());
+            });
+        }
         Mono<Trader> trader = inventoryRepo.findTrader(Global.hmRoleProperty.get("default.customer"), Global.deptId);
         trader.subscribe((t) -> {
             traderAutoCompleter.setTrader(t);

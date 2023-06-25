@@ -59,8 +59,6 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
     private final WeightLossTableModel tableModel = new WeightLossTableModel();
     private WeightLossHistoryDialog dialog;
     private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
-    private LocationAutoCompleter locationAutoCompleter;
-    private StockAutoCompleter stockAutoCompleter;
     private SelectionObserver observer;
     private JProgressBar progress;
     private WeightLossHis his = new WeightLossHis();
@@ -92,13 +90,11 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
     public void initMain() {
         txtDate.setDate(Util1.getTodayDate());
         initTable();
+        assignDefault();
     }
 
     private void initTable() {
         Mono<List<StockUnit>> monoUnit = inventoryRepo.getStockUnit();
-        inventoryRepo.getDefaultLocation().subscribe((t) -> {
-            tableModel.setLocation(t);
-        });
         tableModel.setVouDate(txtDate);
         tableModel.setInventoryRepo(inventoryRepo);
         tableModel.setLblRecord(lblRecord);
@@ -233,6 +229,7 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
     }
 
     private void clear() {
+        assignDefault();
         progress.setIndeterminate(false);
         txtVouNo.setText(null);
         txtRemark.setText(null);
@@ -241,6 +238,12 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
         lblStatus.setForeground(Color.green);
         tableModel.clear();
         tableModel.addNewRow();
+    }
+
+    private void assignDefault() {
+        inventoryRepo.getDefaultLocation().subscribe((t) -> {
+            tableModel.setLocation(t);
+        });
     }
 
     private boolean isValidEntry() {

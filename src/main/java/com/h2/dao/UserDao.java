@@ -4,7 +4,7 @@
  */
 package com.h2.dao;
 
-import com.inventory.model.AppUser;
+import com.user.model.AppUser;
 import java.util.HashMap;
 import java.util.List;
 

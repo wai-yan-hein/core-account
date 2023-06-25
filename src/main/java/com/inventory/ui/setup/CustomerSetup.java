@@ -78,6 +78,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     private SelectionObserver observer;
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
+
     enum Header {
         UserCode,
         Name,
@@ -169,7 +170,6 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         });
         sorter = new TableRowSorter(tblCustomer.getModel());
         tblCustomer.setRowSorter(sorter);
-        txtCreditTerm.setVisible(false);
     }
 
     private void searchCustomer() {
@@ -200,8 +200,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtCusAddress.setText(customer.getAddress());
         chkActive.setSelected(customer.isActive());
         txtCreditLimit.setText(Util1.getString(cus.getCreditLimit()));
-        //txtCreditTerm.setText(Util1.getString(cus.getCreditDays()));
-        spPercent.setValue(cus.getCreditDays().toString());
+        spPercent.setValue(Util1.getInteger(cus.getCreditDays()));
         txtCreditAmt.setValue(customer.getCreditAmt());
         chkMulti.setSelected(customer.isMulti());
         txtPrice.setText(customer.getPriceType());
@@ -239,7 +238,6 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
             customer.setAddress(txtCusAddress.getText());
             customer.setActive(chkActive.isSelected());
             customer.setCreditLimit(Util1.getInteger(txtCreditLimit.getText()));
-            //customer.setCreditDays(Util1.getInteger(txtCreditTerm.getText()));
             customer.setCreditDays(Util1.getInteger(spPercent.getValue()));
             customer.setNrc(txtNRC.getText());
             customer.setRfId(txtRFID.getText());
@@ -371,7 +369,6 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         chkActive = new javax.swing.JCheckBox();
         lblStatus = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
-        txtCreditTerm = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         txtRegion = new javax.swing.JTextField();
         jButton2 = new javax.swing.JButton();
@@ -480,9 +477,6 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
 
         jLabel11.setFont(Global.lableFont);
         jLabel11.setText("Credit Day");
-
-        txtCreditTerm.setFont(Global.textFont);
-        txtCreditTerm.setName("txtCreditTerm"); // NOI18N
 
         jButton1.setFont(Global.lableFont);
         jButton1.setText("Import");
@@ -618,45 +612,53 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                             .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(lblGroup, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(lblGroup1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtCreditLimit)
-                            .addComponent(txtCusEmail)
                             .addComponent(txtCusPhone)
                             .addComponent(txtConPerson)
                             .addComponent(txtCusName)
                             .addComponent(txtCusCode, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelEntryLayout.createSequentialGroup()
-                                .addComponent(txtRegion, javax.swing.GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE)
+                                .addComponent(txtRegion)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(txtCusAddress)
                             .addComponent(txtSysCode, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtPrice)
                             .addGroup(panelEntryLayout.createSequentialGroup()
-                                .addComponent(chkMulti, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtCreditTerm, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(chkActive, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(panelEntryLayout.createSequentialGroup()
-                                .addComponent(txtGroup, javax.swing.GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE)
+                                .addComponent(txtGroup)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnGroup, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(txtAccount)
-                            .addComponent(txtNRC)
                             .addComponent(txtRemark)
                             .addComponent(txtRFID)
-                            .addComponent(txtCreditAmt)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelEntryLayout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
-                                .addComponent(btnDownload)
+                                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelEntryLayout.createSequentialGroup()
+                                        .addComponent(chkMulti)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(chkActive))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelEntryLayout.createSequentialGroup()
+                                        .addComponent(btnDownload)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jButton1))))
+                            .addGroup(panelEntryLayout.createSequentialGroup()
+                                .addComponent(spPercent, javax.swing.GroupLayout.DEFAULT_SIZE, 71, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton1))
-                            .addComponent(spPercent))))
+                                .addComponent(jLabel16)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtCreditAmt, javax.swing.GroupLayout.DEFAULT_SIZE, 71, Short.MAX_VALUE))
+                            .addGroup(panelEntryLayout.createSequentialGroup()
+                                .addComponent(txtCusEmail)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel13)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(txtNRC)
+                                .addGap(1, 1, 1)))))
                 .addContainerGap())
         );
         panelEntryLayout.setVerticalGroup(
@@ -689,9 +691,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
-                    .addComponent(txtCusEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtCusEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel13)
                     .addComponent(txtNRC, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -718,10 +718,8 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel11)
-                    .addComponent(spPercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(7, 7, 7)
-                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(spPercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel16)
                     .addComponent(txtCreditAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -738,15 +736,13 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkMulti)
-                    .addComponent(txtCreditTerm, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkActive)
+                    .addComponent(chkActive)
+                    .addComponent(lblStatus))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblStatus)
                     .addComponent(jButton1)
                     .addComponent(btnDownload))
-                .addContainerGap(119, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         panelEntryLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {txtConPerson, txtCreditLimit, txtCusAddress, txtCusCode, txtCusEmail, txtCusName, txtCusPhone});
@@ -800,12 +796,12 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 393, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(lblRecord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(txtFilter))
+                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -815,16 +811,15 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 646, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel6)
-                            .addComponent(lblRecord))
-                        .addGap(1, 1, 1)))
+                        .addComponent(jScrollPane2))
+                    .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel6)
+                    .addComponent(lblRecord))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -960,7 +955,6 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     private javax.swing.JTextField txtConPerson;
     private javax.swing.JFormattedTextField txtCreditAmt;
     private javax.swing.JTextField txtCreditLimit;
-    private javax.swing.JTextField txtCreditTerm;
     private javax.swing.JTextField txtCusAddress;
     private javax.swing.JTextField txtCusCode;
     private javax.swing.JTextField txtCusEmail;
@@ -983,7 +977,6 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         txtCusAddress.addKeyListener(this);
         txtCusEmail.addKeyListener(this);
         txtCreditLimit.addKeyListener(this);
-        txtCreditTerm.addKeyListener(this);
         txtConPerson.addKeyListener(this);
         chkActive.addKeyListener(this);
         tblCustomer.addKeyListener(this);
@@ -1148,7 +1141,6 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                 break;
             case "txtCreditLimit":
                 if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    txtCreditTerm.requestFocus();
                 }
                 if (e.getKeyCode() == KeyEvent.VK_UP) {
                 }
@@ -1270,13 +1262,12 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                     .setSkipHeaderRecord(false)
                     .build();
             FileWriter out = new FileWriter(CSV_FILE_PATH);
-            CSVPrinter printer = csvFormat.print(out);
-            printer.flush();
-            printer.close();
+            try (CSVPrinter printer = csvFormat.print(out)) {
+                printer.flush();
+            }
             progress.setIndeterminate(false);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, e.getMessage());
-            e.printStackTrace();
         }
     }
 

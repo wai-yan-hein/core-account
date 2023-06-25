@@ -17,7 +17,7 @@ import com.inventory.editor.DepartmentAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.VouStatusAutoCompleter;
-import com.inventory.model.AppUser;
+import com.user.model.AppUser;
 import com.inventory.model.Stock;
 import com.inventory.model.VStockIO;
 import com.inventory.model.VouStatus;
@@ -114,7 +114,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         userRepo.getAppUser().subscribe((t) -> {
             appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
         });
-        userRepo.getDeparment().subscribe((t) -> {
+        userRepo.getDeparment(true).subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true);
             userRepo.findDepartment(Global.deptId).subscribe((tt) -> {
                 departmentAutoCompleter.setDepartment(tt);

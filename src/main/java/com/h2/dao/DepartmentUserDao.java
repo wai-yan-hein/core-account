@@ -19,5 +19,5 @@ public interface DepartmentUserDao {
     
     DepartmentUser findById(Integer id);
     
-    List<DepartmentUser> findAll();
+    List<DepartmentUser> findAll(Boolean active);
 }

@@ -10,7 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
-import lombok.Data;
+import lombok.*;
 
 /**
  *
@@ -35,6 +35,21 @@ public class DepartmentUser {
     private String accountQ;
     @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedDate;
+    @Column(name = "phone")
+    private String phoneNo;
+    @Column(name = "address")
+    private String address;
+    @Column(name = "email")
+    private String email;
+    @Column(name = "active")
+    private boolean active;
+    @Column(name = "deleted")
+    private boolean deleted;
+
+    @Override
+    public String toString() {
+        return deptName;
+    }
 
     public DepartmentUser(Integer deptId) {
         this.deptId = deptId;

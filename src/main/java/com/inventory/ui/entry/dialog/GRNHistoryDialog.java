@@ -16,7 +16,7 @@ import com.inventory.editor.AppUserAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
-import com.inventory.model.AppUser;
+import com.user.model.AppUser;
 import com.inventory.model.GRN;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;

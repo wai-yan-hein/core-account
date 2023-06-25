@@ -124,9 +124,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         inventoryRepo.getLocation().subscribe((t) -> {
             locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
             locationAutoCompleter.setObserver(this);
-            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
-                locationAutoCompleter.setLocation(tt);
-            });
+
         });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, false);
         stockAutoCompleter.setObserver(this);
@@ -334,6 +332,9 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
     }
 
     private void clear() {
+        inventoryRepo.getDefaultLocation().subscribe((tt) -> {
+            locationAutoCompleter.setLocation(tt);
+        });
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.green);
         txtVouNo.setText(null);

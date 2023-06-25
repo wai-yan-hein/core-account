@@ -52,7 +52,7 @@ import com.h2.service.VRoleCompanyService;
 import com.h2.service.VRoleMenuService;
 import com.h2.service.VouStatusService;
 import com.inventory.model.AppRole;
-import com.inventory.model.AppUser;
+import com.user.model.AppUser;
 import com.inventory.model.Category;
 import com.inventory.model.CategoryKey;
 import com.inventory.model.Location;
@@ -91,9 +91,11 @@ import com.user.model.RoleProperty;
 import com.user.model.SysProperty;
 import com.user.model.VRoleCompany;
 import com.h2.service.OrderHisService;
+import com.h2.service.PrivilegeMenuService;
 import com.h2.service.ProcessHisDetailService;
 import com.h2.service.ProcessHisService;
 import com.h2.service.PurHisDetailService;
+import com.h2.service.RelationService;
 import com.h2.service.ReportService;
 import com.h2.service.RetInDetailService;
 import com.h2.service.RetOutDetailService;
@@ -115,6 +117,7 @@ import com.inventory.model.SaleHisDetail;
 import com.inventory.model.SaleHisKey;
 import com.inventory.model.PurHisDetail;
 import com.inventory.model.PurHisKey;
+import com.inventory.model.Region;
 import com.inventory.model.RetInHisDetail;
 import com.inventory.model.RetInHisKey;
 import com.inventory.model.RetOutHisDetail;
@@ -125,6 +128,7 @@ import com.inventory.model.StockInOutDetail;
 import com.inventory.model.TransferHis;
 import com.inventory.model.TransferHisDetail;
 import com.inventory.model.TransferHisKey;
+import com.inventory.model.UnitRelation;
 import com.inventory.model.VOrder;
 import com.inventory.model.VSale;
 import com.inventory.model.VPurchase;
@@ -132,6 +136,7 @@ import com.inventory.model.VReturnIn;
 import com.inventory.model.VReturnOut;
 import com.inventory.model.VTransfer;
 import com.inventory.model.WeightLossHis;
+import com.user.model.PrivilegeMenu;
 import java.util.HashMap;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,6 +151,8 @@ import reactor.core.publisher.Mono;
 @Component
 public class H2Repo {
 
+    @Autowired
+    private RelationService relationService;
     @Autowired
     private LocationService locationService;
     @Autowired
@@ -194,6 +201,8 @@ public class H2Repo {
     private MachineInfoService machineInfoService;
     @Autowired
     private PrivilegeCompanyService pcService;
+    @Autowired
+    private PrivilegeMenuService pmService;
     @Autowired
     private MenuService menuService;
     @Autowired
@@ -367,6 +376,106 @@ public class H2Repo {
         return Mono.justOrEmpty(weightLossService.save(wh));
     }
 
+    public AppUser save(AppUser user) {
+        return userService.save(user);
+    }
+
+    public Currency save(Currency currency) {
+        return currencyService.save(currency);
+    }
+
+    public CompanyInfo save(CompanyInfo info) {
+        return companyInfoService.save(info);
+    }
+
+    public AppRole save(AppRole role) {
+        return roleService.save(role);
+    }
+
+    public RoleProperty save(RoleProperty rp) {
+        return rolePropertyService.save(rp);
+    }
+
+    public PrivilegeCompany save(PrivilegeCompany pc) {
+        return pcService.save(pc);
+    }
+
+    public PrivilegeMenu save(PrivilegeMenu pc) {
+        return pmService.save(pc);
+    }
+
+    public DepartmentUser save(DepartmentUser du) {
+        return deptUserService.save(du);
+    }
+
+    public SysProperty save(SysProperty sp) {
+        return spService.save(sp);
+    }
+
+    public MachineProperty save(MachineProperty rp) {
+        return macPropertyService.save(rp);
+    }
+
+    public BusinessType save(BusinessType rp) {
+        return businessTypeService.save(rp);
+    }
+
+    public Menu save(Menu obj) {
+        return menuService.save(obj);
+    }
+
+    public Project save(Project obj) {
+        return projectService.save(obj);
+    }
+
+    public ExchangeRate save(ExchangeRate r) {
+        return exchangeRateService.save(r);
+    }
+
+    public Trader save(Trader obj) {
+        return traderInvService.save(obj);
+    }
+
+    public Stock save(Stock obj) {
+        return stockService.save(obj);
+    }
+
+    public Location save(Location obj) {
+        return locationService.save(obj);
+    }
+
+    public Region save(Region obj) {
+        return null;
+    }
+
+    public SaleMan save(SaleMan obj) {
+        return saleManService.save(obj);
+    }
+
+    public StockBrand save(StockBrand obj) {
+        return brandService.save(obj);
+    }
+
+    public Category save(Category obj) {
+        return categoryService.save(obj);
+    }
+
+    public StockType save(StockType obj) {
+        return typeService.save(obj);
+    }
+
+    public StockUnit save(StockUnit obj) {
+        return stockUnitService.save(obj);
+    }
+
+    public VouStatus save(VouStatus obj) {
+        return vouStatusService.save(obj);
+    }
+
+    public UnitRelation save(UnitRelation obj) {
+        return relationService.save(obj);
+    }
+
     public Mono<General> getPurRecentPrice(String stockCode, String vouDate, String unit, String compCode, Integer deptId) {
         return Mono.justOrEmpty(reportService.getPurchaseRecentPrice(stockCode, vouDate, unit, compCode, deptId));
     }
@@ -513,8 +622,8 @@ public class H2Repo {
         return Mono.justOrEmpty(deptUserService.findById(deptId));
     }
 
-    public Mono<List<DepartmentUser>> getDeparment() {
-        return Mono.justOrEmpty(deptUserService.findAll());
+    public Mono<List<DepartmentUser>> getDeparment(Boolean active) {
+        return Mono.justOrEmpty(deptUserService.findAll(active));
     }
 
     public Mono<BusinessType> find(Integer id) {
@@ -579,6 +688,18 @@ public class H2Repo {
 
     public Mono<ReturnObject> save(List<Gl> glList) {
         return Mono.justOrEmpty(glService.save(glList));
+    }
+
+    public ChartOfAccount save(ChartOfAccount obj) {
+        return coaService.save(obj);
+    }
+
+    public DepartmentA save(DepartmentA obj) {
+        return departmentAccService.save(obj);
+    }
+
+    public TraderA save(TraderA obj) {
+        return traderAccService.save(obj);
     }
 
     public Mono<List<VPurchase>> searchPurchaseVoucher(FilterObject filter) {

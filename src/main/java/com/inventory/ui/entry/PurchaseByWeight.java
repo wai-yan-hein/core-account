@@ -26,7 +26,6 @@ import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Expense;
 import com.inventory.model.GRN;
-import com.inventory.model.GRNDetail;
 import com.inventory.model.Location;
 import com.inventory.model.PurExpense;
 import com.inventory.model.PurExpenseKey;
@@ -80,8 +79,6 @@ import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -97,8 +94,6 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     private final PurchaseWeightTableModel purTableModel = new PurchaseWeightTableModel();
     private PurchaseHistoryDialog dialog;
     private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
-    @Autowired
-    private WebClient inventoryApi;
     @Autowired
     private InventoryRepo inventoryRepo;
     @Autowired
@@ -329,9 +324,6 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         userRepo.getCurrency().subscribe((t) -> {
             currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
             currAutoCompleter.setObserver(this);
-            userRepo.getDefaultCurrency().subscribe((tt) -> {
-                currAutoCompleter.setCurrency(tt);
-            });
         });
         monoLoc.subscribe((t) -> {
             locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
@@ -389,11 +381,23 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     }
 
     private void assignDefaultValue() {
-        txtPurDate.setDate(Util1.getTodayDate());
+        if (currAutoCompleter != null) {
+            userRepo.getDefaultCurrency().subscribe((t) -> {
+                currAutoCompleter.setCurrency(t);
+            });
+        }
+        if (locationAutoCompleter != null) {
+            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
+                locationAutoCompleter.setLocation(tt);
+            }, (e) -> {
+                log.error(e.getMessage());
+            });
+        }
         Mono<Trader> trader = inventoryRepo.findTrader(Global.hmRoleProperty.get("default.supplier"), Global.deptId);
         trader.subscribe((t) -> {
             traderAutoCompleter.setTrader(t);
         });
+        txtPurDate.setDate(Util1.getTodayDate());
         txtDueDate.setDate(null);
         progress.setIndeterminate(false);
         txtCurrency.setEnabled(ProUtil.isMultiCur());
@@ -616,7 +620,6 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     public void historyPur() {
         if (dialog == null) {
             dialog = new PurchaseHistoryDialog(Global.parentForm);
-            dialog.setInventoryApi(inventoryApi);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setUserRepo(userRepo);
             dialog.setIconImage(searchIcon);
@@ -629,7 +632,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         dialog.setVisible(true);
     }
 
-    public void setVoucher(PurHis pur) {
+    public void setVoucher(PurHis pur, boolean local) {
         if (pur != null) {
             progress.setIndeterminate(true);
             ph = pur;
@@ -644,22 +647,9 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 traderAutoCompleter.setTrader(t);
             });
             String vouNo = ph.getKey().getVouNo();
-            Flux<PurExpense> firstResult = inventoryApi.get()
-                    .uri(builder -> builder.path("/purExpense/get-pur-expense")
-                    .queryParam("vouNo", vouNo)
-                    .queryParam("compCode", Global.compCode)
-                    .build())
-                    .retrieve().bodyToFlux(PurExpense.class);
-
-            Flux<PurHisDetail> secondResult = inventoryApi.get()
-                    .uri(builder -> builder.path("/pur/get-pur-detail")
-                    .queryParam("vouNo", vouNo)
-                    .queryParam("compCode", Global.compCode)
-                    .queryParam("deptId", ph.getKey().getDeptId())
-                    .build())
-                    .retrieve().bodyToFlux(PurHisDetail.class);
-            Mono<List<PurExpense>> p1 = firstResult.collectList();
-            Mono<List<PurHisDetail>> p2 = secondResult.collectList();
+            Integer deptId = ph.getKey().getDeptId();
+            Mono<List<PurExpense>> p1 = inventoryRepo.getPurExpense(vouNo);
+            Mono<List<PurHisDetail>> p2 = inventoryRepo.getPurDetail(vouNo, deptId, local);
             List<PurExpense> listExp = p1.block();
             List<PurHisDetail> listPur = p2.block();
             expenseTableModel.setListDetail(listExp);
@@ -745,22 +735,9 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
 
     private void printVoucher(PurHis p) {
         String vouNo = p.getKey().getVouNo();
-        Flux<VPurchase> fr = inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-purchase-weight-report")
-                .queryParam("vouNo", vouNo)
-                .queryParam("batchNo", p.getBatchNo())
-                .queryParam("compCode", Global.compCode)
-                .build())
-                .retrieve()
-                .bodyToFlux(VPurchase.class);
-        Flux<PurExpense> sr = inventoryApi.get()
-                .uri(builder -> builder.path("/purExpense/get-pur-expense")
-                .queryParam("vouNo", vouNo)
-                .queryParam("compCode", Global.compCode)
-                .build())
-                .retrieve().bodyToFlux(PurExpense.class);
-        Mono<List<VPurchase>> p1 = fr.collectList();
-        Mono<List<PurExpense>> p2 = sr.collectList();
+        String batchNo = p.getBatchNo();
+        Mono<List<VPurchase>> p1 = inventoryRepo.getPurchaseWeightReport(vouNo, batchNo);
+        Mono<List<PurExpense>> p2 = inventoryRepo.getPurExpense(vouNo);
         List<VPurchase> list = p1.block();
         List<PurExpense> listEx = p2.block();
         listEx.removeIf((t) -> Util1.getFloat(t.getAmount()) == 0);
@@ -833,27 +810,24 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             traderAutoCompleter.setTrader(t);
         });
         txtRemark.setText(g.getRemark());
-        Flux<GRNDetail> result = inventoryApi.get()
-                .uri(builder -> builder.path("/grn/get-grn-detail")
-                .queryParam("vouNo", g.getKey().getVouNo())
-                .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", g.getKey().getDeptId())
-                .build())
-                .retrieve().bodyToFlux(GRNDetail.class);
-        result.subscribe((t) -> {
-            PurHisDetail pd = new PurHisDetail();
-            pd.setStockCode(t.getStockCode());
-            pd.setUserCode(t.getUserCode());
-            pd.setStockName(t.getStockName());
-            pd.setRelName(t.getRelName());
-            pd.setWeight(t.getWeight());
-            pd.setQty(t.getQty());
-            pd.setStdWeight(t.getStdWeight());
-            pd.setWeightUnit(t.getWeightUnit());
-            pd.setUnitCode(t.getUnit());
-            pd.setLocCode(t.getLocCode());
-            pd.setLocName(t.getLocName());
-            purTableModel.addPurchase(pd);
+        String vouNo = g.getKey().getVouNo();
+        Integer deptId = g.getKey().getDeptId();
+        inventoryRepo.getGRNDetail(vouNo, deptId).subscribe((list) -> {
+            list.forEach((t) -> {
+                PurHisDetail pd = new PurHisDetail();
+                pd.setStockCode(t.getStockCode());
+                pd.setUserCode(t.getUserCode());
+                pd.setStockName(t.getStockName());
+                pd.setRelName(t.getRelName());
+                pd.setWeight(t.getWeight());
+                pd.setQty(t.getQty());
+                pd.setStdWeight(t.getStdWeight());
+                pd.setWeightUnit(t.getWeightUnit());
+                pd.setUnitCode(t.getUnit());
+                pd.setLocCode(t.getLocCode());
+                pd.setLocName(t.getLocName());
+                purTableModel.addPurchase(pd);
+            });
         }, (e) -> {
             progress.setIndeterminate(false);
             JOptionPane.showMessageDialog(this, e.getMessage());
@@ -1680,8 +1654,9 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             }
             case "PUR-HISTORY" -> {
                 if (selectObj instanceof VPurchase v) {
-                    inventoryRepo.findPurchase(v.getVouNo(), v.getDeptId(),v.isLocal()).subscribe((t) -> {
-                        setVoucher(t);
+                    boolean local = v.isLocal();
+                    inventoryRepo.findPurchase(v.getVouNo(), v.getDeptId(), local).subscribe((t) -> {
+                        setVoucher(t, local);
                     });
                 }
             }

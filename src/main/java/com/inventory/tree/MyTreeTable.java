@@ -29,9 +29,9 @@ public class MyTreeTable extends JTable {
         super.setModel(new MyTreeTableModelAdapter(treeTableModel, tree));
 
         // Gleichzeitiges Selektieren fuer Tree und Table.
-        MyTreeTableSelectionModel selectionModel = new MyTreeTableSelectionModel();
-        tree.setSelectionModel(selectionModel); //For the tree
-        setSelectionModel(selectionModel.getListSelectionModel()); //For the table
+        MyTreeTableSelectionModel model = new MyTreeTableSelectionModel();
+        tree.setSelectionModel(model); //For the tree
+        setSelectionModel(model.getListSelectionModel()); //For the table
         setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         // Renderer fuer den Tree.

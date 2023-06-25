@@ -105,20 +105,8 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         return locationAutoCompleter;
     }
 
-    public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
-        this.locationAutoCompleter = locationAutoCompleter;
-    }
-
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -253,9 +241,6 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         monoLoc.subscribe((t) -> {
             locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
             locationAutoCompleter.setObserver(this);
-            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
-                locationAutoCompleter.setLocation(tt);
-            });
         });
         userRepo.getCurrency().subscribe((t) -> {
             currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
@@ -323,15 +308,24 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void assignDefaultValue() {
-        userRepo.getDefaultCurrency().subscribe((t) -> {
-            currAutoCompleter.setCurrency(t);
-        });
-        inventoryRepo.getDefaultSaleMan().subscribe((t) -> {
-            saleManCompleter.setSaleMan(t);
-        });
-        inventoryRepo.getDefaultLocation().subscribe((t) -> {
-            locationAutoCompleter.setLocation(t);
-        });
+        if (currAutoCompleter != null) {
+            userRepo.getDefaultCurrency().subscribe((t) -> {
+                currAutoCompleter.setCurrency(t);
+            });
+        }
+        if (locationAutoCompleter != null) {
+            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
+                locationAutoCompleter.setLocation(tt);
+            }, (e) -> {
+                log.error(e.getMessage());
+            });
+        }
+        if (saleManCompleter != null) {
+            inventoryRepo.getDefaultSaleMan().subscribe((t) -> {
+                saleManCompleter.setSaleMan(t);
+            });
+        }
+
         Mono<Trader> trader = inventoryRepo.findTrader(Global.hmRoleProperty.get("default.customer"), Global.deptId);
         trader.subscribe((t) -> {
             traderAutoCompleter.setTrader(t);

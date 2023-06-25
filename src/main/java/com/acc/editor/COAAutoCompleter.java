@@ -89,6 +89,7 @@ public final class COAAutoCompleter implements KeyListener {
         JScrollPane scroll = new JScrollPane(table);
         table.getColumnModel().getColumn(0).setPreferredWidth(10);//Code
         table.getColumnModel().getColumn(1).setPreferredWidth(200);//Name
+        table.setFocusable(false);
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -148,8 +149,6 @@ public final class COAAutoCompleter implements KeyListener {
 
             }
         });
-
-        table.setRequestFocusEnabled(false);
 
         if (!list.isEmpty()) {
             table.setRowSelectionInterval(0, 0);

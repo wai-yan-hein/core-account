@@ -132,7 +132,7 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
             log.error(e.getMessage());
         });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
-        userRepo.getDeparment().subscribe((t) -> {
+        userRepo.getDeparment(true).subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true);
             userRepo.findDepartment(Global.deptId).subscribe((tt) -> {
                 departmentAutoCompleter.setDepartment(tt);

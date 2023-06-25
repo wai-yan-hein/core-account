@@ -5,6 +5,7 @@
  */
 package com.inventory.model;
 
+import com.user.model.AppUser;
 import java.io.Serializable;
 import java.util.Date;
 import lombok.Data;

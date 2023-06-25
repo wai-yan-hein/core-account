@@ -447,7 +447,7 @@ public class DayBookTableModel extends AbstractTableModel {
                 gl.setDeptCode(department.getKey().getDeptCode());
                 gl.setDeptUsrCode(department.getUserCode());
             }
-            gl.setGlDate(glDate == null ? LocalDateTime.now() : Util1.parseLocalDateTime(glDate, "dd/MM/yyyy"));
+            gl.setGlDate(glDate == null ? LocalDateTime.now() : Util1.toDate(glDate));
             gl.setSrcAccCode(sourceAccId);
             gl.setCurCode(curCode);
             listVGl.add(gl);

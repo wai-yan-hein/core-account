@@ -7,14 +7,15 @@ package com.h2.dao;
 import com.common.Util1;
 import com.user.model.DepartmentUser;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 /**
  *
  * @author Athu Sint
  */
+@Slf4j
 @Repository
 public class DepartmentUserDaoImpl extends AbstractDao<Integer, DepartmentUser> implements DepartmentUserDao {
 
@@ -37,8 +38,13 @@ public class DepartmentUserDaoImpl extends AbstractDao<Integer, DepartmentUser> 
     }
 
     @Override
-    public List<DepartmentUser> findAll() {
-        String sql = "select o from DepartmentUser o";
+    public List<DepartmentUser> findAll(Boolean active) {
+        String sql;
+        if (active) {
+            sql = "select o from DepartmentUser o where o.deleted =false and o.active =true";
+        } else {
+            sql = "select o from DepartmentUser o where o.deleted =false";
+        }
         return findHSQL(sql);
     }
 

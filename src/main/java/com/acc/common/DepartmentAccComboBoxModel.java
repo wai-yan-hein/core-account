@@ -14,7 +14,7 @@ import javax.swing.event.ListDataListener;
  *
  * @author Lenovo
  */
-public class DepartmentComboBoxModel extends AbstractListModel<DepartmentA> implements ComboBoxModel<DepartmentA> {
+public class DepartmentAccComboBoxModel extends AbstractListModel<DepartmentA> implements ComboBoxModel<DepartmentA> {
 
     private List<DepartmentA> data;
     private DepartmentA selected;

@@ -11,7 +11,7 @@ import com.common.Global;
 import com.common.TokenFile;
 import com.user.common.UserRepo;
 import com.common.Util1;
-import com.inventory.model.AppUser;
+import com.user.model.AppUser;
 import com.inventory.model.MachineInfo;
 import com.user.model.AuthenticationResponse;
 import java.awt.Image;

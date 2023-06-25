@@ -11,13 +11,16 @@ import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.user.common.UserRepo;
 import com.common.Util1;
-import com.inventory.model.AppUser;
+import com.user.common.DepartmentComboBoxModel;
+import com.user.model.AppUser;
 import com.user.common.UserTableModel;
 import com.user.editor.RoleAutoCompleter;
+import com.user.model.DepartmentUser;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.time.LocalDateTime;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
@@ -37,8 +40,8 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
 
     private int selectRow = -1;
     private AppUser appUser = new AppUser();
-    @Autowired
-    private UserTableModel userTableModel;
+    private final UserTableModel userTableModel = new UserTableModel();
+    private final DepartmentComboBoxModel departmentComboBoxModel = new DepartmentComboBoxModel();
     @Autowired
     private UserRepo userRepo;
     private RoleAutoCompleter roleAutoCompleter;
@@ -78,6 +81,11 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
             roleAutoCompleter = new RoleAutoCompleter(txtRole, t, null, false);
             roleAutoCompleter.setAppRole(null);
         });
+        userRepo.getDeparment(true).subscribe((t) -> {
+            t.add(new DepartmentUser());
+            departmentComboBoxModel.setData(t);
+            cboDep.setModel(departmentComboBoxModel);
+        });
     }
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
@@ -87,8 +95,7 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
 
     };
 
-    public void initMain() {
-        initCombo();
+    private void initTable() {
         tblUser.setDefaultRenderer(Object.class, new TableCellRender());
         tblUser.setModel(userTableModel);
         tblUser.getTableHeader().setFont(Global.textFont);
@@ -103,6 +110,11 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
 
             }
         });
+    }
+
+    public void initMain() {
+        initCombo();
+        initTable();
         searchUser();
     }
 
@@ -123,6 +135,16 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
         userRepo.finRole(appUser.getRoleCode()).subscribe((t) -> {
             roleAutoCompleter.setAppRole(t);
         });
+        Integer deptId = user.getDeptId();
+        if (!Util1.isNullOrEmpty(deptId)) {
+            userRepo.findDepartment(deptId).subscribe((t) -> {
+                departmentComboBoxModel.setSelectedItem(t);
+                cboDep.repaint();
+            });
+        } else {
+            departmentComboBoxModel.setSelectedItem(null);
+            cboDep.repaint();
+        }
         lblStatus.setText("EDIT");
     }
 
@@ -141,24 +163,26 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
     }
 
     private boolean isValidEntry() {
-        boolean status;
         if (txtUserName.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "User Name can't empty");
             txtUserName.requestFocus();
-            status = false;
+            return false;
         } else if (txtUserShort.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "User Name can't empty");
             txtUserShort.requestFocus();
-            status = false;
+            return false;
         } else if (txtPassword.getPassword().length < 1) {
             JOptionPane.showMessageDialog(this, "Password can't empty");
             txtPassword.requestFocus();
-            status = false;
+            return false;
         } else if (roleAutoCompleter.getAppRole() == null) {
             JOptionPane.showMessageDialog(this, "Select Role");
             txtRole.requestFocus();
-            status = false;
+            return false;
         } else {
+            if (cboDep.getSelectedItem() instanceof DepartmentUser dep) {
+                appUser.setDeptId(dep.getDeptId());
+            }
             appUser.setUserCode(txtUserCode.getText());
             appUser.setUserName(txtUserName.getText());
             appUser.setUserShortName(txtUserShort.getText());
@@ -166,9 +190,9 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
             appUser.setPassword(String.valueOf(txtPassword.getPassword()));
             appUser.setActive(chkAtive.isSelected());
             appUser.setRoleCode(roleAutoCompleter.getAppRole().getRoleCode());
-            status = true;
+            appUser.setUpdatedDate(LocalDateTime.now());
+            return true;
         }
-        return status;
     }
 
     public void clear() {
@@ -182,6 +206,8 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
         txtUserName.requestFocus();
         appUser = new AppUser();
         roleAutoCompleter.setAppRole(null);
+        departmentComboBoxModel.setSelectedItem(null);
+        cboDep.repaint();
     }
 
     /**
@@ -195,7 +221,6 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
 
         jScrollPane1 = new javax.swing.JScrollPane();
         tblUser = new javax.swing.JTable();
-        jPanel2 = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         chkAtive = new javax.swing.JCheckBox();
         lblStatus = new javax.swing.JLabel();
@@ -211,6 +236,8 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
         txtRole = new javax.swing.JTextField();
         jLabel11 = new javax.swing.JLabel();
         txtPassword = new javax.swing.JPasswordField();
+        jLabel12 = new javax.swing.JLabel();
+        cboDep = new javax.swing.JComboBox<>();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -274,42 +301,39 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
 
         txtPassword.setFont(Global.lableFont);
 
+        jLabel12.setFont(Global.lableFont);
+        jLabel12.setText("Department");
+
+        cboDep.setFont(Global.textFont);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel11, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(txtUserCode, javax.swing.GroupLayout.DEFAULT_SIZE, 356, Short.MAX_VALUE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(txtUserName))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(txtUserShort))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(txtEmail))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(chkAtive, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtRole)))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(txtPassword)))
-                .addContainerGap())
+                    .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(txtUserName, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtUserCode, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtUserShort, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtRole, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(chkAtive, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(cboDep, 0, 247, Short.MAX_VALUE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -339,24 +363,14 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
                     .addComponent(jLabel10)
                     .addComponent(txtRole, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(cboDep)
+                    .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkAtive)
                     .addComponent(lblStatus))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(73, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -365,9 +379,9 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 436, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 331, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -375,8 +389,8 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 575, Short.MAX_VALUE))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -388,15 +402,16 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox<DepartmentUser> cboDep;
     private javax.swing.JCheckBox chkAtive;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JTable tblUser;

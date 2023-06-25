@@ -27,7 +27,6 @@ import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Expense;
 import com.inventory.model.GRN;
-import com.inventory.model.GRNDetail;
 import com.inventory.model.Location;
 import com.inventory.model.PurExpense;
 import com.inventory.model.PurExpenseKey;
@@ -85,8 +84,6 @@ import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -101,8 +98,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     private final PurchaseTableModel purTableModel = new PurchaseTableModel();
     private PurchaseHistoryDialog dialog;
     private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
-    @Autowired
-    private WebClient inventoryApi;
     @Autowired
     private InventoryRepo inventoryRepo;
     @Autowired
@@ -370,17 +365,10 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         userRepo.getCurrency().subscribe((t) -> {
             currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
             currAutoCompleter.setObserver(this);
-            userRepo.getDefaultCurrency().subscribe((tt) -> {
-                currAutoCompleter.setCurrency(tt);
-            });
         });
-
         monoLoc.subscribe((t) -> {
             locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
             locationAutoCompleter.setObserver(this);
-            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
-                locationAutoCompleter.setLocation(tt);
-            });
         });
 
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
@@ -442,11 +430,23 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     private void assignDefaultValue() {
-        txtPurDate.setDate(Util1.getTodayDate());
+        if (currAutoCompleter != null) {
+            userRepo.getDefaultCurrency().subscribe((t) -> {
+                currAutoCompleter.setCurrency(t);
+            });
+        }
+        if (locationAutoCompleter != null) {
+            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
+                locationAutoCompleter.setLocation(tt);
+            }, (e) -> {
+                log.error(e.getMessage());
+            });
+        }
         Mono<Trader> trader = inventoryRepo.findTrader(Global.hmRoleProperty.get("default.customer"), Global.deptId);
         trader.subscribe((t) -> {
             traderAutoCompleter.setTrader(t);
         });
+        txtPurDate.setDate(Util1.getTodayDate());
         txtDueDate.setDate(null);
         txtCurrency.setEnabled(ProUtil.isMultiCur());
         txtVouNo.setText(null);
@@ -693,7 +693,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     public void historyPur() {
         if (dialog == null) {
             dialog = new PurchaseHistoryDialog(Global.parentForm);
-            dialog.setInventoryApi(inventoryApi);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setUserRepo(userRepo);
             dialog.setIconImage(searchIcon);
@@ -802,26 +801,18 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     private void searchExpense(String vouNo) {
         if (panelExpense.isVisible()) {
             expProgress.setIndeterminate(true);
-            inventoryApi.get()
-                    .uri(builder -> builder.path("/purExpense/get-pur-expense")
-                    .queryParam("vouNo", vouNo)
-                    .queryParam("compCode", Global.compCode)
-                    .build())
-                    .retrieve()
-                    .bodyToFlux(PurExpense.class)
-                    .collectList()
-                    .subscribe((t) -> {
-                        if (t.isEmpty()) {
-                            getExpense();
-                        } else {
-                            expenseTableModel.setListDetail(t);
-                            expenseTableModel.addNewRow();
-                            expProgress.setIndeterminate(false);
-                        }
-                    }, (e) -> {
-                        JOptionPane.showMessageDialog(this, e.getMessage());
-                        expProgress.setIndeterminate(false);
-                    });
+            inventoryRepo.getPurExpense(vouNo).subscribe((t) -> {
+                if (t.isEmpty()) {
+                    getExpense();
+                } else {
+                    expenseTableModel.setListDetail(t);
+                    expenseTableModel.addNewRow();
+                    expProgress.setIndeterminate(false);
+                }
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
+                expProgress.setIndeterminate(false);
+            });
         }
     }
 
@@ -830,22 +821,13 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             grnTableModel.clear();
             if (!batchNo.isEmpty()) {
                 grnProgress.setIndeterminate(true);
-                inventoryApi.get()
-                        .uri(builder -> builder.path("/grn/get-grn-detail-batch")
-                        .queryParam("batchNo", batchNo)
-                        .queryParam("compCode", Global.compCode)
-                        .queryParam("deptId", deptId)
-                        .build())
-                        .retrieve()
-                        .bodyToFlux(GRNDetail.class)
-                        .collectList()
-                        .subscribe((t) -> {
-                            grnTableModel.setListDetail(t);
-                            grnProgress.setIndeterminate(false);
-                        }, (e) -> {
-                            grnProgress.setIndeterminate(false);
-                            JOptionPane.showMessageDialog(this, e.getMessage());
-                        });
+                inventoryRepo.getGRNDetailBatch(batchNo, deptId).subscribe((t) -> {
+                    grnTableModel.setListDetail(t);
+                    grnProgress.setIndeterminate(false);
+                }, (e) -> {
+                    grnProgress.setIndeterminate(false);
+                    JOptionPane.showMessageDialog(this, e.getMessage());
+                });
             }
         }
     }
@@ -887,22 +869,9 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
 
     private void printVoucher(PurHis p) {
         String vouNo = p.getKey().getVouNo();
-        Flux<VPurchase> fr = inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-purchase-report")
-                .queryParam("vouNo", vouNo)
-                .queryParam("batchNo", p.getBatchNo())
-                .queryParam("compCode", Global.compCode)
-                .build())
-                .retrieve()
-                .bodyToFlux(VPurchase.class);
-        Flux<PurExpense> sr = inventoryApi.get()
-                .uri(builder -> builder.path("/purExpense/get-pur-expense")
-                .queryParam("vouNo", vouNo)
-                .queryParam("compCode", Global.compCode)
-                .build())
-                .retrieve().bodyToFlux(PurExpense.class);
-        Mono<List<VPurchase>> p1 = fr.collectList();
-        Mono<List<PurExpense>> p2 = sr.collectList();
+        String batchNo = p.getBatchNo();
+        Mono<List<VPurchase>> p1 = inventoryRepo.getPurchaseReport(vouNo, batchNo);
+        Mono<List<PurExpense>> p2 = inventoryRepo.getPurExpense(vouNo);
         p1.zipWith(p2).hasElement().subscribe((t) -> {
             log.info("" + t);
         });

@@ -4,29 +4,21 @@
  */
 package com.user.common;
 
-import com.inventory.model.AppUser;
+import com.user.model.AppUser;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author wai yan
  */
-@Component
+@Slf4j
 public class UserTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(UserTableModel.class);
     private List<AppUser> listUser = new ArrayList();
     private String[] columnNames = {"User Short", "Name"};
-
-    public UserTableModel(List<AppUser> listUser) {
-        this.listUser = listUser;
-
-    }
 
     @Override
     public String getColumnName(int column) {
@@ -50,14 +42,12 @@ public class UserTableModel extends AbstractTableModel {
         try {
             AppUser user = listUser.get(row);
 
-            switch (column) {
-                case 0: //user short
-                    return user.getUserShortName();
-                case 1: //Name
-                    return user.getUserName();
-                default:
-                    return null;
-            }
+            return switch (column) {
+                case 0 -> user.getUserShortName();
+                case 1 -> user.getUserName();
+                default -> null;
+            }; //user short
+            //Name
         } catch (Exception ex) {
             log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }

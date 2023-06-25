@@ -739,7 +739,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         vgl.setCrAmt(closing);
         opTableModel.addVGl(vgl);
         inOutTableModel.addVGl(new Gl(getCurCode(), drAmt, crAmt));
-        txtRecord.setValue(listVGl.size());
+        txtRecord.setValue(listVGl.size()-1);
     }
 
     private void clearModel() {

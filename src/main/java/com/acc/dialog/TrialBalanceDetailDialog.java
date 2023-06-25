@@ -23,6 +23,7 @@ import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.user.common.UserRepo;
+import com.user.model.Currency;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.io.File;
@@ -65,8 +66,10 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private String coaCode;
     private String traderCode;
     private DateModel dateModel;
+    private Currency currency;
     private String curCode;
     private List<String> department;
+    private String deptName;
     private AccountRepo accountRepo;
     private UserRepo userRepo;
     private DateAutoCompleter dateAutoCompleter;
@@ -76,58 +79,32 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private RefAutoCompleter refAutoCompleter;
     private List<Gl> list;
 
-    public DateModel getDateModel() {
-        return dateModel;
+    public void setCurrency(Currency currency) {
+        this.currency = currency;
+        if (currencyAAutoCompleter != null) {
+            currencyAAutoCompleter.setCurrency(this.currency);
+        }
     }
 
     public void setDateModel(DateModel dateModel) {
         this.dateModel = dateModel;
-        dateAutoCompleter.setDateModel(dateModel);
-    }
-
-    public UserRepo getUserRepo() {
-        return userRepo;
+        dateAutoCompleter.setDateModel(this.dateModel);
     }
 
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
 
-    public List<String> getDepartment() {
-        return department;
-    }
-
     public void setDepartment(List<String> department) {
         this.department = department;
-    }
-
-    public AccountRepo getAccountRepo() {
-        return accountRepo;
     }
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
 
-    public String getCurCode() {
-        return curCode;
-    }
-
-    public void setCurCode(String curCode) {
-        this.curCode = curCode;
-        this.txtCur.setText(curCode);
-    }
-
-    public String getTraderCode() {
-        return traderCode;
-    }
-
     public void setTraderCode(String traderCode) {
         this.traderCode = traderCode;
-    }
-
-    public String getCoaCode() {
-        return coaCode;
     }
 
     public void setCoaCode(String coaCode) {
@@ -137,6 +114,11 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     public void setDesp(String desp) {
         this.desp = desp;
         lblName.setText(this.desp);
+    }
+
+    public void setDeptName(String deptName) {
+        this.deptName = deptName;
+        txtDep.setText(this.deptName);
     }
 
     /**
@@ -341,7 +323,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
     public void printVoucher() {
         setVisible(false);
-        String currency = getCurCode();
+        String currency = getCurrency();
         String fromDate = dateAutoCompleter.getDateModel().getStartDate();
         String toDate = dateAutoCompleter.getDateModel().getEndDate();
         if (!currency.equals("-") || !ProUtil.isMultiCur()) {
@@ -355,7 +337,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
                 p.put("p_comp_name", Global.companyName);
                 p.put("p_comp_address", Global.companyAddress);
                 p.put("p_comp_phone", Global.companyPhone);
-                p.put("p_currency", getCurCode());
+                p.put("p_currency", getCurrency());
                 double opening = Util1.getDouble(txtOpening.getValue());
                 double closing = Util1.getDouble(txtClosing.getValue());
                 p.put("p_opening", opening);

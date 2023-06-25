@@ -195,14 +195,12 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
                             VTriBalance vtb = glListingTableModel.getTBAL(selectRow);
                             String coaCode = vtb.getCoaCode();
                             String coaName = vtb.getCoaName();
-                            String curCode = vtb.getCurCode();
-                            openTBDDialog(coaCode, curCode, coaName);
+                            openTBDDialog(coaCode, coaName);
                         } else {
                             VTriBalance vtb = glListingTableModel.getTBAL(selectRow);
                             String coaCode = vtb.getCoaCode();
                             String coaName = vtb.getCoaName();
-                            String curCode = vtb.getCurCode();
-                            openTBDDialog(coaCode, curCode, coaName);
+                            openTBDDialog(coaCode, coaName);
                         }
                     }
                 }
@@ -279,7 +277,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
 
     }
 
-    private void openTBDDialog(String coaCode, String curCode, String coaName) {
+    private void openTBDDialog(String coaCode, String coaName) {
         if (dialog == null) {
             dialog = new TrialBalanceDetailDialog(Global.parentForm);
             dialog.setAccountRepo(accountRepo);
@@ -289,10 +287,11 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             dialog.setLocationRelativeTo(null);
         }
         dialog.setCoaCode(coaCode);
-        dialog.setCurCode(curCode);
+        dialog.setCurrency(currencyAutoCompleter == null ? null : currencyAutoCompleter.getCurrency());
         dialog.setDesp(coaName);
         dialog.setTraderCode(null);
         dialog.setDepartment(departmentAutoCompleter.getListOption());
+        dialog.setDeptName(txtDep.getText());
         dialog.setDateModel(dateAutoCompleter.getDateModel());
         dialog.searchTriBalDetail();
     }

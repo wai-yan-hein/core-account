@@ -19,7 +19,7 @@ import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.SaleManAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
-import com.inventory.model.AppUser;
+import com.user.model.AppUser;
 import com.inventory.model.GRN;
 import com.inventory.model.SaleMan;
 import com.inventory.model.Stock;
@@ -138,7 +138,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         inventoryRepo.getLocation().subscribe((t) -> {
             locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, false);
         });
-        userRepo.getDeparment().subscribe((t) -> {
+        userRepo.getDeparment(true).subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true);
             userRepo.findDepartment(Global.deptId).subscribe((tt) -> {
                 departmentAutoCompleter.setDepartment(tt);

@@ -95,8 +95,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     private ProjectAutoCompleter projectAutoCompleter;
     private SelectionObserver observer;
     private OrderHis orderHis = new OrderHis();
-    private Region region;
-    private String orderCode;
     private JProgressBar progress;
     private Mono<List<Location>> monoLoc;
     private double prvBal = 0;
@@ -254,16 +252,10 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         monoLoc.subscribe((t) -> {
             locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
             locationAutoCompleter.setObserver(this);
-            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
-                locationAutoCompleter.setLocation(tt);
-            });
         });
         userRepo.getCurrency().subscribe((t) -> {
             currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
             currAutoCompleter.setObserver(this);
-            userRepo.getDefaultCurrency().subscribe((tt) -> {
-                currAutoCompleter.setCurrency(tt);
-            });
         });
         inventoryRepo.getSaleMan().subscribe((t) -> {
             saleManCompleter = new SaleManAutoCompleter(txtSaleman, t, null, false, false);
@@ -336,6 +328,18 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         if (saleManCompleter != null) {
             inventoryRepo.getDefaultSaleMan().subscribe((tt) -> {
                 saleManCompleter.setSaleMan(tt);
+            });
+        }
+        if (currAutoCompleter != null) {
+            userRepo.getDefaultCurrency().subscribe((t) -> {
+                currAutoCompleter.setCurrency(t);
+            });
+        }
+        if (locationAutoCompleter != null) {
+            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
+                locationAutoCompleter.setLocation(tt);
+            }, (e) -> {
+                log.error(e.getMessage());
             });
         }
         txtDueDate.setDate(null);
@@ -590,7 +594,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 });
             } else {
                 projectAutoCompleter.setProject(null);
-            }            
+            }
             cboOrderStatusType.setSelectedIndex(OrderStatusType.valueOf(orderHis.getOrderStatus()).ordinal());
             inventoryRepo.getOrderDetail(vouNo, sh.getKey().getDeptId(), local)
                     .subscribe((t) -> {
@@ -627,7 +631,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                         txtTax.setValue(Util1.getFloat(orderHis.getTaxAmt()));
                         txtVouPaid.setValue(Util1.getFloat(orderHis.getPaid()));
                         txtVouBalance.setValue(Util1.getFloat(orderHis.getBalance()));
-                        txtGrandTotal.setValue(Util1.getFloat(orderHis.getGrandTotal()));                          
+                        txtGrandTotal.setValue(Util1.getFloat(orderHis.getGrandTotal()));
                         chkPaid.setSelected(orderHis.getPaid() > 0);
                         focusTable();
                         progress.setIndeterminate(false);
@@ -731,7 +735,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     private void searchOrder(Order order) {
         traderAutoCompleter.setTrader(order.getTrader());
         txtRemark.setText(order.getDesp());
-        orderCode = order.getOrderCode();
         lblStatus.setText("NEW");
 
     }

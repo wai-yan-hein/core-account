@@ -219,16 +219,10 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         monoLoc.subscribe((t) -> {
             locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
             locationAutoCompleter.setObserver(this);
-            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
-                locationAutoCompleter.setLocation(tt);
-            });
         });
         userRepo.getCurrency().subscribe((t) -> {
             currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
             currAutoCompleter.setObserver(this);
-            userRepo.getDefaultCurrency().subscribe((tt) -> {
-                currAutoCompleter.setCurrency(tt);
-            });
         });
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
         projectAutoCompleter.setObserver(this);
@@ -270,11 +264,23 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     private void assignDefaultValue() {
-        txtVouDate.setDate(Util1.getTodayDate());
+        if (currAutoCompleter != null) {
+            userRepo.getDefaultCurrency().subscribe((t) -> {
+                currAutoCompleter.setCurrency(t);
+            });
+        }
+        if (locationAutoCompleter != null) {
+            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
+                locationAutoCompleter.setLocation(tt);
+            }, (e) -> {
+                log.error(e.getMessage());
+            });
+        }
         Mono<Trader> trader = inventoryRepo.findTrader(Global.hmRoleProperty.get("default.customer"), Global.deptId);
         trader.subscribe((t) -> {
             traderAutoCompleter.setTrader(t);
         });
+        txtVouDate.setDate(Util1.getTodayDate());
         progress.setIndeterminate(false);
         txtCus.requestFocus();
         txtCurrency.setEnabled(ProUtil.isMultiCur());

@@ -64,8 +64,6 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
     private InventoryRepo inventoryRepo;
     @Autowired
     private UserRepo userRepo;
-    @Autowired
-    private WebClient inventoryApi;
     private LocationAutoCompleter locationAutoCompleter;
     private final GRNTableModel tableModel = new GRNTableModel();
     private GRNHistoryDialog dialog;
@@ -141,9 +139,6 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         inventoryRepo.getLocation().subscribe((t) -> {
             locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
             locationAutoCompleter.setObserver(this);
-            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
-                locationAutoCompleter.setLocation(tt);
-            });
         });
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "-");
         traderAutoCompleter.setObserver(this);
@@ -151,6 +146,9 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
 
     private void assignDefaultValue() {
         txtDate.setDate(Util1.getTodayDate());
+        inventoryRepo.getDefaultLocation().subscribe((tt) -> {
+            locationAutoCompleter.setLocation(tt);
+        });
     }
 
     private void actionMapping() {
@@ -380,43 +378,35 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             });
 
             String vouNo = grn.getKey().getVouNo();
-            inventoryApi.get()
-                    .uri(builder -> builder.path("/grn/get-grn-detail")
-                    .queryParam("vouNo", vouNo)
-                    .queryParam("compCode", Global.compCode)
-                    .queryParam("deptId", deptId)
-                    .build())
-                    .retrieve().bodyToFlux(GRNDetail.class)
-                    .collectList()
-                    .subscribe((t) -> {
-                        tableModel.setListDetail(t);
-                        tableModel.addNewRow();
-                        if (grn.isClosed()) {
-                            lblStatus.setText("CLOSED");
-                            lblStatus.setForeground(Color.RED);
-                            disableForm(false);
-                        } else if (grn.isDeleted()) {
-                            lblStatus.setText("DELETED");
-                            lblStatus.setForeground(Color.RED);
-                            disableForm(false);
-                            observer.selected("delete", true);
-                        } else {
-                            lblStatus.setText("EDIT");
-                            lblStatus.setForeground(Color.blue);
-                            disableForm(true);
-                            txtBatchNo.setEditable(g.getBatchNo().isEmpty());
-                        }
-                        txtVouNo.setText(vouNo);
-                        txtRemark.setText(grn.getRemark());
-                        txtBatchNo.setText(grn.getBatchNo());
-                        txtDate.setDate(Util1.convertToDate(grn.getVouDate()));
-                        chkClose.setSelected(grn.isClosed());
-                        focusTable();
-                        progress.setIndeterminate(false);
-                    }, (e) -> {
-                        progress.setIndeterminate(false);
-                        JOptionPane.showMessageDialog(this, e.getMessage());
-                    });
+            inventoryRepo.getGRNDetail(vouNo, deptId).subscribe((t) -> {
+                tableModel.setListDetail(t);
+                tableModel.addNewRow();
+                if (grn.isClosed()) {
+                    lblStatus.setText("CLOSED");
+                    lblStatus.setForeground(Color.RED);
+                    disableForm(false);
+                } else if (grn.isDeleted()) {
+                    lblStatus.setText("DELETED");
+                    lblStatus.setForeground(Color.RED);
+                    disableForm(false);
+                    observer.selected("delete", true);
+                } else {
+                    lblStatus.setText("EDIT");
+                    lblStatus.setForeground(Color.blue);
+                    disableForm(true);
+                    txtBatchNo.setEditable(g.getBatchNo().isEmpty());
+                }
+                txtVouNo.setText(vouNo);
+                txtRemark.setText(grn.getRemark());
+                txtBatchNo.setText(grn.getBatchNo());
+                txtDate.setDate(Util1.convertToDate(grn.getVouDate()));
+                chkClose.setSelected(grn.isClosed());
+                focusTable();
+                progress.setIndeterminate(false);
+            }, (e) -> {
+                progress.setIndeterminate(false);
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            });
 
         }
     }

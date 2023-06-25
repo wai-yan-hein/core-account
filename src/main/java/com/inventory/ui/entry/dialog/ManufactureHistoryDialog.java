@@ -136,7 +136,7 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
         stockAutoCompleter.setObserver(this);
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtPT, inventoryRepo, null, true);
         vouStatusAutoCompleter.setObserver(this);
-        userRepo.getDeparment().subscribe((t) -> {
+        userRepo.getDeparment(true).subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true);
             userRepo.findDepartment(Global.deptId).subscribe((tt) -> {
                 departmentAutoCompleter.setDepartment(tt);

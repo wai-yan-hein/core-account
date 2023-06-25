@@ -17,16 +17,13 @@ import com.inventory.ui.common.UserRoleTableModel;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.user.dialog.RoleSetupDialog;
 import java.awt.event.KeyEvent;
-import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -41,8 +38,6 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl, Sel
     @Autowired
     private RoleCompany roleCompany;
     private final UserRoleTableModel userRoleTableModel = new UserRoleTableModel();
-    @Autowired
-    private WebClient userApi;
     @Autowired
     private WebClient accountApi;
     @Autowired
@@ -123,7 +118,7 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl, Sel
     }
 
     private void searchRole() {
-       userRepo.getAppRole().subscribe((t) -> {
+        userRepo.getAppRole().subscribe((t) -> {
             userRoleTableModel.setListRole(t);
         }, (e) -> {
             JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());

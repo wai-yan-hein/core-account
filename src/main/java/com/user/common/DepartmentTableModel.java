@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DepartmentTableModel extends AbstractTableModel {
 
     private List<DepartmentUser> listDepartment = new ArrayList();
-    private final String[] columnNames = {"Short", "Department Name"};
+    private final String[] columnNames = {"Code", "Department Name"};
     private UserRepo userRepo;
 
     public UserRepo getUserRepo() {

@@ -146,13 +146,13 @@ public final class COA3AutoCompleter implements KeyListener {
         popup.addPopupMenuListener(new PopupMenuListener() {
             @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-
             }
 
             @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                 textComp.unregisterKeyboardAction(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0));
                 popupOpen = false;
+
             }
 
             @Override
@@ -162,10 +162,10 @@ public final class COA3AutoCompleter implements KeyListener {
                         editor.stopCellEditing();
                     }
                 }
-
             }
         });
-        table.setRequestFocusEnabled(false);
+
+        table.setFocusable(false);
     }
 
     public void mouseSelect() {
@@ -384,6 +384,8 @@ public final class COA3AutoCompleter implements KeyListener {
                     if (!t.isEmpty()) {
                         table.setRowSelectionInterval(0, 0);
                     }
+                }, (er) -> {
+                    log.error(er.getMessage());
                 });
             }
 

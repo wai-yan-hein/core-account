@@ -7,7 +7,7 @@ package com.inventory.ui.setup.dialog;
 
 import com.acc.common.AccountRepo;
 import com.acc.common.COAComboBoxModel;
-import com.acc.common.DepartmentComboBoxModel;
+import com.acc.common.DepartmentAccComboBoxModel;
 import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.DepartmentA;
@@ -46,7 +46,7 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
     private int selectRow = - 1;
     private Location location = new Location();
     private final LocationTableModel locationTableModel = new LocationTableModel();
-    private final DepartmentComboBoxModel departmentComboBoxModel = new DepartmentComboBoxModel();
+    private final DepartmentAccComboBoxModel departmentComboBoxModel = new DepartmentAccComboBoxModel();
     private final COAComboBoxModel cOAComboBoxModel = new COAComboBoxModel();
     private InventoryRepo inventoryRepo;
     private AccountRepo accountRepo;

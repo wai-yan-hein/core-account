@@ -16,7 +16,7 @@ import com.inventory.editor.AppUserAutoCompleter;
 import com.inventory.editor.DepartmentAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
-import com.inventory.model.AppUser;
+import com.user.model.AppUser;
 import com.inventory.model.Location;
 import com.inventory.model.Stock;
 import com.inventory.model.VTransfer;
@@ -96,7 +96,7 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         userRepo.getAppUser().subscribe((t) -> {
             appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
         });
-        userRepo.getDeparment().subscribe((t) -> {
+        userRepo.getDeparment(true).subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true);
             userRepo.findDepartment(Global.deptId).subscribe((tt) -> {
                 departmentAutoCompleter.setDepartment(tt);

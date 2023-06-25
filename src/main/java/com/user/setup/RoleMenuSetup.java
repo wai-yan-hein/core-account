@@ -29,12 +29,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Slf4j
 public class RoleMenuSetup extends javax.swing.JPanel implements KeyListener, SelectionObserver {
 
-    @Autowired
-    private WebClient userApi;
     private SelectionObserver observer;
     private JProgressBar progress;
     @Autowired
-    private UserRepo uerRepo;
+    private UserRepo userRepo;
 
     public JProgressBar getProgress() {
         return progress;
@@ -60,10 +58,10 @@ public class RoleMenuSetup extends javax.swing.JPanel implements KeyListener, Se
     }
 
     public void createMenuTree(String roleCode) {
-        uerRepo.getRoleMenuTree(roleCode)
+        userRepo.getRoleMenuTree(roleCode)
                 .subscribe((t) -> {
                     VRoleMenu vRoleMenu = new VRoleMenu("Best-System", "System", true, t);
-                    MyAbstractTreeTableModel treeTableModel = new MyDataModel(vRoleMenu, userApi, this);
+                    MyAbstractTreeTableModel treeTableModel = new MyDataModel(vRoleMenu, userRepo, this);
                     MyTreeTable treeTable = new MyTreeTable(treeTableModel);
                     scrollPane.getViewport().add(treeTable);
                 }, (e) -> {

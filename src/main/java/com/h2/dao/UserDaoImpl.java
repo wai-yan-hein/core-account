@@ -8,7 +8,7 @@ import com.common.Util1;
 import com.h2.service.MacPropertyService;
 import com.h2.service.RolePropertyService;
 import com.h2.service.SystemPropertyService;
-import com.inventory.model.AppUser;
+import com.user.model.AppUser;
 import com.user.model.MachineProperty;
 import com.user.model.RoleProperty;
 import com.user.model.SysProperty;

@@ -7,23 +7,18 @@ package com.inventory.tree;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.tree.DefaultTreeSelectionModel;
 
 /**
  *
  * @author Lenovo
  */
-public class MyTreeTableSelectionModel extends DefaultTreeSelectionModel {
+public final class MyTreeTableSelectionModel extends DefaultTreeSelectionModel {
 
     public MyTreeTableSelectionModel() {
         super();
 
-        getListSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-
-            }
+        getListSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
         });
     }
 

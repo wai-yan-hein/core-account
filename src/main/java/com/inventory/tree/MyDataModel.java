@@ -10,32 +10,30 @@ import com.common.SelectionObserver;
 import com.user.model.PrivilegeMenu;
 import com.user.model.PMKey;
 import com.inventory.model.VRoleMenu;
+import com.user.common.UserRepo;
 import java.util.List;
 import javax.swing.JOptionPane;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.reactive.function.client.WebClient;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class MyDataModel extends MyAbstractTreeTableModel {
-
-    private static final Logger log = LoggerFactory.getLogger(MyDataModel.class);
 
     // Spalten Name.
     static protected String[] columnNames = {"Name", "Type", "Allow"};
-    private final WebClient userApi;
+    private final UserRepo userRepo;
     private final SelectionObserver observer;
     // Spalten Typen.
     static protected Class<?>[] columnTypes = {MyTreeTableModel.class, String.class, Boolean.class};
 
-    public MyDataModel(VRoleMenu rootNode, WebClient userApi, SelectionObserver observer) {
+    public MyDataModel(VRoleMenu rootNode, UserRepo userRepo, SelectionObserver observer) {
         super(rootNode);
         root = rootNode;
-        this.userApi = userApi;
+        this.userRepo = userRepo;
         this.observer = observer;
     }
 
@@ -127,18 +125,13 @@ public class MyDataModel extends MyAbstractTreeTableModel {
             PrivilegeMenu privilege = new PrivilegeMenu();
             privilege.setKey(key);
             privilege.setAllow(allow);
-            userApi.post()
-                    .uri("/user/save-privilege-menu")
-                    .body(Mono.just(privilege), PrivilegeMenu.class)
-                    .retrieve()
-                    .bodyToMono(PrivilegeMenu.class)
-                    .subscribe((t) -> {
-                        if (observer != null) {
-                            observer.selected("Menu-Change", "-");
-                        }
-                    }, (e) -> {
-                        JOptionPane.showMessageDialog(Global.parentForm, e.getMessage(), "Permission Allow.", JOptionPane.ERROR_MESSAGE);
-                    });
+            userRepo.savePM(privilege).subscribe((t) -> {
+                if (observer != null) {
+                    observer.selected("Menu-Change", "-");
+                }
+            }, (e) -> {
+                JOptionPane.showMessageDialog(Global.parentForm, e.getMessage(), "Permission Allow.", JOptionPane.ERROR_MESSAGE);
+            });
 
         }
 

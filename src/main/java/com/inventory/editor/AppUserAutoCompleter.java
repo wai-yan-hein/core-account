@@ -7,7 +7,7 @@ package com.inventory.editor;
 
 import com.common.Global;
 import com.common.TableCellRender;
-import com.inventory.model.AppUser;
+import com.user.model.AppUser;
 import com.user.common.UserTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -44,7 +44,7 @@ public final class AppUserAutoCompleter implements KeyListener {
     private final JPopupMenu popup = new JPopupMenu();
     private final JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private final UserTableModel userTableModel;
+    private final UserTableModel userTableModel = new UserTableModel();
     private AppUser appUser;
     public AbstractCellEditor editor;
     private final TableRowSorter<TableModel> sorter;
@@ -64,7 +64,7 @@ public final class AppUserAutoCompleter implements KeyListener {
             list.add(0,user);
             setAppUser(user);
         }
-        userTableModel = new UserTableModel(list);
+        userTableModel.setListUser(list);
         table.setModel(userTableModel);
         table.setSize(50, 50);
         table.getTableHeader().setFont(Global.tblHeaderFont);

@@ -41,6 +41,10 @@ public class ProUtil {
     public static final String BANK_GROUP = "bank.group";
     public static final String C_CREDIT_AMT = "customer.credit.amount";
     public static final String DISABLE_ALL_FILTER = "disable.all.filter";
+    public static final String DEFAULT_LOCATION = "default.location";
+    public static final String DEFAULT_CURRENCY = "default.currency";
+    public static final String DEFAULT_CASH = "default.cash";
+    public static final String DEFAULT_STOCK = "default.stock";
 
     public static String getFontPath() {
         return Global.hmRoleProperty.get("font.path");

@@ -5,7 +5,7 @@
 package com.h2.service;
 
 import com.h2.dao.UserDao;
-import com.inventory.model.AppUser;
+import com.user.model.AppUser;
 import java.util.HashMap;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;

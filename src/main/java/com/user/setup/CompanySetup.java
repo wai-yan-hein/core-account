@@ -13,6 +13,7 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.user.common.CompanyTableModel;
 import com.user.common.UserRepo;
+import com.user.dialog.DepartmentSetupDialog;
 import com.user.dialog.YearEndProcessingDailog;
 import com.user.editor.BusinessTypeAutoCompleter;
 import com.user.editor.CurrencyAutoCompleter;
@@ -281,6 +282,14 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         d.setVisible(true);
     }
 
+    private void departmentDialog() {
+        DepartmentSetupDialog d = new DepartmentSetupDialog(Global.parentForm);
+        d.setUserRepo(userRepo);
+        d.initMain();
+        d.setLocationRelativeTo(null);
+        d.setVisible(true);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -319,6 +328,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         txtBusType = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -547,20 +557,32 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
             }
         });
 
+        jButton2.setFont(Global.lableFont);
+        jButton2.setText("Department");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jButton1)
-                .addContainerGap(112, Short.MAX_VALUE))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButton1)
+                    .addComponent(jButton2))
+                .addContainerGap(94, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jButton1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton2)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -610,10 +632,16 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         yearEndDialog();
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        departmentDialog();
+    }//GEN-LAST:event_jButton2ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkActive;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel13;

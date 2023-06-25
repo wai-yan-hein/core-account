@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.inventory.model;
+package com.user.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Column;
@@ -21,7 +21,8 @@ import lombok.Data;
 @Entity
 @Data
 @Table(name = "appuser")
-public class AppUser implements java.io.Serializable {
+public class AppUser {
+
     @Id
     @Column(name = "user_code")
     private String userCode;
@@ -39,6 +40,8 @@ public class AppUser implements java.io.Serializable {
     private String roleCode;
     @Column(name = "doctor_id")
     private String doctorId;
+    @Column(name = "dept_id")
+    private Integer deptId;
     @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedDate;
 

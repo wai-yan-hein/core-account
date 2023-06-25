@@ -497,7 +497,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         txtFCrdAmt.setFormatterFactory(Util1.getDecimalFormat());
         txtFCrdAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtFCrdAmt.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-        txtFCrdAmt.setEnabled(false);
         txtFCrdAmt.setFont(Global.amtFont);
         txtFCrdAmt.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -509,7 +508,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         txtFDrAmt.setFormatterFactory(Util1.getDecimalFormat());
         txtFDrAmt.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtFDrAmt.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-        txtFDrAmt.setEnabled(false);
         txtFDrAmt.setFont(Global.amtFont);
         txtFDrAmt.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

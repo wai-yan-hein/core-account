@@ -276,7 +276,10 @@ public class AccountRepo {
                 .uri("/account/save-coa")
                 .body(Mono.just(coa), ChartOfAccount.class)
                 .retrieve()
-                .bodyToMono(ChartOfAccount.class);
+                .bodyToMono(ChartOfAccount.class)
+                .doOnSuccess((t) -> {
+                    h2Repo.save(t);
+                });
     }
 
     public Mono<List<ChartOfAccount>> saveCOAFromTemplate(Integer busId, String compCode) {
@@ -443,7 +446,10 @@ public class AccountRepo {
                 .uri("/account/save-department")
                 .body(Mono.just(dep), DepartmentA.class)
                 .retrieve()
-                .bodyToMono(DepartmentA.class);
+                .bodyToMono(DepartmentA.class)
+                .doOnSuccess((t) -> {
+                    h2Repo.save(t);
+                });
     }
 
     public Flux<DepartmentA> getDepartmentTree() {
@@ -488,7 +494,10 @@ public class AccountRepo {
                 .uri("/account/save-trader")
                 .body(Mono.just(t), TraderA.class)
                 .retrieve()
-                .bodyToMono(TraderA.class);
+                .bodyToMono(TraderA.class)
+                .doOnSuccess((trader) -> {
+                    h2Repo.save(trader);
+                });
     }
 
     public List<String> deleteTrader(TraderAKey key) {

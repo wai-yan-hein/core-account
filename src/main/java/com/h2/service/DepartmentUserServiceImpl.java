@@ -38,8 +38,8 @@ public class DepartmentUserServiceImpl implements DepartmentUserService {
     }
 
     @Override
-    public List<DepartmentUser> findAll() {
-        return deptDao.findAll();
+    public List<DepartmentUser> findAll(Boolean active) {
+        return deptDao.findAll(active);
     }
 
 }

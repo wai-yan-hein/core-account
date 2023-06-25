@@ -105,7 +105,6 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         public void focusGained(FocusEvent e) {
             ((JTextFieldDateEditor) e.getSource()).selectAll();
         }
-
     };
 
     private void actionMapping() {
@@ -127,9 +126,6 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private void initCombo() {
         inventoryRepo.getLocation().subscribe((t) -> {
             fromLocaitonCompleter = new LocationAutoCompleter(txtFrom, t, null, false, false);
-            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
-                fromLocaitonCompleter.setLocation(tt);
-            });
             toLocaitonCompleter = new LocationAutoCompleter(txtTo, t, null, false, false);
         });
 
@@ -228,7 +224,14 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         return status;
     }
 
+    private void assingnDefault() {
+        inventoryRepo.getDefaultLocation().subscribe((tt) -> {
+            fromLocaitonCompleter.setLocation(tt);
+        });
+    }
+
     private void clear() {
+        assingnDefault();
         io = new TransferHis();
         lblStatus.setForeground(Color.GREEN);
         lblStatus.setText("NEW");

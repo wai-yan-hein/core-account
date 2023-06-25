@@ -7,7 +7,6 @@ package com.inventory.ui.common;
 import com.H2Repo;
 import com.common.FilterObject;
 import com.inventory.model.CFont;
-import com.user.model.Currency;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.Util1;
@@ -16,6 +15,7 @@ import com.inventory.model.Category;
 import com.inventory.model.CategoryKey;
 import com.inventory.model.Expense;
 import com.inventory.model.GRN;
+import com.inventory.model.GRNDetail;
 import com.inventory.model.GRNKey;
 import com.inventory.model.General;
 import com.inventory.model.Location;
@@ -36,6 +36,7 @@ import com.inventory.model.ProcessHisDetail;
 import com.inventory.model.ProcessHisDetailKey;
 import com.inventory.model.ProcessHisKey;
 import com.inventory.model.ProcessType;
+import com.inventory.model.PurExpense;
 import com.inventory.model.PurHis;
 import com.inventory.model.PurHisDetail;
 import com.inventory.model.PurHisKey;
@@ -110,12 +111,12 @@ public class InventoryRepo {
     private H2Repo h2Repo;
 
     public Mono<Location> getDefaultLocation() {
-        String locCode = Global.hmRoleProperty.get("default.location");
+        String locCode = Global.hmRoleProperty.get(ProUtil.DEFAULT_LOCATION);
         return findLocation(locCode);
     }
 
     public Mono<Stock> getDefaultStock() {
-        String stockCode = Global.hmRoleProperty.get("default.stock");
+        String stockCode = Global.hmRoleProperty.get(ProUtil.DEFAULT_LOCATION);
         return findStock(stockCode);
     }
 
@@ -889,6 +890,11 @@ public class InventoryRepo {
                 .body(Mono.just(t), Trader.class)
                 .retrieve()
                 .bodyToMono(Trader.class)
+                .doOnSuccess((s) -> {
+                    if (localDatabase) {
+                        h2Repo.save(s);
+                    }
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -901,18 +907,11 @@ public class InventoryRepo {
                 .body(Mono.just(s), Stock.class)
                 .retrieve()
                 .bodyToMono(Stock.class)
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
-                });
-    }
-
-    public Mono<Currency> saveCurrency(Currency c) {
-        return inventoryApi.post()
-                .uri("/setup/save-currency")
-                .body(Mono.just(c), Currency.class)
-                .retrieve()
-                .bodyToMono(Currency.class)
+                .doOnSuccess((t) -> {
+                    if (localDatabase) {
+                        h2Repo.save(s);
+                    }
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -925,6 +924,11 @@ public class InventoryRepo {
                 .body(Mono.just(loc), Location.class)
                 .retrieve()
                 .bodyToMono(Location.class)
+                .doOnSuccess((t) -> {
+                    if (localDatabase) {
+                        h2Repo.save(t);
+                    }
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -937,9 +941,14 @@ public class InventoryRepo {
                 .body(Mono.just(reg), Region.class)
                 .retrieve()
                 .bodyToMono(Region.class)
+                .doOnSuccess((t) -> {
+                    if (localDatabase) {
+                        h2Repo.save(t);
+                    }
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
-                    return Mono.empty();
+                    return Mono.error(e);
                 });
     }
 
@@ -949,9 +958,14 @@ public class InventoryRepo {
                 .body(Mono.just(s), SaleMan.class)
                 .retrieve()
                 .bodyToMono(SaleMan.class)
+                .doOnSuccess((t) -> {
+                    if (localDatabase) {
+                        h2Repo.save(t);
+                    }
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
-                    return Mono.empty();
+                    return Mono.error(e);
                 });
     }
 
@@ -961,9 +975,14 @@ public class InventoryRepo {
                 .body(Mono.just(s), StockBrand.class)
                 .retrieve()
                 .bodyToMono(StockBrand.class)
+                .doOnSuccess((t) -> {
+                    if (localDatabase) {
+                        h2Repo.save(t);
+                    }
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
-                    return Mono.empty();
+                    return Mono.error(e);
                 });
     }
 
@@ -985,6 +1004,11 @@ public class InventoryRepo {
                 .body(Mono.just(t), StockType.class)
                 .retrieve()
                 .bodyToMono(StockType.class)
+                .doOnSuccess((st) -> {
+                    if (localDatabase) {
+                        h2Repo.save(st);
+                    }
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -997,6 +1021,11 @@ public class InventoryRepo {
                 .body(Mono.just(unit), StockUnit.class)
                 .retrieve()
                 .bodyToMono(StockUnit.class)
+                .doOnSuccess((t) -> {
+                    if (localDatabase) {
+                        h2Repo.save(t);
+                    }
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -1009,6 +1038,11 @@ public class InventoryRepo {
                 .body(Mono.just(vou), VouStatus.class)
                 .retrieve()
                 .bodyToMono(VouStatus.class)
+                .doOnSuccess((t) -> {
+                    if (localDatabase) {
+                        h2Repo.save(t);
+                    }
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -1033,6 +1067,11 @@ public class InventoryRepo {
                 .body(Mono.just(category), Category.class)
                 .retrieve()
                 .bodyToMono(Category.class)
+                .doOnSuccess((t) -> {
+                    if (localDatabase) {
+                        h2Repo.save(t);
+                    }
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -1101,6 +1140,11 @@ public class InventoryRepo {
                 .body(Mono.just(rel), UnitRelation.class)
                 .retrieve()
                 .bodyToMono(UnitRelation.class)
+                .doOnSuccess((t) -> {
+                    if (localDatabase) {
+                        h2Repo.save(t);
+                    }
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -1124,7 +1168,6 @@ public class InventoryRepo {
 
     public Mono<General> getPurRecentPrice(String stockCode, String vouDate, String unit) {
         if (localDatabase) {
-//            return h2Repo.getPurRecentPrice(stockCode, vouDate, unit, Global.compCode, Global.deptId);G
             General general = new General();
             general.setAmount(0.0F);
             return Mono.justOrEmpty(general);
@@ -2538,5 +2581,63 @@ public class InventoryRepo {
                     log.error("error :" + e.getMessage());
                     return Mono.just(false);
                 });
+    }
+
+    public Mono<List<GRNDetail>> getGRNDetail(String vouNo, Integer deptId) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/grn/get-grn-detail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", deptId)
+                .build())
+                .retrieve().bodyToFlux(GRNDetail.class)
+                .collectList();
+    }
+
+    public Mono<List<PurExpense>> getPurExpense(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/purExpense/get-pur-expense")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(PurExpense.class)
+                .collectList();
+    }
+
+    public Mono<List<VPurchase>> getPurchaseReport(String vouNo, String batchNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/report/get-purchase-report")
+                .queryParam("vouNo", vouNo)
+                .queryParam("batchNo", batchNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(VPurchase.class)
+                .collectList();
+    }
+
+    public Mono<List<VPurchase>> getPurchaseWeightReport(String vouNo, String batchNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/report/get-purchase-weight-report")
+                .queryParam("vouNo", vouNo)
+                .queryParam("batchNo", batchNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(VPurchase.class)
+                .collectList();
+    }
+
+    public Mono<List<GRNDetail>> getGRNDetailBatch(String batchNo, Integer deptId) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/grn/get-grn-detail-batch")
+                .queryParam("batchNo", batchNo)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", deptId)
+                .build())
+                .retrieve()
+                .bodyToFlux(GRNDetail.class)
+                .collectList();
     }
 }

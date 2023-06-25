@@ -47,7 +47,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.coderazzi.filters.gui.AutoChoices;
 import net.coderazzi.filters.gui.TableFilterHeader;
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
@@ -162,8 +161,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
                         String traderCode = apar.getTraderCode();
                         String traderName = apar.getTraderName();
                         String coaCode = apar.getCoaCode();
-                        String curCode = apar.getCurCode();
-                        openTBDDialog(coaCode, curCode, traderCode, traderName);
+                        openTBDDialog(coaCode, traderCode, traderName);
                     }
                 }
             }
@@ -175,7 +173,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         filterHeader.setVisible(false);
     }
 
-    private void openTBDDialog(String coaCode, String curCode, String traderCode, String traderName) {
+    private void openTBDDialog(String coaCode, String traderCode, String traderName) {
         if (dialog == null) {
             dialog = new TrialBalanceDetailDialog(Global.parentForm);
             dialog.setAccountRepo(accountRepo);
@@ -185,10 +183,11 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             dialog.setLocationRelativeTo(null);
         }
         dialog.setCoaCode(coaCode);
-        dialog.setCurCode(curCode);
+        dialog.setCurrency(currencyAutoCompleter == null ? null : currencyAutoCompleter.getCurrency());
         dialog.setDesp(traderName);
         dialog.setTraderCode(traderCode);
         dialog.setDepartment(departmentAutoCompleter.getListOption());
+        dialog.setDeptName(txtDep.getText());
         dialog.setDateModel(dateAutoCompleter.getDateModel());
         dialog.searchTriBalDetail();
     }
