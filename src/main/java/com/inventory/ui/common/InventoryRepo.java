@@ -121,8 +121,18 @@ public class InventoryRepo {
     }
 
     public Mono<SaleMan> getDefaultSaleMan() {
-        String code = Global.hmRoleProperty.get("default.saleman");
-        return findSaleMan(code, Global.deptId);
+        String code = Global.hmRoleProperty.get(ProUtil.DEFAULT_SALEMAN);
+        return findSaleMan(code);
+    }
+
+    public Mono<Trader> getDefaultCustomer() {
+        String code = Global.hmRoleProperty.get(ProUtil.DEFAULT_CUSTOMER);
+        return findTrader(code);
+    }
+
+    public Mono<Trader> getDefaultSupplier() {
+        String code = Global.hmRoleProperty.get(ProUtil.DEFAULT_SUPPLIER);
+        return findTrader(code);
     }
 
     public Mono<List<PriceOption>> getPriceOption(String option) {
@@ -221,10 +231,9 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<SaleMan> findSaleMan(String code, Integer deptId) {
+    public Mono<SaleMan> findSaleMan(String code) {
         SaleManKey key = new SaleManKey();
         key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
         key.setSaleManCode(code);
         if (localDatabase) {
             return h2Repo.find(key);
@@ -352,11 +361,10 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<Trader> findTrader(String code, Integer deptId) {
+    public Mono<Trader> findTrader(String code) {
         TraderKey key = new TraderKey();
         key.setCode(Util1.isNull(code, "-"));
         key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
         if (localDatabase) {
             return h2Repo.find(key);
         }
@@ -543,10 +551,9 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<StockBrand> findBrand(String brandCode, Integer deptId) {
+    public Mono<StockBrand> findBrand(String brandCode) {
         StockBrandKey key = new StockBrandKey();
         key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
         key.setBrandCode(brandCode);
         if (localDatabase) {
             return h2Repo.find(key);
@@ -562,12 +569,10 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<VouStatus> findVouStatus(String code, Integer deptId) {
+    public Mono<VouStatus> findVouStatus(String code) {
         VouStatusKey key = new VouStatusKey();
         key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
         key.setCode(code);
-
         if (localDatabase) {
             return h2Repo.find(key);
         }
@@ -598,10 +603,9 @@ public class InventoryRepo {
                 .collectList();
     }
 
-    public Mono<StockUnit> findUnit(String unitCode, Integer deptId) {
+    public Mono<StockUnit> findUnit(String unitCode) {
         StockUnitKey key = new StockUnitKey();
         key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
         key.setUnitCode(unitCode);
         if (localDatabase) {
             return h2Repo.findUnit(key);
@@ -617,10 +621,9 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<UnitRelation> findRelation(String relCode, Integer deptId) {
+    public Mono<UnitRelation> findRelation(String relCode) {
         RelationKey key = new RelationKey();
         key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
         key.setRelCode(relCode);
         return inventoryApi.post()
                 .uri("/setup/find-unit-relation")
@@ -633,10 +636,9 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<Category> findCategory(String catCode, Integer deptId) {
+    public Mono<Category> findCategory(String catCode) {
         CategoryKey key = new CategoryKey();
         key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
         key.setCatCode(catCode);
         return inventoryApi.post()
                 .uri("/setup/find-category")
@@ -667,10 +669,9 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<StockType> findGroup(String typeCode, Integer deptId) {
+    public Mono<StockType> findGroup(String typeCode) {
         StockTypeKey key = new StockTypeKey();
         key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
         key.setStockTypeCode(typeCode);
         return inventoryApi.post()
                 .uri("/setup/find-type")
@@ -1011,7 +1012,7 @@ public class InventoryRepo {
                 })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
-                    return Mono.empty();
+                    return Mono.error(e);
                 });
     }
 
@@ -1028,7 +1029,7 @@ public class InventoryRepo {
                 })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
-                    return Mono.empty();
+                    return Mono.error(e);
                 });
     }
 
@@ -1074,7 +1075,7 @@ public class InventoryRepo {
                 })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
-                    return Mono.empty();
+                    return Mono.error(e);
                 });
     }
 
@@ -1313,12 +1314,12 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<StockInOut> findStockIO(String vouNo, Integer deptId) {
+    public Mono<StockInOut> findStockIO(String vouNo, Integer deptId, boolean local) {
         StockIOKey key = new StockIOKey();
         key.setCompCode(Global.compCode);
         key.setDeptId(deptId);
         key.setVouNo(vouNo);
-        if (localDatabase) {
+        if (local) {
             return h2Repo.findStkIO(key);
         }
         return inventoryApi.post()

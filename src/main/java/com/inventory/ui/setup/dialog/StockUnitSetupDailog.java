@@ -19,6 +19,7 @@ import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -28,28 +29,26 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyListener {
 
     private static final Logger log = LoggerFactory.getLogger(StockUnitSetupDailog.class);
 
     private int selectRow = - 1;
     private StockUnit stockUnit = new StockUnit();
-
-    @Autowired
-    private StockUnitTableModel stockUnitTableModel;
-    @Autowired
+    private final StockUnitTableModel stockUnitTableModel = new StockUnitTableModel();
     private InventoryRepo inventoryRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
     private List<StockUnit> listStockUnit;
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
 
     public List<StockUnit> getListStockUnit() {
         return listStockUnit;
@@ -57,23 +56,26 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
 
     public void setListStockUnit(List<StockUnit> listStockUnit) {
         this.listStockUnit = listStockUnit;
+        stockUnitTableModel.setListUnit(this.listStockUnit);
+        txtUnitShort.requestFocus();
+
     }
 
     /**
      * Creates new form ItemTypeSetupDialog
+     *
+     * @param frame
      */
-    public StockUnitSetupDailog() {
-        super(Global.parentForm, true);
+    public StockUnitSetupDailog(JFrame frame) {
+        super(frame, true);
         initComponents();
         initKeyListener();
         lblStatus.setForeground(Color.green);
+        swrf = new StartWithRowFilter(txtFilter);
     }
 
     public void initMain() {
-        swrf = new StartWithRowFilter(txtFilter);
         initTable();
-        searchItemUnit();
-        txtUnitShort.requestFocus();
     }
 
     private void initKeyListener() {
@@ -82,10 +84,6 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
         btnClear.addKeyListener(this);
         btnSave.addKeyListener(this);
         tblUnit.addKeyListener(this);
-    }
-
-    private void searchItemUnit() {
-        stockUnitTableModel.setListUnit(listStockUnit);
     }
 
     private void initTable() {
@@ -119,6 +117,8 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
 
     private void save() {
         if (isValidEntry()) {
+            progress.setIndeterminate(true);
+            btnSave.setEnabled(false);
             inventoryRepo.saveStockUnit(stockUnit).subscribe((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
                     listStockUnit.set(selectRow, t);
@@ -126,12 +126,17 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
                     listStockUnit.add(t);
                 }
                 clear();
+            }, (e) -> {
+                progress.setIndeterminate(false);
+                btnSave.setEnabled(true);
             });
 
         }
     }
 
     private void clear() {
+        progress.setIndeterminate(false);
+        btnSave.setEnabled(true);
         txtFilter.setText(null);
         txtUnitShort.setText(null);
         txtUnitDesp.setText(null);
@@ -169,9 +174,9 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
             }
             StockUnitKey key = new StockUnitKey();
             key.setCompCode(Global.compCode);
-            key.setDeptId(Global.deptId);
             key.setUnitCode(txtUnitShort.getText());
             stockUnit.setKey(key);
+            stockUnit.setDeptId(Global.deptId);
             stockUnit.setUnitName(txtUnitDesp.getText());
         }
         return status;
@@ -197,6 +202,7 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
         lblStatus = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         txtUnitDesp = new javax.swing.JTextField();
+        progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Stock Unit Setup");
@@ -328,16 +334,21 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
@@ -404,6 +415,7 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblStatus;
+    private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblUnit;
     private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtUnitDesp;

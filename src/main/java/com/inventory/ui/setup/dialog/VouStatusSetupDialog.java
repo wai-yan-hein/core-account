@@ -158,8 +158,8 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
                 VouStatusKey key = new VouStatusKey();
                 key.setCode(null);
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 vou.setKey(key);
+                vou.setDeptId(Global.deptId);
                 vou.setCreatedBy(Global.loginUser.getUserCode());
                 vou.setCreatedDate(LocalDateTime.now());
                 vou.setMacId(Global.macId);

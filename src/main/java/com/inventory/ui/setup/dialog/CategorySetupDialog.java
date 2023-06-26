@@ -8,7 +8,6 @@ package com.inventory.ui.setup.dialog;
 import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
-import com.common.Util1;
 import com.inventory.model.Category;
 import com.inventory.model.CategoryKey;
 import com.inventory.ui.common.InventoryRepo;
@@ -19,6 +18,7 @@ import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -26,53 +26,48 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
-@Component
+@Slf4j
 public class CategorySetupDialog extends javax.swing.JDialog implements KeyListener {
-
-    private static final Logger log = LoggerFactory.getLogger(CategorySetupDialog.class);
 
     private int selectRow = - 1;
     private Category category = new Category();
-    @Autowired
-    private CategoryTableModel categoryTableModel;
-    @Autowired
+    private final CategoryTableModel categoryTableModel = new CategoryTableModel();
     private InventoryRepo inventoryRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
     private List<Category> listCategory;
 
-    public List<Category> getListCategory() {
-        return listCategory;
-    }
-
     public void setListCategory(List<Category> listCategory) {
         this.listCategory = listCategory;
+        categoryTableModel.setListCategory(this.listCategory);
+        txtUserCode.requestFocus();
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
     }
 
     /**
      * Creates new form ItemTypeSetupDialog
+     *
+     * @param frame
      */
-    public CategorySetupDialog() {
-        super(Global.parentForm, false);
+    public CategorySetupDialog(JFrame frame) {
+        super(frame, false);
         initComponents();
         initKeyListener();
+        swrf = new StartWithRowFilter(txtFilter);
         lblStatus.setForeground(Color.green);
     }
 
     public void initMain() {
-        swrf = new StartWithRowFilter(txtFilter);
         initTable();
-        searchCategory();
-        txtUserCode.requestFocus();
     }
 
     private void initKeyListener() {
@@ -81,10 +76,6 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
         btnClear.addKeyListener(this);
         btnSave.addKeyListener(this);
         tblCategory.addKeyListener(this);
-    }
-
-    private void searchCategory() {
-        categoryTableModel.setListCategory(listCategory);
     }
 
     private void initTable() {
@@ -118,6 +109,8 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
     }
 
     private void save() {
+        progress.setIndeterminate(true);
+        btnSave.setEnabled(false);
         if (isValidEntry()) {
             inventoryRepo.saveCategory(category).subscribe((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
@@ -126,6 +119,10 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
                     listCategory.add(t);
                 }
                 clear();
+            }, (e) -> {
+                progress.setIndeterminate(false);
+                btnSave.setEnabled(true);
+                JOptionPane.showMessageDialog(this, e.getMessage());
             });
 
         }
@@ -141,6 +138,8 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
         categoryTableModel.refresh();
         tblCategory.requestFocus();
         txtUserCode.requestFocus();
+        progress.setIndeterminate(false);
+        btnSave.setEnabled(true);
     }
 
     private boolean isValidEntry() {
@@ -155,8 +154,8 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
                 CategoryKey key = new CategoryKey();
                 key.setCatCode(null);
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 category.setKey(key);
+                category.setDeptId(Global.deptId);
                 category.setCreatedBy(Global.loginUser.getUserCode());
                 category.setCreatedDate(LocalDateTime.now());
                 category.setMacId(Global.macId);
@@ -190,6 +189,7 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
         jLabel3 = new javax.swing.JLabel();
         txtUserCode = new javax.swing.JTextField();
         jSeparator1 = new javax.swing.JSeparator();
+        progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Category Setup");
@@ -286,16 +286,16 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE)
                             .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE))
-                        .addGap(12, 12, 12)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtName, javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtUserCode, javax.swing.GroupLayout.Alignment.LEADING)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGap(18, 18, 18)
                         .addComponent(btnSave)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnClear)))
                 .addContainerGap())
         );
 
@@ -308,18 +308,18 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(txtUserCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnClear)
                     .addComponent(btnSave)
                     .addComponent(lblStatus))
-                .addContainerGap(247, Short.MAX_VALUE))
+                .addContainerGap(235, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -329,16 +329,21 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 312, Short.MAX_VALUE)
+                            .addComponent(txtFilter))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
@@ -407,6 +412,7 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblStatus;
+    private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblCategory;
     private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtName;

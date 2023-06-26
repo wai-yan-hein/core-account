@@ -362,7 +362,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             tableModel.clear();
             grn = g;
             Integer deptId = g.getKey().getDeptId();
-            Mono<Trader> trader = inventoryRepo.findTrader(grn.getTraderCode(), grn.getKey().getDeptId());
+            Mono<Trader> trader = inventoryRepo.findTrader(grn.getTraderCode());
             trader.subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);
             });

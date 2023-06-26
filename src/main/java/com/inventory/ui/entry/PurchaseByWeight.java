@@ -393,8 +393,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 log.error(e.getMessage());
             });
         }
-        Mono<Trader> trader = inventoryRepo.findTrader(Global.hmRoleProperty.get("default.supplier"), Global.deptId);
-        trader.subscribe((t) -> {
+        inventoryRepo.getDefaultSupplier().subscribe((t) -> {
             traderAutoCompleter.setTrader(t);
         });
         txtPurDate.setDate(Util1.getTodayDate());
@@ -642,7 +641,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             inventoryRepo.findLocation(ph.getLocCode()).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
-            Mono<Trader> trader = inventoryRepo.findTrader(ph.getTraderCode(), ph.getKey().getDeptId());
+            Mono<Trader> trader = inventoryRepo.findTrader(ph.getTraderCode());
             trader.subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);
             });
@@ -805,7 +804,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
 
     private void setVoucherDetail(GRN g) {
         purTableModel.clear();
-        Mono<Trader> trader = inventoryRepo.findTrader(g.getTraderCode(), g.getKey().getDeptId());
+        Mono<Trader> trader = inventoryRepo.findTrader(g.getTraderCode());
         trader.subscribe((t) -> {
             traderAutoCompleter.setTrader(t);
         });

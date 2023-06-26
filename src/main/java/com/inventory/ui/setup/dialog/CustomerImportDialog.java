@@ -132,8 +132,8 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                 Trader t = new Trader();
                 TraderKey key = new TraderKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 t.setKey(key);
+                t.setDeptId(Global.deptId);
                 t.setTraderName(row.isMapped("Name") ? Util1.convertToUniCode(row.get("Name")) : "");
                 t.setUserCode(row.isMapped("UserCode") ? Util1.convertToUniCode(row.get("UserCode")) : "");
                 t.setAddress(row.isMapped("Address") ? Util1.convertToUniCode(row.get("Address")) : "");

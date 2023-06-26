@@ -29,7 +29,6 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.RowFilter;
-import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
@@ -37,34 +36,38 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public final class UnitAutoCompleter implements KeyListener {
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(UnitAutoCompleter.class);
     private final JTable table = new JTable();
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-
-    private StockUnitTableModel unitTableModel;
+    private final StockUnitTableModel unitTableModel = new StockUnitTableModel();
     private StockUnit stockUnit;
+    private List<StockUnit> listUnit;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
     private SelectionObserver observer;
 
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
+    }
+
+    public void setListUnit(List<StockUnit> listUnit) {
+        this.listUnit = listUnit;
+    }
+
+    public List<StockUnit> getListUnit() {
+        return listUnit;
     }
 
     public UnitAutoCompleter() {
@@ -74,11 +77,12 @@ public final class UnitAutoCompleter implements KeyListener {
             AbstractCellEditor editor) {
         this.textComp = comp;
         this.editor = editor;
+        this.listUnit = list;
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
         textComp.getDocument().addDocumentListener(documentListener);
-        unitTableModel = new StockUnitTableModel(list);
+        unitTableModel.setListUnit(this.listUnit);
         table.setModel(unitTableModel);
         table.setSize(50, 50);
         table.setFont(Global.textFont); // NOI18N
@@ -176,7 +180,8 @@ public final class UnitAutoCompleter implements KeyListener {
             stockUnit = unitTableModel.getStockUnit(table.convertRowIndexToModel(
                     table.getSelectedRow()));
             textComp.setText(stockUnit.getUnitName());
-            if (editor == null) {
+            if (observer != null) {
+                observer.selected("Unit", "Unit");
             }
         }
 

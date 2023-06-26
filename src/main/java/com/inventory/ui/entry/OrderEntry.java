@@ -20,7 +20,6 @@ import com.inventory.editor.SaleManAutoCompleter;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
-import com.inventory.model.Region;
 import com.inventory.model.Order;
 import com.inventory.model.OrderHis;
 import com.inventory.model.OrderHisDetail;
@@ -321,8 +320,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void assignDefaultValue() {
-        Mono<Trader> trader = inventoryRepo.findTrader(Global.hmRoleProperty.get("default.customer"), Global.deptId);
-        trader.subscribe((t) -> {
+        inventoryRepo.getDefaultCustomer().subscribe((t) -> {
             traderAutoCompleter.setTrader(t);
         });
         if (saleManCompleter != null) {
@@ -578,14 +576,14 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             inventoryRepo.findLocation(orderHis.getLocCode()).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
-            Mono<Trader> trader = inventoryRepo.findTrader(orderHis.getTraderCode(), deptId);
+            Mono<Trader> trader = inventoryRepo.findTrader(orderHis.getTraderCode());
             trader.subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);
             });
             userRepo.findCurrency(orderHis.getCurCode()).subscribe((t) -> {
                 currAutoCompleter.setCurrency(t);
             });
-            inventoryRepo.findSaleMan(orderHis.getSaleManCode(), deptId).subscribe((t) -> {
+            inventoryRepo.findSaleMan(orderHis.getSaleManCode()).subscribe((t) -> {
                 saleManCompleter.setSaleMan(t);
             });
             if (orderHis.getProjectNo() != null) {

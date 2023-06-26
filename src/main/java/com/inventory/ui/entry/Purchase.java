@@ -442,8 +442,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 log.error(e.getMessage());
             });
         }
-        Mono<Trader> trader = inventoryRepo.findTrader(Global.hmRoleProperty.get("default.customer"), Global.deptId);
-        trader.subscribe((t) -> {
+        inventoryRepo.getDefaultCustomer().subscribe((t) -> {
             traderAutoCompleter.setTrader(t);
         });
         txtPurDate.setDate(Util1.getTodayDate());
@@ -723,7 +722,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 }, (e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
                 });
-                Mono<Trader> trader = inventoryRepo.findTrader(ph.getTraderCode(), ph.getKey().getDeptId());
+                Mono<Trader> trader = inventoryRepo.findTrader(ph.getTraderCode());
                 trader.subscribe((t) -> {
                     traderAutoCompleter.setTrader(t);
                 }, (e) -> {
@@ -985,7 +984,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             });
             purTableModel.addNewRow();
             calculateTotalAmount(false);
-            Mono<Trader> trader = inventoryRepo.findTrader(g.getTraderCode(), g.getKey().getDeptId());
+            Mono<Trader> trader = inventoryRepo.findTrader(g.getTraderCode());
             trader.subscribe((tt) -> {
                 traderAutoCompleter.setTrader(tt);
             });

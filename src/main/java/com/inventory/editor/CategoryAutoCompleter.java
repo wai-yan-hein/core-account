@@ -59,6 +59,10 @@ public final class CategoryAutoCompleter implements KeyListener {
     private List<Category> listCategory;
     private boolean custom;
 
+    public List<Category> getListCategory() {
+        return listCategory;
+    }
+
     public SelectionObserver getObserver() {
         return observer;
     }

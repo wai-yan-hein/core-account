@@ -59,6 +59,11 @@ public final class StockTypeAutoCompleter implements KeyListener {
     private List<StockType> listStockType;
     private boolean custom;
 
+    public List<StockType> getListStockType() {
+        return listStockType;
+    }
+    
+
     public SelectionObserver getObserver() {
         return observer;
     }

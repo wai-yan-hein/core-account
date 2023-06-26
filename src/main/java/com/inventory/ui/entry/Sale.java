@@ -188,7 +188,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         inventoryRepo.findLocation(oh.getLocCode()).subscribe((t) -> {
                             locationAutoCompleter.setLocation(t);
                         });
-                        Mono<Trader> trader = inventoryRepo.findTrader(oh.getTraderCode(), deptId);
+                        Mono<Trader> trader = inventoryRepo.findTrader(oh.getTraderCode());
                         trader.subscribe((t) -> {
                             traderAutoCompleter.setTrader(t);
                         });
@@ -196,7 +196,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         userRepo.findCurrency(oh.getCurCode()).subscribe((t) -> {
                             currAutoCompleter.setCurrency(t);
                         });
-                        inventoryRepo.findSaleMan(oh.getSaleManCode(), deptId).subscribe((t) -> {
+                        inventoryRepo.findSaleMan(oh.getSaleManCode()).subscribe((t) -> {
                             saleManCompleter.setSaleMan(t);
                         });
                         if (oh.getProjectNo() != null) {
@@ -425,11 +425,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 log.error(e.getMessage());
             });
         }
-        Mono<Trader> trader = inventoryRepo.findTrader(Global.hmRoleProperty.get("default.customer"), Global.deptId);
-        trader.subscribe((t) -> {
+        inventoryRepo.getDefaultCustomer().subscribe((t) -> {
             traderAutoCompleter.setTrader(t);
-        }, (e) -> {
-            log.error("findTrader : " + e.getMessage());
         });
         if (saleManCompleter != null) {
             inventoryRepo.getDefaultSaleMan().subscribe((tt) -> {
@@ -699,7 +696,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             inventoryRepo.findLocation(saleHis.getLocCode()).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
-            Mono<Trader> trader = inventoryRepo.findTrader(saleHis.getTraderCode(), deptId);
+            Mono<Trader> trader = inventoryRepo.findTrader(saleHis.getTraderCode());
             trader.subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);
             });
@@ -708,7 +705,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 currAutoCompleter.setCurrency(t);
             });
 
-            inventoryRepo.findSaleMan(saleHis.getSaleManCode(), deptId).subscribe((t) -> {
+            inventoryRepo.findSaleMan(saleHis.getSaleManCode()).subscribe((t) -> {
                 saleManCompleter.setSaleMan(t);
             });
             String vouNo = sh.getKey().getVouNo();

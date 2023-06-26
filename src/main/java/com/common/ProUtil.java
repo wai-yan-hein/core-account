@@ -45,6 +45,9 @@ public class ProUtil {
     public static final String DEFAULT_CURRENCY = "default.currency";
     public static final String DEFAULT_CASH = "default.cash";
     public static final String DEFAULT_STOCK = "default.stock";
+    public static final String DEFAULT_CUSTOMER = "default.customer";
+    public static final String DEFAULT_SUPPLIER = "default.supplier";
+    public static final String DEFAULT_SALEMAN = "default.saleman";
 
     public static String getFontPath() {
         return Global.hmRoleProperty.get("font.path");

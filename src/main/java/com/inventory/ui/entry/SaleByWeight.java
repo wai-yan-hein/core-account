@@ -326,8 +326,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             });
         }
 
-        Mono<Trader> trader = inventoryRepo.findTrader(Global.hmRoleProperty.get("default.customer"), Global.deptId);
-        trader.subscribe((t) -> {
+        inventoryRepo.getDefaultCustomer().subscribe((t) -> {
             traderAutoCompleter.setTrader(t);
         });
         txtDueDate.setDate(null);
@@ -570,14 +569,13 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             inventoryRepo.findLocation(saleHis.getLocCode()).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
-            Mono<Trader> trader = inventoryRepo.findTrader(saleHis.getTraderCode(), deptId);
-            trader.subscribe((t) -> {
+            inventoryRepo.findTrader(saleHis.getTraderCode()).subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);
             });
             userRepo.findCurrency(saleHis.getCurCode()).subscribe((t) -> {
                 currAutoCompleter.setCurrency(t);
             });
-            inventoryRepo.findSaleMan(saleHis.getSaleManCode(), deptId).subscribe((t) -> {
+            inventoryRepo.findSaleMan(saleHis.getSaleManCode()).subscribe((t) -> {
                 saleManCompleter.setSaleMan(t);
             });
             String vouNo = sh.getKey().getVouNo();

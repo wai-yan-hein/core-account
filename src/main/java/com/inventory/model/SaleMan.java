@@ -50,6 +50,8 @@ public class SaleMan {
     private String updatedBy;
     @Column(name = "intg_upd_status")
     private String intgUpdStatus;
+    @Column(name = "dept_id")
+    private Integer deptId;
 
     public SaleMan() {
     }

@@ -276,8 +276,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
                 log.error(e.getMessage());
             });
         }
-        Mono<Trader> trader = inventoryRepo.findTrader(Global.hmRoleProperty.get("default.customer"), Global.deptId);
-        trader.subscribe((t) -> {
+        inventoryRepo.getDefaultCustomer().subscribe((t) -> {
             traderAutoCompleter.setTrader(t);
         });
         txtVouDate.setDate(Util1.getTodayDate());
@@ -477,7 +476,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             inventoryRepo.findLocation(ri.getLocCode()).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
-            Mono<Trader> trader = inventoryRepo.findTrader(ri.getTraderCode(), ri.getKey().getDeptId());
+            Mono<Trader> trader = inventoryRepo.findTrader(ri.getTraderCode());
             trader.subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);
             });

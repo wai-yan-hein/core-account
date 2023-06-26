@@ -10,10 +10,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import java.time.LocalDateTime;
-import java.util.Date;
 import lombok.Data;
 
 /**
@@ -44,6 +41,8 @@ public class StockUnit {
     private String userCode;
     @Column(name = "intg_upd_status")
     private String intgUpdStatus;
+    @Column(name = "dept_id")
+    private Integer deptId;
 
     public StockUnit() {
     }

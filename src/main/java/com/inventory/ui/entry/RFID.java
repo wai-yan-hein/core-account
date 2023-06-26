@@ -206,8 +206,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     private void assignDefaultValue() {
         txtSaleDate.setDate(Util1.getTodayDate());
-        Mono<Trader> trader = inventoryRepo.findTrader(Global.hmRoleProperty.get("default.customer"), Global.deptId);
-        trader.subscribe((t) -> {
+        inventoryRepo.getDefaultCustomer().subscribe((t) -> {
             traderAutoCompleter.setTrader(t);
         });
         progress.setIndeterminate(false);
@@ -368,7 +367,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             progress.setIndeterminate(true);
             saleHis = sh;
             Integer deptId = sh.getKey().getDeptId();
-            Mono<Trader> trader = inventoryRepo.findTrader(saleHis.getTraderCode(), deptId);
+            Mono<Trader> trader = inventoryRepo.findTrader(saleHis.getTraderCode());
             trader.subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);
             });
