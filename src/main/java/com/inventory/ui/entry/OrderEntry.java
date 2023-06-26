@@ -20,7 +20,6 @@ import com.inventory.editor.SaleManAutoCompleter;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
-import com.inventory.model.Region;
 import com.inventory.model.Order;
 import com.inventory.model.OrderHis;
 import com.inventory.model.OrderHisDetail;
@@ -51,6 +50,8 @@ import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -901,6 +902,11 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 txtOrderDateFocusGained(evt);
             }
         });
+        txtOrderDate.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                txtOrderDatePropertyChange(evt);
+            }
+        });
 
         txtCurrency.setFont(Global.textFont);
         txtCurrency.setDisabledTextColor(new java.awt.Color(0, 0, 0));
@@ -1605,6 +1611,13 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         // TODO add your handling code here:
     }//GEN-LAST:event_txtProjectNoActionPerformed
 
+    private void txtOrderDatePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_txtOrderDatePropertyChange
+        Trader t = traderAutoCompleter.getTrader();
+        if (t != null) {
+            calDueDate(Util1.getInteger(t.getCreditDays()));
+        }
+    }//GEN-LAST:event_txtOrderDatePropertyChange
+
     @Override
     public void keyEvent(KeyEvent e) {
 
@@ -1613,11 +1626,11 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     @Override
     public void selected(Object source, Object selectObj) {
         switch (source.toString()) {
-            case "CustomerList" -> {
+            case "TRADER" -> {
                 try {
-                    Trader cus = (Trader) selectObj;
+                   Trader cus = traderAutoCompleter.getTrader();
                     if (cus != null) {
-                        txtCus.setText(cus.getTraderName());
+                       calDueDate(Util1.getInteger(cus.getCreditDays()));
                     }
                 } catch (Exception ex) {
                     log.error("selected CustomerList : " + selectObj + " - " + ex.getMessage());
@@ -1758,6 +1771,15 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 }
             }
         }
+    }
+    
+    private void calDueDate(Integer day) {
+        Date vouDate = txtOrderDate.getDate();       
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(vouDate);       
+        calendar.add(Calendar.DAY_OF_MONTH, day);       
+        Date dueDate = calendar.getTime();
+        txtDueDate.setDate(dueDate);        
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
