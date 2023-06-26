@@ -64,6 +64,8 @@ import java.awt.event.KeyListener;
 import java.io.File;
 import java.text.DateFormat;
 import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -542,6 +544,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             ph.setCommP(Util1.getFloat(txtComPercent.getValue()));
             ph.setCommAmt(Util1.getFloat(txtComAmt.getValue()));
             ph.setExpense(Util1.getFloat(txtExpense.getValue()));
+            ph.setDueDate(txtDueDate.getDate());
             if (lblStatus.getText().equals("NEW")) {
                 PurHisKey key = new PurHisKey();
                 key.setCompCode(Global.compCode);
@@ -1123,6 +1126,11 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
 
         txtPurDate.setDateFormatString("dd/MM/yyyy");
         txtPurDate.setFont(Global.textFont);
+        txtPurDate.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                txtPurDatePropertyChange(evt);
+            }
+        });
 
         txtCurrency.setFont(Global.textFont);
         txtCurrency.setDisabledTextColor(new java.awt.Color(0, 0, 0));
@@ -1858,6 +1866,13 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     private void txtProjectNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtProjectNoActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtProjectNoActionPerformed
+
+    private void txtPurDatePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_txtPurDatePropertyChange
+        Trader t = traderAutoCompleter.getTrader();
+        if (t != null) {
+            calDueDate(Util1.getInteger(t.getCreditDays()));
+        }
+    }//GEN-LAST:event_txtPurDatePropertyChange
     private void tabToTable(KeyEvent e) {
         if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
             tblPur.requestFocus();
@@ -1875,11 +1890,11 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     @Override
     public void selected(Object source, Object selectObj) {
         switch (source.toString()) {
-            case "CustomerList" -> {
+            case "TRADER" -> {
                 try {
-                    Trader cus = (Trader) selectObj;
+                    Trader cus = traderAutoCompleter.getTrader();
                     if (cus != null) {
-                        txtCus.setText(cus.getTraderName());
+                       calDueDate(Util1.getInteger(cus.getCreditDays()));
                     }
                 } catch (Exception ex) {
                     log.error("selected CustomerList : " + selectObj + " - " + ex.getMessage());
@@ -2060,6 +2075,15 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 }
             }
         }
+    }
+    
+    private void calDueDate(Integer day) {
+        Date vouDate = txtPurDate.getDate();       
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(vouDate);       
+        calendar.add(Calendar.DAY_OF_MONTH, day);       
+        Date dueDate = calendar.getTime();
+        txtDueDate.setDate(dueDate);        
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -12,7 +12,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -33,7 +32,7 @@ public class PurHis implements java.io.Serializable {
     @Column(name = "trader_code")
     private String traderCode;
     @Column(name = "vou_date", columnDefinition = "TIMESTAMP")
-    private LocalDateTime vouDate;
+    private LocalDateTime vouDate;    
     @Temporal(TemporalType.DATE)
     @Column(name = "due_date")
     private Date dueDate;
