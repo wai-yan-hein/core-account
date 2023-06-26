@@ -126,25 +126,14 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private final AllCashTableModel allCashTableModel = new AllCashTableModel();
     private final DayBookTableModel dayBookTableModel = new DayBookTableModel();
     private ColumnHeaderListener listener;
-    private int selectRow=-1;
-    public UserRepo getUserRepo() {
-        return userRepo;
-    }
+    private int selectRow = -1;
 
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
 
-    public AccountRepo getAccounRepo() {
-        return accountRepo;
-    }
-
     public void setAccounRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
-    }
-
-    public TaskExecutor getTaskExecutor() {
-        return taskExecutor;
     }
 
     public void setTaskExecutor(TaskExecutor taskExecutor) {
@@ -159,25 +148,13 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         this.accountApi = accountApi;
     }
 
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
-    }
-
-    public String getSourceAccId() {
-        return sourceAccId;
     }
 
     public void setSourceAccId(String sourceAccId) {
         this.sourceAccId = sourceAccId;
 
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -239,9 +216,9 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             tblCash.setModel(dayBookTableModel);
             dayBookTableModel.setParent(tblCash);
             dayBookTableModel.setAccountRepo(accountRepo);
-            dayBookTableModel.setDateAutoCompleter(dateAutoCompleter);
             dayBookTableModel.setObserver(this);
             dayBookTableModel.setSourceAccId(sourceAccId);
+            dayBookTableModel.setProgress(progress);
             accountRepo.findCOA(sourceAccId).subscribe((coa) -> {
                 if (coa == null) {
                     JOptionPane.showMessageDialog(this, "mapping coa does not exists.");
@@ -258,9 +235,9 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         } else {
             allCashTableModel.setParent(tblCash);
             allCashTableModel.setAccountRepo(accountRepo);
-            allCashTableModel.setDateAutoCompleter(dateAutoCompleter);
             allCashTableModel.setObserver(this);
             allCashTableModel.setSourceAccId(sourceAccId);
+            allCashTableModel.setProgress(progress);
             allCashTableModel.addNewRow();
             tblCash.setModel(allCashTableModel);
             accountRepo.getDefaultDepartment().subscribe((t) -> {
@@ -739,7 +716,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         vgl.setCrAmt(closing);
         opTableModel.addVGl(vgl);
         inOutTableModel.addVGl(new Gl(getCurCode(), drAmt, crAmt));
-        txtRecord.setValue(listVGl.size()-1);
+        txtRecord.setValue(listVGl.size() - 1);
     }
 
     private void clearModel() {

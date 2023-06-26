@@ -242,6 +242,8 @@ public class COAManagment extends javax.swing.JPanel implements
                 coa.setCredit(chkCredit.isSelected());
                 coa.setCurCode(Util1.isNull(txtCurrency.getText(), null));
                 coa.setMacId(Global.macId);
+                progress.setIndeterminate(true);
+                observer.selected("save", false);
                 accountRepo.saveCOA(coa).subscribe((t) -> {
                     if (t != null) {
                         if (lblStatus.getText().equals("EDIT")) {
@@ -254,6 +256,9 @@ public class COAManagment extends javax.swing.JPanel implements
                             clear();
                         }
                     }
+                }, (e) -> {
+                    progress.setIndeterminate(false);
+                    observer.selected("save", true);
                 });
 
             } catch (HeadlessException ex) {
@@ -410,6 +415,8 @@ public class COAManagment extends javax.swing.JPanel implements
         chkCredit.setSelected(false);
         coa = new ChartOfAccount();
         isNew = false;
+        progress.setIndeterminate(false);
+        observer.selected("save", true);
     }
 
     private void initKeyListener() {
@@ -577,19 +584,19 @@ public class COAManagment extends javax.swing.JPanel implements
     private void searchCOAStandard() {
         log.info("searchCOAStandard");
         accountRepo.getChartOfAccount()
-        .collectList().subscribe((t) -> {
-            standardCOATableModel.setListCOA(t);
-        }, (e) -> {
-        });
+                .collectList().subscribe((t) -> {
+                    standardCOATableModel.setListCOA(t);
+                }, (e) -> {
+                });
     }
-    
+
     private void searchCOAView() {
         log.info("searchCOAStandard");
         accountRepo.getChartOfAccount()
-        .collectList().subscribe((t) -> {
-            cOAViewTableModel.setListCOA(t);
-        }, (e) -> {
-        });
+                .collectList().subscribe((t) -> {
+                    cOAViewTableModel.setListCOA(t);
+                }, (e) -> {
+                });
     }
 
     /**

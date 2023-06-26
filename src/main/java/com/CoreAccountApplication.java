@@ -44,7 +44,7 @@ public class CoreAccountApplication {
 
     private static ConfigurableApplicationContext context;
     private static Tray tray;
-    private static final Image appIcon = new ImageIcon(CoreAccountApplication.class.getResource("/images/applogo.png")).getImage();
+    private static final Image appIcon = new ImageIcon(CoreAccountApplication.class.getResource("/images/applogo.jpg")).getImage();
     private static ServerThread serverThread;
 
     public static void main(String[] args) {

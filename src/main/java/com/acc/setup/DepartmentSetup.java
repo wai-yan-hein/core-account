@@ -47,10 +47,9 @@ import org.springframework.stereotype.Component;
 public class DepartmentSetup extends javax.swing.JPanel implements TreeSelectionListener, MouseListener, KeyListener,
         PanelControl {
 
-    DefaultMutableTreeNode treeRoot;
-    DefaultMutableTreeNode child;
-    DefaultTreeModel treeModel;
-    DefaultMutableTreeNode selectedNode;
+    private DefaultMutableTreeNode treeRoot;
+    private DefaultTreeModel treeModel;
+    private DefaultMutableTreeNode selectedNode;
     private final String parentRootName = "Department";
     private SelectionObserver observer;
     private JProgressBar progress;
@@ -180,6 +179,8 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
     }
 
     public void clear() {
+        progress.setIndeterminate(false);
+        observer.selected("save", true);
         txtSystemCode.setText(null);
         txtUserCode.setText(null);
         txtName.setText(null);
@@ -239,6 +240,8 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
         dep.setActive(chkActive.isSelected());
         dep.setMacId(Global.macId);
         if (isValidDepartment(dep)) {
+            progress.setIndeterminate(true);
+            observer.selected("save", false);
             accountRepo.saveDepartment(dep).subscribe((t) -> {
                 if (t != null) {
                     selectedNode.setUserObject(t);
@@ -249,6 +252,10 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
                     setEnabledControl(false);
                     clear();
                 }
+            }, (e) -> {
+                progress.setIndeterminate(false);
+                observer.selected("save", true);
+                JOptionPane.showMessageDialog(this, e.getMessage());
             });
 
         }
@@ -561,7 +568,6 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
                     txtUserCode.requestFocus();
                 }
             }
-
 
         }
     }

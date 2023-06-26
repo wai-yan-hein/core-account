@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import org.slf4j.Logger;
@@ -34,6 +35,11 @@ public class COAGroupChildTableModel extends AbstractTableModel {
     private AccountRepo accountRepo;
     private HashMap<String, String> hmCOA = new HashMap<>();
     private boolean edit;
+    private JProgressBar progress;
+
+    public void setProgress(JProgressBar progress) {
+        this.progress = progress;
+    }
 
     public boolean isEdit() {
         return edit;
@@ -166,6 +172,7 @@ public class COAGroupChildTableModel extends AbstractTableModel {
 
     private void save(ChartOfAccount coa, int row) {
         if (isValidCOA(coa)) {
+            progress.setIndeterminate(true);
             accountRepo.saveCOA(coa).subscribe((t) -> {
                 if (t.getKey().getCoaCode() != null) {
                     listCOA.set(row, t);
@@ -173,6 +180,9 @@ public class COAGroupChildTableModel extends AbstractTableModel {
                     parent.setRowSelectionInterval(row + 1, row + 1);
                     parent.setColumnSelectionInterval(1, 1);
                 }
+            }, (e) -> {
+                progress.setIndeterminate(false);
+                JOptionPane.showMessageDialog(parent, e.getMessage());
             });
 
         }
@@ -281,8 +291,7 @@ public class COAGroupChildTableModel extends AbstractTableModel {
                 listCOA.add(coa);
                 fireTableRowsInserted(listCOA.size() - 1, listCOA.size() - 1);
             }
-            //parent.scrollRectToVisible(parent.getCellRect(parent.getRowCount() - 1, 0, true));
-
+            progress.setIndeterminate(false);
         }
 
     }

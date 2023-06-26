@@ -45,14 +45,8 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
     private TableFilterHeader filterHeader;
     @Autowired
     private AccountRepo accountRepo;
-    @Autowired
-    private WebClient accountApi;
     private JProgressBar progress;
     private SelectionObserver observer;
-
-    public JProgressBar getProgress() {
-        return progress;
-    }
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
@@ -117,10 +111,13 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
     }
 
     private void searchHead() {
+        progress.setIndeterminate(true);
         accountRepo.getCOAChild("#").collectList().subscribe((t) -> {
             coaHeadTableModel.setListCoaHead(t);
+            progress.setIndeterminate(false);
             tblCoaHead.requestFocus();
         }, (e) -> {
+            progress.setIndeterminate(false);
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
     }
@@ -130,6 +127,7 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         tblCoaGroup.setShowGrid(true);
         tblCoaGroup.getTableHeader().setFont(Global.tblHeaderFont);
         tblCoaGroup.setModel(coaGroupTableModel);
+        coaGroupTableModel.setProgress(progress);
         coaGroupTableModel.setParent(tblCoaGroup);
         coaGroupTableModel.setParetnDesp(lblCoaGroup);
         coaGroupTableModel.setAccountRepo(accountRepo);
@@ -166,6 +164,7 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         tblCOAGroupChild.setModel(cOAGroupChildTableModel);
         cOAGroupChildTableModel.setParent(tblCOAGroupChild);
         cOAGroupChildTableModel.setAccountRepo(accountRepo);
+        cOAGroupChildTableModel.setProgress(progress);
         tblCOAGroupChild.getColumnModel().getColumn(0).setPreferredWidth(1);// no
         tblCOAGroupChild.getColumnModel().getColumn(1).setPreferredWidth(20);// Sys Code
         tblCOAGroupChild.getColumnModel().getColumn(2).setPreferredWidth(20);// Usr Code
@@ -220,13 +219,16 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         ChartOfAccount c = coaHeadTableModel.getChartOfAccount(row);
         String coaCode = c.getKey().getCoaCode();
         if (coaCode != null) {
+            progress.setIndeterminate(true);
             accountRepo.getCOAChild(coaCode).collectList().subscribe((t) -> {
                 coaGroupTableModel.setCoaHeadCode(c.getKey().getCoaCode());
                 coaGroupTableModel.setListCOA(t);
                 coaGroupTableModel.addEmptyRow();
                 lblCoaGroup.setText(c.getCoaNameEng());
                 reqCoaGroup();
+                progress.setIndeterminate(false);
             }, (e) -> {
+                progress.setIndeterminate(false);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             });
         }
@@ -250,13 +252,16 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         ChartOfAccount c = coaGroupTableModel.getChartOfAccount(row);
         String coaCode = c.getKey().getCoaCode();
         if (coaCode != null) {
+            progress.setIndeterminate(true);
             accountRepo.getCOAChild(coaCode).collectList().subscribe((t) -> {
                 cOAGroupChildTableModel.setCoaGroupCode(c.getKey().getCoaCode());
                 cOAGroupChildTableModel.setListCOA(t);
                 cOAGroupChildTableModel.addEmptyRow();
                 lblCoaChild.setText(c.getCoaNameEng());
                 reqCOAGroupChild();
+                progress.setIndeterminate(false);
             }, (e) -> {
+                progress.setIndeterminate(false);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             });
 

@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import org.slf4j.Logger;
@@ -39,23 +40,19 @@ public class DayBookTableModel extends AbstractTableModel {
     private String sourceAccId;
     private JTable parent;
     private SelectionObserver observer;
-    private DateAutoCompleter dateAutoCompleter;
     private String glDate;
     private DepartmentA department;
     private AccountRepo accountRepo;
     private boolean credit;
     private String curCode;
+    private JProgressBar progress;
 
-    public String getCurCode() {
-        return curCode;
+    public void setProgress(JProgressBar progress) {
+        this.progress = progress;
     }
 
     public void setCurCode(String curCode) {
         this.curCode = curCode;
-    }
-
-    public boolean isCredit() {
-        return credit;
     }
 
     public void setCredit(boolean credit) {
@@ -65,40 +62,16 @@ public class DayBookTableModel extends AbstractTableModel {
     public DayBookTableModel() {
     }
 
-    public AccountRepo getAccountRepo() {
-        return accountRepo;
-    }
-
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
-    }
-
-    public DepartmentA getDepartment() {
-        return department;
     }
 
     public void setDepartment(DepartmentA department) {
         this.department = department;
     }
 
-    public String getGlDate() {
-        return glDate;
-    }
-
     public void setGlDate(String glDate) {
         this.glDate = glDate;
-    }
-
-    public DateAutoCompleter getDateAutoCompleter() {
-        return dateAutoCompleter;
-    }
-
-    public void setDateAutoCompleter(DateAutoCompleter dateAutoCompleter) {
-        this.dateAutoCompleter = dateAutoCompleter;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -335,20 +308,19 @@ public class DayBookTableModel extends AbstractTableModel {
 
     private void save(Gl gl, int row, int column) {
         if (isValidEntry(gl, row, column)) {
-            try {
-                accountRepo.save(gl).subscribe((t) -> {
-                    if (t != null) {
-                        listVGl.set(row, t);
-                        addNewRow();
-                        parent.setRowSelectionInterval(row + 1, row + 1);
-                        parent.setColumnSelectionInterval(0, 0);
-                        observer.selected("CAL-TOTAL", "-");
-                    }
-                });
-
-            } catch (JsonSyntaxException ex) {
-                JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
-            }
+            progress.setIndeterminate(true);
+            accountRepo.save(gl).subscribe((t) -> {
+                if (t != null) {
+                    listVGl.set(row, t);
+                    addNewRow();
+                    parent.setRowSelectionInterval(row + 1, row + 1);
+                    parent.setColumnSelectionInterval(0, 0);
+                    observer.selected("CAL-TOTAL", "-");
+                }
+            }, (e) -> {
+                progress.setIndeterminate(false);
+                JOptionPane.showMessageDialog(parent, e.getMessage());
+            });
         }
     }
 
@@ -453,6 +425,7 @@ public class DayBookTableModel extends AbstractTableModel {
             listVGl.add(gl);
             fireTableRowsInserted(listVGl.size() - 1, listVGl.size() - 1);
         }
+        progress.setIndeterminate(false);
     }
 
     public boolean hasEmptyRow() {
