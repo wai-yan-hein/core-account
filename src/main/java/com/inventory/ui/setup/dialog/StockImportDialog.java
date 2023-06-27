@@ -130,7 +130,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         try {
             CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                     .setHeader()
-                    .setSkipHeaderRecord(true)                    
+                    .setSkipHeaderRecord(true)
                     .setAllowMissingColumnNames(true)
                     .setIgnoreEmptyLines(true)
                     .build();
@@ -256,7 +256,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         CategoryKey key = new CategoryKey();
         key.setCatCode(null);
         key.setCompCode(Global.compCode);
-        key.setDeptId(Global.deptId);
+        category.setDeptId(Global.deptId);
         category.setKey(key);
         category.setCreatedBy(Global.loginUser.getUserCode());
         category.setCreatedDate(LocalDateTime.now());
@@ -290,7 +290,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         StockBrandKey key = new StockBrandKey();
         key.setBrandCode(null);
         key.setCompCode(Global.compCode);
-        key.setDeptId(Global.deptId);
+        brand.setDeptId(Global.deptId);
         brand.setKey(key);
         brand.setCreatedBy(Global.loginUser.getUserCode());
         brand.setCreatedDate(LocalDateTime.now());

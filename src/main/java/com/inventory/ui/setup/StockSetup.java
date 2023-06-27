@@ -287,11 +287,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             relationAutoCompleter = new UnitRelationAutoCompleter(txtRelation, t, null, false, false);
             relationAutoCompleter.setRelation(null);
         });
-        
-        monoUnit.subscribe((t) -> {
-            wlUnitCompleter = new UnitAutoCompleter(txtWeightUnit, t, null);
-            wlUnitCompleter.setStockUnit(null);
-        });
         userRepo.getDeparment(true).subscribe((t) -> {
 //            t.add(new DepartmentUser());
             departmentComboBoxModel.setData(t);
