@@ -124,27 +124,32 @@ public class CustomerImportDialog extends javax.swing.JDialog {
             progress.setIndeterminate(true);
             CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                     .setHeader()
-                    .setSkipHeaderRecord(true)
+                    .setSkipHeaderRecord(true)                    
+                    .setAllowMissingColumnNames(true)
+                    .setIgnoreEmptyLines(true)
                     .build();
             Reader in = new FileReader(path);
             Iterable<CSVRecord> records = csvFormat.parse(in);
             records.forEach((row) -> {
                 Trader t = new Trader();
-                TraderKey key = new TraderKey();
-                key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
-                t.setKey(key);
                 t.setTraderName(row.isMapped("Name") ? Util1.convertToUniCode(row.get("Name")) : "");
-                t.setUserCode(row.isMapped("UserCode") ? Util1.convertToUniCode(row.get("UserCode")) : "");
-                t.setAddress(row.isMapped("Address") ? Util1.convertToUniCode(row.get("Address")) : "");
-                t.setPhone(row.isMapped("PhoneNo") ? Util1.convertToUniCode(row.get("PhoneNo")) : "");
-                t.setActive(Boolean.TRUE);
-                t.setCreatedDate(LocalDateTime.now());
-                t.setCreatedBy(Global.loginUser.getUserCode());
-                t.setMacId(Global.macId);
-                t.setType(getImportType());
-                t.setAccount(getAccount());
-                listTrader.add(t);
+                if (!t.getTraderName().equals("")) {
+                    TraderKey key = new TraderKey();
+                    key.setCompCode(Global.compCode);
+                    key.setDeptId(Global.deptId);
+                    t.setKey(key);
+                    t.setUserCode(row.isMapped("UserCode") ? Util1.convertToUniCode(row.get("UserCode")) : "");
+                    t.setAddress(row.isMapped("Address") ? Util1.convertToUniCode(row.get("Address")) : "");
+                    t.setPhone(row.isMapped("PhoneNo") ? Util1.convertToUniCode(row.get("PhoneNo")) : "");
+                    t.setActive(Boolean.TRUE);
+                    t.setCreatedDate(LocalDateTime.now());
+                    t.setCreatedBy(Global.loginUser.getUserCode());
+                    t.setMacId(Global.macId);
+                    t.setType(getImportType());
+                    t.setAccount(getAccount());
+                    listTrader.add(t);
+                }
+
             });
             tableModel.setListTrader(listTrader);
             progress.setIndeterminate(false);

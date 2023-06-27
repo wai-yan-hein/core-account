@@ -8,9 +8,14 @@ import com.common.Global;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.CFont;
+import com.inventory.model.Category;
+import com.inventory.model.CategoryKey;
 import com.inventory.model.Stock;
+import com.inventory.model.StockBrand;
+import com.inventory.model.StockBrandKey;
 import com.inventory.model.StockKey;
 import com.inventory.model.StockType;
+import com.inventory.model.StockTypeKey;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.StockImportTableModel;
 import java.awt.FileDialog;
@@ -41,6 +46,8 @@ public class StockImportDialog extends javax.swing.JDialog {
     private InventoryRepo inventoryRepo;
     private final HashMap<Integer, Integer> hmIntToZw = new HashMap<>();
     private final HashMap<String, String> hmGroup = new HashMap<>();
+    private final HashMap<String, String> hmCat = new HashMap<>();
+    private final HashMap<String, String> hmBrand = new HashMap<>();
 
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
@@ -108,13 +115,19 @@ public class StockImportDialog extends javax.swing.JDialog {
         dispose();
     }
 
+    private static int parseIntegerOrDefault(String value, int defaultValue) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
     private void readFile(String path) {
         List<CFont> listFont = new ArrayList<>();
-        if (listFont != null) {
-            listFont.forEach(f -> {
-                hmIntToZw.put(f.getIntCode(), f.getFontKey().getZwKeyCode());
-            });
-        }
+        listFont.forEach(f -> {
+            hmIntToZw.put(f.getIntCode(), f.getFontKey().getZwKeyCode());
+        });
 
 //        HashMap<String, StockType> hm = new HashMap<>();
 //        List<StockType> listST = inventoryRepo.getStockType().block();
@@ -127,30 +140,39 @@ public class StockImportDialog extends javax.swing.JDialog {
         try {
             CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                     .setHeader()
-                    .setSkipHeaderRecord(true)
+                    .setSkipHeaderRecord(true)                    
                     .setAllowMissingColumnNames(true)
                     .setIgnoreEmptyLines(true)
                     .build();
+
             Reader in = new FileReader(path);
             Iterable<CSVRecord> records = csvFormat.parse(in);
             records.forEach(r -> {
                 Stock t = new Stock();
-                StockKey key = new StockKey();
-                key.setCompCode(Global.compCode);
-                t.setDeptId(Global.deptId);
-                key.setStockCode(null);
-                t.setKey(key);
-                t.setDeptId(Global.deptId);
-                t.setUserCode(r.isMapped("UserCode") ? Util1.convertToUniCode(r.get("UserCode")) : "");
                 t.setStockName(r.isMapped("StockName") ? Util1.convertToUniCode(r.get("StockName")) : "");
-                t.setSalePriceN(r.isMapped("SalePrice") ? Util1.getFloat(r.get("SalePrice")) : Util1.getFloat("0"));
-                t.setTypeCode(r.isMapped("StockGroup") ? getGroupCode(r.get("StockGroup")) : "");
-                t.setActive(true);
-                t.setCreatedDate(LocalDateTime.now());
-                t.setCreatedBy(Global.loginUser.getUserCode());
-                t.setMacId(Global.macId);
-                t.setCalculate(true);
-                listStock.add(t);
+                if (!t.getStockName().equals("")) {
+                    StockKey key = new StockKey();
+                    key.setCompCode(Global.compCode);
+                    key.setStockCode(null);
+                    t.setKey(key);
+                    t.setDeptId(r.isMapped("Department")
+                            ? parseIntegerOrDefault(r.get("Department"), Global.deptId) : Global.deptId);
+                    t.setUserCode(r.isMapped("UserCode") ? Util1.convertToUniCode(r.get("UserCode")) : "");
+                    t.setSalePriceN(r.isMapped("SalePrice") ? Util1.getFloat(r.get("SalePrice")) : Util1.getFloat("0"));
+                    t.setTypeCode(r.isMapped("StockGroup") ? getGroupCode(r.get("StockGroup")) : "");
+                    t.setGroupName(r.isMapped("StockGroup") ? r.get("StockGroup") : "");
+                    t.setCatCode(r.isMapped("Category") ? getCategoryCode(r.get("Category")) : "");
+                    t.setCatName(r.isMapped("Category") ? Util1.convertToUniCode(r.get("Category")) : "");
+                    t.setBrandCode(r.isMapped("Brand") ? getBrandCode(r.get("Brand")) : "");
+                    t.setBrandName(r.isMapped("Brand") ? Util1.convertToUniCode(r.get("Brand")) : "");
+                    t.setActive(true);
+                    t.setCreatedDate(LocalDateTime.now());
+                    t.setCreatedBy(Global.loginUser.getUserCode());
+                    t.setMacId(Global.macId);
+                    t.setCalculate(true);
+                    listStock.add(t);
+                }
+
             });
             tableModel.setListStock(listStock);
         } catch (IOException e) {
@@ -192,11 +214,98 @@ public class StockImportDialog extends javax.swing.JDialog {
     private String getGroupCode(String str) {
         if (hmGroup.isEmpty()) {
             List<StockType> list = inventoryRepo.getStockType().block();
-            list.forEach((t) -> {
-                hmGroup.put(t.getUserCode(), t.getKey().getStockTypeCode());
-            });
+            if (list != null) {
+                list.forEach((t) -> {
+                    hmGroup.put(t.getStockTypeName(), t.getKey().getStockTypeCode());
+                });
+            }
+
+        }
+        if (hmGroup.get(str) == null && !str.isEmpty()) {
+            StockType st = saveGroup(str);
+            hmGroup.put(st.getStockTypeName(), st.getKey().getStockTypeCode());
         }
         return hmGroup.get(str);
+    }
+
+    private StockType saveGroup(String str) {
+        StockType stockType = new StockType();
+        stockType.setUserCode(Global.loginUser.getUserCode());
+        stockType.setStockTypeName(str);
+        stockType.setAccount("");
+        StockTypeKey key = new StockTypeKey();
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        key.setStockTypeCode(null);
+        stockType.setKey(key);
+        stockType.setCreatedBy(Global.loginUser.getUserCode());
+        stockType.setCreatedDate(LocalDateTime.now());
+        stockType.setMacId(Global.macId);
+        return inventoryRepo.saveStockType(stockType).block();
+    }
+
+    private String getCategoryCode(String str) {
+        if (hmCat.isEmpty()) {
+            List<Category> list = inventoryRepo.getCategory().block();
+            if (list != null) {
+                list.forEach((t) -> {
+                    hmCat.put(t.getCatName(), t.getKey().getCatCode());
+                });
+            }
+
+        }
+        if (hmCat.get(str) == null && !str.isEmpty()) {
+            Category ct = saveCategory(str);
+            hmCat.put(ct.getCatName(), ct.getKey().getCatCode());
+        }
+        return hmCat.get(str);
+    }
+
+    private Category saveCategory(String str) {
+        Category category = new Category();
+        CategoryKey key = new CategoryKey();
+        key.setCatCode(null);
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        category.setKey(key);
+        category.setCreatedBy(Global.loginUser.getUserCode());
+        category.setCreatedDate(LocalDateTime.now());
+        category.setMacId(Global.macId);
+        category.setUserCode(Global.loginUser.getUserCode());//txtUserCode.getText()
+        category.setCatName(str);
+        return inventoryRepo.saveCategory(category).block();
+
+    }
+
+    private String getBrandCode(String str) {
+        if (hmBrand.isEmpty()) {
+            List<StockBrand> list = inventoryRepo.getStockBrand().block();
+            if (list != null) {
+                list.forEach((t) -> {
+                    hmBrand.put(t.getBrandName(), t.getKey().getBrandCode());
+                });
+            }
+        }
+        if (hmBrand.get(str) == null && !str.isEmpty()) {
+            StockBrand sb = saveBrand(str);
+            hmBrand.put(sb.getBrandName(), sb.getKey().getBrandCode());
+        }
+        return hmBrand.get(str);
+    }
+
+    private StockBrand saveBrand(String str) {
+        StockBrand brand = new StockBrand();
+        brand.setUserCode(Global.loginUser.getUserCode());
+        brand.setBrandName(str);
+        StockBrandKey key = new StockBrandKey();
+        key.setBrandCode(null);
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        brand.setKey(key);
+        brand.setCreatedBy(Global.loginUser.getUserCode());
+        brand.setCreatedDate(LocalDateTime.now());
+        brand.setMacId(Global.macId);
+        return inventoryRepo.saveBrand(brand).block();
     }
 
     /**
