@@ -8,7 +8,6 @@ package com.acc.entry;
 import com.acc.common.AccountRepo;
 import com.acc.editor.COA3CellEditor;
 import com.user.editor.CurrencyAutoCompleter;
-import com.acc.editor.CurrencyAEditor;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.DepartmentCellEditor;
 import com.acc.editor.DespAutoCompleter;
@@ -41,6 +40,7 @@ import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.user.common.UserRepo;
+import com.user.editor.CurrencyEditor;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -255,12 +255,13 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
             departmentAutoCompleter.setObserver(this);
         });
 
+        currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
+        currencyAutoCompleter.setObserver(this);
         monoCur.subscribe((t) -> {
-            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            currencyAutoCompleter.setObserver(this);
-            userRepo.findCurrency(Global.currency).subscribe((tt) -> {
-                currencyAutoCompleter.setCurrency(tt);
-            });
+            currencyAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currencyAutoCompleter.setCurrency(c);
         });
         coaAutoCompleter = new COA3AutoCompleter(txtAccount, accountRepo, null, true, 0);
         coaAutoCompleter.setSelectionObserver(this);
@@ -344,7 +345,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         tblCash.getColumnModel().getColumn(5).setCellEditor(new BatchCellEditor(accountRepo));
         tblCash.getColumnModel().getColumn(6).setCellEditor(new COA3CellEditor(accountRepo, 3));
         monoCur.subscribe((t) -> {
-            tblCash.getColumnModel().getColumn(7).setCellEditor(new CurrencyAEditor(t));
+            tblCash.getColumnModel().getColumn(7).setCellEditor(new CurrencyEditor(t));
         });
         tblCash.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());
         tblCash.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());

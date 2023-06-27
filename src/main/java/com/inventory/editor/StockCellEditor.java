@@ -99,7 +99,6 @@ public class StockCellEditor extends AbstractCellEditor implements TableCellEdit
         if (anEvent instanceof MouseEvent) {
             return false;
         } else if (anEvent instanceof KeyEvent ke) {
-
             return !ke.isActionKey(); //Function key
         } else {
             return true;

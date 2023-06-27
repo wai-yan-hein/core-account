@@ -110,8 +110,9 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
     }
 
     private void initCombo() {
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, false);
         inventoryRepo.getLocation().subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, false);
+            locationAutoCompleter.setListLocation(t);
         });
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "SUP");
         userRepo.getAppUser().subscribe((t) -> {
@@ -124,15 +125,12 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
                 departmentAutoCompleter.setDepartment(tt);
             });
         });
+        currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
-            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            userRepo.getDefaultCurrency().subscribe((tt) -> {
-                currAutoCompleter.setCurrency(tt);
-            }, (e) -> {
-                log.error(e.getMessage());
-            });
-        }, (e) -> {
-            log.error(e.getMessage());
+            currAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currAutoCompleter.setCurrency(c);
         });
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
         if (inventoryRepo.localDatabase) {

@@ -144,11 +144,12 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "-");
         traderAutoCompleter.setObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
+        currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            userRepo.getDefaultCurrency().subscribe((c) -> {
-                currencyAutoCompleter.setCurrency(c);
-            });
+            currencyAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currencyAutoCompleter.setCurrency(c);
         });
         //cboCash.setRenderer(new ColorComboBoxRender());
         Mono<List<ChartOfAccount>> m1 = accountRepo.getCOAByGroup(ProUtil.getProperty(ProUtil.CASH_GROUP));

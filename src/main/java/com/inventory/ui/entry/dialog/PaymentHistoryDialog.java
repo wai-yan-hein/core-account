@@ -132,11 +132,12 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
         });
         stockAutoCompleter = new StockAutoCompleter(txtAccount, inventoryRepo, null, true);
         cOA3AutoCompleter = new COA3AutoCompleter(txtAccount, accountRepo, null, true, 3);
+        currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            userRepo.getDefaultCurrency().subscribe((tt) -> {
-                currencyAutoCompleter.setCurrency(tt);
-            });
+            currencyAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currencyAutoCompleter.setCurrency(c);
         });
 
     }

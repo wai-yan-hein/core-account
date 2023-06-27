@@ -17,7 +17,7 @@ import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.editor.CurrencyEditor;
+import com.user.editor.CurrencyEditor;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.common.UserRepo;

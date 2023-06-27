@@ -124,11 +124,12 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     }
 
     private void initCombo() {
+        fromLocaitonCompleter = new LocationAutoCompleter(txtFrom,null, false, false);
+        toLocaitonCompleter = new LocationAutoCompleter(txtTo,null, false, false);
         inventoryRepo.getLocation().subscribe((t) -> {
-            fromLocaitonCompleter = new LocationAutoCompleter(txtFrom, t, null, false, false);
-            toLocaitonCompleter = new LocationAutoCompleter(txtTo, t, null, false, false);
+            fromLocaitonCompleter.setListLocation(t);
+            toLocaitonCompleter.setListLocation(t);
         });
-
     }
 
     private void initTable() {

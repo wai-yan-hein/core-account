@@ -5,7 +5,6 @@
  */
 package com.user.setup;
 
-import com.H2Repo;
 import com.acc.common.AccountRepo;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
@@ -400,23 +399,23 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         }, (e) -> {
             log.error(e.getMessage());
         });
+        locCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
+        locCompleter.setObserver(this);
         inventoryRepo.getLocation().subscribe((t) -> {
-            locCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
-            locCompleter.setObserver(this);
-            Mono<Location> loc = inventoryRepo.findLocation(hmProperty.get(txtLocation.getName()));
-            loc.hasElement().subscribe((element) -> {
-                if (element) {
-                    loc.subscribe((tt) -> {
-                        locCompleter.setLocation(tt);
-                    });
-                } else {
-                    locCompleter.setLocation(null);
-                }
-            });
+            locCompleter.setListLocation(t);
         }, (e) -> {
             log.error(e.getMessage());
         });
-
+        Mono<Location> loc = inventoryRepo.findLocation(hmProperty.get(txtLocation.getName()));
+        loc.hasElement().subscribe((element) -> {
+            if (element) {
+                loc.subscribe((tt) -> {
+                    locCompleter.setLocation(tt);
+                });
+            } else {
+                locCompleter.setLocation(null);
+            }
+        });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, false);
         stockAutoCompleter.setObserver(this);
         Mono<Stock> stock = inventoryRepo.findStock(txtStock.getName());

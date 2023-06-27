@@ -120,17 +120,19 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     private void initCompleter() {
         monoLoc = inventoryRepo.getLocation();
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
         monoLoc.subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
-            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
-                locationAutoCompleter.setLocation(tt);
-            });
+            locationAutoCompleter.setListLocation(t);
         });
+        inventoryRepo.getDefaultLocation().subscribe((tt) -> {
+            locationAutoCompleter.setLocation(tt);
+        });
+        currencyAAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            userRepo.getDefaultCurrency().subscribe((tt) -> {
-                currencyAAutoCompleter.setCurrency(tt);
-            });
+            currencyAAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currencyAAutoCompleter.setCurrency(c);
         });
 
     }

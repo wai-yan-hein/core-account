@@ -162,12 +162,13 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
             departmentAutoCompleter.setListOption(department);
 
         });
+        currencyAAutoCompleter = new CurrencyAutoCompleter(txtCur, null);
+        currencyAAutoCompleter.setObserver(this);
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAAutoCompleter = new CurrencyAutoCompleter(txtCur, t, null);
-            currencyAAutoCompleter.setObserver(this);
-            userRepo.findCurrency(curCode).subscribe((tt) -> {
-                currencyAAutoCompleter.setCurrency(tt);
-            });
+            currencyAAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currencyAAutoCompleter.setCurrency(c);
         });
     }
 

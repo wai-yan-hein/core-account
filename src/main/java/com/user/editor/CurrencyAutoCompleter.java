@@ -47,7 +47,7 @@ public final class CurrencyAutoCompleter implements KeyListener, SelectionObserv
     private JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private CurrencyATableModel currencyTabelModel;
+    private CurrencyATableModel currencyTabelModel = new CurrencyATableModel();
     private Currency currency;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
@@ -56,24 +56,29 @@ public final class CurrencyAutoCompleter implements KeyListener, SelectionObserv
     private boolean popupOpen = false;
     private SelectionObserver observer;
 
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
+    }
+
+    public void setListCurrency(List<Currency> list) {
+        currencyTabelModel.setListCurrency(list);
+        if (!list.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
+        }
     }
 
     public CurrencyAutoCompleter() {
     }
 
-    public CurrencyAutoCompleter(JTextComponent comp, List<Currency> list,
-            AbstractCellEditor editor) {
+    public CurrencyAutoCompleter(JTextComponent comp, AbstractCellEditor editor) {
         this.textComp = comp;
         this.editor = editor;
+        initTable();
+    }
+
+    private void initTable() {
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
-        currencyTabelModel = new CurrencyATableModel(list);
         table.setModel(currencyTabelModel);
         table.setFont(Global.lableFont); // NOI18N
         table.setRowHeight(Global.tblRowHeight);
@@ -83,7 +88,6 @@ public final class CurrencyAutoCompleter implements KeyListener, SelectionObserv
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
-
         scroll.setBorder(null);
         table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(40);//Code
@@ -146,12 +150,6 @@ public final class CurrencyAutoCompleter implements KeyListener, SelectionObserv
                 }
             }
         });
-
-        table.setRequestFocusEnabled(false);
-
-        if (!list.isEmpty()) {
-            table.setRowSelectionInterval(0, 0);
-        }
     }
 
     public void mouseSelect() {

@@ -26,7 +26,6 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.time.Duration;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -35,9 +34,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -131,8 +128,9 @@ public class WeightLossHistoryDialog extends javax.swing.JDialog implements KeyL
     }
 
     private void initCombo() {
+        locationAutoCompleter = new LocationAutoCompleter(txtLoc,null, true, false);
         inventoryRepo.getLocation().subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLoc, t, null, true, false);
+            locationAutoCompleter.setListLocation(t);
         });
         userRepo.getAppUser().subscribe((t) -> {
             appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);

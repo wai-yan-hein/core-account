@@ -32,10 +32,6 @@ public class CurrencyATableModel extends AbstractTableModel {
         this.table = table;
     }
 
-    public CurrencyATableModel(List<Currency> listCurrency) {
-        this.listCurrency = listCurrency;
-    }
-
     public CurrencyATableModel() {
     }
 

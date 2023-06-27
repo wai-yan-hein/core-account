@@ -154,8 +154,9 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         }, (e) -> {
             log.error(e.getMessage());
         });
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, false);
         inventoryRepo.getLocation().subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, false);
+            locationAutoCompleter.setListLocation(t);
         }, (e) -> {
             log.error(e.getMessage());
         });
@@ -167,13 +168,12 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         }, (e) -> {
             log.error(e.getMessage());
         });
+        currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
-            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            userRepo.getDefaultCurrency().subscribe((tt) -> {
-                currAutoCompleter.setCurrency(tt);
-            });
-        }, (e) -> {
-            log.error(e.getMessage());
+            currAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currAutoCompleter.setCurrency(c);
         });
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "CUS");
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
@@ -350,6 +350,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         }
 
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

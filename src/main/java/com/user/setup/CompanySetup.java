@@ -107,8 +107,12 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
     }
 
     private void initCombo() {
+        currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
+            currencyAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currencyAutoCompleter.setCurrency(c);
         });
         userRepo.getBusinessType().subscribe((t) -> {
             businessTypeAutoCompleter = new BusinessTypeAutoCompleter(txtBusType, t, null, false);
