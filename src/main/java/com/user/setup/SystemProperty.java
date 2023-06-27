@@ -188,6 +188,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtComP.setName("purchase.commission");
         chkPrint.setName("printer.print");
         chkDisableDep.setName("disable.department");
+        txtCustomer.setName(ProUtil.DEFAULT_CUSTOMER);
+        txtSupplier.setName(ProUtil.DEFAULT_SUPPLIER);
         txtLocation.setName(ProUtil.DEFAULT_LOCATION);
         chkShowExpense.setName(ProUtil.P_SHOW_EXPENSE);
         chkShowGRN.setName(ProUtil.P_SHOW_GRN);
@@ -367,7 +369,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         printerAutoCompleter.setText(hmProperty.get("printer.name"));
         cusCompleter = new TraderAutoCompleter(txtCustomer, inventoryRepo, null, false, "CUS");
         cusCompleter.setObserver(this);
-        Mono<Trader> cus = inventoryRepo.findTrader(hmProperty.get("default.customer"), Global.deptId);
+        Mono<Trader> cus = inventoryRepo.findTrader(hmProperty.get(txtCustomer.getName()));
         cus.hasElement().subscribe((element) -> {
             if (element) {
                 cus.subscribe((t) -> {
@@ -384,7 +386,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         supCompleter = new TraderAutoCompleter(txtSupplier, inventoryRepo, null, false, "SUP");
         supCompleter.setObserver(this);
-        Mono<Trader> sup = inventoryRepo.findTrader(hmProperty.get("default.supplier"), Global.deptId);
+        Mono<Trader> sup = inventoryRepo.findTrader(hmProperty.get(txtSupplier.getName()));
         sup.hasElement().subscribe((element) -> {
             if (element) {
                 sup.subscribe((t) -> {
@@ -1758,13 +1760,13 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             String key;
             String value = "-";
             if (source.equals("CUS")) {
-                key = "default.customer";
+                key = txtCustomer.getName();
                 Trader t = cusCompleter.getTrader();
                 if (t != null) {
                     value = t.getKey().getCode();
                 }
             } else {
-                key = "default.supplier";
+                key = txtSupplier.getName();
                 Trader t = supCompleter.getTrader();
                 if (t != null) {
                     value = t.getKey().getCode();

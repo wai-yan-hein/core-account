@@ -23,6 +23,7 @@ import lombok.Data;
 @Entity
 @Table(name = "unit_relation")
 public class UnitRelation {
+
     @EmbeddedId
     private RelationKey key;
     @Column(name = "rel_name")
@@ -32,6 +33,8 @@ public class UnitRelation {
     @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedDate;
     private transient List<UnitRelationDetail> detailList;
+    @Column(name = "dept_id")
+    private Integer deptId;
 
     public UnitRelation() {
     }

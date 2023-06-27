@@ -14,10 +14,6 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
@@ -137,9 +133,9 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
             if (lblStatus.getText().equals("NEW")) {
                 SaleManKey key = new SaleManKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 key.setSaleManCode(null);
                 saleMan.setKey(key);
+                saleMan.setDeptId(Global.deptId);
                 saleMan.setMacId(Global.macId);
                 saleMan.setCreatedDate(Util1.getTodayDate());
                 saleMan.setCreatedBy(Global.loginUser.getUserCode());

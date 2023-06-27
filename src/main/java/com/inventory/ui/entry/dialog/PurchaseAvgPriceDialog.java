@@ -101,7 +101,7 @@ public class PurchaseAvgPriceDialog extends javax.swing.JDialog {
                 txtQty.setValue(pd.getQty());
                 float orgPrice = Util1.getFloat(pd.getOrgPrice());
                 txtPrice.setValue(orgPrice > 0 ? orgPrice : pd.getPrice());
-                inventoryRepo.findUnit(pd.getUnitCode(), Global.deptId).subscribe((t) -> {
+                inventoryRepo.findUnit(pd.getUnitCode()).subscribe((t) -> {
                     unitModel.setSelectedItem(t);
                     cboUnit.setModel(unitModel);
                 }, (e) -> {
@@ -109,7 +109,7 @@ public class PurchaseAvgPriceDialog extends javax.swing.JDialog {
                 });
                 txtAvgQty.setValue(pd.getAvgQty());
                 txtAvgPrice.setValue(Util1.getFloat(pd.getPrice()));
-                inventoryRepo.findUnit(s.getWeightUnit(), Global.deptId).subscribe((t) -> {
+                inventoryRepo.findUnit(s.getWeightUnit()).subscribe((t) -> {
                     lossUnitModel.setSelectedItem(t);
                     cboAvgUnit.setModel(lossUnitModel);
                 }, (e) -> {

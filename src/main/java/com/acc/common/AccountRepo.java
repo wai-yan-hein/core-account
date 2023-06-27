@@ -277,9 +277,17 @@ public class AccountRepo {
                 .body(Mono.just(coa), ChartOfAccount.class)
                 .retrieve()
                 .bodyToMono(ChartOfAccount.class)
-                .doOnSuccess((t) -> {
-                    h2Repo.save(t);
-                });
+                .onErrorResume((e) -> {
+                    log.error(e.getMessage());
+                    return Mono.error(e);
+                })
+                .doOnSuccess(
+                        (t) -> {
+                            if (localDatabase) {
+                                h2Repo.save(t);
+                            }
+                        }
+                );
     }
 
     public Mono<List<ChartOfAccount>> saveCOAFromTemplate(Integer busId, String compCode) {
@@ -319,11 +327,13 @@ public class AccountRepo {
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve()
-                .bodyToFlux(DepartmentA.class)
+                .bodyToFlux(DepartmentA.class
+                )
                 .collectList();
     }
 
-    public Double getTraderBalance(String date, String traderCode, String compCode) {
+    public Double
+            getTraderBalance(String date, String traderCode, String compCode) {
         try {
             return accountApi.get()
                     .uri(builder -> builder.path("/report/get-trader-balance")
@@ -332,7 +342,8 @@ public class AccountRepo {
                     .queryParam("compCode", compCode)
                     .build())
                     .retrieve()
-                    .bodyToMono(Double.class)
+                    .bodyToMono(Double.class
+                    )
                     .block();
         } catch (Exception e) {
             log.error("getTraderBalance : " + e.getMessage());
@@ -346,24 +357,28 @@ public class AccountRepo {
                 .queryParam("coaCode", coaCode)
                 .queryParam("busId", busId)
                 .build())
-                .retrieve().bodyToFlux(COATemplate.class);
+                .retrieve().bodyToFlux(COATemplate.class
+                );
     }
 
     public Flux<ChartOfAccount> getCOAChild(String coaCode) {
         if (localDatabase) {
             return h2Repo.getCOAChild(coaCode);
+
         }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-coa-child")
                 .queryParam("coaCode", coaCode)
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().bodyToFlux(ChartOfAccount.class);
+                .retrieve().bodyToFlux(ChartOfAccount.class
+                );
     }
 
     public Mono<List<ChartOfAccount>> getCOAByGroup(String groupCode) {
         if (localDatabase) {
             return h2Repo.getCOA3(groupCode);
+
         }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/getCOAByGroup")
@@ -371,11 +386,14 @@ public class AccountRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToFlux(ChartOfAccount.class)
+                .bodyToFlux(ChartOfAccount.class
+                )
                 .onErrorResume((e) -> {
-                    log.error("getCOAByGroup : " + e.getMessage());
+                    log.error(
+                            "getCOAByGroup : " + e.getMessage());
                     return Mono.empty();
-                })
+                }
+                )
                 .collectList();
     }
 
@@ -386,11 +404,14 @@ public class AccountRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToFlux(ChartOfAccount.class)
+                .bodyToFlux(ChartOfAccount.class
+                )
                 .onErrorResume((e) -> {
-                    log.error("getCOAByHead : " + e.getMessage());
+                    log.error(
+                            "getCOAByHead : " + e.getMessage());
                     return Mono.empty();
-                })
+                }
+                )
                 .collectList();
     }
 
@@ -401,7 +422,8 @@ public class AccountRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToFlux(Gl.class);
+                .bodyToFlux(Gl.class
+                );
     }
 
     public Flux<Gl> getVoucher(String vouNo) {
@@ -410,16 +432,19 @@ public class AccountRepo {
                 .queryParam("glVouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().bodyToFlux(Gl.class);
+                .retrieve().bodyToFlux(Gl.class
+                );
     }
 
     public Mono<COATemplate> findCOATemplate(COATemplateKey key) {
         return accountApi.post()
                 .uri("/template/find-coa-template")
-                .body(Mono.just(key), COATemplateKey.class)
+                .body(Mono.just(key), COATemplateKey.class
+                )
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono(COATemplate.class);
+                .bodyToMono(COATemplate.class
+                );
     }
 
     public Mono<ChartOfAccount> findCOA(String coaCode) {
@@ -428,25 +453,38 @@ public class AccountRepo {
         key.setCompCode(Global.compCode);
         if (localDatabase) {
             return h2Repo.find(key);
+
         }
         return accountApi.post()
                 .uri("/account/find-coa")
-                .body(Mono.just(key), COAKey.class)
+                .body(Mono.just(key), COAKey.class
+                )
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono(ChartOfAccount.class)
+                .bodyToMono(ChartOfAccount.class
+                )
                 .onErrorResume((e) -> {
-                    log.error("findCOA :" + e.getMessage());
+                    log.error(
+                            "findCOA :" + e.getMessage());
                     return Mono.empty();
-                });
+                }
+                );
     }
 
     public Mono<DepartmentA> saveDepartment(DepartmentA dep) {
         return accountApi.post()
                 .uri("/account/save-department")
-                .body(Mono.just(dep), DepartmentA.class)
+                .body(Mono.just(dep), DepartmentA.class
+                )
                 .retrieve()
-                .bodyToMono(DepartmentA.class)
+                .bodyToMono(DepartmentA.class
+                )
+                .onErrorResume((e) -> {
+                    log.error(
+                            "saveDepartment : " + e.getMessage());
+                    return Mono.error(e);
+                }
+                )
                 .doOnSuccess((t) -> {
                     h2Repo.save(t);
                 });
@@ -458,46 +496,58 @@ public class AccountRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToFlux(DepartmentA.class);
+                .bodyToFlux(DepartmentA.class
+                );
     }
 
     public Mono<OpeningBalance> saveCOAOpening(OpeningBalance opening) {
         return accountApi.post()
                 .uri("/account/save-opening")
-                .body(Mono.just(opening), OpeningBalance.class)
+                .body(Mono.just(opening), OpeningBalance.class
+                )
                 .retrieve()
-                .bodyToMono(OpeningBalance.class);
+                .bodyToMono(OpeningBalance.class
+                );
     }
 
     public Mono<TmpOpening> getOpening(ReportFilter filter) {
         return accountApi.post()
                 .uri("/account/get-coa-opening")
-                .body(Mono.just(filter), ReportFilter.class)
+                .body(Mono.just(filter), ReportFilter.class
+                )
                 .retrieve()
-                .bodyToMono(TmpOpening.class)
+                .bodyToMono(TmpOpening.class
+                )
                 .onErrorResume((e) -> {
-                    log.info("getOpening " + e.getMessage());
+                    log.info(
+                            "getOpening " + e.getMessage());
                     return Mono.empty();
-                });
+                }
+                );
     }
 
     public Mono<StockOP> save(StockOP op) {
         return accountApi.post()
                 .uri("/account/save-stock-op")
-                .body(Mono.just(op), StockOP.class)
+                .body(Mono.just(op), StockOP.class
+                )
                 .retrieve()
-                .bodyToMono(StockOP.class);
+                .bodyToMono(StockOP.class
+                );
     }
 
     public Mono<TraderA> saveTrader(TraderA t) {
         return accountApi.post()
                 .uri("/account/save-trader")
-                .body(Mono.just(t), TraderA.class)
+                .body(Mono.just(t), TraderA.class
+                )
                 .retrieve()
-                .bodyToMono(TraderA.class)
+                .bodyToMono(TraderA.class
+                )
                 .doOnSuccess((trader) -> {
                     h2Repo.save(trader);
-                });
+                }
+                );
     }
 
     public List<String> deleteTrader(TraderAKey key) {
@@ -509,21 +559,25 @@ public class AccountRepo {
                 .uri(builder -> builder.path("/gl/receive")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().bodyToFlux(Gl.class);
+                .retrieve().bodyToFlux(Gl.class
+                );
     }
 
     public Mono<YearEnd> yearEnd(YearEnd t) {
         return accountApi.post()
                 .uri("/account/yearEnd")
                 .accept(MediaType.APPLICATION_JSON)
-                .body(Mono.just(t), YearEnd.class)
+                .body(Mono.just(t), YearEnd.class
+                )
                 .retrieve()
-                .bodyToMono(YearEnd.class);
+                .bodyToMono(YearEnd.class
+                );
     }
 
     public Mono<List<ChartOfAccount>> searchCOA(String str, int level) {
         if (localDatabase) {
             return h2Repo.searchCOA(str, level);
+
         }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/search-coa")
@@ -532,7 +586,8 @@ public class AccountRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToFlux(ChartOfAccount.class)
+                .bodyToFlux(ChartOfAccount.class
+                )
                 .collectList();
     }
 
@@ -543,7 +598,8 @@ public class AccountRepo {
                 .queryParam("str", str)
                 .build())
                 .retrieve()
-                .bodyToFlux(VDescription.class)
+                .bodyToFlux(VDescription.class
+                )
                 .collectList();
     }
 
@@ -554,7 +610,8 @@ public class AccountRepo {
                 .queryParam("str", str)
                 .build())
                 .retrieve()
-                .bodyToFlux(VDescription.class)
+                .bodyToFlux(VDescription.class
+                )
                 .collectList();
     }
 
@@ -565,7 +622,8 @@ public class AccountRepo {
                 .queryParam("text", str)
                 .build())
                 .retrieve()
-                .bodyToFlux(TraderA.class)
+                .bodyToFlux(TraderA.class
+                )
                 .collectList();
     }
 
@@ -576,34 +634,41 @@ public class AccountRepo {
                 .queryParam("str", str)
                 .build())
                 .retrieve()
-                .bodyToFlux(VDescription.class)
+                .bodyToFlux(VDescription.class
+                )
                 .collectList();
     }
 
     public Mono<List<Gl>> searchJournal(ReportFilter filter) {
         return accountApi.post()
                 .uri("/account/search-journal")
-                .body(Mono.just(filter), ReportFilter.class)
+                .body(Mono.just(filter), ReportFilter.class
+                )
                 .retrieve()
-                .bodyToFlux(Gl.class)
+                .bodyToFlux(Gl.class
+                )
                 .collectList();
     }
 
     public Mono<List<StockOP>> searchOP(ReportFilter filter) {
         return accountApi.post()
                 .uri("/account/search-stock-op")
-                .body(Mono.just(filter), ReportFilter.class)
+                .body(Mono.just(filter), ReportFilter.class
+                )
                 .retrieve()
-                .bodyToFlux(StockOP.class)
+                .bodyToFlux(StockOP.class
+                )
                 .collectList();
     }
 
     public Mono<List<OpeningBalance>> getOpeningBalance(ReportFilter filter) {
         return accountApi.post()
                 .uri("/account/get-opening")
-                .body(Mono.just(filter), ReportFilter.class)
+                .body(Mono.just(filter), ReportFilter.class
+                )
                 .retrieve()
-                .bodyToFlux(OpeningBalance.class)
+                .bodyToFlux(OpeningBalance.class
+                )
                 .collectList();
     }
 
@@ -611,58 +676,72 @@ public class AccountRepo {
         return accountApi
                 .post()
                 .uri("/report/get-report")
-                .body(Mono.just(filter), FilterObject.class)
+                .body(Mono.just(filter), FilterObject.class
+                )
                 .retrieve()
-                .bodyToMono(ReturnObject.class);
+                .bodyToMono(ReturnObject.class
+                );
     }
 
     public Mono<List<VApar>> getArAp(ReportFilter filter) {
         return accountApi.post()
                 .uri("/report/get-arap")
-                .body(Mono.just(filter), ReportFilter.class)
+                .body(Mono.just(filter), ReportFilter.class
+                )
                 .retrieve()
-                .bodyToFlux(VApar.class)
+                .bodyToFlux(VApar.class
+                )
                 .collectList();
     }
 
     public Mono<List<VTriBalance>> getTri(ReportFilter filter) {
         return accountApi.post()
                 .uri("/report/get-tri-balance")
-                .body(Mono.just(filter), ReportFilter.class)
+                .body(Mono.just(filter), ReportFilter.class
+                )
                 .retrieve()
-                .bodyToFlux(VTriBalance.class)
+                .bodyToFlux(VTriBalance.class
+                )
                 .collectList();
     }
 
     public Mono<List<Gl>> searchGl(ReportFilter filter) {
         if (filter.isLocal()) {
             return h2Repo.searchGL(filter);
+
         }
         return accountApi.post()
                 .uri("/account/search-gl")
-                .body(Mono.just(filter), ReportFilter.class)
+                .body(Mono.just(filter), ReportFilter.class
+                )
                 .retrieve()
-                .bodyToFlux(Gl.class)
+                .bodyToFlux(Gl.class
+                )
                 .collectList()
                 .onErrorResume((e) -> {
-                    log.info("searchGl " + e.getMessage());
+                    log.info(
+                            "searchGl " + e.getMessage());
                     return Mono.empty();
-                });
+                }
+                );
     }
 
     public Mono<List<Gl>> searchVoucher(ReportFilter filter) {
         return accountApi
                 .post()
                 .uri("/account/search-voucher")
-                .body(Mono.just(filter), ReportFilter.class)
+                .body(Mono.just(filter), ReportFilter.class
+                )
                 .retrieve()
-                .bodyToFlux(Gl.class)
+                .bodyToFlux(Gl.class
+                )
                 .collectList();
     }
 
     public Mono<List<DateModel>> getDate() {
         String startDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
         boolean isAll = Util1.getBoolean(ProUtil.getProperty(ProUtil.DISABLE_ALL_FILTER));
+
         return accountApi.get()
                 .uri(builder -> builder.path("/account/getDate")
                 .queryParam("startDate", startDate)
@@ -670,11 +749,14 @@ public class AccountRepo {
                 .queryParam("isAll", isAll)
                 .build())
                 .retrieve()
-                .bodyToFlux(DateModel.class)
+                .bodyToFlux(DateModel.class
+                )
                 .collectList()
                 .onErrorResume((e) -> {
-                    log.info("getDate " + e.getMessage());
+                    log.info(
+                            "getDate " + e.getMessage());
                     return Mono.empty();
-                });
+                }
+                );
     }
 }

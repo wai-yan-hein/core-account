@@ -21,6 +21,4 @@ public class StockUnitKey implements Serializable{
     private String unitCode;
     @Column(name = "comp_code")
     private String compCode;
-    @Column(name = "dept_id")
-    private Integer deptId;
 }

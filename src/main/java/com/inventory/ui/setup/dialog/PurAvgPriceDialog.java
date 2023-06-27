@@ -10,7 +10,6 @@ import com.inventory.editor.UnitAutoCompleter;
 import com.inventory.model.PurHisDetail;
 import com.inventory.model.StockUnit;
 import com.inventory.ui.common.InventoryRepo;
-import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.List;
@@ -120,15 +119,14 @@ public class PurAvgPriceDialog extends javax.swing.JDialog {
     }
 
     private void initData() {
-        Integer deptId = pd.getKey().getDeptId();
         txtQty.setValue(pd.getQty());
         txtPrice.setValue(pd.getPrice());
-        inventoryRepo.findUnit(pd.getUnitCode(), deptId).subscribe((t) -> {
+        inventoryRepo.findUnit(pd.getUnitCode()).subscribe((t) -> {
             unitAutoCompleter.setStockUnit(t);
         });
         txtAvgQty.setValue(pd.getQty());
         txtAvgPrice.setValue(pd.getPrice());
-        inventoryRepo.findUnit(pd.getUnitCode(), deptId).subscribe((t) -> {
+        inventoryRepo.findUnit(pd.getUnitCode()).subscribe((t) -> {
             avgunitAutoCompleter.setStockUnit(t);
         });
         txtStockName.setText(pd.getStockName());

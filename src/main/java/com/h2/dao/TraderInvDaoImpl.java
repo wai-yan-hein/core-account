@@ -8,6 +8,7 @@ import com.common.Util1;
 import com.inventory.model.Trader;
 import com.inventory.model.TraderKey;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +57,7 @@ public class TraderInvDaoImpl extends AbstractDao<TraderKey, Trader> implements 
         if (!type.equals("-")) {
             filter += "and (multi = TRUE or type ='" + type + "')";
         }
-        String sql = "select code,user_code,trader_name,price_type,type,address\n"
+        String sql = "select code,user_code,trader_name,price_type,type,address,credit_amt,credit_days\n"
                 + "from trader\n" + filter + "\n"
                 + "order by user_code,trader_name\n"
                 + "limit 100\n";
@@ -69,17 +70,19 @@ public class TraderInvDaoImpl extends AbstractDao<TraderKey, Trader> implements 
                     TraderKey key = new TraderKey();
                     key.setCompCode(compCode);
                     key.setCode(rs.getString("code"));
-                    key.setDeptId(deptId);
                     t.setKey(key);
+                    t.setDeptId(deptId);
                     t.setUserCode(rs.getString("user_code"));
                     t.setTraderName(rs.getString("trader_name"));
                     t.setPriceType(rs.getString("price_type"));
                     t.setType(rs.getString("type"));
                     t.setAddress(rs.getString("address"));
+                    t.setCreditAmt(rs.getFloat("credit_amt"));                  
+                    t.setCreditDays(rs.getInt("credit_days"));
                     list.add(t);
                 }
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             log.error(e.getMessage());
         }
         return list;

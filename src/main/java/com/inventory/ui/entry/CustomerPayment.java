@@ -356,7 +356,7 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
         int deptId = ph.getKey().getDeptId();
         String compCode = ph.getKey().getCompCode();
         String vouNo = ph.getKey().getVouNo();
-        inventoryRepo.findTrader(ph.getTraderCode(), deptId).subscribe((t) -> {
+        inventoryRepo.findTrader(ph.getTraderCode()).subscribe((t) -> {
             traderAutoCompleter.setTrader(t);
         });
         accountRepo.findCOA(ph.getAccount()).subscribe((t) -> {

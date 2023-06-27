@@ -346,7 +346,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         if (s != null) {
             progress.setIndeterminate(true);
             io = s;
-            inventoryRepo.findVouStatus(io.getVouStatusCode(), io.getKey().getDeptId()).subscribe((t) -> {
+            inventoryRepo.findVouStatus(io.getVouStatusCode()).subscribe((t) -> {
                 vouStatusAutoCompleter.setVoucher(t);
             });
             String vouNo = io.getKey().getVouNo();
@@ -355,7 +355,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                         t.forEach((a) -> {
                             outTableModel.addObject(a);
                         });
-
                     }, (e) -> {
                         progress.setIndeterminate(false);
                         JOptionPane.showMessageDialog(this, e.getMessage());
@@ -766,7 +765,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     public void selected(Object source, Object selectObj) {
         if (source.toString().equals("IO-HISTORY")) {
             if (selectObj instanceof VStockIO v) {
-                inventoryRepo.findStockIO(v.getVouNo(), v.getDeptId()).subscribe((t) -> {
+                inventoryRepo.findStockIO(v.getVouNo(), v.getDeptId(), false).subscribe((t) -> {
                     setVoucher(t, false);
                 });
             }

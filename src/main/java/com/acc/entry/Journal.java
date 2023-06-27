@@ -133,7 +133,6 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         txtProjectNo.addFocusListener(fa);
         txtRefrence.addActionListener(action);
         txtDesp.addActionListener(action);
-        tblJournal.addMouseListener(new ColumnHeaderListener(tblJournal));
     }
     private final ActionListener action = (ActionEvent e) -> {
         searchJournal();

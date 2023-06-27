@@ -23,6 +23,4 @@ public class StockBrandKey implements Serializable{
     private String brandCode;
     @Column(name = "comp_code")
     private String compCode;
-    @Column(name = "dept_id")
-    private Integer deptId;
 }

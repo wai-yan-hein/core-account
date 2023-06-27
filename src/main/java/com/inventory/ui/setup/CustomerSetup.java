@@ -211,7 +211,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         }, (e) -> {
             log.error(e.getMessage());
         });
-        inventoryRepo.findTraderGroup(customer.getGroupCode(), customer.getKey().getDeptId()).subscribe((t) -> {
+        inventoryRepo.findTraderGroup(customer.getGroupCode(), Global.deptId).subscribe((t) -> {
             traderGroupAutoCompleter.setGroup(t);
         }, (e) -> {
             log.error(e.getMessage());
@@ -267,10 +267,10 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                 customer.setMacId(Global.macId);
                 customer.setCreatedBy(Global.loginUser.getUserCode());
                 customer.setCreatedDate(LocalDateTime.now());
+                customer.setDeptId(Global.deptId);
                 TraderKey key = new TraderKey();
                 key.setCompCode(Global.compCode);
                 key.setCode(null);
-                key.setDeptId(Global.deptId);
                 customer.setKey(key);
             } else {
                 customer.setUpdatedBy(Global.loginUser.getUserCode());
@@ -716,11 +716,12 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                     .addComponent(jLabel7)
                     .addComponent(txtCreditLimit, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel11)
-                    .addComponent(spPercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel16)
-                    .addComponent(txtCreditAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel16, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel11)
+                        .addComponent(spPercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtCreditAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(txtPrice, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)

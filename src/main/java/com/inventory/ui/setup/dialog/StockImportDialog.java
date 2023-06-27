@@ -31,7 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
@@ -40,7 +39,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Slf4j
 public class StockImportDialog extends javax.swing.JDialog {
 
-    private WebClient inventoryApi;
     private final StockImportTableModel tableModel = new StockImportTableModel();
     private TaskExecutor taskExecutor;
     private InventoryRepo inventoryRepo;
@@ -63,14 +61,6 @@ public class StockImportDialog extends javax.swing.JDialog {
 
     public void setTaskExecutor(TaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
-    }
-
-    public WebClient getWebClient() {
-        return inventoryApi;
-    }
-
-    public void setWebClient(WebClient inventoryApi) {
-        this.inventoryApi = inventoryApi;
     }
 
     /**
@@ -235,7 +225,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         stockType.setAccount("");
         StockTypeKey key = new StockTypeKey();
         key.setCompCode(Global.compCode);
-        key.setDeptId(Global.deptId);
+//        key.setDeptId(Global.deptId);
         key.setStockTypeCode(null);
         stockType.setKey(key);
         stockType.setCreatedBy(Global.loginUser.getUserCode());

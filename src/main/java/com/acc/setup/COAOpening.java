@@ -101,10 +101,6 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         observer.selected("delete", lock);
     }
 
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
@@ -170,7 +166,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         userRepo.getCurrency().subscribe((t) -> {
             currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
             currencyAutoCompleter.setObserver(this);
-            userRepo.findCurrency(Global.currency).subscribe((c) -> {
+            userRepo.getDefaultCurrency().subscribe((c) -> {
                 currencyAutoCompleter.setCurrency(c);
             });
         });
@@ -200,7 +196,6 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         }
     };
 
-    // initialize data for table:: tblOpening
     private void initTable() {
         tblOpening.setModel(openingTableModel);
         tblOpening.getTableHeader().setFont(Global.tblHeaderFont);
@@ -217,6 +212,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         openingTableModel.setObserver(this);
         openingTableModel.setAccountRepo(accountRepo);
         openingTableModel.setObserver(this);
+        openingTableModel.setProgress(progress);
         openingTableModel.addNewRow();
         tblOpening.getColumnModel().getColumn(0).setPreferredWidth(10);
         tblOpening.getColumnModel().getColumn(1).setPreferredWidth(250);

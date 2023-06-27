@@ -208,6 +208,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         lblStatus.setText(status);
         lblStatus.setForeground(status.equals("NEW") ? Color.GREEN : Color.BLUE);
         if (status.equals("EDIT")) {
+            progress.setIndeterminate(true);
             accountRepo.getJournal(vouNo).collectList().subscribe((t) -> {
                 LocalDateTime glDate = t.get(0).getGlDate();
                 String ref = t.get(0).getReference();
@@ -223,7 +224,9 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                 journalTablModel.setListGV(t);
                 journalTablModel.addEmptyRow();
                 focusOnTable();
+                progress.setIndeterminate(false);
             }, (e) -> {
+                progress.setIndeterminate(false);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             });
 
@@ -241,9 +244,13 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                 list.get(0).setEdit(journalTablModel.isEdit());
                 list.get(0).setDelList(journalTablModel.getDelList());
             }
+            progress.setIndeterminate(true);
+            btnSave.setEnabled(false);
             accountRepo.saveGl(list).subscribe((t) -> {
                 clear();
             }, (e) -> {
+                progress.setIndeterminate(false);
+                btnSave.setEnabled(true);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             });
 
@@ -298,6 +305,8 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
     }
 
     public void clear() {
+        progress.setIndeterminate(false);
+        btnSave.setEnabled(true);
         txtVouDate.setDate(Util1.getTodayDate());
         txtFCrdAmt.setValue(0.0);
         txtFDrAmt.setValue(0.0);
@@ -360,6 +369,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         btnConversion = new javax.swing.JButton();
         btnSave = new javax.swing.JButton();
         btnNew = new javax.swing.JButton();
+        progress = new javax.swing.JProgressBar();
 
         jLabel3.setText("jLabel3");
 
@@ -584,18 +594,21 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 291, Short.MAX_VALUE)
@@ -676,6 +689,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblStatus;
+    private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblJournal;
     private javax.swing.JFormattedTextField txtFCrdAmt;
     private javax.swing.JFormattedTextField txtFDrAmt;

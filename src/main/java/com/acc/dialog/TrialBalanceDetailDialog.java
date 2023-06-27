@@ -180,7 +180,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     }
 
     private List<String> getListDep() {
-        return departmentAutoCompleter == null ? department : departmentAutoCompleter.getListOption();
+        return departmentAutoCompleter == null ? null : department;
     }
 
     public void searchTriBalDetail() {
@@ -215,6 +215,8 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
             txtCrAmt.setValue(crAmt);
             txtClosing.setValue(closingAmt);
             txtNetChange.setValue(netChange);
+            txtDrCount.setValue(drAmtTableModel.getListVGl().size());
+            txtCrCount.setValue(crAmtTableModel.getListVGl().size());
             drAmtTableModel.fireTableDataChanged();
             crAmtTableModel.fireTableDataChanged();
             progress.setIndeterminate(false);

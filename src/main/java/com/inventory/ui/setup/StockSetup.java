@@ -43,7 +43,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFormattedTextField;
@@ -71,11 +70,9 @@ import reactor.core.publisher.Mono;
 public class StockSetup extends javax.swing.JPanel implements KeyListener, PanelControl {
 
     private int selectRow = -1;
-    @Autowired
     private CategorySetupDialog categorySetupDailog;
-    @Autowired
+    private StockTypeSetupDialog typeSetupDialog;
     private StockBrandSetupDialog itemBrandDailog;
-    @Autowired
     private StockUnitSetupDailog itemUnitSetupDailog;
     private final StockTableModel stockTableModel = new StockTableModel();
     private final DepartmentComboBoxModel departmentComboBoxModel = new DepartmentComboBoxModel();
@@ -97,7 +94,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private StartWithRowFilter swrf;
     private SelectionObserver observer;
     private JProgressBar progress;
-    private final Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
 
     public enum StockHeader {
         UserCode,
@@ -215,22 +211,22 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         inventoryRepo.findBrand(stock.getBrandCode(), deptId).subscribe((t) -> {
             brandAutoCompleter.setBrand(t);
         });
-        inventoryRepo.findCategory(stock.getCatCode(), deptId).subscribe((t) -> {
+        inventoryRepo.findCategory(stock.getCatCode()).subscribe((t) -> {
             categoryAutoCompleter.setCategory(t);
         });
-        inventoryRepo.findUnit(stock.getSaleUnitCode(), deptId).subscribe((t) -> {
+        inventoryRepo.findUnit(stock.getSaleUnitCode()).subscribe((t) -> {
             saleUnitCompleter.setStockUnit(t);
         });
-        inventoryRepo.findGroup(stock.getTypeCode(), deptId).subscribe((t) -> {
+        inventoryRepo.findGroup(stock.getTypeCode()).subscribe((t) -> {
             typeAutoCompleter.setStockType(t);
         });
-        inventoryRepo.findUnit(stock.getPurUnitCode(), deptId).subscribe((t) -> {
+        inventoryRepo.findUnit(stock.getPurUnitCode()).subscribe((t) -> {
             purUnitCompleter.setStockUnit(t);
         });
-        inventoryRepo.findUnit(stock.getWeightUnit(), deptId).subscribe((t) -> {
+        inventoryRepo.findUnit(stock.getWeightUnit()).subscribe((t) -> {
             wlUnitCompleter.setStockUnit(t);
         });
-        inventoryRepo.findRelation(stock.getRelCode(), deptId).subscribe((t) -> {
+        inventoryRepo.findRelation(stock.getRelCode()).subscribe((t) -> {
             relationAutoCompleter.setRelation(t);
         });
         txtWt.setText(Util1.getString(stock.getWeight()));
@@ -279,14 +275,13 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             brandAutoCompleter = new BrandAutoCompleter(txtBrand, t, null, false, false);
             brandAutoCompleter.setBrand(null);
         });
-        Mono<List<StockUnit>> monoUnit = inventoryRepo.getStockUnit();
-        monoUnit.subscribe((t) -> {
+        inventoryRepo.getStockUnit().subscribe((t) -> {
             purUnitCompleter = new UnitAutoCompleter(txtPurUnit, t, null);
             purUnitCompleter.setStockUnit(null);
-        });
-        monoUnit.subscribe((t) -> {
             saleUnitCompleter = new UnitAutoCompleter(txtSaleUnit, t, null);
             saleUnitCompleter.setStockUnit(null);
+            wlUnitCompleter = new UnitAutoCompleter(txtWeightUnit, t, null);
+            wlUnitCompleter.setStockUnit(null);
         });
         inventoryRepo.getUnitRelation().subscribe((t) -> {
             relationAutoCompleter = new UnitRelationAutoCompleter(txtRelation, t, null, false, false);
@@ -486,7 +481,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private void relationSetup() {
         inventoryRepo.getUnitRelation().subscribe((t) -> {
             RelationSetupDialog relationSetupDialog = new RelationSetupDialog();
-            relationSetupDialog.setIconImage(icon);
             relationSetupDialog.setInventoryRepo(inventoryRepo);
             relationSetupDialog.setListUnitRelation(t);
             relationSetupDialog.initMain();
@@ -506,13 +500,71 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                     .setSkipHeaderRecord(false)
                     .build();
             FileWriter out = new FileWriter(CSV_FILE_PATH);
-            CSVPrinter printer = csvFormat.print(out);
-            printer.flush();
-            printer.close();
+            try (CSVPrinter printer = csvFormat.print(out)) {
+                printer.flush();
+            }
             progress.setIndeterminate(false);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, e.getMessage());
-            e.printStackTrace();
+        }
+    }
+
+    private void categoryDialog() {
+        if (categoryAutoCompleter != null) {
+            if (categorySetupDailog == null) {
+                categorySetupDailog = new CategorySetupDialog(Global.parentForm);
+                categorySetupDailog.setInventoryRepo(inventoryRepo);
+                categorySetupDailog.setSize(Global.width / 2, Global.height / 2);
+                categorySetupDailog.setLocationRelativeTo(null);
+                categorySetupDailog.initMain();
+            }
+            categorySetupDailog.setListCategory(categoryAutoCompleter.getListCategory());
+            categorySetupDailog.setVisible(true);
+        }
+    }
+
+    private void stockTypeDialog() {
+        if (typeAutoCompleter != null) {
+            if (typeSetupDialog == null) {
+                typeSetupDialog = new StockTypeSetupDialog(Global.parentForm);
+                typeSetupDialog.setInventoryRepo(inventoryRepo);
+                typeSetupDialog.setSize(Global.width / 2, Global.height / 2);
+                typeSetupDialog.setLocationRelativeTo(null);
+                typeSetupDialog.initMain();
+            }
+            typeSetupDialog.setListStockType(typeAutoCompleter.getListStockType());
+            typeSetupDialog.setVisible(true);
+        }
+    }
+
+    private void stockUnitDialog() {
+        if (purUnitCompleter != null) {
+            if (itemUnitSetupDailog == null) {
+                itemUnitSetupDailog = new StockUnitSetupDailog(Global.parentForm);
+                itemUnitSetupDailog.setInventoryRepo(inventoryRepo);
+                itemUnitSetupDailog.initMain();
+                itemUnitSetupDailog.setSize(Global.width / 2, Global.height / 2);
+                itemUnitSetupDailog.setLocationRelativeTo(null);
+            }
+            itemUnitSetupDailog.setListStockUnit(purUnitCompleter.getListUnit());
+            itemUnitSetupDailog.setVisible(true);
+            saleUnitCompleter.setListUnit(purUnitCompleter.getListUnit());
+            wlUnitCompleter.setListUnit(purUnitCompleter.getListUnit());
+
+        }
+    }
+
+    private void brandDialog() {
+        if (brandAutoCompleter != null) {
+            if (itemBrandDailog == null) {
+                itemBrandDailog = new StockBrandSetupDialog(Global.parentForm);
+                itemBrandDailog.setInventoryRepo(inventoryRepo);
+                itemBrandDailog.initMain();
+                itemBrandDailog.setSize(Global.width / 2, Global.height / 2);
+                itemBrandDailog.setLocationRelativeTo(null);
+            }
+            itemBrandDailog.setListStockBrand(brandAutoCompleter.getListStockBrand());
+            itemBrandDailog.setVisible(true);
         }
     }
 
@@ -1284,15 +1336,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
     private void btnAddItemTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddItemTypeActionPerformed
         // TODO add your handling code here:
-        inventoryRepo.getStockType().subscribe((t) -> {
-            StockTypeSetupDialog dialog = new StockTypeSetupDialog(Global.parentForm);
-            dialog.setInventoryRepo(inventoryRepo);
-            dialog.setListStockType(t);
-            dialog.initMain();
-            dialog.setSize(Global.width / 2, Global.height / 2);
-            dialog.setLocationRelativeTo(null);
-            dialog.setVisible(true);
-        });
+        stockTypeDialog();
     }//GEN-LAST:event_btnAddItemTypeActionPerformed
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
@@ -1302,40 +1346,18 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
     private void btnAddCategoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddCategoryActionPerformed
         // TODO add your handling code here:
-        inventoryRepo.getCategory().subscribe((t) -> {
-            categorySetupDailog.setListCategory(t);
-            categorySetupDailog.setIconImage(icon);
-            categorySetupDailog.initMain();
-            categorySetupDailog.setSize(Global.width / 2, Global.height / 2);
-            categorySetupDailog.setLocationRelativeTo(null);
-            categorySetupDailog.setVisible(true);
-        });
+        categoryDialog();
     }//GEN-LAST:event_btnAddCategoryActionPerformed
 
     private void btnAddBrandActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddBrandActionPerformed
         // TODO add your handling code here:
-        inventoryRepo.getStockBrand().subscribe((t) -> {
-            itemBrandDailog.setListStockBrand(t);
-            itemBrandDailog.setIconImage(icon);
-            itemBrandDailog.initMain();
-            itemBrandDailog.setSize(Global.width / 2, Global.height / 2);
-            itemBrandDailog.setLocationRelativeTo(null);
-            itemBrandDailog.setVisible(true);
-        });
+        brandDialog();
 
     }//GEN-LAST:event_btnAddBrandActionPerformed
 
     private void btnUnitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUnitActionPerformed
         // TODO add your handling code here:
-        inventoryRepo.getStockUnit().subscribe((t) -> {
-            itemUnitSetupDailog.setListStockUnit(t);
-            itemUnitSetupDailog.setIconImage(icon);
-            itemUnitSetupDailog.initMain();
-            itemUnitSetupDailog.setSize(Global.width / 2, Global.height / 2);
-            itemUnitSetupDailog.setLocationRelativeTo(null);
-            itemUnitSetupDailog.setVisible(true);
-        });
-
+        stockUnitDialog();
     }//GEN-LAST:event_btnUnitActionPerformed
 
     private void txtStockNameFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtStockNameFocusGained
@@ -1382,7 +1404,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         // TODO add your handling code here:
         StockImportDialog dialog = new StockImportDialog(Global.parentForm);
         dialog.setInventoryRepo(inventoryRepo);
-        dialog.setWebClient(inventoryApi);
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
 

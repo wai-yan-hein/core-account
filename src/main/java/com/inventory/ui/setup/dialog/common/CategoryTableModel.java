@@ -9,13 +9,11 @@ import com.inventory.model.Category;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 public class CategoryTableModel extends AbstractTableModel {
 
     private final String[] columnNames = {"Code", "Category"};

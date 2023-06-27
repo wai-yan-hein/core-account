@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import org.slf4j.Logger;
@@ -30,13 +31,18 @@ public class COAGroupTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(COAGroupTableModel.class);
     private List<ChartOfAccount> listCOA = new ArrayList();
-    String[] columnNames = {"No", "System Code", "User Code", "Name", "Active", "Head"};
+    private final String[] columnNames = {"No", "System Code", "User Code", "Name", "Active", "Head"};
     private JTable parent;
     private String coaHeadCode;
     private JLabel paretnDesp;
     private AccountRepo accountRepo;
     private HashMap<String, String> hmCOA = new HashMap<>();
     private boolean edit;
+    private JProgressBar progress;
+
+    public void setProgress(JProgressBar progress) {
+        this.progress = progress;
+    }
 
     public boolean isEdit() {
         return edit;
@@ -177,20 +183,18 @@ public class COAGroupTableModel extends AbstractTableModel {
 
     private void save(ChartOfAccount coa, int row) {
         if (isValidCOA(coa)) {
-            try {
-                accountRepo.saveCOA(coa).subscribe((t) -> {
-                    if (t.getKey().getCoaCode() != null) {
-                        listCOA.set(row, t);
-                        addEmptyRow();
-                        parent.setRowSelectionInterval(row + 1, row + 1);
-                        parent.setColumnSelectionInterval(1, 1);
-                    }
-                });
-
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(parent, ex.getMessage());
-            }
-
+            progress.setIndeterminate(true);
+            accountRepo.saveCOA(coa).subscribe((t) -> {
+                if (t.getKey().getCoaCode() != null) {
+                    listCOA.set(row, t);
+                    addEmptyRow();
+                    parent.setRowSelectionInterval(row + 1, row + 1);
+                    parent.setColumnSelectionInterval(1, 1);
+                }
+            }, (e) -> {
+                progress.setIndeterminate(false);
+                JOptionPane.showMessageDialog(parent, e.getMessage());
+            });
         }
     }
 
@@ -297,7 +301,7 @@ public class COAGroupTableModel extends AbstractTableModel {
                 listCOA.add(coa);
                 fireTableRowsInserted(listCOA.size() - 1, listCOA.size() - 1);
             }
-
+            progress.setIndeterminate(false);
         }
 
     }

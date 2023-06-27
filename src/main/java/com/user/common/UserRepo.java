@@ -170,6 +170,10 @@ public class UserRepo {
                 .body(Mono.just(app), Currency.class)
                 .retrieve()
                 .bodyToMono(Currency.class)
+                .onErrorResume((e) -> {
+                    log.error("saveCurrency : " + e.getMessage());
+                    return Mono.error(e);
+                })
                 .doOnSuccess((t) -> {
                     if (localdatabase) {
                         h2Repo.save(t);

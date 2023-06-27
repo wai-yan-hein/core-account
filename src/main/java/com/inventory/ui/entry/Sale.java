@@ -30,6 +30,7 @@ import com.inventory.model.SaleHisDetail;
 import com.inventory.model.SaleHisKey;
 import com.inventory.model.SaleMan;
 import com.inventory.model.Trader;
+import com.inventory.model.VOrder;
 import com.inventory.model.VSale;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.common.SaleTableModel;
@@ -52,7 +53,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -188,7 +192,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         inventoryRepo.findLocation(oh.getLocCode()).subscribe((t) -> {
                             locationAutoCompleter.setLocation(t);
                         });
-                        Mono<Trader> trader = inventoryRepo.findTrader(oh.getTraderCode(), deptId);
+                        Mono<Trader> trader = inventoryRepo.findTrader(oh.getTraderCode());
                         trader.subscribe((t) -> {
                             traderAutoCompleter.setTrader(t);
                         });
@@ -196,7 +200,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         userRepo.findCurrency(oh.getCurCode()).subscribe((t) -> {
                             currAutoCompleter.setCurrency(t);
                         });
-                        inventoryRepo.findSaleMan(oh.getSaleManCode(), deptId).subscribe((t) -> {
+                        inventoryRepo.findSaleMan(oh.getSaleManCode()).subscribe((t) -> {
                             saleManCompleter.setSaleMan(t);
                         });
                         if (oh.getProjectNo() != null) {
@@ -333,6 +337,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
+
         monoLoc = inventoryRepo.getLocation();
         monoLoc.subscribe((t) -> {
             locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
@@ -425,11 +430,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 log.error(e.getMessage());
             });
         }
-        Mono<Trader> trader = inventoryRepo.findTrader(Global.hmRoleProperty.get("default.customer"), Global.deptId);
-        trader.subscribe((t) -> {
+        inventoryRepo.getDefaultCustomer().subscribe((t) -> {
             traderAutoCompleter.setTrader(t);
-        }, (e) -> {
-            log.error("findTrader : " + e.getMessage());
         });
         if (saleManCompleter != null) {
             inventoryRepo.getDefaultSaleMan().subscribe((tt) -> {
@@ -699,7 +701,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             inventoryRepo.findLocation(saleHis.getLocCode()).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
-            Mono<Trader> trader = inventoryRepo.findTrader(saleHis.getTraderCode(), deptId);
+            Mono<Trader> trader = inventoryRepo.findTrader(saleHis.getTraderCode());
             trader.subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);
             });
@@ -708,7 +710,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 currAutoCompleter.setCurrency(t);
             });
 
-            inventoryRepo.findSaleMan(saleHis.getSaleManCode(), deptId).subscribe((t) -> {
+            inventoryRepo.findSaleMan(saleHis.getSaleManCode()).subscribe((t) -> {
                 saleManCompleter.setSaleMan(t);
             });
             String vouNo = sh.getKey().getVouNo();
@@ -878,6 +880,15 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         traderAutoCompleter.setTrader(t, row);
     }
 
+    private void calDueDate(Integer day) {
+        Date vouDate = txtSaleDate.getDate();       
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(vouDate);       
+        calendar.add(Calendar.DAY_OF_MONTH, day);       
+        Date dueDate = calendar.getTime();
+        txtDueDate.setDate(dueDate);        
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -973,6 +984,11 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 txtCusFocusGained(evt);
             }
         });
+        txtCus.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                txtCusMouseExited(evt);
+            }
+        });
         txtCus.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtCusActionPerformed(evt);
@@ -1018,6 +1034,11 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtSaleDate.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 txtSaleDateFocusGained(evt);
+            }
+        });
+        txtSaleDate.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                txtSaleDatePropertyChange(evt);
             }
         });
 
@@ -1592,7 +1613,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }//GEN-LAST:event_formComponentShown
 
     private void txtCusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCusActionPerformed
-        //getCustomer();
+        //inventoryRepo.getCustomer().subscribe()
     }//GEN-LAST:event_txtCusActionPerformed
 
     private void txtCusFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCusFocusGained
@@ -1719,6 +1740,18 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         // TODO add your handling code here:
     }//GEN-LAST:event_txtProjectNoActionPerformed
 
+    private void txtCusMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtCusMouseExited
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtCusMouseExited
+
+    private void txtSaleDatePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_txtSaleDatePropertyChange
+
+        Trader t = traderAutoCompleter.getTrader();
+        if (t != null) {
+            calDueDate(Util1.getInteger(t.getCreditDays()));
+        }
+    }//GEN-LAST:event_txtSaleDatePropertyChange
+
     @Override
     public void keyEvent(KeyEvent e) {
 
@@ -1727,14 +1760,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     @Override
     public void selected(Object source, Object selectObj) {
         switch (source.toString()) {
-            case "CustomerList" -> {
-                try {
-                    Trader cus = (Trader) selectObj;
-                    if (cus != null) {
-                        txtCus.setText(cus.getTraderName());
-                    }
-                } catch (Exception ex) {
-                    log.error("selected CustomerList : " + selectObj + " - " + ex.getMessage());
+            case "TRADER" -> {
+                Trader cus = traderAutoCompleter.getTrader();
+                if (cus != null) {
+                    calDueDate(Util1.getInteger(cus.getCreditDays()));
                 }
             }
             case "SALE-TOTAL" ->
@@ -1751,15 +1780,12 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 }
             }
             case "ORDER-HISTORY" -> {
-//                if (selectObj instanceof VSale s) {
-                VSale s = (VSale) selectObj;
-                //get sale
+                VOrder s = (VOrder) selectObj;
                 inventoryRepo.findOrder(s.getVouNo(), s.getDeptId(), s.isLocal()).subscribe((t) -> {
                     setSaleVoucherDetail(t, s.isLocal());
                 }, (e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
                 });
-//                }
             }
             case "Select" -> {
                 calculateTotalAmount(false);
@@ -1768,17 +1794,20 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }
 
     @Override
-    public void keyTyped(KeyEvent e) {
+    public void keyTyped(KeyEvent e
+    ) {
 
     }
 
     @Override
-    public void keyPressed(KeyEvent e) {
+    public void keyPressed(KeyEvent e
+    ) {
 
     }
 
     @Override
-    public void keyReleased(KeyEvent e) {
+    public void keyReleased(KeyEvent e
+    ) {
         Object sourceObj = e.getSource();
         String ctrlName = "-";
         if (sourceObj instanceof JTextField jTextField) {
@@ -1795,6 +1824,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             case "txtCus" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtLocation.requestFocus();
+
                 }
             }
             case "txtLocation" -> {
@@ -1881,6 +1911,13 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 }
             }
         }
+    }
+
+    public String addCreditDay(String date, Integer dCount) {
+        return LocalDateTime
+                .parse(date)
+                .plusDays(dCount)
+                .toString();
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -101,7 +101,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         initCombo();
         initTable();
     }
-    
+
     private void initSpinner() {
         SpinnerModel spinnerModel = new SpinnerNumberModel(0, 0, 100, 1);
         spPercent.setModel(spinnerModel);
@@ -179,14 +179,14 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         chkCD.setSelected(supplier.isCashDown());
         chkMulti.setSelected(supplier.isMulti());
         spPercent.setValue(Util1.getInteger(supplier.getCreditDays()));
-        txtCusName.requestFocus();        
+        txtCusName.requestFocus();
         lblStatus.setText("EDIT");
         inventoryRepo.findRegion(supplier.getRegCode()).subscribe((t) -> {
             regionAutoCompleter.setRegion(t);
         }, (e) -> {
             log.error(e.getMessage());
         });
-        inventoryRepo.findTraderGroup(supplier.getGroupCode(), supplier.getKey().getDeptId()).subscribe((t) -> {
+        inventoryRepo.findTraderGroup(supplier.getGroupCode(), Global.deptId).subscribe((t) -> {
             traderGroupAutoCompleter.setGroup(t);
         }, (e) -> {
             log.error(e.getMessage());
@@ -236,10 +236,10 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
                 supplier.setMacId(Global.macId);
                 supplier.setCreatedBy(Global.loginUser.getUserCode());
                 supplier.setCreatedDate(LocalDateTime.now());
+                supplier.setDeptId(Global.deptId);
                 TraderKey key = new TraderKey();
                 key.setCompCode(Global.compCode);
                 key.setCode(null);
-                key.setDeptId(Global.deptId);
                 supplier.setKey(key);
             } else {
                 supplier.setUpdatedBy(Global.loginUser.getUserCode());

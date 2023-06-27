@@ -238,7 +238,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         initComponents();
         initKeyFoucsManager();
         initPopup();
-        adjustFrameSize();
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -1074,27 +1073,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         }
     }
 
-    public void adjustFrameSize() {
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        GraphicsDevice gd = ge.getDefaultScreenDevice();
-        Rectangle bounds = gd.getDefaultConfiguration().getBounds();
-
-        // Adjust the frame size and position
-        Insets screenInsets = Toolkit.getDefaultToolkit().getScreenInsets(getGraphicsConfiguration());
-        int taskbarHeight = screenInsets.bottom;
-
-        // Set the frame size and position
-        int newHeight = bounds.height;
-        int newY = bounds.y;
-        if (screenInsets.bottom > 0) {
-            newHeight -= taskbarHeight;
-            newY += taskbarHeight;
-        }
-
-        setSize(bounds.width, newHeight);
-        setLocation(bounds.x, newY);
-    }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -1492,7 +1470,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     private void formComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentResized
         // TODO add your handling code here:
-        adjustFrameSize();
     }//GEN-LAST:event_formComponentResized
 
     /**

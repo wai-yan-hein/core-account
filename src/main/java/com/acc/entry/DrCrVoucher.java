@@ -245,7 +245,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     }
 
     public void openVoucherDialog(String type, List<Gl> listVGl) {
-        VoucherEntryDailog dailog = new VoucherEntryDailog();
+        VoucherEntryDailog dailog = new VoucherEntryDailog(Global.parentForm);
         dailog.setIconImage(Global.parentForm.getIconImage());
         dailog.setAccountRepo(accountRepo);
         dailog.setUserRepo(userRepo);

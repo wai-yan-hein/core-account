@@ -86,16 +86,8 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         actionMapping();
     }
 
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -256,10 +248,10 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         txtPrice.setValue(ph.getPrice());
         txtAmt.setValue(ph.getQty() * ph.getPrice());
         chkFinish.setSelected(ph.isFinished());
-        inventoryRepo.findUnit(ph.getUnit(), deptId).subscribe((t) -> {
+        inventoryRepo.findUnit(ph.getUnit()).subscribe((t) -> {
             unitAutoCompleter.setStockUnit(t);
         });
-        inventoryRepo.findVouStatus(ph.getPtCode(), deptId).subscribe((t) -> {
+        inventoryRepo.findVouStatus(ph.getPtCode()).subscribe((t) -> {
             vouStatusAutoCompleter.setVoucher(t);
         });
         inventoryRepo.findStock(ph.getStockCode()).subscribe((t) -> {
@@ -960,7 +952,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
         if (str.equals("STOCK")) {
             Stock s = stockAutoCompleter.getStock();
             if (s != null) {
-                inventoryRepo.findUnit(s.getPurUnitCode(), Global.deptId).subscribe((t) -> {
+                inventoryRepo.findUnit(s.getPurUnitCode()).subscribe((t) -> {
                     unitAutoCompleter.setStockUnit(t);
                 });
                 getPattern();

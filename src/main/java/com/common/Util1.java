@@ -18,13 +18,11 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
 import java.io.Writer;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
@@ -878,7 +876,7 @@ public class Util1 {
 
     public static String getBaseboardSerialNumber() {
         String os = System.getProperty("os.name").toLowerCase();
-        String command = "";
+        var command = "";
         if (os.contains("win")) {
             command = "wmic baseboard get serialnumber";
         } else if (os.contains("nix") || os.contains("nux") || os.contains("mac")) {

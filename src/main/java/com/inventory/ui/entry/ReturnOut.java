@@ -259,8 +259,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     }
 
     private void assignDefaultValue() {
-        Mono<Trader> trader = inventoryRepo.findTrader(Global.hmRoleProperty.get("default.supplier"), Global.deptId);
-        trader.subscribe((t) -> {
+        inventoryRepo.getDefaultSupplier().subscribe((t) -> {
             traderAutoCompleter.setTrader(t);
         });
         if (currAutoCompleter != null) {
@@ -505,7 +504,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             inventoryRepo.findLocation(ri.getLocCode()).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
-            Mono<Trader> trader = inventoryRepo.findTrader(ri.getTraderCode(), deptId);
+            Mono<Trader> trader = inventoryRepo.findTrader(ri.getTraderCode());
             trader.subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);
             });

@@ -9,25 +9,17 @@ import com.inventory.model.StockUnit;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
-@Component
+@Slf4j
 public class StockUnitTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(StockUnitTableModel.class);
     private final String[] columnNames = {"Unit-S", "Unit-Name"};
     private List<StockUnit> listUnit = new ArrayList<>();
-
-    public StockUnitTableModel(List<StockUnit> listUnit) {
-        this.listUnit = listUnit;
-    }
-
     @Override
     public int getRowCount() {
         return listUnit == null ? 0 : listUnit.size();
@@ -47,9 +39,12 @@ public class StockUnitTableModel extends AbstractTableModel {
     public Object getValueAt(int rowIndex, int columnIndex) {
         StockUnit itemUnit = listUnit.get(rowIndex);
         return switch (columnIndex) {
-            case 0 -> itemUnit.getKey().getUnitCode();
-            case 1 -> itemUnit.getUnitName();
-            default -> null;
+            case 0 ->
+                itemUnit.getKey().getUnitCode();
+            case 1 ->
+                itemUnit.getUnitName();
+            default ->
+                null;
         };
     }
 

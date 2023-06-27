@@ -26,6 +26,7 @@ import java.util.ArrayList;
 
 import javax.swing.JTable;
 import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
 import javax.swing.table.AbstractTableModel;
 
 import org.slf4j.Logger;
@@ -40,13 +41,16 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
     private static final Logger log = LoggerFactory.getLogger(OpeningBalanceTableModel.class);
     private AccountRepo accountRepo;
     private JTable parent;
-
     private TraderAAutoCompleter tradeAutoCompleter;
     private SelectionObserver selectionObserver;
-
     private String[] columnsName = {"Code", "Chart Of Account", "Trader Code", "Trader Name", "Dept:", "Project No ", "Currency", "Dr-Amt", "Cr-Amt"};
     private List<OpeningBalance> listOpening = new ArrayList();
     private JDateChooser opDate;
+    private JProgressBar progress;
+
+    public void setProgress(JProgressBar progress) {
+        this.progress = progress;
+    }
 
     public AccountRepo getAccountRepo() {
         return accountRepo;
@@ -123,7 +127,6 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
         };
     }
 
-    // get data to grid view
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         if (!listOpening.isEmpty()) {
@@ -282,6 +285,7 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
         if (opening.getKey().getOpId() == null) {
             opening.setCreatedDate(LocalDateTime.now());
         }
+        progress.setIndeterminate(true);
         accountRepo.saveCOAOpening(opening).subscribe((t) -> {
             if (t != null) {
                 opening.setKey(t.getKey());
@@ -316,6 +320,7 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
             listOpening.add(opening);
             fireTableRowsInserted(listOpening.size() - 1, listOpening.size() - 1);
         }
+        progress.setIndeterminate(false);
     }
 
     private OpeningBalance aboveObject() {

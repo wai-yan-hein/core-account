@@ -118,6 +118,8 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
 
     private void saveCurrency() {
         if (isValidCurrency()) {
+            progress.setIndeterminate(true);
+            btnSave.setEnabled(false);
             userRepo.saveCurrency(currency).subscribe((t) -> {
                 if (lblStatus.getText().equals("NEW")) {
                     currencyTabelModel.addCurrency(t);
@@ -125,6 +127,10 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
                     currencyTabelModel.setCurrency(selectRow, currency);
                 }
                 clear();
+            }, (e) -> {
+                progress.setIndeterminate(false);
+                btnSave.setEnabled(true);
+                JOptionPane.showMessageDialog(this, e.getMessage());
             });
         }
     }
@@ -138,6 +144,8 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
     }
 
     public void clear() {
+        progress.setIndeterminate(false);
+        btnSave.setEnabled(true);
         txtCurrCode.setText(null);
         txtCurrName.setText(null);
         txtCurrSymbol.setText(null);
@@ -198,6 +206,7 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
         btnSave = new javax.swing.JButton();
         lblStatus = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
+        progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Currency Setup");
@@ -335,18 +344,23 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 317, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 309, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -378,6 +392,7 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblStatus;
+    private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblCurrency;
     private javax.swing.JTextField txtCurrCode;
     private javax.swing.JTextField txtCurrName;

@@ -105,7 +105,7 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
                     selectRow = tblRel.convertRowIndexToModel(tblRel.getSelectedRow());
                     UnitRelation rel = relationTableModel.getRelation(selectRow);
                     String relCode = rel.getKey().getRelCode();
-                    Integer deptId = rel.getKey().getDeptId();
+                    Integer deptId = rel.getDeptId();
                     if (relCode != null) {
                         lblName.setText(rel.getRelName());
                         lblStatus.setText("EDIT");
@@ -148,9 +148,9 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
             rel = new UnitRelation();
             RelationKey key = new RelationKey();
             key.setCompCode(Global.compCode);
-            key.setDeptId(Global.deptId);
             key.setRelCode(null);
             rel.setKey(key);
+            rel.setDeptId(Global.deptId);
             rel.setDetailList(listD);
         } else {
             rel.setDetailList(listD);

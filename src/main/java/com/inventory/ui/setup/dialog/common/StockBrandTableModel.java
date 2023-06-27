@@ -9,23 +9,19 @@ import com.inventory.model.StockBrand;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
-@Component
+@Slf4j
 public class StockBrandTableModel extends AbstractTableModel {
 
     private final String[] columnNames = {"Code", "Brand"};
     private List<StockBrand> listItemBrand = new ArrayList<>();
 
     public StockBrandTableModel() {
-    }
-
-    public StockBrandTableModel(List<StockBrand> listStockBrand) {
-        this.listItemBrand = listStockBrand;
     }
 
     @Override

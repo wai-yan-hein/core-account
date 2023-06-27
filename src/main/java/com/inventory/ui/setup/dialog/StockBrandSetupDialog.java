@@ -8,7 +8,6 @@ package com.inventory.ui.setup.dialog;
 import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
-import com.common.Util1;
 import com.inventory.model.StockBrand;
 import com.inventory.model.StockBrandKey;
 import com.inventory.ui.common.InventoryRepo;
@@ -19,6 +18,7 @@ import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
 import java.util.List;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -28,52 +28,48 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
-@Component
 public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyListener {
 
     private static final Logger log = LoggerFactory.getLogger(StockBrandSetupDialog.class);
 
     private int selectRow = - 1;
     private StockBrand brand = new StockBrand();
-    @Autowired
-    private StockBrandTableModel itemBrandTableModel;
-    @Autowired
+    private final StockBrandTableModel itemBrandTableModel = new StockBrandTableModel();
     private InventoryRepo inventoryRepo;
     private List<StockBrand> listStockBrand;
-
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
 
-    public List<StockBrand> getListStockBrand() {
-        return listStockBrand;
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
     }
 
     public void setListStockBrand(List<StockBrand> listStockBrand) {
         this.listStockBrand = listStockBrand;
+        itemBrandTableModel.setListItemBrand(this.listStockBrand);
+        txtCode.requestFocus();
+
     }
 
     /**
      * Creates new form ItemTypeSetupDialog
+     * @param frame
      */
-    public StockBrandSetupDialog() {
-        super(Global.parentForm, true);
+    public StockBrandSetupDialog(JFrame frame) {
+        super(frame, true);
         initComponents();
         initKeyListener();
         lblStatus.setForeground(Color.green);
+        swrf = new StartWithRowFilter(txtFilter);
     }
 
     public void initMain() {
-        swrf = new StartWithRowFilter(txtFilter);
         initTable();
-        searchItemBrand();
-        txtCode.requestFocus();
     }
 
     private void initKeyListener() {
@@ -82,10 +78,6 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
         btnClear.addKeyListener(this);
         btnSave.addKeyListener(this);
         tblBrand.addKeyListener(this);
-    }
-
-    private void searchItemBrand() {
-        itemBrandTableModel.setListItemBrand(listStockBrand);
     }
 
     private void initTable() {
@@ -158,8 +150,8 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
                 StockBrandKey key = new StockBrandKey();
                 key.setBrandCode(null);
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 brand.setKey(key);
+                brand.setDeptId(Global.deptId);
                 brand.setCreatedBy(Global.loginUser.getUserCode());
                 brand.setCreatedDate(LocalDateTime.now());
                 brand.setMacId(Global.macId);

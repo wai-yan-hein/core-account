@@ -47,7 +47,7 @@ public final class BrandAutoCompleter implements KeyListener {
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private StockBrandTableModel brandTableModel;
+    private final StockBrandTableModel brandTableModel = new StockBrandTableModel();
     private StockBrand brand;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
@@ -59,8 +59,8 @@ public final class BrandAutoCompleter implements KeyListener {
     private List<StockBrand> listStockBrand;
     private boolean custom;
 
-    public SelectionObserver getObserver() {
-        return observer;
+    public List<StockBrand> getListStockBrand() {
+        return listStockBrand;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -106,7 +106,7 @@ public final class BrandAutoCompleter implements KeyListener {
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
-        brandTableModel = new StockBrandTableModel(list);
+        brandTableModel.setListItemBrand(this.listStockBrand);
         table.setModel(brandTableModel);
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
