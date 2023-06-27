@@ -208,7 +208,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         chkEx.setSelected(stock.isExplode());
 //        Integer deptId = Global.deptId;
         Integer deptId = stock.getDeptId();
-        inventoryRepo.findBrand(stock.getBrandCode(), deptId).subscribe((t) -> {
+        inventoryRepo.findBrand(stock.getBrandCode()).subscribe((t) -> {
             brandAutoCompleter.setBrand(t);
         });
         inventoryRepo.findCategory(stock.getCatCode()).subscribe((t) -> {
@@ -287,7 +287,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             relationAutoCompleter = new UnitRelationAutoCompleter(txtRelation, t, null, false, false);
             relationAutoCompleter.setRelation(null);
         });
-
+        
         monoUnit.subscribe((t) -> {
             wlUnitCompleter = new UnitAutoCompleter(txtWeightUnit, t, null);
             wlUnitCompleter.setStockUnit(null);
