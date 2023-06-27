@@ -739,9 +739,11 @@ public class AccountRepo {
     }
 
     public Mono<List<DateModel>> getDate() {
+        if (localDatabase) {
+            return Mono.just(h2Repo.getDate());
+        }
         String startDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
         boolean isAll = Util1.getBoolean(ProUtil.getProperty(ProUtil.DISABLE_ALL_FILTER));
-
         return accountApi.get()
                 .uri(builder -> builder.path("/account/getDate")
                 .queryParam("startDate", startDate)
@@ -749,14 +751,11 @@ public class AccountRepo {
                 .queryParam("isAll", isAll)
                 .build())
                 .retrieve()
-                .bodyToFlux(DateModel.class
-                )
+                .bodyToFlux(DateModel.class)
                 .collectList()
                 .onErrorResume((e) -> {
-                    log.info(
-                            "getDate " + e.getMessage());
-                    return Mono.empty();
-                }
-                );
+                    log.info("getDate " + e.getMessage());
+                    return Mono.error(e);
+                });
     }
 }

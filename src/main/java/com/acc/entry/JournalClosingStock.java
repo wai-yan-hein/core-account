@@ -203,6 +203,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         accountRepo.getDefaultDepartment().subscribe((t) -> {
             tableModel.setDepartment(t);
         });
+        tableModel.setProgress(progress);
         tableModel.setAccountRepo(accountRepo);
         tblJournal.setModel(tableModel);
         tblJournal.getTableHeader().setFont(Global.tblHeaderFont);

@@ -14,9 +14,11 @@ import com.common.Util1;
 import com.user.model.Currency;
 import com.user.model.Project;
 import java.awt.HeadlessException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
@@ -33,17 +35,14 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
     private JTable parent;
     private AccountRepo accountRepo;
     private DepartmentA department;
+    private JProgressBar progress;
 
-    public DepartmentA getDepartment() {
-        return department;
+    public void setProgress(JProgressBar progress) {
+        this.progress = progress;
     }
 
     public void setDepartment(DepartmentA department) {
         this.department = department;
-    }
-
-    public AccountRepo getAccountRepo() {
-        return accountRepo;
     }
 
     public void setAccountRepo(AccountRepo accountRepo) {
@@ -226,7 +225,9 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
     }
 
     private void save(StockOP op, int row, int column) {
+        op.setUpdatedDate(LocalDateTime.now());
         if (isValidEntry(op, column)) {
+            progress.setIndeterminate(true);
             if (op.getKey().getTranCode() == null) {
                 op.setCreatedBy(Global.loginUser.getUserCode());
             } else {
@@ -237,6 +238,9 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
                     listGV.set(row, t);
                     addNewRow();
                 }
+            }, (e) -> {
+                progress.setIndeterminate(false);
+                JOptionPane.showMessageDialog(parent, e.getMessage());
             });
 
         }
@@ -292,6 +296,7 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
             fireTableRowsInserted(listGV.size() - 1, listGV.size() - 1);
 
         }
+        progress.setIndeterminate(false);
     }
 
 }

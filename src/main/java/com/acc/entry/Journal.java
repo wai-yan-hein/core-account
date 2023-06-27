@@ -5,7 +5,6 @@
 package com.acc.entry;
 
 import com.acc.common.AccountRepo;
-import com.acc.common.ColumnHeaderListener;
 import com.acc.common.DateAutoCompleter;
 import com.acc.common.JournalTableModel;
 import com.acc.dialog.JournalEntryDialog;

@@ -282,25 +282,26 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     private void saveCustomer() {
         if (isValidEntry()) {
             progress.setIndeterminate(true);
+            observer.selected("save", false);
             inventoryRepo.saveTrader(customer).subscribe((t) -> {
-                if (!Util1.isNull(customer.getKey().getCode())) {
-                    if (lblStatus.getText().equals("EDIT")) {
-                        customerTabelModel.setCustomer(selectRow, customer);
-                    } else {
-                        customerTabelModel.addCustomer(customer);
-                    }
-                    progress.setIndeterminate(false);
-                    clear();
+                if (lblStatus.getText().equals("EDIT")) {
+                    customerTabelModel.setCustomer(selectRow, customer);
+                } else {
+                    customerTabelModel.addCustomer(customer);
                 }
+                clear();
             }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
+                observer.selected("save", true);
                 progress.setIndeterminate(false);
+                JOptionPane.showMessageDialog(this, e.getMessage());
             });
 
         }
     }
 
     public void clear() {
+        observer.selected("save", true);
+        progress.setIndeterminate(false);
         customer = new Trader();
         txtSysCode.setText(null);
         txtCusCode.setText(null);

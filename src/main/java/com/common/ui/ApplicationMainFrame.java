@@ -798,6 +798,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private void initDate() {
         accounRepo.getDate().subscribe((t) -> {
             Global.listDate = t;
+        }, (e) -> {
+            log.error(e.getMessage());
         });
     }
 

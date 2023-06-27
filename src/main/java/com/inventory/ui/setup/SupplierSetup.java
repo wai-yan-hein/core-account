@@ -251,19 +251,16 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private void saveCustomer() {
         if (isValidEntry()) {
+            observer.selected("save", false);
             progress.setIndeterminate(true);
             inventoryRepo.saveTrader(supplier).subscribe((t) -> {
-                if (t.getKey().getCode() != null) {
-                    if (lblStatus.getText().equals("EDIT")) {
-                        supplierTabelModel.setCustomer(selectRow, t);
-                    } else {
-                        supplierTabelModel.addCustomer(t);
-                    }
-                    progress.setIndeterminate(false);
-                    clear();
+                if (lblStatus.getText().equals("EDIT")) {
+                    supplierTabelModel.setCustomer(selectRow, t);
+                } else {
+                    supplierTabelModel.addCustomer(t);
                 }
+                clear();
             }, (e) -> {
-                progress.setIndeterminate(false);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             });
 
@@ -271,6 +268,8 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     }
 
     public void clear() {
+        observer.selected("save", true);
+        progress.setIndeterminate(false);
         txtSysCode.setText(null);
         txtCusCode.setText(null);
         txtCusName.setText(null);
