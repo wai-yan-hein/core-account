@@ -8,6 +8,7 @@ import com.acc.common.AccountRepo;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
 import com.common.Global;
+import com.h2.dao.DateFilterRepo;
 import com.h2.service.BrandService;
 import com.h2.service.BusinessTypeService;
 import com.h2.service.COAService;
@@ -163,6 +164,8 @@ public class CloudIntegration {
     private WeightLossService weightLossService;
     @Autowired
     private ProcessHisService processHisService;
+    @Autowired
+    private DateFilterRepo dateFilterRepo;
 
     public void startDownload() {
         if (localDatabase) {
@@ -359,9 +362,16 @@ public class CloudIntegration {
     }
 
     private void downloadAccount() {
+        downloadDate();
         downloadDepartmentAccount();
         downloadTraderAccount();
         downloadChartofAccount();
+    }
+
+    private void downloadDate() {
+        accountRepo.getDate().subscribe((t) -> {
+            dateFilterRepo.saveAll(t);
+        });
     }
 
     private void downloadChartofAccount() {

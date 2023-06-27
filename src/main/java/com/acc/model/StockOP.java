@@ -25,6 +25,7 @@ public class StockOP {
     private String remark;
     private String createdBy;
     private LocalDateTime createdDate;
+    private LocalDateTime updatedDate;
     private String updatedBy;
     private boolean deleted;
     private double clAmt;

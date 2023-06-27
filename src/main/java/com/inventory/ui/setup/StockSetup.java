@@ -394,6 +394,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
     private void saveStock() {
         if (isValidEntry()) {
+            observer.selected("save", false);
             progress.setIndeterminate(true);
             inventoryRepo.saveStock(stock).subscribe((t) -> {
                 if (t.getKey().getStockCode() != null) {
@@ -402,10 +403,10 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                     } else {
                         stockTableModel.setStock(selectRow, t);
                     }
-                    progress.setIndeterminate(false);
                     clear();
                 }
             }, (e) -> {
+                observer.selected("save", true);
                 progress.setIndeterminate(false);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             });
@@ -414,6 +415,8 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     }
 
     public void clear() {
+        observer.selected("save", true);
+        progress.setIndeterminate(false);
         relationAutoCompleter.setRelation(null);
         brandAutoCompleter.setBrand(null);
         categoryAutoCompleter.setCategory(null);
