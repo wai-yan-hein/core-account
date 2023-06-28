@@ -19,16 +19,28 @@ import com.inventory.model.StockTypeKey;
 import com.inventory.ui.common.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.StockImportTableModel;
 import java.awt.FileDialog;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.JFrame;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.core.task.TaskExecutor;
 
@@ -77,6 +89,7 @@ public class StockImportDialog extends javax.swing.JDialog {
     private void initTable() {
         tblTrader.setModel(tableModel);
         tblTrader.getTableHeader().setFont(Global.tblHeaderFont);
+        tblTrader.setFont(Global.textFont);
         tblTrader.setDefaultRenderer(Object.class, new TableCellRender());
         tblTrader.setDefaultRenderer(Float.class, new TableCellRender());
 
@@ -90,7 +103,39 @@ public class StockImportDialog extends javax.swing.JDialog {
         String directory = dialog.getFile();
         log.info("File Path :" + directory);
         if (directory != null) {
-            readFile(dialog.getDirectory() + "\\" + directory);
+            String filePath = dialog.getDirectory() + "\\" + directory;
+            removeBOMFromFile(filePath);
+            readFile(filePath);
+        }
+    }
+
+    private void removeBOMFromFile(String filePath) {
+        try (InputStreamReader reader = new InputStreamReader(new FileInputStream(filePath), StandardCharsets.UTF_8); BufferedReader bufferedReader = new BufferedReader(reader)) {
+
+            // Skip the BOM by reading the first character
+            bufferedReader.mark(1);
+            if (bufferedReader.read() != '\uFEFF') {
+                // Reset the reader if no BOM found
+                bufferedReader.reset();
+            }
+
+            // Create a temporary file to write the BOM-free content
+            File tempFile = File.createTempFile("temp", null);
+            try (FileWriter writer = new FileWriter(tempFile)) {
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    writer.write(line);
+                    writer.write(System.lineSeparator());
+                }
+            }
+
+            // Replace the original file with the temporary file
+            File originalFile = new File(filePath);
+            if (originalFile.delete()) {
+                tempFile.renameTo(originalFile);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -113,6 +158,31 @@ public class StockImportDialog extends javax.swing.JDialog {
         }
     }
 
+    private static boolean isContainBOM(Path path) throws IOException {
+
+        if (Files.notExists(path)) {
+            throw new IllegalArgumentException("Path: " + path + " does not exists!");
+        }
+
+        boolean result = false;
+
+        byte[] bom = new byte[3];
+        try (InputStream is = new FileInputStream(path.toFile())) {
+
+            // read first 3 bytes of a file.
+            is.read(bom);
+
+            // BOM encoded as ef bb bf
+            String content = new String(Hex.encodeHex(bom));
+            if ("efbbbf".equalsIgnoreCase(content)) {
+                result = true;
+            }
+
+        }
+
+        return result;
+    }
+
     private void readFile(String path) {
         List<CFont> listFont = new ArrayList<>();
         listFont.forEach(f -> {
@@ -128,14 +198,20 @@ public class StockImportDialog extends javax.swing.JDialog {
 //        }
         List<Stock> listStock = new ArrayList<>();
         try {
+
+            Reader in = new FileReader(path);
             CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                     .setHeader()
                     .setSkipHeaderRecord(true)
                     .setAllowMissingColumnNames(true)
                     .setIgnoreEmptyLines(true)
+                    .setIgnoreHeaderCase(true)
                     .build();
+           // CSVParser csvParser = csvFormat.parse(in);
+//             Access the header map
+           // Map<String, Integer> headerMap = csvParser.getHeaderMap();
+            //log.info(headerMap.toString());
 
-            Reader in = new FileReader(path);
             Iterable<CSVRecord> records = csvFormat.parse(in);
             records.forEach(r -> {
                 Stock t = new Stock();
