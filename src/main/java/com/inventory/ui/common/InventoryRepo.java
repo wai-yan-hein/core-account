@@ -9,6 +9,7 @@ import com.common.FilterObject;
 import com.inventory.model.CFont;
 import com.common.Global;
 import com.common.ProUtil;
+import com.common.ReportFilter;
 import com.common.Util1;
 import com.inventory.model.AccSetting;
 import com.inventory.model.Category;
@@ -761,6 +762,16 @@ public class InventoryRepo {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
                 });
+    }
+
+    public Mono<List<Stock>> searchStock(ReportFilter filter) {
+        return inventoryApi
+                .post()
+                .uri("/setup/search-stock")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToFlux(Stock.class)
+                .collectList();
     }
 
     public Mono<List<Stock>> getUpdateStock(String updatedDate) {

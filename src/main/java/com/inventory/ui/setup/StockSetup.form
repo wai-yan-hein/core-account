@@ -179,14 +179,14 @@
                                                   <Component id="btnAddBrand" alignment="1" min="-2" pref="30" max="-2" attributes="0"/>
                                               </Group>
                                           </Group>
-                                          <Component id="txtRelation" max="32767" attributes="0"/>
                                           <Component id="txtUserCode" alignment="0" max="32767" attributes="0"/>
+                                          <Component id="txtStockCode" alignment="0" max="32767" attributes="0"/>
                                       </Group>
                                   </Group>
                                   <Group type="102" attributes="0">
                                       <Component id="jLabel8" linkSize="15" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                      <Component id="txtStockCode" max="32767" attributes="0"/>
+                                      <Component id="txtRelation" max="32767" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="btnAddRelation" min="-2" pref="30" max="-2" attributes="0"/>
                                   </Group>
@@ -207,7 +207,7 @@
                                   </Group>
                                   <Component id="txtStockName" max="32767" attributes="0"/>
                                   <Component id="txtBarCode" alignment="0" max="32767" attributes="0"/>
-                                  <Component id="jComboBox1" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="cboDept" alignment="0" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
                           </Group>
@@ -228,7 +228,8 @@
                           <Group type="102" alignment="0" attributes="0">
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="jLabel30" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jComboBox1" alignment="3" max="32767" attributes="0"/>
+                                  <Component id="cboDept" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="txtStockCode" alignment="3" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace min="-2" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="1" attributes="0">
@@ -252,10 +253,12 @@
                           </Group>
                           <Group type="102" attributes="0">
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="jLabel6" linkSize="16" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Group type="102" alignment="0" attributes="0">
-                                      <Component id="txtRelation" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="jLabel6" linkSize="16" min="-2" pref="22" max="-2" attributes="0"/>
+                                      <EmptySpace min="28" pref="28" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <EmptySpace min="-2" pref="28" max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="3" attributes="0">
                                           <Component id="txtUserCode" alignment="3" min="-2" max="-2" attributes="0"/>
                                           <Component id="jLabel1" alignment="3" min="-2" pref="16" max="-2" attributes="0"/>
@@ -270,7 +273,7 @@
                                       <Component id="jLabel2" linkSize="16" alignment="3" min="-2" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
-                              <EmptySpace max="-2" attributes="0"/>
+                              <EmptySpace min="-2" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="btnAddBrand" min="-2" max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="3" attributes="0">
@@ -281,11 +284,14 @@
                           </Group>
                       </Group>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="jLabel8" linkSize="16" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="txtStockCode" alignment="3" min="-2" max="-2" attributes="0"/>
-                          </Group>
                           <Component id="btnAddRelation" min="-2" max="-2" attributes="0"/>
+                          <Group type="102" attributes="0">
+                              <EmptySpace min="3" pref="3" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="txtRelation" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="jLabel8" linkSize="16" alignment="3" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                          </Group>
                       </Group>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
                       <Component id="jPanel3" min="-2" max="-2" attributes="0"/>
@@ -303,7 +309,7 @@
                           <Component id="btnDownload" min="-2" max="-2" attributes="0"/>
                           <Component id="chkDeleted" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace min="28" pref="28" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="28" max="-2" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -1047,20 +1053,17 @@
                 <Property name="text" type="java.lang.String" value="Department"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JComboBox" name="jComboBox1">
+            <Component class="javax.swing.JComboBox" name="cboDept">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
                   <Connection code="Global.textFont" type="code"/>
                 </Property>
                 <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-                  <StringArray count="1">
-                    <StringItem index="0" value="&lt;DepartmentUser&gt;"/>
-                  </StringArray>
+                  <StringArray count="0"/>
                 </Property>
-                <Property name="selectedIndex" type="int" value="-1"/>
               </Properties>
               <AuxValues>
-                <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+                <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;DepartmentUser&gt;"/>
               </AuxValues>
             </Component>
           </SubComponents>
@@ -1075,24 +1078,24 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel25" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="txtGroup1" pref="79" max="32767" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel26" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtCat2" pref="79" max="32767" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
+                  <Component id="txtCat1" pref="79" max="32767" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel27" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtBrand2" pref="79" max="32767" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
+                  <Component id="txtBrand1" pref="79" max="32767" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel28" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="txtStock1" pref="79" max="32767" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel29" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
-                  <Component id="cboDept" pref="77" max="32767" attributes="0"/>
+                  <Component id="cboDept1" pref="77" max="32767" attributes="0"/>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -1103,8 +1106,8 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
                       <Component id="txtGroup1" alignment="0" max="32767" attributes="0"/>
-                      <Component id="txtCat2" alignment="0" max="32767" attributes="0"/>
-                      <Component id="txtBrand2" alignment="0" max="32767" attributes="0"/>
+                      <Component id="txtCat1" alignment="0" max="32767" attributes="0"/>
+                      <Component id="txtBrand1" alignment="0" max="32767" attributes="0"/>
                       <Component id="txtStock1" alignment="0" max="32767" attributes="0"/>
                       <Component id="jLabel25" alignment="0" max="32767" attributes="0"/>
                       <Component id="jLabel26" alignment="0" max="32767" attributes="0"/>
@@ -1112,7 +1115,7 @@
                       <Component id="jLabel28" alignment="0" max="32767" attributes="0"/>
                       <Group type="103" alignment="0" groupAlignment="3" attributes="0">
                           <Component id="jLabel29" alignment="3" max="32767" attributes="0"/>
-                          <Component id="cboDept" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="cboDept1" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
@@ -1144,7 +1147,7 @@
             <Property name="text" type="java.lang.String" value="Category"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JTextField" name="txtCat2">
+        <Component class="javax.swing.JTextField" name="txtCat1">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.textFont" type="code"/>
@@ -1159,7 +1162,7 @@
             <Property name="text" type="java.lang.String" value="Brand"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JTextField" name="txtBrand2">
+        <Component class="javax.swing.JTextField" name="txtBrand1">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.textFont" type="code"/>
@@ -1189,20 +1192,17 @@
             <Property name="text" type="java.lang.String" value="Department"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JComboBox" name="cboDept">
+        <Component class="javax.swing.JComboBox" name="cboDept1">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.textFont" type="code"/>
             </Property>
             <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-              <StringArray count="1">
-                <StringItem index="0" value="&lt;DepartmentUser&gt;"/>
-              </StringArray>
+              <StringArray count="0"/>
             </Property>
-            <Property name="selectedIndex" type="int" value="-1"/>
           </Properties>
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;DepartmentUser&gt;"/>
           </AuxValues>
         </Component>
       </SubComponents>
