@@ -307,8 +307,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         monoLoc.subscribe((t) -> {
             tblSale.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
-        }, (e) -> {
-            log.error("getLocation : " + e.getMessage());
         });
         tblSale.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
         inventoryRepo.getStockUnit().subscribe((t) -> {
@@ -337,19 +335,20 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
-
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
+        locationAutoCompleter.setObserver(this);
         monoLoc = inventoryRepo.getLocation();
         monoLoc.subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
-            locationAutoCompleter.setObserver(this);
+            locationAutoCompleter.setListLocation(t);
         }, (e) -> {
             log.error(e.getMessage());
         });
+        currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
-            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            currAutoCompleter.setObserver(this);
-        }, (e) -> {
-            log.error(e.getMessage());
+            currAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currAutoCompleter.setCurrency(c);
         });
         inventoryRepo.getSaleMan().subscribe((t) -> {
             saleManCompleter = new SaleManAutoCompleter(txtSaleman, t, null, false, false);
@@ -881,12 +880,12 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }
 
     private void calDueDate(Integer day) {
-        Date vouDate = txtSaleDate.getDate();       
+        Date vouDate = txtSaleDate.getDate();
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(vouDate);       
-        calendar.add(Calendar.DAY_OF_MONTH, day);       
+        calendar.setTime(vouDate);
+        calendar.add(Calendar.DAY_OF_MONTH, day);
         Date dueDate = calendar.getTime();
-        txtDueDate.setDate(dueDate);        
+        txtDueDate.setDate(dueDate);
     }
 
     /**

@@ -238,16 +238,17 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         inventoryRepo.getSaleMan().subscribe((t) -> {
             saleManCompleter = new SaleManAutoCompleter(txtSaleman, t, null, false, false);
         });
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
+        locationAutoCompleter.setObserver(this);
         monoLoc.subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
             locationAutoCompleter.setObserver(this);
         });
+        currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
-            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            currAutoCompleter.setObserver(this);
-            userRepo.getDefaultCurrency().subscribe((tt) -> {
-                currAutoCompleter.setCurrency(tt);
-            });
+            currAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currAutoCompleter.setCurrency(c);
         });
     }
 

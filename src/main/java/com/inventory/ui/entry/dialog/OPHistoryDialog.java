@@ -126,8 +126,9 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
         userRepo.getAppUser().subscribe((t) -> {
             appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
         });
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation,null, true, false);
         inventoryRepo.getLocation().subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, false);
+            locationAutoCompleter.setListLocation(t);
         }, (e) -> {
             log.error(e.getMessage());
         });
@@ -138,13 +139,12 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
                 departmentAutoCompleter.setDepartment(tt);
             });
         });
+        currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
-            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            userRepo.getDefaultCurrency().subscribe((tt) -> {
-                currAutoCompleter.setCurrency(tt);
-            });
-        }, (e) -> {
-            log.error(e.getMessage());
+            currAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currAutoCompleter.setCurrency(c);
         });
     }
 

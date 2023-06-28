@@ -250,13 +250,17 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
         monoLoc = inventoryRepo.getLocation();
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
+        locationAutoCompleter.setObserver(this);
         monoLoc.subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
-            locationAutoCompleter.setObserver(this);
+            locationAutoCompleter.setListLocation(t);
         });
+        currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
-            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            currAutoCompleter.setObserver(this);
+            currAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currAutoCompleter.setCurrency(c);
         });
         inventoryRepo.getSaleMan().subscribe((t) -> {
             saleManCompleter = new SaleManAutoCompleter(txtSaleman, t, null, false, false);
@@ -1627,9 +1631,9 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         switch (source.toString()) {
             case "TRADER" -> {
                 try {
-                   Trader cus = traderAutoCompleter.getTrader();
+                    Trader cus = traderAutoCompleter.getTrader();
                     if (cus != null) {
-                       calDueDate(Util1.getInteger(cus.getCreditDays()));
+                        calDueDate(Util1.getInteger(cus.getCreditDays()));
                     }
                 } catch (Exception ex) {
                     log.error("selected CustomerList : " + selectObj + " - " + ex.getMessage());
@@ -1771,14 +1775,14 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             }
         }
     }
-    
+
     private void calDueDate(Integer day) {
-        Date vouDate = txtOrderDate.getDate();       
+        Date vouDate = txtOrderDate.getDate();
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(vouDate);       
-        calendar.add(Calendar.DAY_OF_MONTH, day);       
+        calendar.setTime(vouDate);
+        calendar.add(Calendar.DAY_OF_MONTH, day);
         Date dueDate = calendar.getTime();
-        txtDueDate.setDate(dueDate);        
+        txtDueDate.setDate(dueDate);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

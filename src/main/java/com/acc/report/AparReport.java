@@ -277,12 +277,13 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             cOAAutoCompleter = new COAAutoCompleter(txtAccount, t, null, true);
             cOAAutoCompleter.setSelectionObserver(this);
         });
+        currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
+        currencyAutoCompleter.setObserver(this);
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            currencyAutoCompleter.setObserver(this);
-            userRepo.findCurrency(Global.currency).subscribe((c) -> {
-                currencyAutoCompleter.setCurrency(c);
-            });
+            currencyAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currencyAutoCompleter.setCurrency(c);
         });
 
         traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accountRepo, null, true);

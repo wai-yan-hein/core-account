@@ -118,8 +118,9 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     }
 
     private void initCombo() {
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, false);
         inventoryRepo.getLocation().subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, false);
+            locationAutoCompleter.setListLocation(t);
         });
         userRepo.getAppUser().subscribe((t) -> {
             appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
@@ -130,15 +131,12 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
                 departmentAutoCompleter.setDepartment(tt);
             });
         });
+        currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
-            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            userRepo.getDefaultCurrency().subscribe((tt) -> {
-                currAutoCompleter.setCurrency(tt);
-            }, (e) -> {
-                log.error(e.getMessage());
-            });
-        }, (e) -> {
-            log.error(e.getMessage());
+            currAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currAutoCompleter.setCurrency(c);
         });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "CUS");
@@ -811,7 +809,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     }//GEN-LAST:event_txtCusFocusGained
 
     private void btnUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadActionPerformed
-        if(inventoryRepo.localDatabase){
+        if (inventoryRepo.localDatabase) {
             integration.uploadReturnIn();
         }
     }//GEN-LAST:event_btnUploadActionPerformed

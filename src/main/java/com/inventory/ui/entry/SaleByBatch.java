@@ -229,13 +229,17 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
         monoLoc = inventoryRepo.getLocation();
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
+        locationAutoCompleter.setObserver(this);
         monoLoc.subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
-            locationAutoCompleter.setObserver(this);
+            locationAutoCompleter.setListLocation(t);
         });
+        currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
-            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            currAutoCompleter.setObserver(this);
+            currAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currAutoCompleter.setCurrency(c);
         });
         inventoryRepo.getSaleMan().subscribe((t) -> {
             saleManCompleter = new SaleManAutoCompleter(txtSaleman, t, null, false, false);

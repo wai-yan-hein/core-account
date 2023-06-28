@@ -151,9 +151,13 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
     };
 
     private void initCombo() {
+        locationAutoCompleter = new LocationAutoCompleter(txtLoc, null, true, true);
+        locationAutoCompleter.setObserver(this);
         inventoryRepo.getLocation().subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLoc, t, null, true, true);
-            locationAutoCompleter.setObserver(this);
+            locationAutoCompleter.setListLocation(t);
+        });
+        inventoryRepo.getDefaultLocation().subscribe((t) -> {
+            locationAutoCompleter.setLocation(t);
         });
         inventoryRepo.getStockType().subscribe((t) -> {
             typeAutoCompleter = new StockTypeAutoCompleter(txtGroup, t, null, true, false);

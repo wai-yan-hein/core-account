@@ -22,10 +22,6 @@ public class LocationTableModel extends AbstractTableModel {
     public LocationTableModel() {
     }
 
-    public LocationTableModel(List<Location> listLocation) {
-        this.listLocation = listLocation;
-    }
-
     @Override
     public int getRowCount() {
         return listLocation == null ? 0 : listLocation.size();

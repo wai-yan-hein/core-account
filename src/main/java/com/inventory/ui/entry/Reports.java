@@ -188,8 +188,10 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     }
 
     private void initCombo() {
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, true);
+        locationAutoCompleter.setObserver(this);
         inventoryRepo.getLocation().subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, true);
+            locationAutoCompleter.setListLocation(t);
         });
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, true, "-");
         inventoryRepo.getSaleMan().subscribe((t) -> {
@@ -208,12 +210,12 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         inventoryRepo.getRegion().subscribe((t) -> {
             regionAutoCompleter = new RegionAutoCompleter(txtRegion, t, null, true, false);
         });
+        currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            currencyAutoCompleter.setObserver(this);
-            userRepo.getDefaultCurrency().subscribe((tt) -> {
-                currencyAutoCompleter.setCurrency(tt);
-            });
+            currencyAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currencyAutoCompleter.setCurrency(c);
         });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, inventoryRepo, null, true);

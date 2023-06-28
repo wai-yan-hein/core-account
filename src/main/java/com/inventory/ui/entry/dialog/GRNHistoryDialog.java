@@ -120,8 +120,9 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
     }
 
     private void initCombo() {
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation,null, true, false);
         inventoryRepo.getLocation().subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, false);
+            locationAutoCompleter.setListLocation(t);
         });
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "-");
         userRepo.getAppUser().subscribe((t) -> {

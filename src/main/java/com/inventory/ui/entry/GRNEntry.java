@@ -46,7 +46,6 @@ import javax.swing.ListSelectionModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
@@ -136,9 +135,10 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
     };
 
     private void initCombo() {
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
+        locationAutoCompleter.setObserver(this);
         inventoryRepo.getLocation().subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
-            locationAutoCompleter.setObserver(this);
+            locationAutoCompleter.setListLocation(t);
         });
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "-");
         traderAutoCompleter.setObserver(this);

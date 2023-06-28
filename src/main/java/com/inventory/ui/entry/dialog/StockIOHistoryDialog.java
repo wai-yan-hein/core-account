@@ -120,9 +120,9 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
                 departmentAutoCompleter.setDepartment(tt);
             });
         });
-
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation,null, true, false);
         inventoryRepo.getLocation().subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, false);
+            locationAutoCompleter.setListLocation(t);
         });
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, inventoryRepo, null, true);
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
