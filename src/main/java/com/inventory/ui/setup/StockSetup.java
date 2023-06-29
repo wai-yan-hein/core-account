@@ -64,7 +64,7 @@ import org.springframework.stereotype.Component;
  * @author Lenovo
  */
 @Component
-public class StockSetup extends javax.swing.JPanel implements KeyListener, PanelControl {
+public class StockSetup extends javax.swing.JPanel implements KeyListener, PanelControl, SelectionObserver {
 
     private int selectRow = -1;
     private CategorySetupDialog categorySetupDailog;
@@ -94,6 +94,11 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private final DepartmentComboBoxModel departmentComboBoxModel1 = new DepartmentComboBoxModel();
     @Autowired
     private UserRepo userRepo;
+
+    @Override
+    public void selected(Object source, Object selectObj) {
+        searchStock();
+    }
 
     public enum StockHeader {
         UserCode,
@@ -164,6 +169,10 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtSalePriceC.addFocusListener(fa);
         txtSalePriceD.addFocusListener(fa);
         txtSalePriceE.addFocusListener(fa);
+        txtBrand1.addFocusListener(fa);
+        txtCat1.addFocusListener(fa);
+        txtGroup1.addFocusListener(fa);
+        txtStock1.addFocusListener(fa);
     }
 
     private void initData() {
@@ -314,20 +323,20 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         });
         inventoryRepo.getStockType().subscribe((t) -> {
             typeAutoCompleterF = new StockTypeAutoCompleter(txtGroup1, t, null, true, false);
-//            typeAutoCompleterF.setObserver(this);
+            typeAutoCompleterF.setObserver(this);
         });
 
         inventoryRepo.getCategory().subscribe((t) -> {
             categoryAutoCompleterF = new CategoryAutoCompleter(txtCat1, t, null, true, false);
-//            categoryAutoCompleterF.setObserver(this);
+            categoryAutoCompleterF.setObserver(this);
         });
         inventoryRepo.getStockBrand().subscribe((t) -> {
             brandAutoCompleterF = new BrandAutoCompleter(txtBrand1, t, null, true, false);
-//            brandAutoCompleterF.setObserver(this);
+            brandAutoCompleterF.setObserver(this);
         });
 
         stockAutoCompleterF = new StockAutoCompleter(txtStock1, inventoryRepo, null, true);
-//        stockAutoCompleterF.setObserver(this);
+        stockAutoCompleterF.setObserver(this);
     }
 
     private boolean isValidEntry() {
