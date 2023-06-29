@@ -879,8 +879,10 @@ public class Util1 {
         var command = "";
         if (os.contains("win")) {
             command = "wmic baseboard get serialnumber";
-        } else if (os.contains("nix") || os.contains("nux") || os.contains("mac")) {
+        } else if (os.contains("nix") || os.contains("nux")) {
             command = "dmidecode -t baseboard | grep 'Serial Number'";
+        } else if (os.contains("mac")) {
+            command = "ioreg -l | grep IOPlatformSerialNumber";
         } else {
             JOptionPane.showMessageDialog(new JFrame(), "Unsupported operating system.");
             System.exit(0);
@@ -912,9 +914,27 @@ public class Util1 {
     }
 
     private static String getProcessId() {
+
+        String os = System.getProperty("os.name").toLowerCase();
         try {
-            String command = "wmic cpu get processorid";
-            ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/c", command);
+            String command = "";
+            if (os.contains("win")) {
+                command = "wmic cpu get processorid";
+            } else if (os.contains("nix") || os.contains("nux")) {
+                command = "dmidecode -t baseboard | grep 'Serial Number'";
+            } else if (os.contains("mac")) {
+                command = "ioreg -l | grep IOPlatformSerialNumber";
+            } else {
+                JOptionPane.showMessageDialog(new JFrame(), "Unsupported operating system.");
+                System.exit(0);
+            }
+            ProcessBuilder processBuilder;
+//                    = new ProcessBuilder("cmd.exe", "/c", command);
+            if (os.contains("win")) {
+                processBuilder = new ProcessBuilder("cmd.exe", "/c", command);
+            } else {
+                processBuilder = new ProcessBuilder("bash", "-c", command);
+            }
             Process process = processBuilder.start();
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;

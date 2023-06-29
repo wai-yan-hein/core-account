@@ -202,13 +202,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         filter.setCatCode(getCategory());
         filter.setStockTypeCode(getType());
         filter.setStockCode(getStock());
-        inventoryApi
-                .post()
-                .uri("/setup/search-stock")
-                .body(Mono.just(filter), ReportFilter.class)
-                .retrieve()
-                .bodyToFlux(Stock.class)
-                .collectList()
+        inventoryRepo.searchStock(filter)
                 .subscribe((t) -> {
                     stockTableModel.setListStock(t);
                     progress.setIndeterminate(false);
