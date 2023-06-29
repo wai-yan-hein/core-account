@@ -82,7 +82,8 @@ public class StockTypeEditor extends AbstractCellEditor implements TableCellEdit
         if (value != null) {
             jtf.setText(value.toString());
         }
-        completer = new StockTypeAutoCompleter(jtf, listStockType, this, false, false);
+        completer = new StockTypeAutoCompleter(jtf, this, false);
+        completer.setListStockType(listStockType);
         return component;
     }
 

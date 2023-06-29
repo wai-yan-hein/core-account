@@ -116,18 +116,20 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
     }
 
     private void initCombo() {
+        typeAutoCompleter = new StockTypeAutoCompleter(txtGroup, null, true);
+        typeAutoCompleter.setObserver(this);
         inventoryRepo.getStockType().subscribe((t) -> {
-            typeAutoCompleter = new StockTypeAutoCompleter(txtGroup, t, null, true, false);
-            typeAutoCompleter.setObserver(this);
+            typeAutoCompleter.setListStockType(t);
         });
-
+        categoryAutoCompleter = new CategoryAutoCompleter(txtCat, null, true);
+        categoryAutoCompleter.setObserver(this);
         inventoryRepo.getCategory().subscribe((t) -> {
-            categoryAutoCompleter = new CategoryAutoCompleter(txtCat, t, null, true, false);
-            categoryAutoCompleter.setObserver(this);
+            categoryAutoCompleter.setListCategory(t);
         });
+        brandAutoCompleter = new BrandAutoCompleter(txtBrand, null, true);
+        brandAutoCompleter.setObserver(this);
         inventoryRepo.getStockBrand().subscribe((t) -> {
-            brandAutoCompleter = new BrandAutoCompleter(txtBrand, t, null, true, false);
-            brandAutoCompleter.setObserver(this);
+            brandAutoCompleter.setListStockBrand(t);
         });
 
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);

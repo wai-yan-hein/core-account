@@ -238,17 +238,20 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     }
 
     private void initCombo() {
+        typeAutoCompleter = new StockTypeAutoCompleter(txtType, null, false);
+        typeAutoCompleter.setStockType(null);
         inventoryRepo.getStockType().subscribe((t) -> {
-            typeAutoCompleter = new StockTypeAutoCompleter(txtType, t, null, false, false);
-            typeAutoCompleter.setStockType(null);
+            typeAutoCompleter.setListStockType(t);
         });
+        categoryAutoCompleter = new CategoryAutoCompleter(txtCat, null, false);
+        categoryAutoCompleter.setCategory(null);
         inventoryRepo.getCategory().subscribe((t) -> {
-            categoryAutoCompleter = new CategoryAutoCompleter(txtCat, t, null, false, false);
-            categoryAutoCompleter.setCategory(null);
+            categoryAutoCompleter.setListCategory(t);
         });
+        brandAutoCompleter = new BrandAutoCompleter(txtBrand, null, false);
+        brandAutoCompleter.setBrand(null);
         inventoryRepo.getStockBrand().subscribe((t) -> {
-            brandAutoCompleter = new BrandAutoCompleter(txtBrand, t, null, false, false);
-            brandAutoCompleter.setBrand(null);
+            brandAutoCompleter.setListStockBrand(t);
         });
         inventoryRepo.getStockUnit().subscribe((t) -> {
             purUnitCompleter = new UnitAutoCompleter(txtPurUnit, t, null);

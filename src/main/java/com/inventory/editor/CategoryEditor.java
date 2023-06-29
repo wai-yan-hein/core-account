@@ -86,7 +86,8 @@ public class CategoryEditor extends AbstractCellEditor implements TableCellEdito
         if (value != null) {
             jtf.setText(value.toString());
         }
-        completer = new CategoryAutoCompleter(jtf, listCategory, this, false, false);
+        completer = new CategoryAutoCompleter(jtf, this, false);
+        completer.setListCategory(listCategory);
         return component;
     }
 

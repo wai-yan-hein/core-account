@@ -197,15 +197,17 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         inventoryRepo.getSaleMan().subscribe((t) -> {
             saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, t, null, true, false);
         });
-
+        stockTypeAutoCompleter = new StockTypeAutoCompleter(txtStockType, null, true);
         inventoryRepo.getStockType().subscribe((t) -> {
-            stockTypeAutoCompleter = new StockTypeAutoCompleter(txtStockType, t, null, true, false);
+            stockTypeAutoCompleter.setListStockType(t);
         });
+        categoryAutoCompleter = new CategoryAutoCompleter(txtCategory, null, true);
         inventoryRepo.getCategory().subscribe((t) -> {
-            categoryAutoCompleter = new CategoryAutoCompleter(txtCategory, t, null, true, false);
+            categoryAutoCompleter.setListCategory(t);
         });
+        brandAutoCompleter = new BrandAutoCompleter(txtBrand, null, true);
         inventoryRepo.getStockBrand().subscribe((t) -> {
-            brandAutoCompleter = new BrandAutoCompleter(txtBrand, t, null, true, false);
+            brandAutoCompleter.setListStockBrand(t);
         });
         inventoryRepo.getRegion().subscribe((t) -> {
             regionAutoCompleter = new RegionAutoCompleter(txtRegion, t, null, true, false);
