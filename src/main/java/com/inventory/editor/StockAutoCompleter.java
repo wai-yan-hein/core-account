@@ -49,7 +49,7 @@ public final class StockAutoCompleter implements KeyListener {
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private StockCompleterTableModel stockTableModel;
+    private final StockCompleterTableModel stockTableModel = new StockCompleterTableModel();
     private Stock stock;
     public AbstractCellEditor editor;
     private int x = 0;
@@ -80,7 +80,6 @@ public final class StockAutoCompleter implements KeyListener {
         listOption.clear();
     }
 
-    //private CashFilter cashFilter = Global.allCash;
     public StockAutoCompleter() {
     }
 
@@ -97,7 +96,6 @@ public final class StockAutoCompleter implements KeyListener {
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
-        stockTableModel = new StockCompleterTableModel();
         table.setModel(stockTableModel);
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
@@ -170,7 +168,7 @@ public final class StockAutoCompleter implements KeyListener {
             }
         });
 
-        table.setRequestFocusEnabled(false);
+        table.setFocusable(false);
     }
 
     public void mouseSelect() {
@@ -353,7 +351,6 @@ public final class StockAutoCompleter implements KeyListener {
      */
     @Override
     public void keyReleased(KeyEvent e) {
-        log.info("search.");
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
@@ -367,11 +364,8 @@ public final class StockAutoCompleter implements KeyListener {
                         table.setRowSelectionInterval(0, 0);
                     }
                 });
-
             }
-
         }
-
     }
 
     private boolean containKey(KeyEvent e) {

@@ -686,22 +686,18 @@ public class AccountRepo {
     public Mono<List<VApar>> getArAp(ReportFilter filter) {
         return accountApi.post()
                 .uri("/report/get-arap")
-                .body(Mono.just(filter), ReportFilter.class
-                )
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToFlux(VApar.class
-                )
+                .bodyToFlux(VApar.class)
                 .collectList();
     }
 
     public Mono<List<VTriBalance>> getTri(ReportFilter filter) {
         return accountApi.post()
                 .uri("/report/get-tri-balance")
-                .body(Mono.just(filter), ReportFilter.class
-                )
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToFlux(VTriBalance.class
-                )
+                .bodyToFlux(VTriBalance.class)
                 .collectList();
     }
 
@@ -712,11 +708,9 @@ public class AccountRepo {
         }
         return accountApi.post()
                 .uri("/account/search-gl")
-                .body(Mono.just(filter), ReportFilter.class
-                )
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToFlux(Gl.class
-                )
+                .bodyToFlux(Gl.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.info(
@@ -730,18 +724,16 @@ public class AccountRepo {
         return accountApi
                 .post()
                 .uri("/account/search-voucher")
-                .body(Mono.just(filter), ReportFilter.class
-                )
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToFlux(Gl.class
-                )
+                .bodyToFlux(Gl.class)
                 .collectList();
     }
 
     public Mono<List<DateModel>> getDate() {
-        if (localDatabase) {
-            return Mono.just(h2Repo.getDate());
-        }
+        /* if (localDatabase) {
+        return Mono.just(h2Repo.getDate());
+        }*/
         String startDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
         boolean isAll = Util1.getBoolean(ProUtil.getProperty(ProUtil.DISABLE_ALL_FILTER));
         return accountApi.get()

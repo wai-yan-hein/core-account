@@ -371,6 +371,7 @@ public class CloudIntegration {
     private void downloadDate() {
         accountRepo.getDate().subscribe((t) -> {
             dateFilterRepo.saveAll(t);
+            log.info("downloadDate.");
         });
     }
 
