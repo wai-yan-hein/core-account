@@ -163,7 +163,9 @@ public final class BrandAutoCompleter implements KeyListener {
                     table.getSelectedRow()));
             textComp.setText(brand.getBrandName());
         }
-
+        if (observer != null) {
+            observer.selected("Brand", "Brand");
+        }
         popup.setVisible(false);
         if (editor != null) {
             editor.stopCellEditing();

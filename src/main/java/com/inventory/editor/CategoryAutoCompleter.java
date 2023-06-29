@@ -166,7 +166,9 @@ public final class CategoryAutoCompleter implements KeyListener {
                     table.getSelectedRow()));
             textComp.setText(type.getCatName());
         }
-
+        if (observer != null) {
+            observer.selected("Category", "Category");
+        }
         popup.setVisible(false);
         if (editor != null) {
             editor.stopCellEditing();

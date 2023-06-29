@@ -163,6 +163,9 @@ public final class StockTypeAutoCompleter implements KeyListener {
             type = stockTypeTableModel.getStockType(table.convertRowIndexToModel(
                     table.getSelectedRow()));
             textComp.setText(type.getStockTypeName());
+            if (observer != null) {
+                observer.selected("StockType", "StockType");
+            }
             popup.setVisible(false);
             if (editor != null) {
                 editor.stopCellEditing();
