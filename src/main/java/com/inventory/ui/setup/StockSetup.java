@@ -270,7 +270,11 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
 
     private void searchStock() {
         progress.setIndeterminate(true);
-        ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
+        Integer deptId = Global.deptId;
+        if (cboDept1.getSelectedItem() instanceof DepartmentUser dep) {
+            deptId = dep.getDeptId();
+        }
+        ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, deptId);
         filter.setBrandCode(getBrand());
         filter.setCatCode(getCategory());
         filter.setStockTypeCode(getType());
@@ -1366,6 +1370,11 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         jLabel29.setText("Department");
 
         cboDept1.setFont(Global.textFont);
+        cboDept1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cboDept1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
@@ -1607,6 +1616,10 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         // TODO add your handling code here:
         txtUserCode.requestFocus();
     }//GEN-LAST:event_txtUserCodeFocusGained
+
+    private void cboDept1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboDept1ActionPerformed
+        searchStock();
+    }//GEN-LAST:event_cboDept1ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
