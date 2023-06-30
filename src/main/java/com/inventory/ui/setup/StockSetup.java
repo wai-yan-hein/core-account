@@ -315,19 +315,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             cboDept.setModel(departmentComboBoxModel);
             cboDept1.setModel(departmentComboBoxModel1);
         });
-        inventoryRepo.getStockType().subscribe((t) -> {
-            typeAutoCompleterF = new StockTypeAutoCompleter(txtGroup1, t, null, true, false);
-//            typeAutoCompleterF.setObserver(this);
-        });
-
-        inventoryRepo.getCategory().subscribe((t) -> {
-            categoryAutoCompleterF = new CategoryAutoCompleter(txtCat1, t, null, true, false);
-//            categoryAutoCompleterF.setObserver(this);
-        });
-        inventoryRepo.getStockBrand().subscribe((t) -> {
-            brandAutoCompleterF = new BrandAutoCompleter(txtBrand1, t, null, true, false);
-//            brandAutoCompleterF.setObserver(this);
-        });
 
         stockAutoCompleterF = new StockAutoCompleter(txtStock1, inventoryRepo, null, true);
 //        stockAutoCompleterF.setObserver(this);
