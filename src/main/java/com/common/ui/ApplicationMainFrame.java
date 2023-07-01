@@ -882,10 +882,12 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     public void initMenu() {
+        progress.setIndeterminate(true);
         menuBar.removeAll();
         userRepo.getRoleMenu(Global.roleCode).subscribe((t) -> {
             createMenu(t);
         }, (e) -> {
+            progress.setIndeterminate(false);
             JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
         });
     }
@@ -931,6 +933,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 }
             });
         }
+        progress.setIndeterminate(false);
         revalidate();
         repaint();
     }

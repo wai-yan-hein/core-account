@@ -17,6 +17,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
@@ -156,6 +157,8 @@ public final class StockTypeAutoCompleter implements KeyListener {
                 }
             }
         });
+        setListStockType(new ArrayList<>());
+
     }
 
     public void mouseSelect() {
@@ -163,6 +166,9 @@ public final class StockTypeAutoCompleter implements KeyListener {
             type = stockTypeTableModel.getStockType(table.convertRowIndexToModel(
                     table.getSelectedRow()));
             textComp.setText(type.getStockTypeName());
+            if (observer != null) {
+                observer.selected("StockType", "StockType");
+            }
             popup.setVisible(false);
             if (editor != null) {
                 editor.stopCellEditing();

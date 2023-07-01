@@ -24,20 +24,7 @@ import com.user.model.CompanyInfo;
 import java.awt.HeadlessException;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.time.LocalDateTime;
-import java.util.Base64;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
@@ -116,7 +103,6 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         });
         searchCompany();
         txtCode.requestFocus();
-
     }
 
     private void searchCompany() {
@@ -185,29 +171,11 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                                         })
                                         .thenReturn(Boolean.TRUE);
                             }
-                        })
-                        .subscribe(
-                                sta -> {
-                                },
-                                err -> {
-                                    JOptionPane.showMessageDialog(this, err.getMessage());
-                                    progress.setIndeterminate(false);
-                                }
-                        );
-//                userRepo.saveCompany(companyInfo).subscribe((t) -> {
-//                    if (status.equals("NEW")) {
-//                        tableModel.addCompany(t);
-//                    } else {
-//                        tableModel.setCompany(selectRow, t);
-//                    }
-//                    updateCompany(t);
-//                    clear();
-//                    progress.setIndeterminate(false);
-//                }, (e) -> {
-//                    JOptionPane.showMessageDialog(this, e.getMessage());
-//                    progress.setIndeterminate(false);
-//                });
-
+                        }).subscribe(sta -> {
+                }, err -> {
+                    JOptionPane.showMessageDialog(this, err.getMessage());
+                    progress.setIndeterminate(false);
+                });
             } catch (HeadlessException e) {
                 log.error("Save Company :" + e.getMessage());
                 JOptionPane.showMessageDialog(Global.parentForm, "Could'nt saved.");
@@ -320,8 +288,6 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         String hostIp = Util1.getServerIp(environment.getProperty("host.name"));
         String text = String.format("%s,%s,%s,%s", hostIp, uPort, iPort, aPort);
         String encodeStr = EncryptUtil.encode(text);
-        log.info("encode : " + encodeStr);
-        log.info("decode : " + EncryptUtil.decode(encodeStr));
         QRDialog d = new QRDialog(Global.parentForm);
         d.setLocationRelativeTo(null);
         d.setImage(QRUtil.createdQRImage(encodeStr));

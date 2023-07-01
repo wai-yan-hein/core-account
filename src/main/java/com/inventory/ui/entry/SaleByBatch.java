@@ -241,11 +241,12 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
         userRepo.getDefaultCurrency().subscribe((c) -> {
             currAutoCompleter.setCurrency(c);
         });
+        saleManCompleter = new SaleManAutoCompleter(txtSaleman, null, false);
         inventoryRepo.getSaleMan().subscribe((t) -> {
-            saleManCompleter = new SaleManAutoCompleter(txtSaleman, t, null, false, false);
-            inventoryRepo.getDefaultSaleMan().subscribe((s) -> {
-                saleManCompleter.setSaleMan(s);
-            });
+            saleManCompleter.setListSaleMan(t);
+        });
+        inventoryRepo.getDefaultSaleMan().subscribe((s) -> {
+            saleManCompleter.setSaleMan(s);
         });
 
     }

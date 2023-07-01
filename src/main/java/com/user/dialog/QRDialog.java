@@ -4,7 +4,6 @@
  */
 package com.user.dialog;
 
-import com.common.Util1;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import lombok.extern.slf4j.Slf4j;

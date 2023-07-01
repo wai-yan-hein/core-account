@@ -47,7 +47,7 @@ public final class UnitRelationAutoCompleter implements KeyListener {
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private RelationTableModel relationTableModel;
+    private final RelationTableModel relationTableModel = new RelationTableModel();
     private UnitRelation relation;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
@@ -55,7 +55,12 @@ public final class UnitRelationAutoCompleter implements KeyListener {
     private int y = 0;
     private List<String> listOption = new ArrayList<>();
     private SelectionObserver observer;
+    private boolean filter;
     private List<UnitRelation> listRelation;
+
+    public List<UnitRelation> getListRelation() {
+        return listRelation;
+    }
 
     public SelectionObserver getObserver() {
         return observer;
@@ -73,19 +78,25 @@ public final class UnitRelationAutoCompleter implements KeyListener {
         this.listOption = listOption;
     }
 
+    public void setListRelation(List<UnitRelation> list) {
+        relationTableModel.setListRelation(list);
+        if (!list.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
+        }
+        this.listRelation = list;
+    }
+
     public UnitRelationAutoCompleter() {
     }
 
-    public UnitRelationAutoCompleter(JTextComponent comp, List<UnitRelation> list,
-            AbstractCellEditor editor, boolean filter, boolean custom) {
+    public UnitRelationAutoCompleter(JTextComponent comp,
+            AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
-        this.listRelation = list;
+        this.filter = filter;
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
-        relationTableModel = new RelationTableModel();
-        relationTableModel.setListRelation(listRelation);
         table.setModel(relationTableModel);
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
@@ -97,7 +108,6 @@ public final class UnitRelationAutoCompleter implements KeyListener {
         JScrollPane scroll = new JScrollPane(table);
         table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(30);//Code
-
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -106,14 +116,10 @@ public final class UnitRelationAutoCompleter implements KeyListener {
                 }
             }
         });
-
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
-
         popup.setPopupSize(300, 300);
-
         popup.add(scroll);
-
         if (textComp instanceof JTextField) {
             textComp.registerKeyboardAction(showAction, KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
                     JComponent.WHEN_FOCUSED);
@@ -153,14 +159,6 @@ public final class UnitRelationAutoCompleter implements KeyListener {
 
             }
         });
-
-        table.setRequestFocusEnabled(false);
-
-        if (list != null) {
-            if (!list.isEmpty()) {
-                table.setRowSelectionInterval(0, 0);
-            }
-        }
     }
 
     public void mouseSelect() {

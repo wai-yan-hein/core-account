@@ -194,8 +194,9 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             locationAutoCompleter.setListLocation(t);
         });
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, true, "-");
+        saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, null, true);
         inventoryRepo.getSaleMan().subscribe((t) -> {
-            saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, t, null, true, false);
+            saleManAutoCompleter.setListSaleMan(t);
         });
         stockTypeAutoCompleter = new StockTypeAutoCompleter(txtStockType, null, true);
         inventoryRepo.getStockType().subscribe((t) -> {
