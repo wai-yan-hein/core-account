@@ -11,7 +11,7 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.common.ProjectTableModel;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.model.Project;
 import com.user.model.ProjectKey;
 import com.user.model.ProjectStatus;

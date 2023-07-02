@@ -4,7 +4,7 @@
  */
 package com.inventory.ui.common;
 
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.inventory.model.AppRole;
 import java.util.ArrayList;
 import java.util.List;

@@ -9,7 +9,7 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.inventory.model.VouStatus;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.VouStatusTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;

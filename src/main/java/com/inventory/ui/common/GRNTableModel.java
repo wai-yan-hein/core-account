@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.common;
 
+import com.repo.InventoryRepo;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.Util1;

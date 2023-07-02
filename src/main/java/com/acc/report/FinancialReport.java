@@ -5,7 +5,7 @@
  */
 package com.acc.report;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.DateAutoCompleter;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
@@ -22,7 +22,7 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.VRoleMenu;
 import com.inventory.ui.common.ReportTableModel;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.editor.ProjectAutoCompleter;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;

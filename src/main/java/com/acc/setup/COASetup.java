@@ -5,7 +5,7 @@
  */
 package com.acc.setup;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.COAGroupChildTableModel;
 import com.acc.common.COAGroupTableModel;
 import com.acc.common.COAHeadTableModel;

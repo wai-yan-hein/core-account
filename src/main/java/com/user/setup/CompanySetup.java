@@ -5,7 +5,7 @@
  */
 package com.user.setup;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.common.EncryptUtil;
 import com.common.Global;
 import com.common.PanelControl;
@@ -14,7 +14,7 @@ import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.user.common.CompanyTableModel;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.dialog.DepartmentSetupDialog;
 import com.user.dialog.QRDialog;
 import com.user.dialog.YearEndProcessingDailog;

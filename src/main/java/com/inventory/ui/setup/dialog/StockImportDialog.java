@@ -16,7 +16,7 @@ import com.inventory.model.StockBrandKey;
 import com.inventory.model.StockKey;
 import com.inventory.model.StockType;
 import com.inventory.model.StockTypeKey;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.StockImportTableModel;
 import java.awt.FileDialog;
 import java.io.BufferedReader;

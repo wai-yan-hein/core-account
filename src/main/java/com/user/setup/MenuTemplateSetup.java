@@ -10,7 +10,7 @@ import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.model.MenuTemplate;
 import com.user.model.MenuTemplateKey;
 import java.awt.event.ActionEvent;

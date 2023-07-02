@@ -4,7 +4,8 @@
  */
 package com.user.common;
 
-import com.acc.common.AccountRepo;
+import com.repo.UserRepo;
+import com.repo.AccountRepo;
 import com.acc.model.BusinessType;
 import com.acc.model.COATemplate;
 import com.acc.model.COATemplateKey;

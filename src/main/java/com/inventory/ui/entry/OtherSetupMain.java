@@ -4,10 +4,10 @@
  */
 package com.inventory.ui.entry;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.common.Global;
 import com.common.SelectionObserver;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import lombok.extern.slf4j.Slf4j;

@@ -5,7 +5,7 @@
  */
 package com.acc.dialog;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.JournalEntryTableModel;
 import com.acc.editor.COA3CellEditor;
 import com.acc.editor.DepartmentCellEditor;
@@ -17,7 +17,7 @@ import com.common.ProUtil;
 import com.common.Util1;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.editor.CurrencyEditor;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.ProjectKey;

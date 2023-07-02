@@ -12,7 +12,7 @@ import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.dialog.CurrencySetupDialog;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.model.ExchangeRate;

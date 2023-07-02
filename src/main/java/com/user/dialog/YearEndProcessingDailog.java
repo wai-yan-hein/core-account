@@ -5,11 +5,11 @@
 package com.user.dialog;
 
 import com.CoreAccountApplication;
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.common.Global;
 import com.common.Util1;
 import com.user.common.CompanyComboModel;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.model.CompanyInfo;
 import com.user.model.YearEnd;
 import java.time.LocalDate;
