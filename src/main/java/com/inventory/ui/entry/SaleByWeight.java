@@ -463,7 +463,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                 int yes_no = JOptionPane.showConfirmDialog(this,
                         "Are you sure to delete?", "Save Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
-                    inventoryRepo.delete(saleHis.getKey()).subscribe((t) -> {
+                    inventoryRepo.delete(saleHis).subscribe((t) -> {
                         clear();
                     });
                 }
@@ -473,7 +473,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                         "Are you sure to restore?", "Purchase Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
                     saleHis.setDeleted(false);
-                    inventoryRepo.restore(saleHis.getKey()).subscribe((t) -> {
+                    inventoryRepo.restore(saleHis).subscribe((t) -> {
                         lblStatus.setText("EDIT");
                         lblStatus.setForeground(Color.blue);
                         disableForm(true);
@@ -567,7 +567,6 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         if (sh != null) {
             progress.setIndeterminate(true);
             saleHis = sh;
-            Integer deptId = sh.getKey().getDeptId();
             inventoryRepo.findLocation(saleHis.getLocCode()).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
@@ -1572,7 +1571,9 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                 setAllLocation();
             case "SALE-HISTORY" -> {
                 if (selectObj instanceof VSale s) {
-                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId(), s.isLocal()).subscribe((t) -> {
+                    boolean local = s.isLocal();
+                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId(), local).subscribe((t) -> {
+                        t.setLocal(local);
                         setSaleVoucher(t);
                     });
                 }
