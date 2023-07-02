@@ -1643,8 +1643,9 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<Boolean> delete(SaleHisKey key) {
-        if (localDatabase) {
+    public Mono<Boolean> delete(SaleHis sh) {
+        SaleHisKey key = sh.getKey();
+        if (sh.isLocal()) {
             return h2Repo.deleteSale(key);
         }
         return inventoryApi.post()
@@ -1670,7 +1671,11 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<Boolean> restore(SaleHisKey key) {
+    public Mono<Boolean> restore(SaleHis sh) {
+        SaleHisKey key = sh.getKey();
+        if (sh.isLocal()) {
+            return h2Repo.restoreSale(key);
+        }
         return inventoryApi.post()
                 .uri("/sale/restore-sale")
                 .body(Mono.just(key), SaleHisKey.class)
