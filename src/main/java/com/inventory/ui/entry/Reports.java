@@ -81,6 +81,8 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private boolean isReport = false;
     private String stDate;
     private String enDate;
+    private String stDueDate;
+    private String enDueDate;
     private TraderAutoCompleter traderAutoCompleter;
     private SaleManAutoCompleter saleManAutoCompleter;
     private LocationAutoCompleter locationAutoCompleter;
@@ -148,6 +150,8 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         txtRegion.addFocusListener(fa);
         txtBatchNo.addFocusListener(fa);
         txtProjectNo.addFocusListener(fa);
+        txtFromDueDate.addFocusListener(fa);
+        txtToDueDate.addFocusListener(fa);
     }
 
     public void initMain() {
@@ -159,6 +163,8 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private void initDate() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
+        txtFromDueDate.setDate(Util1.getTodayDate());
+        txtToDueDate.setDate(Util1.getTodayDate());
     }
 
     private void initTableReport() {
@@ -244,10 +250,14 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     isReport = true;
                     stDate = Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd");
                     enDate = Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd");
+                    stDueDate = Util1.toDateStr(txtFromDueDate.getDate(), "yyyy-MM-dd");
+                    enDueDate = Util1.toDateStr(txtToDueDate.getDate(), "yyyy-MM-dd");
                     filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
                     filter.setOpDate(Util1.toDateStr(Global.startDate, "dd/MM/yyyy", "yyyy-MM-dd"));
                     filter.setFromDate(stDate);
                     filter.setToDate(enDate);
+                    filter.setFromDueDate(stDueDate);
+                    filter.setToDueDate(enDueDate);
                     filter.setCurCode(getCurCode());
                     filter.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
                     filter.setSaleManCode(saleManAutoCompleter.getSaleMan().getKey().getSaleManCode());
@@ -407,6 +417,10 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         txtBatchNo = new javax.swing.JTextField();
         jLabel16 = new javax.swing.JLabel();
         txtProjectNo = new javax.swing.JTextField();
+        jLabel17 = new javax.swing.JLabel();
+        txtFromDueDate = new com.toedter.calendar.JDateChooser();
+        txtToDueDate = new com.toedter.calendar.JDateChooser();
+        jLabel18 = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
         lblRecord = new javax.swing.JLabel();
         txtFilter = new javax.swing.JTextField();
@@ -590,44 +604,63 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             }
         });
 
+        jLabel17.setFont(Global.lableFont);
+        jLabel17.setText("From Due Date");
+
+        txtFromDueDate.setDateFormatString("dd/MM/yyyy");
+        txtFromDueDate.setFont(Global.lableFont);
+
+        txtToDueDate.setDateFormatString("dd/MM/yyyy");
+        txtToDueDate.setFont(Global.lableFont);
+
+        jLabel18.setFont(Global.lableFont);
+        jLabel18.setText("To Due Date");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel11, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel13, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel15, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel11, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel13, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel15, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(txtFromDate, javax.swing.GroupLayout.DEFAULT_SIZE, 151, Short.MAX_VALUE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtToDate, javax.swing.GroupLayout.DEFAULT_SIZE, 152, Short.MAX_VALUE))
-                    .addComponent(txtTrader)
-                    .addComponent(txtLocation)
-                    .addComponent(txtStockType)
-                    .addComponent(txtCategory)
-                    .addComponent(txtBrand)
-                    .addComponent(txtRegion)
-                    .addComponent(txtSaleMan)
-                    .addComponent(txtStock)
-                    .addComponent(txtVouType)
-                    .addComponent(txtBatchNo)
-                    .addComponent(txtProjectNo))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtFromDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE)
+                            .addComponent(txtFromDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtToDate, javax.swing.GroupLayout.DEFAULT_SIZE, 122, Short.MAX_VALUE)
+                            .addComponent(txtToDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(txtProjectNo, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtBatchNo, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtRegion, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtVouType, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtBrand, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtCategory, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtStockType, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtStock, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtLocation, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtSaleMan, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtTrader))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -640,6 +673,13 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                         .addComponent(txtFromDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(txtToDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(5, 5, 5)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jLabel17, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(txtFromDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtToDueDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(txtTrader)
@@ -684,10 +724,8 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtProjectNo))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
-
-        jLabel16.getAccessibleContext().setAccessibleName("Project No");
 
         jLabel12.setFont(Global.lableFont);
         jLabel12.setText("Record :");
@@ -737,10 +775,10 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtCurrency)
-                    .addComponent(txtDate))
+                    .addComponent(txtDate)
+                    .addComponent(txtCurrency))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -764,18 +802,16 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 484, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel12)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 409, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(txtFilter))
+                        .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 409, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtFilter)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 477, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -785,16 +821,15 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 407, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel12)
-                            .addComponent(lblRecord)))
+                        .addComponent(jScrollPane1))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel12)
+                    .addComponent(lblRecord))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -930,6 +965,8 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -950,6 +987,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private javax.swing.JTextField txtDate;
     private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
+    private com.toedter.calendar.JDateChooser txtFromDueDate;
     private javax.swing.JTextField txtLocation;
     private javax.swing.JTextField txtProjectNo;
     private javax.swing.JTextField txtRegion;
@@ -957,6 +995,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private javax.swing.JTextField txtStock;
     private javax.swing.JTextField txtStockType;
     private com.toedter.calendar.JDateChooser txtToDate;
+    private com.toedter.calendar.JDateChooser txtToDueDate;
     private javax.swing.JTextField txtTrader;
     private javax.swing.JTextField txtVouType;
     // End of variables declaration//GEN-END:variables
@@ -1001,6 +1040,8 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         if (source.equals("Date")) {
             txtFromDate.setDate(Util1.toDate(dateAutoCompleter.getDateModel().getStartDate(), "yyyy-MM-dd"));
             txtToDate.setDate(Util1.toDate(dateAutoCompleter.getDateModel().getEndDate(), "yyyy-MM-dd"));
+            txtFromDueDate.setDate(Util1.toDate(dateAutoCompleter.getDateModel().getStartDate(), "yyyy-MM-dd"));
+            txtToDueDate.setDate(Util1.toDate(dateAutoCompleter.getDateModel().getEndDate(), "yyyy-MM-dd"));
         }
     }
 
