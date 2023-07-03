@@ -22,21 +22,19 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jScrollPane1" pref="484" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Component id="jLabel12" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="lblRecord" min="-2" pref="409" max="-2" attributes="0"/>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
                   <Component id="txtFilter" alignment="0" max="32767" attributes="0"/>
+                  <Component id="jScrollPane1" alignment="0" pref="477" max="32767" attributes="0"/>
               </Group>
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jPanel1" max="32767" attributes="0"/>
                   <Component id="jPanel2" max="32767" attributes="0"/>
+                  <Component id="jPanel1" max="32767" attributes="0"/>
               </Group>
-              <EmptySpace min="-2" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -48,19 +46,18 @@
                   <Group type="102" attributes="0">
                       <Component id="txtFilter" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jScrollPane1" pref="407" max="32767" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="jLabel12" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblRecord" alignment="3" min="-2" max="-2" attributes="0"/>
-                      </Group>
+                      <Component id="jScrollPane1" max="32767" attributes="0"/>
                   </Group>
                   <Group type="102" attributes="0">
                       <Component id="jPanel2" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                      <Component id="jPanel1" max="32767" attributes="0"/>
                   </Group>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="jLabel12" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="lblRecord" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -101,43 +98,53 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" attributes="0">
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Component id="jLabel16" max="32767" attributes="0"/>
-                      <Component id="jLabel1" alignment="1" max="32767" attributes="0"/>
-                      <Component id="jLabel4" alignment="1" max="32767" attributes="0"/>
-                      <Component id="jLabel2" alignment="1" max="32767" attributes="0"/>
-                      <Component id="jLabel3" alignment="1" max="32767" attributes="0"/>
-                      <Component id="jLabel6" alignment="1" max="32767" attributes="0"/>
-                      <Component id="jLabel7" alignment="1" max="32767" attributes="0"/>
-                      <Component id="jLabel8" alignment="1" max="32767" attributes="0"/>
-                      <Component id="jLabel9" alignment="1" max="32767" attributes="0"/>
-                      <Component id="jLabel11" alignment="1" max="32767" attributes="0"/>
-                      <Component id="jLabel13" alignment="1" max="32767" attributes="0"/>
-                      <Component id="jLabel15" alignment="1" max="32767" attributes="0"/>
-                  </Group>
-                  <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" attributes="0">
-                          <Component id="txtFromDate" pref="151" max="32767" attributes="0"/>
-                          <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
-                          <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
-                          <Component id="txtToDate" pref="152" max="32767" attributes="0"/>
-                      </Group>
-                      <Component id="txtTrader" max="32767" attributes="0"/>
-                      <Component id="txtLocation" max="32767" attributes="0"/>
-                      <Component id="txtStockType" max="32767" attributes="0"/>
-                      <Component id="txtCategory" max="32767" attributes="0"/>
-                      <Component id="txtBrand" max="32767" attributes="0"/>
-                      <Component id="txtRegion" max="32767" attributes="0"/>
-                      <Component id="txtSaleMan" max="32767" attributes="0"/>
-                      <Component id="txtStock" max="32767" attributes="0"/>
-                      <Component id="txtVouType" max="32767" attributes="0"/>
-                      <Component id="txtBatchNo" max="32767" attributes="0"/>
-                      <Component id="txtProjectNo" alignment="0" max="32767" attributes="0"/>
+                      <Component id="jLabel16" min="-2" pref="80" max="-2" attributes="0"/>
+                      <Component id="jLabel1" alignment="1" min="-2" pref="80" max="-2" attributes="0"/>
+                      <Component id="jLabel4" alignment="1" min="-2" pref="80" max="-2" attributes="0"/>
+                      <Component id="jLabel2" alignment="1" min="-2" pref="80" max="-2" attributes="0"/>
+                      <Component id="jLabel3" alignment="1" min="-2" pref="80" max="-2" attributes="0"/>
+                      <Component id="jLabel6" alignment="1" min="-2" max="-2" attributes="0"/>
+                      <Component id="jLabel7" alignment="1" min="-2" pref="80" max="-2" attributes="0"/>
+                      <Component id="jLabel8" alignment="1" min="-2" pref="80" max="-2" attributes="0"/>
+                      <Component id="jLabel9" alignment="1" min="-2" pref="80" max="-2" attributes="0"/>
+                      <Component id="jLabel11" alignment="1" min="-2" pref="80" max="-2" attributes="0"/>
+                      <Component id="jLabel13" alignment="1" min="-2" pref="80" max="-2" attributes="0"/>
+                      <Component id="jLabel15" alignment="1" min="-2" pref="80" max="-2" attributes="0"/>
+                      <Component id="jLabel17" min="-2" pref="80" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="1" attributes="0">
+                      <Group type="102" attributes="0">
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="txtFromDueDate" pref="123" max="32767" attributes="0"/>
+                              <Component id="txtFromDate" max="32767" attributes="0"/>
+                          </Group>
+                          <EmptySpace min="-2" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="jLabel5" min="-2" pref="76" max="-2" attributes="0"/>
+                              <Component id="jLabel18" min="-2" pref="76" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace min="-2" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="txtToDate" pref="122" max="32767" attributes="0"/>
+                              <Component id="txtToDueDate" max="32767" attributes="0"/>
+                          </Group>
+                      </Group>
+                      <Component id="txtProjectNo" alignment="0" max="32767" attributes="0"/>
+                      <Component id="txtBatchNo" alignment="0" max="32767" attributes="0"/>
+                      <Component id="txtRegion" alignment="0" max="32767" attributes="0"/>
+                      <Component id="txtVouType" alignment="0" max="32767" attributes="0"/>
+                      <Component id="txtBrand" alignment="0" max="32767" attributes="0"/>
+                      <Component id="txtCategory" alignment="0" max="32767" attributes="0"/>
+                      <Component id="txtStockType" alignment="0" max="32767" attributes="0"/>
+                      <Component id="txtStock" alignment="0" max="32767" attributes="0"/>
+                      <Component id="txtLocation" alignment="0" max="32767" attributes="0"/>
+                      <Component id="txtSaleMan" alignment="0" max="32767" attributes="0"/>
+                      <Component id="txtTrader" max="32767" attributes="0"/>
+                  </Group>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -152,6 +159,15 @@
                           <Component id="jLabel5" alignment="0" min="-2" pref="22" max="-2" attributes="0"/>
                       </Group>
                       <Component id="txtToDate" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="103" alignment="0" groupAlignment="0" max="-2" attributes="0">
+                          <Component id="jLabel17" alignment="0" max="32767" attributes="0"/>
+                          <Component id="txtFromDueDate" alignment="0" max="32767" attributes="0"/>
+                          <Component id="jLabel18" alignment="0" min="-2" pref="22" max="-2" attributes="0"/>
+                      </Group>
+                      <Component id="txtToDueDate" alignment="0" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
@@ -208,7 +224,7 @@
                       <Component id="jLabel16" alignment="3" min="-2" pref="22" max="-2" attributes="0"/>
                       <Component id="txtProjectNo" alignment="3" max="32767" attributes="0"/>
                   </Group>
-                  <EmptySpace max="32767" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -397,6 +413,38 @@
             <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtProjectNoFocusGained"/>
           </Events>
         </Component>
+        <Component class="javax.swing.JLabel" name="jLabel17">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.lableFont" type="code"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="From Due Date"/>
+          </Properties>
+        </Component>
+        <Component class="com.toedter.calendar.JDateChooser" name="txtFromDueDate">
+          <Properties>
+            <Property name="dateFormatString" type="java.lang.String" value="dd/MM/yyyy"/>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.lableFont" type="code"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="com.toedter.calendar.JDateChooser" name="txtToDueDate">
+          <Properties>
+            <Property name="dateFormatString" type="java.lang.String" value="dd/MM/yyyy"/>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.lableFont" type="code"/>
+            </Property>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel18">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.lableFont" type="code"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="To Due Date"/>
+          </Properties>
+        </Component>
       </SubComponents>
     </Container>
     <Component class="javax.swing.JLabel" name="jLabel12">
@@ -443,10 +491,10 @@
                       <Component id="jLabel10" max="32767" attributes="0"/>
                       <Component id="jLabel14" max="32767" attributes="0"/>
                   </Group>
-                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="txtCurrency" max="32767" attributes="0"/>
                       <Component id="txtDate" max="32767" attributes="0"/>
+                      <Component id="txtCurrency" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>

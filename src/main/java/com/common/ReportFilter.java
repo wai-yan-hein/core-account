@@ -71,6 +71,8 @@ public class ReportFilter {
     private String batchNo;
     private String projectNo;
     private float creditAmt;
+    private String fromDueDate;
+    private String toDueDate;
     public ReportFilter(Integer macId, String compCode, Integer deptId) {
         this.macId = macId;
         this.compCode = compCode;
