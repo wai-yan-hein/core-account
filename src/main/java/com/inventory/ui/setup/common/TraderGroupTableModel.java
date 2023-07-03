@@ -6,7 +6,7 @@
 package com.inventory.ui.setup.common;
 
 import com.inventory.model.TraderGroup;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;

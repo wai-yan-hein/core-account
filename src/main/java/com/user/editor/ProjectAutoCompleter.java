@@ -6,14 +6,14 @@
 package com.user.editor;
 
 import com.acc.editor.*;
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.DespTableModel;
 import com.acc.model.VDescription;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.user.common.ProjectTableModel;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.model.Project;
 import com.user.model.ProjectKey;
 import java.awt.Color;

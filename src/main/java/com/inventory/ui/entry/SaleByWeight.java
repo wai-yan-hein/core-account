@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.entry;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.JasperReportUtil;
@@ -28,14 +28,14 @@ import com.inventory.model.SaleMan;
 import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
 import com.inventory.model.VSale;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.common.SaleByWeightTableModel;
 import com.inventory.ui.common.StockBalanceTableModel;
 import com.inventory.ui.entry.dialog.SaleHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import java.awt.Color;
 import java.awt.event.ActionEvent;

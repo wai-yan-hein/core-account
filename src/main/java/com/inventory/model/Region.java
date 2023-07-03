@@ -5,9 +5,9 @@
  */
 package com.inventory.model;
 
-import java.util.Date;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.time.LocalDateTime;
 
 /**
  *
@@ -23,7 +23,7 @@ public class Region implements java.io.Serializable {
     private String parentRegion;
     
     private String updatedBy;
-    private Date createdDate;
+    private LocalDateTime createdDate;
     private String createdBy;
     private Integer macId;
     private String userCode;

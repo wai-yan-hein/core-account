@@ -5,7 +5,7 @@
  */
 package com.acc.setup;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.COAViewTableModel;
 import com.acc.common.StandardCOATableModel;
 import com.acc.dialog.COAUnusedDailog;
@@ -23,9 +23,9 @@ import com.common.Util1;
 import com.user.model.Menu;
 import com.inventory.editor.MenuAutoCompleter;
 import com.inventory.model.CFont;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.model.MenuKey;
 import java.awt.FileDialog;
 import java.awt.HeadlessException;

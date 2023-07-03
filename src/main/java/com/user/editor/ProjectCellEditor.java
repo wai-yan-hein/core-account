@@ -6,7 +6,7 @@
 package com.user.editor;
 
 import com.common.Global;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.model.Project;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;

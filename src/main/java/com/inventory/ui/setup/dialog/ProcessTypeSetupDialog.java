@@ -10,7 +10,7 @@ import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.inventory.model.ProcessType;
 import com.inventory.model.ProcessTypeKey;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.ProcessTypeTableModel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;

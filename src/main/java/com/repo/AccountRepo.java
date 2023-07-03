@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.acc.common;
+package com.repo;
 
 import com.H2Repo;
 import com.acc.model.COAKey;
@@ -30,6 +30,7 @@ import com.common.Global;
 import com.common.ProUtil;
 import com.common.ReturnObject;
 import com.common.Util1;
+import com.model.VoucherInfo;
 import com.user.model.YearEnd;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -749,5 +750,22 @@ public class AccountRepo {
                     log.info("getDate " + e.getMessage());
                     return Mono.error(e);
                 });
+    }
+
+    public Mono<List<VoucherInfo>> getIntegrationVoucher(String fromDate, String toDate, String tranSource) {
+        return accountApi.get()
+                .uri(builder -> builder.path("/account/getIntegrationVoucher")
+                .queryParam("fromDate", fromDate)
+                .queryParam("toDate", toDate)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("tranSource", tranSource)
+                .build())
+                .retrieve()
+                .bodyToFlux(VoucherInfo.class)
+                .collectList()
+                .doOnError((e) -> {
+                    log.error("getIntegrationVoucher :" + e.getMessage());
+                });
+
     }
 }

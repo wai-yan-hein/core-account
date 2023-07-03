@@ -6,7 +6,7 @@
 package com.inventory.ui.entry;
 
 import com.CloudIntegration;
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.KeyPropagate;
@@ -37,7 +37,7 @@ import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
 import com.inventory.model.VPurchase;
 import com.inventory.ui.common.GRNTableModel;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.common.PurExpenseTableModel;
 import com.inventory.ui.common.PurchaseTableModel;
 import com.inventory.ui.entry.dialog.BatchSearchDialog;
@@ -47,7 +47,7 @@ import com.inventory.ui.setup.dialog.ExpenseSetupDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;

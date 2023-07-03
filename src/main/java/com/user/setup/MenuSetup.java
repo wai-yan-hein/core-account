@@ -5,7 +5,7 @@
  */
 package com.user.setup;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
@@ -13,7 +13,7 @@ import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.toedter.calendar.JTextFieldDateEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.model.Menu;
 import com.user.model.MenuKey;
 import java.awt.event.ActionEvent;

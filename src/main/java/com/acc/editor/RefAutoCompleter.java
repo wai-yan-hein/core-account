@@ -5,7 +5,7 @@
  */
 package com.acc.editor;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.RefTableModel;
 import com.acc.model.VDescription;
 import com.common.Global;

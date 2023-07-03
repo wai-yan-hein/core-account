@@ -4,6 +4,7 @@
  */
 package com.user.common;
 
+import com.repo.UserRepo;
 import com.user.model.PrivilegeCompany;
 import java.util.ArrayList;
 import java.util.List;

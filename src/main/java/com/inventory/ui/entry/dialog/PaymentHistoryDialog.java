@@ -5,14 +5,14 @@
  */
 package com.inventory.ui.entry.dialog;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.editor.COA3AutoCompleter;
 import com.common.FilterObject;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
@@ -22,7 +22,7 @@ import com.user.model.AppUser;
 import com.inventory.model.PaymentHis;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.PaymentSearchTableModel;
 import com.user.editor.CurrencyAutoCompleter;
 import java.awt.event.FocusAdapter;

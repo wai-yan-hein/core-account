@@ -10,7 +10,7 @@ import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.inventory.model.StockBrand;
 import com.inventory.model.StockBrandKey;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.StockBrandTableModel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;

@@ -9,7 +9,7 @@ import com.common.Global;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.PriceOption;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.common.SalePriceTableModel;
 import com.inventory.ui.common.SaleTableModel;
 import java.awt.Color;

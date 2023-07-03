@@ -10,7 +10,7 @@ import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.inventory.model.TraderGroup;
 import com.inventory.model.TraderGroupKey;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.setup.common.TraderGroupTableModel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;

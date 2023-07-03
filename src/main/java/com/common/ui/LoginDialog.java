@@ -9,7 +9,7 @@ import com.MessageDialog;
 import com.CoreAccountApplication;
 import com.common.Global;
 import com.common.TokenFile;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.common.Util1;
 import com.user.model.AppUser;
 import com.inventory.model.MachineInfo;

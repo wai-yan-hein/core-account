@@ -9,7 +9,7 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.inventory.model.GRN;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.GRNSearchTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;

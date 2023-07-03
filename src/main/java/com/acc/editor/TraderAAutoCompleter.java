@@ -5,7 +5,7 @@
  */
 package com.acc.editor;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.TraderATableModel;
 import com.acc.model.TraderA;
 import com.acc.model.TraderAKey;

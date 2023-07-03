@@ -4,7 +4,7 @@
  */
 package com.inventory.ui.entry;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.COAComboBoxModel;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
@@ -17,12 +17,12 @@ import com.inventory.model.PaymentHis;
 import com.inventory.model.PaymentHisDetail;
 import com.inventory.model.PaymentHisKey;
 import com.inventory.model.Trader;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.common.PaymentTableModel;
 import com.inventory.ui.entry.dialog.PaymentHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;

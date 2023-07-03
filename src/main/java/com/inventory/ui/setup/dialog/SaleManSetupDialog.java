@@ -20,7 +20,7 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.SaleMan;
 import com.inventory.model.SaleManKey;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.SaleManTableModel;
 import java.awt.Color;
 import java.util.List;

@@ -4,7 +4,7 @@
  */
 package com.acc.entry;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.ColumnHeaderListener;
 import com.acc.common.DateAutoCompleter;
 import com.acc.common.JournalClosingStockTableModel;
@@ -19,7 +19,7 @@ import com.acc.model.ReportFilter;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.editor.CurrencyEditor;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.editor.ProjectCellEditor;

@@ -5,14 +5,14 @@
  */
 package com.acc.dialog;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.ChartOfAccountImportTableModel;
 import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.Util1;
 import com.inventory.model.CFont;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import java.awt.FileDialog;
 import java.io.BufferedReader;
 import java.io.FileInputStream;

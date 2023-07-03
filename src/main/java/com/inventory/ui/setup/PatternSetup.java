@@ -21,7 +21,7 @@ import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.StockTypeAutoCompleter;
 import com.inventory.model.Pattern;
 import com.inventory.model.Stock;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.common.PatternTableModel;
 import com.inventory.ui.common.StockCompleterTableModel;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;

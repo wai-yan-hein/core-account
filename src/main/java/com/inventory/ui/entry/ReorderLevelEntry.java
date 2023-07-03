@@ -20,7 +20,7 @@ import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.StockTypeAutoCompleter;
 import com.inventory.model.ReorderLevel;
 import com.inventory.model.StockUnit;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.common.ReorderTableModel;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;

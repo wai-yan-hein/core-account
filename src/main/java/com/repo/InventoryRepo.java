@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.inventory.ui.common;
+package com.repo;
 
 import com.H2Repo;
 import com.common.FilterObject;
@@ -150,7 +150,6 @@ public class InventoryRepo {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
                 });
-
     }
 
     public Mono<List<PriceOption>> getUpdatePriceOption(String updatedDate) {

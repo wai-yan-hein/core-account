@@ -5,7 +5,7 @@
  */
 package com.acc.setup;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.model.DepartmentA;
 import com.acc.model.DepartmentAKey;
 import com.common.Global;

@@ -5,7 +5,7 @@
  */
 package com.user.setup;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.model.ChartOfAccount;
@@ -24,8 +24,8 @@ import com.inventory.model.Location;
 import com.inventory.model.Stock;
 import com.user.model.SysProperty;
 import com.inventory.model.Trader;
-import com.inventory.ui.common.InventoryRepo;
-import com.user.common.UserRepo;
+import com.repo.InventoryRepo;
+import com.repo.UserRepo;
 import com.user.editor.MacAutoCompleter;
 import com.user.editor.TextAutoCompleter;
 import com.user.model.MachineProperty;
