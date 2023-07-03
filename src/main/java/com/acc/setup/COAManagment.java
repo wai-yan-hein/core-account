@@ -336,8 +336,7 @@ public class COAManagment extends javax.swing.JPanel implements
     }
 
     private void createTreeNode(DefaultMutableTreeNode treeRoot) {
-        accountRepo.getCOATree()
-                .collectList().subscribe((t) -> {
+        accountRepo.getCOATree().collectList().subscribe((t) -> {
                     if (!t.isEmpty()) {
                         t.forEach((menu) -> {
                             if (menu.getChild() != null) {
@@ -477,18 +476,8 @@ public class COAManagment extends javax.swing.JPanel implements
     }
 
     private void importCOA() {
-        ChartOfAccount coa = (ChartOfAccount) selectedNode.getUserObject();
-        Integer cLevel = coa == null ? 0 : coa.getCoaLevel();
-        String cCode = cLevel == 2 ? coa.getKey().getCoaCode() : null;
-        if (cCode != null) {
-            FileDialog dialog = new FileDialog(Global.parentForm, "Choose CSV File", FileDialog.LOAD);
-            dialog.setDirectory("D:\\");
-            dialog.setFile(".csv");
-            dialog.setVisible(true);
-            String directory = dialog.getFile();
-            log.info("File Path :" + directory);
-            String path = dialog.getDirectory() != null ? dialog.getDirectory() + "\\" + directory : "";
-            readFile(path, cCode);
+        if (selectedNode.getUserObject() instanceof ChartOfAccount c) {
+            importDialog(c);
         }
 
     }
@@ -574,8 +563,6 @@ public class COAManagment extends javax.swing.JPanel implements
         tblStandCOA.getColumnModel().getColumn(3).setPreferredWidth(100);// Active
         tblStandCOA.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
         tblStandCOA.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        //tblStandCOA.setDefaultRenderer(Boolean.class, new TableCellRender());
-        //tblStandCOA.setDefaultRenderer(Object.class, new TableCellRender());
         tblStandCOA.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         searchCOAStandard();
@@ -597,6 +584,16 @@ public class COAManagment extends javax.swing.JPanel implements
                     cOAViewTableModel.setListCOA(t);
                 }, (e) -> {
                 });
+    }
+
+    private void importDialog(ChartOfAccount coa) {
+        ChartOfAccountImportDialog dialog = new ChartOfAccountImportDialog(Global.parentForm);
+        dialog.initMain();
+        dialog.setCoaParent(coa);
+        dialog.setAccountRepo(accountRepo);
+        dialog.setSize(Global.width - 400, Global.height - 400);
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
     }
 
     /**
@@ -1053,12 +1050,7 @@ public class COAManagment extends javax.swing.JPanel implements
 
     private void btnImportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImportActionPerformed
         // TODO add your handling code here:
-        ChartOfAccountImportDialog importDialog = new ChartOfAccountImportDialog();
-        importDialog.setInventoryRepo(inventoryRepo);
-        importDialog.setAccountRepo(accountRepo);
-        importDialog.setSize(Global.width - 400, Global.height - 400);
-        importDialog.setLocationRelativeTo(null);
-        importDialog.setVisible(true);
+        importDialog(null);
 
     }//GEN-LAST:event_btnImportActionPerformed
 

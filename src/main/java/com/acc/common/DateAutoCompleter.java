@@ -150,8 +150,10 @@ public final class DateAutoCompleter implements KeyListener, SelectionObserver {
 
         table.setRequestFocusEnabled(false);
 
-        if (!Global.listDate.isEmpty()) {
-            table.setRowSelectionInterval(0, 0);
+        if (Global.listDate != null) {
+            if (!Global.listDate.isEmpty()) {
+                table.setRowSelectionInterval(0, 0);
+            }
         }
     }
 
