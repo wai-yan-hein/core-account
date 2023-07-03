@@ -202,7 +202,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                     Map<String, Object> param = new HashMap<>();
                     param.put("p_report_name", reportName);
                     param.put("p_report_title", cOA3AutoCompleter.getCOA().getCoaNameEng());
-                    param.put("p_date", String.format("Between %s and %s", Util1.toDateStr(stDate, "yyyy-MM-dd", Global.dateFormat), Util1.toDateStr(stDate, "yyyy-MM-dd", Global.dateFormat)));
+                    param.put("p_date", String.format("Between %s and %s", Util1.toDateStr(stDate, "yyyy-MM-dd", Global.dateFormat), Util1.toDateStr(enDate, "yyyy-MM-dd", Global.dateFormat)));
                     param.put("p_print_date", Util1.getTodayDateTime());
                     param.put("p_comp_name", Global.companyName);
                     param.put("p_comp_address", Global.companyAddress);
