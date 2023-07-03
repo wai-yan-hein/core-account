@@ -30,7 +30,7 @@ import reactor.core.publisher.Mono;
 @Component
 @Slf4j
 public class HMSIntegration extends javax.swing.JPanel {
-
+    
     @Autowired
     private HMSRepo hmsRepo;
     @Autowired
@@ -38,11 +38,11 @@ public class HMSIntegration extends javax.swing.JPanel {
     private final HMSIntegrationTableModel tableModel = new HMSIntegrationTableModel();
     private JProgressBar progress;
     private SelectionObserver observer;
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
@@ -53,17 +53,17 @@ public class HMSIntegration extends javax.swing.JPanel {
     public HMSIntegration() {
         initComponents();
     }
-
+    
     public void initMain() {
         initTable();
         initDate();
     }
-
+    
     private void initDate() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
     }
-
+    
     private void initTable() {
         tblAudit.setModel(tableModel);
         tblAudit.setFont(Global.textFont);
@@ -73,7 +73,7 @@ public class HMSIntegration extends javax.swing.JPanel {
         tblAudit.setDefaultRenderer(Object.class, new TableCellRender());
         tblAudit.setDefaultRenderer(Double.class, new TableCellRender());
     }
-
+    
     private void check() {
         enableForm(false);
         String fromDate = Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd");
@@ -118,6 +118,9 @@ public class HMSIntegration extends javax.swing.JPanel {
                 }
             }
         }
+        m1.zipWith(m2).hasElement().subscribe((t) -> {
+            log.info("element : " + t);
+        });
         m1.zipWith(m2).subscribe((zip) -> {
             List<VoucherInfo> list1 = zip.getT1();
             List<VoucherInfo> list2 = zip.getT2();
@@ -145,9 +148,9 @@ public class HMSIntegration extends javax.swing.JPanel {
         }, (e) -> {
             enableForm(true);
         });
-
+        
     }
-
+    
     private void sync() {
         if (cboType.getSelectedItem() instanceof VoucherInfoEnum c) {
             enableForm(false);
@@ -167,10 +170,10 @@ public class HMSIntegration extends javax.swing.JPanel {
                     enableForm(true);
                 });
             });
-
+            
         }
     }
-
+    
     private void enableForm(boolean status) {
         progress.setIndeterminate(!status);
         btnSync.setEnabled(status);
