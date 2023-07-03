@@ -21,7 +21,8 @@ public class Region implements java.io.Serializable {
     private String regionName;
     private String regionType;
     private String parentRegion;
-    
+
+    private Integer deptId;
     private String updatedBy;
     private LocalDateTime createdDate;
     private String createdBy;

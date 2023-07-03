@@ -35,12 +35,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.swing.JFrame;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.core.task.TaskExecutor;
 
@@ -207,9 +205,9 @@ public class StockImportDialog extends javax.swing.JDialog {
                     .setIgnoreEmptyLines(true)
                     .setIgnoreHeaderCase(true)
                     .build();
-           // CSVParser csvParser = csvFormat.parse(in);
+            // CSVParser csvParser = csvFormat.parse(in);
 //             Access the header map
-           // Map<String, Integer> headerMap = csvParser.getHeaderMap();
+            // Map<String, Integer> headerMap = csvParser.getHeaderMap();
             //log.info(headerMap.toString());
 
             Iterable<CSVRecord> records = csvFormat.parse(in);
@@ -225,11 +223,11 @@ public class StockImportDialog extends javax.swing.JDialog {
                             ? parseIntegerOrDefault(r.get("Department"), Global.deptId) : Global.deptId);
                     t.setUserCode(r.isMapped("UserCode") ? Util1.convertToUniCode(r.get("UserCode")) : "");
                     t.setSalePriceN(r.isMapped("SalePrice") ? Util1.getFloat(r.get("SalePrice")) : Util1.getFloat("0"));
-                    t.setTypeCode(r.isMapped("StockGroup") ? getGroupCode(r.get("StockGroup")) : "");
+                    t.setTypeCode(r.isMapped("StockGroup") ? getGroupCode(r.get("StockGroup"), t.getDeptId()) : "");
                     t.setGroupName(r.isMapped("StockGroup") ? r.get("StockGroup") : "");
-                    t.setCatCode(r.isMapped("Category") ? getCategoryCode(r.get("Category")) : "");
+                    t.setCatCode(r.isMapped("Category") ? getCategoryCode(r.get("Category"), t.getDeptId()) : "");
                     t.setCatName(r.isMapped("Category") ? Util1.convertToUniCode(r.get("Category")) : "");
-                    t.setBrandCode(r.isMapped("Brand") ? getBrandCode(r.get("Brand")) : "");
+                    t.setBrandCode(r.isMapped("Brand") ? getBrandCode(r.get("Brand"), t.getDeptId()) : "");
                     t.setBrandName(r.isMapped("Brand") ? Util1.convertToUniCode(r.get("Brand")) : "");
                     t.setActive(true);
                     t.setCreatedDate(LocalDateTime.now());
@@ -277,7 +275,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         return tmpStr;
     }
 
-    private String getGroupCode(String str) {
+    private String getGroupCode(String str, Integer deptId) {
         if (hmGroup.isEmpty()) {
             List<StockType> list = inventoryRepo.getStockType().block();
             if (list != null) {
@@ -288,29 +286,29 @@ public class StockImportDialog extends javax.swing.JDialog {
 
         }
         if (hmGroup.get(str) == null && !str.isEmpty()) {
-            StockType st = saveGroup(str);
+            StockType st = saveGroup(str, deptId);
             hmGroup.put(st.getStockTypeName(), st.getKey().getStockTypeCode());
         }
         return hmGroup.get(str);
     }
 
-    private StockType saveGroup(String str) {
+    private StockType saveGroup(String str, Integer deptId) {
         StockType stockType = new StockType();
         stockType.setUserCode(Global.loginUser.getUserCode());
         stockType.setStockTypeName(str);
         stockType.setAccount("");
         StockTypeKey key = new StockTypeKey();
         key.setCompCode(Global.compCode);
-//        key.setDeptId(Global.deptId);
         key.setStockTypeCode(null);
         stockType.setKey(key);
+        stockType.setDeptId(deptId);
         stockType.setCreatedBy(Global.loginUser.getUserCode());
         stockType.setCreatedDate(LocalDateTime.now());
         stockType.setMacId(Global.macId);
         return inventoryRepo.saveStockType(stockType).block();
     }
 
-    private String getCategoryCode(String str) {
+    private String getCategoryCode(String str, Integer deptId) {
         if (hmCat.isEmpty()) {
             List<Category> list = inventoryRepo.getCategory().block();
             if (list != null) {
@@ -321,19 +319,20 @@ public class StockImportDialog extends javax.swing.JDialog {
 
         }
         if (hmCat.get(str) == null && !str.isEmpty()) {
-            Category ct = saveCategory(str);
+            Category ct = saveCategory(str, deptId);
             hmCat.put(ct.getCatName(), ct.getKey().getCatCode());
         }
         return hmCat.get(str);
     }
 
-    private Category saveCategory(String str) {
+    private Category saveCategory(String str, Integer deptId) {
         Category category = new Category();
         CategoryKey key = new CategoryKey();
         key.setCatCode(null);
         key.setCompCode(Global.compCode);
         category.setDeptId(Global.deptId);
         category.setKey(key);
+        category.setDeptId(deptId);
         category.setCreatedBy(Global.loginUser.getUserCode());
         category.setCreatedDate(LocalDateTime.now());
         category.setMacId(Global.macId);
@@ -343,7 +342,7 @@ public class StockImportDialog extends javax.swing.JDialog {
 
     }
 
-    private String getBrandCode(String str) {
+    private String getBrandCode(String str, Integer deptId) {
         if (hmBrand.isEmpty()) {
             List<StockBrand> list = inventoryRepo.getStockBrand().block();
             if (list != null) {
@@ -353,13 +352,13 @@ public class StockImportDialog extends javax.swing.JDialog {
             }
         }
         if (hmBrand.get(str) == null && !str.isEmpty()) {
-            StockBrand sb = saveBrand(str);
+            StockBrand sb = saveBrand(str, deptId);
             hmBrand.put(sb.getBrandName(), sb.getKey().getBrandCode());
         }
         return hmBrand.get(str);
     }
 
-    private StockBrand saveBrand(String str) {
+    private StockBrand saveBrand(String str, Integer deptId) {
         StockBrand brand = new StockBrand();
         brand.setUserCode(Global.loginUser.getUserCode());
         brand.setBrandName(str);
@@ -368,6 +367,7 @@ public class StockImportDialog extends javax.swing.JDialog {
         key.setCompCode(Global.compCode);
         brand.setDeptId(Global.deptId);
         brand.setKey(key);
+        brand.setDeptId(deptId);
         brand.setCreatedBy(Global.loginUser.getUserCode());
         brand.setCreatedDate(LocalDateTime.now());
         brand.setMacId(Global.macId);

@@ -119,7 +119,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         btnSave.setEnabled(true);
     }
 
-    private String getRegion(String str) {
+    private String getRegion(String str, Integer deptId) {
         if (hmRegion.isEmpty()) {
             List<Region> list = inventoryRepo.getRegion().block();
             if (list != null) {
@@ -129,21 +129,21 @@ public class CustomerImportDialog extends javax.swing.JDialog {
             }
         }
         if (hmRegion.get(str) == null && !str.isEmpty()) {
-            Region reg = saveRegion(str);
+            Region reg = saveRegion(str, deptId);
             hmRegion.put(reg.getRegionName(), reg.getKey().getRegCode());
         }
         return hmRegion.get(str);
     }
 
-    private Region saveRegion(String str) {
+    private Region saveRegion(String str, Integer deptId) {
         Region region = new Region();
         region.setUserCode(Global.loginUser.getUserCode());
         region.setRegionName(str);
         RegionKey key = new RegionKey();
         key.setCompCode(Global.compCode);
-        key.setDeptId(Global.deptId);
         key.setRegCode(null);
         region.setKey(key);
+        region.setDeptId(deptId);
         region.setCreatedBy(Global.loginUser.getUserCode());
         region.setCreatedDate(Util1.getTodayLocalDateTime());
         region.setMacId(Global.macId);
@@ -176,7 +176,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                     t.setPhone(row.isMapped("PhoneNo") ? Util1.convertToUniCode(row.get("PhoneNo")) : "");
                     t.setContactPerson(row.isMapped("ContactPerson") ? Util1.convertToUniCode(row.get("ContactPerson")) : "");
                     t.setEmail(row.isMapped("Email") ? row.get("Email") : "");
-                    t.setRegCode(row.isMapped("Region") ? getRegion(row.get("Region")) : "");
+                    t.setRegCode(row.isMapped("Region") ? getRegion(row.get("Region"), t.getDeptId()) : "");
                     t.setRemark(row.isMapped("Remark") ? row.get("Remark") : "");
                     t.setActive(Boolean.TRUE);
                     t.setCreatedDate(LocalDateTime.now());

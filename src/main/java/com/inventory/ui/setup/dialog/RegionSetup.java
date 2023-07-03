@@ -158,9 +158,9 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
             if (lblStatus.getText().equals("NEW")) {
                 RegionKey key = new RegionKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 key.setRegCode(null);
                 region.setKey(key);
+                region.setDeptId(Global.deptId);
                 region.setCreatedBy(Global.loginUser.getUserCode());
                 region.setCreatedDate(Util1.getTodayLocalDateTime());
                 region.setMacId(Global.macId);

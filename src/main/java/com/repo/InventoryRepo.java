@@ -400,7 +400,7 @@ public class InventoryRepo {
         RegionKey key = new RegionKey();
         key.setRegCode(Util1.isNull(code, "-"));
         key.setCompCode(Global.compCode);
-        key.setDeptId(Global.deptId);
+//        key.setDeptId(Global.deptId);
         return inventoryApi.post()
                 .uri("/setup/find-region")
                 .body(Mono.just(key), RegionKey.class)
