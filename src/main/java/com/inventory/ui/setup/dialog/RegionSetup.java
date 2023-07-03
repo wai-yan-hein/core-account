@@ -162,7 +162,7 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
                 key.setRegCode(null);
                 region.setKey(key);
                 region.setCreatedBy(Global.loginUser.getUserCode());
-                region.setCreatedDate(Util1.getTodayDate());
+                region.setCreatedDate(Util1.getTodayLocalDateTime());
                 region.setMacId(Global.macId);
             } else {
                 region.setUpdatedBy(Global.loginUser.getUserCode());

@@ -9,6 +9,8 @@ import com.common.Global;
 import com.common.ProUtil;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.inventory.model.Region;
+import com.inventory.model.RegionKey;
 import com.inventory.model.Trader;
 import com.inventory.model.TraderKey;
 import com.repo.InventoryRepo;
@@ -40,8 +42,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
     private AccountRepo accountRepo;
     private final TraderImportTableModel tableModel = new TraderImportTableModel();
     private TaskExecutor taskExecutor;
-    private final HashMap<Integer, Integer> hmZG = new HashMap<>();
-    private final HashMap<String, String> hmCOA = new HashMap<>();
+    private final HashMap<String, String> hmRegion = new HashMap<>();
 
     public AccountRepo getAccountRepo() {
         return accountRepo;
@@ -118,17 +119,49 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         btnSave.setEnabled(true);
     }
 
+    private String getRegion(String str) {
+        if (hmRegion.isEmpty()) {
+            List<Region> list = inventoryRepo.getRegion().block();
+            if (list != null) {
+                list.forEach((t) -> {
+                    hmRegion.put(t.getRegionName(), t.getKey().getRegCode());
+                });
+            }
+        }
+        if (hmRegion.get(str) == null && !str.isEmpty()) {
+            Region reg = saveRegion(str);
+            hmRegion.put(reg.getRegionName(), reg.getKey().getRegCode());
+        }
+        return hmRegion.get(str);
+    }
+
+    private Region saveRegion(String str) {
+        Region region = new Region();
+        region.setUserCode(Global.loginUser.getUserCode());
+        region.setRegionName(str);
+        RegionKey key = new RegionKey();
+        key.setCompCode(Global.compCode);
+        key.setDeptId(Global.deptId);
+        key.setRegCode(null);
+        region.setKey(key);
+        region.setCreatedBy(Global.loginUser.getUserCode());
+        region.setCreatedDate(Util1.getTodayLocalDateTime());
+        region.setMacId(Global.macId);
+        return inventoryRepo.saveRegion(region).block();
+    }
+
     private void readFile(String path) {
         List<Trader> listTrader = new ArrayList<>();
         try {
             progress.setIndeterminate(true);
+            Reader in = new FileReader(path);
             CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                     .setHeader()
-                    .setSkipHeaderRecord(true)                    
+                    .setSkipHeaderRecord(true)
                     .setAllowMissingColumnNames(true)
                     .setIgnoreEmptyLines(true)
+                    .setIgnoreHeaderCase(true)
                     .build();
-            Reader in = new FileReader(path);
             Iterable<CSVRecord> records = csvFormat.parse(in);
             records.forEach((row) -> {
                 Trader t = new Trader();
@@ -141,6 +174,10 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                     t.setUserCode(row.isMapped("UserCode") ? Util1.convertToUniCode(row.get("UserCode")) : "");
                     t.setAddress(row.isMapped("Address") ? Util1.convertToUniCode(row.get("Address")) : "");
                     t.setPhone(row.isMapped("PhoneNo") ? Util1.convertToUniCode(row.get("PhoneNo")) : "");
+                    t.setContactPerson(row.isMapped("ContactPerson") ? Util1.convertToUniCode(row.get("ContactPerson")) : "");
+                    t.setEmail(row.isMapped("Email") ? row.get("Email") : "");
+                    t.setRegCode(row.isMapped("Region") ? getRegion(row.get("Region")) : "");
+                    t.setRemark(row.isMapped("Remark") ? row.get("Remark") : "");
                     t.setActive(Boolean.TRUE);
                     t.setCreatedDate(LocalDateTime.now());
                     t.setCreatedBy(Global.loginUser.getUserCode());

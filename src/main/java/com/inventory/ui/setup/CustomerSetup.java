@@ -83,7 +83,11 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         UserCode,
         Name,
         Address,
-        PhoneNo
+        PhoneNo,
+        Email,
+        ContactPerson,
+        Region,
+        Remark
     }
 
     public JProgressBar getProgress() {
