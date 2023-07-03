@@ -17,5 +17,4 @@ public class RegionKey {
 
     private String regCode;
     private String compCode;
-    private Integer deptId;
 }
