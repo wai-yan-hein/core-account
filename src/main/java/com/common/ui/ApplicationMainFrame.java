@@ -7,7 +7,7 @@ package com.common.ui;
 
 import com.CloudIntegration;
 import com.CoreAccountApplication;
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.entry.AllCash;
 import com.acc.entry.DrCrVoucher;
 import com.acc.entry.Journal;
@@ -24,12 +24,12 @@ import com.acc.setup.TraderSetup;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.common.Util1;
 import com.user.setup.MenuSetup;
 import com.user.model.DepartmentUser;
 import com.inventory.model.VRoleMenu;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.entry.GRNEntry;
 import com.inventory.ui.entry.Manufacture;
 import com.inventory.ui.entry.OrderEntry;
@@ -82,12 +82,8 @@ import com.user.setup.AppUserSetup;
 import com.user.setup.CompanySetup;
 import com.user.setup.CompanyTemplate;
 import com.user.setup.CurrencyExchange;
+import com.user.setup.HMSIntegration;
 import com.user.setup.ProjectSetup;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Insets;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -211,6 +207,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private String hostName;
     @Autowired
     private CloudIntegration integration;
+    @Autowired
+    private HMSIntegration hmsIntegration;
 
     private PanelControl control;
     private final HashMap<String, JPanel> hmPanel = new HashMap<>();
@@ -632,6 +630,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 companySetup.initMain();
                 return companySetup;
             }
+            case "HMS Integration" -> {
+                hmsIntegration.setName(menuName);
+                hmsIntegration.setObserver(this);
+                hmsIntegration.setProgress(progress);
+                hmsIntegration.initMain();
+                return hmsIntegration;
+            }
             case "Company Template" -> {
                 companyTemplate.setName(menuName);
                 companyTemplate.setObserver(this);
@@ -882,10 +887,12 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     public void initMenu() {
+        progress.setIndeterminate(true);
         menuBar.removeAll();
         userRepo.getRoleMenu(Global.roleCode).subscribe((t) -> {
             createMenu(t);
         }, (e) -> {
+            progress.setIndeterminate(false);
             JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
         });
     }
@@ -931,6 +938,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 }
             });
         }
+        progress.setIndeterminate(false);
         revalidate();
         repaint();
     }

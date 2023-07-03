@@ -158,6 +158,7 @@ public final class CategoryAutoCompleter implements KeyListener {
 
             }
         });
+        setListCategory(new ArrayList<>());
     }
 
     public void mouseSelect() {

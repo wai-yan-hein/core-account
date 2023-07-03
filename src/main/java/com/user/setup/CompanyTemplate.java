@@ -4,14 +4,14 @@
  */
 package com.user.setup;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.BusinessTypeComboBoxModel;
 import com.acc.model.BusinessType;
 import com.acc.setup.COATemplateSetup;
 import com.common.Global;
 import com.common.SelectionObserver;
-import com.inventory.ui.common.InventoryRepo;
-import com.user.common.UserRepo;
+import com.repo.InventoryRepo;
+import com.repo.UserRepo;
 import com.user.dialog.BusinessTypeSetupDialog;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;

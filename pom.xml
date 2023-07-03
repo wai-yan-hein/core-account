@@ -110,6 +110,13 @@
             <artifactId>commons-csv</artifactId>
             <version>1.10.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.zxing/core -->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.5.1</version>
+        </dependency>
+
     </dependencies>
     <build>
         <finalName>core-account</finalName>

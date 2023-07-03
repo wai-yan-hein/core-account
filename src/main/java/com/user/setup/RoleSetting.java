@@ -5,14 +5,14 @@
  */
 package com.user.setup;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.inventory.model.AppRole;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.common.UserRoleTableModel;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.user.dialog.RoleSetupDialog;

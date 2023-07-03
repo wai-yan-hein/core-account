@@ -10,7 +10,7 @@ import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.inventory.model.GRN;
 import com.inventory.ui.common.BatchTableModel;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;

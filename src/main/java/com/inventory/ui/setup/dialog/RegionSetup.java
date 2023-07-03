@@ -11,7 +11,7 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.Region;
 import com.inventory.model.RegionKey;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.RegionTableModel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;

@@ -10,7 +10,7 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
 import com.inventory.editor.BatchAutoCompeter;
@@ -25,7 +25,7 @@ import com.inventory.model.SaleMan;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;
 import com.inventory.model.VOrder;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.OrderVouSearchTableModel;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
@@ -132,8 +132,9 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         userRepo.getAppUser().subscribe((t) -> {
             appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
         });
+        saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, null, true);
         inventoryRepo.getSaleMan().subscribe((t) -> {
-            saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, t, null, true, false);
+            saleManAutoCompleter.setListSaleMan(t);
         });
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, false);
         inventoryRepo.getLocation().subscribe((t) -> {

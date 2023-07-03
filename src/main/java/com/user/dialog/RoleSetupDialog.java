@@ -10,7 +10,7 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.AppRole;
 import com.inventory.ui.common.UserRoleTableModel;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;

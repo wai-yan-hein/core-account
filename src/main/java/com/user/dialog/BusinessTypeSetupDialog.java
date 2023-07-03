@@ -4,13 +4,13 @@
  */
 package com.user.dialog;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.model.BusinessType;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.user.common.BusinessTypeTableModel;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;

@@ -23,7 +23,7 @@ import com.inventory.model.Stock;
 import com.inventory.model.StockBrand;
 import com.inventory.model.StockKey;
 import com.inventory.model.StockUnit;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.setup.common.StockTableModel;
 import com.inventory.ui.setup.dialog.CategorySetupDialog;
 import com.inventory.ui.setup.dialog.RelationSetupDialog;
@@ -33,7 +33,7 @@ import com.inventory.ui.setup.dialog.StockTypeSetupDialog;
 import com.inventory.ui.setup.dialog.StockUnitSetupDailog;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.common.DepartmentComboBoxModel;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.model.DepartmentUser;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -322,9 +322,10 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             wlUnitCompleter = new UnitAutoCompleter(txtWeightUnit, t, null);
             wlUnitCompleter.setStockUnit(null);
         });
+        relationAutoCompleter = new UnitRelationAutoCompleter(txtRelation, null, false);
+        relationAutoCompleter.setRelation(null);
         inventoryRepo.getUnitRelation().subscribe((t) -> {
-            relationAutoCompleter = new UnitRelationAutoCompleter(txtRelation, t, null, false, false);
-            relationAutoCompleter.setRelation(null);
+            relationAutoCompleter.setListRelation(t);
         });
         userRepo.getDeparment(true).subscribe((t) -> {
             departmentComboBoxModel.setData(t);

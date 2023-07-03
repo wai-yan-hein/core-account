@@ -7,7 +7,7 @@ package com.inventory.ui.entry;
 
 import com.CloudIntegration;
 import com.H2Repo;
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.JasperReportUtil;
@@ -32,7 +32,7 @@ import com.inventory.model.SaleMan;
 import com.inventory.model.Trader;
 import com.inventory.model.VOrder;
 import com.inventory.model.VSale;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.common.SaleTableModel;
 import com.inventory.ui.common.StockBalanceTableModel;
 import com.inventory.ui.entry.dialog.OrderHistoryDialog;
@@ -40,7 +40,7 @@ import com.inventory.ui.entry.dialog.SaleHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
@@ -350,10 +350,9 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         userRepo.getDefaultCurrency().subscribe((c) -> {
             currAutoCompleter.setCurrency(c);
         });
+        saleManCompleter = new SaleManAutoCompleter(txtSaleman, null, false);
         inventoryRepo.getSaleMan().subscribe((t) -> {
-            saleManCompleter = new SaleManAutoCompleter(txtSaleman, t, null, false, false);
-        }, (e) -> {
-            log.error(e.getMessage());
+            saleManCompleter.setListSaleMan(t);
         });
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
         projectAutoCompleter.setObserver(this);
@@ -591,7 +590,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 int yes_no = JOptionPane.showConfirmDialog(this,
                         "Are you sure to delete?", "Sale Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
-                    inventoryRepo.delete(saleHis.getKey()).subscribe((t) -> {
+                    inventoryRepo.delete(saleHis).subscribe((t) -> {
                         clear();
                     });
                 }
@@ -601,7 +600,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         "Are you sure to restore?", "Sale Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
                     saleHis.setDeleted(false);
-                    inventoryRepo.restore(saleHis.getKey()).subscribe((t) -> {
+                    inventoryRepo.restore(saleHis).subscribe((t) -> {
                         lblStatus.setText("EDIT");
                         lblStatus.setForeground(Color.blue);
                         disableForm(true);
@@ -692,11 +691,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         dialog.search();
     }
 
-    public void setSaleVoucher(SaleHis sh, boolean local) {
+    public void setSaleVoucher(SaleHis sh) {
         if (sh != null) {
             progress.setIndeterminate(true);
             saleHis = sh;
-            Integer deptId = sh.getKey().getDeptId();
             inventoryRepo.findLocation(saleHis.getLocCode()).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
@@ -713,7 +711,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 saleManCompleter.setSaleMan(t);
             });
             String vouNo = sh.getKey().getVouNo();
-            inventoryRepo.getSaleDetail(vouNo, sh.getKey().getDeptId(), local).subscribe((t) -> {
+            inventoryRepo.getSaleDetail(vouNo, sh.getKey().getDeptId(), saleHis.isLocal()).subscribe((t) -> {
                 saleTableModel.setListDetail(t);
                 saleTableModel.addNewRow();
                 if (sh.isVouLock()) {
@@ -1771,8 +1769,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 setAllLocation();
             case "SALE-HISTORY" -> {
                 if (selectObj instanceof VSale s) {
-                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId(), s.isLocal()).subscribe((t) -> {
-                        setSaleVoucher(t, s.isLocal());
+                    boolean local = s.isLocal();
+                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId(), local).subscribe((t) -> {
+                        t.setLocal(local);
+                        setSaleVoucher(t);
                     }, (e) -> {
                         JOptionPane.showMessageDialog(this, e.getMessage());
                     });

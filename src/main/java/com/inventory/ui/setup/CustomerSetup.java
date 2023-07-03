@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.setup;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.editor.COAAutoCompleter;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
@@ -21,7 +21,7 @@ import com.inventory.model.Region;
 import com.inventory.model.Trader;
 import com.inventory.model.TraderGroup;
 import com.inventory.model.TraderKey;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.setup.common.CustomerTabelModel;
 import com.inventory.ui.setup.dialog.CustomerImportDialog;
 import com.inventory.ui.setup.dialog.RegionSetup;

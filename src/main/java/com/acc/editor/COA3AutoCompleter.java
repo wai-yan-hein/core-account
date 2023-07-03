@@ -5,7 +5,7 @@
  */
 package com.acc.editor;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.COA1TableModel;
 import com.acc.common.COA2TableModel;
 import com.acc.common.COA3TableModel;

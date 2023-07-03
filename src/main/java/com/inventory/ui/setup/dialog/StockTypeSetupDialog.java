@@ -11,7 +11,7 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.StockType;
 import com.inventory.model.StockTypeKey;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.StockTypeTableModel;
 import java.awt.Color;
 import java.awt.FileDialog;

@@ -9,7 +9,7 @@ import com.common.Global;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.user.common.DepartmentTableModel;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.model.DepartmentUser;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;

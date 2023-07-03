@@ -7,7 +7,7 @@ package com.user.setup;
 
 import com.common.Global;
 import com.user.common.RoleCompanyTableModel;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.model.PrivilegeCompany;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;

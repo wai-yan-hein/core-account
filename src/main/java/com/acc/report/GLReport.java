@@ -6,7 +6,7 @@
 package com.acc.report;
 
 import com.acc.dialog.TrialBalanceDetailDialog;
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.DateAutoCompleter;
 import com.acc.common.DateTableDecorator;
 import com.acc.common.GLListingTableModel;
@@ -22,7 +22,7 @@ import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import java.awt.event.FocusAdapter;

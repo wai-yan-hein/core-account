@@ -5,7 +5,7 @@
  */
 package com.acc.setup;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.BusinessTypeComboBoxModel;
 import com.acc.common.COATemplateGroupTableModel;
 import com.acc.common.COATemplateHeadTableModel;

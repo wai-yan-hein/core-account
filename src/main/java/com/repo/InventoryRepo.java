@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.inventory.ui.common;
+package com.repo;
 
 import com.H2Repo;
 import com.common.FilterObject;
@@ -150,7 +150,6 @@ public class InventoryRepo {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
                 });
-
     }
 
     public Mono<List<PriceOption>> getUpdatePriceOption(String updatedDate) {
@@ -1643,8 +1642,9 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<Boolean> delete(SaleHisKey key) {
-        if (localDatabase) {
+    public Mono<Boolean> delete(SaleHis sh) {
+        SaleHisKey key = sh.getKey();
+        if (sh.isLocal()) {
             return h2Repo.deleteSale(key);
         }
         return inventoryApi.post()
@@ -1670,7 +1670,11 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<Boolean> restore(SaleHisKey key) {
+    public Mono<Boolean> restore(SaleHis sh) {
+        SaleHisKey key = sh.getKey();
+        if (sh.isLocal()) {
+            return h2Repo.restoreSale(key);
+        }
         return inventoryApi.post()
                 .uri("/sale/restore-sale")
                 .body(Mono.just(key), SaleHisKey.class)

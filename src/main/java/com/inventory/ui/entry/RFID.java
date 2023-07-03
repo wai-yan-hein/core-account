@@ -20,12 +20,12 @@ import com.inventory.model.SaleHisDetail;
 import com.inventory.model.SaleHisKey;
 import com.inventory.model.Trader;
 import com.inventory.model.VSale;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.common.RFIDTableModel;
 import com.inventory.ui.entry.dialog.SaleHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import java.awt.Color;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
@@ -301,19 +301,19 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         switch (status) {
             case "EDIT" -> {
                 int yes_no = JOptionPane.showConfirmDialog(this,
-                        "Are you sure to delete?", "Save Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+                        "Are you sure to delete?", "Sale Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
-                    inventoryRepo.delete(saleHis.getKey()).subscribe((t) -> {
+                    inventoryRepo.delete(saleHis).subscribe((t) -> {
                         clear();
                     });
                 }
             }
             case "DELETED" -> {
                 int yes_no = JOptionPane.showConfirmDialog(this,
-                        "Are you sure to restore?", "Purchase Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                        "Are you sure to restore?", "Sale Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
                     saleHis.setDeleted(false);
-                    inventoryRepo.restore(saleHis.getKey()).subscribe((t) -> {
+                    inventoryRepo.restore(saleHis).subscribe((t) -> {
                         lblStatus.setText("EDIT");
                         lblStatus.setForeground(Color.blue);
                         disableForm(true);

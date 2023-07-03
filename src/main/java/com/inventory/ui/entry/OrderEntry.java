@@ -29,14 +29,14 @@ import com.inventory.model.SaleMan;
 import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
 import com.inventory.model.VOrder;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.common.OrderTableModel;
 import com.inventory.ui.common.StockBalanceTableModel;
 import com.inventory.ui.entry.dialog.OrderHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
@@ -262,8 +262,9 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         userRepo.getDefaultCurrency().subscribe((c) -> {
             currAutoCompleter.setCurrency(c);
         });
+        saleManCompleter = new SaleManAutoCompleter(txtSaleman, null, false);
         inventoryRepo.getSaleMan().subscribe((t) -> {
-            saleManCompleter = new SaleManAutoCompleter(txtSaleman, t, null, false, false);
+            saleManCompleter.setListSaleMan(t);
         });
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
         projectAutoCompleter.setObserver(this);

@@ -10,7 +10,7 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.user.common.CurrencyComboBoxModel;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.model.Currency;
 import com.user.model.ExchangeKey;
 import com.user.model.ExchangeRate;

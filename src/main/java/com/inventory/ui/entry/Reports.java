@@ -27,10 +27,10 @@ import com.inventory.editor.StockTypeAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.editor.VouStatusAutoCompleter;
 import com.inventory.model.VRoleMenu;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.common.ReportTableModel;
 import com.toedter.calendar.JTextFieldDateEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
@@ -194,8 +194,9 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             locationAutoCompleter.setListLocation(t);
         });
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, true, "-");
+        saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, null, true);
         inventoryRepo.getSaleMan().subscribe((t) -> {
-            saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, t, null, true, false);
+            saleManAutoCompleter.setListSaleMan(t);
         });
         stockTypeAutoCompleter = new StockTypeAutoCompleter(txtStockType, null, true);
         inventoryRepo.getStockType().subscribe((t) -> {

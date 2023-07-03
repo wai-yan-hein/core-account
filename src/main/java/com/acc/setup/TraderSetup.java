@@ -5,7 +5,7 @@
  */
 package com.acc.setup;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.TraderATableModel;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.model.TraderA;

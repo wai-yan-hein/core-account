@@ -42,67 +42,50 @@ import javax.swing.text.JTextComponent;
  *
  * @author wai yan
  */
-public class SaleManAutoCompleter implements KeyListener, SelectionObserver {
+public final class SaleManAutoCompleter implements KeyListener, SelectionObserver {
 
     private final JTable table = new JTable();
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER";
-    private SaleManCompleterTableModel saleManTableModel;
+    private final SaleManCompleterTableModel saleManTableModel = new SaleManCompleterTableModel();
     private SaleMan saleMan;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
     private SelectionObserver selectionObserver;
-    private List<String> listOption = new ArrayList<>();
-    private OptionDialog optionDialog;
     private List<SaleMan> listSaleMan;
-    private boolean custom;
-
-    public List<String> getListOption() {
-        return listOption;
-    }
-
-    public void setListOption(List<String> listOption) {
-        this.listOption = listOption;
-    }
+    private boolean filter;
 
     public void setSelectionObserver(SelectionObserver selectionObserver) {
         this.selectionObserver = selectionObserver;
     }
 
-    private void initOption() {
-        listOption.clear();
-        listSaleMan.forEach(t -> {
-            listOption.add(t.getKey().getSaleManCode());
-        });
+    public void setListSaleMan(List<SaleMan> list) {
+        if (filter) {
+            SaleMan sm = new SaleMan("-", "All");
+            list.add(0, sm);
+            setSaleMan(sm);
+        }
+        saleManTableModel.setListSaleMan(list);;
+        if (!list.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
+        }
+        this.listSaleMan = list;
     }
 
     public SaleManAutoCompleter() {
     }
 
-    public SaleManAutoCompleter(JTextComponent comp, List<SaleMan> list,
-            AbstractCellEditor editor, boolean filter, boolean custom) {
+    public SaleManAutoCompleter(JTextComponent comp,
+            AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
-        this.listSaleMan = list;
-        this.custom = custom;
-        initOption();
-        if (filter) {
-            SaleMan sm = new SaleMan("-", "All");
-            list = new ArrayList<>(list);
-            list.add(0, sm);
-            setSaleMan(sm);
-        }
-        if (custom) {
-            list = new ArrayList<>(list);
-            list.add(1, new SaleMan("C", "Custom"));
-        }
+        this.filter = filter;
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
-        saleManTableModel = new SaleManCompleterTableModel(list);
         table.setModel(saleManTableModel);
         table.setSize(50, 50);
         table.setFont(Global.textFont); // NOI18N
@@ -169,12 +152,7 @@ public class SaleManAutoCompleter implements KeyListener, SelectionObserver {
             public void popupMenuCanceled(PopupMenuEvent e) {
             }
         });
-
-        table.setRequestFocusEnabled(false);
-
-        if (!list.isEmpty()) {
-            table.setRowSelectionInterval(0, 0);
-        }
+        setListSaleMan(new ArrayList<>());
     }
 
     public SaleMan getSaleMan() {
@@ -195,31 +173,6 @@ public class SaleManAutoCompleter implements KeyListener, SelectionObserver {
             saleMan = saleManTableModel.getSaleMan(table.convertRowIndexToModel(
                     table.getSelectedRow()));
             textComp.setText(saleMan.getSaleManName());
-            listOption = new ArrayList<>();
-            if (custom) {
-                switch (saleMan.getKey().getSaleManCode()) {
-                    case "C" -> {
-                        optionDialog = new OptionDialog(Global.parentForm, "Sale Man");
-                        List<OptionModel> listOP = new ArrayList<>();
-                        listSaleMan.forEach(t -> {
-                            listOP.add(new OptionModel(t.getKey().getSaleManCode(), t.getSaleManName()));
-                        });
-                        optionDialog.setOptionList(listOP);
-                        optionDialog.setLocationRelativeTo(null);
-                        optionDialog.setVisible(true);
-                        if (optionDialog.isSelect()) {
-                            listOption = optionDialog.getOptionList();
-                        }
-                        //open
-                    }
-                    case "-" ->
-                        initOption();
-                    default -> {
-                        listOption.clear();
-                        listOption.add(saleMan.getKey().getSaleManCode());
-                    }
-                }
-            }
             if (editor == null) {
                 if (selectionObserver != null) {
                     selectionObserver.selected("SaleMan", saleMan.getSaleManName());

@@ -4,7 +4,7 @@
  */
 package com.inventory.ui.setup.dialog;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.TableCellRender;
@@ -13,7 +13,7 @@ import com.inventory.model.Region;
 import com.inventory.model.RegionKey;
 import com.inventory.model.Trader;
 import com.inventory.model.TraderKey;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.TraderImportTableModel;
 import java.awt.Color;
 import java.awt.FileDialog;

@@ -9,7 +9,7 @@ import com.common.Global;
 import com.common.Util1;
 import com.inventory.model.PriceOption;
 import com.inventory.model.Stock;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.common.SaleTableModel;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;

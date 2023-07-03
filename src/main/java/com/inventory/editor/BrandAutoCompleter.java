@@ -154,7 +154,7 @@ public final class BrandAutoCompleter implements KeyListener {
 
             }
         });
-        table.setRequestFocusEnabled(false);
+        setListStockBrand(new ArrayList<>());
     }
 
     public void mouseSelect() {

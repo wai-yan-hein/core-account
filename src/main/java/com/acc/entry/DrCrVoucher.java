@@ -4,7 +4,7 @@
  */
 package com.acc.entry;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.DateAutoCompleter;
 import com.acc.common.VoucherTableModel;
 import com.acc.dialog.VoucherEntryDailog;
@@ -26,7 +26,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.toedter.calendar.JTextFieldDateEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;

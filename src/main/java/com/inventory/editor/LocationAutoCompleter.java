@@ -112,7 +112,7 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
     public LocationAutoCompleter() {
     }
 
-    public LocationAutoCompleter(JTextComponent textComp,AbstractCellEditor editor, boolean filter, boolean custom) {
+    public LocationAutoCompleter(JTextComponent textComp, AbstractCellEditor editor, boolean filter, boolean custom) {
         this.textComp = textComp;
         this.filter = filter;
         this.custom = custom;
@@ -189,6 +189,7 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
             public void popupMenuCanceled(PopupMenuEvent e) {
             }
         });
+        setListLocation(new ArrayList<>());
     }
 
     public Location getLocation() {

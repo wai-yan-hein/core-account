@@ -4,7 +4,7 @@
  */
 package com;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
 import com.common.Global;
@@ -57,8 +57,8 @@ import com.inventory.model.SaleHis;
 import com.inventory.model.StockInOut;
 import com.inventory.model.TransferHis;
 import com.inventory.model.WeightLossHis;
-import com.inventory.ui.common.InventoryRepo;
-import com.user.common.UserRepo;
+import com.repo.InventoryRepo;
+import com.repo.UserRepo;
 import java.time.Duration;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;

@@ -13,7 +13,7 @@ import com.inventory.editor.StockUnitEditor;
 import com.inventory.model.RelationKey;
 import com.inventory.model.UnitRelationDetail;
 import com.inventory.model.UnitRelation;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.RelationDetailTableModel;
 import com.inventory.ui.setup.dialog.common.RelationTableModel;

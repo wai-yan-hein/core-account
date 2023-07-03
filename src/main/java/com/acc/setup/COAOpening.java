@@ -4,7 +4,7 @@
  */
 package com.acc.setup;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.OpeningBalanceTableModel;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.model.OpeningBalance;
@@ -24,7 +24,7 @@ import com.common.Util1;
 import com.common.DecimalFormatRender;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.editor.CurrencyEditor;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.editor.ProjectCellEditor;

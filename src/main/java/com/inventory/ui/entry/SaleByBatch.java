@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.entry;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.JasperReportUtil;
@@ -28,14 +28,14 @@ import com.inventory.model.SaleHisKey;
 import com.inventory.model.SaleMan;
 import com.inventory.model.Trader;
 import com.inventory.model.VSale;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.common.SaleByBatchTableModel;
 import com.inventory.ui.common.StockBalanceTableModel;
 import com.inventory.ui.entry.dialog.SaleHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -241,11 +241,12 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
         userRepo.getDefaultCurrency().subscribe((c) -> {
             currAutoCompleter.setCurrency(c);
         });
+        saleManCompleter = new SaleManAutoCompleter(txtSaleman, null, false);
         inventoryRepo.getSaleMan().subscribe((t) -> {
-            saleManCompleter = new SaleManAutoCompleter(txtSaleman, t, null, false, false);
-            inventoryRepo.getDefaultSaleMan().subscribe((s) -> {
-                saleManCompleter.setSaleMan(s);
-            });
+            saleManCompleter.setListSaleMan(t);
+        });
+        inventoryRepo.getDefaultSaleMan().subscribe((s) -> {
+            saleManCompleter.setSaleMan(s);
         });
 
     }
@@ -452,7 +453,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
                 int yes_no = JOptionPane.showConfirmDialog(this,
                         "Are you sure to delete?", "Save Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
-                    inventoryRepo.delete(saleHis.getKey()).subscribe((t) -> {
+                    inventoryRepo.delete(saleHis).subscribe((t) -> {
                         clear();
                     });
                 }
@@ -462,7 +463,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
                         "Are you sure to restore?", "Purchase Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
                     saleHis.setDeleted(false);
-                    inventoryRepo.restore(saleHis.getKey()).subscribe((t) -> {
+                    inventoryRepo.restore(saleHis).subscribe((t) -> {
                         lblStatus.setText("EDIT");
                         lblStatus.setForeground(Color.blue);
                         disableForm(true);
@@ -556,7 +557,6 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
         if (sh != null) {
             progress.setIndeterminate(true);
             saleHis = sh;
-            Integer deptId = sh.getKey().getDeptId();
             inventoryRepo.findLocation(saleHis.getLocCode()).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
@@ -1561,7 +1561,9 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
                 setAllLocation();
             case "SALE-HISTORY" -> {
                 if (selectObj instanceof VSale s) {
-                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId(), s.isLocal()).subscribe((t) -> {
+                    boolean local = s.isLocal();
+                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId(),local).subscribe((t) -> {
+                        t.setLocal(local);
                         setSaleVoucher(t);
                     });
                 }

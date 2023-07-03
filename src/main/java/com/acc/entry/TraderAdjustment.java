@@ -5,7 +5,7 @@
  */
 package com.acc.entry;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.editor.COA3CellEditor;
 import com.user.editor.CurrencyAutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
@@ -39,7 +39,7 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.editor.CurrencyEditor;
 import java.awt.Color;
 import java.awt.Dimension;
