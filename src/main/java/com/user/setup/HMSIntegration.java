@@ -75,8 +75,7 @@ public class HMSIntegration extends javax.swing.JPanel {
     }
 
     private void check() {
-        progress.setIndeterminate(true);
-        btnCheck.setEnabled(false);
+        enableForm(false);
         String fromDate = Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd");
         String toDate = Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd");
         Mono<List<VoucherInfo>> m1 = null;
@@ -113,11 +112,12 @@ public class HMSIntegration extends javax.swing.JPanel {
                     m1 = hmsRepo.getDCList(fromDate, toDate);
                     m2 = accountRepo.getIntegrationVoucher(fromDate, toDate, type);
                 }
+                case "PAYMENT" -> {
+                    m1 = hmsRepo.getPaymentList(fromDate, toDate);
+                    m2 = accountRepo.getIntegrationVoucher(fromDate, toDate, type);
+                }
             }
         }
-        m1.zipWith(m2).hasElement().subscribe((t) -> {
-            log.info(t + "");
-        });
         m1.zipWith(m2).subscribe((zip) -> {
             List<VoucherInfo> list1 = zip.getT1();
             List<VoucherInfo> list2 = zip.getT2();
@@ -143,16 +143,14 @@ public class HMSIntegration extends javax.swing.JPanel {
             btnCheck.setEnabled(true);
             btnSync.setEnabled(!joinList.isEmpty());
         }, (e) -> {
-            progress.setIndeterminate(false);
-            btnCheck.setEnabled(true);
+            enableForm(true);
         });
 
     }
 
     private void sync() {
         if (cboType.getSelectedItem() instanceof VoucherInfoEnum c) {
-            progress.setIndeterminate(true);
-            btnSync.setEnabled(false);
+            enableForm(false);
             List<VoucherInfo> list = tableModel.getListVoucher();
             list.forEach((t) -> {
                 String vouNo = t.getVouNo();
@@ -162,18 +160,21 @@ public class HMSIntegration extends javax.swing.JPanel {
                     int size = tableModel.getListVoucher().size();
                     txtRecord.setValue(size);
                     if (size == 0) {
-                        progress.setIndeterminate(false);
-                        btnSync.setEnabled(true);
+                        enableForm(true);
                         lblLog.setText("Done.");
                     }
                 }, (e) -> {
-                    progress.setIndeterminate(false);
-                    btnSync.setEnabled(true);
+                    enableForm(true);
                 });
             });
 
         }
+    }
 
+    private void enableForm(boolean status) {
+        progress.setIndeterminate(!status);
+        btnSync.setEnabled(status);
+        btnCheck.setEnabled(status);
     }
 
     /**

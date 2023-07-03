@@ -100,29 +100,40 @@ public class HMSRepo {
                 .collectList();
     }
 
+    public Mono<List<VoucherInfo>> getPaymentList(String fromDate, String toDate) {
+        return hmsApi.get()
+                .uri(builder -> builder.path("/getPaymentList")
+                .queryParam("fromDate", fromDate)
+                .queryParam("toDate", toDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(VoucherInfo.class)
+                .collectList();
+    }
+
     public Mono<String> syncToAccount(String transSource, String vouNo) {
         String url = "";
         switch (transSource) {
             case "SALE" ->
-                url = "/sale";
+                url = "/sale?vouNo";
             case "PURCHASE" ->
-                url = "/purchase";
+                url = "/purchase?vouNo";
             case "RETURN_IN" ->
-                url = "/returnIn";
+                url = "/returnIn?vouNo";
             case "RETURN_OUT" ->
-                url = "/returnOut";
+                url = "/returnOut?vouNo";
             case "OPD" ->
-                url = "/opd";
+                url = "/opd?vouNo";
             case "OT" ->
-                url = "/ot";
+                url = "/ot?vouNo";
             case "DC" ->
-                url = "/dc";
+                url = "/dc?vouNo";
             case "PAYMENT" ->
-                url = "/payment";
+                url = "/payment?payId";
         }
         if (!url.isEmpty()) {
             return hmsApi.post()
-                    .uri("" + url + "?vouNo={vouNo}", vouNo)
+                    .uri("" + url + "={vouNo}", vouNo)
                     .retrieve()
                     .bodyToMono(String.class);
         }
