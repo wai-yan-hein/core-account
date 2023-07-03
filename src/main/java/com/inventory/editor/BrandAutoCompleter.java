@@ -8,9 +8,7 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.model.OptionModel;
 import com.inventory.model.StockBrand;
-import com.inventory.ui.setup.dialog.OptionDialog;
 import com.inventory.ui.setup.dialog.common.StockBrandTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -53,11 +51,9 @@ public final class BrandAutoCompleter implements KeyListener {
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
-    private List<String> listOption = new ArrayList<>();
-    private OptionDialog optionDialog;
     private SelectionObserver observer;
     private List<StockBrand> listStockBrand;
-    private boolean custom;
+    private boolean filter;
 
     public List<StockBrand> getListStockBrand() {
         return listStockBrand;
@@ -67,46 +63,30 @@ public final class BrandAutoCompleter implements KeyListener {
         this.observer = observer;
     }
 
-    public List<String> getListOption() {
-        return listOption;
-    }
-
-    public void setListOption(List<String> listOption) {
-        this.listOption = listOption;
-    }
-
-    private void initOption() {
-        listOption.clear();
-        listStockBrand.forEach(t -> {
-            listOption.add(t.getKey().getBrandCode());
-        });
-    }
-
-    //private CashFilter cashFilter = Global.allCash;
-    public BrandAutoCompleter() {
-    }
-
-    public BrandAutoCompleter(JTextComponent comp, List<StockBrand> list,
-            AbstractCellEditor editor, boolean filter, boolean custom) {
-        this.textComp = comp;
-        this.editor = editor;
-        this.listStockBrand = list;
-        this.custom = custom;
-        initOption();
+    public void setListStockBrand(List<StockBrand> list) {
         if (filter) {
             StockBrand sb = new StockBrand("-", "All");
             list = new ArrayList<>(list);
             list.add(0, sb);
             setBrand(sb);
         }
-        if (custom) {
-            list = new ArrayList<>(list);
-            list.add(1, new StockBrand("C", "Custom"));
+        brandTableModel.setListItemBrand(list);
+        if (!list.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
         }
+        this.listStockBrand = list;
+    }
+
+    public BrandAutoCompleter() {
+    }
+
+    public BrandAutoCompleter(JTextComponent comp, AbstractCellEditor editor, boolean filter) {
+        this.textComp = comp;
+        this.editor = editor;
+        this.filter = filter;
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
-        brandTableModel.setListItemBrand(this.listStockBrand);
         table.setModel(brandTableModel);
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
@@ -174,14 +154,7 @@ public final class BrandAutoCompleter implements KeyListener {
 
             }
         });
-
-        table.setRequestFocusEnabled(false);
-
-        if (list != null) {
-            if (!list.isEmpty()) {
-                table.setRowSelectionInterval(0, 0);
-            }
-        }
+        setListStockBrand(new ArrayList<>());
     }
 
     public void mouseSelect() {
@@ -189,33 +162,10 @@ public final class BrandAutoCompleter implements KeyListener {
             brand = brandTableModel.getItemBrand(table.convertRowIndexToModel(
                     table.getSelectedRow()));
             textComp.setText(brand.getBrandName());
-            if (custom) {
-                switch (brand.getKey().getBrandCode()) {
-                    case "C" -> {
-                        optionDialog = new OptionDialog(Global.parentForm, "Stock Brand");
-                        List<OptionModel> listOP = new ArrayList<>();
-                        listStockBrand.forEach(t -> {
-                            listOP.add(new OptionModel(t.getKey().getBrandCode(), t.getBrandName()));
-                        });
-                        optionDialog.setOptionList(listOP);
-                        optionDialog.setLocationRelativeTo(null);
-                        optionDialog.setVisible(true);
-                        if (optionDialog.isSelect()) {
-                            listOption = optionDialog.getOptionList();
-                        }
-                        //open
-                    }
-                    case "-" ->
-                        initOption();
-                    default -> {
-
-                        listOption.clear();
-                        listOption.add(brand.getKey().getBrandCode());
-                    }
-                }
-            }
         }
-
+        if (observer != null) {
+            observer.selected("Brand", "Brand");
+        }
         popup.setVisible(false);
         if (editor != null) {
             editor.stopCellEditing();

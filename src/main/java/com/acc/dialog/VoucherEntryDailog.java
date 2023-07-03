@@ -5,7 +5,7 @@
  */
 package com.acc.dialog;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.CrDrVoucherEntryTableModel;
 import com.acc.editor.COA3CellEditor;
 import com.acc.editor.DepartmentCellEditor;
@@ -17,10 +17,10 @@ import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.editor.CurrencyEditor;
+import com.user.editor.CurrencyEditor;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;

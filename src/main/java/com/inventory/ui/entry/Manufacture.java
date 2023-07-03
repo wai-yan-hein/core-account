@@ -23,13 +23,13 @@ import com.inventory.model.ProcessHisDetail;
 import com.inventory.model.ProcessHisDetailKey;
 import com.inventory.model.ProcessHisKey;
 import com.inventory.model.Stock;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.common.ProcessHisDetailTableModel;
 import com.inventory.ui.entry.dialog.ManufactureHistoryDialog;
 import com.inventory.ui.setup.dialog.VouStatusSetupDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -113,10 +113,10 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
     }
 
     private void initCompleter() {
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation,null, false, false);
+        locationAutoCompleter.setObserver(this);
         inventoryRepo.getLocation().subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
-            locationAutoCompleter.setObserver(this);
-
+            locationAutoCompleter.setListLocation(t);
         });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, false);
         stockAutoCompleter.setObserver(this);

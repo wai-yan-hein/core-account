@@ -7,6 +7,7 @@ package com;
 import com.acc.model.BusinessType;
 import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
+import com.acc.model.DateModel;
 import com.acc.model.DepartmentA;
 import com.acc.model.DepartmentAKey;
 import com.acc.model.Gl;
@@ -16,6 +17,7 @@ import com.common.FilterObject;
 import com.common.Global;
 import com.common.ReturnObject;
 import com.common.Util1;
+import com.h2.dao.DateFilterRepo;
 import com.h2.service.BrandService;
 import com.h2.service.BusinessTypeService;
 import com.h2.service.COAService;
@@ -251,6 +253,8 @@ public class H2Repo {
     private ProcessHisDetailService processHIsDetailService;
     @Autowired
     private OrderDetailService orderDetailService;
+    @Autowired
+    private DateFilterRepo dateFilterRepo;
 
     public Mono<List<Location>> getLocation() {
         return Mono.justOrEmpty(locationService.findAll(Global.compCode));
@@ -680,6 +684,10 @@ public class H2Repo {
 
     public Flux<ChartOfAccount> getCOAChild(String coaCode) {
         return Flux.fromIterable(coaService.getCOAChild(coaCode, Global.compCode));
+    }
+
+    public List<DateModel> getDate() {
+        return dateFilterRepo.findAll();
     }
 
     public Mono<Gl> save(Gl gl) {

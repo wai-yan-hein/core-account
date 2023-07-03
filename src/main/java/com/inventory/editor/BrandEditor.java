@@ -66,7 +66,6 @@ public class BrandEditor extends AbstractCellEditor implements TableCellEditor {
                     stopCellEditing();
                 }
             }
-
             @Override
             public void keyReleased(KeyEvent keyEvent) {
             }
@@ -82,7 +81,8 @@ public class BrandEditor extends AbstractCellEditor implements TableCellEditor {
         if (value != null) {
             jtf.setText(value.toString());
         }
-        completer = new BrandAutoCompleter(jtf, listStockBrand, this, false, false);
+        completer = new BrandAutoCompleter(jtf, this, false);
+        completer.setListStockBrand(listStockBrand);
         return component;
     }
 
@@ -90,13 +90,11 @@ public class BrandEditor extends AbstractCellEditor implements TableCellEditor {
     public Object getCellEditorValue() {
         Object obj;
         StockBrand type = completer.getBrand();
-
         if (type != null) {
             obj = type;
         } else {
             obj = ((JTextField) component).getText();
         }
-
         return obj;
 
     }
@@ -109,9 +107,7 @@ public class BrandEditor extends AbstractCellEditor implements TableCellEditor {
     public boolean isCellEditable(EventObject anEvent) {
         if (anEvent instanceof MouseEvent) {
             return false;
-        } else if (anEvent instanceof KeyEvent) {
-            KeyEvent ke = (KeyEvent) anEvent;
-
+        } else if (anEvent instanceof KeyEvent ke) {
             return !ke.isActionKey(); //Function key
         } else {
             return true;

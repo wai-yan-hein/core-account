@@ -5,10 +5,9 @@
  */
 package com.acc.dialog;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.JournalEntryTableModel;
 import com.acc.editor.COA3CellEditor;
-import com.acc.editor.CurrencyAEditor;
 import com.acc.editor.DepartmentCellEditor;
 import com.acc.editor.TraderCellEditor;
 import com.acc.model.Gl;
@@ -18,7 +17,8 @@ import com.common.ProUtil;
 import com.common.Util1;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
+import com.user.editor.CurrencyEditor;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.ProjectKey;
 import java.awt.Color;
@@ -185,7 +185,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         tblJournal.getColumnModel().getColumn(2).setCellEditor(new TraderCellEditor(accountRepo));
         tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountRepo, 3));
         userRepo.getCurrency().subscribe((t) -> {
-            tblJournal.getColumnModel().getColumn(4).setCellEditor(new CurrencyAEditor(t));
+            tblJournal.getColumnModel().getColumn(4).setCellEditor(new CurrencyEditor(t));
         });
         tblJournal.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
         tblJournal.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());

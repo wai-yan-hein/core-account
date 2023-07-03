@@ -2,13 +2,14 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.inventory.ui.common;
+package com.repo;
 
 import com.H2Repo;
 import com.common.FilterObject;
 import com.inventory.model.CFont;
 import com.common.Global;
 import com.common.ProUtil;
+import com.common.ReportFilter;
 import com.common.Util1;
 import com.inventory.model.AccSetting;
 import com.inventory.model.Category;
@@ -149,7 +150,6 @@ public class InventoryRepo {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
                 });
-
     }
 
     public Mono<List<PriceOption>> getUpdatePriceOption(String updatedDate) {
@@ -400,7 +400,7 @@ public class InventoryRepo {
         RegionKey key = new RegionKey();
         key.setRegCode(Util1.isNull(code, "-"));
         key.setCompCode(Global.compCode);
-        key.setDeptId(Global.deptId);
+//        key.setDeptId(Global.deptId);
         return inventoryApi.post()
                 .uri("/setup/find-region")
                 .body(Mono.just(key), RegionKey.class)
@@ -761,6 +761,16 @@ public class InventoryRepo {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
                 });
+    }
+
+    public Mono<List<Stock>> searchStock(ReportFilter filter) {
+        return inventoryApi
+                .post()
+                .uri("/setup/search-stock")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToFlux(Stock.class)
+                .collectList();
     }
 
     public Mono<List<Stock>> getUpdateStock(String updatedDate) {
@@ -1632,8 +1642,9 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<Boolean> delete(SaleHisKey key) {
-        if (localDatabase) {
+    public Mono<Boolean> delete(SaleHis sh) {
+        SaleHisKey key = sh.getKey();
+        if (sh.isLocal()) {
             return h2Repo.deleteSale(key);
         }
         return inventoryApi.post()
@@ -1659,7 +1670,11 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<Boolean> restore(SaleHisKey key) {
+    public Mono<Boolean> restore(SaleHis sh) {
+        SaleHisKey key = sh.getKey();
+        if (sh.isLocal()) {
+            return h2Repo.restoreSale(key);
+        }
         return inventoryApi.post()
                 .uri("/sale/restore-sale")
                 .body(Mono.just(key), SaleHisKey.class)

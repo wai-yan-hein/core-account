@@ -10,7 +10,7 @@ import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockCellEditor;
@@ -18,7 +18,7 @@ import com.inventory.model.Location;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisDetail;
 import com.inventory.model.OPHisKey;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.common.OpeningTableModel;
 import com.inventory.ui.entry.dialog.OPHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
@@ -120,17 +120,19 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     private void initCompleter() {
         monoLoc = inventoryRepo.getLocation();
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
         monoLoc.subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
-            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
-                locationAutoCompleter.setLocation(tt);
-            });
+            locationAutoCompleter.setListLocation(t);
         });
+        inventoryRepo.getDefaultLocation().subscribe((tt) -> {
+            locationAutoCompleter.setLocation(tt);
+        });
+        currencyAAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            userRepo.getDefaultCurrency().subscribe((tt) -> {
-                currencyAAutoCompleter.setCurrency(tt);
-            });
+            currencyAAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currencyAAutoCompleter.setCurrency(c);
         });
 
     }

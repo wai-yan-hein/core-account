@@ -20,7 +20,7 @@ import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.StockTypeAutoCompleter;
 import com.inventory.model.ReorderLevel;
 import com.inventory.model.StockUnit;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.common.ReorderTableModel;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
@@ -151,21 +151,28 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
     };
 
     private void initCombo() {
+        locationAutoCompleter = new LocationAutoCompleter(txtLoc, null, true, true);
+        locationAutoCompleter.setObserver(this);
         inventoryRepo.getLocation().subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLoc, t, null, true, true);
-            locationAutoCompleter.setObserver(this);
+            locationAutoCompleter.setListLocation(t);
         });
+        inventoryRepo.getDefaultLocation().subscribe((t) -> {
+            locationAutoCompleter.setLocation(t);
+        });
+        typeAutoCompleter = new StockTypeAutoCompleter(txtGroup, null, true);
+        typeAutoCompleter.setObserver(this);
         inventoryRepo.getStockType().subscribe((t) -> {
-            typeAutoCompleter = new StockTypeAutoCompleter(txtGroup, t, null, true, false);
-            typeAutoCompleter.setObserver(this);
+            typeAutoCompleter.setListStockType(t);
         });
+        categoryAutoCompleter = new CategoryAutoCompleter(txtCat, null, true);
+        categoryAutoCompleter.setObserver(this);
         inventoryRepo.getCategory().subscribe((t) -> {
-            categoryAutoCompleter = new CategoryAutoCompleter(txtCat, t, null, true, false);
-            categoryAutoCompleter.setObserver(this);
+            categoryAutoCompleter.setListCategory(t);
         });
+        brandAutoCompleter = new BrandAutoCompleter(txtBrand, null, true);
+        brandAutoCompleter.setObserver(this);
         inventoryRepo.getStockBrand().subscribe((t) -> {
-            brandAutoCompleter = new BrandAutoCompleter(txtBrand, t, null, true, false);
-            brandAutoCompleter.setObserver(this);
+            brandAutoCompleter.setListStockBrand(t);
         });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         stockAutoCompleter.setObserver(this);

@@ -8,9 +8,7 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.model.OptionModel;
 import com.inventory.model.StockType;
-import com.inventory.ui.setup.dialog.OptionDialog;
 import com.inventory.ui.setup.dialog.common.StockTypeTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -47,22 +45,19 @@ public final class StockTypeAutoCompleter implements KeyListener {
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private StockTypeTableModel stockTypeTableModel;
+    private final StockTypeTableModel stockTypeTableModel = new StockTypeTableModel();
     private StockType type;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
-    private List<String> listOption = new ArrayList<>();
-    private OptionDialog optionDialog;
     private SelectionObserver observer;
     private List<StockType> listStockType;
-    private boolean custom;
+    private boolean filter;
 
     public List<StockType> getListStockType() {
         return listStockType;
     }
-    
 
     public SelectionObserver getObserver() {
         return observer;
@@ -72,45 +67,30 @@ public final class StockTypeAutoCompleter implements KeyListener {
         this.observer = observer;
     }
 
-    public List<String> getListOption() {
-        return listOption;
-    }
-
-    public void setListOption(List<String> listOption) {
-        this.listOption = listOption;
-    }
-
-    private void initOption() {
-        listOption.clear();
-        listStockType.forEach(t -> {
-            listOption.add(t.getKey().getStockTypeCode());
-        });
+    public void setListStockType(List<StockType> list) {
+        if (filter) {
+            StockType st = new StockType("-", "All");
+            list.add(0, st);
+            setStockType(st);
+        }
+        stockTypeTableModel.setListType(list);
+        if (!list.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
+        }
+        this.listStockType = list;
     }
 
     public StockTypeAutoCompleter() {
     }
 
-    public StockTypeAutoCompleter(JTextComponent comp, List<StockType> list,
-            AbstractCellEditor editor, boolean filter, boolean custom) {
+    public StockTypeAutoCompleter(JTextComponent comp,
+            AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
-        this.listStockType = list;
-        this.custom = custom;
-        initOption();
-        if (filter) {
-            StockType st = new StockType("-", "All");
-            list = new ArrayList<>(list);
-            list.add(0, st);
-            setStockType(st);
-        }
-        if (custom) {
-            list = new ArrayList<>(list);
-            list.add(1, new StockType("C", "Custom"));
-        }
+        this.filter = filter;
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
-        stockTypeTableModel = new StockTypeTableModel(list);
         table.setModel(stockTypeTableModel);
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
@@ -177,14 +157,8 @@ public final class StockTypeAutoCompleter implements KeyListener {
                 }
             }
         });
+        setListStockType(new ArrayList<>());
 
-        table.setRequestFocusEnabled(false);
-
-        if (list != null) {
-            if (!list.isEmpty()) {
-                table.setRowSelectionInterval(0, 0);
-            }
-        }
     }
 
     public void mouseSelect() {
@@ -192,31 +166,8 @@ public final class StockTypeAutoCompleter implements KeyListener {
             type = stockTypeTableModel.getStockType(table.convertRowIndexToModel(
                     table.getSelectedRow()));
             textComp.setText(type.getStockTypeName());
-            if (custom) {
-                switch (type.getKey().getStockTypeCode()) {
-                    case "C" -> {
-                        optionDialog = new OptionDialog(Global.parentForm, "Stock Type");
-                        List<OptionModel> listOP = new ArrayList<>();
-                        listStockType.forEach(t -> {
-                            listOP.add(new OptionModel(t.getKey().getStockTypeCode(), t.getStockTypeName()));
-                        });
-                        optionDialog.setOptionList(listOP);
-                        optionDialog.setLocationRelativeTo(null);
-                        optionDialog.setVisible(true);
-                        if (optionDialog.isSelect()) {
-                            listOption = optionDialog.getOptionList();
-                        }
-                        //open
-                    }
-                    case "-" ->
-                        initOption();
-                    default -> {
-
-                        listOption.clear();
-                        listOption.add(type.getKey().getStockTypeCode());
-                    }
-                }
-
+            if (observer != null) {
+                observer.selected("StockType", "StockType");
             }
             popup.setVisible(false);
             if (editor != null) {
@@ -364,8 +315,8 @@ public final class StockTypeAutoCompleter implements KeyListener {
      */
     @Override
     public void keyReleased(KeyEvent e) {
-        String filter = textComp.getText();
-        if (filter.length() == 0) {
+        String str = textComp.getText();
+        if (str.length() == 0) {
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(startsWithFilter);

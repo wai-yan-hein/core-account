@@ -4,6 +4,7 @@
  */
 package com.inventory.ui.common;
 
+import com.repo.InventoryRepo;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;

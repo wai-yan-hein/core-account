@@ -10,7 +10,7 @@ import com.common.SelectionObserver;
 import com.user.model.PrivilegeMenu;
 import com.user.model.PMKey;
 import com.inventory.model.VRoleMenu;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import java.util.List;
 import javax.swing.JOptionPane;
 import lombok.extern.slf4j.Slf4j;

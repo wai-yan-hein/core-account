@@ -10,7 +10,7 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
 import com.inventory.editor.DepartmentAutoCompleter;
@@ -20,7 +20,7 @@ import com.user.model.AppUser;
 import com.inventory.model.Location;
 import com.inventory.model.Stock;
 import com.inventory.model.VTransfer;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.TransferVouSearchTableModel;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -52,46 +52,47 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
-    
+
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
     }
-    
+
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-    
+
     public UserRepo getUserRepo() {
         return userRepo;
     }
-    
+
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-    
+
     public SelectionObserver getObserver() {
         return observer;
     }
-    
+
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-    
+
     public TransferHistoryDialog(JFrame frame) {
         super(frame, true);
         initComponents();
         initKeyListener();
     }
-    
+
     public void initMain() {
         initTableVoucher();
         setTodayDate();
         initCombo();
     }
-    
+
     private void initCombo() {
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation,null, true, false);
         inventoryRepo.getLocation().subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, false);
+            locationAutoCompleter.setListLocation(t);
         });
         userRepo.getAppUser().subscribe((t) -> {
             appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
@@ -104,7 +105,7 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
     }
-    
+
     private void initTableVoucher() {
         tableModel.setParent(tblVoucher);
         tblVoucher.setModel(tableModel);
@@ -123,26 +124,26 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         tblFilter = new StartWithRowFilter(txtFilter);
         tblVoucher.setRowSorter(sorter);
     }
-    
+
     private void setTodayDate() {
         if (txtFromDate.getDate() == null) {
             txtFromDate.setDate(Util1.getTodayDate());
             txtToDate.setDate(Util1.getTodayDate());
         }
     }
-    
+
     private String getUserCode() {
         return appUserAutoCompleter == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
     }
-    
+
     private String getLocCode() {
         return locationAutoCompleter == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
     }
-    
+
     private Integer getDepId() {
         return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
     }
-    
+
     public void search() {
         progess.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
@@ -166,18 +167,18 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
             progess.setIndeterminate(false);
-        }, () -> {            
+        }, () -> {
             progess.setIndeterminate(false);
             setVisible(true);
         });
     }
-    
+
     private void calAmount() {
         List<VTransfer> list = tableModel.getListDetail();
         txtTotalRecord.setValue(list.size());
         tblVoucher.requestFocus();
     }
-    
+
     private void select() {
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
@@ -190,7 +191,7 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
                     "No Voucher Selected", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     private void initKeyListener() {
         txtFromDate.getDateEditor().getUiComponent().setName("txtFromDate");
         txtFromDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -199,7 +200,7 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         txtVouNo.addKeyListener(this);
         txtUser.addKeyListener(this);
     }
-    
+
     private void clearFilter() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
@@ -715,13 +716,13 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
     @Override
     public void keyTyped(KeyEvent e) {
     }
-    
+
     @Override
     public void keyPressed(KeyEvent e) {
     }
-    
+
     @Override
     public void keyReleased(KeyEvent e) {
-        
+
     }
 }

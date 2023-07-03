@@ -4,13 +4,12 @@
  */
 package com.acc.entry;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.ColumnHeaderListener;
 import com.acc.common.DateAutoCompleter;
 import com.acc.common.JournalClosingStockTableModel;
 import com.acc.editor.COA3CellEditor;
 import com.user.editor.CurrencyAutoCompleter;
-import com.acc.editor.CurrencyAEditor;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.DepartmentCellEditor;
 import com.acc.model.DepartmentA;
@@ -19,9 +18,9 @@ import com.common.Global;
 import com.acc.model.ReportFilter;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
-import com.common.Util1;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
+import com.user.editor.CurrencyEditor;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.editor.ProjectCellEditor;
 import com.user.model.Currency;
@@ -191,9 +190,13 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         dateAutoCompleter.setSelectionObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
         projectAutoCompleter.setObserver(this);
+        currencyAAutoCompleter = new CurrencyAutoCompleter(txtCur, null);
+        currencyAAutoCompleter.setObserver(this);
         monoCur.subscribe((t) -> {
-            currencyAAutoCompleter = new CurrencyAutoCompleter(txtCur, t, null);
-            currencyAAutoCompleter.setObserver(this);
+            currencyAAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currencyAAutoCompleter.setCurrency(c);
         });
 
     }
@@ -203,6 +206,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         accountRepo.getDefaultDepartment().subscribe((t) -> {
             tableModel.setDepartment(t);
         });
+        tableModel.setProgress(progress);
         tableModel.setAccountRepo(accountRepo);
         tblJournal.setModel(tableModel);
         tblJournal.getTableHeader().setFont(Global.tblHeaderFont);
@@ -227,7 +231,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         tblJournal.getColumnModel().getColumn(3).setCellEditor(new COA3CellEditor(accountRepo, 3));
         tblJournal.getColumnModel().getColumn(4).setCellEditor(new ProjectCellEditor(userRepo));
         monoCur.subscribe((t) -> {
-            tblJournal.getColumnModel().getColumn(5).setCellEditor(new CurrencyAEditor(t));
+            tblJournal.getColumnModel().getColumn(5).setCellEditor(new CurrencyEditor(t));
         });
         tblJournal.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
 

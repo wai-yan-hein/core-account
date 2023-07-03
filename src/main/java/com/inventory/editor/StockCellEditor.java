@@ -7,7 +7,7 @@ package com.inventory.editor;
 
 import com.common.Global;
 import com.inventory.model.Stock;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -99,7 +99,6 @@ public class StockCellEditor extends AbstractCellEditor implements TableCellEdit
         if (anEvent instanceof MouseEvent) {
             return false;
         } else if (anEvent instanceof KeyEvent ke) {
-
             return !ke.isActionKey(); //Function key
         } else {
             return true;

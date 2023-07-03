@@ -12,7 +12,7 @@ import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.dialog.CurrencySetupDialog;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.model.ExchangeRate;
@@ -73,14 +73,13 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
     private void initComobo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
+        currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
+        currAutoCompleter.setObserver(this);
         userRepo.getCurrency().subscribe((t) -> {
-            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            currAutoCompleter.setObserver(this);
-            userRepo.getDefaultCurrency().subscribe((tt) -> {
-                currAutoCompleter.setCurrency(tt);
-            });
-        }, (e) -> {
-            log.error(e.getMessage());
+            currAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currAutoCompleter.setCurrency(c);
         });
     }
 

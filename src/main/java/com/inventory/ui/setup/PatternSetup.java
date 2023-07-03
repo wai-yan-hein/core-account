@@ -21,7 +21,7 @@ import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.StockTypeAutoCompleter;
 import com.inventory.model.Pattern;
 import com.inventory.model.Stock;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.common.PatternTableModel;
 import com.inventory.ui.common.StockCompleterTableModel;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
@@ -116,18 +116,20 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
     }
 
     private void initCombo() {
+        typeAutoCompleter = new StockTypeAutoCompleter(txtGroup, null, true);
+        typeAutoCompleter.setObserver(this);
         inventoryRepo.getStockType().subscribe((t) -> {
-            typeAutoCompleter = new StockTypeAutoCompleter(txtGroup, t, null, true, false);
-            typeAutoCompleter.setObserver(this);
+            typeAutoCompleter.setListStockType(t);
         });
-
+        categoryAutoCompleter = new CategoryAutoCompleter(txtCat, null, true);
+        categoryAutoCompleter.setObserver(this);
         inventoryRepo.getCategory().subscribe((t) -> {
-            categoryAutoCompleter = new CategoryAutoCompleter(txtCat, t, null, true, false);
-            categoryAutoCompleter.setObserver(this);
+            categoryAutoCompleter.setListCategory(t);
         });
+        brandAutoCompleter = new BrandAutoCompleter(txtBrand, null, true);
+        brandAutoCompleter.setObserver(this);
         inventoryRepo.getStockBrand().subscribe((t) -> {
-            brandAutoCompleter = new BrandAutoCompleter(txtBrand, t, null, true, false);
-            brandAutoCompleter.setObserver(this);
+            brandAutoCompleter.setListStockBrand(t);
         });
 
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
@@ -200,13 +202,7 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         filter.setCatCode(getCategory());
         filter.setStockTypeCode(getType());
         filter.setStockCode(getStock());
-        inventoryApi
-                .post()
-                .uri("/setup/search-stock")
-                .body(Mono.just(filter), ReportFilter.class)
-                .retrieve()
-                .bodyToFlux(Stock.class)
-                .collectList()
+        inventoryRepo.searchStock(filter)
                 .subscribe((t) -> {
                     stockTableModel.setListStock(t);
                     progress.setIndeterminate(false);

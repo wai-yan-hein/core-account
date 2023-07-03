@@ -10,7 +10,7 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
@@ -20,7 +20,7 @@ import com.user.model.AppUser;
 import com.inventory.model.GRN;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.GRNHistoryTableModel;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -120,8 +120,9 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
     }
 
     private void initCombo() {
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation,null, true, false);
         inventoryRepo.getLocation().subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, false);
+            locationAutoCompleter.setListLocation(t);
         });
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "-");
         userRepo.getAppUser().subscribe((t) -> {

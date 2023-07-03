@@ -12,7 +12,7 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
 import com.inventory.editor.BatchAutoCompeter;
@@ -27,7 +27,7 @@ import com.inventory.model.SaleMan;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;
 import com.inventory.model.VSale;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.SaleVouSearchTableModel;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.editor.CurrencyAutoCompleter;
@@ -149,13 +149,13 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         }, (e) -> {
             log.error(e.getMessage());
         });
+        saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, null, true);
         inventoryRepo.getSaleMan().subscribe((t) -> {
-            saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, t, null, true, false);
-        }, (e) -> {
-            log.error(e.getMessage());
+            saleManAutoCompleter.setListSaleMan(t);
         });
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, false);
         inventoryRepo.getLocation().subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, false);
+            locationAutoCompleter.setListLocation(t);
         }, (e) -> {
             log.error(e.getMessage());
         });
@@ -167,13 +167,12 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         }, (e) -> {
             log.error(e.getMessage());
         });
+        currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
-            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            userRepo.getDefaultCurrency().subscribe((tt) -> {
-                currAutoCompleter.setCurrency(tt);
-            });
-        }, (e) -> {
-            log.error(e.getMessage());
+            currAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currAutoCompleter.setCurrency(c);
         });
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "CUS");
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
@@ -350,6 +349,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         }
 
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

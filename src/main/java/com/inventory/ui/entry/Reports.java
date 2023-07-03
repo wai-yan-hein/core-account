@@ -27,10 +27,10 @@ import com.inventory.editor.StockTypeAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.editor.VouStatusAutoCompleter;
 import com.inventory.model.VRoleMenu;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.common.ReportTableModel;
 import com.toedter.calendar.JTextFieldDateEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
@@ -194,32 +194,37 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     }
 
     private void initCombo() {
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, true);
+        locationAutoCompleter.setObserver(this);
         inventoryRepo.getLocation().subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, true);
+            locationAutoCompleter.setListLocation(t);
         });
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, true, "-");
+        saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, null, true);
         inventoryRepo.getSaleMan().subscribe((t) -> {
-            saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, t, null, true, false);
+            saleManAutoCompleter.setListSaleMan(t);
         });
-
+        stockTypeAutoCompleter = new StockTypeAutoCompleter(txtStockType, null, true);
         inventoryRepo.getStockType().subscribe((t) -> {
-            stockTypeAutoCompleter = new StockTypeAutoCompleter(txtStockType, t, null, true, false);
+            stockTypeAutoCompleter.setListStockType(t);
         });
+        categoryAutoCompleter = new CategoryAutoCompleter(txtCategory, null, true);
         inventoryRepo.getCategory().subscribe((t) -> {
-            categoryAutoCompleter = new CategoryAutoCompleter(txtCategory, t, null, true, false);
+            categoryAutoCompleter.setListCategory(t);
         });
+        brandAutoCompleter = new BrandAutoCompleter(txtBrand, null, true);
         inventoryRepo.getStockBrand().subscribe((t) -> {
-            brandAutoCompleter = new BrandAutoCompleter(txtBrand, t, null, true, false);
+            brandAutoCompleter.setListStockBrand(t);
         });
         inventoryRepo.getRegion().subscribe((t) -> {
             regionAutoCompleter = new RegionAutoCompleter(txtRegion, t, null, true, false);
         });
+        currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            currencyAutoCompleter.setObserver(this);
-            userRepo.getDefaultCurrency().subscribe((tt) -> {
-                currencyAutoCompleter.setCurrency(tt);
-            });
+            currencyAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currencyAutoCompleter.setCurrency(c);
         });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, inventoryRepo, null, true);

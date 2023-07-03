@@ -5,7 +5,7 @@
  */
 package com.acc.report;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.DateAutoCompleter;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
@@ -22,7 +22,7 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.VRoleMenu;
 import com.inventory.ui.common.ReportTableModel;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.editor.ProjectAutoCompleter;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -202,7 +202,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                     Map<String, Object> param = new HashMap<>();
                     param.put("p_report_name", reportName);
                     param.put("p_report_title", cOA3AutoCompleter.getCOA().getCoaNameEng());
-                    param.put("p_date", String.format("Between %s and %s", Util1.toDateStr(stDate, "yyyy-MM-dd", Global.dateFormat), Util1.toDateStr(stDate, "yyyy-MM-dd", Global.dateFormat)));
+                    param.put("p_date", String.format("Between %s and %s", Util1.toDateStr(stDate, "yyyy-MM-dd", Global.dateFormat), Util1.toDateStr(enDate, "yyyy-MM-dd", Global.dateFormat)));
                     param.put("p_print_date", Util1.getTodayDateTime());
                     param.put("p_comp_name", Global.companyName);
                     param.put("p_comp_address", Global.companyAddress);

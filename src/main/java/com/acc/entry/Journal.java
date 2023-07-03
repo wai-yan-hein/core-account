@@ -4,8 +4,7 @@
  */
 package com.acc.entry;
 
-import com.acc.common.AccountRepo;
-import com.acc.common.ColumnHeaderListener;
+import com.repo.AccountRepo;
 import com.acc.common.DateAutoCompleter;
 import com.acc.common.JournalTableModel;
 import com.acc.dialog.JournalEntryDialog;
@@ -19,7 +18,7 @@ import com.acc.model.ReportFilter;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.editor.ProjectAutoCompleter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

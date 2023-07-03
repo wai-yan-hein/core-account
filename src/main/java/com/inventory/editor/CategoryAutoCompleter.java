@@ -47,21 +47,15 @@ public final class CategoryAutoCompleter implements KeyListener {
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private CategoryTableModel categoryTableModel;
+    private final CategoryTableModel categoryTableModel = new CategoryTableModel();
     private Category type;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
-    private List<String> listOption = new ArrayList<>();
-    private OptionDialog optionDialog;
     private SelectionObserver observer;
     private List<Category> listCategory;
-    private boolean custom;
-
-    public List<Category> getListCategory() {
-        return listCategory;
-    }
+    private boolean filter;
 
     public SelectionObserver getObserver() {
         return observer;
@@ -71,45 +65,33 @@ public final class CategoryAutoCompleter implements KeyListener {
         this.observer = observer;
     }
 
-    private void initOption() {
-        listOption.clear();
-        listCategory.forEach(t -> {
-            listOption.add(t.getKey().getCatCode());
-        });
+    public void setListCategory(List<Category> list) {
+        if (filter) {
+            Category c = new Category("-", "All");
+            list.add(0, c);
+            setCategory(c);
+        }
+        categoryTableModel.setListCategory(list);
+        if (!list.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
+        }
+        this.listCategory = list;
     }
 
-    public List<String> getListOption() {
-        return listOption;
-    }
-
-    public void setListOption(List<String> listOption) {
-        this.listOption = listOption;
+    public List<Category> getListCategory() {
+        return listCategory;
     }
 
     public CategoryAutoCompleter() {
     }
 
-    public CategoryAutoCompleter(JTextComponent comp, List<Category> list,
-            AbstractCellEditor editor, boolean filter, boolean custom) {
+    public CategoryAutoCompleter(JTextComponent comp, AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
-        this.listCategory = list;
-        this.custom = custom;
-        initOption();
-        if (filter) {
-            Category c = new Category("-", "All");
-            list = new ArrayList<>(list);
-            list.add(0, c);
-            setCategory(c);
-        }
-        if (custom) {
-            list = new ArrayList<>(list);
-            list.add(1, new Category("C", "Custom"));
-        }
+        this.filter = filter;
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
-        categoryTableModel = new CategoryTableModel(list);
         table.setModel(categoryTableModel);
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
@@ -121,7 +103,6 @@ public final class CategoryAutoCompleter implements KeyListener {
         JScrollPane scroll = new JScrollPane(table);
         table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(30);//Code
-
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -177,14 +158,7 @@ public final class CategoryAutoCompleter implements KeyListener {
 
             }
         });
-
-        table.setRequestFocusEnabled(false);
-
-        if (list != null) {
-            if (!list.isEmpty()) {
-                table.setRowSelectionInterval(0, 0);
-            }
-        }
+        setListCategory(new ArrayList<>());
     }
 
     public void mouseSelect() {
@@ -192,35 +166,10 @@ public final class CategoryAutoCompleter implements KeyListener {
             type = categoryTableModel.getCategory(table.convertRowIndexToModel(
                     table.getSelectedRow()));
             textComp.setText(type.getCatName());
-            if (custom) {
-                switch (type.getKey().getCatCode()) {
-                    case "C" -> {
-                        optionDialog = new OptionDialog(Global.parentForm, "Stock Category");
-                        List<OptionModel> listOP = new ArrayList<>();
-                        listCategory.forEach(t -> {
-                            listOP.add(new OptionModel(t.getKey().getCatCode(), t.getCatName()));
-                        });
-                        optionDialog.setOptionList(listOP);
-                        optionDialog.setLocationRelativeTo(null);
-                        optionDialog.setVisible(true);
-                        if (optionDialog.isSelect()) {
-                            listOption = optionDialog.getOptionList();
-                        }
-                        //open
-                    }
-                    case "-" ->
-                        initOption();
-                    default -> {
-                        if (observer != null) {
-                            observer.selected("SC", type.getKey().getCatCode());
-                        }
-                        listOption.clear();
-                        listOption.add(type.getKey().getCatCode());
-                    }
-                }
-            }
         }
-
+        if (observer != null) {
+            observer.selected("Category", "Category");
+        }
         popup.setVisible(false);
         if (editor != null) {
             editor.stopCellEditing();

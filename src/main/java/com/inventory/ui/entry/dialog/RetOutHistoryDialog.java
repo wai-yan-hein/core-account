@@ -11,7 +11,7 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
 import com.inventory.editor.DepartmentAutoCompleter;
@@ -23,7 +23,7 @@ import com.inventory.model.Stock;
 import com.inventory.model.Trader;
 import com.inventory.model.VPurchase;
 import com.inventory.model.VReturnOut;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.RetOutVouSearchTableModel;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
@@ -37,6 +37,7 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClient;
+
 /**
  *
  * @author wai yan
@@ -124,8 +125,9 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
             appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
         });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, false);
         inventoryRepo.getLocation().subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, false);
+            locationAutoCompleter.setListLocation(t);
         });
         userRepo.getDeparment(true).subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true);
@@ -133,15 +135,12 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
                 departmentAutoCompleter.setDepartment(tt);
             });
         });
+        currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
-            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            userRepo.getDefaultCurrency().subscribe((tt) -> {
-                currAutoCompleter.setCurrency(tt);
-            }, (e) -> {
-                log.error(e.getMessage());
-            });
-        }, (e) -> {
-            log.error(e.getMessage());
+            currAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currAutoCompleter.setCurrency(c);
         });
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
         if (inventoryRepo.localDatabase) {
@@ -803,7 +802,7 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
     }//GEN-LAST:event_txtCurrencyActionPerformed
 
     private void btnUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadActionPerformed
-        if(inventoryRepo.localDatabase){
+        if (inventoryRepo.localDatabase) {
             integration.uploadReturnOut();
         }
     }//GEN-LAST:event_btnUploadActionPerformed

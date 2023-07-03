@@ -5,9 +5,9 @@
  */
 package com.inventory.ui.entry;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.common.Global;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.LocationSetupDialog;
 import com.inventory.ui.setup.dialog.ProcessTypeSetupDialog;
 import com.inventory.ui.setup.dialog.RegionSetup;

@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.acc.editor;
+package com.user.editor;
 
+import com.common.Global;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.model.Currency;
-import com.common.Global;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
@@ -25,7 +25,7 @@ import javax.swing.table.TableCellEditor;
  *
  * @author Lenovo
  */
-public class CurrencyAEditor extends AbstractCellEditor implements TableCellEditor {
+public class CurrencyEditor extends AbstractCellEditor implements TableCellEditor {
 
     private JComponent component = null;
     private CurrencyAutoCompleter completer;
@@ -43,7 +43,7 @@ public class CurrencyAEditor extends AbstractCellEditor implements TableCellEdit
 
     };
 
-    public CurrencyAEditor(List<Currency> listCurrency) {
+    public CurrencyEditor(List<Currency> listCurrency) {
         this.listCurrency = listCurrency;
     }
 
@@ -82,10 +82,9 @@ public class CurrencyAEditor extends AbstractCellEditor implements TableCellEdit
         component = jtf;
         if (value != null) {
             jtf.setText(value.toString());
-            jtf.selectAll();
         }
-        completer = new CurrencyAutoCompleter(jtf, listCurrency, this);
-
+        completer = new CurrencyAutoCompleter(jtf, this);
+        completer.setListCurrency(listCurrency);
         return component;
     }
 
@@ -115,11 +114,8 @@ public class CurrencyAEditor extends AbstractCellEditor implements TableCellEdit
         } else if (anEvent instanceof KeyEvent) {
             KeyEvent ke = (KeyEvent) anEvent;
 
-            if (ke.isActionKey()) {//Function key
-                return false;
-            } else {
-                return true;
-            }
+            //Function key
+            return !ke.isActionKey();
         } else {
             return true;
         }

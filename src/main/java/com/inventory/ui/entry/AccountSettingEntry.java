@@ -4,7 +4,7 @@
  */
 package com.inventory.ui.entry;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.common.Global;
@@ -13,7 +13,7 @@ import com.common.TableCellRender;
 import com.inventory.model.AccKey;
 import com.inventory.model.AccSetting;
 import com.inventory.model.AccType;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.AccountSettingTableModel;
 import java.awt.Color;
 import java.awt.event.FocusAdapter;
@@ -137,8 +137,6 @@ public class AccountSettingEntry extends javax.swing.JPanel {
         lblStatus.setForeground(Color.blue);
         cboType.setEnabled(false);
         cboType.setSelectedIndex(AccType.valueOf(setting.getKey().getType()).ordinal());
-//        txtType.setText(setting.getKey().getType());
-//        txtType.setEnabled(false);
         txtCash.setText(setting.getPayAcc());
         txtDiscount.setText(setting.getDiscountAcc());
         txtTax.setText(setting.getTaxAcc());

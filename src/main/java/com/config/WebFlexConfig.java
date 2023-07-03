@@ -81,6 +81,21 @@ public class WebFlexConfig {
     }
 
     @Bean
+    public WebClient hmsApi() {
+        String url = environment.getProperty("hms.url");
+        int port = Util1.getInteger(environment.getProperty("hms.port"));
+        return WebClient.builder()
+                .exchangeStrategies(ExchangeStrategies.builder()
+                        .codecs(configurer -> configurer
+                        .defaultCodecs()
+                        .maxInMemorySize(100 * 1024 * 1024))
+                        .build())
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getToken())
+                .baseUrl(getUrl(url, port))
+                .build();
+    }
+
+    @Bean
     public String hostName() {
         return environment.getProperty("host.name");
     }

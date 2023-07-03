@@ -7,9 +7,10 @@ package com.inventory.editor;
 
 import com.common.Global;
 import com.inventory.model.Location;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
+import com.inventory.model.Stock;
+import com.repo.InventoryRepo;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
 import java.util.List;
@@ -29,21 +30,6 @@ public class LocationCellEditor extends AbstractCellEditor implements TableCellE
     private LocationAutoCompleter completer;
     private List<Location> listLocation;
 
-    private final FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusLost(FocusEvent e) {
-        }
-
-        @Override
-        public void focusGained(FocusEvent e) {
-            JTextField jtf = (JTextField) e.getSource();
-            String lastString = jtf.getText().substring(jtf.getText().length() - 1);
-            jtf.setText("");
-            jtf.setText(lastString);
-        }
-
-    };
-
     public LocationCellEditor(List<Location> listLocation) {
         this.listLocation = listLocation;
     }
@@ -53,12 +39,39 @@ public class LocationCellEditor extends AbstractCellEditor implements TableCellE
             boolean isSelected, int rowIndex, int vColIndex) {
         JTextField jtf = new JTextField();
         jtf.setFont(Global.textFont);
-        jtf.addFocusListener(fa);
+        KeyListener keyListener = new KeyListener() {
+            @Override
+            public void keyPressed(KeyEvent keyEvent) {
+                int keyCode = keyEvent.getKeyCode();
+
+                if ((keyEvent.isControlDown() && (keyCode == KeyEvent.VK_DELETE))
+                        || (keyEvent.isShiftDown() && (keyCode == KeyEvent.VK_DELETE))
+                        || (keyCode == KeyEvent.VK_F5)
+                        || (keyCode == KeyEvent.VK_F7)
+                        || (keyCode == KeyEvent.VK_F9)
+                        || (keyCode == KeyEvent.VK_F10)
+                        || (keyCode == KeyEvent.VK_ESCAPE)) {
+                    stopCellEditing();
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent keyEvent) {
+            }
+
+            @Override
+            public void keyTyped(KeyEvent keyEvent) {
+            }
+        };
+
+        jtf.addKeyListener(keyListener);
         component = jtf;
         if (value != null) {
             jtf.setText(value.toString());
+            jtf.selectAll();
         }
-        completer = new LocationAutoCompleter(jtf, listLocation, this, false, false);
+        completer = new LocationAutoCompleter(jtf, this, false, false);
+        completer.setListLocation(listLocation);
         return component;
     }
 
@@ -86,7 +99,6 @@ public class LocationCellEditor extends AbstractCellEditor implements TableCellE
         if (anEvent instanceof MouseEvent) {
             return false;
         } else if (anEvent instanceof KeyEvent ke) {
-
             return !ke.isActionKey(); //Function key
         } else {
             return true;

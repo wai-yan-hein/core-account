@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockCellEditor;
@@ -22,7 +22,7 @@ import com.inventory.model.Location;
 import com.inventory.model.TransferHis;
 import com.inventory.model.TransferHisKey;
 import com.inventory.model.VTransfer;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.common.TransferTableModel;
 import com.inventory.ui.entry.dialog.TransferHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
@@ -124,11 +124,12 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     }
 
     private void initCombo() {
+        fromLocaitonCompleter = new LocationAutoCompleter(txtFrom,null, false, false);
+        toLocaitonCompleter = new LocationAutoCompleter(txtTo,null, false, false);
         inventoryRepo.getLocation().subscribe((t) -> {
-            fromLocaitonCompleter = new LocationAutoCompleter(txtFrom, t, null, false, false);
-            toLocaitonCompleter = new LocationAutoCompleter(txtTo, t, null, false, false);
+            fromLocaitonCompleter.setListLocation(t);
+            toLocaitonCompleter.setListLocation(t);
         });
-
     }
 
     private void initTable() {

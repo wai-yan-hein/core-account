@@ -9,18 +9,15 @@ import com.inventory.model.Stock;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
-@Component
+@Slf4j
 public class StockCompleterTableModel extends AbstractTableModel {
 
-    static Logger log = LoggerFactory.getLogger(StockCompleterTableModel.class.getName());
     private List<Stock> listStock = new ArrayList();
     private String[] columnNames = {"Code", "Name", "Group", "Category", "Brand"};
 

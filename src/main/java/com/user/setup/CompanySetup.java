@@ -5,15 +5,18 @@
  */
 package com.user.setup;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
+import com.common.EncryptUtil;
 import com.common.Global;
 import com.common.PanelControl;
+import com.common.QRUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.user.common.CompanyTableModel;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.dialog.DepartmentSetupDialog;
+import com.user.dialog.QRDialog;
 import com.user.dialog.YearEndProcessingDailog;
 import com.user.editor.BusinessTypeAutoCompleter;
 import com.user.editor.CurrencyAutoCompleter;
@@ -28,6 +31,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -43,6 +47,8 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
     private UserRepo userRepo;
     @Autowired
     private AccountRepo accountRepo;
+    @Autowired
+    private Environment environment;
     private int selectRow = -1;
     private CompanyInfo companyInfo = new CompanyInfo();
     private CurrencyAutoCompleter currencyAutoCompleter;
@@ -97,7 +103,6 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         });
         searchCompany();
         txtCode.requestFocus();
-
     }
 
     private void searchCompany() {
@@ -107,8 +112,12 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
     }
 
     private void initCombo() {
+        currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
+            currencyAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currencyAutoCompleter.setCurrency(c);
         });
         userRepo.getBusinessType().subscribe((t) -> {
             businessTypeAutoCompleter = new BusinessTypeAutoCompleter(txtBusType, t, null, false);
@@ -162,29 +171,11 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                                         })
                                         .thenReturn(Boolean.TRUE);
                             }
-                        })
-                        .subscribe(
-                                sta -> {
-                                },
-                                err -> {
-                                    JOptionPane.showMessageDialog(this, err.getMessage());
-                                    progress.setIndeterminate(false);
-                                }
-                        );
-//                userRepo.saveCompany(companyInfo).subscribe((t) -> {
-//                    if (status.equals("NEW")) {
-//                        tableModel.addCompany(t);
-//                    } else {
-//                        tableModel.setCompany(selectRow, t);
-//                    }
-//                    updateCompany(t);
-//                    clear();
-//                    progress.setIndeterminate(false);
-//                }, (e) -> {
-//                    JOptionPane.showMessageDialog(this, e.getMessage());
-//                    progress.setIndeterminate(false);
-//                });
-
+                        }).subscribe(sta -> {
+                }, err -> {
+                    JOptionPane.showMessageDialog(this, err.getMessage());
+                    progress.setIndeterminate(false);
+                });
             } catch (HeadlessException e) {
                 log.error("Save Company :" + e.getMessage());
                 JOptionPane.showMessageDialog(Global.parentForm, "Could'nt saved.");
@@ -290,6 +281,19 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         d.setVisible(true);
     }
 
+    private void qrDialog() {
+        String uPort = environment.getProperty("user.port");
+        String iPort = environment.getProperty("inventory.port");
+        String aPort = environment.getProperty("account.port");
+        String hostIp = Util1.getServerIp(environment.getProperty("host.name"));
+        String text = String.format("%s,%s,%s,%s", hostIp, uPort, iPort, aPort);
+        String encodeStr = EncryptUtil.encode(text);
+        QRDialog d = new QRDialog(Global.parentForm);
+        d.setLocationRelativeTo(null);
+        d.setImage(QRUtil.createdQRImage(encodeStr));
+        d.setVisible(true);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -329,6 +333,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         jPanel2 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -565,6 +570,14 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
             }
         });
 
+        jButton3.setFont(Global.lableFont);
+        jButton3.setText("QR");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -573,7 +586,8 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButton1)
-                    .addComponent(jButton2))
+                    .addComponent(jButton2)
+                    .addComponent(jButton3))
                 .addContainerGap(94, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
@@ -583,6 +597,8 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                 .addComponent(jButton1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton3)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -637,11 +653,17 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         departmentDialog();
     }//GEN-LAST:event_jButton2ActionPerformed
 
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+        qrDialog();
+    }//GEN-LAST:event_jButton3ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkActive;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel13;

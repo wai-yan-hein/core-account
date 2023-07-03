@@ -11,7 +11,7 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
 import com.inventory.editor.DepartmentAutoCompleter;
@@ -22,7 +22,7 @@ import com.user.model.AppUser;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;
 import com.inventory.model.VReturnIn;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.RetInVouSearchTableModel;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
@@ -118,8 +118,9 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     }
 
     private void initCombo() {
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, false);
         inventoryRepo.getLocation().subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, true, false);
+            locationAutoCompleter.setListLocation(t);
         });
         userRepo.getAppUser().subscribe((t) -> {
             appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
@@ -130,15 +131,12 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
                 departmentAutoCompleter.setDepartment(tt);
             });
         });
+        currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
-            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            userRepo.getDefaultCurrency().subscribe((tt) -> {
-                currAutoCompleter.setCurrency(tt);
-            }, (e) -> {
-                log.error(e.getMessage());
-            });
-        }, (e) -> {
-            log.error(e.getMessage());
+            currAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currAutoCompleter.setCurrency(c);
         });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "CUS");
@@ -811,7 +809,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     }//GEN-LAST:event_txtCusFocusGained
 
     private void btnUploadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUploadActionPerformed
-        if(inventoryRepo.localDatabase){
+        if (inventoryRepo.localDatabase) {
             integration.uploadReturnIn();
         }
     }//GEN-LAST:event_btnUploadActionPerformed

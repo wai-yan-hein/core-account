@@ -4,7 +4,7 @@
  */
 package com.inventory.ui.entry;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.COAComboBoxModel;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
@@ -17,12 +17,12 @@ import com.inventory.model.PaymentHis;
 import com.inventory.model.PaymentHisDetail;
 import com.inventory.model.PaymentHisKey;
 import com.inventory.model.Trader;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.common.PaymentTableModel;
 import com.inventory.ui.entry.dialog.PaymentHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
@@ -144,11 +144,12 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "-");
         traderAutoCompleter.setObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
+        currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            userRepo.getDefaultCurrency().subscribe((c) -> {
-                currencyAutoCompleter.setCurrency(c);
-            });
+            currencyAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currencyAutoCompleter.setCurrency(c);
         });
         //cboCash.setRenderer(new ColorComboBoxRender());
         Mono<List<ChartOfAccount>> m1 = accountRepo.getCOAByGroup(ProUtil.getProperty(ProUtil.CASH_GROUP));

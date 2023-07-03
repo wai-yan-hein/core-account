@@ -11,7 +11,7 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.Region;
 import com.inventory.model.RegionKey;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.RegionTableModel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
@@ -158,11 +158,11 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
             if (lblStatus.getText().equals("NEW")) {
                 RegionKey key = new RegionKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 key.setRegCode(null);
                 region.setKey(key);
+                region.setDeptId(Global.deptId);
                 region.setCreatedBy(Global.loginUser.getUserCode());
-                region.setCreatedDate(Util1.getTodayDate());
+                region.setCreatedDate(Util1.getTodayLocalDateTime());
                 region.setMacId(Global.macId);
             } else {
                 region.setUpdatedBy(Global.loginUser.getUserCode());

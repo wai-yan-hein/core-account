@@ -9,7 +9,7 @@ import com.common.Util1;
 import com.inventory.editor.UnitAutoCompleter;
 import com.inventory.model.PurHisDetail;
 import com.inventory.model.StockUnit;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.List;

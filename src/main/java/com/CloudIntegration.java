@@ -4,10 +4,11 @@
  */
 package com;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
 import com.common.Global;
+import com.h2.dao.DateFilterRepo;
 import com.h2.service.BrandService;
 import com.h2.service.BusinessTypeService;
 import com.h2.service.COAService;
@@ -56,8 +57,8 @@ import com.inventory.model.SaleHis;
 import com.inventory.model.StockInOut;
 import com.inventory.model.TransferHis;
 import com.inventory.model.WeightLossHis;
-import com.inventory.ui.common.InventoryRepo;
-import com.user.common.UserRepo;
+import com.repo.InventoryRepo;
+import com.repo.UserRepo;
 import java.time.Duration;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -163,6 +164,8 @@ public class CloudIntegration {
     private WeightLossService weightLossService;
     @Autowired
     private ProcessHisService processHisService;
+    @Autowired
+    private DateFilterRepo dateFilterRepo;
 
     public void startDownload() {
         if (localDatabase) {
@@ -359,9 +362,17 @@ public class CloudIntegration {
     }
 
     private void downloadAccount() {
+        downloadDate();
         downloadDepartmentAccount();
         downloadTraderAccount();
         downloadChartofAccount();
+    }
+
+    private void downloadDate() {
+        accountRepo.getDate().subscribe((t) -> {
+            dateFilterRepo.saveAll(t);
+            log.info("downloadDate.");
+        });
     }
 
     private void downloadChartofAccount() {

@@ -50,7 +50,7 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER";
-    private LocationTableModel locationTableModel;
+    private LocationTableModel locationTableModel = new LocationTableModel();
     private Location location;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
@@ -60,6 +60,8 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
     private List<String> listOption = new ArrayList<>();
     private OptionDialog optionDialog;
     private List<Location> listLocation;
+    private boolean filter;
+    private boolean custom;
 
     public SelectionObserver getObserver() {
         return observer;
@@ -73,8 +75,20 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
         return listLocation;
     }
 
-    public void setListLocation(List<Location> listLocation) {
-        this.listLocation = listLocation;
+    public void setListLocation(List<Location> list) {
+        if (filter) {
+            Location loc = new Location("-", "All");
+            list.add(0, loc);
+            setLocation(loc);
+        }
+        if (custom) {
+            list.add(1, new Location("C", "Custom"));
+        }
+        locationTableModel.setListLocation(list);
+        if (!list.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
+        }
+        this.listLocation = list;
     }
 
     public List<String> getListOption() {
@@ -98,27 +112,20 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
     public LocationAutoCompleter() {
     }
 
-    public LocationAutoCompleter(JTextComponent comp, List<Location> list,
-            AbstractCellEditor editor, boolean filter, boolean custom) {
-        this.textComp = comp;
+    public LocationAutoCompleter(JTextComponent textComp, AbstractCellEditor editor, boolean filter, boolean custom) {
+        this.textComp = textComp;
+        this.filter = filter;
+        this.custom = custom;
         this.editor = editor;
-        this.listLocation = list;
         initOption();
-        if (filter) {
-            Location loc = new Location("-", "All");
-            list = new ArrayList<>(list);
-            list.add(0, loc);
-            setLocation(loc);
-        }
-        if (custom) {
-            list = new ArrayList<>(list);
-            list.add(1, new Location("C", "Custom"));
-        }
+        initTable();
+    }
+
+    private void initTable() {
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
         textComp.getDocument().addDocumentListener(documentListener);
-        locationTableModel = new LocationTableModel(list);
         table.setModel(locationTableModel);
         table.setSize(50, 50);
         table.setFont(Global.textFont); // NOI18N
@@ -131,7 +138,6 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
         JScrollPane scroll = new JScrollPane(table);
         table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(40);//Code
-
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -143,7 +149,6 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
 
         scroll.getVerticalScrollBar().setFocusable(false);
         scroll.getHorizontalScrollBar().setFocusable(false);
-
         popup.setBorder(BorderFactory.createLineBorder(Color.black));
         popup.setPopupSize(400, 200);
 
@@ -184,14 +189,7 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
             public void popupMenuCanceled(PopupMenuEvent e) {
             }
         });
-
-        table.setRequestFocusEnabled(false);
-
-        if (list != null) {
-            if (!list.isEmpty()) {
-                table.setRowSelectionInterval(0, 0);
-            }
-        }
+        setListLocation(new ArrayList<>());
     }
 
     public Location getLocation() {
@@ -388,8 +386,8 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
 
     @Override
     public void keyReleased(KeyEvent e) {
-        String filter = textComp.getText();
-        if (filter.length() == 0) {
+        String str = textComp.getText();
+        if (str.length() == 0) {
             sorter.setRowFilter(null);
         } else {
             sorter.setRowFilter(startsWithFilter);

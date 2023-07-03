@@ -5,7 +5,7 @@
  */
 package com.acc.dialog;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.CrAmtTableModel;
 import com.acc.common.DateAutoCompleter;
 import com.acc.common.DrAmtTableModel;
@@ -22,7 +22,7 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.model.Currency;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -162,12 +162,13 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
             departmentAutoCompleter.setListOption(department);
 
         });
+        currencyAAutoCompleter = new CurrencyAutoCompleter(txtCur, null);
+        currencyAAutoCompleter.setObserver(this);
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAAutoCompleter = new CurrencyAutoCompleter(txtCur, t, null);
-            currencyAAutoCompleter.setObserver(this);
-            userRepo.findCurrency(curCode).subscribe((tt) -> {
-                currencyAAutoCompleter.setCurrency(tt);
-            });
+            currencyAAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currencyAAutoCompleter.setCurrency(c);
         });
     }
 

@@ -7,7 +7,7 @@ package com.acc.report;
 
 import com.acc.dialog.TrialBalanceDetailDialog;
 import com.acc.common.APARTableModel;
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.DateAutoCompleter;
 import com.acc.common.GLTableCellRender;
 import com.acc.editor.COAAutoCompleter;
@@ -20,7 +20,7 @@ import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import java.awt.event.FocusAdapter;
@@ -277,12 +277,13 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             cOAAutoCompleter = new COAAutoCompleter(txtAccount, t, null, true);
             cOAAutoCompleter.setSelectionObserver(this);
         });
+        currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
+        currencyAutoCompleter.setObserver(this);
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            currencyAutoCompleter.setObserver(this);
-            userRepo.findCurrency(Global.currency).subscribe((c) -> {
-                currencyAutoCompleter.setCurrency(c);
-            });
+            currencyAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currencyAutoCompleter.setCurrency(c);
         });
 
         traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accountRepo, null, true);

@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.setup;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.editor.COAAutoCompleter;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
@@ -21,7 +21,7 @@ import com.inventory.model.Region;
 import com.inventory.model.Trader;
 import com.inventory.model.TraderGroup;
 import com.inventory.model.TraderKey;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.setup.common.CustomerTabelModel;
 import com.inventory.ui.setup.dialog.CustomerImportDialog;
 import com.inventory.ui.setup.dialog.RegionSetup;
@@ -83,7 +83,11 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         UserCode,
         Name,
         Address,
-        PhoneNo
+        PhoneNo,
+        Email,
+        ContactPerson,
+        Region,
+        Remark
     }
 
     public JProgressBar getProgress() {
@@ -282,25 +286,26 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     private void saveCustomer() {
         if (isValidEntry()) {
             progress.setIndeterminate(true);
+            observer.selected("save", false);
             inventoryRepo.saveTrader(customer).subscribe((t) -> {
-                if (!Util1.isNull(customer.getKey().getCode())) {
-                    if (lblStatus.getText().equals("EDIT")) {
-                        customerTabelModel.setCustomer(selectRow, customer);
-                    } else {
-                        customerTabelModel.addCustomer(customer);
-                    }
-                    progress.setIndeterminate(false);
-                    clear();
+                if (lblStatus.getText().equals("EDIT")) {
+                    customerTabelModel.setCustomer(selectRow, customer);
+                } else {
+                    customerTabelModel.addCustomer(customer);
                 }
+                clear();
             }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
+                observer.selected("save", true);
                 progress.setIndeterminate(false);
+                JOptionPane.showMessageDialog(this, e.getMessage());
             });
 
         }
     }
 
     public void clear() {
+        observer.selected("save", true);
+        progress.setIndeterminate(false);
         customer = new Trader();
         txtSysCode.setText(null);
         txtCusCode.setText(null);

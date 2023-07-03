@@ -9,24 +9,17 @@ import com.inventory.model.SaleMan;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author wai yan
  */
-@Component
+@Slf4j
 public class SaleManCompleterTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(SaleManCompleterTableModel.class);
     private List<SaleMan> listSaleMan = new ArrayList<>();
     private final String[] columnNames = {"Code", "Name"};
-
-    public SaleManCompleterTableModel(List<SaleMan> listSaleMan) {
-        this.listSaleMan = listSaleMan;
-    }
 
     @Override
     public int getRowCount() {
@@ -88,4 +81,14 @@ public class SaleManCompleterTableModel extends AbstractTableModel {
     public boolean isCellEditable(int row, int column) {
         return false;
     }
+
+    public List<SaleMan> getListSaleMan() {
+        return listSaleMan;
+    }
+
+    public void setListSaleMan(List<SaleMan> listSaleMan) {
+        this.listSaleMan = listSaleMan;
+        fireTableDataChanged();
+    }
+    
 }

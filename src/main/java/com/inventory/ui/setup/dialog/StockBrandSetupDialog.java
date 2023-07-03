@@ -10,7 +10,7 @@ import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.inventory.model.StockBrand;
 import com.inventory.model.StockBrandKey;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.StockBrandTableModel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
@@ -58,6 +58,7 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
 
     /**
      * Creates new form ItemTypeSetupDialog
+     *
      * @param frame
      */
     public StockBrandSetupDialog(JFrame frame) {
@@ -111,6 +112,8 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
 
     private void save() {
         if (isValidEntry()) {
+            progress.setIndeterminate(true);
+            btnSave.setEnabled(false);
             inventoryRepo.saveBrand(brand).subscribe((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
                     listStockBrand.set(selectRow, t);
@@ -118,12 +121,18 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
                     listStockBrand.add(t);
                 }
                 clear();
+            }, (e) -> {
+                progress.setIndeterminate(false);
+                btnSave.setEnabled(true);
+                JOptionPane.showMessageDialog(this, e.getMessage());
             });
 
         }
     }
 
     private void clear() {
+        progress.setIndeterminate(false);
+        btnSave.setEnabled(true);
         txtCode.setText(null);
         txtFilter.setText(null);
         txtName.setText(null);
@@ -184,6 +193,7 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
         jLabel3 = new javax.swing.JLabel();
         txtCode = new javax.swing.JTextField();
         jSeparator1 = new javax.swing.JSeparator();
+        progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Stock Brand Setup");
@@ -320,16 +330,21 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
@@ -396,6 +411,7 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblStatus;
+    private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblBrand;
     private javax.swing.JTextField txtCode;
     private javax.swing.JTextField txtFilter;

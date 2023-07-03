@@ -11,7 +11,7 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.VouStatusTableModel;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
@@ -123,6 +123,8 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
 
     private void save() {
         if (isValidEntry()) {
+            progress.setIndeterminate(true);
+            btnSave.setEnabled(false);
             inventoryRepo.saveVouStatus(vou).subscribe((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
                     listVou.set(selectRow, t);
@@ -130,12 +132,18 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
                     listVou.add(t);
                 }
                 clear();
+            }, (e) -> {
+                progress.setIndeterminate(false);
+                btnSave.setEnabled(true);
+                JOptionPane.showMessageDialog(this, e.getMessage());
             });
 
         }
     }
 
     private void clear() {
+        progress.setIndeterminate(false);
+        btnSave.setEnabled(true);
         txtUserCode.setText(null);
         txtFilter.setText(null);
         txtName.setText(null);
@@ -193,6 +201,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
         jLabel3 = new javax.swing.JLabel();
         txtUserCode = new javax.swing.JTextField();
         jSeparator1 = new javax.swing.JSeparator();
+        progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Voucher Status Setup");
@@ -298,7 +307,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(btnClear)))
                 .addContainerGap())
         );
 
@@ -332,16 +341,21 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 306, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 312, Short.MAX_VALUE)
+                            .addComponent(txtFilter))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
@@ -410,6 +424,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblStatus;
+    private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblVou;
     private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtName;

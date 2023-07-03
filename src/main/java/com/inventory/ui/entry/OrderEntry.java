@@ -29,14 +29,14 @@ import com.inventory.model.SaleMan;
 import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
 import com.inventory.model.VOrder;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import com.inventory.ui.common.OrderTableModel;
 import com.inventory.ui.common.StockBalanceTableModel;
 import com.inventory.ui.entry.dialog.OrderHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
@@ -250,16 +250,21 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
         monoLoc = inventoryRepo.getLocation();
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
+        locationAutoCompleter.setObserver(this);
         monoLoc.subscribe((t) -> {
-            locationAutoCompleter = new LocationAutoCompleter(txtLocation, t, null, false, false);
-            locationAutoCompleter.setObserver(this);
+            locationAutoCompleter.setListLocation(t);
         });
+        currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
-            currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            currAutoCompleter.setObserver(this);
+            currAutoCompleter.setListCurrency(t);
         });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currAutoCompleter.setCurrency(c);
+        });
+        saleManCompleter = new SaleManAutoCompleter(txtSaleman, null, false);
         inventoryRepo.getSaleMan().subscribe((t) -> {
-            saleManCompleter = new SaleManAutoCompleter(txtSaleman, t, null, false, false);
+            saleManCompleter.setListSaleMan(t);
         });
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
         projectAutoCompleter.setObserver(this);
@@ -1627,9 +1632,9 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         switch (source.toString()) {
             case "TRADER" -> {
                 try {
-                   Trader cus = traderAutoCompleter.getTrader();
+                    Trader cus = traderAutoCompleter.getTrader();
                     if (cus != null) {
-                       calDueDate(Util1.getInteger(cus.getCreditDays()));
+                        calDueDate(Util1.getInteger(cus.getCreditDays()));
                     }
                 } catch (Exception ex) {
                     log.error("selected CustomerList : " + selectObj + " - " + ex.getMessage());
@@ -1771,14 +1776,14 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             }
         }
     }
-    
+
     private void calDueDate(Integer day) {
-        Date vouDate = txtOrderDate.getDate();       
+        Date vouDate = txtOrderDate.getDate();
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(vouDate);       
-        calendar.add(Calendar.DAY_OF_MONTH, day);       
+        calendar.setTime(vouDate);
+        calendar.add(Calendar.DAY_OF_MONTH, day);
         Date dueDate = calendar.getTime();
-        txtDueDate.setDate(dueDate);        
+        txtDueDate.setDate(dueDate);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

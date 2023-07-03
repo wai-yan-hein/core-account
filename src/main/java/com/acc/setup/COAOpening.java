@@ -4,7 +4,7 @@
  */
 package com.acc.setup;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.OpeningBalanceTableModel;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.model.OpeningBalance;
@@ -13,7 +13,6 @@ import com.acc.model.ReportFilter;
 import com.acc.editor.COA3CellEditor;
 import com.acc.editor.TraderCellEditor;
 import com.acc.editor.DepartmentCellEditor;
-import com.acc.editor.CurrencyAEditor;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.TraderAAutoCompleter;
 import com.user.editor.CurrencyAutoCompleter;
@@ -25,7 +24,8 @@ import com.common.Util1;
 import com.common.DecimalFormatRender;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
+import com.user.editor.CurrencyEditor;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.editor.ProjectCellEditor;
 import java.awt.Dimension;
@@ -163,12 +163,13 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
             departmenttAutoCompleter = new DepartmentAutoCompleter(txtDept, t, null, true, true);
             departmenttAutoCompleter.setObserver(this);
         });
+        currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
+        currencyAutoCompleter.setObserver(this);
         userRepo.getCurrency().subscribe((t) -> {
-            currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, t, null);
-            currencyAutoCompleter.setObserver(this);
-            userRepo.getDefaultCurrency().subscribe((c) -> {
-                currencyAutoCompleter.setCurrency(c);
-            });
+            currencyAutoCompleter.setListCurrency(t);
+        });
+        userRepo.getDefaultCurrency().subscribe((c) -> {
+            currencyAutoCompleter.setCurrency(c);
         });
         coaAutoCompleter = new COA3AutoCompleter(txtCOA, accountRepo, null, true, 0);
         coaAutoCompleter.setSelectionObserver(this);
@@ -233,7 +234,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         });
         tblOpening.getColumnModel().getColumn(5).setCellEditor(new ProjectCellEditor(userRepo));
         userRepo.getCurrency().subscribe((t) -> {
-            tblOpening.getColumnModel().getColumn(6).setCellEditor(new CurrencyAEditor(t));
+            tblOpening.getColumnModel().getColumn(6).setCellEditor(new CurrencyEditor(t));
         });
         tblOpening.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
         tblOpening.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());

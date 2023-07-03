@@ -11,7 +11,7 @@ import com.inventory.model.VRoleMenu;
 import com.inventory.tree.MyAbstractTreeTableModel;
 import com.inventory.tree.MyDataModel;
 import com.inventory.tree.MyTreeTable;
-import com.user.common.UserRepo;
+import com.repo.UserRepo;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JOptionPane;

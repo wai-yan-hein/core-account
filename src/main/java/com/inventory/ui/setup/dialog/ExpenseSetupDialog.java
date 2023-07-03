@@ -5,7 +5,7 @@
  */
 package com.inventory.ui.setup.dialog;
 
-import com.acc.common.AccountRepo;
+import com.repo.AccountRepo;
 import com.acc.common.COAComboBoxModel;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
@@ -16,7 +16,7 @@ import com.common.Util1;
 import com.inventory.model.Expense;
 import com.inventory.model.ExpenseKey;
 import com.inventory.ui.common.ExpenseTableModel;
-import com.inventory.ui.common.InventoryRepo;
+import com.repo.InventoryRepo;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;

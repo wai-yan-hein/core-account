@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.acc.common;
+package com.repo;
 
 import com.H2Repo;
 import com.acc.model.COAKey;
@@ -30,6 +30,7 @@ import com.common.Global;
 import com.common.ProUtil;
 import com.common.ReturnObject;
 import com.common.Util1;
+import com.model.VoucherInfo;
 import com.user.model.YearEnd;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -686,22 +687,18 @@ public class AccountRepo {
     public Mono<List<VApar>> getArAp(ReportFilter filter) {
         return accountApi.post()
                 .uri("/report/get-arap")
-                .body(Mono.just(filter), ReportFilter.class
-                )
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToFlux(VApar.class
-                )
+                .bodyToFlux(VApar.class)
                 .collectList();
     }
 
     public Mono<List<VTriBalance>> getTri(ReportFilter filter) {
         return accountApi.post()
                 .uri("/report/get-tri-balance")
-                .body(Mono.just(filter), ReportFilter.class
-                )
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToFlux(VTriBalance.class
-                )
+                .bodyToFlux(VTriBalance.class)
                 .collectList();
     }
 
@@ -712,11 +709,9 @@ public class AccountRepo {
         }
         return accountApi.post()
                 .uri("/account/search-gl")
-                .body(Mono.just(filter), ReportFilter.class
-                )
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToFlux(Gl.class
-                )
+                .bodyToFlux(Gl.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.info(
@@ -730,18 +725,18 @@ public class AccountRepo {
         return accountApi
                 .post()
                 .uri("/account/search-voucher")
-                .body(Mono.just(filter), ReportFilter.class
-                )
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToFlux(Gl.class
-                )
+                .bodyToFlux(Gl.class)
                 .collectList();
     }
 
     public Mono<List<DateModel>> getDate() {
+        /* if (localDatabase) {
+        return Mono.just(h2Repo.getDate());
+        }*/
         String startDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
         boolean isAll = Util1.getBoolean(ProUtil.getProperty(ProUtil.DISABLE_ALL_FILTER));
-
         return accountApi.get()
                 .uri(builder -> builder.path("/account/getDate")
                 .queryParam("startDate", startDate)
@@ -749,14 +744,28 @@ public class AccountRepo {
                 .queryParam("isAll", isAll)
                 .build())
                 .retrieve()
-                .bodyToFlux(DateModel.class
-                )
+                .bodyToFlux(DateModel.class)
                 .collectList()
                 .onErrorResume((e) -> {
-                    log.info(
-                            "getDate " + e.getMessage());
-                    return Mono.empty();
-                }
-                );
+                    log.info("getDate " + e.getMessage());
+                    return Mono.error(e);
+                });
+    }
+
+    public Mono<List<VoucherInfo>> getIntegrationVoucher(String fromDate, String toDate, String tranSource) {
+        return accountApi.get()
+                .uri(builder -> builder.path("/account/getIntegrationVoucher")
+                .queryParam("fromDate", fromDate)
+                .queryParam("toDate", toDate)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("tranSource", tranSource)
+                .build())
+                .retrieve()
+                .bodyToFlux(VoucherInfo.class)
+                .collectList()
+                .doOnError((e) -> {
+                    log.error("getIntegrationVoucher :" + e.getMessage());
+                });
+
     }
 }
