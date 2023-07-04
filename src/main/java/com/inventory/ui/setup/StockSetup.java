@@ -150,9 +150,9 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private void initFocusListener() {
         txtUserCode.addFocusListener(fa);
         txtStockName.addFocusListener(fa);
-        txtType.addFocusListener(fa);
-        
         txtBrand.addFocusListener(fa);
+        
+        txtType.addFocusListener(fa);
         txtCat.addFocusListener(fa);
         txtBarCode.addFocusListener(fa);
         txtRelation.addFocusListener(fa);
@@ -183,7 +183,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         tblStock.setModel(stockTableModel);
         tblStock.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblStock.getColumnModel().getColumn(0).setPreferredWidth(1);
-        tblStock.getColumnModel().getColumn(1).setPreferredWidth(10);
+        tblStock.getColumnModel().getColumn(1).setPreferredWidth(50);
         tblStock.getColumnModel().getColumn(2).setPreferredWidth(300);
         tblStock.getColumnModel().getColumn(3).setPreferredWidth(10);
         tblStock.getColumnModel().getColumn(4).setPreferredWidth(50);
@@ -356,7 +356,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             JOptionPane.showMessageDialog(this, "You must choose stock type.",
                     "Stock Type.", JOptionPane.ERROR_MESSAGE);
             status = false;
-            txtType.requestFocus();
+            txtBrand.requestFocus();
         } else if (purUnitCompleter.getStockUnit() == null) {
             JOptionPane.showMessageDialog(this, "Purchase Unit  cannot be blank.",
                     "Stock Unit Pattern.", JOptionPane.ERROR_MESSAGE);
@@ -494,9 +494,9 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtUserCode.addKeyListener(this);
         txtStockName.addKeyListener(this);
         lblRecord.addKeyListener(this);
-        txtType.addKeyListener(this);
-        txtCat.addKeyListener(this);
         txtBrand.addKeyListener(this);
+        txtCat.addKeyListener(this);
+        txtType.addKeyListener(this);
         chkActive.addKeyListener(this);
         btnAddBrand.addKeyListener(this);
         btnAddCategory.addKeyListener(this);
@@ -644,9 +644,9 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtSalePriceE = new javax.swing.JTextField();
         txtSaleUnit = new javax.swing.JTextField();
         btnAddItemType1 = new javax.swing.JButton();
-        txtType = new javax.swing.JTextField();
-        txtCat = new javax.swing.JTextField();
         txtBrand = new javax.swing.JTextField();
+        txtCat = new javax.swing.JTextField();
+        txtType = new javax.swing.JTextField();
         jPanel3 = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
         txtPurUnit = new javax.swing.JTextField();
@@ -737,7 +737,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         });
 
         jLabel2.setFont(Global.lableFont);
-        jLabel2.setText("Stock Type");
+        jLabel2.setText("Stock Group");
 
         btnAddItemType.setBackground(Global.selectionColor);
         btnAddItemType.setFont(Global.lableFont);
@@ -1008,17 +1008,17 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             }
         });
 
-        txtType.setFont(Global.textFont);
-        txtType.setName("txtType"); // NOI18N
+        txtBrand.setFont(Global.textFont);
+        txtBrand.setName("txtBrand"); // NOI18N
 
         txtCat.setFont(Global.textFont);
         txtCat.setName("txtCat"); // NOI18N
 
-        txtBrand.setFont(Global.textFont);
-        txtBrand.setName("txtBrand"); // NOI18N
-        txtBrand.addActionListener(new java.awt.event.ActionListener() {
+        txtType.setFont(Global.textFont);
+        txtType.setName("txtType"); // NOI18N
+        txtType.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtBrandActionPerformed(evt);
+                txtTypeActionPerformed(evt);
             }
         });
 
@@ -1233,8 +1233,8 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(jPanel1Layout.createSequentialGroup()
                                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(txtType)
-                                            .addComponent(txtBrand))
+                                            .addComponent(txtBrand)
+                                            .addComponent(txtType))
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addComponent(btnAddItemType)
@@ -1300,13 +1300,13 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(btnAddItemType)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(txtBrand, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(jLabel2)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(btnAddBrand)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(txtType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtBrand, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(jLabel5))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1533,9 +1533,9 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         // TODO add your handling code here:
     }//GEN-LAST:event_txtPurUnitFocusGained
 
-    private void txtBrandActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBrandActionPerformed
+    private void txtTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTypeActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtBrandActionPerformed
+    }//GEN-LAST:event_txtTypeActionPerformed
 
     private void btnAddItemType1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddItemType1ActionPerformed
         // TODO add your handling code here:
@@ -1758,20 +1758,20 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             case "txtStockName" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
-                        txtType.requestFocus();
+                        txtBrand.requestFocus();
                     
                 }
             }
             case "txtCat" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
-                        txtBrand.requestFocus();
+                        txtType.requestFocus();
                 }
             }
             case "btnAddCategory" -> {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER ->
-                        txtBrand.requestFocus();
+                        txtType.requestFocus();
                 }
             }
             case "txtBrand" -> {

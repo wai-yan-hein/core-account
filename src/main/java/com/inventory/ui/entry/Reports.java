@@ -323,8 +323,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
 
     private void printReport(String reportUrl, String reportName, Map<String, Object> param) {
         filter.setReportName(reportName);
-        inventoryApi
-                .post()
+        inventoryApi.post()
                 .uri("/report/get-report")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()

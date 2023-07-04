@@ -12,7 +12,6 @@ import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.Util1;
 import com.inventory.model.CFont;
-import com.repo.InventoryRepo;
 import java.awt.FileDialog;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -22,52 +21,54 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.Element;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class ChartOfAccountImportDialog extends javax.swing.JDialog {
 
-    private static final Logger log = LoggerFactory.getLogger(ChartOfAccountImportDialog.class);
     private final ChartOfAccountImportTableModel importTableModel = new ChartOfAccountImportTableModel();
     private AccountRepo accountRepo;
-    private InventoryRepo inventoryRepo;
     private final List<ChartOfAccount> listCOA = new ArrayList<>();
     private final HashMap<Integer, Integer> hmZG = new HashMap<>();
     private final HashMap<String, String> hmCOA = new HashMap<>();
+    private ChartOfAccount coaParent;
 
-    public AccountRepo getAccountRepo() {
-        return accountRepo;
+    public void setCoaParent(ChartOfAccount coaParent) {
+        if (coaParent != null) {
+            lblParent.setText(coaParent.getCoaNameEng());
+        }
+        this.coaParent = coaParent;
+
     }
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
 
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
     /**
      * Creates new form CustomerImportDialog
+     *
+     * @param frame
      */
-    public ChartOfAccountImportDialog() {
-        super(Global.parentForm, true);
+    public ChartOfAccountImportDialog(JFrame frame) {
+        super(frame, true);
         initComponents();
     }
 
-    private void initMain() {
+    public void initMain() {
         tblCustomer.setModel(importTableModel);
         tblCustomer.setRowHeight(Global.tblRowHeight);
         tblCustomer.getTableHeader().setFont(Global.tblHeaderFont);
+        tblCustomer.setShowGrid(true);
     }
 
     private void chooseFile() {
@@ -80,7 +81,46 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
         if (directory != null) {
             readFile(dialog.getDirectory() + "\\" + directory);
         }
+    }
 
+    private void readFromTextPane() {
+        if (hasTextContent()) {
+            Document document = txtPane.getDocument();
+            Element root = document.getDefaultRootElement();
+            int lineCount = root.getElementCount();
+            try {
+                for (int i = 0; i < lineCount; i++) {
+                    Element lineElement = root.getElement(i);
+                    int startOffset = lineElement.getStartOffset();
+                    int endOffset = lineElement.getEndOffset();
+                    String line = document.getText(startOffset, endOffset - startOffset);
+                    String[] tmp = line.split("\t");
+                    String userCode = tmp[0];
+                    String coaName = tmp[1];
+                    COAKey key = new COAKey();
+                    key.setCompCode(Global.compCode);
+                    ChartOfAccount coa = new ChartOfAccount();
+                    coa.setKey(key);
+                    coa.setCoaCodeUsr(userCode);
+                    coa.setCoaNameEng(Util1.convertToUniCode(coaName));
+                    coa.setActive(true);
+                    coa.setDeleted(false);
+                    coa.setMacId(Global.macId);
+                    coa.setCreatedBy(Global.loginUser.getUserCode());
+                    coa.setCreatedDate(LocalDateTime.now());
+                    coa.setModifiedDate(LocalDateTime.now());
+                    coa.setOption("USR");
+                    if (coaParent != null) {
+                        coa.setCoaParent(coaParent.getKey().getCoaCode());
+                        coa.setCoaLevel(coaParent.getCoaLevel() + 1);
+                    }
+                    listCOA.add(coa);
+                }
+                importTableModel.setListCOA(listCOA);
+            } catch (BadLocationException e) {
+                log.error("readFromTextPane : " + e.getMessage());
+            }
+        }
     }
 
     private void readFile(String path) {
@@ -99,7 +139,7 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
         int lineCount = 0;
 
         try {
-            try ( FileInputStream fis = new FileInputStream(path);  InputStreamReader isr = new InputStreamReader(fis);  BufferedReader reader = new BufferedReader(isr)) {
+            try (FileInputStream fis = new FileInputStream(path); InputStreamReader isr = new InputStreamReader(fis); BufferedReader reader = new BufferedReader(isr)) {
                 while ((line = reader.readLine()) != null) {
                     ChartOfAccount coa = new ChartOfAccount();
                     String[] data = line.split(splitBy);    // use comma as separator
@@ -130,7 +170,6 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
                     listCOA.add(coa);
                 }
             }
-
             importTableModel.setListCOA(listCOA);
         } catch (IOException e) {
             log.error("Read CSV File :" + e.getMessage());
@@ -140,11 +179,17 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
 
     private void saveCOA() {
         listCOA.forEach((t) -> {
-            accountRepo.saveCOA(t);
-            log.info("saved.");
+            ChartOfAccount coa = accountRepo.saveCOA(t).block();
+            log.info("saved : " + coa.getCoaNameEng());
         });
-        this.dispose();
+        importTableModel.clear();
+        txtPane.setText(null);
+    }
 
+    private boolean hasTextContent() {
+        Document document = txtPane.getDocument();
+        int length = document.getLength();
+        return length > 0;
     }
 
     private String getZawgyiText(String text) {
@@ -196,6 +241,11 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
         jButton3 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         txtLevel = new javax.swing.JTextField();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        txtPane = new javax.swing.JTextPane();
+        jLabel2 = new javax.swing.JLabel();
+        lblParent = new javax.swing.JLabel();
+        jButton4 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -251,6 +301,19 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
 
         txtLevel.setFont(Global.lableFont);
 
+        jScrollPane2.setViewportView(txtPane);
+
+        jLabel2.setText("Parent Code");
+
+        lblParent.setText("-");
+
+        jButton4.setText("Read");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -258,19 +321,29 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                    .addGroup(layout.createSequentialGroup()
                         .addComponent(chkIntegra)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtLevel, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButton3)
+                        .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lblParent, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 40, Short.MAX_VALUE)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(txtLevel, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton2)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButton1)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton1))
+                    .addComponent(jScrollPane2)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jButton4)))
                 .addContainerGap())
         );
 
@@ -280,7 +353,12 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 304, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jButton4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane2)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
@@ -288,7 +366,9 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
                     .addComponent(chkIntegra)
                     .addComponent(jButton3)
                     .addComponent(txtLevel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel2)
+                    .addComponent(lblParent))
                 .addContainerGap())
         );
 
@@ -302,7 +382,6 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         // TODO add your handling code here:
-        initMain();
     }//GEN-LAST:event_formComponentShown
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
@@ -319,6 +398,11 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
         // TODO add your handling code here:
     }//GEN-LAST:event_chkIntegraActionPerformed
 
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        // TODO add your handling code here:
+        readFromTextPane();
+    }//GEN-LAST:event_jButton4ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -328,9 +412,14 @@ public class ChartOfAccountImportDialog extends javax.swing.JDialog {
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JLabel lblParent;
     private javax.swing.JTable tblCustomer;
     private javax.swing.JTextField txtLevel;
+    private javax.swing.JTextPane txtPane;
     // End of variables declaration//GEN-END:variables
 }

@@ -8,18 +8,17 @@ import com.acc.model.ChartOfAccount;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author wai yan
  */
+@Slf4j
 public class ChartOfAccountImportTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(ChartOfAccountImportTableModel.class);
     private List<ChartOfAccount> listCOA = new ArrayList();
-    private String[] columnNames = {"Code", "User Code", "Name", "Parent Code", "Option", "Company Id", "Active"};
+    private String[] columnNames = {"User Code", "Coa Name", "Parent Code"};
 
     @Override
     public String getColumnName(int column) {
@@ -28,17 +27,12 @@ public class ChartOfAccountImportTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return false;
+        return true;
     }
 
     @Override
     public Class getColumnClass(int column) {
-        return switch (column) {
-            case 6 ->
-                Boolean.class;
-            default ->
-                String.class;
-        };
+        return String.class;
     }
 
     @Override
@@ -46,22 +40,13 @@ public class ChartOfAccountImportTableModel extends AbstractTableModel {
 
         try {
             ChartOfAccount coa = listCOA.get(row);
-
             return switch (column) {
                 case 0 ->
-                    coa.getMigCode();
-                case 1 ->
                     coa.getCoaCodeUsr();
-                case 2 ->
+                case 1 ->
                     coa.getCoaNameEng();
-                case 3 ->
+                case 2 ->
                     coa.getCoaParent();
-                case 4 ->
-                    coa.getOption();
-                case 5 ->
-                    coa.getKey().getCompCode();
-                case 6 ->
-                    coa.isActive();
                 default ->
                     null;
             }; //Id
@@ -70,7 +55,6 @@ public class ChartOfAccountImportTableModel extends AbstractTableModel {
         } catch (Exception ex) {
             log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
-
         return null;
     }
 
@@ -81,9 +65,6 @@ public class ChartOfAccountImportTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        if (listCOA == null) {
-            return 0;
-        }
         return listCOA.size();
     }
 
