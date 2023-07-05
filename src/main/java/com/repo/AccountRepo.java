@@ -112,14 +112,15 @@ public class AccountRepo {
 
     public Flux<TraderA> getTrader(String text) {
         if (localDatabase) {
-            return h2Repo.findTraderAccount(text);
+            return h2Repo.getTrader(text);
         }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/search-trader")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("text", text)
                 .build())
-                .retrieve().bodyToFlux(TraderA.class);
+                .retrieve()
+                .bodyToFlux(TraderA.class);
     }
 
     public Flux<ChartOfAccount> getChartOfAccount() {
@@ -328,24 +329,21 @@ public class AccountRepo {
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve()
-                .bodyToFlux(DepartmentA.class
-                )
+                .bodyToFlux(DepartmentA.class)
                 .collectList();
     }
 
-    public Double
-            getTraderBalance(String date, String traderCode, String compCode) {
+    public Double getTraderBalance(String date, String traderCode, String curCode, String compCode) {
         try {
             return accountApi.get()
                     .uri(builder -> builder.path("/report/get-trader-balance")
                     .queryParam("date", date)
                     .queryParam("traderCode", traderCode)
+                    .queryParam("curCode", curCode)
                     .queryParam("compCode", compCode)
                     .build())
                     .retrieve()
-                    .bodyToMono(Double.class
-                    )
-                    .block();
+                    .bodyToMono(Double.class).block();
         } catch (Exception e) {
             log.error("getTraderBalance : " + e.getMessage());
         }
@@ -514,17 +512,13 @@ public class AccountRepo {
     public Mono<TmpOpening> getOpening(ReportFilter filter) {
         return accountApi.post()
                 .uri("/account/get-coa-opening")
-                .body(Mono.just(filter), ReportFilter.class
-                )
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToMono(TmpOpening.class
-                )
+                .bodyToMono(TmpOpening.class)
                 .onErrorResume((e) -> {
-                    log.info(
-                            "getOpening " + e.getMessage());
+                    log.info("getOpening " + e.getMessage());
                     return Mono.empty();
-                }
-                );
+                });
     }
 
     public Mono<StockOP> save(StockOP op) {
@@ -665,11 +659,9 @@ public class AccountRepo {
     public Mono<List<OpeningBalance>> getOpeningBalance(ReportFilter filter) {
         return accountApi.post()
                 .uri("/account/get-opening")
-                .body(Mono.just(filter), ReportFilter.class
-                )
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToFlux(OpeningBalance.class
-                )
+                .bodyToFlux(OpeningBalance.class)
                 .collectList();
     }
 

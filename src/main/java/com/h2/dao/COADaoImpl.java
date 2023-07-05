@@ -7,6 +7,8 @@ package com.h2.dao;
 import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import com.common.Util1;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,9 +50,9 @@ public class COADaoImpl extends AbstractDao<COAKey, ChartOfAccount> implements C
 
     @Override
     public List<ChartOfAccount> getCOA(String headCode, String compCode) {
-        String sql = "select coa.coa_code,coa.comp_code,coa.coa_name_eng\n" + "from chart_of_account coa join(\n" +
-                "select coa_code,comp_code\n" + "from chart_of_account\n" + "where coa_parent ='" + headCode + "'\n" + 
-                "and comp_code ='" + compCode + "'\n" + ")a\n" + "on coa.coa_parent = a.coa_code\n" + "and coa.comp_code = a.comp_code\n" + "where coa.coa_level =3";
+        String sql = "select coa.coa_code,coa.comp_code,coa.coa_name_eng\n" + "from chart_of_account coa join(\n"
+                + "select coa_code,comp_code\n" + "from chart_of_account\n" + "where coa_parent ='" + headCode + "'\n"
+                + "and comp_code ='" + compCode + "'\n" + ")a\n" + "on coa.coa_parent = a.coa_code\n" + "and coa.comp_code = a.comp_code\n" + "where coa.coa_level =3";
         List<Map<String, Object>> result = getList(sql);
         List<ChartOfAccount> list = new ArrayList<>();
         result.forEach((row) -> {
@@ -119,44 +121,48 @@ public class COADaoImpl extends AbstractDao<COAKey, ChartOfAccount> implements C
     @Override
     public List<ChartOfAccount> searchCOA(String str, Integer level, String compCode) {
         List<ChartOfAccount> list = new ArrayList<>();
-        String sql = "select a.*,c1.coa_code group_code,c1.coa_code_usr group_usr_code,c1.coa_name_eng group_name,c2.coa_code head_code,"
-                + "c2.coa_code_usr head_usr_code,c2.coa_name_eng head_name\n" +
-                "from (\n" +
-                "select coa_code,coa_code_usr,coa_name_eng,coa_parent,comp_code,coa_level\n" +
-                "from chart_of_account\n" +
-                "where active = TRUE\n" +
-                "and deleted = FALSE\n" +
-                "and (coa_level =" + level + " or 0 =" + level + ")\n" +
-                "and comp_code ='" + compCode + "'\n" +
-//                "and (coa_code_usr like '" + str + "%' or coa_name_eng like '" + str + "%')\n" +
-                " and (LOWER(REPLACE(coa_code_usr, ' ', '')) like '" + str + "%' or LOWER(REPLACE(coa_name_eng, ' ', '')) like '" + str + "%') \n" +
-                "limit 20\n" + ")a\n" +
-                "left join chart_of_account c1\n" +
-                "on a.coa_parent = c1.coa_code\n" +
-                "and a.comp_code = c1.comp_code\n" +
-                "left join chart_of_account c2\n" +
-                "on c1.coa_parent = c2.coa_code\n" +
-                "and c1.comp_code = c2.comp_code";
-        List<Map<String, Object>> result = getList(sql);
-        result.forEach((rs) -> {
-            ChartOfAccount coa = new ChartOfAccount();
-            //coa_code, coa_code_usr, coa_name_eng, group_code, group_usr_code, group_name, head_code, head_usr_code, head_name
-            COAKey key = new COAKey();
-            key.setCoaCode(Util1.getString(rs.get("coa_code")));
-            key.setCompCode(compCode);
-            coa.setKey(key);
-            coa.setCoaCodeUsr(Util1.getString(rs.get("coa_code_usr")));
-            coa.setCoaNameEng(Util1.getString(rs.get("coa_name_eng")));
-            coa.setGroupCode(Util1.getString(rs.get("group_code")));
-            coa.setGroupUsrCode(Util1.getString(rs.get("group_usr_code")));
-            coa.setGroupName(Util1.getString(rs.get("group_name")));
-            coa.setHeadCode(Util1.getString(rs.get("head_code")));
-            coa.setHeadUsrCode(Util1.getString(rs.get("head_usr_code")));
-            coa.setHeadName(Util1.getString(rs.get("head_name")));
-            coa.setCoaLevel(Util1.getInteger(rs.get("coa_level")));
-            list.add(coa);
-
-        });
+        str = Util1.cleanStr(str);
+        str = str + "%";
+        String sql = """
+                     select a.*,c1.coa_code group_code,c1.coa_code_usr group_usr_code,c1.coa_name_eng group_name,c2.coa_code head_code,c2.coa_code_usr head_usr_code,c2.coa_name_eng head_name
+                     from (
+                     select coa_code,coa_code_usr,coa_name_eng,coa_parent,comp_code,coa_level
+                     from chart_of_account
+                     where active = true
+                     and deleted = false
+                     and (coa_level =? or 0 =?)
+                     and comp_code =?
+                     and (LOWER(REPLACE(coa_code_usr, ' ', '')) like ? or LOWER(REPLACE(coa_name_eng, ' ', '')) like ?)
+                     limit 20
+                     )a
+                     left join chart_of_account c1
+                     on a.coa_parent = c1.coa_code
+                     and a.comp_code = c1.comp_code
+                     left join chart_of_account c2
+                     on c1.coa_parent = c2.coa_code
+                     and c1.comp_code = c2.comp_code""";
+        ResultSet rs = getResult(sql, level, level, compCode, str, str);
+        try {
+            while (rs.next()) {
+                ChartOfAccount coa = new ChartOfAccount();
+                COAKey key = new COAKey();
+                key.setCoaCode(rs.getString("coa_code"));
+                key.setCompCode(compCode);
+                coa.setKey(key);
+                coa.setCoaCodeUsr(rs.getString("coa_code_usr"));
+                coa.setCoaNameEng(rs.getString("coa_name_eng"));
+                coa.setGroupCode(rs.getString("group_code"));
+                coa.setGroupUsrCode(rs.getString("group_usr_code"));
+                coa.setGroupName(rs.getString("group_name"));
+                coa.setHeadCode(rs.getString("head_code"));
+                coa.setHeadUsrCode(rs.getString("head_usr_code"));
+                coa.setHeadName(rs.getString("head_name"));
+                coa.setCoaLevel(rs.getInt("coa_level"));
+                list.add(coa);
+            }
+        } catch (SQLException e) {
+            log.error("searchCOA : " + e.getMessage());
+        }
         return list;
     }
 }

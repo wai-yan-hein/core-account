@@ -654,7 +654,7 @@ public class H2Repo {
         return Flux.fromIterable(traderAccService.findAll(Global.compCode));
     }
 
-    public Flux<TraderA> findTraderAccount(String str) {
+    public Flux<TraderA> getTrader(String str) {
         return Flux.fromIterable(traderAccService.getTrader(str, Global.compCode));
     }
 
