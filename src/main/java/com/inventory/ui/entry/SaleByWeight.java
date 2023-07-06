@@ -368,7 +368,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             if (Util1.getBoolean(ProUtil.getProperty("trader.balance"))) {
                 String date = Util1.toDateStr(txtSaleDate.getDate(), "yyyy-MM-dd");
                 String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
-                balance = accountRepo.getTraderBalance(date, traderCode, Global.compCode);
+                balance = accountRepo.getTraderBalance(date, traderCode, saleHis.getCurCode(), Global.compCode);
                 if (balance != 0) {
                     prvBal = balance - Util1.getDouble(txtVouBalance.getValue());
                 }

@@ -356,7 +356,9 @@ public final class BatchNoAutoCompeter implements KeyListener {
                         t.add(s);
                     }
                     despModel.setListAutoText(t);
-                    table.setRowSelectionInterval(0, 0);
+                    if (!t.isEmpty()) {
+                        table.setRowSelectionInterval(0, 0);
+                    }
                 }, (err) -> {
                     log.error(err.getMessage());
                 });

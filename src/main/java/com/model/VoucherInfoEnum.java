@@ -9,5 +9,5 @@ package com.model;
  * @author DELL
  */
 public enum VoucherInfoEnum {
-    SALE, PURCHASE, RETURN_IN, RETURN_OUT, OPD, OT, DC, PAYMENT, BILL
+    SALE, PURCHASE, RETURN_IN, RETURN_OUT, OPD, OT, DC, PAYMENT, BILL, EXPENSE
 }
