@@ -39,6 +39,7 @@ import com.inventory.ui.entry.Purchase;
 import com.inventory.ui.entry.PurchaseByWeight;
 import com.inventory.ui.entry.RFID;
 import com.inventory.ui.entry.CustomerPayment;
+import com.inventory.ui.entry.PurchaseExport;
 import com.inventory.ui.entry.ReorderLevelEntry;
 import com.inventory.ui.entry.ReturnIn;
 import com.inventory.ui.entry.ReturnOut;
@@ -129,6 +130,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private Purchase purchase;
     @Autowired
     private PurchaseByWeight purchaseByWeight;
+    @Autowired
+    private PurchaseExport purchaseExport;
     @Autowired
     private ReturnIn retIn;
     @Autowired
@@ -442,6 +445,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 purchaseByWeight.setProgress(progress);
                 purchaseByWeight.initMain();
                 return purchaseByWeight;
+            }
+            case "Purchase Export" -> {
+                purchaseExport.setName(menuName);
+                purchaseExport.setObserver(this);
+                purchaseExport.setProgress(progress);
+                purchaseExport.initMain();
+                return purchaseExport;
             }
             case "Return In" -> {
                 retIn.setName(menuName);
