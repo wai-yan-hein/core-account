@@ -49,19 +49,25 @@ public class TraderInvDaoImpl extends AbstractDao<TraderKey, Trader> implements 
 
     @Override
     public List<Trader> searchTrader(String str, String type, String compCode, Integer deptId) {
-        String filter = "where active = TRUE\n"
-                + "and deleted = FALSE\n"
-                + "and comp_code ='" + compCode + "'\n"
-                + "and (dept_id =" + deptId + " or 0 =" + deptId + ")\n"
-                + "and (LOWER(REPLACE(user_code, ' ', '')) like '" + str + "%' or LOWER(REPLACE(trader_name, ' ', '')) like '" + str + "%') \n";
+       str = Util1.cleanStr(str);
+        str = str + "%";
+        String filter = """
+                where active = true
+                and deleted = false
+                and comp_code =?
+                and (dept_id =? or 0 =?)
+                and (LOWER(REPLACE(user_code, ' ', '')) like ? or LOWER(REPLACE(trader_name, ' ', '')) like ?)
+                """;
         if (!type.equals("-")) {
-            filter += "and (multi = TRUE or type ='" + type + "')";
+            filter += "and (multi =true or type ='" + type + "')";
         }
-        String sql = "select code,user_code,trader_name,price_type,type,address,credit_amt,credit_days\n"
-                + "from trader\n" + filter + "\n"
-                + "order by user_code,trader_name\n"
-                + "limit 100\n";
-        ResultSet rs = getResult(sql);
+        String sql = """
+                     select code,user_code,trader_name,price_type,type,address,credit_amt,credit_days
+                     from trader
+                     """ + filter + "\n" +
+                "order by user_code,trader_name\n" +
+                "limit 100\n";
+        ResultSet rs = getResult(sql, compCode, deptId, deptId, str, str);
         List<Trader> list = new ArrayList<>();
         try {
             if (rs != null) {
@@ -77,7 +83,7 @@ public class TraderInvDaoImpl extends AbstractDao<TraderKey, Trader> implements 
                     t.setPriceType(rs.getString("price_type"));
                     t.setType(rs.getString("type"));
                     t.setAddress(rs.getString("address"));
-                    t.setCreditAmt(rs.getFloat("credit_amt"));                  
+                    t.setCreditAmt(rs.getFloat("credit_amt"));
                     t.setCreditDays(rs.getInt("credit_days"));
                     list.add(t);
                 }

@@ -49,28 +49,28 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
     }
 
     @Override
-    public List<Stock> getStock(String str, String compCode,Integer deptId) {
-        str = Util1.cleanString(str);
-        List<Stock> list = getStockList("LOWER(REPLACE(s.user_code, ' ', '')) like '" + str + "%'", compCode);
-        if (list.isEmpty()) {
-            list = getStockList("LOWER(REPLACE(s.stock_name, ' ', '')) like '" + str + "%'", compCode);
-        }
-        return list;
+    public List<Stock> getStock(String str, String compCode, Integer deptId) {
+        str = Util1.cleanStr(str);
+        str = str + "%";
+        return getStockList(str, compCode, deptId);
     }
 
-    private List<Stock> getStockList(String filter, String compCode) {
+    private List<Stock> getStockList(String str, String compCode, Integer deptId) {
         List<Stock> listStock = new ArrayList<>();
         String sql = """
-        select s.*,rel.rel_name,st.stock_type_name,cat.cat_name,b.brand_name
-        from stock s
-        join unit_relation rel on s.rel_code= rel.rel_code
-        left join stock_type st on s.stock_type_code = st.stock_type_code
-        left join category cat  on s.category_code = cat.cat_code
-        left join stock_brand b on s.brand_code  = b.brand_code
-        where s.comp_code ='""" + compCode + "'\n" + "and s.active =true\n"
-                + "and " + filter + "\n"
-                + "order by s.user_code,s.stock_name\n" + "limit 100";
-        ResultSet rs = getResult(sql);
+                select s.*,rel.rel_name,st.stock_type_name,cat.cat_name,b.brand_name
+                from stock s
+                join unit_relation rel on s.rel_code= rel.rel_code
+                left join stock_type st on s.stock_type_code = st.stock_type_code
+                left join category cat  on s.category_code = cat.cat_code
+                left join stock_brand b on s.brand_code  = b.brand_code
+                where s.deleted = false and s.comp_code =?
+                and s.active = true
+                and (s.dept_id = ? or 0 =?)
+                and (LOWER(REPLACE(s.user_code, ' ', '')) like ? or LOWER(REPLACE(s.stock_name, ' ', '')) like ?)
+                order by s.user_code,s.stock_name
+                limit 100""";
+        ResultSet rs = getResult(sql, compCode, deptId, deptId, str, str);
         if (rs != null) {
             try {
                 while (rs.next()) {
@@ -108,7 +108,7 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
                     s.setExplode(rs.getBoolean("explode"));
                     listStock.add(s);
                 }
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 log.error(e.getMessage());
             }
         }

@@ -8,6 +8,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
+import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.time.LocalDateTime;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -97,8 +97,19 @@ public abstract class AbstractDao<PK extends Serializable, T> {
     @Transactional
     public ResultSet getResult(String sql) {
         return jdbcTemplate.execute((ConnectionCallback<ResultSet>) con -> {
-            Statement stmt = con.createStatement();
+            PreparedStatement stmt = con.prepareStatement(sql);
             return stmt.executeQuery(sql);
+        });
+    }
+
+    @Transactional
+    public ResultSet getResult(String sql, Object... params) {
+        return jdbcTemplate.execute((ConnectionCallback<ResultSet>) con -> {
+            PreparedStatement stmt = con.prepareStatement(sql);
+            for (int i = 0; i < params.length; i++) {
+                stmt.setObject(i + 1, params[i]);
+            }
+            return stmt.executeQuery();
         });
     }
 }

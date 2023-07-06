@@ -359,7 +359,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
             if (Util1.getBoolean(ProUtil.getProperty("trader.balance"))) {
                 String date = Util1.toDateStr(txtSaleDate.getDate(), "yyyy-MM-dd");
                 String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
-                balance = accountRepo.getTraderBalance(date, traderCode, Global.compCode);
+                balance = accountRepo.getTraderBalance(date, traderCode, saleHis.getCurCode(), Global.compCode);
                 if (balance != 0) {
                     prvBal = balance - Util1.getDouble(txtVouBalance.getValue());
                 }
@@ -1562,7 +1562,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
             case "SALE-HISTORY" -> {
                 if (selectObj instanceof VSale s) {
                     boolean local = s.isLocal();
-                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId(),local).subscribe((t) -> {
+                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId(), local).subscribe((t) -> {
                         t.setLocal(local);
                         setSaleVoucher(t);
                     });

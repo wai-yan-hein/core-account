@@ -260,8 +260,8 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     private void calTotal(List<VApar> list) {
         double drAmt = list.stream().mapToDouble((value) -> Util1.getDouble(value.getDrAmt())).sum();
         double crAmt = list.stream().mapToDouble((value) -> Util1.getDouble(value.getCrAmt())).sum();
-        txtFTotalCrAmt.setValue(drAmt);
-        txtFTotalDrAmt.setValue(crAmt);
+        txtFTotalDrAmt.setValue(drAmt);
+        txtFTotalCrAmt.setValue(crAmt);
         txtFOFB.setValue(drAmt - crAmt);
     }
 

@@ -984,4 +984,11 @@ public class Util1 {
         }
         return null; // Handle the failure to convert to byte array
     }
+
+    public static String cleanStr(String str) {
+        if (str != null) {
+            return str.replaceAll(" ", "").toLowerCase();
+        }
+        return "";
+    }
 }
