@@ -33,10 +33,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PurchaseExportTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Description", "Relation", "Length", "Width", "M", "Location",
-        "Weight", "Weight Unit", "Qty", "Unit", "Std-Weight", "Total Qty", "Price", "Amount"};
-//    {"Code", "Description", "Relation", "Location",
-//        "Weight", "Weight Unit", "Qty", "Unit", "Std-Weight", "Total Qty", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Description", "Relation", "Length", "Width", "Moisturizer", "Location",
+        "Weight", "Weight Unit", "Qty", "Unit", "Std-Weight", "Total Weight", "Price", "Amount"};
     private JTable parent;
     private List<PurHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
@@ -123,7 +121,7 @@ public class PurchaseExportTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 0, 2, 3, 4, 5, 7, 9, 11, 12, 13, 14 ->
+            case 0, 2, 3, 4, 7, 8, 9, 11, 12, 13, 14 ->
                 Float.class;
             default ->
                 String.class;
@@ -235,19 +233,23 @@ public class PurchaseExportTableModel extends AbstractTableModel {
                             addNewRow();
                         }
                     }
-                    parent.setColumnSelectionInterval(4, 4);
-                }
-                case 2 -> {
-//                        return record.getRelName();
+                    parent.setColumnSelectionInterval(3, 3);
                 }
                 case 3 -> {
-//                        return record.getLength();
+                    if (Util1.isNumber(value)) {
+                        record.setLength(Util1.getFloat(value));
+                    }
+                    parent.setColumnSelectionInterval(4, 4);
                 }
                 case 4 -> {
-//                        return record.getWidth();
+                    if (Util1.isNumber(value)) {
+                        record.setWidth(Util1.getFloat(value));
+                    }
+                    parent.setColumnSelectionInterval(5, 5);
                 }
                 case 5 -> {
-//                        return record.getMPercent();
+                    record.setMPercent(value.toString());
+                    parent.setColumnSelectionInterval(7, 7);
                 }
                 case 6 -> {
                     //Loc
@@ -260,6 +262,9 @@ public class PurchaseExportTableModel extends AbstractTableModel {
                     //weight
                     if (Util1.isNumber(value)) {
                         record.setWeight(Util1.getFloat(value));
+                        if (record.getQty() != null && record.getWeight() != null) {
+                            record.setTotalWeight(Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight()));
+                        }
                     }
                 }
                 case 8 -> {
@@ -272,6 +277,9 @@ public class PurchaseExportTableModel extends AbstractTableModel {
                     //Qty
                     if (Util1.isNumber(value)) {
                         record.setQty(Util1.getFloat(value));
+                        if (record.getQty() != null && record.getWeight() != null) {
+                            record.setTotalWeight(Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight()));
+                        }
                         parent.setRowSelectionInterval(row, row);
                     }
                 }

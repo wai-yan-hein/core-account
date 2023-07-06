@@ -48,6 +48,14 @@ public class PurHisDetail implements Serializable {
     private String weightUnit;
     @Column(name = "std_weight")
     private Float stdWeight;
+    @Column(name = "length")
+    private Float length;
+    @Column(name = "width")
+    private Float width;
+    @Column(name = "total_weight")
+    private Float totalWeight;
+    @Column(name = "m_percent")
+    private String mPercent;
 
     @Transient
     private String userCode;
@@ -63,12 +71,4 @@ public class PurHisDetail implements Serializable {
     private String relName;
     @Transient
     private String locName;
-    @Transient
-    private Float length;
-    @Transient
-    private Float width;
-    @Transient
-    private Float totalWeight;
-    @Transient
-    private String mPercent;
 }

@@ -121,7 +121,7 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 0, 1, 2, 3, 5, 7 ->
+            case 0, 1, 2, 3, 7 ->
                 Float.class;
             default ->
                 String.class;
