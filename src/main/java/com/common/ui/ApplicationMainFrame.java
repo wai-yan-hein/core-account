@@ -5,7 +5,6 @@
  */
 package com.common.ui;
 
-import com.CloudIntegration;
 import com.CoreAccountApplication;
 import com.repo.AccountRepo;
 import com.acc.entry.AllCash;
@@ -26,6 +25,7 @@ import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.repo.UserRepo;
 import com.common.Util1;
+import com.h2.dao.DateFilterRepo;
 import com.user.setup.MenuSetup;
 import com.user.model.DepartmentUser;
 import com.inventory.model.VRoleMenu;
@@ -39,6 +39,7 @@ import com.inventory.ui.entry.Purchase;
 import com.inventory.ui.entry.PurchaseByWeight;
 import com.inventory.ui.entry.RFID;
 import com.inventory.ui.entry.CustomerPayment;
+import com.inventory.ui.entry.PurchaseExport;
 import com.inventory.ui.entry.MillingEntry;
 import com.inventory.ui.entry.ReorderLevelEntry;
 import com.inventory.ui.entry.ReturnIn;
@@ -131,6 +132,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     @Autowired
     private PurchaseByWeight purchaseByWeight;
     @Autowired
+    private PurchaseExport purchaseExport;
+    @Autowired
     private ReturnIn retIn;
     @Autowired
     private ReturnOut retOut;
@@ -209,10 +212,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     @Autowired
     private String hostName;
     @Autowired
-    private CloudIntegration integration;
-    @Autowired
     private HMSIntegration hmsIntegration;
-
+    @Autowired
+    private DateFilterRepo dateFilterRepo;
     private PanelControl control;
     private final HashMap<String, JPanel> hmPanel = new HashMap<>();
     private final ActionListener menuListener = (java.awt.event.ActionEvent evt) -> {
@@ -396,6 +398,10 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         if (hmPanel.containsKey(menuName)) {
             return hmPanel.get(menuName);
         }
+        if (Global.deptId == null || Global.deptId == 0) {
+            JOptionPane.showMessageDialog(this, "No deapartment assign. Please logout.");
+            return null;
+        }
         switch (menuName) {
             case "Sale" -> {
                 sale.setName(menuName);
@@ -445,6 +451,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 purchaseByWeight.setProgress(progress);
                 purchaseByWeight.initMain();
                 return purchaseByWeight;
+            }
+            case "Purchase Export" -> {
+                purchaseExport.setName(menuName);
+                purchaseExport.setObserver(this);
+                purchaseExport.setProgress(progress);
+                purchaseExport.initMain();
+                return purchaseExport;
             }
             case "Return In" -> {
                 retIn.setName(menuName);
@@ -797,7 +810,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             } else {
                 assignCompany(t.get(0));
             }
-            integration.start();
             initDate();
             departmentAssign();
             initMenu();
@@ -811,11 +823,15 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void initDate() {
-        accounRepo.getDate().subscribe((t) -> {
-            Global.listDate = t;
-        }, (e) -> {
-            log.error(e.getMessage());
-        });
+        Global.listDate = accounRepo.getDate(true).block();
+        if (Global.listDate == null || Global.listDate.isEmpty()) {
+            accounRepo.getDate(false).subscribe((t) -> {
+                dateFilterRepo.saveAll(t);
+                Global.listDate = t;
+            }, (e) -> {
+                log.error(e.getMessage());
+            });
+        }
     }
 
     private void assignCompany(VRoleCompany vuca) {

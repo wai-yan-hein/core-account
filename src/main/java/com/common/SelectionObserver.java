@@ -12,4 +12,5 @@ package com.common;
 public interface SelectionObserver {
 
     void selected(Object source, Object selectObj);
+
 }

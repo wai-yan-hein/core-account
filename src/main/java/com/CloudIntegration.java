@@ -8,7 +8,7 @@ import com.repo.AccountRepo;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
 import com.common.Global;
-import com.h2.dao.DateFilterRepo;
+import com.common.SelectionObserver;
 import com.h2.service.BrandService;
 import com.h2.service.BusinessTypeService;
 import com.h2.service.COAService;
@@ -59,13 +59,11 @@ import com.inventory.model.TransferHis;
 import com.inventory.model.WeightLossHis;
 import com.repo.InventoryRepo;
 import com.repo.UserRepo;
-import java.time.Duration;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.TaskScheduler;
 
 /**
  *
@@ -143,8 +141,6 @@ public class CloudIntegration {
     @Autowired
     private TraderAService traderService;
     @Autowired
-    private TaskScheduler taskScheduler;
-    @Autowired
     private DepartmentAccService departmentAService;
     @Autowired
     private GlService glService;
@@ -164,14 +160,19 @@ public class CloudIntegration {
     private WeightLossService weightLossService;
     @Autowired
     private ProcessHisService processHisService;
-    @Autowired
-    private DateFilterRepo dateFilterRepo;
+    private SelectionObserver observer;
+
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
+    }
 
     public void startDownload() {
         if (localDatabase) {
+            log.info("download start.");
             downloadUser();
             downloadInventory();
             downloadAccount();
+            log.info("download end.");
         }
     }
 
@@ -362,17 +363,9 @@ public class CloudIntegration {
     }
 
     private void downloadAccount() {
-        downloadDate();
         downloadDepartmentAccount();
         downloadTraderAccount();
         downloadChartofAccount();
-    }
-
-    private void downloadDate() {
-        accountRepo.getDate().subscribe((t) -> {
-            dateFilterRepo.saveAll(t);
-            log.info("downloadDate.");
-        });
     }
 
     private void downloadChartofAccount() {
@@ -384,7 +377,7 @@ public class CloudIntegration {
             });
             log.info("downloadChartOfAccount done.");
         }, (e) -> {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
         });
     }
 
@@ -396,7 +389,7 @@ public class CloudIntegration {
             });
             log.info("downloadTrader done.");
         }, (e) -> {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
         });
     }
 
@@ -408,7 +401,7 @@ public class CloudIntegration {
             });
             log.info("downloadDepartmentAccount done.");
         }, (e) -> {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
         });
     }
 
@@ -418,9 +411,9 @@ public class CloudIntegration {
             u.forEach((a) -> {
                 userService.save(a);
             });
-            log.info("downloadAppUser done.");
+            observer.selected("download", "downloadAppUser done.");
         }, (err) -> {
-            log.info(err.getMessage());
+            log.error(err.getMessage());
         });
     }
 
@@ -430,9 +423,9 @@ public class CloudIntegration {
             b.forEach((a) -> {
                 businessTypeService.save(a);
             });
-            log.info("downloadAppUser done.");
+            observer.selected("download", "downloadAppUser done.");
         }, (err) -> {
-            log.info(err.getMessage());
+            log.error(err.getMessage());
         });
     }
 
@@ -442,9 +435,9 @@ public class CloudIntegration {
             c.forEach((a) -> {
                 companyInfoService.save(a);
             });
-            log.info("downloadCompanyInfo done.");
+            observer.selected("download", "downloadCompanyInfo done.");
         }, (err) -> {
-            log.info(err.getMessage());
+            log.error(err.getMessage());
         });
     }
 
@@ -454,9 +447,9 @@ public class CloudIntegration {
             c.forEach((a) -> {
                 currencyService.save(a);
             });
-            log.info("downloadCurrency done.");
+            observer.selected("download", "downloadCurrency done.");
         }, (err) -> {
-            log.info(err.getMessage());
+            log.error(err.getMessage());
         });
     }
 
@@ -466,9 +459,9 @@ public class CloudIntegration {
             d.forEach((a) -> {
                 departmentService.save(a);
             });
-            log.info("downloadDepartment done.");
+            observer.selected("download", "downloadDepartment done.");
         }, (err) -> {
-            log.info(err.getMessage());
+            log.error(err.getMessage());
         });
     }
 
@@ -478,9 +471,9 @@ public class CloudIntegration {
             ex.forEach((a) -> {
                 exchangeRateService.save(a);
             });
-            log.info("downloadExchangeRate done.");
+            observer.selected("download", "downloadExchangeRate done.");
         }, (err) -> {
-            log.info(err.getMessage());
+            log.error(err.getMessage());
         });
     }
 
@@ -490,9 +483,9 @@ public class CloudIntegration {
             m.forEach((a) -> {
                 machineInfoService.save(a);
             });
-            log.info("downloadMachineInfo done.");
+            observer.selected("download", "downloadMachineInfo done.");
         }, (err) -> {
-            log.info(err.getMessage());
+            log.error(err.getMessage());
         });
     }
 
@@ -502,9 +495,9 @@ public class CloudIntegration {
             m.forEach((a) -> {
                 macPropertyService.save(a);
             });
-            log.info("downloadMacProperty done.");
+            observer.selected("download", "downloadMacProperty done.");
         }, (err) -> {
-            log.info(err.getMessage());
+            log.error(err.getMessage());
         });
     }
 
@@ -514,9 +507,9 @@ public class CloudIntegration {
             m.forEach((a) -> {
                 menuService.save(a);
             });
-            log.info("downloadMenu done.");
+            observer.selected("download", "downloadMenu done.");
         }, (err) -> {
-            log.info(err.getMessage());
+            log.error(err.getMessage());
         });
     }
 
@@ -526,9 +519,9 @@ public class CloudIntegration {
             p.forEach((a) -> {
                 pcService.save(a);
             });
-            log.info("downloadPC done.");
+            observer.selected("download", "downloadPC done.");
         }, (err) -> {
-            log.info(err.getMessage());
+            log.error(err.getMessage());
         });
     }
 
@@ -538,9 +531,9 @@ public class CloudIntegration {
             m.forEach((a) -> {
                 pmService.save(a);
             });
-            log.info("downloadPM done.");
+            observer.selected("download", "downloadPM done.");
         }, (err) -> {
-            log.info(err.getMessage());
+            log.error(err.getMessage());
         });
     }
 
@@ -550,9 +543,9 @@ public class CloudIntegration {
             p.forEach((a) -> {
                 pService.save(a);
             });
-            log.info("downloadPM done.");
+            observer.selected("download", "downloadPM done.");
         }, (err) -> {
-            log.info(err.getMessage());
+            log.error(err.getMessage());
         });
     }
 
@@ -562,9 +555,9 @@ public class CloudIntegration {
             r.forEach((a) -> {
                 roleService.save(a);
             });
-            log.info("downloadRole done.");
+            observer.selected("download", "downloadRole done.");
         }, (err) -> {
-            log.info(err.getMessage());
+            log.error(err.getMessage());
         });
     }
 
@@ -574,9 +567,9 @@ public class CloudIntegration {
             r.forEach((a) -> {
                 rpService.save(a);
             });
-            log.info("downloadRoleProperty done.");
+            observer.selected("download", "downloadRoleProperty done.");
         }, (err) -> {
-            log.info(err.getMessage());
+            log.error(err.getMessage());
         });
     }
 
@@ -586,9 +579,9 @@ public class CloudIntegration {
             r.forEach((a) -> {
                 sysPropertyService.save(a);
             });
-            log.info("downloadSystemProperty done.");
+            observer.selected("download", "downloadSystemProperty done.");
         }, (err) -> {
-            log.info(err.getMessage());
+            log.error(err.getMessage());
         });
     }
 
@@ -614,7 +607,7 @@ public class CloudIntegration {
             });
             log.info("downloadPriceOption done.");
         }, (e) -> {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
         });
     }
 
@@ -626,7 +619,7 @@ public class CloudIntegration {
             });
             log.info("downloadVouStatus done.");
         }, (e) -> {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
         });
     }
 
@@ -638,7 +631,7 @@ public class CloudIntegration {
             });
             log.info("downloadInvTrader done.");
         }, (e) -> {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
         });
     }
 
@@ -650,7 +643,7 @@ public class CloudIntegration {
             });
             log.info("downloadSaleMan done.");
         }, (e) -> {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
         });
     }
 
@@ -662,7 +655,7 @@ public class CloudIntegration {
             });
             log.info("downloadLocation done.");
         }, (e) -> {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
         });
     }
 
@@ -674,7 +667,7 @@ public class CloudIntegration {
             });
             log.info("downloadRelation done.");
         }, (e) -> {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
         });
     }
 
@@ -686,7 +679,7 @@ public class CloudIntegration {
             });
             log.info("downloadUnit done.");
         }, (e) -> {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
         });
     }
 
@@ -698,7 +691,7 @@ public class CloudIntegration {
             });
             log.info("downloadBrand done.");
         }, (e) -> {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
         });
     }
 
@@ -710,7 +703,7 @@ public class CloudIntegration {
             });
             log.info("downloadCategory done.");
         }, (e) -> {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
         });
     }
 
@@ -722,7 +715,7 @@ public class CloudIntegration {
             });
             log.info("downloadStockType done.");
         }, (e) -> {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
         });
     }
 
@@ -735,15 +728,16 @@ public class CloudIntegration {
             });
             log.info("downloadStock done.");
         }, (e) -> {
-            log.info(e.getMessage());
+            log.error(e.getMessage());
         });
     }
 
     public void start() {
         if (localDatabase) {
-            taskScheduler.scheduleAtFixedRate(() -> {
-                startDownload();
-            }, Duration.ofMinutes(5));
+            startDownload();
+            /*taskScheduler.scheduleAtFixedRate(() -> {
+            
+            }, Duration.ofMinutes(15));*/
         }
 
     }

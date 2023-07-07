@@ -48,6 +48,14 @@ public class PurHisDetail implements Serializable {
     private String weightUnit;
     @Column(name = "std_weight")
     private Float stdWeight;
+    @Column(name = "length")
+    private Float length;
+    @Column(name = "width")
+    private Float width;
+    @Column(name = "total_weight")
+    private Float totalWeight;
+    @Column(name = "m_percent")
+    private String mPercent;
 
     @Transient
     private String userCode;

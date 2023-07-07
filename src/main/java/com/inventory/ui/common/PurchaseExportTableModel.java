@@ -16,7 +16,7 @@ import com.inventory.model.PurDetailKey;
 import com.inventory.model.PurHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
-import com.inventory.ui.entry.PurchaseByWeight;
+import com.inventory.ui.entry.PurchaseExport;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +31,10 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class PurchaseWeightTableModel extends AbstractTableModel {
+public class PurchaseExportTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Description", "Relation", "Location",
-        "Weight", "Weight Unit", "Qty", "Unit", "Std-Weight", "Total Qty", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Description", "Relation", "Length", "Width", "Moisturizer", "Location",
+        "Weight", "Weight Unit", "Qty", "Unit", "Std-Weight", "Total Weight", "Price", "Amount"};
     private JTable parent;
     private List<PurHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
@@ -42,14 +42,14 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
     private JLabel lblRec;
-    private PurchaseByWeight purchase;
+    private PurchaseExport purchaseExport;
 
-    public PurchaseByWeight getPurchase() {
-        return purchase;
+    public PurchaseExport getPurchaseExport() {
+        return purchaseExport;
     }
 
-    public void setPurchase(PurchaseByWeight purchase) {
-        this.purchase = purchase;
+    public void setPurchaseExport(PurchaseExport purchaseExport) {
+        this.purchaseExport = purchaseExport;
     }
 
     public JLabel getLblRec() {
@@ -121,7 +121,7 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 0, 1, 2, 3, 7 ->
+            case 0, 2, 3, 4, 7, 8, 9, 11, 12, 13, 14 ->
                 Float.class;
             default ->
                 String.class;
@@ -131,7 +131,7 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case 2, 11 ->
+            case 2, 14 ->
                 false;
             default ->
                 true;
@@ -165,35 +165,44 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                         return record.getRelName();
                     }
                     case 3 -> {
+                        return record.getLength();
+                    }
+                    case 4 -> {
+                        return record.getWidth();
+                    }
+                    case 5 -> {
+                        return record.getMPercent();
+                    }
+                    case 6 -> {
                         //loc
                         return record.getLocName();
                     }
-                    case 4 -> {
+                    case 7 -> {
                         //weight
                         return record.getWeight();
                     }
-                    case 5 -> {
+                    case 8 -> {
                         //unit
                         return record.getWeightUnit();
                     }
-                    case 6 -> {
+                    case 9 -> {
                         return record.getQty();
                     }
-                    case 7 -> {
+                    case 10 -> {
                         return record.getUnitCode();
                     }
-                    case 8 -> {
+                    case 11 -> {
                         //std weight
                         return record.getStdWeight();
                     }
                     //total
-                    case 9 -> {
+                    case 12 -> {
                         return Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight());
                     }
-                    case 10 -> {
+                    case 13 -> {
                         return record.getPrice();
                     }
-                    case 11 -> {
+                    case 14 -> {
                         return record.getAmount();
                     }
                 }
@@ -224,35 +233,57 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                             addNewRow();
                         }
                     }
-                    parent.setColumnSelectionInterval(4, 4);
+                    parent.setColumnSelectionInterval(3, 3);
                 }
                 case 3 -> {
+                    if (Util1.isNumber(value)) {
+                        record.setLength(Util1.getFloat(value));
+                    }
+                    parent.setColumnSelectionInterval(4, 4);
+                }
+                case 4 -> {
+                    if (Util1.isNumber(value)) {
+                        record.setWidth(Util1.getFloat(value));
+                    }
+                    parent.setColumnSelectionInterval(5, 5);
+                }
+                case 5 -> {
+                    record.setMPercent(value.toString());
+                    parent.setColumnSelectionInterval(7, 7);
+                }
+                case 6 -> {
                     //Loc
                     if (value instanceof Location l) {
                         record.setLocCode(l.getKey().getLocCode());
                         record.setLocName(l.getLocName());
                     }
                 }
-                case 4 -> {
+                case 7 -> {
                     //weight
                     if (Util1.isNumber(value)) {
                         record.setWeight(Util1.getFloat(value));
+                        if (record.getQty() != null && record.getWeight() != null) {
+                            record.setTotalWeight(Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight()));
+                        }
                     }
                 }
-                case 5 -> {
+                case 8 -> {
                     //weight unit
                     if (value instanceof StockUnit u) {
                         record.setWeightUnit(u.getKey().getUnitCode());
                     }
                 }
-                case 6 -> {
+                case 9 -> {
                     //Qty
                     if (Util1.isNumber(value)) {
                         record.setQty(Util1.getFloat(value));
+                        if (record.getQty() != null && record.getWeight() != null) {
+                            record.setTotalWeight(Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight()));
+                        }
                         parent.setRowSelectionInterval(row, row);
                     }
                 }
-                case 7 -> {
+                case 10 -> {
                     //Unit
                     if (value != null) {
                         if (value instanceof StockUnit u) {
@@ -261,13 +292,13 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                     }
                     parent.setColumnSelectionInterval(8, 8);
                 }
-                case 8 -> {
+                case 11 -> {
                     //std weight
                     if (Util1.isNumber(value)) {
                         record.setStdWeight(Util1.getFloat(value));
                     }
                 }
-                case 10 -> {
+                case 13 -> {
                     //Pur Price
                     if (Util1.isNumber(value)) {
                         if (Util1.isPositive(Util1.getFloat(value))) {
@@ -284,7 +315,7 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                         parent.setColumnSelectionInterval(column, column);
                     }
                 }
-                case 11 -> {
+                case 14 -> {
                     //Amount
                     if (value != null) {
                         record.setAmount(Util1.getFloat(value));
@@ -314,7 +345,7 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
 
     private void assignLocation(PurHisDetail sd) {
         if (sd.getLocCode() == null) {
-            LocationAutoCompleter completer = purchase.getLocationAutoCompleter();
+            LocationAutoCompleter completer = purchaseExport.getLocationAutoCompleter();
             if (completer != null) {
                 Location l = completer.getLocation();
                 if (l != null) {

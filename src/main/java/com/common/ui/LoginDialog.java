@@ -5,9 +5,11 @@
  */
 package com.common.ui;
 
+import com.CloudIntegration;
 import com.MessageDialog;
 import com.CoreAccountApplication;
 import com.common.Global;
+import com.common.SelectionObserver;
 import com.common.TokenFile;
 import com.repo.UserRepo;
 import com.common.Util1;
@@ -36,12 +38,15 @@ import reactor.core.publisher.Mono;
 @PropertySource(value = {"file:config/application.properties"})
 @Component
 @Slf4j
-public class LoginDialog extends javax.swing.JDialog implements KeyListener {
+public class LoginDialog extends javax.swing.JDialog implements KeyListener, SelectionObserver {
 
     private int loginAttempt = 0;
+    private int enableCount = 0;
     private String APP_NAME = "Core Account";
     private Image appIcon;
     private final TokenFile<AuthenticationResponse> file = new TokenFile<>(AuthenticationResponse.class);
+    @Autowired
+    private CloudIntegration integration;
 
     public Image getAppIcon() {
         return appIcon;
@@ -124,14 +129,26 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
                 System.exit(0);
             }
         } else {
-            lblStatus.setText("Latest version.");
+            enableForm(false);
+            taskExecutor.execute(() -> {
+                lblStatus.setText("downloading...");
+                integration.setObserver(this);
+                integration.start();
+            });
             Global.macId = t.getMacId();
             setLocationRelativeTo(null);
-            setVisible(true);
             toFront();
             requestFocus();
-        }
+            setVisible(true);
 
+        }
+    }
+
+    private void enableForm(boolean status) {
+        txtLoginName.setEnabled(status);
+        txtPassword.setEnabled(status);
+        btnLogin.setEnabled(status);
+        progress.setIndeterminate(!status);
     }
 
     private void logout() {
@@ -283,6 +300,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
         jLabel2 = new javax.swing.JLabel();
         btnLogin = new javax.swing.JButton();
         lblStatus = new javax.swing.JLabel();
+        progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Login Core Account Cloud");
@@ -345,15 +363,16 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 324, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 324, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtLoginName, javax.swing.GroupLayout.PREFERRED_SIZE, 324, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 324, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 324, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 324, Short.MAX_VALUE)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 324, Short.MAX_VALUE)
+                    .addComponent(txtLoginName, javax.swing.GroupLayout.DEFAULT_SIZE, 324, Short.MAX_VALUE)
+                    .addComponent(txtPassword, javax.swing.GroupLayout.DEFAULT_SIZE, 324, Short.MAX_VALUE)
+                    .addComponent(btnLogin, javax.swing.GroupLayout.DEFAULT_SIZE, 324, Short.MAX_VALUE)
+                    .addComponent(lblStatus, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -369,8 +388,10 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
                 .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnLogin, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -387,8 +408,8 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 293, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
@@ -421,7 +442,20 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel lblStatus;
+    private javax.swing.JProgressBar progress;
     private javax.swing.JTextField txtLoginName;
     private javax.swing.JPasswordField txtPassword;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void selected(Object source, Object selectObj) {
+        if (source.toString().equals("download")) {
+            enableCount += 1;
+            lblStatus.setText(selectObj.toString());
+            if (enableCount > 14) {
+                enableForm(true);
+                lblStatus.setText("Latest version.");
+            }
+        }
+    }
 }

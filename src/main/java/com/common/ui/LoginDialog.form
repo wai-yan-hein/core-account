@@ -43,8 +43,8 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jPanel1" min="-2" pref="293" max="-2" attributes="0"/>
-              <EmptySpace max="32767" attributes="0"/>
+              <Component id="jPanel1" max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -62,14 +62,15 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" attributes="0">
+              <Group type="102" alignment="1" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="jLabel1" min="-2" pref="324" max="-2" attributes="0"/>
-                      <Component id="jLabel2" alignment="0" min="-2" pref="324" max="-2" attributes="0"/>
-                      <Component id="txtLoginName" alignment="0" min="-2" pref="324" max="-2" attributes="0"/>
-                      <Component id="txtPassword" alignment="0" min="-2" pref="324" max="-2" attributes="0"/>
-                      <Component id="btnLogin" alignment="0" min="-2" pref="324" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="1" attributes="0">
+                      <Component id="progress" max="32767" attributes="0"/>
+                      <Component id="jLabel1" alignment="1" pref="324" max="32767" attributes="0"/>
+                      <Component id="jLabel2" alignment="1" pref="324" max="32767" attributes="0"/>
+                      <Component id="txtLoginName" alignment="1" pref="324" max="32767" attributes="0"/>
+                      <Component id="txtPassword" alignment="1" pref="324" max="32767" attributes="0"/>
+                      <Component id="btnLogin" alignment="1" pref="324" max="32767" attributes="0"/>
                       <Component id="lblStatus" alignment="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -89,8 +90,10 @@
                   <Component id="txtPassword" min="-2" pref="27" max="-2" attributes="0"/>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Component id="btnLogin" min="-2" pref="30" max="-2" attributes="0"/>
-                  <EmptySpace type="separate" max="-2" attributes="0"/>
-                  <Component id="lblStatus" min="-2" pref="40" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="lblStatus" pref="38" max="32767" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="progress" min="-2" pref="2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -166,6 +169,8 @@
               <Connection code="Global.lableFont" type="code"/>
             </Property>
           </Properties>
+        </Component>
+        <Component class="javax.swing.JProgressBar" name="progress">
         </Component>
       </SubComponents>
     </Container>

@@ -5,6 +5,7 @@
 package com.repo;
 
 import com.H2Repo;
+import com.acc.model.VDescription;
 import com.common.FilterObject;
 import com.inventory.model.CFont;
 import com.common.Global;
@@ -2668,6 +2669,18 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(GRNDetail.class)
+                .collectList();
+    }
+
+    public Mono<List<VDescription>> getDescription(String str) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/pur/get-description")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("str", str)
+                .build())
+                .retrieve()
+                .bodyToFlux(VDescription.class
+                )
                 .collectList();
     }
 }

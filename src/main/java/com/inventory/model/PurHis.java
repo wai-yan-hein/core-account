@@ -32,7 +32,7 @@ public class PurHis implements java.io.Serializable {
     @Column(name = "trader_code")
     private String traderCode;
     @Column(name = "vou_date", columnDefinition = "TIMESTAMP")
-    private LocalDateTime vouDate;    
+    private LocalDateTime vouDate;
     @Temporal(TemporalType.DATE)
     @Column(name = "due_date")
     private Date dueDate;
@@ -86,6 +86,8 @@ public class PurHis implements java.io.Serializable {
     private Float expense;
     @Column(name = "project_no")
     private String projectNo;
+    @Column(name = "car_no")
+    private String carNo;
     @Transient
     private String status = "STATUS";
     @Transient

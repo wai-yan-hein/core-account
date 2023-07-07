@@ -315,6 +315,10 @@ public class JournalEntryTableModel extends AbstractTableModel {
                     record.setKey(key);
                     record.setTranSource("GV");
                     record.setCurCode(Global.currency);
+                    accountRepo.getDefaultDepartment().subscribe((t) -> {
+                        record.setDeptCode(t.getKey().getDeptCode());
+                        record.setDeptUsrCode(t.getUserCode());
+                    });
                     if (!listGV.isEmpty()) {
                         Gl get = listGV.get(listGV.size() - 1);
                         if (!Util1.isNull(get.getDeptCode())) {

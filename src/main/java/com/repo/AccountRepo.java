@@ -711,10 +711,10 @@ public class AccountRepo {
                 .collectList();
     }
 
-    public Mono<List<DateModel>> getDate() {
-        /* if (localDatabase) {
-        return Mono.just(h2Repo.getDate());
-        }*/
+    public Mono<List<DateModel>> getDate(boolean local) {
+        if (local) {
+            return Mono.just(h2Repo.getDate());
+        }
         String startDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
         boolean isAll = Util1.getBoolean(ProUtil.getProperty(ProUtil.DISABLE_ALL_FILTER));
         return accountApi.get()
