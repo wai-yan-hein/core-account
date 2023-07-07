@@ -110,7 +110,6 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
     private JProgressBar progress;
     private PurHis ph = new PurHis();
     private Mono<List<Location>> monoLoc;
-    private PurExpenseTableModel expenseTableModel = new PurExpenseTableModel();
     private ProjectAutoCompleter projectAutoCompleter;
 
     public LocationAutoCompleter getLocationAutoCompleter() {
@@ -205,24 +204,6 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         initPurTable();
         assignDefaultValue();
         txtCus.requestFocus();
-    }
-
-    private void getExpense() {
-        expenseTableModel.clear();
-        inventoryRepo.getExpense().subscribe((t) -> {
-            for (Expense e : t) {
-                PurExpense p = new PurExpense();
-                PurExpenseKey key = new PurExpenseKey();
-                key.setExpenseCode(e.getKey().getExpenseCode());
-                key.setCompCode(e.getKey().getCompCode());
-                p.setKey(key);
-                p.setExpenseName(e.getExpenseName());
-                p.setAmount(0.0f);
-                expenseTableModel.addObject(p);
-            }
-            expenseTableModel.addNewRow();
-        });
-
     }
 
     private void initDateListner() {
@@ -406,7 +387,6 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.GREEN);
         progress.setIndeterminate(false);
-        getExpense();
         txtCus.requestFocus();
         projectAutoCompleter.setProject(null);
     }
@@ -416,7 +396,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
             progress.setIndeterminate(true);
             observer.selected("save", false);
             ph.setListPD(purExportTableModel.getListDetail());
-            ph.setListExpense(expenseTableModel.getListDetail());
+//            ph.setListExpense(expenseTableModel.getListDetail());
             ph.setListDel(purExportTableModel.getDelList());
             inventoryRepo.save(ph).subscribe((t) -> {
                 clear();
@@ -617,7 +597,6 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         if (pur != null) {
             try {
                 purExportTableModel.clear();
-                expenseTableModel.clear();
                 progress.setIndeterminate(true);
                 ph = pur;
                 Integer deptId = ph.getKey().getDeptId();
@@ -637,15 +616,15 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
                 }, (e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
                 });
-//                if (pur.getProjectNo() != null) {
-//                    userRepo.find(new ProjectKey(pur.getProjectNo(), Global.compCode)).subscribe(t -> {
-//                        projectAutoCompleter.setProject(t);
-//                    }, (e) -> {
-//                        JOptionPane.showMessageDialog(this, e.getMessage());
-//                    });
-//                } else {
-//                    projectAutoCompleter.setProject(null);
-//                }
+                if (pur.getProjectNo() != null) {
+                    userRepo.find(new ProjectKey(pur.getProjectNo(), Global.compCode)).subscribe(t -> {
+                        projectAutoCompleter.setProject(t);
+                    }, (e) -> {
+                        JOptionPane.showMessageDialog(this, e.getMessage());
+                    });
+                } else {
+                    projectAutoCompleter.setProject(null);
+                }
 
                 String vouNo = ph.getKey().getVouNo();
 
