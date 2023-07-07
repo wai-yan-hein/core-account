@@ -19,21 +19,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.inventory.editor.BatchAutoCompeter;
+import com.inventory.editor.CarNoAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
-import com.inventory.model.Expense;
 import com.inventory.model.GRN;
 import com.inventory.model.Location;
 import com.inventory.model.PurExpense;
-import com.inventory.model.PurExpenseKey;
 import com.inventory.model.PurHis;
 import com.inventory.model.PurHisDetail;
 import com.inventory.model.PurHisKey;
 import com.inventory.model.Trader;
 import com.inventory.model.VPurchase;
-import com.inventory.ui.common.PurExpenseTableModel;
 import com.inventory.ui.common.PurchaseExportTableModel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.BatchSearchDialog;
@@ -90,7 +88,7 @@ import reactor.core.publisher.Mono;
 @Component
 @Slf4j
 public class PurchaseExport extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
-
+    
     private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
     private List<PurHisDetail> listDetail = new ArrayList();
     private final PurchaseExportTableModel purExportTableModel = new PurchaseExportTableModel();
@@ -111,27 +109,28 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
     private PurHis ph = new PurHis();
     private Mono<List<Location>> monoLoc;
     private ProjectAutoCompleter projectAutoCompleter;
-
+    private CarNoAutoCompleter carNoAutoCompleter;
+    
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;
     }
-
+    
     public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
         this.locationAutoCompleter = locationAutoCompleter;
     }
-
+    
     public JProgressBar getProgress() {
         return progress;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public SelectionObserver getObserver() {
         return observer;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -148,7 +147,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         initDateListner();
         actionMapping();
     }
-
+    
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
@@ -157,11 +156,11 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         tblPur.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_DOWN_MASK), "avg-price");
         tblPur.getActionMap().put("avg-price", new AvgPriceAction());
-
+        
     }
-
+    
     private class AvgPriceAction extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             int row = tblPur.convertRowIndexToModel(tblPur.getSelectedRow());
@@ -190,22 +189,22 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
             });
         }
     }
-
+    
     private class DeleteAction extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
         }
     }
-
+    
     public void initMain() {
         initCombo();
         initPurTable();
         assignDefaultValue();
         txtCus.requestFocus();
     }
-
+    
     private void initDateListner() {
         txtPurDate.getDateEditor().getUiComponent().setName("txtPurDate");
         txtPurDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -218,7 +217,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         txtLocation.addFocusListener(fa);
         txtRemark.addFocusListener(fa);
         txtReference.addFocusListener(fa);
-
+        
     }
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
@@ -230,7 +229,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
             }
         }
     };
-
+    
     private void initPurTable() {
         tblPur.setModel(purExportTableModel);
         purExportTableModel.setLblRec(lblRec);
@@ -280,7 +279,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblPur.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
-
+    
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "SUP");
         traderAutoCompleter.setObserver(this);
@@ -301,8 +300,10 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         batchAutoCompeter.setObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
         projectAutoCompleter.setObserver(this);
+        carNoAutoCompleter = new CarNoAutoCompleter(txtCarNo, inventoryRepo, null, false);
+        carNoAutoCompleter.setObserver(this);
     }
-
+    
     private void initKeyListener() {
         txtPurDate.getDateEditor().getUiComponent().setName("txtPurDate");
         txtPurDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -322,7 +323,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         txtComAmt.addKeyListener(this);
         txtComPercent.addKeyListener(this);
     }
-
+    
     private void initTextBoxValue() {
         txtVouTotal.setValue(0.00);
         txtVouDiscount.setValue(0.00);
@@ -335,7 +336,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         txtComPercent.setValue(0.00);
         txtComAmt.setValue(0.00);
     }
-
+    
     private void initTextBoxFormat() {
         txtVouBalance.setFormatterFactory(Util1.getDecimalFormat());
         txtVouDiscount.setFormatterFactory(Util1.getDecimalFormat());
@@ -348,7 +349,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         txtComPercent.setFormatterFactory(Util1.getDecimalFormat());
         txtComAmt.setFormatterFactory(Util1.getDecimalFormat());
     }
-
+    
     private void assignDefaultValue() {
         if (currAutoCompleter != null) {
             userRepo.getDefaultCurrency().subscribe((t) -> {
@@ -374,7 +375,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         txtReference.setText(null);
         txtBatchNo.setText(null);
     }
-
+    
     private void clear() {
         disableForm(true);
         purExportTableModel.clear();
@@ -390,7 +391,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         txtCus.requestFocus();
         projectAutoCompleter.setProject(null);
     }
-
+    
     public void savePur(boolean print) {
         if (isValidEntry() && purExportTableModel.isValidEntry()) {
             progress.setIndeterminate(true);
@@ -411,7 +412,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
             });
         }
     }
-
+    
     private boolean isValidEntry() {
         boolean status = true;
         if (lblStatus.getText().equals("DELETED")) {
@@ -476,7 +477,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         }
         return status;
     }
-
+    
     private void deletePur() {
         String status = lblStatus.getText();
         switch (status) {
@@ -499,15 +500,15 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
                         lblStatus.setForeground(Color.blue);
                         disableForm(true);
                     });
-
+                    
                 }
             }
             default ->
                 JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }
-
+        
     }
-
+    
     private void deleteTran() {
         int row = tblPur.convertRowIndexToModel(tblPur.getSelectedRow());
         if (row >= 0) {
@@ -522,7 +523,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
             }
         }
     }
-
+    
     private void calculateTotalAmount(boolean partial) {
         float totalVouBalance;
         float totalAmount = 0.0f;
@@ -561,7 +562,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
                 - Util1.getFloat(txtVouDiscount.getValue())
                 - ttlExp);
         float grandTotal = Util1.getFloat(txtGrandTotal.getValue());
-
+        
         float paid = Util1.getFloat(txtVouPaid.getText());
         if (!partial) {
             if (paid == 0 || paid != grandTotal) {
@@ -572,12 +573,12 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
                 }
             }
         }
-
+        
         paid = Util1.getFloat(txtVouPaid.getText());
         totalVouBalance = grandTotal - paid;
         txtVouBalance.setValue(Util1.getFloat(totalVouBalance));
     }
-
+    
     public void historyPur() {
         if (dialog == null) {
             dialog = new PurchaseHistoryDialog(Global.parentForm);
@@ -592,7 +593,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         dialog.search();
         dialog.setVisible(true);
     }
-
+    
     public void setVoucher(PurHis pur, boolean local) {
         if (pur != null) {
             try {
@@ -625,9 +626,9 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
                 } else {
                     projectAutoCompleter.setProject(null);
                 }
-
+                
                 String vouNo = ph.getKey().getVouNo();
-
+                
                 inventoryRepo.getPurDetail(vouNo, deptId, local)
                         .subscribe((t) -> {
                             purExportTableModel.setListDetail(t);
@@ -685,10 +686,10 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
             } catch (Exception e) {
                 log.error(e.getMessage());
             }
-
+            
         }
     }
-
+    
     private void calQty(List<PurHisDetail> list) {
         float ttlQty = 0.0f;
         for (PurHisDetail p : list) {
@@ -696,7 +697,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         }
 //        txtQty.setValue(ttlQty);
     }
-
+    
     private void disableForm(boolean status) {
         tblPur.setEnabled(status);
         panelPur.setEnabled(status);
@@ -720,7 +721,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         observer.selected("delete", status);
         observer.selected("print", status);
     }
-
+    
     private void setAllLocation() {
         List<PurHisDetail> listPurDetail = purExportTableModel.getListDetail();
         Location l = locationAutoCompleter.getLocation();
@@ -728,12 +729,12 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
             listPurDetail.forEach(sd -> {
                 sd.setLocCode(l.getKey().getLocCode());
                 sd.setLocName(l.getLocName());
-
+                
             });
         }
         purExportTableModel.setListDetail(listPurDetail);
     }
-
+    
     private void printVoucher(PurHis p) {
         String vouNo = p.getKey().getVouNo();
         String batchNo = p.getBatchNo();
@@ -782,9 +783,9 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
                 JOptionPane.showMessageDialog(this, "define report in " + key);
             }
         }
-
+        
     }
-
+    
     private void focusTable() {
         int rc = tblPur.getRowCount();
         if (rc > 1) {
@@ -795,15 +796,15 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
             txtPurDate.requestFocusInWindow();
         }
     }
-
+    
     public void addTrader(Trader t) {
         traderAutoCompleter.addTrader(t);
     }
-
+    
     public void setTrader(Trader t, int row) {
         traderAutoCompleter.setTrader(t, row);
     }
-
+    
     private void setVoucherDetail(GRN g) {
         purExportTableModel.clear();
         Mono<Trader> trader = inventoryRepo.findTrader(g.getTraderCode());
@@ -839,7 +840,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
             txtBatchNo.setEnabled(false);
         });
     }
-
+    
     private void expenseDialog() {
         ExpenseSetupDialog d = new ExpenseSetupDialog(Global.parentForm);
         d.setInventoryRepo(inventoryRepo);
@@ -848,7 +849,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         d.setLocationRelativeTo(null);
         d.setVisible(true);
     }
-
+    
     private void batchDialog() {
         BatchSearchDialog d = new BatchSearchDialog(Global.parentForm);
         d.setInventoryRepo(inventoryRepo);
@@ -856,7 +857,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         d.initMain();
         d.setLocationRelativeTo(null);
         d.setVisible(true);
-
+        
     }
 
     /**
@@ -1585,12 +1586,12 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
             }
         }
     }
-
+    
     @Override
     public void keyEvent(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void selected(Object source, Object selectObj) {
         switch (source.toString()) {
@@ -1629,17 +1630,17 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
             }
         }
     }
-
+    
     @Override
     public void keyTyped(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
@@ -1835,38 +1836,38 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
     public void delete() {
         deletePur();
     }
-
+    
     @Override
     public void print() {
         savePur(true);
     }
-
+    
     @Override
     public void save() {
         savePur(false);
     }
-
+    
     @Override
     public void newForm() {
         clear();
     }
-
+    
     @Override
     public void history() {
         historyPur();
     }
-
+    
     @Override
     public void refresh() {
     }
-
+    
     @Override
     public void filter() {
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
 }
