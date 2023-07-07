@@ -390,6 +390,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         progress.setIndeterminate(false);
         txtCus.requestFocus();
         projectAutoCompleter.setProject(null);
+        carNoAutoCompleter.setAutoText(null);
     }
     
     public void savePur(boolean print) {
