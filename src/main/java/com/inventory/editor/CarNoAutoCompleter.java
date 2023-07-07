@@ -5,12 +5,10 @@
 package com.inventory.editor;
 
 import com.acc.common.DespTableModel;
-import com.acc.editor.DespAutoCompleter;
 import com.acc.model.VDescription;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.repo.AccountRepo;
 import com.repo.InventoryRepo;
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -43,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class CarNoAutoCompleter implements KeyListener {
+
     private final JTable table = new JTable();
     private JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
@@ -350,7 +349,9 @@ public class CarNoAutoCompleter implements KeyListener {
         if (!str.isEmpty()) {
             if (!containKey(e)) {
                 inventoryRepo.getDescription(str).subscribe((t) -> {
-                    t.add(new VDescription("All"));
+                    if (this.filter) {
+                        t.add(new VDescription("All"));
+                    }
                     despModel.setListAutoText(t);
                 }, (err) -> {
                     log.error(err.getMessage());

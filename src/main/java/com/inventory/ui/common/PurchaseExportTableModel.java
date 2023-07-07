@@ -397,7 +397,7 @@ public class PurchaseExportTableModel extends AbstractTableModel {
         float wt = Util1.getFloat(pur.getWeight());
         float qty = Util1.getFloat(pur.getQty());
         if (pur.getStockCode() != null) {
-            float amount = (qty * wt * price) / stdWt;
+            float amount = Math.round((qty * wt * price) / stdWt);
             pur.setAmount(amount);
         }
     }
