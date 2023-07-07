@@ -39,6 +39,7 @@ import com.inventory.ui.entry.Purchase;
 import com.inventory.ui.entry.PurchaseByWeight;
 import com.inventory.ui.entry.RFID;
 import com.inventory.ui.entry.CustomerPayment;
+import com.inventory.ui.entry.MillingEntry;
 import com.inventory.ui.entry.ReorderLevelEntry;
 import com.inventory.ui.entry.ReturnIn;
 import com.inventory.ui.entry.ReturnOut;
@@ -159,6 +160,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private GRNEntry grnEntry;
     @Autowired
     private CustomerPayment customerPayment;
+    @Autowired
+    private MillingEntry millingEntry;
 //account
     @Autowired
     private DepartmentSetup departmentSetup;
@@ -594,6 +597,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 customerPayment.setProgress(progress);
                 customerPayment.initMain();
                 return customerPayment;
+            }
+            case "Milling Entry" -> {
+                millingEntry.setName(menuName);
+                millingEntry.setObserver(this);
+                millingEntry.setProgress(progress);
+                millingEntry.initMain();
+                return millingEntry;
             }
             case "Menu" -> {
                 menuSetup.setName(menuName);

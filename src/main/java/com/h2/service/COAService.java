@@ -31,4 +31,8 @@ public interface COAService {
     List<ChartOfAccount> getTraderCOA(String compCode);
 
     List<ChartOfAccount> searchCOA(String str, Integer level, String compCode);
+
+    List<ChartOfAccount> getCOAByGroup(String groupCode, String compCode);
+
+    List<ChartOfAccount> getCOAByHead(String headCode, String compCode);
 }

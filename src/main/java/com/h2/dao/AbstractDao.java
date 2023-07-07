@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.time.LocalDateTime;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -97,7 +98,7 @@ public abstract class AbstractDao<PK extends Serializable, T> {
     @Transactional
     public ResultSet getResult(String sql) {
         return jdbcTemplate.execute((ConnectionCallback<ResultSet>) con -> {
-            PreparedStatement stmt = con.prepareStatement(sql);
+            Statement stmt = con.createStatement();
             return stmt.executeQuery(sql);
         });
     }

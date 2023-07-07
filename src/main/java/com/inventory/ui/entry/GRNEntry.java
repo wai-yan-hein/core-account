@@ -272,7 +272,8 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             if (lblStatus.getText().equals("NEW")) {
                 String batchNo = txtBatchNo.getText();
                 if (!batchNo.isEmpty()) {
-                    if (!inventoryRepo.getBatchList(txtBatchNo.getText()).block().isEmpty()) {
+                    batchNo = inventoryRepo.findByBatchNo(txtBatchNo.getText()).block().getBatchNo();
+                    if (!Util1.isNullOrEmpty(batchNo)) {
                         JOptionPane.showMessageDialog(Global.parentForm, String.format("Batch No %s already exists.", txtBatchNo.getText()));
                         return false;
                     }

@@ -50,20 +50,32 @@ public class COADaoImpl extends AbstractDao<COAKey, ChartOfAccount> implements C
 
     @Override
     public List<ChartOfAccount> getCOA(String headCode, String compCode) {
-        String sql = "select coa.coa_code,coa.comp_code,coa.coa_name_eng\n" + "from chart_of_account coa join(\n"
-                + "select coa_code,comp_code\n" + "from chart_of_account\n" + "where coa_parent ='" + headCode + "'\n"
-                + "and comp_code ='" + compCode + "'\n" + ")a\n" + "on coa.coa_parent = a.coa_code\n" + "and coa.comp_code = a.comp_code\n" + "where coa.coa_level =3";
-        List<Map<String, Object>> result = getList(sql);
+        String sql = """
+                     select coa.coa_code,coa.comp_code,coa.coa_name_eng
+                     from chart_of_account coa join(
+                     select coa_code,comp_code
+                     from chart_of_account
+                     where coa_parent =?
+                     and comp_code =?
+                     )a
+                     on coa.coa_parent = a.coa_code
+                     and coa.comp_code = a.comp_code
+                     where coa.coa_level =3""";
+        ResultSet rs = getResult(sql, headCode, compCode);
         List<ChartOfAccount> list = new ArrayList<>();
-        result.forEach((row) -> {
-            ChartOfAccount c = new ChartOfAccount();
-            COAKey key = new COAKey();
-            key.setCoaCode(Util1.getString(row.get("coa_code")));
-            key.setCompCode(Util1.getString(row.get("comp_code")));
-            c.setKey(key);
-            c.setCoaNameEng(Util1.getString(row.get("coa_name_eng")));
-            list.add(c);
-        });
+        try {
+            while (rs.next()) {
+                ChartOfAccount coa = new ChartOfAccount();
+                COAKey key = new COAKey();
+                key.setCoaCode(rs.getString("coa_code"));
+                key.setCompCode(rs.getString("comp_code"));
+                coa.setKey(key);
+                coa.setCoaNameEng(rs.getString("coa_name_eng"));
+                list.add(coa);
+            }
+        } catch (SQLException e) {
+            log.error("getCOA : " + e.getMessage());
+        }
         return list;
     }
 
@@ -163,6 +175,67 @@ public class COADaoImpl extends AbstractDao<COAKey, ChartOfAccount> implements C
         } catch (SQLException e) {
             log.error("searchCOA : " + e.getMessage());
         }
+        return list;
+    }
+
+    @Override
+    public List<ChartOfAccount> getCOAByGroup(String groupCode, String compCode) {
+        String sql = """
+                select coa_code,coa_name_eng,comp_code
+                from chart_of_account
+                where coa_parent =?
+                and comp_code =?
+                and active = true and deleted = false
+                order by coa_code_usr,coa_name_eng""";
+        ResultSet rs = getResult(sql, groupCode, compCode);
+        List<ChartOfAccount> list = new ArrayList<>();
+        try {
+            while (rs.next()) {
+                ChartOfAccount c = new ChartOfAccount();
+                COAKey key = new COAKey();
+                key.setCoaCode(rs.getString("coa_code"));
+                key.setCompCode(rs.getString("comp_code"));
+                c.setKey(key);
+                c.setCoaNameEng(rs.getString("coa_name_eng"));
+                list.add(c);
+            }
+        } catch (SQLException e) {
+            log.error("getCOAByGroup : " + e.getMessage());
+        }
+        return list;
+    }
+
+    @Override
+    public List<ChartOfAccount> getCOAByHead(String headCode, String compCode) {
+        List<ChartOfAccount> list = new ArrayList<>();
+        String sql = """
+                select coa.coa_code,coa.coa_code_usr,coa.coa_name_eng,coa.comp_code
+                from(
+                select coa_code,comp_code
+                from chart_of_account
+                where coa_parent =?
+                and comp_code =?
+                )a
+                join chart_of_account coa on a.coa_code = coa.coa_parent
+                and a.comp_code=coa.comp_code
+                and coa.active =true and coa.deleted =false
+                order by coa.coa_code_usr,coa.coa_name_eng""";
+        ResultSet rs = getResult(sql, headCode, compCode);
+        try {
+            while (rs.next()) {
+                ChartOfAccount coa = new ChartOfAccount();
+                COAKey key = new COAKey();
+                key.setCoaCode(rs.getString("coa_code"));
+                key.setCompCode(rs.getString("comp_code"));
+                coa.setKey(key);
+                coa.setCoaNameEng(rs.getString("coa_name_eng"));
+                coa.setCoaCodeUsr(rs.getString("coa_code_usr"));
+                list.add(coa);
+            }
+        } catch (SQLException e) {
+            log.error("getCOAByHead : " + e.getMessage());
+        }
+
         return list;
     }
 }

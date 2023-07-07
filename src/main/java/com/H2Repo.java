@@ -285,7 +285,7 @@ public class H2Repo {
     }
 
     public Mono<List<Stock>> getStock(String str) {
-        return Mono.justOrEmpty(stockService.getStock(str, Global.compCode, Global.deptId));
+        return Mono.justOrEmpty(stockService.getStock(str, Global.compCode, 0));
     }
 
     public Mono<List<Category>> getCategory() {
@@ -654,8 +654,8 @@ public class H2Repo {
         return Flux.fromIterable(traderAccService.findAll(Global.compCode));
     }
 
-    public Flux<TraderA> getTrader(String str) {
-        return Flux.fromIterable(traderAccService.getTrader(str, Global.compCode));
+    public Mono<List<TraderA>> getTrader(String str) {
+        return Mono.just(traderAccService.getTrader(str, Global.compCode));
     }
 
     public Flux<ChartOfAccount> getChartofAccount() {
@@ -680,6 +680,14 @@ public class H2Repo {
 
     public Mono<List<ChartOfAccount>> getCOA3(String headCode) {
         return Mono.justOrEmpty(coaService.getCOA(headCode, Global.compCode));
+    }
+
+    public Mono<List<ChartOfAccount>> getCOAByGroup(String groupCode) {
+        return Mono.justOrEmpty(coaService.getCOAByGroup(groupCode, Global.compCode));
+    }
+
+    public Mono<List<ChartOfAccount>> getCOAByHead(String headCode) {
+        return Mono.justOrEmpty(coaService.getCOAByHead(headCode, Global.compCode));
     }
 
     public Flux<ChartOfAccount> getCOAChild(String coaCode) {

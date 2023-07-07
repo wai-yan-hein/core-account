@@ -141,16 +141,17 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
             traderGroupAutoCompleter = new TraderGroupAutoCompleter(txtGroup, t, null, false);
             traderGroupAutoCompleter.setGroup(null);
         });
-
+        cOAAutoCompleter = new COAAutoCompleter(txtAccount, null, false);
         accountRepo.getCOAByGroup(ProUtil.getProperty(ProUtil.DEBTOR_GROUP)).subscribe((t) -> {
-            cOAAutoCompleter = new COAAutoCompleter(txtAccount,
-                    t,
-                    null, false);
-            accountRepo.findCOA(ProUtil.getProperty(ProUtil.DEBTOR_ACC)).subscribe((tt) -> {
-                cOAAutoCompleter.setCoa(tt);
-            });
+            cOAAutoCompleter.setListCOA(t);
         });
+        assignDefault();
+    }
 
+    private void assignDefault() {
+        accountRepo.findCOA(ProUtil.getProperty(ProUtil.DEBTOR_ACC)).subscribe((tt) -> {
+            cOAAutoCompleter.setCoa(tt);
+        });
     }
 
     private void initTable() {
@@ -333,6 +334,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
             cOAAutoCompleter.setCoa(null);
         }
         spPercent.setValue(0);
+        assignDefault();
     }
     private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
         @Override

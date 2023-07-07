@@ -5,12 +5,11 @@
 package com.inventory.ui.common;
 
 import com.repo.InventoryRepo;
-import com.common.Global;
 import com.common.ProUtil;
 import com.inventory.model.VStockBalance;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JOptionPane;
+import javax.swing.JCheckBox;
 import javax.swing.JProgressBar;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +25,11 @@ public class StockBalanceTableModel extends AbstractTableModel {
     private final String[] columnNames = {"Locaiton", "Qty",};
     private InventoryRepo inventoryRepo;
     private JProgressBar progress;
+    private JCheckBox chkSummary;
+
+    public void setChkSummary(JCheckBox chkSummary) {
+        this.chkSummary = chkSummary;
+    }
 
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
@@ -123,7 +127,7 @@ public class StockBalanceTableModel extends AbstractTableModel {
     public void calStockBalance(String stockCode) {
         if (ProUtil.isCalStock()) {
             progress.setIndeterminate(true);
-            inventoryRepo.getStockBalance(stockCode, false).subscribe((t) -> {
+            inventoryRepo.getStockBalance(stockCode, chkSummary.isSelected()).subscribe((t) -> {
                 setListStockBalance(t);
                 progress.setIndeterminate(false);
             }, (e) -> {

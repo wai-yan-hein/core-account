@@ -54,30 +54,36 @@ public final class COAAutoCompleter implements KeyListener {
     private int x = 0;
     private int y = 0;
     boolean popupOpen = false;
-    private SelectionObserver selectionObserver;
+    private SelectionObserver observer;
     private boolean filter;
+    private List<ChartOfAccount> listCOA;
 
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
+    public void setListCOA(List<ChartOfAccount> listCOA) {
+        if (filter) {
+            ChartOfAccount c = new ChartOfAccount(new COAKey("-", Global.compCode), "All");
+            listCOA.add(0, c);
+            setCoa(c);
+        }
+        cOATableModel.setListCOA(listCOA);
+        if (!listCOA.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
+        }
+        this.listCOA = listCOA;
     }
 
-    //private CashFilter cashFilter = Global.allCash;
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
+    }
+
     public COAAutoCompleter() {
     }
 
-    public COAAutoCompleter(JTextComponent comp, List<ChartOfAccount> list,
-            AbstractCellEditor editor, boolean filter) {
+    public COAAutoCompleter(JTextComponent comp, AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
         this.filter = filter;
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
-        if (this.filter) {
-            ChartOfAccount c = new ChartOfAccount(new COAKey("-", Global.compCode), "All");
-            list.add(0, c);
-            setCoa(c);
-        }
-        cOATableModel.setListCOA(list);
         table.setModel(cOATableModel);
         table.getTableHeader().setFont(Global.lableFont);
         table.setFont(Global.textFont); // NOI18N
@@ -150,9 +156,6 @@ public final class COAAutoCompleter implements KeyListener {
             }
         });
 
-        if (!list.isEmpty()) {
-            table.setRowSelectionInterval(0, 0);
-        }
     }
 
     public void mouseSelect() {
@@ -161,8 +164,8 @@ public final class COAAutoCompleter implements KeyListener {
                     table.getSelectedRow()));
             ((JTextField) textComp).setText(coa.getCoaNameEng());
             if (editor == null) {
-                if (selectionObserver != null) {
-                    selectionObserver.selected("Selected", coa.getKey().getCoaCode());
+                if (observer != null) {
+                    observer.selected("Selected", coa.getKey().getCoaCode());
                 }
             }
         }

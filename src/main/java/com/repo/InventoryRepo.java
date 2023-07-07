@@ -490,6 +490,20 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<GRN> findByBatchNo(String batchNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/grn/findByBatchNo")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", ProUtil.getDepId())
+                .queryParam("batchNo", batchNo)
+                .build())
+                .retrieve().bodyToMono(GRN.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<List<Expense>> getExpense() {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/expense/get-expense")

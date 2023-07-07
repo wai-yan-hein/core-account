@@ -53,11 +53,11 @@ public class TraderADaoImpl extends AbstractDao<TraderAKey, TraderA> implements 
                 """;
         String sql = """
                      SELECT code AS trader_code, user_code, trader_name, account_code, discriminator
-                     FROM trader
-                     """ +
-                filter + "\n" +
-                "ORDER BY user_code, trader_name\n" +
-                "LIMIT 100";
+                     FROM trader_acc
+                     """
+                + filter + "\n"
+                + "ORDER BY user_code, trader_name\n"
+                + "LIMIT 100";
         ResultSet rs = getResult(sql, compCode, text, text);
         List<TraderA> list = new ArrayList<>();
         try {

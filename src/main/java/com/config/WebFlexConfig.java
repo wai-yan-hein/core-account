@@ -10,6 +10,7 @@ import com.common.Util1;
 import com.user.model.AuthenticationRequest;
 import com.user.model.AuthenticationResponse;
 import java.awt.HeadlessException;
+import java.net.http.HttpClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

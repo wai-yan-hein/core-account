@@ -356,7 +356,7 @@ public final class TraderAAutoCompleter implements KeyListener {
         if (!str.isEmpty()) {
             if (!containKey(e)) {
                 traderTableModel.clear();
-                accountRepo.searchTrader(str).subscribe((t) -> {
+                accountRepo.getTrader(str).subscribe((t) -> {
                     if (filter) {
                         TraderA s = new TraderA(new TraderAKey("-", Global.compCode), "All");
                         t.add(s);

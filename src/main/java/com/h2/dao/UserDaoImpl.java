@@ -66,7 +66,6 @@ public class UserDaoImpl extends AbstractDao<String, AppUser> implements UserDao
         List<SysProperty> systemProperty = spService.getSystemProperty(compCode);
         if (!systemProperty.isEmpty()) {
             for (SysProperty p : systemProperty) {
-                log.info(p.getKey().getPropKey() + " : " + p.getPropValue());
                 hm.put(p.getKey().getPropKey(), p.getPropValue());
             }
         }
@@ -74,13 +73,19 @@ public class UserDaoImpl extends AbstractDao<String, AppUser> implements UserDao
         List<RoleProperty> roleProperty = rpService.getRoleProperty(roleCode);
         if (!roleProperty.isEmpty()) {
             for (RoleProperty rp : roleProperty) {
-                hm.put(rp.getKey().getPropKey(), rp.getPropValue());
+                String value = rp.getPropValue();
+                if (!Util1.isNullOrEmpty(value) || !value.equals("-")) {
+                    hm.put(rp.getKey().getPropKey(), rp.getPropValue());
+                }
             }
         }
         List<MachineProperty> machineProperties = mpService.getMacProperty(macId);
         if (!machineProperties.isEmpty()) {
             for (MachineProperty p : machineProperties) {
-                hm.put(p.getKey().getPropKey(), p.getPropValue());
+                String value = p.getPropValue();
+                if (!Util1.isNullOrEmpty(value) || !value.equals("-")) {
+                    hm.put(p.getKey().getPropKey(), p.getPropValue());
+                }
             }
         }
         return hm;

@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.h2.service;
+
 import com.acc.model.TraderA;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public interface TraderAService {
     List<TraderA> findAll(String compCode);
 
     String getMaxDate();
-    
-    List<TraderA> getTrader(String text,String compCode);
+
+    List<TraderA> getTrader(String text, String compCode);
 
 }

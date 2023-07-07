@@ -108,7 +108,7 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
                     s.setExplode(rs.getBoolean("explode"));
                     listStock.add(s);
                 }
-            } catch (Exception e) {
+            } catch (SQLException e) {
                 log.error(e.getMessage());
             }
         }

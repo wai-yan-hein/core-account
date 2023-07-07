@@ -110,7 +110,7 @@ public class AccountRepo {
                 .bodyToFlux(TraderA.class);
     }
 
-    public Flux<TraderA> getTrader(String text) {
+    public Mono<List<TraderA>> getTrader(String text) {
         if (localDatabase) {
             return h2Repo.getTrader(text);
         }
@@ -120,7 +120,8 @@ public class AccountRepo {
                 .queryParam("text", text)
                 .build())
                 .retrieve()
-                .bodyToFlux(TraderA.class);
+                .bodyToFlux(TraderA.class)
+                .collectList();
     }
 
     public Flux<ChartOfAccount> getChartOfAccount() {
@@ -376,12 +377,12 @@ public class AccountRepo {
 
     public Mono<List<ChartOfAccount>> getCOAByGroup(String groupCode) {
         if (localDatabase) {
-            return h2Repo.getCOA3(groupCode);
+            return h2Repo.getCOAByGroup(groupCode);
 
         }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/getCOAByGroup")
-                .queryParam("groupCode", groupCode == null ? "" : groupCode)
+                .queryParam("groupCode", groupCode == null ? "-" : groupCode)
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
@@ -403,8 +404,7 @@ public class AccountRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToFlux(ChartOfAccount.class
-                )
+                .bodyToFlux(ChartOfAccount.class)
                 .onErrorResume((e) -> {
                     log.error(
                             "getCOAByHead : " + e.getMessage());
@@ -606,18 +606,6 @@ public class AccountRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(VDescription.class
-                )
-                .collectList();
-    }
-
-    public Mono<List<TraderA>> searchTrader(String str) {
-        return accountApi.get()
-                .uri(builder -> builder.path("/account/search-trader")
-                .queryParam("compCode", Global.compCode)
-                .queryParam("text", str)
-                .build())
-                .retrieve()
-                .bodyToFlux(TraderA.class
                 )
                 .collectList();
     }
