@@ -1461,9 +1461,11 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         jLabel1.setText("Total Qty :");
 
         txtQty.setEditable(false);
+        txtQty.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtQty.setFont(Global.amtFont);
 
         txtWeight.setEditable(false);
+        txtWeight.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
         txtWeight.setFont(Global.amtFont);
 
         jLabel3.setFont(Global.lableFont);
