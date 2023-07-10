@@ -684,13 +684,13 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
                             JOptionPane.showMessageDialog(this, e.getMessage());
                             progress.setIndeterminate(false);
                         }, () -> {
-                            if (pur.getProjectNo() != null) {
-                                userRepo.find(new ProjectKey(pur.getProjectNo(), Global.compCode)).subscribe(t1 -> {
-                                    projectAutoCompleter.setProject(t1);
-                                });
-                            } else {
-                                projectAutoCompleter.setProject(null);
-                            }
+//                            if (pur.getProjectNo() != null) {
+//                                userRepo.find(new ProjectKey(pur.getProjectNo(), Global.compCode)).subscribe(t1 -> {
+//                                    projectAutoCompleter.setProject(t1);
+//                                });
+//                            } else {
+//                                projectAutoCompleter.setProject(null);
+//                            }
                         });
             } catch (Exception e) {
                 log.error(e.getMessage());

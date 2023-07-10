@@ -77,7 +77,7 @@
                           <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="txtCus" max="32767" attributes="0"/>
-                              <Component id="txtSaleDate" alignment="1" max="32767" attributes="0"/>
+                              <Component id="txtSaleDate" alignment="1" pref="185" max="32767" attributes="0"/>
                               <Component id="txtVouNo" alignment="1" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
@@ -88,7 +88,7 @@
                           </Group>
                           <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="txtRemark" max="32767" attributes="0"/>
+                              <Component id="txtRemark" pref="161" max="32767" attributes="0"/>
                               <Component id="txtSaleman" max="32767" attributes="0"/>
                               <Component id="txtLocation" max="32767" attributes="0"/>
                           </Group>
@@ -100,14 +100,23 @@
                           </Group>
                           <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="1" attributes="0">
-                              <Component id="txtDueDate" alignment="0" max="32767" attributes="0"/>
+                              <Component id="txtDueDate" alignment="0" pref="185" max="32767" attributes="0"/>
                               <Component id="txtCurrency" max="32767" attributes="0"/>
                               <Component id="txtReference" max="32767" attributes="0"/>
                           </Group>
-                          <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
-                          <Component id="carNoLabel" min="-2" pref="64" max="-2" attributes="0"/>
-                          <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
-                          <Component id="txtCarNo" max="32767" attributes="0"/>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Group type="102" attributes="0">
+                                  <Component id="carNoLabel" min="-2" pref="64" max="-2" attributes="0"/>
+                                  <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
+                                  <Component id="txtCarNo" pref="161" max="32767" attributes="0"/>
+                              </Group>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <Component id="carNoLabel1" min="-2" pref="64" max="-2" attributes="0"/>
+                                  <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
+                                  <Component id="txtProjectNo" max="32767" attributes="0"/>
+                              </Group>
+                          </Group>
                       </Group>
                       <Component id="jScrollPane1" alignment="1" max="32767" attributes="0"/>
                   </Group>
@@ -129,16 +138,22 @@
                       <Component id="txtCarNo" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="carNoLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Component id="txtDueDate" max="32767" attributes="0"/>
-                      <Component id="txtSaleDate" max="32767" attributes="0"/>
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="jLabel3" linkSize="12" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="txtSaleman" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="jLabel5" linkSize="12" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                          <Component id="txtDueDate" max="32767" attributes="0"/>
+                          <Component id="txtSaleDate" max="32767" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="jLabel3" linkSize="12" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="txtSaleman" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="jLabel5" linkSize="12" alignment="3" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <Component id="jLabel4" alignment="0" max="32767" attributes="0"/>
                       </Group>
-                      <Component id="jLabel4" alignment="0" max="32767" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="carNoLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="txtProjectNo" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
@@ -154,7 +169,7 @@
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jScrollPane1" pref="183" max="32767" attributes="0"/>
+                  <Component id="jScrollPane1" pref="164" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -415,6 +430,28 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Car No"/>
           </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="carNoLabel1">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.lableFont" type="code"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Project No"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtProjectNo">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
+            <Property name="disabledTextColor" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+              <Color blue="0" green="0" red="0" type="rgb"/>
+            </Property>
+            <Property name="name" type="java.lang.String" value="txtCurrency" noResource="true"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtProjectNoActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>
@@ -925,11 +962,11 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="1" attributes="0">
                   <Component id="sbProgress" min="-2" pref="2" max="-2" attributes="0"/>
-                  <EmptySpace max="32767" attributes="0"/>
-                  <Component id="jScrollPane2" min="-2" pref="131" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
+                  <Component id="jScrollPane2" pref="0" max="32767" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="chkSummary" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
