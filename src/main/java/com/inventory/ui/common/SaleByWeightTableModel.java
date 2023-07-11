@@ -12,7 +12,6 @@ import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.model.Location;
-import com.inventory.model.PriceOption;
 import com.inventory.model.SaleDetailKey;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
@@ -257,7 +256,7 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                             sd.setWeightUnit(s.getWeightUnit());
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setStock(s);
-                            sd.setPrice(sd.getPrice() == 0 ? s.getSalePriceN() : sd.getPrice());
+                            sd.setPrice(Util1.getFloat(sd.getPrice()) == 0 ? s.getSalePriceN() : sd.getPrice());
                             parent.setColumnSelectionInterval(4, 4);
                             addNewRow();
                         }
@@ -313,7 +312,7 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 sd.setPrice(Util1.getFloat(value));
                                 parent.setColumnSelectionInterval(0, 0);
-                                parent.setRowSelectionInterval(row + 1, row+1);
+                                parent.setRowSelectionInterval(row + 1, row + 1);
                             } else {
                                 showMessageBox("Input value must be positive");
                                 parent.setColumnSelectionInterval(column, column);
@@ -449,7 +448,6 @@ public class SaleByWeightTableModel extends AbstractTableModel {
         }
         return status;
     }
-
 
     public List<SaleDetailKey> getDelList() {
         return deleteList;

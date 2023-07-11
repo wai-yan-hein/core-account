@@ -56,6 +56,7 @@ public class CarNoAutoCompleter implements KeyListener {
     private SelectionObserver observer;
     private InventoryRepo inventoryRepo;
     private boolean filter;
+    private String tranType;
 
     public SelectionObserver getObserver() {
         return observer;
@@ -69,11 +70,12 @@ public class CarNoAutoCompleter implements KeyListener {
     }
 
     public CarNoAutoCompleter(JTextComponent comp, InventoryRepo inventoryRepo,
-            AbstractCellEditor editor, boolean filter) {
+            AbstractCellEditor editor, boolean filter, String tranType) {
         this.textComp = comp;
         this.editor = editor;
         this.filter = filter;
         this.inventoryRepo = inventoryRepo;
+        this.tranType = tranType;
         if (this.filter) {
             setAutoText(new VDescription("All"));
         }
@@ -348,7 +350,7 @@ public class CarNoAutoCompleter implements KeyListener {
         String str = textComp.getText();
         if (!str.isEmpty()) {
             if (!containKey(e)) {
-                inventoryRepo.getDescription(str).subscribe((t) -> {
+                inventoryRepo.getDescription(str, this.tranType).subscribe((t) -> {
                     if (this.filter) {
                         t.add(new VDescription("All"));
                     }

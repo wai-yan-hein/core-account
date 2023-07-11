@@ -303,7 +303,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         batchAutoCompeter.setObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
         projectAutoCompleter.setObserver(this);
-        carNoAutoCompleter = new CarNoAutoCompleter(txtCarNo, inventoryRepo, null, false);
+        carNoAutoCompleter = new CarNoAutoCompleter(txtCarNo, inventoryRepo, null, false, "Purchase");
         carNoAutoCompleter.setObserver(this);
     }
 
@@ -684,13 +684,13 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
                             JOptionPane.showMessageDialog(this, e.getMessage());
                             progress.setIndeterminate(false);
                         }, () -> {
-                            if (pur.getProjectNo() != null) {
-                                userRepo.find(new ProjectKey(pur.getProjectNo(), Global.compCode)).subscribe(t1 -> {
-                                    projectAutoCompleter.setProject(t1);
-                                });
-                            } else {
-                                projectAutoCompleter.setProject(null);
-                            }
+//                            if (pur.getProjectNo() != null) {
+//                                userRepo.find(new ProjectKey(pur.getProjectNo(), Global.compCode)).subscribe(t1 -> {
+//                                    projectAutoCompleter.setProject(t1);
+//                                });
+//                            } else {
+//                                projectAutoCompleter.setProject(null);
+//                            }
                         });
             } catch (Exception e) {
                 log.error(e.getMessage());
@@ -750,52 +750,59 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
     private void printVoucher(PurHis p) {
         String vouNo = p.getKey().getVouNo();
         String batchNo = p.getBatchNo();
-        Mono<List<VPurchase>> p1 = inventoryRepo.getPurchaseWeightReport(vouNo, batchNo);
+        Mono<List<VPurchase>> p1 = inventoryRepo.getPurchaseReport(vouNo, batchNo);
         Mono<List<PurExpense>> p2 = inventoryRepo.getPurExpense(vouNo);
-        List<VPurchase> list = p1.block();
-        List<PurExpense> listEx = p2.block();
-        listEx.removeIf((t) -> Util1.getFloat(t.getAmount()) == 0);
-        if (list != null) {
-            String key = "report.purchase.voucher";
-            String reportName = ProUtil.getProperty(key);
-            if (reportName != null) {
-                try {
-                    String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
-                    Map<String, Object> param = new HashMap<>();
-                    param.put("p_print_date", Util1.getTodayDateTime());
-                    param.put("p_comp_name", Global.companyName);
-                    param.put("p_comp_address", Global.companyAddress);
-                    param.put("p_comp_phone", Global.companyPhone);
-                    param.put("p_logo_path", logoPath);
-                    param.put("p_remark", p.getRemark());
-                    param.put("p_vou_no", vouNo);
-                    param.put("p_vou_date", Util1.toDateStr(p.getVouDate(), "dd/MM/yyyy"));
-                    param.put("p_trader_name", traderAutoCompleter.getTrader().getTraderName());
-                    param.put("p_vou_total", p.getVouTotal());
-                    param.put("p_exp", Util1.getFloat(p.getExpense()) * -1);
-                    param.put("p_vou_paid", p.getPaid());
-                    param.put("p_vou_balance", p.getBalance());
-                    param.put("SUBREPORT_DIR", "report/");
-                    String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
-                    ObjectMapper mapper = new ObjectMapper();
-                    JsonNode n1 = mapper.readTree(gson.toJson(list));
-                    JsonDataSource d1 = new JsonDataSource(n1, null) {
-                    };
-                    ObjectMapper m2 = new ObjectMapper();
-                    JsonNode n2 = m2.readTree(gson.toJson(listEx));
-                    JsonDataSource d2 = new JsonDataSource(n2, null) {
-                    };
-                    param.put("p_sub_data", d2);
-                    JasperPrint main = JasperFillManager.fillReport(reportPath, param, d1);
-                    JasperViewer.viewReport(main, false);
-                } catch (JsonProcessingException | JRException e) {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
+        p1.zipWith(p2).hasElement().subscribe((t) -> {
+            log.info("" + t);
+        });
+        p1.zipWith(p2).subscribe((t) -> {
+            List<VPurchase> list = t.getT1();
+            List<PurExpense> listEx = t.getT2();
+            listEx.removeIf((ex) -> Util1.getFloat(ex.getAmount()) == 0);
+            if (list != null) {
+                String key = "report.purchase.voucher";
+                String reportName = ProUtil.getProperty(key);
+                if (reportName != null) {
+                    try {
+                        String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
+                        Map<String, Object> param = new HashMap<>();
+                        param.put("p_print_date", Util1.getTodayDateTime());
+                        param.put("p_comp_name", Global.companyName);
+                        param.put("p_comp_address", Global.companyAddress);
+                        param.put("p_comp_phone", Global.companyPhone);
+                        param.put("p_logo_path", logoPath);
+                        param.put("p_remark", p.getRemark());
+                        param.put("p_vou_no", vouNo);
+                        param.put("p_vou_date", Util1.toDateStr(p.getVouDate(), "dd/MM/yyyy"));
+                        param.put("p_vou_total", p.getVouTotal());
+                        param.put("p_exp", Util1.getFloat(p.getExpense()) * -1);
+                        param.put("p_vou_paid", p.getPaid());
+                        param.put("p_vou_balance", p.getBalance());
+                        param.put("p_batch_no", p.getBatchNo());
+                        param.put("SUBREPORT_DIR", "report/");
+                        String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
+                        ObjectMapper mapper = new ObjectMapper();
+                        JsonNode n1 = mapper.readTree(gson.toJson(list));
+                        JsonDataSource d1 = new JsonDataSource(n1, null) {
+                        };
+                        ObjectMapper m2 = new ObjectMapper();
+                        JsonNode n2 = m2.readTree(gson.toJson(listEx));
+                        JsonDataSource d2 = new JsonDataSource(n2, null) {
+                        };
+                        param.put("p_sub_data", d2);
+                        JasperPrint main = JasperFillManager.fillReport(reportPath, param, d1);
+                        JasperViewer.viewReport(main, false);
+                    } catch (JsonProcessingException | JRException e) {
+                        JOptionPane.showMessageDialog(this, e.getMessage());
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "define report in " + key);
                 }
-            } else {
-                JOptionPane.showMessageDialog(this, "define report in " + key);
             }
-        }
-
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }, () -> {
+        });
     }
 
     private void focusTable() {
