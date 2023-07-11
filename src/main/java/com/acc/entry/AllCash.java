@@ -35,6 +35,7 @@ import com.acc.model.DepartmentA;
 import com.acc.model.ReportFilter;
 import com.acc.model.TmpOpening;
 import com.acc.model.Gl;
+import com.common.ComponentUtil;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -47,6 +48,7 @@ import com.user.editor.CurrencyEditor;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.editor.ProjectCellEditor;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
@@ -69,6 +71,7 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -546,7 +549,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         String stDate = dateAutoCompleter.getDateModel().getStartDate();
         String endDate = dateAutoCompleter.getDateModel().getEndDate();
         if (!currency.equals("-") || !ProUtil.isMultiCur()) {
-            progress.setIndeterminate(true);
+            enableToolBar(false);
             taskExecutor.execute(() -> {
                 try {
                     String path = "temp/Ledger" + Global.macId + ".json";
@@ -571,9 +574,9 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                     JsonDataSource ds = new JsonDataSource(input);
                     JasperPrint js = JasperFillManager.fillReport(filePath, p, ds);
                     JasperViewer.viewReport(js, false);
-                    progress.setIndeterminate(false);
+                    enableToolBar(true);
                 } catch (JRException ex) {
-                    progress.setIndeterminate(false);
+                    enableToolBar(true);
                     JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
                     log.error("printVoucher : " + ex.getMessage());
                 } catch (JsonProcessingException ex) {
@@ -610,7 +613,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void searchCash() {
-        progress.setIndeterminate(true);
+        enableToolBar(false);
         clearModel();
         Mono<TmpOpening> monoOp = accountRepo.getOpening(getOPFilter());
         ReportFilter filter = getFilter();
@@ -626,20 +629,29 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                     calDebitCredit();
                     requestFoucsTable();
                     decorator.refreshButton(filter.getFromDate());
-                    progress.setIndeterminate(false);
+                    enableToolBar(true);
                 }, (e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
-                    progress.setIndeterminate(false);
+                    enableToolBar(true);
                 });
             } else {
                 setData(new ArrayList<>(), filter.getFromDate());
                 calDebitCredit();
                 requestFoucsTable();
                 decorator.refreshButton(filter.getFromDate());
-                progress.setIndeterminate(false);
+                enableToolBar(true);
             }
         });
+    }
 
+    private void enableToolBar(boolean status) {
+        progress.setIndeterminate(!status);
+        observer.selected("refresh", status);
+        observer.selected("print", status);
+        observer.selected("save", false);
+        observer.selected("history", false);
+        ComponentUtil.setComponentHierarchyEnabled(panelDate, status);
+        ComponentUtil.setComponentHierarchyEnabled(panelOption, status);
     }
 
     private Mono<List<Gl>> getGl(ReportFilter filter) {
@@ -774,7 +786,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         txtProjectNo = new javax.swing.JTextField();
         jLabel11 = new javax.swing.JLabel();
         panelDate = new javax.swing.JPanel();
-        jPanel2 = new javax.swing.JPanel();
+        panelOption = new javax.swing.JPanel();
         jLabel9 = new javax.swing.JLabel();
         chkSummary = new javax.swing.JCheckBox();
         txtRecord = new javax.swing.JFormattedTextField();
@@ -1117,7 +1129,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             .addGap(0, 33, Short.MAX_VALUE)
         );
 
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+        panelOption.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         jLabel9.setText("Records : ");
 
@@ -1147,11 +1159,11 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             }
         });
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
+        javax.swing.GroupLayout panelOptionLayout = new javax.swing.GroupLayout(panelOption);
+        panelOption.setLayout(panelOptionLayout);
+        panelOptionLayout.setHorizontalGroup(
+            panelOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelOptionLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(chkSummary)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1164,11 +1176,11 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
+        panelOptionLayout.setVerticalGroup(
+            panelOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelOptionLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(panelOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkSummary)
                     .addComponent(jLabel9)
                     .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1190,7 +1202,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(panelDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(panelOption, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 559, Short.MAX_VALUE))
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -1209,7 +1221,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(panelDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(panelOption, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -1374,10 +1386,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JLabel jLabel9;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JPanel panelDate;
+    private javax.swing.JPanel panelOption;
     private javax.swing.JTable tblCIO;
     private javax.swing.JTable tblCash;
     private javax.swing.JTable tblCashOP;

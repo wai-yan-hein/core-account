@@ -20,6 +20,7 @@ import com.acc.setup.COAOpening;
 import com.acc.setup.COASetup;
 import com.acc.setup.DepartmentSetup;
 import com.acc.setup.TraderSetup;
+import com.common.ComponentUtil;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
@@ -98,6 +99,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
+import javax.swing.plaf.ComponentUI;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
@@ -402,6 +404,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             JOptionPane.showMessageDialog(this, "No deapartment assign. Please logout.");
             return null;
         }
+        enableToolBar(true);
         switch (menuName) {
             case "Sale" -> {
                 sale.setName(menuName);
@@ -781,6 +784,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
             }
         }
+        enableToolBar(false);
         return null;
     }
 
@@ -1086,10 +1090,17 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             case "history" -> {
                 btnHistory.setEnabled(Util1.getBoolean(selectObj.toString()));
             }
+            case "refresh" -> {
+                btnRefresh.setEnabled(Util1.getBoolean(selectObj.toString()));
+            }
             case "change-name" -> {
                 lblCompName.setText(Global.companyName);
             }
         }
+    }
+
+    private void enableToolBar(boolean status) {
+        ComponentUtil.setComponentHierarchyEnabled(toolBar, status);
     }
 
     private void setNetwork(long time) {
@@ -1120,7 +1131,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
         jMenu1 = new javax.swing.JMenu();
         tabMain = new javax.swing.JTabbedPane();
-        jToolBar1 = new javax.swing.JToolBar();
+        toolBar = new javax.swing.JToolBar();
         btnSave = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JToolBar.Separator();
         btnPrint = new javax.swing.JButton();
@@ -1173,7 +1184,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
         tabMain.setTabPlacement(javax.swing.JTabbedPane.BOTTOM);
 
-        jToolBar1.setFocusable(false);
+        toolBar.setFocusable(false);
 
         btnSave.setFont(Global.lableFont);
         btnSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/save_18px.png"))); // NOI18N
@@ -1186,8 +1197,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 btnSaveActionPerformed(evt);
             }
         });
-        jToolBar1.add(btnSave);
-        jToolBar1.add(jSeparator1);
+        toolBar.add(btnSave);
+        toolBar.add(jSeparator1);
 
         btnPrint.setFont(Global.lableFont);
         btnPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/print_18px.png"))); // NOI18N
@@ -1200,8 +1211,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 btnPrintActionPerformed(evt);
             }
         });
-        jToolBar1.add(btnPrint);
-        jToolBar1.add(jSeparator6);
+        toolBar.add(btnPrint);
+        toolBar.add(jSeparator6);
 
         btnRefresh.setFont(Global.lableFont);
         btnRefresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/refresh_18px.png"))); // NOI18N
@@ -1214,8 +1225,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 btnRefreshActionPerformed(evt);
             }
         });
-        jToolBar1.add(btnRefresh);
-        jToolBar1.add(jSeparator5);
+        toolBar.add(btnRefresh);
+        toolBar.add(jSeparator5);
 
         btnDelete.setFont(Global.lableFont);
         btnDelete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/trash_18px.png"))); // NOI18N
@@ -1228,8 +1239,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 btnDeleteActionPerformed(evt);
             }
         });
-        jToolBar1.add(btnDelete);
-        jToolBar1.add(jSeparator2);
+        toolBar.add(btnDelete);
+        toolBar.add(jSeparator2);
 
         btnHistory.setFont(Global.lableFont);
         btnHistory.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/time_machine_18px.png"))); // NOI18N
@@ -1242,8 +1253,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 btnHistoryActionPerformed(evt);
             }
         });
-        jToolBar1.add(btnHistory);
-        jToolBar1.add(jSeparator7);
+        toolBar.add(btnHistory);
+        toolBar.add(jSeparator7);
 
         btnNew.setFont(Global.lableFont);
         btnNew.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/new_copy_18px.png"))); // NOI18N
@@ -1256,8 +1267,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 btnNewActionPerformed(evt);
             }
         });
-        jToolBar1.add(btnNew);
-        jToolBar1.add(jSeparator3);
+        toolBar.add(btnNew);
+        toolBar.add(jSeparator3);
 
         btnLogout.setFont(Global.lableFont);
         btnLogout.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/logout_rounded_down_18px.png"))); // NOI18N
@@ -1270,8 +1281,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 btnLogoutActionPerformed(evt);
             }
         });
-        jToolBar1.add(btnLogout);
-        jToolBar1.add(jSeparator8);
+        toolBar.add(btnLogout);
+        toolBar.add(jSeparator8);
 
         btnFilter.setFont(Global.lableFont);
         btnFilter.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/slider_18px.png"))); // NOI18N
@@ -1285,8 +1296,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 btnFilterActionPerformed(evt);
             }
         });
-        jToolBar1.add(btnFilter);
-        jToolBar1.add(jSeparator11);
+        toolBar.add(btnFilter);
+        toolBar.add(jSeparator11);
 
         btnExit.setFont(Global.lableFont);
         btnExit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/cancel_18px.png"))); // NOI18N
@@ -1299,8 +1310,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 btnExitActionPerformed(evt);
             }
         });
-        jToolBar1.add(btnExit);
-        jToolBar1.add(jSeparator9);
+        toolBar.add(btnExit);
+        toolBar.add(jSeparator9);
 
         lblUserName.setFont(Global.lableFont);
         lblUserName.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -1385,7 +1396,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblNetwork, javax.swing.GroupLayout.DEFAULT_SIZE, 61, Short.MAX_VALUE)
+                .addComponent(lblNetwork, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -1409,7 +1420,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(tabMain)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(toolBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1428,7 +1439,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(toolBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(0, 0, 0)
                 .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1535,7 +1546,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private javax.swing.JToolBar.Separator jSeparator7;
     private javax.swing.JToolBar.Separator jSeparator8;
     private javax.swing.JToolBar.Separator jSeparator9;
-    private javax.swing.JToolBar jToolBar1;
     private javax.swing.JLabel lblCompName;
     private javax.swing.JLabel lblDep;
     private javax.swing.JLabel lblLock;
@@ -1545,5 +1555,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JProgressBar progress;
     private javax.swing.JTabbedPane tabMain;
+    private javax.swing.JToolBar toolBar;
     // End of variables declaration//GEN-END:variables
 }

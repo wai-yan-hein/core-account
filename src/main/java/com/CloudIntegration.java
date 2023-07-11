@@ -59,11 +59,13 @@ import com.inventory.model.TransferHis;
 import com.inventory.model.WeightLossHis;
 import com.repo.InventoryRepo;
 import com.repo.UserRepo;
+import java.time.Duration;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.TaskScheduler;
 
 /**
  *
@@ -160,6 +162,8 @@ public class CloudIntegration {
     private WeightLossService weightLossService;
     @Autowired
     private ProcessHisService processHisService;
+    @Autowired
+    private TaskScheduler taskScheduler;
     private SelectionObserver observer;
 
     public void setObserver(SelectionObserver observer) {
@@ -234,7 +238,6 @@ public class CloudIntegration {
                     purHisService.updateACK(p.getKey());
                 });
             });
-
         }
     }
 
@@ -304,7 +307,6 @@ public class CloudIntegration {
                     weightLossService.updateACK(r.getKey());
                 });
             });
-
         }
     }
 
@@ -413,6 +415,7 @@ public class CloudIntegration {
             });
             observer.selected("download", "downloadAppUser done.");
         }, (err) -> {
+            observer.selected("download", "offline.");
             log.error(err.getMessage());
         });
     }
@@ -425,6 +428,7 @@ public class CloudIntegration {
             });
             observer.selected("download", "downloadAppUser done.");
         }, (err) -> {
+            observer.selected("download", "offline.");
             log.error(err.getMessage());
         });
     }
@@ -437,6 +441,7 @@ public class CloudIntegration {
             });
             observer.selected("download", "downloadCompanyInfo done.");
         }, (err) -> {
+            observer.selected("download", "offline.");
             log.error(err.getMessage());
         });
     }
@@ -449,6 +454,7 @@ public class CloudIntegration {
             });
             observer.selected("download", "downloadCurrency done.");
         }, (err) -> {
+            observer.selected("download", "offline.");
             log.error(err.getMessage());
         });
     }
@@ -461,6 +467,7 @@ public class CloudIntegration {
             });
             observer.selected("download", "downloadDepartment done.");
         }, (err) -> {
+            observer.selected("download", "offline.");
             log.error(err.getMessage());
         });
     }
@@ -473,6 +480,7 @@ public class CloudIntegration {
             });
             observer.selected("download", "downloadExchangeRate done.");
         }, (err) -> {
+            observer.selected("download", "offline.");
             log.error(err.getMessage());
         });
     }
@@ -485,6 +493,7 @@ public class CloudIntegration {
             });
             observer.selected("download", "downloadMachineInfo done.");
         }, (err) -> {
+            observer.selected("download", "offline.");
             log.error(err.getMessage());
         });
     }
@@ -497,6 +506,7 @@ public class CloudIntegration {
             });
             observer.selected("download", "downloadMacProperty done.");
         }, (err) -> {
+            observer.selected("download", "offline.");
             log.error(err.getMessage());
         });
     }
@@ -509,6 +519,7 @@ public class CloudIntegration {
             });
             observer.selected("download", "downloadMenu done.");
         }, (err) -> {
+            observer.selected("download", "offline.");
             log.error(err.getMessage());
         });
     }
@@ -521,6 +532,7 @@ public class CloudIntegration {
             });
             observer.selected("download", "downloadPC done.");
         }, (err) -> {
+            observer.selected("download", "offline.");
             log.error(err.getMessage());
         });
     }
@@ -533,6 +545,7 @@ public class CloudIntegration {
             });
             observer.selected("download", "downloadPM done.");
         }, (err) -> {
+            observer.selected("download", "offline.");
             log.error(err.getMessage());
         });
     }
@@ -545,6 +558,7 @@ public class CloudIntegration {
             });
             observer.selected("download", "downloadPM done.");
         }, (err) -> {
+            observer.selected("download", "offline.");
             log.error(err.getMessage());
         });
     }
@@ -557,6 +571,7 @@ public class CloudIntegration {
             });
             observer.selected("download", "downloadRole done.");
         }, (err) -> {
+            observer.selected("download", "offline.");
             log.error(err.getMessage());
         });
     }
@@ -569,6 +584,7 @@ public class CloudIntegration {
             });
             observer.selected("download", "downloadRoleProperty done.");
         }, (err) -> {
+            observer.selected("download", "offline.");
             log.error(err.getMessage());
         });
     }
@@ -581,6 +597,7 @@ public class CloudIntegration {
             });
             observer.selected("download", "downloadSystemProperty done.");
         }, (err) -> {
+            observer.selected("download", "offline.");
             log.error(err.getMessage());
         });
     }
@@ -734,10 +751,11 @@ public class CloudIntegration {
 
     public void start() {
         if (localDatabase) {
-            startDownload();
-            /*taskScheduler.scheduleAtFixedRate(() -> {
-            
-            }, Duration.ofMinutes(15));*/
+            taskScheduler.scheduleAtFixedRate(() -> {
+                startDownload();
+            }, Duration.ofMinutes(15));
+        } else {
+            observer.selected("enable", true);
         }
 
     }

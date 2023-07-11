@@ -153,4 +153,8 @@ public class DateTableDecorator {
             observer.selected("Date-Search", date);
         }
     }
+
+    public void setEnable(boolean status) {
+        contentPanel.setEnabled(status);
+    }
 }

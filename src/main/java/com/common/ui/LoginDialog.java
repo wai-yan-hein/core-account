@@ -149,6 +149,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
         txtPassword.setEnabled(status);
         btnLogin.setEnabled(status);
         progress.setIndeterminate(!status);
+        lblStatus.setText(status ? "Latest Version." : "");
     }
 
     private void logout() {
@@ -449,12 +450,16 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
 
     @Override
     public void selected(Object source, Object selectObj) {
-        if (source.toString().equals("download")) {
+        String type = source.toString();
+        if (type.equals("download")) {
             enableCount += 1;
             lblStatus.setText(selectObj.toString());
             if (enableCount > 14) {
                 enableForm(true);
-                lblStatus.setText("Latest version.");
+            }
+        } else if (type.equals("enable")) {
+            if (selectObj instanceof Boolean enable) {
+                enableForm(enable);
             }
         }
     }

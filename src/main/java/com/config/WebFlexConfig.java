@@ -10,7 +10,7 @@ import com.common.Util1;
 import com.user.model.AuthenticationRequest;
 import com.user.model.AuthenticationResponse;
 import java.awt.HeadlessException;
-import java.net.http.HttpClient;
+import java.time.Duration;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -18,10 +18,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
+import reactor.netty.resources.ConnectionProvider;
 
 /**
  *
@@ -48,6 +51,7 @@ public class WebFlexConfig {
                         .build())
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getToken())
                 .baseUrl(getUrl(url, port))
+                .clientConnector(reactorClientHttpConnector())
                 .build();
     }
 
@@ -63,6 +67,7 @@ public class WebFlexConfig {
                         .build())
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getToken())
                 .baseUrl(getUrl(url, port))
+                .clientConnector(reactorClientHttpConnector())
                 .build();
     }
 
@@ -78,6 +83,7 @@ public class WebFlexConfig {
                         .build())
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getToken())
                 .baseUrl(getUrl(url, port))
+                .clientConnector(reactorClientHttpConnector())
                 .build();
     }
 
@@ -93,6 +99,7 @@ public class WebFlexConfig {
                         .build())
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + getToken())
                 .baseUrl(getUrl(url, port))
+                .clientConnector(reactorClientHttpConnector())
                 .build();
     }
 
@@ -161,5 +168,26 @@ public class WebFlexConfig {
             log.error("authenticate : " + e.getMessage());
         }
         return "";
+    }
+
+    @Bean
+    public ConnectionProvider connectionProvider() {
+        return ConnectionProvider.builder("custom-provider")
+                .maxConnections(10) // maximum number of connections
+                .maxIdleTime(Duration.ofSeconds(10)) // maximum idle time
+                .maxLifeTime(Duration.ofSeconds(60)) // maximum life time
+                .pendingAcquireTimeout(Duration.ofSeconds(5)) // pending acquire timeout
+                .evictInBackground(Duration.ofSeconds(30)) // eviction interval
+                .build();
+    }
+
+    @Bean
+    public HttpClient httpClient() {
+        return HttpClient.create(connectionProvider());
+    }
+
+    @Bean
+    public ReactorClientHttpConnector reactorClientHttpConnector() {
+        return new ReactorClientHttpConnector(httpClient());
     }
 }
