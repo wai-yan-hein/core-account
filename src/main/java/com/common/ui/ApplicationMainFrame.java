@@ -40,7 +40,6 @@ import com.inventory.ui.entry.PurchaseByWeight;
 import com.inventory.ui.entry.RFID;
 import com.inventory.ui.entry.CustomerPayment;
 import com.inventory.ui.entry.PurchaseExport;
-import com.inventory.ui.entry.MillingEntry;
 import com.inventory.ui.entry.ReorderLevelEntry;
 import com.inventory.ui.entry.ReturnIn;
 import com.inventory.ui.entry.ReturnOut;
@@ -71,6 +70,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.reactive.function.client.WebClient;
 import com.inventory.ui.entry.Reports;
+import com.inventory.ui.entry.MilingEntry;
 import com.inventory.ui.entry.SaleByBatch;
 import com.inventory.ui.entry.SaleByWeight;
 import com.inventory.ui.entry.Transfer;
@@ -164,7 +164,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     @Autowired
     private CustomerPayment customerPayment;
     @Autowired
-    private MillingEntry millingEntry;
+    private MilingEntry millingEntry;
 //account
     @Autowired
     private DepartmentSetup departmentSetup;
@@ -178,7 +178,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private AparReport aparReport;
     @Autowired
     private TraderSetup traderSetup;
-
+    @Autowired
+    private MilingEntry riceMilingEntry;
     @Autowired
     private TaskExecutor taskExecutor;
     @Autowired
@@ -731,6 +732,20 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return journalClosingStock;
             }
             case "Trader" -> {
+                traderSetup.setName(menuName);
+                traderSetup.setObserver(this);
+                traderSetup.setProgress(progress);
+                traderSetup.initMain();
+                return traderSetup;
+            }
+            case "Rice Miling" -> {
+                riceMilingEntry.setName(menuName);
+                riceMilingEntry.setObserver(this);
+                riceMilingEntry.setProgress(progress);
+                riceMilingEntry.initMain();
+                return riceMilingEntry;
+            }
+            case "Puddy Miling" -> {
                 traderSetup.setName(menuName);
                 traderSetup.setObserver(this);
                 traderSetup.setProgress(progress);
