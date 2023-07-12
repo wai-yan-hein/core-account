@@ -10,8 +10,8 @@ import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.model.Location;
-import com.inventory.model.MilingRawDetailKey;
-import com.inventory.model.MilingRawDetail;
+import com.inventory.model.MillingRawDetailKey;
+import com.inventory.model.MillingRawDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.ui.entry.MilingEntry;
@@ -24,21 +24,20 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Athu Sint
  */
+@Slf4j
 public class MilingRawTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(MilingRawTableModel.class);
-    private String[] columnNames = {"Code", "Description", "Relation", "Location", "Weight", "Weight Unit", "Qty", "Unit", "Std-Weight", "Total Weight", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Stock Name", "Location", "Weight", "Weight Unit", "Qty", "Unit", "Std-Weight", "Total Weight", "Price", "Amount"};
     private JTable parent;
-    private List<MilingRawDetail> listDetail = new ArrayList();
+    private List<MillingRawDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
-    private final List<MilingRawDetailKey> deleteList = new ArrayList();
+    private final List<MillingRawDetailKey> deleteList = new ArrayList();
     private StockBalanceTableModel sbTableModel;
     private InventoryRepo inventoryRepo;
     private JLabel lblStockName;
@@ -46,6 +45,11 @@ public class MilingRawTableModel extends AbstractTableModel {
     private JDateChooser vouDate;
     private boolean change = false;
     private MilingEntry sale;
+    private Location location;
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
 
     public MilingEntry getSale() {
         return sale;
@@ -145,7 +149,7 @@ public class MilingRawTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 0, 1, 2, 3, 5 ->
+            case 0, 1, 2, 4, 6 ->
                 String.class;
             default ->
                 Float.class;
@@ -155,7 +159,7 @@ public class MilingRawTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 2, 9, 11 -> {
+            case 8 -> {
                 return false;
             }
         }
@@ -165,7 +169,7 @@ public class MilingRawTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
         try {
-            MilingRawDetail sd = listDetail.get(row);
+            MillingRawDetail sd = listDetail.get(row);
             switch (column) {
                 case 0 -> {
                     //code
@@ -184,36 +188,33 @@ public class MilingRawTableModel extends AbstractTableModel {
                     return stockName;
                 }
                 case 2 -> {
-                    return sd.getRelName();
-                }
-                case 3 -> {
                     //loc
                     return sd.getLocName();
                 }
-                case 4 -> {
+                case 3 -> {
                     return sd.getWeight();
                 }
-                case 5 -> {
+                case 4 -> {
                     return sd.getWeightUnit();
                 }
-                case 6 -> {
+                case 5 -> {
                     //qty
                     return sd.getQty();
                 }
-                case 7 -> {
+                case 6 -> {
                     return sd.getUnitCode();
                 }
-                case 8 -> {
+                case 7 -> {
                     return sd.getStdWeight();
                 }
-                case 9 -> {
+                case 8 -> {
                     return sd.getTotalWeight();
                 }
-                case 10 -> {
+                case 9 -> {
                     //price
                     return sd.getPrice();
                 }
-                case 11 -> {
+                case 10 -> {
                     //amount
                     return sd.getAmount();
                 }
@@ -230,7 +231,7 @@ public class MilingRawTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object value, int row, int column) {
         try {
-            MilingRawDetail sd = listDetail.get(row);
+            MillingRawDetail sd = listDetail.get(row);
             if (value != null) {
                 switch (column) {
                     case 0, 1 -> {
@@ -242,16 +243,17 @@ public class MilingRawTableModel extends AbstractTableModel {
                             sd.setUserCode(s.getUserCode());
                             sd.setRelName(s.getRelName());
                             sd.setQty(1.0f);
+                            sd.setWeight(s.getWeight());
                             sd.setStdWeight(s.getWeight());
                             sd.setWeightUnit(s.getWeightUnit());
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setStock(s);
                             sd.setPrice(Util1.getFloat(sd.getPrice()) == 0 ? s.getSalePriceN() : sd.getPrice());
-                            parent.setColumnSelectionInterval(4, 4);
+                            parent.setColumnSelectionInterval(3, 3);
                             addNewRow();
                         }
                     }
-                    case 3 -> {
+                    case 2 -> {
                         //Loc
                         if (value instanceof Location l) {
                             sd.setLocCode(l.getKey().getLocCode());
@@ -259,18 +261,15 @@ public class MilingRawTableModel extends AbstractTableModel {
 
                         }
                     }
-                    case 4 -> {
+                    case 3 -> {
                         sd.setWeight(Util1.getFloat(value));
-                        if (sd.getQty() != null && sd.getWeight() != null) {
-                            sd.setTotalWeight(Util1.getFloat(sd.getQty()) * Util1.getFloat(sd.getWeight()));
-                        }
                     }
-                    case 5 -> {
+                    case 4 -> {
                         if (value instanceof StockUnit u) {
                             sd.setWeightUnit(u.getKey().getUnitCode());
                         }
                     }
-                    case 6 -> {
+                    case 5 -> {
                         //Qty
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
@@ -292,16 +291,16 @@ public class MilingRawTableModel extends AbstractTableModel {
                             parent.setColumnSelectionInterval(column, column);
                         }
                     }
-                    case 7 -> {
+                    case 6 -> {
                         //Unit
                         if (value instanceof StockUnit stockUnit) {
                             sd.setUnitCode(stockUnit.getKey().getUnitCode());
                         }
                     }
-                    case 8 -> {
+                    case 7 -> {
                         sd.setStdWeight(Util1.getFloat(value));
                     }
-                    case 10 -> {
+                    case 9 -> {
                         //price
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
@@ -317,27 +316,16 @@ public class MilingRawTableModel extends AbstractTableModel {
                             parent.setColumnSelectionInterval(column, column);
                         }
                     }
-                    case 11 -> {
+                    case 10 -> {
                         //amt
                         sd.setAmount(Util1.getFloat(value));
 
                     }
 
                 }
-                if (column != 10) {
-                    if (Util1.getFloat(sd.getPrice()) == 0) {
-                        if (ProUtil.isSaleLastPrice()) {
-                            if (sd.getStockCode() != null && sd.getUnitCode() != null) {
-                                inventoryRepo.getSaleRecentPrice(sd.getStockCode(),
-                                        Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), sd.getUnitCode()).subscribe((t) -> {
-                                    sd.setPrice(t.getAmount());
-                                });
-                            }
-                        }
-                    }
-                }
                 change = true;
                 assignLocation(sd);
+                calWeightTotal(sd);
                 calculateAmount(sd);
                 fireTableRowsUpdated(row, row);
                 selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
@@ -348,15 +336,11 @@ public class MilingRawTableModel extends AbstractTableModel {
         }
     }
 
-    private void assignLocation(MilingRawDetail sd) {
+    private void assignLocation(MillingRawDetail sd) {
         if (sd.getLocCode() == null) {
-            LocationAutoCompleter completer = sale.getLocationAutoCompleter();
-            if (completer != null) {
-                Location l = completer.getLocation();
-                if (l != null) {
-                    sd.setLocCode(l.getKey().getLocCode());
-                    sd.setLocName(l.getLocName());
-                }
+            if (location != null) {
+                sd.setLocCode(location.getKey().getLocCode());
+                sd.setLocName(location.getLocName());
             }
         }
     }
@@ -364,7 +348,7 @@ public class MilingRawTableModel extends AbstractTableModel {
     public void addNewRow() {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
-                MilingRawDetail pd = new MilingRawDetail();
+                MillingRawDetail pd = new MillingRawDetail();
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }
@@ -374,7 +358,7 @@ public class MilingRawTableModel extends AbstractTableModel {
     private boolean hasEmptyRow() {
         boolean status = false;
         if (listDetail.size() >= 1) {
-            MilingRawDetail get = listDetail.get(listDetail.size() - 1);
+            MillingRawDetail get = listDetail.get(listDetail.size() - 1);
             if (get.getStockCode() == null) {
                 status = true;
             }
@@ -382,11 +366,11 @@ public class MilingRawTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<MilingRawDetail> getListDetail() {
+    public List<MillingRawDetail> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<MilingRawDetail> listDetail) {
+    public void setListDetail(List<MillingRawDetail> listDetail) {
         this.listDetail = listDetail;
         addNewRow();
         fireTableDataChanged();
@@ -397,7 +381,11 @@ public class MilingRawTableModel extends AbstractTableModel {
         addNewRow();
     }
 
-    private void calculateAmount(MilingRawDetail s) {
+    private void calWeightTotal(MillingRawDetail m) {
+        m.setTotalWeight(Util1.getFloat(m.getQty()) * Util1.getFloat(m.getWeight()));
+    }
+
+    private void calculateAmount(MillingRawDetail s) {
         float price = Util1.getFloat(s.getPrice());
         float stdWt = Util1.getFloat(s.getStdWeight());
         float wt = Util1.getFloat(s.getWeight());
@@ -414,7 +402,7 @@ public class MilingRawTableModel extends AbstractTableModel {
 
     public boolean isValidEntry() {
         boolean status = true;
-        for (MilingRawDetail sdh : listDetail) {
+        for (MillingRawDetail sdh : listDetail) {
             if (sdh.getStockCode() != null) {
                 if (Util1.getFloat(sdh.getAmount()) <= 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
@@ -438,7 +426,7 @@ public class MilingRawTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<MilingRawDetailKey> getDelList() {
+    public List<MillingRawDetailKey> getDelList() {
         return deleteList;
     }
 
@@ -449,7 +437,7 @@ public class MilingRawTableModel extends AbstractTableModel {
     }
 
     public void delete(int row) {
-        MilingRawDetail sdh = listDetail.get(row);
+        MillingRawDetail sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
             deleteList.add(sdh.getKey());
         }
@@ -464,7 +452,7 @@ public class MilingRawTableModel extends AbstractTableModel {
         parent.requestFocus();
     }
 
-    public void addSale(MilingRawDetail sd) {
+    public void addSale(MillingRawDetail sd) {
         if (listDetail != null) {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);

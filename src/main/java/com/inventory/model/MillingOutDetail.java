@@ -24,10 +24,10 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 @Table(name = "miling_out_detail")
-public class MilingOutDetail {
+public class MillingOutDetail {
 
     @EmbeddedId
-    private MilingOutDetailKey key;
+    private MillingOutDetailKey key;
     @Column(name = "stock_code")
     private String stockCode;
     @Temporal(TemporalType.DATE)

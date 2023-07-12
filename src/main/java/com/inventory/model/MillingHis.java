@@ -25,11 +25,11 @@ import lombok.Data;
 @Entity
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Table(name = "miling_his")
-public class MilingHis {
+@Table(name = "milling_his")
+public class MillingHis {
 
     @EmbeddedId
-    private MilingHisKey key;
+    private MillingHisKey key;
     @Column(name = "trader_code")
     private String traderCode;
     @Column(name = "saleman_code")
@@ -98,12 +98,12 @@ public class MilingHis {
     @Transient
     private String localVouNo;
     private transient String status = "STATUS";
-    private transient List<MilingRawDetail> listSH;
-    private transient List<MilingRawDetailKey> listDel;
+    private transient List<MillingRawDetail> listSH;
+    private transient List<MillingRawDetailKey> listDel;
     private transient boolean backup;
     private transient List<String> location;
     private transient boolean local = false;
 
-    public MilingHis() {
+    public MillingHis() {
     }
 }
