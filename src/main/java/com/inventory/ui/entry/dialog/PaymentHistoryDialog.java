@@ -111,7 +111,7 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
         super(frame, true);
         initComponents();
         initKeyListener();
-        initFocous();
+        initFocus();
         setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
     }
 
@@ -121,8 +121,16 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
         setTodayDate();
     }
 
-    private void initFocous() {
+    private void initFocus() {
         txtAccount.addFocusListener(fa);
+        txtVouNo.addFocusListener(fa);
+        txtSaleVouNo.addFocusListener(fa);
+        txtRemark.addFocusListener(fa);
+        txtCus.addFocusListener(fa);
+        txtAccount.addFocusListener(fa);
+        txtProjectNo.addFocusListener(fa);
+        txtUser.addFocusListener(fa);
+        txtCurrency.addFocusListener(fa);
     }
 
     private void initCombo() {
@@ -189,6 +197,7 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
         filter.setToDate(Util1.toDateStr(txtToDate.getDate(), "yyyy-MM-dd"));
         filter.setUserCode(getUserCode());
         filter.setVouNo(txtVouNo.getText());
+        filter.setSaleVouNo(txtSaleVouNo.getText());
         filter.setRemark(Util1.isNull(txtRemark.getText(), "-"));
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         filter.setLocCode(getLocCode());
@@ -270,9 +279,11 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
         jButton1 = new javax.swing.JButton();
         chkDel = new javax.swing.JCheckBox();
         jLabel7 = new javax.swing.JLabel();
-        txtStock1 = new javax.swing.JTextField();
+        txtProjectNo = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
         txtCurrency = new javax.swing.JTextField();
+        jLabel10 = new javax.swing.JLabel();
+        txtSaleVouNo = new javax.swing.JTextField();
         txtFilter = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblVoucher = new javax.swing.JTable();
@@ -371,11 +382,11 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
         jLabel7.setFont(Global.lableFont);
         jLabel7.setText("Project No");
 
-        txtStock1.setFont(Global.textFont);
-        txtStock1.setName("txtCus"); // NOI18N
-        txtStock1.addFocusListener(new java.awt.event.FocusAdapter() {
+        txtProjectNo.setFont(Global.textFont);
+        txtProjectNo.setName("txtCus"); // NOI18N
+        txtProjectNo.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
-                txtStock1FocusGained(evt);
+                txtProjectNoFocusGained(evt);
             }
         });
 
@@ -387,6 +398,17 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
         txtCurrency.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 txtCurrencyFocusGained(evt);
+            }
+        });
+
+        jLabel10.setFont(Global.lableFont);
+        jLabel10.setText("Sale Vou No");
+
+        txtSaleVouNo.setFont(Global.textFont);
+        txtSaleVouNo.setName("txtVouNo"); // NOI18N
+        txtSaleVouNo.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtSaleVouNoFocusGained(evt);
             }
         });
 
@@ -411,7 +433,8 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
                                     .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                    .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addGap(0, 7, Short.MAX_VALUE))
                             .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -419,13 +442,14 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                                 .addComponent(txtFromDate, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE)
                                 .addComponent(txtToDate, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 119, Short.MAX_VALUE)
-                                .addComponent(txtVouNo, javax.swing.GroupLayout.Alignment.LEADING))
+                                .addComponent(txtVouNo, javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(txtSaleVouNo, javax.swing.GroupLayout.Alignment.LEADING))
                             .addComponent(chkDel)
                             .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtCus, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtUser, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtStock1, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -451,6 +475,10 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
                     .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel10)
+                    .addComponent(txtSaleVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -464,7 +492,7 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
-                    .addComponent(txtStock1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel8)
@@ -580,7 +608,7 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 710, Short.MAX_VALUE)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 704, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addComponent(jLabel1)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -592,7 +620,7 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -664,13 +692,17 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
         }
     }//GEN-LAST:event_tblVoucherMouseClicked
 
-    private void txtStock1FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtStock1FocusGained
+    private void txtProjectNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtProjectNoFocusGained
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtStock1FocusGained
+    }//GEN-LAST:event_txtProjectNoFocusGained
 
     private void txtCurrencyFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCurrencyFocusGained
         // TODO add your handling code here:
     }//GEN-LAST:event_txtCurrencyFocusGained
+
+    private void txtSaleVouNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSaleVouNoFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtSaleVouNoFocusGained
 
     /**
      * @param args the command line arguments
@@ -682,6 +714,7 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JCheckBox chkDel;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -702,8 +735,9 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
     private javax.swing.JTextField txtCus;
     private javax.swing.JTextField txtFilter;
     private com.toedter.calendar.JDateChooser txtFromDate;
+    private javax.swing.JTextField txtProjectNo;
     private javax.swing.JTextField txtRemark;
-    private javax.swing.JTextField txtStock1;
+    private javax.swing.JTextField txtSaleVouNo;
     private com.toedter.calendar.JDateChooser txtToDate;
     private javax.swing.JFormattedTextField txtTotalRecord;
     private javax.swing.JTextField txtUser;

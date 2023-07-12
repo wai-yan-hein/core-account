@@ -230,7 +230,6 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
                         .subscribe((payment) -> {
                             lblMessage.setText(payment.isEmpty() ? "No Record." : "");
                             tableModel.setListDetail(payment);
-                            txtRecord.setValue(payment.size());
                             progress.setIndeterminate(false);
                             calTotalPayment();
                         }, (e) -> {
@@ -250,6 +249,7 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
         txtAmount.setValue(payment);
         txtOutstanding.setValue(outstanding - payment);
         txtDifAmt.setValue(outstanding - creditAmt);
+        txtRecord.setValue(tableModel.getListDetail().size());
     }
 
     private void savePayment() {
@@ -384,7 +384,7 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
         }
         inventoryRepo.getPaymentDetail(vouNo, deptId).subscribe((t) -> {
             tableModel.setListDetail(t);
-            txtRecord.setValue(t.size());
+            calTotalPayment();
             tblPayment.requestFocus();
         });
     }
@@ -411,6 +411,7 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
                 if (yes_no == 0) {
                     inventoryRepo.delete(ph.getKey()).subscribe((t) -> {
                         if (t) {
+                            calTotalPayment();
                             clear();
                         }
                     });

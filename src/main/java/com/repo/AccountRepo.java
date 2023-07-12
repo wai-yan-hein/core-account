@@ -425,14 +425,15 @@ public class AccountRepo {
                 );
     }
 
-    public Flux<Gl> getVoucher(String vouNo) {
+    public Mono<List<Gl>> getVoucher(String vouNo) {
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-voucher")
                 .queryParam("glVouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().bodyToFlux(Gl.class
-                );
+                .retrieve()
+                .bodyToFlux(Gl.class)
+                .collectList();
     }
 
     public Mono<COATemplate> findCOATemplate(COATemplateKey key) {

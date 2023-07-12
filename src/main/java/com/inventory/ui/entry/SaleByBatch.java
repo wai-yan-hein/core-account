@@ -742,6 +742,15 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
         traderAutoCompleter.setTrader(t, row);
     }
 
+    private void observeMain() {
+        observer.selected("control", this);
+        observer.selected("save", true);
+        observer.selected("print", true);
+        observer.selected("history", true);
+        observer.selected("delete", true);
+        observer.selected("refresh", false);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -1414,7 +1423,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
     }// </editor-fold>//GEN-END:initComponents
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
-        observer.selected("control", this);
+        observeMain();
     }//GEN-LAST:event_formComponentShown
 
     private void txtCusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCusActionPerformed

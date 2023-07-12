@@ -20,7 +20,7 @@ import com.acc.model.DeleteObj;
 import com.acc.model.DepartmentA;
 import com.acc.model.ReportFilter;
 import com.acc.model.TmpOpening;
-import static com.common.ProUtil.gson;
+import com.common.ProUtil;
 import com.common.Util1;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -142,7 +142,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
                     if (tblVoucher.getSelectedRow() >= 0) {
                         selectRow = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
                         Gl gl = voucherTableModel.getVGl(selectRow);
-                        accountRepo.getVoucher(gl.getGlVouNo()).collectList().subscribe((t) -> {
+                        accountRepo.getVoucher(gl.getGlVouNo()).subscribe((t) -> {
                             openVoucherDialog(gl.getTranSource(), t);
                         });
                     }
@@ -296,30 +296,37 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     }
 
     private void printVoucher(Gl gl) {
-        try {
-            String glVouNo = gl.getGlVouNo();
-            String rpName = gl.getTranSource().equals("DR") ? "Payment / Debit Voucher" : "Receipt / Credit Voucher";
-            String rpPath = Global.accountRP + "DrCrVoucherA5.jasper";
-            Map<String, Object> p = new HashMap();
-            p.put("p_report_name", rpName);
-            p.put("p_date", String.format("Between %s and %s", dateAutoCompleter.getDateModel().getStartDate(), dateAutoCompleter.getDateModel().getEndDate()));
-            p.put("p_print_date", Util1.getTodayDateTime());
-            p.put("p_comp_name", Global.companyName);
-            p.put("p_comp_address", Global.companyAddress);
-            p.put("p_comp_phone", Global.companyPhone);
-            p.put("p_vou_type", gl.getTranSource());
-            Util1.initJasperContext();
-            List<Gl> list = accountRepo.getVoucher(glVouNo).collectList().block();
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode node = mapper.readTree(gson.toJson(list));
-            JsonDataSource ds = new JsonDataSource(node, null) {
-            };
-            JasperPrint js = JasperFillManager.fillReport(rpPath, p, ds);
-            JasperViewer.viewReport(js, false);
-        } catch (JsonProcessingException | JRException ex) {
-            log.error("printVoucher : " + ex.getMessage());
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
+        progress.setIndeterminate(true);
+        String glVouNo = gl.getGlVouNo();
+        accountRepo.getVoucher(glVouNo).subscribe((list) -> {
+            try {
+                String rpName = gl.getTranSource().equals("DR") ? "Payment / Debit Voucher" : "Receipt / Credit Voucher";
+                String rpPath = Global.accountRP + "DrCrVoucherA5.jasper";
+                Map<String, Object> p = new HashMap();
+                p.put("p_report_name", rpName);
+                p.put("p_date", String.format("Between %s and %s", dateAutoCompleter.getDateModel().getStartDate(), dateAutoCompleter.getDateModel().getEndDate()));
+                p.put("p_print_date", Util1.getTodayDateTime());
+                p.put("p_comp_name", Global.companyName);
+                p.put("p_comp_address", Global.companyAddress);
+                p.put("p_comp_phone", Global.companyPhone);
+                p.put("p_vou_type", gl.getTranSource());
+                Util1.initJasperContext();
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode node = mapper.readTree(ProUtil.gson.toJson(list));
+                JsonDataSource ds = new JsonDataSource(node, null) {
+                };
+                JasperPrint js = JasperFillManager.fillReport(rpPath, p, ds);
+                JasperViewer.viewReport(js, false);
+                progress.setIndeterminate(false);
+            } catch (JsonProcessingException | JRException ex) {
+                progress.setIndeterminate(false);
+                log.error("printVoucher : " + ex.getMessage());
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }, (e) -> {
+            progress.setIndeterminate(false);
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        });
 
     }
 
