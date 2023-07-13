@@ -297,6 +297,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
             tblStockBalance.setModel(stockBalanceTableModel);
             stockBalanceTableModel.setProgress(sbProgress);
             stockBalanceTableModel.setInventoryRepo(inventoryRepo);
+            stockBalanceTableModel.setChkSummary(chkSummary);
             tblStockBalance.getColumnModel().getColumn(0).setPreferredWidth(100);//Unit
             tblStockBalance.getColumnModel().getColumn(1).setPreferredWidth(140);//Cost Price
             tblStockBalance.getTableHeader().setFont(Global.tblHeaderFont);
@@ -813,6 +814,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
         jScrollPane2 = new javax.swing.JScrollPane();
         tblStockBalance = new javax.swing.JTable();
         sbProgress = new javax.swing.JProgressBar();
+        chkSummary = new javax.swing.JCheckBox();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -1372,6 +1374,8 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
         tblStockBalance.setRowHeight(Global.tblRowHeight);
         jScrollPane2.setViewportView(tblStockBalance);
 
+        chkSummary.setText("Summary");
+
         javax.swing.GroupLayout sbPanelLayout = new javax.swing.GroupLayout(sbPanel);
         sbPanel.setLayout(sbPanelLayout);
         sbPanelLayout.setHorizontalGroup(
@@ -1380,7 +1384,10 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
                 .addContainerGap()
                 .addGroup(sbPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(sbProgress, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE))
+                    .addComponent(sbProgress, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
+                    .addGroup(sbPanelLayout.createSequentialGroup()
+                        .addComponent(chkSummary)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         sbPanelLayout.setVerticalGroup(
@@ -1389,6 +1396,8 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
                 .addComponent(sbProgress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkSummary)
                 .addContainerGap())
         );
 
@@ -1703,6 +1712,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
     private javax.swing.JCheckBox chkA4;
     private javax.swing.JCheckBox chkA5;
     private javax.swing.JCheckBox chkPaid;
+    private javax.swing.JCheckBox chkSummary;
     private javax.swing.JCheckBox chkVou;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;

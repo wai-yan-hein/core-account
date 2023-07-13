@@ -12,7 +12,6 @@ import com.inventory.model.MillingOutDetailKey;
 import com.inventory.model.MillingOutDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
-import com.inventory.ui.entry.MilingEntry;
 import com.repo.InventoryRepo;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
@@ -44,7 +43,6 @@ public class MilingOutTableModel extends AbstractTableModel {
     private JButton btnProgress;
     private JDateChooser vouDate;
     private boolean change = false;
-    private MilingEntry sale;
     private JFormattedTextField totalWeight;
     private Location location;
 
@@ -58,14 +56,6 @@ public class MilingOutTableModel extends AbstractTableModel {
 
     public void setModel(JFormattedTextField totalWeight) {
         this.totalWeight = totalWeight;
-    }
-
-    public MilingEntry getSale() {
-        return sale;
-    }
-
-    public void setSale(MilingEntry sale) {
-        this.sale = sale;
     }
 
     public StockBalanceTableModel getSbTableModel() {
@@ -252,7 +242,7 @@ public class MilingOutTableModel extends AbstractTableModel {
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setStock(s);
                             sd.setPrice(Util1.getFloat(sd.getPrice()) == 0 ? s.getSalePriceN() : sd.getPrice());
-                            parent.setColumnSelectionInterval(3, 3);
+                            setTableSelection(row, 3);
                             addNewRow();
                         }
                     }
@@ -336,11 +326,16 @@ public class MilingOutTableModel extends AbstractTableModel {
                 calculateAmount(sd);
                 fireTableRowsUpdated(row, row);
                 selectionObserver.selected("SALE-TOTAL-OUT", "SALE-TOTAL-OUT");
-                parent.requestFocusInWindow();
+                parent.requestFocus();
             }
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
+    }
+
+    private void setTableSelection(int row, int column) {
+        parent.setRowSelectionInterval(row, row);
+        parent.setColumnSelectionInterval(column, column);
     }
 
     private void assignLocation(MillingOutDetail sd) {
@@ -460,10 +455,17 @@ public class MilingOutTableModel extends AbstractTableModel {
         parent.requestFocus();
     }
 
-    public void addSale(MillingOutDetail sd) {
+    public void addObject(MillingOutDetail sd) {
         if (listDetail != null) {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
+        }
+    }
+
+    public void setObject(int row, MillingOutDetail mod) {
+        if (!listDetail.isEmpty()) {
+            listDetail.set(row, mod);
+            fireTableRowsUpdated(row, row);
         }
     }
 

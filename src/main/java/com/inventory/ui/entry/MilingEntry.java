@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.common.CustomTableCellRenderer;
 import com.repo.AccountRepo;
 import com.common.DecimalFormatRender;
 import com.common.Global;
@@ -91,7 +92,6 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
     private UserRepo userRepo;
     @Autowired
     private TaskExecutor taskExecutor;
-    private OrderHistoryDialog orderDialog;
     private CurrencyAutoCompleter currAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
@@ -325,6 +325,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         tblRaw.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblRaw.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
     }
 
     private void initOutputTable() {
@@ -332,7 +333,6 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         // tbl Output
         tblOutput.setModel(milingOutTableModel);
         milingOutTableModel.setParent(tblOutput);
-        milingOutTableModel.setSale(this);
         milingOutTableModel.addNewRow();
         milingOutTableModel.setSelectionObserver(this);
         milingOutTableModel.setVouDate(txtSaleDate);
@@ -369,6 +369,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         tblOutput.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());//price
         tblOutput.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblOutput.setDefaultRenderer(Float.class, new DecimalFormatRender());
+        tblOutput.getColumnModel().getColumn(10).setCellRenderer(new CustomTableCellRenderer(0, 10, Color.yellow));
         tblOutput.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblOutput.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -459,20 +460,6 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         txtOutputQty.setValue(null);
         txtOutputWeight.setValue(null);
         txtOutputAmt.setValue(null);
-    }
-
-    private void historyOrder() {
-        if (orderDialog == null) {
-            orderDialog = new OrderHistoryDialog(Global.parentForm);
-            orderDialog.setInventoryRepo(inventoryRepo);
-            orderDialog.setUserRepo(userRepo);
-            orderDialog.setObserver(this);
-            orderDialog.initMain();
-            orderDialog.setSize(Global.width - 100, Global.height - 100);
-            orderDialog.setLocationRelativeTo(null);
-        }
-        orderDialog.search();
-        orderDialog.setVisible(true);
     }
 
     public void saveSale(boolean print) {
@@ -607,24 +594,26 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         txtLoadWeight.setValue(loadWt);
         txtLoadAmt.setValue(loadAmt);
         //cal output
-        listOutDetail = milingOutTableModel.getListDetail();
-        listOutDetail.get(0).setPrice(0.0f);
-        listOutDetail.get(0).setAmount(0.0f);
-        float outAmt = listOutDetail.stream().map(sdh -> Util1.getFloat(sdh.getAmount())).reduce(0.0f, (accumulator, _item) -> accumulator + _item);
-        listOutDetail.get(0).setAmount(loadAmt - outAmt);
-        listOutDetail.get(0).setPrice(listOutDetail.get(0).getAmount() / listOutDetail.get(0).getQty());
-        log.info(listOutDetail.get(0).getAmount().toString());
 
         //calculate total
-        milingOutTableModel.setListDetail(listOutDetail);
         listOutDetail = milingOutTableModel.getListDetail();
-        outAmt = listOutDetail.stream().map(sdh -> Util1.getFloat(sdh.getAmount())).reduce(0.0f, (accumulator, _item) -> accumulator + _item);
+        float outAmt = listOutDetail.stream().map(sdh -> Util1.getFloat(sdh.getAmount())).reduce(0.0f, (accumulator, _item) -> accumulator + _item);
         float outQty = listOutDetail.stream().map(s -> Util1.getFloat(s.getQty())).reduce(0.0f, (accumulator, _item) -> accumulator + _item);
         float outWt = listOutDetail.stream().map(d -> Util1.getFloat(d.getTotalWeight())).reduce(0.0f, (accumulator, _item) -> accumulator + _item);
         txtOutputQty.setValue(outQty);
         txtOutputWeight.setValue(outWt);
         txtOutputAmt.setValue(outAmt);
         txtDiffWeight.setValue(loadWt - outWt);
+
+        float knowAmt = listOutDetail.stream()
+                .skip(1) // Skip the first element
+                .map(sdh -> Util1.getFloat(sdh.getAmount()))
+                .reduce(0.0f, Float::sum);
+        float amt = loadAmt - knowAmt;
+        MillingOutDetail mod = listOutDetail.get(0);
+        mod.setAmount(amt);
+        mod.setPrice(amt / Util1.getFloat(mod.getQty()));
+        milingOutTableModel.setObject(0, mod);
     }
 
     public void historySale() {
