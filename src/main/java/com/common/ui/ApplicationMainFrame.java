@@ -741,19 +741,12 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 traderSetup.initMain();
                 return traderSetup;
             }
-            case "Rice Miling" -> {
+            case "Miling" -> {
                 riceMilingEntry.setName(menuName);
                 riceMilingEntry.setObserver(this);
                 riceMilingEntry.setProgress(progress);
                 riceMilingEntry.initMain();
                 return riceMilingEntry;
-            }
-            case "Puddy Miling" -> {
-                traderSetup.setName(menuName);
-                traderSetup.setObserver(this);
-                traderSetup.setProgress(progress);
-                traderSetup.initMain();
-                return traderSetup;
             }
             case "Trader Adjustment" -> {
                 TraderAdjustment adj = new TraderAdjustment();
