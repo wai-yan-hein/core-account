@@ -181,7 +181,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     @Autowired
     private TraderSetup traderSetup;
     @Autowired
-    private MilingEntry riceMilingEntry;
+    private MilingEntry milingEntry;
     @Autowired
     private TaskExecutor taskExecutor;
     @Autowired
@@ -742,11 +742,11 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return traderSetup;
             }
             case "Miling" -> {
-                riceMilingEntry.setName(menuName);
-                riceMilingEntry.setObserver(this);
-                riceMilingEntry.setProgress(progress);
-                riceMilingEntry.initMain();
-                return riceMilingEntry;
+                milingEntry.setName(menuName);
+                milingEntry.setObserver(this);
+                milingEntry.setProgress(progress);
+                milingEntry.initMain();
+                return milingEntry;
             }
             case "Trader Adjustment" -> {
                 TraderAdjustment adj = new TraderAdjustment();

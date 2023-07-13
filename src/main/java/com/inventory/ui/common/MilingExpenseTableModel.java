@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MilingExpenseTableModel extends AbstractTableModel {
 
     private List<MilingExpense> listDetail = new ArrayList<>();
+    private final List<MilingExpenseKey> deleteList = new ArrayList();
     private final String[] columnNames = {"Code", "Name", "Qty", "Price", "Amount"};
     private JTable parent;
     private SelectionObserver selectionObserver;
@@ -262,6 +263,22 @@ public class MilingExpenseTableModel extends AbstractTableModel {
             }
         }
         return status;
+    }
+
+    public void delete(int row) {
+        MilingExpense sdh = listDetail.get(row);
+        if (sdh.getKey() != null) {
+            deleteList.add(sdh.getKey());
+        }
+        listDetail.remove(row);
+        addNewRow();
+        fireTableRowsDeleted(row, row);
+        if (row - 1 >= 0) {
+            parent.setRowSelectionInterval(row - 1, row - 1);
+        } else {
+            parent.setRowSelectionInterval(0, 0);
+        }
+        parent.requestFocus();
     }
 
 }
