@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 public class MilingOutTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(MilingOutTableModel.class);
-    private String[] columnNames = {"Code", "Stock Name", "Location", "Weight", "Weight Unit", "Qty", "Unit", "Std-Weight", "Total Weight", "%", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Stock Name", "Location", "Weight", "Weight Unit", "Qty", "Unit", "Total Weight", "%", "Price", "Amount"};
     private JTable parent;
     private List<MillingOutDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
@@ -195,19 +195,16 @@ public class MilingOutTableModel extends AbstractTableModel {
                     return sd.getUnitCode();
                 }
                 case 7 -> {
-                    return sd.getStdWeight();
-                }
-                case 8 -> {
                     return sd.getTotalWeight();
                 }
-                case 9 -> {
+                case 8 -> {
                     return sd.getPercent();
                 }
-                case 10 -> {
+                case 9 -> {
                     //price
                     return sd.getPrice();
                 }
-                case 11 -> {
+                case 10 -> {
                     //amount
                     return sd.getAmount();
                 }
@@ -290,14 +287,11 @@ public class MilingOutTableModel extends AbstractTableModel {
                             sd.setUnitCode(stockUnit.getKey().getUnitCode());
                         }
                     }
-                    case 7 -> {
-                        sd.setStdWeight(Util1.getFloat(value));
-                    }
-                    case 9 -> {
+                    case 10 -> {
                         sd.setPercent(Util1.getFloat(value));
                     }
 
-                    case 10 -> {
+                    case 11 -> {
                         //price
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
@@ -313,7 +307,7 @@ public class MilingOutTableModel extends AbstractTableModel {
                             parent.setColumnSelectionInterval(column, column);
                         }
                     }
-                    case 11 -> {
+                    case 12 -> {
                         //amt
                         sd.setAmount(Util1.getFloat(value));
 

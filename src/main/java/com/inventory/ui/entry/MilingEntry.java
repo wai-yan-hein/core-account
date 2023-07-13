@@ -184,8 +184,11 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblRaw.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
-        tblRaw.getActionMap().put(solve, new DeleteAction());
-
+        tblRaw.getActionMap().put(solve, new DeleteAction(tblRaw));
+        tblOutput.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
+        tblOutput.getActionMap().put(solve, new DeleteAction(tblOutput));
+        tblExpense.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
+        tblExpense.getActionMap().put(solve, new DeleteAction(tblExpense));
     }
 
     private void setSaleVoucherDetail(OrderHis oh, boolean local) {
@@ -261,9 +264,21 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
 
     private class DeleteAction extends AbstractAction {
 
+        private JTable table;
+
+        public DeleteAction(JTable table) {
+            this.table = table;
+        }
+
         @Override
         public void actionPerformed(ActionEvent e) {
-            deleteTran();
+            if (table.getName().equals("tblRaw")) {
+                deleteRaw();
+            } else if (table.getName().equals("tblOutput")) {
+                deleteOutput();
+            } else if (table.getName().equals("tblExpense")) {
+                deleteExpense();
+            }
         }
     }
 
@@ -272,7 +287,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         txtSaleDate.getDateEditor().getUiComponent().addKeyListener(this);
         txtSaleDate.getDateEditor().getUiComponent().addFocusListener(fa);
         txtCurrency.addFocusListener(fa);
-        txtCus.addFocusListener(fa);;
+        txtCus.addFocusListener(fa);
         txtRemark.addFocusListener(fa);
         txtReference.addFocusListener(fa);
         txtProjectNo.addFocusListener(fa);
@@ -391,11 +406,10 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         tblOutput.getColumnModel().getColumn(4).setPreferredWidth(30);//unit
         tblOutput.getColumnModel().getColumn(5).setPreferredWidth(50);//qty
         tblOutput.getColumnModel().getColumn(6).setPreferredWidth(30);//unit
-        tblOutput.getColumnModel().getColumn(7).setPreferredWidth(50);//std
-        tblOutput.getColumnModel().getColumn(8).setPreferredWidth(50);//total
-        tblOutput.getColumnModel().getColumn(9).setPreferredWidth(50);//percent
-        tblOutput.getColumnModel().getColumn(10).setPreferredWidth(50);//price
-        tblOutput.getColumnModel().getColumn(11).setPreferredWidth(60);//amt
+        tblOutput.getColumnModel().getColumn(7).setPreferredWidth(50);//total
+        tblOutput.getColumnModel().getColumn(8).setPreferredWidth(50);//percent
+        tblOutput.getColumnModel().getColumn(9).setPreferredWidth(50);//price
+        tblOutput.getColumnModel().getColumn(10).setPreferredWidth(60);//amt
         tblOutput.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblOutput.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         monoLoc.subscribe((t) -> {
@@ -617,7 +631,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         }
     }
 
-    private void deleteTran() {
+    private void deleteRaw() {
         int row = tblRaw.convertRowIndexToModel(tblRaw.getSelectedRow());
         if (row >= 0) {
             if (tblRaw.getCellEditor() != null) {
@@ -626,7 +640,37 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
             int yes_no = JOptionPane.showConfirmDialog(this,
                     "Are you sure to delete?", "Sale Transaction delete.", JOptionPane.YES_NO_OPTION);
             if (yes_no == 0) {
+                milingRawTableModel.delete(row);
+                calculateMilling();
+            }
+        }
+    }
+
+    private void deleteOutput() {
+        int row = tblOutput.convertRowIndexToModel(tblOutput.getSelectedRow());
+        if (row >= 0) {
+            if (tblOutput.getCellEditor() != null) {
+                tblOutput.getCellEditor().stopCellEditing();
+            }
+            int yes_no = JOptionPane.showConfirmDialog(this,
+                    "Are you sure to delete?", "Sale Transaction delete.", JOptionPane.YES_NO_OPTION);
+            if (yes_no == 0) {
                 milingOutTableModel.delete(row);
+                calculateMilling();
+            }
+        }
+    }
+
+    private void deleteExpense() {
+        int row = tblExpense.convertRowIndexToModel(tblExpense.getSelectedRow());
+        if (row >= 0) {
+            if (tblExpense.getCellEditor() != null) {
+                tblExpense.getCellEditor().stopCellEditing();
+            }
+            int yes_no = JOptionPane.showConfirmDialog(this,
+                    "Are you sure to delete?", "Sale Transaction delete.", JOptionPane.YES_NO_OPTION);
+            if (yes_no == 0) {
+                milingExpenseTableModel.delete(row);
                 calculateMilling();
             }
         }
