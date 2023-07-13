@@ -512,7 +512,7 @@ public class Util1 {
         return value;
     }
 
-    public static Float gerFloatOne(Object number) {
+    public static Float getFloatOne(Object number) {
         float value = 1.0f;
         if (Util1.getFloat(number) > 0) {
             value = Float.parseFloat(number.toString());

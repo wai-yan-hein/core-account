@@ -389,11 +389,9 @@ public class MilingOutTableModel extends AbstractTableModel {
 
     private void calculateAmount(MillingOutDetail s) {
         float price = Util1.getFloat(s.getPrice());
-        float stdWt = Util1.getFloat(s.getStdWeight());
-        float wt = Util1.getFloat(s.getWeight());
         float qty = Util1.getFloat(s.getQty());
         if (s.getStockCode() != null) {
-            float amount = (qty * wt * price) / stdWt;
+            float amount = qty * price;
             s.setAmount(amount);
             s.setPercent((s.getTotalWeight() / Util1.getFloat(totalWeight.getValue())) * 100);
         }

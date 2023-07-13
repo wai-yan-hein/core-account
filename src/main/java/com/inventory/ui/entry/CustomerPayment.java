@@ -299,7 +299,7 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
             ph.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
             ph.setTraderCode(t.getKey().getCode());
             ph.setVouDate(Util1.convertToLocalDateTime(txtVouDate.getDate()));
-            ph.setAmount(Util1.gerFloatOne(txtAmount.getValue()));
+            ph.setAmount(Util1.getFloatOne(txtAmount.getValue()));
             ph.setDeleted(false);
             ph.setRemark(txtRemark.getText());
             ph.setMacId(Global.macId);
