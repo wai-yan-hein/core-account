@@ -8,8 +8,8 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.model.Location;
-import com.inventory.model.MillingOutDetailKey;
-import com.inventory.model.MillingOutDetail;
+import com.inventory.model.MilingOutDetailKey;
+import com.inventory.model.MilingOutDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.repo.InventoryRepo;
@@ -34,9 +34,9 @@ public class MilingOutTableModel extends AbstractTableModel {
     private static final Logger log = LoggerFactory.getLogger(MilingOutTableModel.class);
     private String[] columnNames = {"Code", "Stock Name", "Location", "Weight", "Weight Unit", "Qty", "Unit", "Total Weight", "%", "Price", "Amount"};
     private JTable parent;
-    private List<MillingOutDetail> listDetail = new ArrayList();
+    private List<MilingOutDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
-    private final List<MillingOutDetailKey> deleteList = new ArrayList();
+    private final List<MilingOutDetailKey> deleteList = new ArrayList();
     private StockBalanceTableModel sbTableModel;
     private InventoryRepo inventoryRepo;
     private JLabel lblStockName;
@@ -168,7 +168,7 @@ public class MilingOutTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
         try {
-            MillingOutDetail sd = listDetail.get(row);
+            MilingOutDetail sd = listDetail.get(row);
             switch (column) {
                 case 0 -> {
                     //code
@@ -221,7 +221,7 @@ public class MilingOutTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object value, int row, int column) {
         try {
-            MillingOutDetail sd = listDetail.get(row);
+            MilingOutDetail sd = listDetail.get(row);
             if (value != null) {
                 switch (column) {
                     case 0, 1 -> {
@@ -332,7 +332,7 @@ public class MilingOutTableModel extends AbstractTableModel {
         parent.setColumnSelectionInterval(column, column);
     }
 
-    private void assignLocation(MillingOutDetail sd) {
+    private void assignLocation(MilingOutDetail sd) {
         if (sd.getLocCode() == null) {
             if (location != null) {
                 sd.setLocCode(location.getKey().getLocCode());
@@ -344,7 +344,7 @@ public class MilingOutTableModel extends AbstractTableModel {
     public void addNewRow() {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
-                MillingOutDetail pd = new MillingOutDetail();
+                MilingOutDetail pd = new MilingOutDetail();
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }
@@ -354,7 +354,7 @@ public class MilingOutTableModel extends AbstractTableModel {
     private boolean hasEmptyRow() {
         boolean status = false;
         if (listDetail.size() >= 1) {
-            MillingOutDetail get = listDetail.get(listDetail.size() - 1);
+            MilingOutDetail get = listDetail.get(listDetail.size() - 1);
             if (get.getStockCode() == null) {
                 status = true;
             }
@@ -362,11 +362,11 @@ public class MilingOutTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<MillingOutDetail> getListDetail() {
+    public List<MilingOutDetail> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<MillingOutDetail> listDetail) {
+    public void setListDetail(List<MilingOutDetail> listDetail) {
         this.listDetail = listDetail;
         addNewRow();
         fireTableDataChanged();
@@ -377,11 +377,11 @@ public class MilingOutTableModel extends AbstractTableModel {
         addNewRow();
     }
 
-    private void calWeightTotal(MillingOutDetail m) {
+    private void calWeightTotal(MilingOutDetail m) {
         m.setTotalWeight(Util1.getFloat(m.getQty()) * Util1.getFloat(m.getWeight()));
     }
 
-    private void calculateAmount(MillingOutDetail s) {
+    private void calculateAmount(MilingOutDetail s) {
         float price = Util1.getFloat(s.getPrice());
         float qty = Util1.getFloat(s.getQty());
         if (s.getStockCode() != null) {
@@ -397,7 +397,7 @@ public class MilingOutTableModel extends AbstractTableModel {
 
     public boolean isValidEntry() {
         boolean status = true;
-        for (MillingOutDetail sdh : listDetail) {
+        for (MilingOutDetail sdh : listDetail) {
             if (sdh.getStockCode() != null) {
                 if (Util1.getFloat(sdh.getAmount()) <= 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
@@ -421,7 +421,7 @@ public class MilingOutTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<MillingOutDetailKey> getDelList() {
+    public List<MilingOutDetailKey> getDelList() {
         return deleteList;
     }
 
@@ -432,7 +432,7 @@ public class MilingOutTableModel extends AbstractTableModel {
     }
 
     public void delete(int row) {
-        MillingOutDetail sdh = listDetail.get(row);
+        MilingOutDetail sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
             deleteList.add(sdh.getKey());
         }
@@ -447,14 +447,14 @@ public class MilingOutTableModel extends AbstractTableModel {
         parent.requestFocus();
     }
 
-    public void addObject(MillingOutDetail sd) {
+    public void addObject(MilingOutDetail sd) {
         if (listDetail != null) {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
         }
     }
 
-    public void setObject(int row, MillingOutDetail mod) {
+    public void setObject(int row, MilingOutDetail mod) {
         if (!listDetail.isEmpty()) {
             listDetail.set(row, mod);
             fireTableRowsUpdated(row, row);

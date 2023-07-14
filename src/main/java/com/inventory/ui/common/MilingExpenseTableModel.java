@@ -102,7 +102,7 @@ public class MilingExpenseTableModel extends AbstractTableModel {
     public boolean isValidEntry() {
         boolean status = true;
         for (MilingExpense sdh : listDetail) {
-            if (sdh.getExpenseCode() != null) {
+            if (sdh.getExpenseName() != null) {
                 if (Util1.getFloat(sdh.getAmount()) <= 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Expense.",
                             "Invalid.", JOptionPane.ERROR_MESSAGE);
@@ -140,7 +140,7 @@ public class MilingExpenseTableModel extends AbstractTableModel {
             MilingExpense b = listDetail.get(row);
             return switch (column) {
                 case 0 ->
-                    b.getExpenseCode();
+                    b.getKey() == null ? "" : b.getKey().getExpenseCode();
                 case 1 ->
                     b.getExpenseName();
                 case 2 ->
@@ -172,7 +172,6 @@ public class MilingExpenseTableModel extends AbstractTableModel {
                             key.setCompCode(ex.getKey().getCompCode());
                             key.setExpenseCode(ex.getKey().getExpenseCode());
                             b.setKey(key);
-                            b.setExpenseCode(ex.getKey().getExpenseCode());
                             b.setExpenseName(ex.getExpenseName());
                             b.setQty(1.0f);
                             addNewRow();
@@ -259,7 +258,7 @@ public class MilingExpenseTableModel extends AbstractTableModel {
     private void calculateAmount(MilingExpense s) {
         float price = Util1.getFloat(s.getPrice());
         float qty = Util1.getFloat(s.getQty());
-        if (s.getExpenseCode() != null) {
+        if (s.getKey().getExpenseCode() != null) {
             float amount = qty * price;
             s.setAmount(amount);
         }
@@ -279,7 +278,7 @@ public class MilingExpenseTableModel extends AbstractTableModel {
         boolean status = false;
         if (listDetail.size() >= 1) {
             MilingExpense get = listDetail.get(listDetail.size() - 1);
-            if (get.getExpenseCode() == null) {
+            if (get.getKey().getExpenseCode() == null) {
                 status = true;
             }
         }

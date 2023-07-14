@@ -22,6 +22,7 @@ import com.inventory.model.GRNKey;
 import com.inventory.model.General;
 import com.inventory.model.Location;
 import com.inventory.model.LocationKey;
+import com.inventory.model.MilingHis;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisDetail;
 import com.inventory.model.OPHisKey;
@@ -2120,6 +2121,27 @@ public class InventoryRepo {
                                 JOptionPane.WARNING_MESSAGE);
                         if (status == JOptionPane.YES_OPTION) {
                             return h2Repo.save(ph);
+                        }
+                        return Mono.error(new RuntimeException(e.getMessage()));
+                    }
+                    return Mono.error(new RuntimeException(e.getMessage()));
+                });
+    }
+    
+    public Mono<MilingHis> save(MilingHis ph) {
+        return inventoryApi.post()
+                .uri("/miling/save-miling")
+                .body(Mono.just(ph), MilingHis.class)
+                .retrieve()
+                .bodyToMono(MilingHis.class)
+                .onErrorResume((e) -> {
+                    if (localDatabase) {
+                        int status = JOptionPane.showConfirmDialog(Global.parentForm,
+                                "Can't save voucher to cloud. Do you want save local?",
+                                "Offline", JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                        if (status == JOptionPane.YES_OPTION) {
+//                            return h2Repo.save(ph);
                         }
                         return Mono.error(new RuntimeException(e.getMessage()));
                     }

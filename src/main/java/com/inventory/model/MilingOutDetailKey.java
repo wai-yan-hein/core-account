@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Embeddable
-public class MillingRawDetailKey implements Serializable {
+public class MilingOutDetailKey implements Serializable {
     @Column(name = "comp_code")
     private String compCode;
     @Column(name = "dept_id")

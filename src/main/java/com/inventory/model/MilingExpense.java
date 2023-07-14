@@ -23,10 +23,8 @@ public class MilingExpense {
 
     @EmbeddedId
     private MilingExpenseKey key;
-    @Column(name = "name")
+    @Column(name = "expense_name")
     private String expenseName;
-    @Column(name = "code")
-    private String expenseCode;
     @Column(name = "qty")
     private Float qty;
     @Column(name = "price")

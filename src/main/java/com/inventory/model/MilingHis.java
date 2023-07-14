@@ -26,10 +26,10 @@ import lombok.Data;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Table(name = "milling_his")
-public class MillingHis {
+public class MilingHis {
 
     @EmbeddedId
-    private MillingHisKey key;
+    private MilingHisKey key;
     @Column(name = "trader_code")
     private String traderCode;
     @Column(name = "saleman_code")
@@ -95,19 +95,38 @@ public class MillingHis {
     private String tmpVouNo;
     @Column(name = "car_no")
     private String carNo;
+    @Column(name = "vou_status_id")
+    private String vouStatusId;
+    @Column(name = "load_qty")
+    private Float loadQty;
+    @Column(name = "load_weight")
+    private Float loadWeight;
+    @Column(name = "load_amount")
+    private Float loadAmount;
+    @Column(name = "load_expense")
+    private Float loadExpense;
+    @Column(name = "load_cost")
+    private Float loadCost;
+    @Column(name = "output_qty")
+    private Float outputQty;
+    @Column(name = "output_weight")
+    private Float outputWeight;
+    @Column(name = "output_amount")
+    private Float outputAmount;
+    @Column(name = "diff_weight")
+    private Float diffWeight;
+    
     @Transient
     private String localVouNo;
     private transient String status = "STATUS";
-    private transient List<MillingRawDetail> listRaw;
-    private transient List<MillingRawDetailKey> listRawDel;
-    private transient List<MillingOutDetail> listOutput;
-    private transient List<MillingOutDetailKey> listOutputDel;
+    private transient List<MilingRawDetail> listRaw;
+    private transient List<MilingRawDetailKey> listRawDel;
+    private transient List<MilingOutDetail> listOutput;
+    private transient List<MilingOutDetailKey> listOutputDel;
     private transient List<MilingExpense> listExpense;
     private transient List<MilingExpenseKey> listExpenseDel;
-    private transient boolean backup;
-    private transient List<String> location;
     private transient boolean local = false;
 
-    public MillingHis() {
+    public MilingHis() {
     }
 }

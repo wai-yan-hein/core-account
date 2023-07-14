@@ -23,11 +23,11 @@ import lombok.Data;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
-@Table(name = "miling_out_detail")
-public class MillingOutDetail {
+@Table(name = "miling_raw")
+public class MilingRawDetail {
 
     @EmbeddedId
-    private MillingOutDetailKey key;
+    private MilingRawDetailKey key;
     @Column(name = "stock_code")
     private String stockCode;
     @Temporal(TemporalType.DATE)
@@ -51,10 +51,10 @@ public class MillingOutDetail {
     private String weightUnit;
     @Column(name = "std_weight")
     private Float stdWeight;
-    @Column(name = "percent")
-    private Float percent;
     @Column(name = "total_weight")
     private Float totalWeight;
+    @Transient
+    private Float totalAmount;
     @Transient
     private String userCode;
     @Transient

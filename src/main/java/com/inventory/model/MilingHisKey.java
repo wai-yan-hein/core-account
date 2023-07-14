@@ -1,7 +1,6 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.inventory.model;
 
@@ -11,23 +10,19 @@ import java.io.Serializable;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-
 /**
  *
- * @author wai yan
+ * @author DELL
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Embeddable
-public class MillingOutDetailKey implements Serializable {
+public class MilingHisKey implements Serializable{
+
+    @Column(name = "vou_no")
+    private String vouNo;
     @Column(name = "comp_code")
     private String compCode;
     @Column(name = "dept_id")
     private Integer deptId;
-    @Column(name = "unique_id")
-    private Integer uniqueId;
-    @Column(name = "vou_no")
-    private String vouNo;
-
-
 }
