@@ -23,7 +23,7 @@ import lombok.Data;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
-@Table(name = "miling_raw_detail")
+@Table(name = "miling_raw")
 public class MillingRawDetail {
 
     @EmbeddedId

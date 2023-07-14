@@ -8,8 +8,8 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.model.Location;
-import com.inventory.model.MillingOutDetailKey;
 import com.inventory.model.MillingOutDetail;
+import com.inventory.model.MillingOutDetailKey;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.repo.InventoryRepo;
@@ -287,11 +287,11 @@ public class MilingOutTableModel extends AbstractTableModel {
                             sd.setUnitCode(stockUnit.getKey().getUnitCode());
                         }
                     }
-                    case 10 -> {
+                    case 8 -> {
                         sd.setPercent(Util1.getFloat(value));
                     }
 
-                    case 11 -> {
+                    case 9 -> {
                         //price
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
@@ -307,7 +307,7 @@ public class MilingOutTableModel extends AbstractTableModel {
                             parent.setColumnSelectionInterval(column, column);
                         }
                     }
-                    case 12 -> {
+                    case 10 -> {
                         //amt
                         sd.setAmount(Util1.getFloat(value));
 

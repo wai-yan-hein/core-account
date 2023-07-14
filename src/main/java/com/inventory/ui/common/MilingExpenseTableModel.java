@@ -9,8 +9,8 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.model.Expense;
-import com.inventory.model.MilingExpense;
-import com.inventory.model.MilingExpenseKey;
+import com.inventory.model.MillingExpense;
+import com.inventory.model.MillingExpenseKey;
 import com.repo.InventoryRepo;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MilingExpenseTableModel extends AbstractTableModel {
 
-    private List<MilingExpense> listDetail = new ArrayList<>();
-    private final List<MilingExpenseKey> deleteList = new ArrayList();
+    private List<MillingExpense> listDetail = new ArrayList<>();
+    private final List<MillingExpenseKey> deleteList = new ArrayList();
     private final String[] columnNames = {"Code", "Name", "Qty", "Price", "Amount"};
     private JTable parent;
     private SelectionObserver selectionObserver;
@@ -95,11 +95,32 @@ public class MilingExpenseTableModel extends AbstractTableModel {
         };
     }
 
-    public List<MilingExpense> getListDetail() {
+    public List<MillingExpense> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<MilingExpense> listDetail) {
+    public boolean isValidEntry() {
+        boolean status = true;
+        for (MillingExpense sdh : listDetail) {
+            if (sdh.getExpenseName() != null) {
+                if (Util1.getFloat(sdh.getAmount()) <= 0) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Expense.",
+                            "Invalid.", JOptionPane.ERROR_MESSAGE);
+                    status = false;
+                    parent.requestFocus();
+                    break;
+                } else if (Util1.getFloat(sdh.getPrice()) <= 0 || Util1.getFloat(sdh.getAmount()) <= 0) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.");
+                    status = false;
+                    parent.requestFocus();
+                    break;
+                }
+            }
+        }
+        return status;
+    }
+
+    public void setListDetail(List<MillingExpense> listDetail) {
         this.listDetail = listDetail;
         addNewRow();
         fireTableDataChanged();
@@ -116,10 +137,10 @@ public class MilingExpenseTableModel extends AbstractTableModel {
             return null;
         }
         try {
-            MilingExpense b = listDetail.get(row);
+            MillingExpense b = listDetail.get(row);
             return switch (column) {
                 case 0 ->
-                    b.getExpenseCode();
+                    b.getKey() == null ? "" : b.getKey().getExpenseCode();
                 case 1 ->
                     b.getExpenseName();
                 case 2 ->
@@ -142,16 +163,15 @@ public class MilingExpenseTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object value, int row, int column) {
         try {
-            MilingExpense b = listDetail.get(row);
+            MillingExpense b = listDetail.get(row);
             if (value != null) {
                 switch (column) {
                     case 0, 1 -> {
                         if (value instanceof Expense ex) {
-                            MilingExpenseKey key = new MilingExpenseKey();
+                            MillingExpenseKey key = new MillingExpenseKey();
                             key.setCompCode(ex.getKey().getCompCode());
                             key.setExpenseCode(ex.getKey().getExpenseCode());
                             b.setKey(key);
-                            b.setExpenseCode(ex.getKey().getExpenseCode());
                             b.setExpenseName(ex.getExpenseName());
                             b.setQty(1.0f);
                             addNewRow();
@@ -199,12 +219,12 @@ public class MilingExpenseTableModel extends AbstractTableModel {
         JOptionPane.showMessageDialog(Global.parentForm, text);
     }
 
-    public void setObject(MilingExpense t, int row) {
+    public void setObject(MillingExpense t, int row) {
         listDetail.set(row, t);
         fireTableRowsUpdated(row, row);
     }
 
-    public void addObject(MilingExpense t) {
+    public void addObject(MillingExpense t) {
         listDetail.add(t);
         fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
     }
@@ -223,7 +243,7 @@ public class MilingExpenseTableModel extends AbstractTableModel {
         return columnNames.length;
     }
 
-    public MilingExpense getExpense(int row) {
+    public MillingExpense getExpense(int row) {
         return listDetail.get(row);
     }
 
@@ -235,10 +255,10 @@ public class MilingExpenseTableModel extends AbstractTableModel {
         }
     }
 
-    private void calculateAmount(MilingExpense s) {
+    private void calculateAmount(MillingExpense s) {
         float price = Util1.getFloat(s.getPrice());
         float qty = Util1.getFloat(s.getQty());
-        if (s.getExpenseCode() != null) {
+        if (s.getKey().getExpenseCode() != null) {
             float amount = qty * price;
             s.setAmount(amount);
         }
@@ -247,7 +267,7 @@ public class MilingExpenseTableModel extends AbstractTableModel {
     public void addNewRow() {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
-                MilingExpense pd = new MilingExpense();
+                MillingExpense pd = new MillingExpense();
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }
@@ -257,16 +277,26 @@ public class MilingExpenseTableModel extends AbstractTableModel {
     private boolean hasEmptyRow() {
         boolean status = false;
         if (listDetail.size() >= 1) {
-            MilingExpense get = listDetail.get(listDetail.size() - 1);
-            if (get.getExpenseCode() == null) {
+            MillingExpense get = listDetail.get(listDetail.size() - 1);
+            if (get.getKey().getExpenseCode() == null) {
                 status = true;
             }
         }
         return status;
     }
 
+    public List<MillingExpenseKey> getDelList() {
+        return deleteList;
+    }
+
+    public void clearDelList() {
+        if (deleteList != null) {
+            deleteList.clear();
+        }
+    }
+
     public void delete(int row) {
-        MilingExpense sdh = listDetail.get(row);
+        MillingExpense sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
             deleteList.add(sdh.getKey());
         }

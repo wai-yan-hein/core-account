@@ -95,13 +95,36 @@ public class MillingHis {
     private String tmpVouNo;
     @Column(name = "car_no")
     private String carNo;
+    @Column(name = "vou_status_id")
+    private String vouStatusId;
+    @Column(name = "load_qty")
+    private Float loadQty;
+    @Column(name = "load_weight")
+    private Float loadWeight;
+    @Column(name = "load_amount")
+    private Float loadAmount;
+    @Column(name = "load_expense")
+    private Float loadExpense;
+    @Column(name = "load_cost")
+    private Float loadCost;
+    @Column(name = "output_qty")
+    private Float outputQty;
+    @Column(name = "output_weight")
+    private Float outputWeight;
+    @Column(name = "output_amount")
+    private Float outputAmount;
+    @Column(name = "diff_weight")
+    private Float diffWeight;
+    
     @Transient
     private String localVouNo;
     private transient String status = "STATUS";
-    private transient List<MillingRawDetail> listSH;
-    private transient List<MillingRawDetailKey> listDel;
-    private transient boolean backup;
-    private transient List<String> location;
+    private transient List<MillingRawDetail> listRaw;
+    private transient List<MillingRawDetailKey> listRawDel;
+    private transient List<MillingOutDetail> listOutput;
+    private transient List<MillingOutDetailKey> listOutputDel;
+    private transient List<MillingExpense> listExpense;
+    private transient List<MillingExpenseKey> listExpenseDel;
     private transient boolean local = false;
 
     public MillingHis() {

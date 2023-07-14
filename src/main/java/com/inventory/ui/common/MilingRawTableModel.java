@@ -8,10 +8,9 @@ import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.model.Location;
-import com.inventory.model.MillingRawDetailKey;
 import com.inventory.model.MillingRawDetail;
+import com.inventory.model.MillingRawDetailKey;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.ui.entry.MilingEntry;
@@ -159,7 +158,7 @@ public class MilingRawTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 8 -> {
+            case 8, 10 -> {
                 return false;
             }
         }

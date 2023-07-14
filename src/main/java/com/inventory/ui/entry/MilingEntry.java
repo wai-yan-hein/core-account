@@ -20,12 +20,12 @@ import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
-import com.inventory.model.MilingExpense;
+import com.inventory.model.MillingExpense;
 import com.inventory.model.OrderHis;
 import com.inventory.model.MillingHis;
-import com.inventory.model.MillingRawDetail;
 import com.inventory.model.MillingHisKey;
 import com.inventory.model.MillingOutDetail;
+import com.inventory.model.MillingRawDetail;
 import com.inventory.model.Trader;
 import com.inventory.model.VOrder;
 import com.inventory.model.VSale;
@@ -88,11 +88,11 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
     private final Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
     private List<MillingRawDetail> listDetail = new ArrayList();
     private List<MillingOutDetail> listOutDetail = new ArrayList();
-    private List<MilingExpense> listExpense = new ArrayList<>();
+    private List<MillingExpense> listExpense = new ArrayList<>();
     private final MilingOutTableModel milingOutTableModel = new MilingOutTableModel();
     private final MilingRawTableModel milingRawTableModel = new MilingRawTableModel();
     private final MilingExpenseTableModel milingExpenseTableModel = new MilingExpenseTableModel();
-//    private RiceMilingHisHistoryDialog dialog;
+//    private RiceMillingHisHistoryDialog dialog;
     private final StockBalanceTableModel stockBalanceTableModel = new StockBalanceTableModel();
     private ProcessTypeComboBoxModel vouStatusTableModel = new ProcessTypeComboBoxModel();
     @Autowired
@@ -184,14 +184,14 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblRaw.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
-        tblRaw.getActionMap().put(solve, new DeleteAction(tblRaw));
+        tblRaw.getActionMap().put(solve, new DeleteAction("tblRaw"));
         tblOutput.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
-        tblOutput.getActionMap().put(solve, new DeleteAction(tblOutput));
+        tblOutput.getActionMap().put(solve, new DeleteAction("tblOutput"));
         tblExpense.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
-        tblExpense.getActionMap().put(solve, new DeleteAction(tblExpense));
+        tblExpense.getActionMap().put(solve, new DeleteAction("tblExpense"));
     }
 
-    private void setSaleVoucherDetail(OrderHis oh, boolean local) {
+    private void setSaleVoucherDetail(OrderHis oh, boolean local) { //todo
         milingOutTableModel.clear();
         if (oh != null) {
             progress.setIndeterminate(true);
@@ -200,7 +200,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
 //            inventoryRepo.getOrderDetail(vouNo, deptId, local)
 //                    .subscribe((list) -> {
 //                        list.forEach((od) -> {
-//                            RiceMilingHisDetail sd = new RiceMilingHisDetail();
+//                            RiceMillingHisDetail sd = new RiceMillingHisDetail();
 //                            sd.setStockCode(od.getStockCode());
 //                            sd.setUserCode(od.getUserCode());
 //                            sd.setStockName(od.getStockName());
@@ -264,20 +264,31 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
 
     private class DeleteAction extends AbstractAction {
 
-        private JTable table;
+        private String table;
 
-        public DeleteAction(JTable table) {
+        public DeleteAction(String table) {
             this.table = table;
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (table.getName().equals("tblRaw")) {
-                deleteRaw();
-            } else if (table.getName().equals("tblOutput")) {
-                deleteOutput();
-            } else if (table.getName().equals("tblExpense")) {
-                deleteExpense();
+            if (table != null) {
+                switch (table) {
+                    case "tblRaw":
+                        deleteRaw();
+                        break;
+                    case "tblOutput":
+                        deleteOutput();
+                        break;
+                    case "tblExpense":
+                        deleteExpense();
+                        break;
+                    default:
+                        // Handle unknown case
+                        break;
+                }
+            } else {
+                // Handle null table case
             }
         }
     }
@@ -423,7 +434,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         }, (e) -> {
             log.error("getStockUnit: " + e.getMessage());
         });
-        tblOutput.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());//price
+        tblOutput.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());//price
         tblOutput.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblOutput.setDefaultRenderer(Float.class, new DecimalFormatRender());
         tblOutput.getColumnModel().getColumn(9).setCellRenderer(new CustomTableCellRenderer(0, 9, Color.yellow));
@@ -524,10 +535,15 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         cboProcessType.repaint();
     }
 
-    public void saveSale(boolean print) {
-        if (isValidEntry() && milingRawTableModel.isValidEntry()) {
-//            milling.setListSH(riceMilingTableModel.getListDetail());
-//            milling.setListDel(riceMilingTableModel.getDelList());
+    public void saveSale(boolean print) { //todo
+        if (isValidEntry() && milingRawTableModel.isValidEntry()
+                && milingOutTableModel.isValidEntry() && milingExpenseTableModel.isValidEntry()) {
+            milling.setListRaw(milingRawTableModel.getListDetail());
+            milling.setListRawDel(milingRawTableModel.getDelList());
+            milling.setListOutput(milingOutTableModel.getListDetail());
+            milling.setListOutputDel(milingOutTableModel.getDelList());
+            milling.setListExpense(milingExpenseTableModel.getListDetail());
+            milling.setListExpenseDel(milingExpenseTableModel.getDelList());
 //            milling.setBackup(riceMilingTableModel.isChange());
             observer.selected("save", false);
             progress.setIndeterminate(true);
@@ -539,20 +555,20 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
                     balance = accountRepo.getTraderBalance(date, traderCode, milling.getCurCode(), Global.compCode);
                 }
             }
-//            inventoryRepo.save(milling).subscribe((t) -> {
-//                progress.setIndeterminate(false);
-//                clear();
+            inventoryRepo.save(milling).subscribe((t) -> {
+                progress.setIndeterminate(false);
+                clear();
 //                if (print) {
 //                    String reportName = getReportName();
 //                    String vouNo = t.getKey().getVouNo();
 //                    boolean local = t.isLocal();
 //                    printVoucher(vouNo, reportName, local);
 //                }
-//            }, (e) -> {
-//                observer.selected("save", true);
-//                JOptionPane.showMessageDialog(this, e.getMessage());
-//                progress.setIndeterminate(false);
-//            });
+            }, (e) -> {
+                observer.selected("save", true);
+                JOptionPane.showMessageDialog(this, e.getMessage());
+                progress.setIndeterminate(false);
+            });
         }
     }
 
@@ -576,7 +592,13 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
                     "No Sale Record.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtOutputAmt.requestFocus();
-        } else {
+        }  else if((VouStatus) cboProcessType.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(this, "You must choose process type.",
+                    "No Sale Record.", JOptionPane.ERROR_MESSAGE);
+            status = false;
+            txtOutputAmt.requestFocus();
+        }
+        else {
             milling.setRemark(txtRemark.getText());
             milling.setReference(txtReference.getText());
             milling.setCurCode(currAutoCompleter.getCurrency().getCurCode());
@@ -586,6 +608,17 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
             milling.setMacId(Global.macId);
             Project p = projectAutoCompleter.getProject();
             milling.setProjectNo(p == null ? null : p.getKey().getProjectNo());
+            VouStatus v = (VouStatus) cboProcessType.getSelectedItem();
+            milling.setVouStatusId(v.getKey().getCode());
+            milling.setLoadQty(Util1.getFloat(txtLoadQty.getValue()));
+            milling.setLoadWeight(Util1.getFloat(txtLoadWeight.getValue()));
+            milling.setLoadAmount(Util1.getFloat(txtLoadAmt.getValue()));
+            milling.setLoadExpense(Util1.getFloat(txtLoadExpense.getValue()));
+            milling.setLoadCost(Util1.getFloat(txtLoadCost.getValue()));
+            milling.setOutputQty(Util1.getFloat(txtOutputQty.getValue()));
+            milling.setOutputWeight(Util1.getFloat(txtOutputWeight.getValue()));
+            milling.setOutputAmount(Util1.getFloat(txtOutputAmt.getValue()));
+            milling.setDiffWeight(Util1.getFloat(txtWtLoss.getValue()));
             if (lblStatus.getText().equals("NEW")) {
                 MillingHisKey key = new MillingHisKey();
                 key.setCompCode(Global.compCode);
@@ -602,7 +635,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         return status;
     }
 
-    private void deleteSale() {
+    private void deleteSale() { //todo
         String status = lblStatus.getText();
         switch (status) {
             case "EDIT" -> {
@@ -718,9 +751,9 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         }
     }
 
-    public void historySale() {
+    public void historySale() { //todo
 //        if (dialog == null) {
-//            dialog = new RiceMilingHisHistoryDialog(Global.parentForm);
+//            dialog = new RiceMillingHisHistoryDialog(Global.parentForm);
 //            dialog.setInventoryRepo(inventoryRepo);
 //            dialog.setIntegration(integration);
 //            dialog.setUserRepo(userRepo);
@@ -733,7 +766,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
 //        dialog.search();
     }
 
-    public void setSaleVoucher(MillingHis sh) {
+    public void setSaleVoucher(MillingHis sh) { //todo
         if (sh != null) {
             progress.setIndeterminate(true);
             milling = sh;
@@ -812,8 +845,8 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
 
     }
 
-    private void setAllLocation() {
-//        List<RiceMilingHisDetail> listSaleDetail = riceMilingTableModel.getListDetail();
+    private void setAllLocation() { //todo
+//        List<RiceMillingHisDetail> listSaleDetail = riceMilingTableModel.getListDetail();
 //        Location loc = locationAutoCompleter.getLocation();
 //        if (listSaleDetail != null) {
 //            listSaleDetail.forEach(sd -> {
@@ -824,7 +857,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
 //        riceMilingTableModel.setListDetail(listSaleDetail);
     }
 
-    private void printVoucher(String vouNo, String reportName, boolean local) {
+    private void printVoucher(String vouNo, String reportName, boolean local) { //todo
         inventoryRepo.getSaleReport(vouNo).subscribe((t) -> {
             viewReport(t, reportName);
         }, (e) -> {
@@ -924,6 +957,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         jButton2 = new javax.swing.JButton();
         cboProcessType = new javax.swing.JComboBox<>();
         addExpense = new javax.swing.JButton();
+        lblStatus = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
         sbPanel = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -957,7 +991,6 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         txtLoadExpense = new javax.swing.JFormattedTextField();
         jLabel18 = new javax.swing.JLabel();
         txtLoadCost = new javax.swing.JFormattedTextField();
-        lblStatus = new javax.swing.JLabel();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -1089,6 +1122,9 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
             }
         });
 
+        lblStatus.setFont(new java.awt.Font("Tahoma", 0, 30)); // NOI18N
+        lblStatus.setText("NEW");
+
         javax.swing.GroupLayout panelSaleLayout = new javax.swing.GroupLayout(panelSale);
         panelSale.setLayout(panelSaleLayout);
         panelSaleLayout.setHorizontalGroup(
@@ -1132,6 +1168,8 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                             .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(addExpense, javax.swing.GroupLayout.Alignment.TRAILING))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 53, Short.MAX_VALUE)
+                .addComponent(lblStatus)
                 .addContainerGap())
         );
 
@@ -1143,24 +1181,27 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
             panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelSaleLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel17)
-                    .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel6)
-                    .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel10)
-                    .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(txtSaleDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(txtReference, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel9)
-                        .addComponent(jLabel15)
-                        .addComponent(jButton2)
-                        .addComponent(cboProcessType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(panelSaleLayout.createSequentialGroup()
+                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel17)
+                            .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel6)
+                            .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel10)
+                            .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(txtSaleDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(txtReference, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel9)
+                                .addComponent(jLabel15)
+                                .addComponent(jButton2)
+                                .addComponent(cboProcessType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addComponent(lblStatus))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1207,7 +1248,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, sbPanelLayout.createSequentialGroup()
                 .addComponent(sbProgress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 20, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkSummary)
                 .addContainerGap())
@@ -1423,9 +1464,6 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
                 .addContainerGap(52, Short.MAX_VALUE))
         );
 
-        lblStatus.setFont(new java.awt.Font("Tahoma", 0, 30)); // NOI18N
-        lblStatus.setText("NEW");
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -1439,18 +1477,13 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane4, javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane5))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                        .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                    .addComponent(sbPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(205, 205, 205)
-                                .addComponent(lblStatus)))))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(sbPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
@@ -1473,14 +1506,12 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
                         .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 75, Short.MAX_VALUE)
                                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(55, 55, 55))
                             .addGroup(layout.createSequentialGroup()
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(sbPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(lblStatus))))
+                                .addComponent(sbPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                     .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addContainerGap())
         );
