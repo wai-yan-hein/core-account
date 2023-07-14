@@ -184,11 +184,11 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblRaw.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
-        tblRaw.getActionMap().put(solve, new DeleteAction(tblRaw));
+        tblRaw.getActionMap().put(solve, new DeleteAction("tblRaw"));
         tblOutput.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
-        tblOutput.getActionMap().put(solve, new DeleteAction(tblOutput));
+        tblOutput.getActionMap().put(solve, new DeleteAction("tblOutput"));
         tblExpense.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
-        tblExpense.getActionMap().put(solve, new DeleteAction(tblExpense));
+        tblExpense.getActionMap().put(solve, new DeleteAction("tblExpense"));
     }
 
     private void setSaleVoucherDetail(OrderHis oh, boolean local) {
@@ -264,20 +264,31 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
 
     private class DeleteAction extends AbstractAction {
 
-        private JTable table;
+        private String table;
 
-        public DeleteAction(JTable table) {
+        public DeleteAction(String table) {
             this.table = table;
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (table.getName().equals("tblRaw")) {
-                deleteRaw();
-            } else if (table.getName().equals("tblOutput")) {
-                deleteOutput();
-            } else if (table.getName().equals("tblExpense")) {
-                deleteExpense();
+            if (table != null) {
+                switch (table) {
+                    case "tblRaw":
+                        deleteRaw();
+                        break;
+                    case "tblOutput":
+                        deleteOutput();
+                        break;
+                    case "tblExpense":
+                        deleteExpense();
+                        break;
+                    default:
+                        // Handle unknown case
+                        break;
+                }
+            } else {
+                // Handle null table case
             }
         }
     }
