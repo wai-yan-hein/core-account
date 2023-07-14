@@ -152,7 +152,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         txtOutputWeight.setFormatterFactory(Util1.getDecimalFormat());
         txtLoadQty.setFormatterFactory(Util1.getDecimalFormat());
         txtLoadWeight.setFormatterFactory(Util1.getDecimalFormat());
-        txtDiffWeight.setFormatterFactory(Util1.getDecimalFormat());
+        txtWtLoss.setFormatterFactory(Util1.getDecimalFormat());
         txtLoadExpense.setFormatterFactory(Util1.getDecimalFormat());
         txtLoadCost.setFormatterFactory(Util1.getDecimalFormat());
 
@@ -163,7 +163,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         txtOutputWeight.setFont(Global.amtFont);
         txtLoadQty.setFont(Global.amtFont);
         txtLoadWeight.setFont(Global.amtFont);
-        txtDiffWeight.setFont(Global.amtFont);
+        txtWtLoss.setFont(Global.amtFont);
         txtLoadExpense.setFont(Global.amtFont);
         txtLoadCost.setFont(Global.amtFont);
 
@@ -174,7 +174,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         txtOutputWeight.setHorizontalAlignment(JTextField.RIGHT);
         txtLoadQty.setHorizontalAlignment(JTextField.RIGHT);
         txtLoadWeight.setHorizontalAlignment(JTextField.RIGHT);
-        txtDiffWeight.setHorizontalAlignment(JTextField.RIGHT);
+        txtWtLoss.setHorizontalAlignment(JTextField.RIGHT);
         txtLoadExpense.setHorizontalAlignment(JTextField.RIGHT);
         txtLoadCost.setHorizontalAlignment(JTextField.RIGHT);
 
@@ -426,7 +426,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         tblOutput.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());//price
         tblOutput.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblOutput.setDefaultRenderer(Float.class, new DecimalFormatRender());
-        tblOutput.getColumnModel().getColumn(10).setCellRenderer(new CustomTableCellRenderer(0, 10, Color.yellow));
+        tblOutput.getColumnModel().getColumn(9).setCellRenderer(new CustomTableCellRenderer(0, 9, Color.yellow));
         tblOutput.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblOutput.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -702,7 +702,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         txtOutputQty.setValue(outQty);
         txtOutputWeight.setValue(outWt);
         txtOutputAmt.setValue(outAmt);
-        txtDiffWeight.setValue(loadWt - outWt);
+        txtWtLoss.setValue(loadWt - outWt);
 
         float knowAmt = listOutDetail.stream()
                 .skip(1) // Skip the first element
@@ -949,7 +949,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         txtOutputWeight = new javax.swing.JFormattedTextField();
         txtOutputQty = new javax.swing.JFormattedTextField();
         jLabel16 = new javax.swing.JLabel();
-        txtDiffWeight = new javax.swing.JFormattedTextField();
+        txtWtLoss = new javax.swing.JFormattedTextField();
         jScrollPane5 = new javax.swing.JScrollPane();
         tblExpense = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
@@ -1334,9 +1334,9 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
 
         txtOutputQty.setEditable(false);
 
-        jLabel16.setText("Diff Weight :");
+        jLabel16.setText("Weight Loss :");
 
-        txtDiffWeight.setEditable(false);
+        txtWtLoss.setEditable(false);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -1354,7 +1354,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
                     .addComponent(txtOutputAmt, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtOutputWeight, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtOutputQty)
-                    .addComponent(txtDiffWeight))
+                    .addComponent(txtWtLoss))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -1374,7 +1374,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
                     .addComponent(jLabel13))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtDiffWeight, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtWtLoss, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel16))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -1718,7 +1718,6 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
     private javax.swing.JTable tblStockBalance;
     private javax.swing.JTextField txtCurrency;
     private javax.swing.JTextField txtCus;
-    private javax.swing.JFormattedTextField txtDiffWeight;
     private javax.swing.JFormattedTextField txtLoadAmt;
     private javax.swing.JFormattedTextField txtLoadCost;
     private javax.swing.JFormattedTextField txtLoadExpense;
@@ -1732,6 +1731,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
     private javax.swing.JTextField txtRemark;
     private com.toedter.calendar.JDateChooser txtSaleDate;
     private javax.swing.JFormattedTextField txtVouNo;
+    private javax.swing.JFormattedTextField txtWtLoss;
     // End of variables declaration//GEN-END:variables
 
     @Override
@@ -1773,7 +1773,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
     }
 
     private void expenseDialog() {
-        ExpenseSetupDialog d = new ExpenseSetupDialog(Global.parentForm);
+        ExpenseSetupDialog d = new ExpenseSetupDialog(Global.parentForm, false);
         d.setInventoryRepo(inventoryRepo);
         d.setAccountRepo(accountRepo);
         d.initMain();

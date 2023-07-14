@@ -32,16 +32,14 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListener {
-
-    private static final Logger log = LoggerFactory.getLogger(ExpenseSetupDialog.class);
 
     private int selectRow = - 1;
     private Expense exp = new Expense();
@@ -51,6 +49,7 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
     private COAComboBoxModel coaComboModel = new COAComboBoxModel();
+    private boolean needAccount;
 
     public AccountRepo getAccountRepo() {
         return accountRepo;
@@ -72,9 +71,12 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
      * Creates new form ItemTypeSetupDialog
      *
      * @param frame
+     * @param needAccount
      */
-    public ExpenseSetupDialog(JFrame frame) {
+    public ExpenseSetupDialog(JFrame frame, boolean needAccount) {
         super(frame, false);
+        this.needAccount = needAccount;
+        cboAccount.setEnabled(needAccount);
         initComponents();
         initKeyListener();
         initSpinner();
@@ -137,6 +139,7 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
 
     private void setExpense(Expense cat) {
         exp = cat;
+        txtUserCode.setText(exp.getUserCode());
         txtName.setText(exp.getExpenseName());
         spPercent.setValue(exp.getPercent());
         cboAccount.setSelectedIndex(getIndex(cat.getAccountCode()));
@@ -173,6 +176,7 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
 
     private void clear() {
         txtName.setText(null);
+        txtUserCode.setText(null);
         txtFilter.setText(null);
         cboAccount.setSelectedItem(null);
         cboAccount.repaint();
@@ -186,12 +190,13 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
 
     private boolean isValidEntry() {
         boolean status = true;
-        if (coaComboModel.getSelectedItem() == null) {
-            status = false;
-            JOptionPane.showMessageDialog(this, "Invalid Name");
-            cboAccount.requestFocus();
+        if (needAccount) {
+            if (coaComboModel.getSelectedItem() == null) {
+                status = false;
+                JOptionPane.showMessageDialog(this, "Invalid Name");
+                cboAccount.requestFocus();
+            }
         } else {
-
             if (lblStatus.getText().equals("NEW")) {
                 ExpenseKey key = new ExpenseKey();
                 key.setExpenseCode(null);
@@ -199,6 +204,7 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
                 exp.setKey(key);
             }
             ChartOfAccount c = (ChartOfAccount) cboAccount.getSelectedItem();
+            exp.setUserCode(txtUserCode.getText());
             exp.setAccountCode(c.getKey().getCoaCode());
             exp.setExpenseName(txtName.getText());
             exp.setPercent(Util1.getFloat(spPercent.getValue()));
@@ -229,6 +235,8 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
         cboAccount = new javax.swing.JComboBox<>();
         jLabel4 = new javax.swing.JLabel();
         spPercent = new javax.swing.JSpinner();
+        jLabel5 = new javax.swing.JLabel();
+        txtUserCode = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Expense Setup");
@@ -317,6 +325,22 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
 
         spPercent.setFont(Global.textFont);
 
+        jLabel5.setFont(Global.lableFont);
+        jLabel5.setText("User Code");
+
+        txtUserCode.setFont(Global.textFont);
+        txtUserCode.setName("txtName"); // NOI18N
+        txtUserCode.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtUserCodeFocusGained(evt);
+            }
+        });
+        txtUserCode.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtUserCodeActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -329,14 +353,16 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(12, 12, 12)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtName)
                             .addComponent(cboAccount, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(spPercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE))))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(txtUserCode)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE)
                         .addGap(26, 26, 26)
@@ -357,6 +383,10 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
                     .addComponent(cboAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(txtUserCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -370,7 +400,7 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
                     .addComponent(btnClear)
                     .addComponent(btnSave)
                     .addComponent(lblStatus))
-                .addContainerGap(237, Short.MAX_VALUE))
+                .addContainerGap(209, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -380,8 +410,8 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE))
+                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 352, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 352, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -448,6 +478,14 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
         }
     }//GEN-LAST:event_cboAccountActionPerformed
 
+    private void txtUserCodeFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtUserCodeFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtUserCodeFocusGained
+
+    private void txtUserCodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtUserCodeActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtUserCodeActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -459,6 +497,7 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
@@ -467,6 +506,7 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
     private javax.swing.JTable tblCategory;
     private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtName;
+    private javax.swing.JTextField txtUserCode;
     // End of variables declaration//GEN-END:variables
 
     @Override

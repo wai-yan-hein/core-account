@@ -148,7 +148,7 @@ public class MilingOutTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 0, 1, 3, 4, 6 ->
+            case 0, 1, 2 ->
                 String.class;
             default ->
                 Float.class;
@@ -158,7 +158,7 @@ public class MilingOutTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 8, 9, 11 -> {
+            case 7, 8, 10 -> {
                 return false;
             }
         }

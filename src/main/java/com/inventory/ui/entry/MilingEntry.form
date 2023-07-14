@@ -662,7 +662,7 @@
                       <Component id="txtOutputAmt" alignment="0" max="32767" attributes="0"/>
                       <Component id="txtOutputWeight" alignment="0" max="32767" attributes="0"/>
                       <Component id="txtOutputQty" max="32767" attributes="0"/>
-                      <Component id="txtDiffWeight" max="32767" attributes="0"/>
+                      <Component id="txtWtLoss" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -688,7 +688,7 @@
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="txtDiffWeight" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtWtLoss" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="jLabel16" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
@@ -729,10 +729,10 @@
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel16">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Diff Weight :"/>
+            <Property name="text" type="java.lang.String" value="Weight Loss :"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JFormattedTextField" name="txtDiffWeight">
+        <Component class="javax.swing.JFormattedTextField" name="txtWtLoss">
           <Properties>
             <Property name="editable" type="boolean" value="false"/>
           </Properties>

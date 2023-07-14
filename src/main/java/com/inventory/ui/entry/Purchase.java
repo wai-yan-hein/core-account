@@ -960,7 +960,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     private void expenseDialog() {
-        ExpenseSetupDialog d = new ExpenseSetupDialog(Global.parentForm);
+        ExpenseSetupDialog d = new ExpenseSetupDialog(Global.parentForm,true);
         d.setInventoryRepo(inventoryRepo);
         d.setAccountRepo(accountRepo);
         d.initMain();

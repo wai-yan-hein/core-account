@@ -23,13 +23,16 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
             boolean isSelected, boolean hasFocus,
             int row, int column) {
         Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
+        if (isSelected) {
+            component.setBackground(Global.selectionColor);
+        }
         if (row == targetRow && column == targetColumn) {
             component.setForeground(Color.BLACK);
             component.setBackground(targetColor);
         } else {
             // Reset the background color for other cells
-            component.setBackground(UIManager.getColor("background"));
+            component.setBackground(table.getBackground());
+            component.setForeground(Color.WHITE);
         }
         if (value instanceof Float d) {
             String s = formatter.format(d);

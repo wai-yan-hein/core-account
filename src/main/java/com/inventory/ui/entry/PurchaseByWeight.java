@@ -850,7 +850,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     }
 
     private void expenseDialog() {
-        ExpenseSetupDialog d = new ExpenseSetupDialog(Global.parentForm);
+        ExpenseSetupDialog d = new ExpenseSetupDialog(Global.parentForm,true);
         d.setInventoryRepo(inventoryRepo);
         d.setAccountRepo(accountRepo);
         d.initMain();

@@ -19,6 +19,7 @@ public class Expense {
     private ExpenseKey key;
     private String expenseName;
     private String accountCode;
+    private String userCode;
     private Float percent;
     private boolean deleted;
 }

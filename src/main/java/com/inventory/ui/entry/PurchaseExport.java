@@ -861,7 +861,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
     }
 
     private void expenseDialog() {
-        ExpenseSetupDialog d = new ExpenseSetupDialog(Global.parentForm);
+        ExpenseSetupDialog d = new ExpenseSetupDialog(Global.parentForm,true);
         d.setInventoryRepo(inventoryRepo);
         d.setAccountRepo(accountRepo);
         d.initMain();
