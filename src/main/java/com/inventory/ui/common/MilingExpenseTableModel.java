@@ -99,6 +99,27 @@ public class MilingExpenseTableModel extends AbstractTableModel {
         return listDetail;
     }
 
+    public boolean isValidEntry() {
+        boolean status = true;
+        for (MilingExpense sdh : listDetail) {
+            if (sdh.getExpenseCode() != null) {
+                if (Util1.getFloat(sdh.getAmount()) <= 0) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Expense.",
+                            "Invalid.", JOptionPane.ERROR_MESSAGE);
+                    status = false;
+                    parent.requestFocus();
+                    break;
+                } else if (Util1.getFloat(sdh.getPrice()) <= 0 || Util1.getFloat(sdh.getAmount()) <= 0) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.");
+                    status = false;
+                    parent.requestFocus();
+                    break;
+                }
+            }
+        }
+        return status;
+    }
+
     public void setListDetail(List<MilingExpense> listDetail) {
         this.listDetail = listDetail;
         addNewRow();
@@ -263,6 +284,16 @@ public class MilingExpenseTableModel extends AbstractTableModel {
             }
         }
         return status;
+    }
+
+    public List<MilingExpenseKey> getDelList() {
+        return deleteList;
+    }
+
+    public void clearDelList() {
+        if (deleteList != null) {
+            deleteList.clear();
+        }
     }
 
     public void delete(int row) {

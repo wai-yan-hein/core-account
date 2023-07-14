@@ -159,7 +159,7 @@ public class MilingRawTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 8 -> {
+            case 8, 10 -> {
                 return false;
             }
         }

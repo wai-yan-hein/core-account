@@ -98,8 +98,12 @@ public class MillingHis {
     @Transient
     private String localVouNo;
     private transient String status = "STATUS";
-    private transient List<MillingRawDetail> listSH;
-    private transient List<MillingRawDetailKey> listDel;
+    private transient List<MillingRawDetail> listRaw;
+    private transient List<MillingRawDetailKey> listRawDel;
+    private transient List<MillingOutDetail> listOutput;
+    private transient List<MillingOutDetailKey> listOutputDel;
+    private transient List<MilingExpense> listExpense;
+    private transient List<MilingExpenseKey> listExpenseDel;
     private transient boolean backup;
     private transient List<String> location;
     private transient boolean local = false;

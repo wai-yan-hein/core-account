@@ -434,7 +434,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
         }, (e) -> {
             log.error("getStockUnit: " + e.getMessage());
         });
-        tblOutput.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());//price
+        tblOutput.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());//price
         tblOutput.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblOutput.setDefaultRenderer(Float.class, new DecimalFormatRender());
         tblOutput.getColumnModel().getColumn(10).setCellRenderer(new CustomTableCellRenderer(0, 10, Color.yellow));
@@ -536,9 +536,14 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
     }
 
     public void saveSale(boolean print) {
-        if (isValidEntry() && milingRawTableModel.isValidEntry()) {
-//            milling.setListSH(riceMilingTableModel.getListDetail());
-//            milling.setListDel(riceMilingTableModel.getDelList());
+        if (isValidEntry() && milingRawTableModel.isValidEntry()
+                && milingOutTableModel.isValidEntry() && milingExpenseTableModel.isValidEntry()) {
+            milling.setListRaw(milingRawTableModel.getListDetail());
+            milling.setListRawDel(milingRawTableModel.getDelList());
+            milling.setListOutput(milingOutTableModel.getListDetail());
+            milling.setListOutputDel(milingOutTableModel.getDelList());
+            milling.setListExpense(milingExpenseTableModel.getListDetail());
+            milling.setListExpenseDel(milingExpenseTableModel.getDelList());
 //            milling.setBackup(riceMilingTableModel.isChange());
             observer.selected("save", false);
             progress.setIndeterminate(true);

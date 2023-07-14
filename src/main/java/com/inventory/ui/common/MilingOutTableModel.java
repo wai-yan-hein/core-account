@@ -158,7 +158,7 @@ public class MilingOutTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 8, 9, 11 -> {
+            case 8, 10 -> {
                 return false;
             }
         }
@@ -287,11 +287,11 @@ public class MilingOutTableModel extends AbstractTableModel {
                             sd.setUnitCode(stockUnit.getKey().getUnitCode());
                         }
                     }
-                    case 10 -> {
+                    case 8 -> {
                         sd.setPercent(Util1.getFloat(value));
                     }
 
-                    case 11 -> {
+                    case 9 -> {
                         //price
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
@@ -307,7 +307,7 @@ public class MilingOutTableModel extends AbstractTableModel {
                             parent.setColumnSelectionInterval(column, column);
                         }
                     }
-                    case 12 -> {
+                    case 10 -> {
                         //amt
                         sd.setAmount(Util1.getFloat(value));
 
