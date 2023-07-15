@@ -234,7 +234,6 @@ public class MilingOutTableModel extends AbstractTableModel {
                             sd.setRelName(s.getRelName());
                             sd.setQty(1.0f);
                             sd.setWeight(s.getWeight());
-                            sd.setStdWeight(s.getWeight());
                             sd.setWeightUnit(s.getWeightUnit());
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setStock(s);

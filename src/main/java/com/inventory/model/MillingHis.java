@@ -30,55 +30,28 @@ public class MillingHis {
 
     @EmbeddedId
     private MillingHisKey key;
+    @Column(name = "dept_id")
+    private Integer deptId;
     @Column(name = "trader_code")
     private String traderCode;
-    @Column(name = "saleman_code")
-    private String saleManCode;
     @Column(name = "vou_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime vouDate;
-    @Column(name = "credit_term", columnDefinition = "TIMESTAMP")
-    private LocalDateTime creditTerm;
     @Column(name = "cur_code")
     private String curCode;
     @Column(name = "remark")
     private String remark;
     @Column(name = "reference")
     private String reference;
-    @Column(name = "vou_total")
-    private Float vouTotal;
-    @Column(name = "grand_total")
-    private Float grandTotal;
-    @Column(name = "discount")
-    private Float discount;
-    @Column(name = "disc_p")
-    private Float discP;
-    @Column(name = "tax_amt")
-    private Float taxAmt;
-    @Column(name = "tax_p")
-    private Float taxPercent;
     @Column(name = "deleted")
     private boolean deleted;
-    @Column(name = "paid")
-    private Float paid;
-    @Column(name = "vou_balance")
-    private Float balance;
-    @Temporal(TemporalType.DATE)
-    @Column(name = "created_date")
-    private Date createdDate;
+    @Column(name = "created_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime createdDate;
     @Column(name = "created_by")
     private String createdBy;
-    @Column(name = "session_id")
-    private Integer session;
     @Column(name = "updated_by")
     private String updatedBy;
     @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedDate;
-    @Column(name = "address")
-    private String address;
-    @Column(name = "order_code")
-    private String orderCode;
-    @Column(name = "reg_code")
-    private String regionCode;
     @Column(name = "loc_code")
     private String locCode;
     @Column(name = "mac_id")
@@ -87,12 +60,8 @@ public class MillingHis {
     private String intgUpdStatus;
     @Column(name = "vou_lock")
     private boolean vouLock;
-    @Column(name = "order_no")
-    private String orderNo;
     @Column(name = "project_no")
     private String projectNo;
-    @Column(name = "tmp_vou_no")
-    private String tmpVouNo;
     @Column(name = "car_no")
     private String carNo;
     @Column(name = "vou_status_id")
@@ -115,7 +84,6 @@ public class MillingHis {
     private Float outputAmount;
     @Column(name = "diff_weight")
     private Float diffWeight;
-    
     @Transient
     private String localVouNo;
     private transient String status = "STATUS";
@@ -126,6 +94,7 @@ public class MillingHis {
     private transient List<MillingExpense> listExpense;
     private transient List<MillingExpenseKey> listExpenseDel;
     private transient boolean local = false;
+
 
     public MillingHis() {
     }

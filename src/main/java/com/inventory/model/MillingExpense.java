@@ -18,7 +18,7 @@ import jakarta.persistence.Table;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
-@Table(name = "miling_expense")
+@Table(name = "milling_expense")
 public class MillingExpense {
 
     @EmbeddedId

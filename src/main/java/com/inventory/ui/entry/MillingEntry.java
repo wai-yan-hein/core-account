@@ -83,7 +83,7 @@ import reactor.core.publisher.Mono;
  */
 @Component
 @Slf4j
-public class MilingEntry extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
+public class MillingEntry extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
 
     private final Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
     private List<MillingRawDetail> listDetail = new ArrayList();
@@ -136,7 +136,7 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
     /**
      * Creates new form SaleEntry1
      */
-    public MilingEntry() {
+    public MillingEntry() {
         initComponents();
         lblStatus.setForeground(Color.GREEN);
         initKeyListener();
@@ -544,7 +544,6 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
             milling.setListOutputDel(milingOutTableModel.getDelList());
             milling.setListExpense(milingExpenseTableModel.getListDetail());
             milling.setListExpenseDel(milingExpenseTableModel.getDelList());
-//            milling.setBackup(riceMilingTableModel.isChange());
             observer.selected("save", false);
             progress.setIndeterminate(true);
             if (print) {
@@ -592,13 +591,12 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
                     "No Sale Record.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtOutputAmt.requestFocus();
-        }  else if((VouStatus) cboProcessType.getSelectedItem() == null) {
+        } else if ((VouStatus) cboProcessType.getSelectedItem() == null) {
             JOptionPane.showMessageDialog(this, "You must choose process type.",
                     "No Sale Record.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtOutputAmt.requestFocus();
-        }
-        else {
+        } else {
             milling.setRemark(txtRemark.getText());
             milling.setReference(txtReference.getText());
             milling.setCurCode(currAutoCompleter.getCurrency().getCurCode());
@@ -619,15 +617,14 @@ public class MilingEntry extends javax.swing.JPanel implements SelectionObserver
             milling.setOutputWeight(Util1.getFloat(txtOutputWeight.getValue()));
             milling.setOutputAmount(Util1.getFloat(txtOutputAmt.getValue()));
             milling.setDiffWeight(Util1.getFloat(txtWtLoss.getValue()));
+            milling.setDeptId(Global.deptId);
             if (lblStatus.getText().equals("NEW")) {
                 MillingHisKey key = new MillingHisKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 key.setVouNo(null);
                 milling.setKey(key);
-                milling.setCreatedDate(Util1.getTodayDate());
+                milling.setCreatedDate(LocalDateTime.now());
                 milling.setCreatedBy(Global.loginUser.getUserCode());
-                milling.setSession(Global.sessionId);
             } else {
                 milling.setUpdatedBy(Global.loginUser.getUserCode());
             }

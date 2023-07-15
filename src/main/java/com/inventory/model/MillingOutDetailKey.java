@@ -22,8 +22,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class MillingOutDetailKey implements Serializable {
     @Column(name = "comp_code")
     private String compCode;
-    @Column(name = "dept_id")
-    private Integer deptId;
     @Column(name = "unique_id")
     private Integer uniqueId;
     @Column(name = "vou_no")

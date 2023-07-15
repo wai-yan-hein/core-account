@@ -71,7 +71,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.reactive.function.client.WebClient;
 import com.inventory.ui.entry.Reports;
-import com.inventory.ui.entry.MilingEntry;
+import com.inventory.ui.entry.MillingEntry;
 import com.inventory.ui.entry.SaleByBatch;
 import com.inventory.ui.entry.SaleByWeight;
 import com.inventory.ui.entry.Transfer;
@@ -166,7 +166,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     @Autowired
     private CustomerPayment customerPayment;
     @Autowired
-    private MilingEntry millingEntry;
+    private MillingEntry millingEntry;
 //account
     @Autowired
     private DepartmentSetup departmentSetup;
@@ -181,7 +181,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     @Autowired
     private TraderSetup traderSetup;
     @Autowired
-    private MilingEntry milingEntry;
+    private MillingEntry milingEntry;
     @Autowired
     private TaskExecutor taskExecutor;
     @Autowired

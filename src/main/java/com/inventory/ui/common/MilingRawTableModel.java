@@ -13,7 +13,7 @@ import com.inventory.model.MillingRawDetail;
 import com.inventory.model.MillingRawDetailKey;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
-import com.inventory.ui.entry.MilingEntry;
+import com.inventory.ui.entry.MillingEntry;
 import com.repo.InventoryRepo;
 import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MilingRawTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Stock Name", "Location", "Weight", "Weight Unit", "Qty", "Unit", "Std-Weight", "Total Weight", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Stock Name", "Location", "Weight", "Weight Unit", "Qty", "Unit", "Total Weight", "Price", "Amount"};
     private JTable parent;
     private List<MillingRawDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
@@ -43,18 +43,18 @@ public class MilingRawTableModel extends AbstractTableModel {
     private JButton btnProgress;
     private JDateChooser vouDate;
     private boolean change = false;
-    private MilingEntry sale;
+    private MillingEntry sale;
     private Location location;
 
     public void setLocation(Location location) {
         this.location = location;
     }
 
-    public MilingEntry getSale() {
+    public MillingEntry getSale() {
         return sale;
     }
 
-    public void setSale(MilingEntry sale) {
+    public void setSale(MillingEntry sale) {
         this.sale = sale;
     }
 
@@ -204,16 +204,13 @@ public class MilingRawTableModel extends AbstractTableModel {
                     return sd.getUnitCode();
                 }
                 case 7 -> {
-                    return sd.getStdWeight();
-                }
-                case 8 -> {
                     return sd.getTotalWeight();
                 }
-                case 9 -> {
+                case 8 -> {
                     //price
                     return sd.getPrice();
                 }
-                case 10 -> {
+                case 9 -> {
                     //amount
                     return sd.getAmount();
                 }
@@ -243,7 +240,6 @@ public class MilingRawTableModel extends AbstractTableModel {
                             sd.setRelName(s.getRelName());
                             sd.setQty(1.0f);
                             sd.setWeight(s.getWeight());
-                            sd.setStdWeight(s.getWeight());
                             sd.setWeightUnit(s.getWeightUnit());
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setStock(s);
@@ -296,10 +292,7 @@ public class MilingRawTableModel extends AbstractTableModel {
                             sd.setUnitCode(stockUnit.getKey().getUnitCode());
                         }
                     }
-                    case 7 -> {
-                        sd.setStdWeight(Util1.getFloat(value));
-                    }
-                    case 9 -> {
+                    case 8 -> {
                         //price
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
@@ -315,7 +308,7 @@ public class MilingRawTableModel extends AbstractTableModel {
                             parent.setColumnSelectionInterval(column, column);
                         }
                     }
-                    case 10 -> {
+                    case 9 -> {
                         //amt
                         sd.setAmount(Util1.getFloat(value));
 
@@ -386,11 +379,9 @@ public class MilingRawTableModel extends AbstractTableModel {
 
     private void calculateAmount(MillingRawDetail s) {
         float price = Util1.getFloat(s.getPrice());
-        float stdWt = Util1.getFloat(s.getStdWeight());
-        float wt = Util1.getFloat(s.getWeight());
         float qty = Util1.getFloat(s.getQty());
         if (s.getStockCode() != null) {
-            float amount = (qty * wt * price) / stdWt;
+            float amount = (qty  * price);
             s.setAmount(amount);
         }
     }
