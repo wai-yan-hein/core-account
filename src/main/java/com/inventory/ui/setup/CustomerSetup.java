@@ -352,6 +352,15 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         }
     };
 
+    private void observeMain() {
+        observer.selected("control", this);
+        observer.selected("save", true);
+        observer.selected("print", false);
+        observer.selected("history", false);
+        observer.selected("delete", true);
+        observer.selected("refresh", true);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -842,7 +851,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         // TODO add your handling code here:
-        observer.selected("control", this);
+        observeMain();
     }//GEN-LAST:event_formComponentShown
 
     private void tblCustomerKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblCustomerKeyReleased

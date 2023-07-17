@@ -424,6 +424,15 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         }*/
     }
 
+    private void observeMain() {
+        observer.selected("control", this);
+        observer.selected("save", true);
+        observer.selected("print", false);
+        observer.selected("history", true);
+        observer.selected("delete", true);
+        observer.selected("refresh", false);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -660,8 +669,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         // TODO add your handling code here:
-        observer.selected("control", this);
-        focusOnTable();
+        observeMain();
     }//GEN-LAST:event_formComponentShown
 
     private void tblOpeningComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_tblOpeningComponentShown

@@ -70,6 +70,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     private AccountRepo accountRepo;
     @Autowired
     private UserRepo userRepo;
+    private VoucherEntryDailog dialog;
 
     public JProgressBar getProgress() {
         return progress;
@@ -245,17 +246,19 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     }
 
     public void openVoucherDialog(String type, List<Gl> listVGl) {
-        VoucherEntryDailog dailog = new VoucherEntryDailog(Global.parentForm);
-        dailog.setIconImage(Global.parentForm.getIconImage());
-        dailog.setAccountRepo(accountRepo);
-        dailog.setUserRepo(userRepo);
-        dailog.setVouType(type);
-        dailog.setObserver(this);
-        dailog.setListVGl(listVGl);
-        dailog.initMain();
-        dailog.setSize(Global.width - 200, Global.height - 200);
-        dailog.setLocationRelativeTo(null);
-        dailog.setVisible(true);
+        if (dialog == null) {
+            dialog = new VoucherEntryDailog(Global.parentForm);
+            dialog.setIconImage(Global.parentForm.getIconImage());
+            dialog.setAccountRepo(accountRepo);
+            dialog.setUserRepo(userRepo);
+            dialog.setObserver(this);
+            dialog.initMain();
+        }
+        dialog.setVouType(type);
+        dialog.setListVGl(listVGl);
+        dialog.setSize(Global.width - 200, Global.height - 200);
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
     }
 
     private void deleteVoucher() {
@@ -328,6 +331,15 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
 
+    }
+
+    private void observeMain() {
+        observer.selected("control", this);
+        observer.selected("save", false);
+        observer.selected("print", true);
+        observer.selected("history", false);
+        observer.selected("delete", true);
+        observer.selected("refresh", true);
     }
 
     /**
@@ -638,7 +650,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         // TODO add your handling code here:
-        observer.selected("control", this);
+        observeMain();
     }//GEN-LAST:event_formComponentShown
 
     private void tblVoucherMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblVoucherMouseClicked

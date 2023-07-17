@@ -337,29 +337,29 @@ public class COAManagment extends javax.swing.JPanel implements
 
     private void createTreeNode(DefaultMutableTreeNode treeRoot) {
         accountRepo.getCOATree().collectList().subscribe((t) -> {
-                    if (!t.isEmpty()) {
-                        t.forEach((menu) -> {
-                            if (menu.getChild() != null) {
-                                if (!menu.getChild().isEmpty()) {
-                                    DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
-                                    treeRoot.add(parent);
-                                    addChildMenu(parent, menu.getChild());
-                                } else {  //No Child
-                                    DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
+            if (!t.isEmpty()) {
+                t.forEach((menu) -> {
+                    if (menu.getChild() != null) {
+                        if (!menu.getChild().isEmpty()) {
+                            DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
+                            treeRoot.add(parent);
+                            addChildMenu(parent, menu.getChild());
+                        } else {  //No Child
+                            DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
 
-                                    treeRoot.add(parent);
-                                }
-                            } else {  //No Child
-                                DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
-                                treeRoot.add(parent);
-                            }
-
-                        });
-                        treeModel.setRoot(treeRoot);
-                        treeModel.reload(treeRoot);
-                        progress.setIndeterminate(false);
+                            treeRoot.add(parent);
+                        }
+                    } else {  //No Child
+                        DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
+                        treeRoot.add(parent);
                     }
+
                 });
+                treeModel.setRoot(treeRoot);
+                treeModel.reload(treeRoot);
+                progress.setIndeterminate(false);
+            }
+        });
 
     }
 
@@ -594,6 +594,15 @@ public class COAManagment extends javax.swing.JPanel implements
         dialog.setSize(Global.width - 400, Global.height - 400);
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
+    }
+
+    private void observeMain() {
+        observer.selected("control", this);
+        observer.selected("save", true);
+        observer.selected("print", false);
+        observer.selected("history", false);
+        observer.selected("delete", true);
+        observer.selected("refresh", true);
     }
 
     /**
@@ -1016,8 +1025,7 @@ public class COAManagment extends javax.swing.JPanel implements
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         // TODO add your handling code here:
-        observer.selected("control", this);
-        txtUsrCode.requestFocus();
+        observeMain();
     }//GEN-LAST:event_formComponentShown
 
     private void formFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_formFocusLost

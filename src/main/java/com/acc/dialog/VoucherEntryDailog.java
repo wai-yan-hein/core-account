@@ -71,19 +71,17 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
 
     public void setListVGl(List<Gl> listVGl) {
         this.listVGl = listVGl;
+        searchDetail();
     }
 
     public void setVouType(String vouType) {
         this.vouType = vouType;
         setTitle(vouType.equals("DR") ? "Payment / Debit Voucher" : "Receipt / Credit Voucher");
+        tableModel.setVouType(vouType);
         lable1.setText(vouType.equals("DR") ? "To" : "From");
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
+    private void setStatus(String status) {
         this.status = status;
         lblStatus.setText(status);
         lblStatus.setForeground(status.equals("NEW") ? Color.GREEN : Color.BLUE);
@@ -129,6 +127,9 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
     public void initMain() {
         batchLock(!Global.batchLock);
         initTable();
+    }
+
+    public void assignDefault() {
         accountRepo.getDefaultCash().subscribe((coa) -> {
             if (coa != null) {
                 srcAcc = coa.getKey().getCoaCode();
@@ -138,7 +139,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
                 disableForm(false);
             }
         });
-
+        clear();
     }
 
     private void disableForm(boolean s) {
@@ -157,7 +158,6 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         tblJournal.setCellSelectionEnabled(true);
         tableModel.setParent(tblJournal);
         tableModel.setAccountRepo(accountRepo);
-        tableModel.setVouType(vouType);
         tableModel.setTtlAmt(txtAmt);
         tblJournal.getTableHeader().setFont(Global.lableFont);
         tblJournal.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -186,28 +186,27 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         tblJournal.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         txtAmt.setFormatterFactory(Util1.getDecimalFormat());
-        clear();
-        searchDetail();
     }
 
     private void searchDetail() {
-        if (this.listVGl != null) {
-            if (!this.listVGl.isEmpty()) {
-                Gl vgl = listVGl.get(0);
-                txtVouDate.setDate(Util1.convertToDate(vgl.getGlDate()));
-                txtRefrence.setText(vgl.getReference());
-                txtVouNo.setText(vgl.getGlVouNo());
-                txtFrom.setText(vgl.getFromDes());
-                txtFor.setText(vgl.getForDes());
-                txtNa.setText(vgl.getNarration());
-                tableModel.setListVGl(listVGl);
-                lblStatus.setText("EDIT");
-                accountRepo.findCOA(vgl.getSrcAccCode()).subscribe((coa) -> {
-                    lblCash.setText(coa == null ? null : coa.getCoaNameEng());
-                });
-                tableModel.addEmptyRow();
-                tableModel.calAmount();
-            }
+        if (listVGl != null && !listVGl.isEmpty()) {
+            Gl vgl = listVGl.get(0);
+            txtVouDate.setDate(Util1.convertToDate(vgl.getGlDate()));
+            txtRefrence.setText(vgl.getReference());
+            txtVouNo.setText(vgl.getGlVouNo());
+            txtFrom.setText(vgl.getFromDes());
+            txtFor.setText(vgl.getForDes());
+            txtNa.setText(vgl.getNarration());
+            tableModel.setListVGl(listVGl);
+            accountRepo.findCOA(vgl.getSrcAccCode()).subscribe((coa) -> {
+                lblCash.setText(coa == null ? null : coa.getCoaNameEng());
+            });
+            setStatus("EDIT");
+            tableModel.addEmptyRow();
+            tableModel.calAmount();
+        } else {
+            setStatus("NEW");
+            assignDefault();
         }
     }
 
@@ -248,6 +247,10 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
     }
 
     public boolean isValidData() {
+        if (srcAcc == null) {
+            JOptionPane.showMessageDialog(tblJournal, "Invalid Cash.");
+            return false;
+        }
         for (Gl g : tableModel.getListVGl()) {
             g.setSrcAccCode(srcAcc);
             g.setGlDate(Util1.convertToLocalDateTime(txtVouDate.getDate()));
@@ -668,7 +671,6 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
 
     private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
         // TODO add your handling code here:
-        log.info("closed.");
         if (observer != null) {
             observer.selected("SEARCH", "SEARCH");
         }
