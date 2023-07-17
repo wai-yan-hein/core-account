@@ -77,11 +77,11 @@ public class MilingExpenseTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 0, 1, 2, 3 -> {
-                return true;
+            case 4 -> {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     @Override
@@ -175,7 +175,7 @@ public class MilingExpenseTableModel extends AbstractTableModel {
                             b.setExpenseName(ex.getExpenseName());
                             b.setQty(1.0f);
                             addNewRow();
-                            parent.setColumnSelectionInterval(1, 1);
+                            parent.setColumnSelectionInterval(2, 2);
                         }
                     }
 
@@ -194,10 +194,15 @@ public class MilingExpenseTableModel extends AbstractTableModel {
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 b.setPrice(Util1.getFloat(value));
+                                parent.setColumnSelectionInterval(0, 0);
+                                parent.setRowSelectionInterval(row + 1, row + 1);
                             } else {
                                 showMessageBox("Input value must be positive");
                                 parent.setColumnSelectionInterval(column, column);
                             }
+                        } else {
+                            showMessageBox("Input value must be positive");
+                            parent.setColumnSelectionInterval(column, column);
                         }
                     }
                     case 4 ->
