@@ -344,10 +344,10 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         tblRaw.getColumnModel().getColumn(4).setPreferredWidth(30);//unit
         tblRaw.getColumnModel().getColumn(5).setPreferredWidth(50);//qty
         tblRaw.getColumnModel().getColumn(6).setPreferredWidth(30);//unit
-        tblRaw.getColumnModel().getColumn(7).setPreferredWidth(50);//std
-        tblRaw.getColumnModel().getColumn(8).setPreferredWidth(50);//total
-        tblRaw.getColumnModel().getColumn(9).setPreferredWidth(50);//price
-        tblRaw.getColumnModel().getColumn(10).setPreferredWidth(60);//amt
+//        tblRaw.getColumnModel().getColumn(7).setPreferredWidth(50);//std
+        tblRaw.getColumnModel().getColumn(7).setPreferredWidth(50);//total
+        tblRaw.getColumnModel().getColumn(8).setPreferredWidth(50);//price
+        tblRaw.getColumnModel().getColumn(9).setPreferredWidth(60);//amt
         tblRaw.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblRaw.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         monoLoc.subscribe((t) -> {
@@ -360,10 +360,9 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         }, (e) -> {
             log.error("getStockUnit: " + e.getMessage());
         });
-        tblRaw.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());//weight
-        tblRaw.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());//price
-        tblRaw.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());//price
-        tblRaw.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());//price
+        tblRaw.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());//qty
+        tblRaw.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());//price
+        tblRaw.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());//amt
         tblRaw.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblRaw.setDefaultRenderer(Float.class, new DecimalFormatRender());
         tblRaw.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)

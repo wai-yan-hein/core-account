@@ -263,17 +263,18 @@ public class MilingOutTableModel extends AbstractTableModel {
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 sd.setQty(Util1.getFloat(value));
+
+                                if (sd.getQty() != null && sd.getWeight() != null) {
+                                    sd.setTotalWeight(Util1.getFloat(sd.getQty()) * Util1.getFloat(sd.getWeight()));
+                                }
                                 if (sd.getUnitCode() == null) {
-                                    parent.setColumnSelectionInterval(7, 7);
+                                    parent.setColumnSelectionInterval(6, 6);
                                 } else {
                                     parent.setColumnSelectionInterval(9, 9);
                                 }
                             } else {
                                 showMessageBox("Input value must be positive");
                                 parent.setColumnSelectionInterval(column, column);
-                            }
-                            if (sd.getQty() != null && sd.getWeight() != null) {
-                                sd.setTotalWeight(Util1.getFloat(sd.getQty()) * Util1.getFloat(sd.getWeight()));
                             }
                         } else {
                             showMessageBox("Input value must be number.");

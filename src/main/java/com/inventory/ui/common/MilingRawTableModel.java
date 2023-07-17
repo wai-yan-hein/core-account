@@ -158,7 +158,7 @@ public class MilingRawTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 8, 10 -> {
+            case 7, 10 -> {
                 return false;
             }
         }
@@ -272,7 +272,7 @@ public class MilingRawTableModel extends AbstractTableModel {
                                 if (sd.getUnitCode() == null) {
                                     parent.setColumnSelectionInterval(7, 7);
                                 } else {
-                                    parent.setColumnSelectionInterval(9, 9);
+                                    parent.setColumnSelectionInterval(8, 8);
                                 }
                                 if (sd.getQty() != null && sd.getWeight() != null) {
                                     sd.setTotalWeight(Util1.getFloat(sd.getQty()) * Util1.getFloat(sd.getWeight()));
