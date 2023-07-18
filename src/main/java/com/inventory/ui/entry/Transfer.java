@@ -124,8 +124,8 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     }
 
     private void initCombo() {
-        fromLocaitonCompleter = new LocationAutoCompleter(txtFrom,null, false, false);
-        toLocaitonCompleter = new LocationAutoCompleter(txtTo,null, false, false);
+        fromLocaitonCompleter = new LocationAutoCompleter(txtFrom, null, false, false);
+        toLocaitonCompleter = new LocationAutoCompleter(txtTo, null, false, false);
         inventoryRepo.getLocation().subscribe((t) -> {
             fromLocaitonCompleter.setListLocation(t);
             toLocaitonCompleter.setListLocation(t);
@@ -353,7 +353,15 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
+    }
 
+    private void observeMain() {
+        observer.selected("control", this);
+        observer.selected("save", true);
+        observer.selected("print", true);
+        observer.selected("history", true);
+        observer.selected("delete", true);
+        observer.selected("refresh", false);
     }
 
     /**
@@ -544,8 +552,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         // TODO add your handling code here:
-        observer.selected("control", this);
-        focusOnTable();
+        observeMain();
     }//GEN-LAST:event_formComponentShown
 
     private void tblTransferKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblTransferKeyReleased

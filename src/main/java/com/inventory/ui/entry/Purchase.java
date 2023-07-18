@@ -960,7 +960,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     private void expenseDialog() {
-        ExpenseSetupDialog d = new ExpenseSetupDialog(Global.parentForm,true);
+        ExpenseSetupDialog d = new ExpenseSetupDialog(Global.parentForm, true);
         d.setInventoryRepo(inventoryRepo);
         d.setAccountRepo(accountRepo);
         d.initMain();
@@ -1006,6 +1006,15 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         float qty = Util1.getFloat(txtQty.getText());
         float price = Util1.getFloat(txtDefaultCom.getValue());
         txtComAmt.setValue(qty * price);
+    }
+
+    private void observeMain() {
+        observer.selected("control", this);
+        observer.selected("save", true);
+        observer.selected("print", true);
+        observer.selected("history", true);
+        observer.selected("delete", true);
+        observer.selected("refresh", false);
     }
 
     /**
@@ -1764,8 +1773,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     }// </editor-fold>//GEN-END:initComponents
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
-        observer.selected("control", this);
-    }//GEN-LAST:event_formComponentShown
+        observeMain();    }//GEN-LAST:event_formComponentShown
 
     private void txtCusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCusActionPerformed
         //getCustomer();

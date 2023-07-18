@@ -466,6 +466,15 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
         }
     }
 
+    private void observeMain() {
+        observer.selected("control", this);
+        observer.selected("save", true);
+        observer.selected("print", true);
+        observer.selected("history", true);
+        observer.selected("delete", true);
+        observer.selected("refresh", false);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -806,7 +815,7 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         // TODO add your handling code here:
-        observer.selected("control", this);
+        observeMain();
     }//GEN-LAST:event_formComponentShown
 
     private void txtAmountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAmountActionPerformed

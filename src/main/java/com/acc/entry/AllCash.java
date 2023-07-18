@@ -751,6 +751,15 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         }
     }
 
+    private void observeMain() {
+        observer.selected("control", this);
+        observer.selected("save", false);
+        observer.selected("print", true);
+        observer.selected("history", false);
+        observer.selected("delete", true);
+        observer.selected("refresh", true);
+    }
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -1227,7 +1236,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         // TODO add your handling code here:
-        observer.selected("control", this);
+        observeMain();
     }//GEN-LAST:event_formComponentShown
 
     private void txtDateFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtDateFocusGained
