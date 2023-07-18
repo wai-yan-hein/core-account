@@ -433,7 +433,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         tblOutput.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());//price
         tblOutput.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblOutput.setDefaultRenderer(Float.class, new DecimalFormatRender());
-        tblOutput.getColumnModel().getColumn(9).setCellRenderer(new CustomTableCellRenderer(0, 9, Color.yellow));
+//        tblOutput.getColumnModel().getColumn(9).setCellRenderer(new CustomTableCellRenderer(0, 9, Color.yellow));
         tblOutput.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblOutput.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -527,7 +527,9 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         txtOutputQty.setValue(null);
         txtOutputWeight.setValue(null);
         txtOutputAmt.setValue(null);
+        txtWtLoss.setValue(null);
         txtLoadExpense.setValue(null);
+        txtLoadCost.setValue(null);
         cboProcessType.repaint();
     }
 
