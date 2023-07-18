@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentSearchTableModel extends AbstractTableModel {
 
     private List<PaymentHis> listDetail = new ArrayList();
-    private final String[] columnNames = {"Vou Date", "Vou No", "Customer Name", "Remark", "Payment", "Created By"};
+    private final String[] columnNames = {"Vou Date", "Vou No", "Name", "Remark", "Payment", "Created By"};
 
     private JTable parent;
 

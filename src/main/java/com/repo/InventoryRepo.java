@@ -2588,10 +2588,11 @@ public class InventoryRepo {
                 .collectList();
     }
 
-    public Mono<List<PaymentHisDetail>> getCustomerBalance(String traderCode) {
+    public Mono<List<PaymentHisDetail>> getTraderBalance(String traderCode, String tranOption) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/payment/getCustomerBalance")
+                .uri(builder -> builder.path("/payment/getTraderBalance")
                 .queryParam("traderCode", traderCode)
+                .queryParam("tranOption", tranOption)
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()

@@ -43,8 +43,6 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -52,18 +50,14 @@ import reactor.core.publisher.Mono;
  *
  * @author Lenovo
  */
-@Component
 @Slf4j
-public class CustomerPayment extends javax.swing.JPanel implements SelectionObserver, PanelControl {
+public class Payment extends javax.swing.JPanel implements SelectionObserver, PanelControl {
 
     private final PaymentTableModel tableModel = new PaymentTableModel();
     private SelectionObserver observer;
     private JProgressBar progress;
-    @Autowired
     private UserRepo userRepo;
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private AccountRepo accountRepo;
     private TraderAutoCompleter traderAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
@@ -71,31 +65,44 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
     private COAComboBoxModel coaComboModel = new COAComboBoxModel();
     private PaymentHis ph = new PaymentHis();
     private PaymentHistoryDialog dialog;
-
-    public SelectionObserver getObserver() {
-        return observer;
-    }
+    private String tranOption;
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
-    }
-
-    public JProgressBar getProgress() {
-        return progress;
     }
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
 
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
     /**
      * Creates new form ReceiveEntry
+     *
+     * @param tranOption
      */
-    public CustomerPayment() {
+    public Payment(String tranOption) {
+        this.tranOption = tranOption;
         initComponents();
         initFocusAdapter();
         initFormat();
+        configureOption();
         actionMapping();
+    }
+
+    private void configureOption() {
+        lblTrader.setText(tranOption.equals("C") ? "Customer" : "Supplier");
     }
 
     private void initFormat() {
@@ -218,7 +225,7 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
         tblPayment.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
 
-    private void searchCustomerBalance() {
+    private void searchTraderBalance() {
         Trader t = traderAutoCompleter.getTrader();
         if (t != null) {
             if (lblStatus.getText().equals("NEW")) {
@@ -226,7 +233,7 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
                 Float creditAmt = Util1.getFloat(txtCreditAmt.getValue());
                 Float tmp = Util1.getFloat(ProUtil.getProperty(ProUtil.C_CREDIT_AMT));
                 txtCreditAmt.setValue(creditAmt == 0 ? tmp : creditAmt);
-                inventoryRepo.getCustomerBalance(t.getKey().getCode())
+                inventoryRepo.getTraderBalance(t.getKey().getCode(), tranOption)
                         .subscribe((payment) -> {
                             lblMessage.setText(payment.isEmpty() ? "No Record." : "");
                             tableModel.setListDetail(payment);
@@ -258,6 +265,7 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
             progress.setIndeterminate(true);
             ph.setListDetail(tableModel.getPaymentList());
             ph.setListDelete(tableModel.getListDelete());
+            ph.setTranOption(tranOption);
             inventoryRepo.savePayment(ph).subscribe((t) -> {
                 clear();
             }, (e) -> {
@@ -307,7 +315,7 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
             if (lblStatus.getText().equals("NEW")) {
                 PaymentHisKey key = new PaymentHisKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
+                ph.setDeptId(Global.deptId);
                 ph.setKey(key);
                 ph.setCreatedBy(Global.loginUser.getUserCode());
                 ph.setCreatedDate(LocalDateTime.now());
@@ -340,11 +348,12 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
 
     private void historyPayment() {
         if (dialog == null) {
-            dialog = new PaymentHistoryDialog(Global.parentForm);
+            dialog = new PaymentHistoryDialog(Global.parentForm, tranOption);
             dialog.setObserver(this);
             dialog.setUserRepo(userRepo);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setAccountRepo(accountRepo);
+            dialog.setTitle(String.format("%s Payment History Dialog", tranOption.equals("C") ? "Customer" : "Supplier"));
             dialog.initMain();
             dialog.setSize(Global.width - 100, Global.height - 100);
             dialog.setLocationRelativeTo(null);
@@ -354,7 +363,7 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
 
     private void setVoucherDetail(PaymentHis ph) {
         this.ph = ph;
-        int deptId = ph.getKey().getDeptId();
+        int deptId = ph.getDeptId();
         String compCode = ph.getKey().getCompCode();
         String vouNo = ph.getKey().getVouNo();
         inventoryRepo.findTrader(ph.getTraderCode()).subscribe((t) -> {
@@ -503,7 +512,7 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
         jScrollPane1 = new javax.swing.JScrollPane();
         tblPayment = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
-        jLabel3 = new javax.swing.JLabel();
+        lblTrader = new javax.swing.JLabel();
         txtTrader = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
         txtProjectNo = new javax.swing.JTextField();
@@ -676,8 +685,8 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        jLabel3.setFont(Global.lableFont);
-        jLabel3.setText("Customer");
+        lblTrader.setFont(Global.lableFont);
+        lblTrader.setText("Customer");
 
         txtTrader.setFont(Global.textFont);
 
@@ -707,7 +716,7 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel6)
-                    .addComponent(jLabel3))
+                    .addComponent(lblTrader))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -735,7 +744,7 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblTrader, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtTrader)
                     .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cboCash, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -831,7 +840,6 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
@@ -844,6 +852,7 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblMessage;
     private javax.swing.JLabel lblStatus;
+    private javax.swing.JLabel lblTrader;
     private javax.swing.JTable tblPayment;
     private javax.swing.JFormattedTextField txtAmount;
     private javax.swing.JFormattedTextField txtCreditAmt;
@@ -867,7 +876,7 @@ public class CustomerPayment extends javax.swing.JPanel implements SelectionObse
                 setVoucherDetail(p);
             }
         } else if (source != null) {
-            searchCustomerBalance();
+            searchTraderBalance();
         }
     }
 
