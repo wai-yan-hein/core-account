@@ -75,7 +75,7 @@
                           <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="txtVouNo" max="32767" attributes="0"/>
-                              <Component id="vouDate" pref="82" max="32767" attributes="0"/>
+                              <Component id="txtVouDate" pref="82" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                       <Group type="102" attributes="0">
@@ -120,7 +120,7 @@
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="vouDate" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtVouDate" min="-2" max="-2" attributes="0"/>
                       <Component id="jLabel4" alignment="0" min="-2" max="-2" attributes="0"/>
                       <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
                       <Component id="txtCurrency" min="-2" max="-2" attributes="0"/>
@@ -199,7 +199,7 @@
             <Property name="text" type="java.lang.String" value="Currency"/>
           </Properties>
         </Component>
-        <Component class="com.toedter.calendar.JDateChooser" name="vouDate">
+        <Component class="com.toedter.calendar.JDateChooser" name="txtVouDate">
           <Properties>
             <Property name="dateFormatString" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="&quot;dd/MM/yyyy&quot;" type="code"/>

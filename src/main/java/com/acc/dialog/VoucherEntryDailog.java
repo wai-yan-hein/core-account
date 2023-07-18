@@ -199,6 +199,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
             txtNa.setText(vgl.getNarration());
             tableModel.setListVGl(listVGl);
             accountRepo.findCOA(vgl.getSrcAccCode()).subscribe((coa) -> {
+                srcAcc = vgl.getSrcAccCode();
                 lblCash.setText(coa == null ? null : coa.getCoaNameEng());
             });
             setStatus("EDIT");
@@ -761,9 +762,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
                 if (isEnter(e)) {
                     if (e.getSource() instanceof JTextFieldDateEditor txt) {
                         String date = ((JTextFieldDateEditor) txt).getText();
-                        if (date.length() == 8 || date.length() == 6) {
-                            txtVouDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
-                        }
+                        txtVouDate.setDate(Util1.formatDate(date));
                         if (txtVouDate.getDate() != null) {
                             if (!ProUtil.isValidDate(txtVouDate.getDate())) {
                                 txtVouDate.setDate(Util1.getTodayDate());

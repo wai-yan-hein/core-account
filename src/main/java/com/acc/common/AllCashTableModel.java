@@ -118,8 +118,11 @@ public class AllCashTableModel extends AbstractTableModel {
                 Gl vgi = listVGl.get(row);
                 switch (column) {
                     case 0 -> {
+                        if (vgi.getGlDate() == null) {
+                            return Util1.toDateStr(LocalDateTime.now(), Global.dateFormat);
+                        }
                         //Id
-                        return Util1.toDateStr(vgi.getGlDate(), "dd/MM/yyyy");
+                        return Util1.toDateStr(vgi.getGlDate(), Global.dateFormat);
                     }
                     case 1 -> {
                         //Department
@@ -179,18 +182,7 @@ public class AllCashTableModel extends AbstractTableModel {
             switch (column) {
                 case 0 -> {
                     if (value != null) {
-                        if (Util1.isValidDateFormat(value.toString(), "dd/MM/yyyy")) {
-                            gl.setGlDate(Util1.parseLocalDateTime(Util1.toDate(value.toString(), Global.dateFormat)));
-                        } else {
-                            int length = value.toString().length();
-                            if (length == 8 || length == 6) {
-                                String toFormatDate = Util1.toFormatDate(value.toString(), length);
-                                gl.setGlDate(Util1.parseLocalDateTime(Util1.toDate(toFormatDate, Global.dateFormat)));
-                            } else {
-                                gl.setGlDate(LocalDateTime.now());
-                                JOptionPane.showMessageDialog(Global.parentForm, "Invalid Date");
-                            }
-                        }
+                        gl.setGlDate(Util1.formatLocalDateTime(value.toString()));
                     }
                     parent.setColumnSelectionInterval(1, 1);
                 }

@@ -1733,18 +1733,14 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             case "txtSaleDate" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
-                    if (date.length() == 8 || date.length() == 6) {
-                        txtSaleDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
-                    }
+                    txtSaleDate.setDate(Util1.formatDate(date));
                     txtCus.requestFocus();
                 }
             }
             case "txtDueDate" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
-                    if (date.length() == 8 || date.length() == 6) {
-                        txtDueDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
-                    }
+                    txtDueDate.setDate(Util1.formatDate(date));
                     txtReference.requestFocus();
                 }
             }

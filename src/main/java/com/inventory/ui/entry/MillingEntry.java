@@ -274,19 +274,16 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         public void actionPerformed(ActionEvent e) {
             if (table != null) {
                 switch (table) {
-                    case "tblRaw":
+                    case "tblRaw" ->
                         deleteRaw();
-                        break;
-                    case "tblOutput":
+                    case "tblOutput" ->
                         deleteOutput();
-                        break;
-                    case "tblExpense":
+                    case "tblExpense" ->
                         deleteExpense();
-                        break;
-                    default:
-                        // Handle unknown case
-                        break;
+                    default -> {
+                    }
                 }
+                // Handle unknown case
             } else {
                 // Handle null table case
             }
@@ -1690,9 +1687,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             case "txtSaleDate" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
-                    if (date.length() == 8 || date.length() == 6) {
-                        txtSaleDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
-                    }
+                    txtSaleDate.setDate(Util1.formatDate(date));
                     txtCus.requestFocus();
                 }
             }

@@ -2002,9 +2002,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             case "txtPurDate" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
-                    if (date.length() == 8 || date.length() == 6) {
-                        txtPurDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
-                    }
+                    txtPurDate.setDate(Util1.formatDate(date));
                     txtCus.requestFocus();
                 }
                 tabToTable(e);
@@ -2012,9 +2010,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             case "txtDueDate" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
-                    if (date.length() == 8 || date.length() == 6) {
-                        txtDueDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
-                    }
+                    txtDueDate.setDate(Util1.formatDate(date));
                     txtReference.requestFocus();
                 }
                 tabToTable(e);

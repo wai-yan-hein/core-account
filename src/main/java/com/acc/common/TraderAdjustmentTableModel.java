@@ -148,7 +148,11 @@ public class TraderAdjustmentTableModel extends AbstractTableModel {
                 switch (column) {
                     case 0 -> {
                         //Id
-                        return Util1.toDateStr(vgi.getGlDate(), "dd/MM/yyyy");
+                        if (vgi.getGlDate() == null) {
+                            return Util1.toDateStr(LocalDateTime.now(), Global.dateFormat);
+                        }
+                        //Id
+                        return Util1.toDateStr(vgi.getGlDate(), Global.dateFormat);
                     }
                     case 1 -> {
                         //Department

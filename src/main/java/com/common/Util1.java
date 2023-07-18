@@ -734,22 +734,50 @@ public class Util1 {
         return r;
     }
 
-    public static LocalDateTime formatDate(Object obj) {
-        if (obj != null) {
-            String dateString = obj.toString();
+    public static Date formatDate(String input) {
+        // First, check the length of the input string to determine the date format
+        SimpleDateFormat[] dateFormats = {
+            new SimpleDateFormat("ddMMyy"),
+            new SimpleDateFormat("ddMMyyyy"),
+            new SimpleDateFormat("dd/MM/yyyy")
+        };
 
+        for (SimpleDateFormat dateFormat : dateFormats) {
             try {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                return LocalDateTime.parse(dateString, formatter);
-            } catch (DateTimeParseException ex) {
-            }
-            try {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yy");
-                return LocalDateTime.parse(dateString, formatter);
-            } catch (DateTimeParseException ex) {
+                Date date = dateFormat.parse(input);
+                return date;
+            } catch (ParseException ignored) {
+                // If parsing fails, ignore and try the next format
             }
         }
+
+        // If none of the formats match, throw an exception or handle it accordingly
+        JOptionPane.showMessageDialog(Global.parentForm, "Invalid Date Format. Example ddMMyy,ddMMyyyy,dd/MM/yyyy");
         return null;
+    }
+
+    public static LocalDateTime formatLocalDateTime(String input) {
+        DateTimeFormatter formatter = switch (input.length()) {
+            case 6 ->
+                DateTimeFormatter.ofPattern("ddMMyy");
+            case 8 ->
+                DateTimeFormatter.ofPattern("ddMMyyyy");
+            default ->
+                DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        }; // For input format "010123"
+        // For input format "01012023"
+        // For input format "01/01/2023"
+
+        try {
+            LocalDate localDate = LocalDate.parse(input, formatter);
+            return localDate.atStartOfDay();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            // If none of the formats match, throw an exception or handle it accordingly
+            JOptionPane.showMessageDialog(Global.parentForm, "Invalid Date Format. Example ddMMyy,ddMMyyyy,dd/MM/yyyy");
+            return null;
+        }
+
     }
 
     public static String toFormatDate(String obj, int length) {
