@@ -5,7 +5,6 @@
  */
 package com.inventory.ui.entry;
 
-import com.common.CustomTableCellRenderer;
 import com.repo.AccountRepo;
 import com.common.DecimalFormatRender;
 import com.common.Global;
@@ -36,6 +35,7 @@ import com.repo.InventoryRepo;
 import com.inventory.ui.common.MilingOutTableModel;
 import com.inventory.ui.common.ProcessTypeComboBoxModel;
 import com.inventory.ui.common.StockBalanceTableModel;
+import com.inventory.ui.entry.dialog.MillingHistoryDialog;
 import com.inventory.ui.setup.dialog.ExpenseSetupDialog;
 import com.inventory.ui.setup.dialog.VouStatusSetupDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
@@ -85,6 +85,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class MillingEntry extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
 
+    private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
     private final Image icon = new ImageIcon(getClass().getResource("/images/setting.png")).getImage();
     private List<MillingRawDetail> listDetail = new ArrayList();
     private List<MillingOutDetail> listOutDetail = new ArrayList();
@@ -92,7 +93,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private final MilingOutTableModel milingOutTableModel = new MilingOutTableModel();
     private final MilingRawTableModel milingRawTableModel = new MilingRawTableModel();
     private final MilingExpenseTableModel milingExpenseTableModel = new MilingExpenseTableModel();
-//    private RiceMillingHisHistoryDialog dialog;
+    private MillingHistoryDialog dialog;
     private final StockBalanceTableModel stockBalanceTableModel = new StockBalanceTableModel();
     private ProcessTypeComboBoxModel vouStatusTableModel = new ProcessTypeComboBoxModel();
     @Autowired
@@ -189,78 +190,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         tblOutput.getActionMap().put(solve, new DeleteAction("tblOutput"));
         tblExpense.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblExpense.getActionMap().put(solve, new DeleteAction("tblExpense"));
-    }
-
-    private void setSaleVoucherDetail(OrderHis oh, boolean local) { //todo
-        milingOutTableModel.clear();
-        if (oh != null) {
-            progress.setIndeterminate(true);
-            Integer deptId = oh.getKey().getDeptId();
-            String vouNo = oh.getKey().getVouNo();
-//            inventoryRepo.getOrderDetail(vouNo, deptId, local)
-//                    .subscribe((list) -> {
-//                        list.forEach((od) -> {
-//                            RiceMillingHisDetail sd = new RiceMillingHisDetail();
-//                            sd.setStockCode(od.getStockCode());
-//                            sd.setUserCode(od.getUserCode());
-//                            sd.setStockName(od.getStockName());
-//                            sd.setTraderName(od.getTraderName());
-//                            sd.setRelName(od.getRelName());
-//                            sd.setQty(od.getQty());
-//                            sd.setAmount(od.getAmount());
-//                            sd.setUnitCode(od.getUnitCode());
-//                            sd.setPrice(od.getPrice());
-//                            sd.setLocCode(od.getLocCode());
-//                            sd.setLocName(od.getLocName());
-//                            riceMilingTableModel.addSale(sd);
-//                        });
-//                    }, (e) -> {
-//                        progress.setIndeterminate(false);
-//                        JOptionPane.showMessageDialog(this, e.getMessage());
-//                    }, () -> {
-//                        inventoryRepo.findLocation(oh.getLocCode()).subscribe((t) -> {
-//                            locationAutoCompleter.setLocation(t);
-//                        });
-//                        Mono<Trader> trader = inventoryRepo.findTrader(oh.getTraderCode());
-//                        trader.subscribe((t) -> {
-//                            traderAutoCompleter.setTrader(t);
-//                        });
-//
-//                        userRepo.findCurrency(oh.getCurCode()).subscribe((t) -> {
-//                            currAutoCompleter.setCurrency(t);
-//                        });
-//                        inventoryRepo.findSaleMan(oh.getSaleManCode()).subscribe((t) -> {
-//                            saleManCompleter.setSaleMan(t);
-//                        });
-//                        if (oh.getProjectNo() != null) {
-//                            userRepo.find(new ProjectKey(oh.getProjectNo(), Global.compCode)).subscribe(t1 -> {
-//                                projectAutoCompleter.setProject(t1);
-//                            });
-//                        } else {
-//                            projectAutoCompleter.setProject(null);
-//                        }
-//
-//                        txtDueDate.setDate(Util1.convertToDate(oh.getCreditTerm()));
-//                        txtRemark.setText(oh.getRemark());
-//                        txtReference.setText(oh.getReference());
-//                        txtSaleDate.setDate(Util1.convertToDate(oh.getVouDate()));
-//                        txtVouTotal.setValue(Util1.getFloat(oh.getVouTotal()));
-//                        txtVouDiscP.setValue(Util1.getFloat(oh.getDiscP()));
-//                        txtVouDiscount.setValue(Util1.getFloat(oh.getDiscount()));
-//                        txtVouTaxP.setValue(Util1.getFloat(oh.getTaxPercent()));
-//                        txtTax.setValue(Util1.getFloat(oh.getTaxAmt()));
-//                        txtVouPaid.setValue(Util1.getFloat(oh.getPaid()));
-//                        txtVouBalance.setValue(Util1.getFloat(oh.getBalance()));
-//                        txtGrandTotal.setValue(Util1.getFloat(oh.getGrandTotal()));
-//                        chkPaid.setSelected(Util1.getFloat(oh.getPaid()) > 0);
-//                        txtOrderNo.setText(oh.getKey().getVouNo());
-//                        riceMilingTableModel.addNewRow();
-//                        focusTable();
-//                        progress.setIndeterminate(false);
-//                    });
-        }
-
-    }
+    }    
 
     private class DeleteAction extends AbstractAction {
 
@@ -638,23 +568,23 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         switch (status) {
             case "EDIT" -> {
                 int yes_no = JOptionPane.showConfirmDialog(this,
-                        "Are you sure to delete?", "Sale Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+                        "Are you sure to delete?", "Milling Voucher Delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
-//                    inventoryRepo.delete(milling).subscribe((t) -> {
-//                        clear();
-//                    });
+                    inventoryRepo.deleteMilling(milling).subscribe((t) -> {
+                        clear();
+                    });
                 }
             }
             case "DELETED" -> {
                 int yes_no = JOptionPane.showConfirmDialog(this,
-                        "Are you sure to restore?", "Sale Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                        "Are you sure to restore?", "Milling Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
                     milling.setDeleted(false);
-//                    inventoryRepo.restore(milling).subscribe((t) -> {
-//                        lblStatus.setText("EDIT");
-//                        lblStatus.setForeground(Color.blue);
-//                        disableForm(true);
-//                    });
+                    inventoryRepo.restoreMilling(milling).subscribe((t) -> {
+                        lblStatus.setText("EDIT");
+                        lblStatus.setForeground(Color.blue);
+                        disableForm(true);
+                    });
                 }
             }
             default ->
@@ -672,7 +602,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     "Are you sure to delete?", "Sale Transaction delete.", JOptionPane.YES_NO_OPTION);
             if (yes_no == 0) {
                 milingRawTableModel.delete(row);
-                calculateMilling();
+                calculateMilling(false);
             }
         }
     }
@@ -687,7 +617,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     "Are you sure to delete?", "Sale Transaction delete.", JOptionPane.YES_NO_OPTION);
             if (yes_no == 0) {
                 milingOutTableModel.delete(row);
-                calculateMilling();
+                calculateMilling(false);
             }
         }
     }
@@ -702,12 +632,12 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     "Are you sure to delete?", "Sale Transaction delete.", JOptionPane.YES_NO_OPTION);
             if (yes_no == 0) {
                 milingExpenseTableModel.delete(row);
-                calculateMilling();
+                calculateMilling(false);
             }
         }
     }
 
-    private void calculateMilling() {
+    private void calculateMilling(boolean firstRow) {
         //cal raw
         listDetail = milingRawTableModel.getListDetail();
         float loadQty = listDetail.stream().map(s -> Util1.getFloat(s.getQty())).reduce(0.0f, (accumulator, _item) -> accumulator + _item);
@@ -735,33 +665,37 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         txtOutputAmt.setValue(outAmt);
         txtWtLoss.setValue(loadWt - outWt);
 
-        float knowAmt = listOutDetail.stream()
-                .skip(1) // Skip the first element
-                .map(sdh -> Util1.getFloat(sdh.getAmount()))
-                .reduce(0.0f, Float::sum);
-        float amt = costAmt - knowAmt;
-        MillingOutDetail mod = listOutDetail.get(0);
-        float qty = Util1.getFloat(mod.getQty());
-        if (qty > 0) {
-            mod.setAmount(amt);
-            mod.setPrice(amt / qty);
-            milingOutTableModel.setObject(0, mod);
+        if (!firstRow) {
+            float knowAmt = listOutDetail.stream()
+                    .skip(1) // Skip the first element
+                    .map(sdh -> Util1.getFloat(sdh.getAmount()))
+                    .reduce(0.0f, Float::sum);
+            float amt = costAmt - knowAmt;
+            MillingOutDetail mod = listOutDetail.get(0);
+            float qty = Util1.getFloat(mod.getQty());
+            if (qty > 0) {
+                mod.setAmount(amt);
+                mod.setPrice(amt / qty);
+                milingOutTableModel.setObject(0, mod);
+            }
         }
+
     }
 
     public void historySale() { //todo
-//        if (dialog == null) {
-//            dialog = new RiceMillingHisHistoryDialog(Global.parentForm);
-//            dialog.setInventoryRepo(inventoryRepo);
-//            dialog.setIntegration(integration);
-//            dialog.setUserRepo(userRepo);
-//            dialog.setTaskExecutor(taskExecutor);
-//            dialog.setObserver(this);
-//            dialog.initMain();
-//            dialog.setSize(Global.width - 100, Global.height - 100);
-//            dialog.setLocationRelativeTo(null);
-//        }
-//        dialog.search();
+        if (dialog == null) {
+            dialog = new MillingHistoryDialog(Global.parentForm);
+            dialog.setTitle("Milling Voucher Search");
+            dialog.setInventoryRepo(inventoryRepo);
+            dialog.setUserRepo(userRepo);
+            dialog.setIconImage(searchIcon);
+            dialog.setObserver(this);
+            dialog.initMain();
+            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setLocationRelativeTo(null);
+        }
+        dialog.search();
+        dialog.setVisible(true);
     }
 
     public void setSaleVoucher(MillingHis sh) { //todo
@@ -841,18 +775,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         observer.selected("delete", status);
         observer.selected("print", status);
 
-    }
-
-    private void setAllLocation() { //todo
-//        List<RiceMillingHisDetail> listSaleDetail = riceMilingTableModel.getListDetail();
-//        Location loc = locationAutoCompleter.getLocation();
-//        if (listSaleDetail != null) {
-//            listSaleDetail.forEach(sd -> {
-//                sd.setLocCode(loc.getKey().getLocCode());
-//                sd.setLocName(loc.getLocName());
-//            });
-//        }
-//        riceMilingTableModel.setListDetail(listSaleDetail);
     }
 
     private void printVoucher(String vouNo, String reportName, boolean local) { //todo
@@ -1614,31 +1536,23 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             case "TRADER" -> {
             }
             case "SALE-TOTAL" ->
-                calculateMilling();
+                calculateMilling(false);
             case "SALE-TOTAL-OUT" ->
-                calculateMilling();
+                calculateMilling(false);
+            case "SALE-TOTAL-SKIP" ->
+                calculateMilling(true);
             case "EXPENSE" ->
-                calculateMilling();
-            case "Location" ->
-                setAllLocation();
+                calculateMilling(false);
             case "SALE-HISTORY" -> {
                 if (selectObj instanceof VSale s) {
                     boolean local = s.isLocal();
-//                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId(), local).subscribe((t) -> {
-//                        t.setLocal(local);
-//                        setSaleVoucher(t);
-//                    }, (e) -> {
-//                        JOptionPane.showMessageDialog(this, e.getMessage());
-//                    });
+                    inventoryRepo.findMilling(s.getVouNo(), s.getDeptId(), local).subscribe((t) -> {
+                        t.setLocal(local);
+                        setSaleVoucher(t);
+                    }, (e) -> {
+                        JOptionPane.showMessageDialog(this, e.getMessage());
+                    });
                 }
-            }
-            case "ORDER-HISTORY" -> {
-                VOrder s = (VOrder) selectObj;
-                inventoryRepo.findOrder(s.getVouNo(), s.getDeptId(), s.isLocal()).subscribe((t) -> {
-                    setSaleVoucherDetail(t, s.isLocal());
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                });
             }
             case "Select" -> {
             }

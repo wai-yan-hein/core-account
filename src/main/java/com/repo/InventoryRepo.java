@@ -24,6 +24,7 @@ import com.inventory.model.Location;
 import com.inventory.model.LocationKey;
 import com.inventory.model.MillingExpense;
 import com.inventory.model.MillingHis;
+import com.inventory.model.MillingHisKey;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisDetail;
 import com.inventory.model.OPHisKey;
@@ -838,12 +839,12 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<String>> deleteStock(StockKey key) {
+    public Mono<List<General>> deleteStock(StockKey key) {
         return inventoryApi.post()
                 .uri("/setup/delete-stock")
                 .body(Mono.just(key), StockKey.class)
                 .retrieve()
-                .bodyToFlux(String.class)
+                .bodyToFlux(General.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
@@ -1162,6 +1163,19 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<Boolean> deleteMilling(MillingHis his) {
+        MillingHisKey key = his.getKey();
+        return inventoryApi.post()
+                .uri("/milling/delete-milling")
+                .body(Mono.just(key), MillingHisKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<UnitRelation> saveUnitRelation(UnitRelation rel) {
         return inventoryApi.post()
                 .uri("/setup/save-unit-relation")
@@ -1392,6 +1406,25 @@ public class InventoryRepo {
                 .body(Mono.just(key), SaleHisKey.class)
                 .retrieve()
                 .bodyToMono(SaleHis.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<MillingHis> findMilling(String vouNo, Integer deptId, boolean local) {
+        MillingHisKey key = new MillingHisKey();
+        key.setVouNo(vouNo);
+        key.setCompCode(Global.compCode);
+//        key.setDeptId(deptId);
+        if (local) {
+//            return h2Repo.findSale(key);
+        }
+        return inventoryApi.post()
+                .uri("/milling/find-milling")
+                .body(Mono.just(key), MillingHisKey.class)
+                .retrieve()
+                .bodyToMono(MillingHis.class)
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -1695,6 +1728,22 @@ public class InventoryRepo {
         return inventoryApi.post()
                 .uri("/sale/restore-sale")
                 .body(Mono.just(key), SaleHisKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<Boolean> restoreMilling(MillingHis his) {
+        MillingHisKey key = his.getKey();
+        if (his.isLocal()) {
+//            return h2Repo.restoreSale(key);
+        }
+        return inventoryApi.post()
+                .uri("/milling/restore-milling")
+                .body(Mono.just(key), MillingHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
                 .onErrorResume((e) -> {
@@ -2131,7 +2180,7 @@ public class InventoryRepo {
 
     public Mono<MillingHis> save(MillingHis ph) {
         return inventoryApi.post()
-                .uri("/miling/save-miling")
+                .uri("/milling/save-milling")
                 .body(Mono.just(ph), MillingHis.class)
                 .retrieve()
                 .bodyToMono(MillingHis.class)

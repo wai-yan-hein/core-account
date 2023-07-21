@@ -319,7 +319,12 @@ public class MilingOutTableModel extends AbstractTableModel {
                 calWeightTotal(sd);
                 calculateAmount(sd);
                 fireTableRowsUpdated(row, row);
-                selectionObserver.selected("SALE-TOTAL-OUT", "SALE-TOTAL-OUT");
+                if(row != 0) {
+                    selectionObserver.selected("SALE-TOTAL-OUT", "SALE-TOTAL-OUT");
+                } else {
+                    selectionObserver.selected("SALE-TOTAL-SKIP", "SALE-TOTAL-SKIP");
+                }
+                
                 parent.requestFocus();
             }
         } catch (Exception ex) {
