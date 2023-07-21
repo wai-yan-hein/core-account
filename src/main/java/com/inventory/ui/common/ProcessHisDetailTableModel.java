@@ -199,7 +199,7 @@ public class ProcessHisDetailTableModel extends AbstractTableModel {
                 ProcessHisDetail p = listDetail.get(row);
                 switch (column) {
                     case 0 ->
-                        p.setVouDate(Util1.formatDate(value));
+                        p.setVouDate(Util1.formatLocalDateTime(value.toString()));
                     case 1, 2 -> {
                         if (value instanceof Stock s) {
                             p.setStockUsrCode(s.getUserCode());

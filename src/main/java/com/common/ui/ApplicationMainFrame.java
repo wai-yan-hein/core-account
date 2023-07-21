@@ -39,7 +39,7 @@ import com.inventory.ui.entry.OtherSetupMain;
 import com.inventory.ui.entry.Purchase;
 import com.inventory.ui.entry.PurchaseByWeight;
 import com.inventory.ui.entry.RFID;
-import com.inventory.ui.entry.CustomerPayment;
+import com.inventory.ui.entry.Payment;
 import com.inventory.ui.entry.PurchaseExport;
 import com.inventory.ui.entry.ReorderLevelEntry;
 import com.inventory.ui.entry.ReturnIn;
@@ -99,7 +99,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
-import javax.swing.plaf.ComponentUI;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
@@ -163,8 +162,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private WeightLossEntry weightLoss;
     @Autowired
     private GRNEntry grnEntry;
-    @Autowired
-    private CustomerPayment customerPayment;
     @Autowired
     private MillingEntry millingEntry;
 //account
@@ -609,11 +606,26 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return grnEntry;
             }
             case "Customer Payment" -> {
-                customerPayment.setName(menuName);
-                customerPayment.setObserver(this);
-                customerPayment.setProgress(progress);
-                customerPayment.initMain();
-                return customerPayment;
+                Payment payment = new Payment("C");
+                payment.setUserRepo(userRepo);
+                payment.setInventoryRepo(inventoryRepo);
+                payment.setAccountRepo(accounRepo);
+                payment.setName(menuName);
+                payment.setObserver(this);
+                payment.setProgress(progress);
+                payment.initMain();
+                return payment;
+            }
+            case "Supplier Payment" -> {
+                Payment payment = new Payment("S");
+                payment.setUserRepo(userRepo);
+                payment.setInventoryRepo(inventoryRepo);
+                payment.setAccountRepo(accounRepo);
+                payment.setName(menuName);
+                payment.setObserver(this);
+                payment.setProgress(progress);
+                payment.initMain();
+                return payment;
             }
             case "Milling Entry" -> {
                 millingEntry.setName(menuName);

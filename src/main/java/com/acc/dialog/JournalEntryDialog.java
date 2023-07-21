@@ -726,9 +726,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
             case "txtDate":
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
-                    if (date.length() == 8 || date.length() == 6) {
-                        txtVouDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
-                    }
+                    txtVouDate.setDate(Util1.formatDate(date));
                     if (txtVouDate.getDate() != null) {
                         if (!ProUtil.isValidDate(txtVouDate.getDate())) {
                             txtVouDate.setDate(Util1.getTodayDate());

@@ -158,9 +158,9 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     }
 
     private void initDateListner() {
-        vouDate.getDateEditor().getUiComponent().setName("vouDate");
-        vouDate.getDateEditor().getUiComponent().addKeyListener(this);
-        vouDate.getDateEditor().getUiComponent().addFocusListener(fa);
+        txtVouDate.getDateEditor().getUiComponent().setName("txtVouDate");
+        txtVouDate.getDateEditor().getUiComponent().addKeyListener(this);
+        txtVouDate.getDateEditor().getUiComponent().addFocusListener(fa);
     }
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
@@ -174,7 +174,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         tblRet.setModel(roTableModel);
         roTableModel.setParent(tblRet);
         roTableModel.setInventoryRepo(inventoryRepo);
-        roTableModel.setVouDate(vouDate);
+        roTableModel.setVouDate(txtVouDate);
         roTableModel.setLblRec(lblRec);
         roTableModel.setReturnOut(this);
         roTableModel.addNewRow();
@@ -229,8 +229,8 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     }
 
     private void initKeyListener() {
-        vouDate.getDateEditor().getUiComponent().setName("vouDate");
-        vouDate.getDateEditor().getUiComponent().addKeyListener(this);
+        txtVouDate.getDateEditor().getUiComponent().setName("vouDate");
+        txtVouDate.getDateEditor().getUiComponent().addKeyListener(this);
         txtVouNo.addKeyListener(this);
         txtRemark.addKeyListener(this);
         txtCus.addKeyListener(this);
@@ -278,7 +278,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                 log.error(e.getMessage());
             });
         }
-        vouDate.setDate(Util1.getTodayDate());
+        txtVouDate.setDate(Util1.getTodayDate());
         progress.setIndeterminate(false);
         txtCurrency.setEnabled(ProUtil.isMultiCur());
         txtVouNo.setText(null);
@@ -392,7 +392,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             ri.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             Project p = projectAutoCompleter.getProject();
             ri.setProjectNo(p == null ? null : p.getKey().getProjectNo());
-            ri.setVouDate(Util1.convertToLocalDateTime(vouDate.getDate()));
+            ri.setVouDate(Util1.convertToLocalDateTime(txtVouDate.getDate()));
             ri.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
             ri.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
             ri.setStatus(lblStatus.getText());
@@ -544,7 +544,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                         }
                         txtVouNo.setText(ri.getKey().getVouNo());
                         txtRemark.setText(ri.getRemark());
-                        vouDate.setDate(Util1.convertToDate(ri.getVouDate()));
+                        txtVouDate.setDate(Util1.convertToDate(ri.getVouDate()));
                         txtVouTotal.setValue(Util1.getFloat(ri.getVouTotal()));
                         txtVouDiscP.setValue(Util1.getFloat(ri.getDiscP()));
                         txtVouDiscount.setValue(Util1.getFloat(ri.getDiscount()));
@@ -564,7 +564,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
 
     private void disableForm(boolean status) {
         tblRet.setEnabled(status);
-        vouDate.setEnabled(status);
+        txtVouDate.setEnabled(status);
         txtCus.setEnabled(status);
         txtLocation.setEnabled(status);
         txtRemark.setEnabled(status);
@@ -636,7 +636,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         txtVouNo = new javax.swing.JFormattedTextField();
         jLabel4 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
-        vouDate = new com.toedter.calendar.JDateChooser();
+        txtVouDate = new com.toedter.calendar.JDateChooser();
         txtCurrency = new javax.swing.JTextField();
         jLabel21 = new javax.swing.JLabel();
         txtRemark = new javax.swing.JTextField();
@@ -709,8 +709,8 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         jLabel6.setFont(Global.lableFont);
         jLabel6.setText("Currency");
 
-        vouDate.setDateFormatString("dd/MM/yyyy");
-        vouDate.setFont(Global.textFont);
+        txtVouDate.setDateFormatString("dd/MM/yyyy");
+        txtVouDate.setFont(Global.textFont);
 
         txtCurrency.setFont(Global.textFont);
         txtCurrency.setDisabledTextColor(new java.awt.Color(0, 0, 0));
@@ -774,7 +774,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                         .addGap(18, 18, 18)
                         .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtVouNo)
-                            .addComponent(vouDate, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)))
+                            .addComponent(txtVouDate, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)))
                     .addGroup(panelSaleLayout.createSequentialGroup()
                         .addComponent(jLabel2)
                         .addGap(18, 18, 18)
@@ -814,7 +814,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                     .addComponent(jLabel22))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(vouDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtVouDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4)
                     .addComponent(jLabel6)
                     .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -1298,12 +1298,10 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                 }
                 tabToTable(e);
             }
-            case "vouDate" -> {
+            case "txtVouDate" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
-                    if (date.length() == 8 || date.length() == 6) {
-                        vouDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
-                    }
+                    txtVouDate.setDate(Util1.formatDate(date));
                     txtCus.requestFocus();
                 }
                 tabToTable(e);
@@ -1375,13 +1373,13 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
     private javax.swing.JTextField txtRemark;
     private javax.swing.JFormattedTextField txtTax;
     private javax.swing.JFormattedTextField txtVouBalance;
+    private com.toedter.calendar.JDateChooser txtVouDate;
     private javax.swing.JFormattedTextField txtVouDiscP;
     private javax.swing.JFormattedTextField txtVouDiscount;
     private javax.swing.JFormattedTextField txtVouNo;
     private javax.swing.JFormattedTextField txtVouPaid;
     private javax.swing.JFormattedTextField txtVouTaxP;
     private javax.swing.JFormattedTextField txtVouTotal;
-    private com.toedter.calendar.JDateChooser vouDate;
     // End of variables declaration//GEN-END:variables
 
     @Override

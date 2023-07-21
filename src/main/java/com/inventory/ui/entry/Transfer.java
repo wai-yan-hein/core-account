@@ -660,9 +660,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             case "txtDate" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
-                    if (date.length() == 8 || date.length() == 6) {
-                        txtDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
-                    }
+                    txtDate.setDate(Util1.formatDate(date));
                     txtFrom.requestFocus();
                 }
             }

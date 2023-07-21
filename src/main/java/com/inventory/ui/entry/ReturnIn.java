@@ -1307,9 +1307,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             case "txtVouDate" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     String date = ((JTextFieldDateEditor) sourceObj).getText();
-                    if (date.length() == 8 || date.length() == 6) {
-                        txtVouDate.setDate(Util1.convertToDate(Util1.formatDate(date)));
-                    }
+                    txtVouDate.setDate(Util1.formatDate(date));
                     txtCus.requestFocus();
                 }
                 tabToTable(e);
