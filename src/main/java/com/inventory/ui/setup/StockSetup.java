@@ -43,6 +43,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -1933,9 +1934,14 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     public void delete() {
         if (stock.getKey() != null) {
             inventoryRepo.deleteStock(stock.getKey()).subscribe((t) -> {
-                stockTableModel.deleteStock(selectRow);
-                clear();
-                JOptionPane.showMessageDialog(this, "Deleted.");
+                if (!t.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, t.get(0).getMessage());
+                } else {
+                    stockTableModel.deleteStock(selectRow);
+                    clear();
+                    JOptionPane.showMessageDialog(this, "Deleted.");
+                }
+
             });
 
         }
