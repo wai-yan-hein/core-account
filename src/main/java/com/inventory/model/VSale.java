@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VSale {
 
-     private String sdCode;
+    private String sdCode;
     private String vouNo;
     private String traderCode;
     private String rfId;
@@ -84,4 +84,7 @@ public class VSale {
     private Float creditAmt;
     private Float diffAmt;
     private boolean local;
+    private String tranOption;
+    private String saleVouNo;
+    private String payDate;
 }

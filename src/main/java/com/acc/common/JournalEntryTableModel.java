@@ -81,10 +81,6 @@ public class JournalEntryTableModel extends AbstractTableModel {
         this.ttlDrAmt = ttlDrAmt;
     }
 
-    public AccountRepo getAccountRepo() {
-        return accountRepo;
-    }
-
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }

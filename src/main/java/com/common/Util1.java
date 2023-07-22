@@ -1002,7 +1002,7 @@ public class Util1 {
         return Util1.toDateStr(Util1.getTodayDate(), "yyyyMMdd");
     }
 
-    public static byte[] listToByteArray(List<VSale> obj) {
+    public static <T> byte[] listToByteArray(List<T> obj) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             String jsonString = mapper.writeValueAsString(obj);

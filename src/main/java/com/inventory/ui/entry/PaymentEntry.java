@@ -32,8 +32,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.JFormattedTextField;
 import javax.swing.JOptionPane;
@@ -43,6 +47,11 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.data.JsonDataSource;
+import net.sf.jasperreports.view.JasperViewer;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -51,7 +60,7 @@ import reactor.core.publisher.Mono;
  * @author Lenovo
  */
 @Slf4j
-public class Payment extends javax.swing.JPanel implements SelectionObserver, PanelControl {
+public class PaymentEntry extends javax.swing.JPanel implements SelectionObserver, PanelControl {
 
     private final PaymentTableModel tableModel = new PaymentTableModel();
     private SelectionObserver observer;
@@ -92,7 +101,7 @@ public class Payment extends javax.swing.JPanel implements SelectionObserver, Pa
      *
      * @param tranOption
      */
-    public Payment(String tranOption) {
+    public PaymentEntry(String tranOption) {
         this.tranOption = tranOption;
         initComponents();
         initFocusAdapter();
@@ -259,7 +268,7 @@ public class Payment extends javax.swing.JPanel implements SelectionObserver, Pa
         txtRecord.setValue(tableModel.getListDetail().size());
     }
 
-    private void savePayment() {
+    private void savePayment(boolean print) {
         if (isValidEntry()) {
             observer.selected("save", false);
             progress.setIndeterminate(true);
@@ -268,12 +277,50 @@ public class Payment extends javax.swing.JPanel implements SelectionObserver, Pa
             ph.setTranOption(tranOption);
             inventoryRepo.savePayment(ph).subscribe((t) -> {
                 clear();
+                if (print) {
+                    printVoucher(t.getKey());
+                }
             }, (e) -> {
                 JOptionPane.showMessageDialog(this, e.getMessage());
                 progress.setIndeterminate(false);
                 observer.selected("save", true);
             });
         }
+    }
+
+    private void enableToolBar(boolean status) {
+        progress.setIndeterminate(!status);
+        observer.selected("refresh", status);
+        observer.selected("print", status);
+        observer.selected("save", false);
+        observer.selected("history", true);
+    }
+
+    private void printVoucher(PaymentHisKey key) {
+        enableToolBar(false);
+        inventoryRepo.paymentReport(key).subscribe((t) -> {
+            try {
+                byte[] data = Util1.listToByteArray(t);
+                String reportName = "PaymentVoucher";
+                String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
+                Map<String, Object> param = new HashMap<>();
+                param.put("p_print_date", Util1.getTodayDateTime());
+                param.put("p_comp_name", Global.companyName);
+                param.put("p_comp_address", Global.companyAddress);
+                param.put("p_comp_phone", Global.companyPhone);
+                param.put("p_logo_path", logoPath);
+                param.put("p_tran_option", tranOption);
+                String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");
+                ByteArrayInputStream stream = new ByteArrayInputStream(data);
+                JsonDataSource ds = new JsonDataSource(stream);
+                JasperPrint jp = JasperFillManager.fillReport(reportPath, param, ds);
+                JasperViewer.viewReport(jp, false);
+                enableToolBar(true);
+            } catch (JRException ex) {
+                enableToolBar(true);
+                JOptionPane.showMessageDialog(this, ex.getMessage());
+            }
+        });
     }
 
     private boolean isValidEntry() {
@@ -882,7 +929,7 @@ public class Payment extends javax.swing.JPanel implements SelectionObserver, Pa
 
     @Override
     public void save() {
-        savePayment();
+        savePayment(false);
     }
 
     @Override
@@ -902,6 +949,7 @@ public class Payment extends javax.swing.JPanel implements SelectionObserver, Pa
 
     @Override
     public void print() {
+        savePayment(true);
     }
 
     @Override

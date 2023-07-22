@@ -176,14 +176,13 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
             dialog = new JournalEntryDialog(Global.parentForm);
             dialog.setAccountRepo(accountRepo);
             dialog.setUserRepo(userRepo);
+            dialog.initMain();
             dialog.setSize(Global.width - 100, Global.height - 100);
             dialog.setIconImage(Global.parentForm.getIconImage());
             dialog.setLocationRelativeTo(null);
         }
-        dialog.clear();
-        dialog.setVouNo(glVou);
         dialog.setStatus(status);
-        dialog.initMain();
+        dialog.searchJournalByVouId(glVou);
         dialog.setVisible(true);
     }
 

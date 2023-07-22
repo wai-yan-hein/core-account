@@ -39,7 +39,7 @@ import com.inventory.ui.entry.OtherSetupMain;
 import com.inventory.ui.entry.Purchase;
 import com.inventory.ui.entry.PurchaseByWeight;
 import com.inventory.ui.entry.RFID;
-import com.inventory.ui.entry.Payment;
+import com.inventory.ui.entry.PaymentEntry;
 import com.inventory.ui.entry.PurchaseExport;
 import com.inventory.ui.entry.ReorderLevelEntry;
 import com.inventory.ui.entry.ReturnIn;
@@ -606,7 +606,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return grnEntry;
             }
             case "Customer Payment" -> {
-                Payment payment = new Payment("C");
+                PaymentEntry payment = new PaymentEntry("C");
                 payment.setUserRepo(userRepo);
                 payment.setInventoryRepo(inventoryRepo);
                 payment.setAccountRepo(accounRepo);
@@ -617,7 +617,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return payment;
             }
             case "Supplier Payment" -> {
-                Payment payment = new Payment("S");
+                PaymentEntry payment = new PaymentEntry("S");
                 payment.setUserRepo(userRepo);
                 payment.setInventoryRepo(inventoryRepo);
                 payment.setAccountRepo(accounRepo);

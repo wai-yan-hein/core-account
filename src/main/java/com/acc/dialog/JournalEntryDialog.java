@@ -51,7 +51,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
     private String status;
     private AccountRepo accountRepo;
     private UserRepo userRepo;
-    private String vouNo;
 
     public UserRepo getUserRepo() {
         return userRepo;
@@ -59,14 +58,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
 
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
-    }
-
-    public String getVouNo() {
-        return vouNo;
-    }
-
-    public void setVouNo(String vouNo) {
-        this.vouNo = vouNo;
     }
 
     public AccountRepo getAccountRepo() {
@@ -163,8 +154,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         btnConversion.setVisible(ProUtil.isMultiCur());
         initTable();
         initCombo();
-        searchJournalByVouId();
-        txtVouDate.requestFocusInWindow();
     }
 
     private void initTable() {
@@ -203,7 +192,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
     }
 
-    private void searchJournalByVouId() {
+    public void searchJournalByVouId(String vouNo) {
         journalTablModel.clear();
         lblStatus.setText(status);
         lblStatus.setForeground(status.equals("NEW") ? Color.GREEN : Color.BLUE);

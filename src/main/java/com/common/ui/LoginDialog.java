@@ -151,7 +151,6 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
     }
 
     private void logout() {
-        dispose();
         CoreAccountApplication.restart();
     }
 

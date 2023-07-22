@@ -2418,6 +2418,19 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<List<VSale>> paymentReport(PaymentHisKey key) {
+        return inventoryApi.post()
+                .uri("/payment/paymentReport")
+                .body(Mono.just(key), PaymentHisKey.class)
+                .retrieve()
+                .bodyToFlux(VSale.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("paymentReport :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<List<AccSetting>> getAccSetting() {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getAccSetting")
