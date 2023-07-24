@@ -2071,6 +2071,22 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
+    
+    public Mono<List<MillingHis>> getMillingVoucher(FilterObject filter) {
+        if (filter.isLocal()) {
+//            return h2Repo.searchPurchaseVoucher(filter);
+        }
+        return inventoryApi.post()
+                .uri("/milling/get-milling")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToFlux(MillingHis.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
 
     public Mono<List<PurHisDetail>> getPurDetail(String vouNo, Integer deptId, boolean local) {
         if (local) {
