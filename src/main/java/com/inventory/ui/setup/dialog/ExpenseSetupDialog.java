@@ -33,6 +33,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  *
@@ -97,7 +99,11 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
     }
 
     private void initCombo() {
-        accountRepo.getCOAByHead(ProUtil.getProperty(ProUtil.INCOME))
+        Mono<List<ChartOfAccount>> m1 = accountRepo.getCOAByHead(ProUtil.getProperty(ProUtil.INCOME));
+        Mono<List<ChartOfAccount>> m2 = accountRepo.getCOAByHead(ProUtil.getProperty(ProUtil.EXPENSE));
+        Mono.zip(m1, m2).flatMap((t) -> Flux.fromIterable(t.getT1())
+                .concatWith(Flux.fromIterable(t.getT2()))
+                .collectList())
                 .subscribe((t) -> {
                     coaComboModel.setData(t);
                     cboAccount.setModel(coaComboModel);

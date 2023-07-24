@@ -1113,6 +1113,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             case "refresh" -> {
                 btnRefresh.setEnabled(Util1.getBoolean(selectObj.toString()));
             }
+            case "enableToolBar" -> {
+                enableToolBar(Util1.getBoolean(selectObj.toString()));
+            }
             case "change-name" -> {
                 lblCompName.setText(Global.companyName);
             }

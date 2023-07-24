@@ -40,6 +40,7 @@ import java.awt.event.KeyEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JFrame;
@@ -291,6 +292,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     param.put("p_currency", getCurCode());
                     param.put("p_stock_type", stockTypeAutoCompleter.getStockType().getStockTypeName());
                     param.put("p_location", txtLocation.getText());
+                    param.put("p_divider", new BigDecimal(Util1.getFloatOne(ProUtil.getProperty(ProUtil.DIVIDER))));
                     printReport(reportUrl, reportUrl, param);
                 }
                 isReport = false;

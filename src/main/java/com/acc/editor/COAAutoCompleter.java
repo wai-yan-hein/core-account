@@ -61,7 +61,6 @@ public final class COAAutoCompleter implements KeyListener {
     public void setListCOA(List<ChartOfAccount> listCOA) {
         if (filter) {
             ChartOfAccount c = new ChartOfAccount(new COAKey("-", Global.compCode), "All");
-            c.setKey(new COAKey("-", Global.compCode));
             listCOA.add(0, c);
             setCoa(c);
         }

@@ -16,6 +16,7 @@ import com.user.common.HMSIntegrationTableModel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +31,7 @@ import reactor.core.publisher.Mono;
 @Component
 @Slf4j
 public class HMSIntegration extends javax.swing.JPanel {
-    
+
     @Autowired
     private HMSRepo hmsRepo;
     @Autowired
@@ -38,11 +39,11 @@ public class HMSIntegration extends javax.swing.JPanel {
     private final HMSIntegrationTableModel tableModel = new HMSIntegrationTableModel();
     private JProgressBar progress;
     private SelectionObserver observer;
-    
+
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-    
+
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
@@ -53,17 +54,27 @@ public class HMSIntegration extends javax.swing.JPanel {
     public HMSIntegration() {
         initComponents();
     }
-    
+
     public void initMain() {
+        initFormat();
         initTable();
         initDate();
     }
-    
+
+    private void initFormat() {
+        txtHMSTotal.setFormatterFactory(Util1.getDecimalFormat());
+        txtAccTotal.setFormatterFactory(Util1.getDecimalFormat());
+        txtDiffAmt.setFormatterFactory(Util1.getDecimalFormat());
+        txtHMSTotal.setFont(Global.amtFont);
+        txtAccTotal.setFont(Global.amtFont);
+        txtDiffAmt.setFont(Global.amtFont);
+    }
+
     private void initDate() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
     }
-    
+
     private void initTable() {
         tblAudit.setModel(tableModel);
         tblAudit.setFont(Global.textFont);
@@ -73,7 +84,7 @@ public class HMSIntegration extends javax.swing.JPanel {
         tblAudit.setDefaultRenderer(Object.class, new TableCellRender());
         tblAudit.setDefaultRenderer(Double.class, new TableCellRender());
     }
-    
+
     private void check() {
         enableForm(false);
         String fromDate = Util1.toDateStr(txtFromDate.getDate(), "yyyy-MM-dd");
@@ -121,36 +132,62 @@ public class HMSIntegration extends javax.swing.JPanel {
         m1.zipWith(m2).hasElement().subscribe((t) -> {
             log.info("element : " + t);
         });
-        m1.zipWith(m2).subscribe((zip) -> {
-            List<VoucherInfo> list1 = zip.getT1();
-            List<VoucherInfo> list2 = zip.getT2();
-            list1.forEach((l1) -> {
-                list2.forEach((l2) -> {
-                    if (l1.getVouNo().equals(l2.getVouNo())) {
-                        if (!Objects.equals(Util1.getDouble(l1.getVouTotal()), Util1.getDouble(l2.getVouTotal()))) {
-                            VoucherInfo obj = VoucherInfo.builder()
-                                    .option("Different")
-                                    .vouNo(l1.getVouNo())
-                                    .hmsVouTotal(l1.getVouTotal())
-                                    .accVouTotal(l2.getVouTotal())
-                                    .diffAmt(l1.getVouTotal() - l2.getVouTotal())
-                                    .build();
-                            joinList.add(obj);
+        m1.zipWith(m2)
+                .subscribe((zip) -> {
+                    List<VoucherInfo> list1 = zip.getT1();
+                    List<VoucherInfo> list2 = zip.getT2();
+
+                    list1.forEach((l1) -> {
+                        Optional<VoucherInfo> matchedVoucher = list2.stream()
+                                .filter(l2 -> l1.getVouNo().equals(l2.getVouNo()))
+                                .findFirst();
+
+                        if (matchedVoucher.isPresent()) {
+                            VoucherInfo l2 = matchedVoucher.get();
+                            if (!Objects.equals(Util1.getDouble(l1.getVouTotal()), Util1.getDouble(l2.getVouTotal()))) {
+                                VoucherInfo obj = VoucherInfo.builder()
+                                        .option("Different")
+                                        .vouNo(l1.getVouNo())
+                                        .hmsVouTotal(l1.getVouTotal())
+                                        .accVouTotal(l2.getVouTotal())
+                                        .diffAmt(l1.getVouTotal() - l2.getVouTotal())
+                                        .build();
+                                joinList.add(obj);
+                            }
+                        } else {
+                            boolean vouNoExists = joinList.stream().anyMatch(voucher -> voucher.getVouNo().equals(l1.getVouNo()));
+                            if (!vouNoExists) {
+                                VoucherInfo obj = VoucherInfo.builder()
+                                        .option("Not Sent")
+                                        .vouNo(l1.getVouNo())
+                                        .hmsVouTotal(l1.getVouTotal())
+                                        .build();
+                                joinList.add(obj);
+                            }
                         }
-                    }
+                    });
+                    tableModel.setListVoucher(joinList);
+                    txtRecord.setValue(joinList.size());
+                    double ttlHMS = joinList.stream()
+                            .filter(gl -> gl.getHmsVouTotal() != null)
+                            .mapToDouble(VoucherInfo::getHmsVouTotal)
+                            .sum();
+                    double ttlAcc = joinList.stream()
+                            .filter(gl -> gl.getAccVouTotal() != null)
+                            .mapToDouble(VoucherInfo::getAccVouTotal)
+                            .sum();
+                    txtHMSTotal.setValue(ttlHMS);
+                    txtAccTotal.setValue(ttlAcc);
+                    txtDiffAmt.setValue(ttlHMS - ttlAcc);
+                    progress.setIndeterminate(false);
+                    btnCheck.setEnabled(true);
+                    btnSync.setEnabled(!joinList.isEmpty());
+                }, (e) -> {
+                    enableForm(true);
                 });
-            });
-            tableModel.setListVoucher(joinList);
-            txtRecord.setValue(joinList.size());
-            progress.setIndeterminate(false);
-            btnCheck.setEnabled(true);
-            btnSync.setEnabled(!joinList.isEmpty());
-        }, (e) -> {
-            enableForm(true);
-        });
-        
+
     }
-    
+
     private void sync() {
         if (cboType.getSelectedItem() instanceof VoucherInfoEnum c) {
             enableForm(false);
@@ -170,14 +207,18 @@ public class HMSIntegration extends javax.swing.JPanel {
                     enableForm(true);
                 });
             });
-            
+
         }
     }
-    
+
     private void enableForm(boolean status) {
         progress.setIndeterminate(!status);
         btnSync.setEnabled(status);
         btnCheck.setEnabled(status);
+    }
+
+    private void observerMain() {
+        observer.selected("enableToolBar", false);
     }
 
     /**
@@ -204,6 +245,13 @@ public class HMSIntegration extends javax.swing.JPanel {
         jLabel4 = new javax.swing.JLabel();
         txtRecord = new javax.swing.JFormattedTextField();
         lblLog = new javax.swing.JLabel();
+        jPanel3 = new javax.swing.JPanel();
+        jLabel5 = new javax.swing.JLabel();
+        txtHMSTotal = new javax.swing.JFormattedTextField();
+        jLabel6 = new javax.swing.JLabel();
+        txtAccTotal = new javax.swing.JFormattedTextField();
+        jLabel7 = new javax.swing.JLabel();
+        txtDiffAmt = new javax.swing.JFormattedTextField();
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -275,6 +323,11 @@ public class HMSIntegration extends javax.swing.JPanel {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        tblAudit.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentShown(java.awt.event.ComponentEvent evt) {
+                tblAuditComponentShown(evt);
+            }
+        });
         jScrollPane1.setViewportView(tblAudit);
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
@@ -336,6 +389,56 @@ public class HMSIntegration extends javax.swing.JPanel {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel5.setFont(Global.lableFont);
+        jLabel5.setText("HMS Vou Total :");
+
+        txtHMSTotal.setEditable(false);
+
+        jLabel6.setFont(Global.lableFont);
+        jLabel6.setText("Acc Vou Total :");
+
+        txtAccTotal.setEditable(false);
+
+        jLabel7.setFont(Global.lableFont);
+        jLabel7.setText("Different :");
+
+        txtDiffAmt.setEditable(false);
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtHMSTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel6)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtAccTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel7)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtDiffAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(txtHMSTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6)
+                    .addComponent(txtAccTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7)
+                    .addComponent(txtDiffAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -345,7 +448,8 @@ public class HMSIntegration extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1))
+                    .addComponent(jScrollPane1)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -356,7 +460,9 @@ public class HMSIntegration extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 204, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 168, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -371,6 +477,11 @@ public class HMSIntegration extends javax.swing.JPanel {
         sync();
     }//GEN-LAST:event_btnSyncActionPerformed
 
+    private void tblAuditComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_tblAuditComponentShown
+        // TODO add your handling code here:
+        observerMain();
+    }//GEN-LAST:event_tblAuditComponentShown
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCheck;
@@ -380,12 +491,19 @@ public class HMSIntegration extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblLog;
     private javax.swing.JTable tblAudit;
+    private javax.swing.JFormattedTextField txtAccTotal;
+    private javax.swing.JFormattedTextField txtDiffAmt;
     private com.toedter.calendar.JDateChooser txtFromDate;
+    private javax.swing.JFormattedTextField txtHMSTotal;
     private javax.swing.JFormattedTextField txtRecord;
     private com.toedter.calendar.JDateChooser txtToDate;
     // End of variables declaration//GEN-END:variables

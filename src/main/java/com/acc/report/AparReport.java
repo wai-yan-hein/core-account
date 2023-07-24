@@ -197,7 +197,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private String getCoaCode() {
-        return cOAAutoCompleter == null ? "-"
+        return cOAAutoCompleter.getCOA() == null ? "-"
                 : cOAAutoCompleter.getCOA().getKey().getCoaCode();
     }
 

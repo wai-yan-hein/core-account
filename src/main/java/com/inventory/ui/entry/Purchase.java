@@ -120,6 +120,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     private List<StockUnit> listUnit;
     private final PurExpenseTableModel expenseTableModel = new PurExpenseTableModel();
     private final GRNTableModel grnTableModel = new GRNTableModel();
+    private BatchSearchDialog batchDialog;
 
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;
@@ -951,12 +952,15 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     private void batchDialog() {
-        BatchSearchDialog d = new BatchSearchDialog(Global.parentForm);
-        d.setInventoryRepo(inventoryRepo);
-        d.setObserver(this);
-        d.initMain();
-        d.setLocationRelativeTo(null);
-        d.setVisible(true);
+        if (batchDialog == null) {
+            batchDialog = new BatchSearchDialog(Global.parentForm);
+            batchDialog.setInventoryRepo(inventoryRepo);
+            batchDialog.setObserver(this);
+            batchDialog.initMain();
+            batchDialog.setLocationRelativeTo(null);
+        }
+        batchDialog.searchBatch();
+        batchDialog.setVisible(true);
     }
 
     private void expenseDialog() {

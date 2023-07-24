@@ -95,6 +95,8 @@ public class SaleHis {
     private String tmpVouNo;
     @Column(name = "car_no")
     private String carNo;
+    @Column(name = "batch_no")
+    private String batchNo;
     @Transient
     private String localVouNo;
     private transient String status = "STATUS";
@@ -103,6 +105,7 @@ public class SaleHis {
     private transient boolean backup;
     private transient List<String> location;
     private transient boolean local = false;
+    private transient List<SaleExpense> listExpense;
 
     public SaleHis() {
     }
