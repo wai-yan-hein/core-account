@@ -242,7 +242,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
             if (row >= 0) {
                 MillingHis v = tableModel.getSelectVou(row);
                 v.setLocal(chkLocal.isSelected());
-                observer.selected("PUR-HISTORY", v);
+                observer.selected("MILLING-HISTORY", v);
                 setVisible(false);
             } else {
                 JOptionPane.showMessageDialog(this, "Please select the voucher.",

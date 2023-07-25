@@ -20,14 +20,11 @@ import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.MillingExpense;
-import com.inventory.model.OrderHis;
 import com.inventory.model.MillingHis;
 import com.inventory.model.MillingHisKey;
 import com.inventory.model.MillingOutDetail;
 import com.inventory.model.MillingRawDetail;
 import com.inventory.model.Trader;
-import com.inventory.model.VOrder;
-import com.inventory.model.VSale;
 import com.inventory.model.VouStatus;
 import com.inventory.ui.common.MilingExpenseTableModel;
 import com.inventory.ui.common.MilingRawTableModel;
@@ -45,6 +42,7 @@ import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
+import com.user.model.ProjectKey;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -190,7 +188,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         tblOutput.getActionMap().put(solve, new DeleteAction("tblOutput"));
         tblExpense.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblExpense.getActionMap().put(solve, new DeleteAction("tblExpense"));
-    }    
+    }
 
     private class DeleteAction extends AbstractAction {
 
@@ -695,6 +693,27 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         dialog.setVisible(true);
     }
 
+    public void searchRawDetail(String vouNo, Integer deptId, boolean isLocal) {
+        inventoryRepo.getRawDetail(vouNo, deptId, milling.isLocal()).subscribe((l) -> {
+            milingRawTableModel.setListDetail(l);
+            milingRawTableModel.addNewRow();
+        });
+    }
+
+    public void searchExpenseDetail(String vouNo, Integer deptId, boolean isLocal) {
+        inventoryRepo.getExpenseDetail(vouNo, deptId, milling.isLocal()).subscribe((e) -> {
+            milingExpenseTableModel.setListDetail(e);
+            milingExpenseTableModel.addNewRow();
+        });
+    }
+
+    public void searchOutputDetail(String vouNo, Integer deptId, boolean isLocal) {
+        inventoryRepo.getOutputDetail(vouNo, deptId, milling.isLocal()).subscribe((t) -> {
+            milingOutTableModel.setListDetail(t);
+            milingOutTableModel.addNewRow();
+        });
+    }
+
     public void setSaleVoucher(MillingHis sh) { //todo
         if (sh != null) {
             progress.setIndeterminate(true);
@@ -708,55 +727,61 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 currAutoCompleter.setCurrency(t);
             });
             String vouNo = sh.getKey().getVouNo();
-//            inventoryRepo.getSaleDetail(vouNo, sh.getKey().getDeptId(), milling.isLocal()).subscribe((t) -> {
-//                riceMilingTableModel.setListDetail(t);
-//                riceMilingTableModel.addNewRow();
-//                if (sh.isVouLock()) {
-//                    lblStatus.setText("Voucher is locked.");
-//                    lblStatus.setForeground(Color.RED);
-//                    disableForm(false);
-//                } else if (!ProUtil.isSaleEdit()) {
-//                    lblStatus.setText("No Permission.");
-//                    lblStatus.setForeground(Color.RED);
-//                    disableForm(false);
-//                    observer.selected("print", true);
-//                } else if (sh.isDeleted()) {
-//                    lblStatus.setText("DELETED");
-//                    lblStatus.setForeground(Color.RED);
-//                    disableForm(false);
-//                    observer.selected("delete", true);
-//                } else {
-//                    lblStatus.setText("EDIT");
-//                    lblStatus.setForeground(Color.blue);
-//                    disableForm(true);
-//                }
-//                txtVouNo.setText(milling.getKey().getVouNo());
-//                txtDueDate.setDate(Util1.convertToDate(milling.getCreditTerm()));
-//                txtRemark.setText(milling.getRemark());
-//                txtReference.setText(milling.getReference());
-//                txtSaleDate.setDate(Util1.convertToDate(milling.getVouDate()));
-//                txtVouTotal.setValue(Util1.getFloat(milling.getVouTotal()));
-//                txtVouDiscP.setValue(Util1.getFloat(milling.getDiscP()));
-//                txtVouDiscount.setValue(Util1.getFloat(milling.getDiscount()));
-//                txtVouTaxP.setValue(Util1.getFloat(milling.getTaxPercent()));
-//                txtTax.setValue(Util1.getFloat(milling.getTaxAmt()));
-//                txtVouPaid.setValue(Util1.getFloat(milling.getPaid()));
-//                txtVouBalance.setValue(Util1.getFloat(milling.getBalance()));
-//                txtGrandTotal.setValue(Util1.getFloat(milling.getGrandTotal()));
-//                chkPaid.setSelected(milling.getPaid() > 0);
-//                if (milling.getProjectNo() != null) {
-//                    userRepo.find(new ProjectKey(milling.getProjectNo(), Global.compCode)).subscribe(t1 -> {
-//                        projectAutoCompleter.setProject(t1);
-//                    });
-//                } else {
-//                    projectAutoCompleter.setProject(null);
-//                }
-//                focusTable();
-//                progress.setIndeterminate(false);
-//            }, (e) -> {
-//                progress.setIndeterminate(false);
-//                JOptionPane.showMessageDialog(this, e.getMessage());
-//            });
+            searchRawDetail(vouNo, sh.getDeptId(), milling.isLocal());
+            searchExpenseDetail(vouNo, sh.getDeptId(), milling.isLocal());
+            searchOutputDetail(vouNo, sh.getDeptId(), milling.isLocal());
+            if (sh.isVouLock()) {
+                lblStatus.setText("Voucher is locked.");
+                lblStatus.setForeground(Color.RED);
+                disableForm(false);
+            } else if (!ProUtil.isSaleEdit()) {
+                lblStatus.setText("No Permission.");
+                lblStatus.setForeground(Color.RED);
+                disableForm(false);
+                observer.selected("print", true);
+            } else if (sh.isDeleted()) {
+                lblStatus.setText("DELETED");
+                lblStatus.setForeground(Color.RED);
+                disableForm(false);
+                observer.selected("delete", true);
+            } else {
+                lblStatus.setText("EDIT");
+                lblStatus.setForeground(Color.blue);
+                disableForm(true);
+            }
+            txtVouNo.setText(milling.getKey().getVouNo());
+            txtRemark.setText(milling.getRemark());
+            txtReference.setText(milling.getReference());
+            txtSaleDate.setDate(Util1.convertToDate(milling.getVouDate()));
+
+            txtLoadQty.setText(String.format("%.00f", milling.getLoadQty()));
+            txtLoadWeight.setText(String.format("%.00f", milling.getLoadWeight()));
+            txtLoadAmt.setText(String.format("%.00f", milling.getLoadAmount()));
+            txtLoadExpense.setText(String.format("%.00f", milling.getLoadExpense()));
+            txtLoadCost.setText(String.format("%.00f", milling.getLoadCost()));
+            txtOutputQty.setText(String.format("%.00f", milling.getOutputQty()));
+            txtOutputWeight.setText(String.format("%.00f", milling.getOutputWeight()));
+            txtOutputAmt.setText(String.format("%.00f", milling.getOutputAmount()));
+            txtWtLoss.setText(String.format("%.00f", milling.getDiffWeight()));
+            if (milling.getProjectNo() != null) {
+                userRepo.find(new ProjectKey(milling.getProjectNo(), Global.compCode)).subscribe(t1 -> {
+                    projectAutoCompleter.setProject(t1);
+                });
+            } else {
+                projectAutoCompleter.setProject(null);
+            }
+
+            if (milling.getProcessType() != null) {
+                inventoryRepo.findVouStatus(milling.getVouStatusId()).subscribe(t1 -> {
+                    vouStatusTableModel.setSelectedItem(t1);
+                    cboProcessType.repaint();
+                });
+            } else {
+                projectAutoCompleter.setProject(null);
+            }
+            focusTable();
+            progress.setIndeterminate(false);
+
         }
     }
 
@@ -1540,10 +1565,10 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 calculateMilling(true);
             case "EXPENSE" ->
                 calculateMilling(false);
-            case "SALE-HISTORY" -> {
-                if (selectObj instanceof VSale s) {
+            case "MILLING-HISTORY" -> {
+                if (selectObj instanceof MillingHis s) {
                     boolean local = s.isLocal();
-                    inventoryRepo.findMilling(s.getVouNo(), s.getDeptId(), local).subscribe((t) -> {
+                    inventoryRepo.findMilling(s.getKey().getVouNo(), s.getDeptId(), local).subscribe((t) -> {
                         t.setLocal(local);
                         setSaleVoucher(t);
                     }, (e) -> {

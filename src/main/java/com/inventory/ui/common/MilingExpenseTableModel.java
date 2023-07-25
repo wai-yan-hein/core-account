@@ -140,7 +140,7 @@ public class MilingExpenseTableModel extends AbstractTableModel {
             MillingExpense b = listDetail.get(row);
             return switch (column) {
                 case 0 ->
-                    b.getKey() == null ? "" : b.getKey().getExpenseCode();
+                    b.getKey() == null ? null : b.getKey().getExpenseCode();
                 case 1 ->
                     b.getExpenseName();
                 case 2 ->
@@ -283,7 +283,7 @@ public class MilingExpenseTableModel extends AbstractTableModel {
         boolean status = false;
         if (listDetail.size() >= 1) {
             MillingExpense get = listDetail.get(listDetail.size() - 1);
-            if (get.getKey().getExpenseCode() == null) {
+            if (get.getKey() == null || get.getKey().getExpenseCode() == null) {
                 status = true;
             }
         }
