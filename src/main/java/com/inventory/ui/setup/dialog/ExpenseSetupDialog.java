@@ -78,7 +78,11 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
     public ExpenseSetupDialog(JFrame frame, boolean needAccount) {
         super(frame, false);
         this.needAccount = needAccount;
-        cboAccount.setEnabled(needAccount);
+        if (cboAccount != null) {
+            cboAccount.setEnabled(true);
+        } else {
+            System.out.println("cboAccount is null. Make sure to initialize it.");
+        }
         initComponents();
         initKeyListener();
         initSpinner();

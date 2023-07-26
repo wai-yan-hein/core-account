@@ -18,6 +18,7 @@ import com.inventory.editor.AppUserAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
+import com.inventory.model.MillingHis;
 import com.user.model.AppUser;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;
@@ -205,7 +206,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
         filter.setCurCode(getCurCode());
         tableModel.clear();
-        inventoryRepo.getPurchaseVoucher(filter)
+        inventoryRepo.getMillingVoucher(filter)
                 .subscribe((t) -> {
                     tableModel.setListDetail(t);
                     calAmount();
@@ -219,9 +220,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
     }
 
     private void calAmount() {
-        List<VPurchase> list = tableModel.getListDetail();
-        txtPaid.setValue(list.stream().mapToDouble(VPurchase::getPaid).sum());
-        txtTotalAmt.setValue(list.stream().mapToDouble(VPurchase::getVouTotal).sum());
+        List<MillingHis> list = tableModel.getListDetail();
         txtTotalRecord.setValue(list.size());
         tblVoucher.requestFocus();
     }
@@ -241,9 +240,9 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         try {
             int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
             if (row >= 0) {
-                VPurchase v = tableModel.getSelectVou(row);
+                MillingHis v = tableModel.getSelectVou(row);
                 v.setLocal(chkLocal.isSelected());
-                observer.selected("PUR-HISTORY", v);
+                observer.selected("MILLING-HISTORY", v);
                 setVisible(false);
             } else {
                 JOptionPane.showMessageDialog(this, "Please select the voucher.",

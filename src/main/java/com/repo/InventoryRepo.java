@@ -25,6 +25,8 @@ import com.inventory.model.LocationKey;
 import com.inventory.model.MillingExpense;
 import com.inventory.model.MillingHis;
 import com.inventory.model.MillingHisKey;
+import com.inventory.model.MillingOutDetail;
+import com.inventory.model.MillingRawDetail;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisDetail;
 import com.inventory.model.OPHisKey;
@@ -2087,6 +2089,22 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
+    
+    public Mono<List<MillingHis>> getMillingVoucher(FilterObject filter) {
+        if (filter.isLocal()) {
+//            return h2Repo.searchPurchaseVoucher(filter);
+        }
+        return inventoryApi.post()
+                .uri("/milling/get-milling")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToFlux(MillingHis.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
 
     public Mono<List<PurHisDetail>> getPurDetail(String vouNo, Integer deptId, boolean local) {
         if (local) {
@@ -2541,6 +2559,63 @@ public class InventoryRepo {
                 .queryParam("deptId", deptId)
                 .build())
                 .retrieve().bodyToFlux(SaleHisDetail.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+    
+    public Mono<List<MillingRawDetail>> getRawDetail(String vouNo, int deptId, boolean local) {
+        if (local) {
+//            return h2Repo.getSaleDetail(vouNo, deptId);
+        }
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/milling/get-raw-detail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", deptId)
+                .build())
+                .retrieve()
+                .bodyToFlux(MillingRawDetail.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+    
+    public Mono<List<MillingExpense>> getExpenseDetail(String vouNo, int deptId, boolean local) {
+        if (local) {
+//            return h2Repo.getSaleDetail(vouNo, deptId);
+        }
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/milling/get-expense-detail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", deptId)
+                .build())
+                .retrieve()
+                .bodyToFlux(MillingExpense.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+    
+    public Mono<List<MillingOutDetail>> getOutputDetail(String vouNo, int deptId, boolean local) {
+        if (local) {
+//            return h2Repo.getSaleDetail(vouNo, deptId);
+        }
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/milling/get-output-detail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", deptId)
+                .build())
+                .retrieve()
+                .bodyToFlux(MillingOutDetail.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());

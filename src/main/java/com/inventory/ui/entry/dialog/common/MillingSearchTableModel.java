@@ -6,6 +6,7 @@
 package com.inventory.ui.entry.dialog.common;
 
 import com.common.Global;
+import com.inventory.model.MillingHis;
 import com.inventory.model.VPurchase;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MillingSearchTableModel extends AbstractTableModel {
 
-    private List<VPurchase> listDetail = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Supplier", "Remark", "Load Qty", "Load Weight", "Load Amount",
-        "Output Qty", "Output Weight", "Output Amount", "Weight Diff"};
+    private List<MillingHis> listDetail = new ArrayList();
+    private final String[] columnNames = {"Date", "Vou No", "Trader", "Remark", "Created By", "Reference", "Process Type"};
     private JTable parent;
 
     public JTable getParent() {
@@ -55,11 +55,11 @@ public class MillingSearchTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-        switch (column) {
-            case 4, 5, 6, 7, 8, 9, 10 -> {
-                return Float.class;
-            }
-        }
+//        switch (column) {
+//            case 4, 5, 6, 7, 8, 9, 10 -> {
+//                return Float.class;
+//            }
+//        }
         return String.class;
     }
 
@@ -67,18 +67,18 @@ public class MillingSearchTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
         try {
             if (!listDetail.isEmpty()) {
-                VPurchase his = listDetail.get(row);
+                MillingHis his = listDetail.get(row);
                 switch (column) {
                     case 0 -> {
                         //date
-                        return his.getVouDate();
+                        return his.getVouDateStr();
                     }
                     case 1 -> {
                         //vou-no
                         if (his.isDeleted()) {
-                            return his.getVouNo() + "***";
+                            return his.getKey().getVouNo()+ "***";
                         } else {
-                            return his.getVouNo();
+                            return his.getKey().getVouNo();
                         }
                     }
                     case 2 -> {
@@ -95,10 +95,10 @@ public class MillingSearchTableModel extends AbstractTableModel {
                     }
                     case 5 -> {
                         //v-total
-                        return his.getPaid();
+                        return his.getReference();
                     }
                     case 6 -> {
-                        return his.getVouTotal();
+                        return his.getProcessType();
                     }
                 }
             }
@@ -108,20 +108,20 @@ public class MillingSearchTableModel extends AbstractTableModel {
         return null;
     }
 
-    public List<VPurchase> getListDetail() {
+    public List<MillingHis> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<VPurchase> listDetail) {
+    public void setListDetail(List<MillingHis> listDetail) {
         this.listDetail = listDetail;
         fireTableDataChanged();
     }
 
-    public VPurchase getSelectVou(int row) {
+    public MillingHis getSelectVou(int row) {
         return listDetail.get(row);
     }
 
-    public void addObject(VPurchase t) {
+    public void addObject(MillingHis t) {
         listDetail.add(t);
     }
 

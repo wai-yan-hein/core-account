@@ -10,11 +10,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import lombok.Data;
 
@@ -94,7 +91,9 @@ public class MillingHis {
     private transient List<MillingExpense> listExpense;
     private transient List<MillingExpenseKey> listExpenseDel;
     private transient boolean local = false;
-
+    private transient String traderName = "";
+    private transient String processType = "";
+    private transient String vouDateStr = "";
 
     public MillingHis() {
     }
