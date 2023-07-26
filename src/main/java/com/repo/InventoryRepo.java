@@ -2089,7 +2089,7 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
-    
+
     public Mono<List<MillingHis>> getMillingVoucher(FilterObject filter) {
         if (filter.isLocal()) {
 //            return h2Repo.searchPurchaseVoucher(filter);
@@ -2501,6 +2501,22 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<Boolean> checkPaymentExist(String vouNo, String traderCode, String tranOption) {
+        FilterObject obj = new FilterObject(Global.compCode, Global.deptId);
+        obj.setVouNo(vouNo);
+        obj.setTraderCode(traderCode);
+        obj.setTranOption(tranOption);
+        return inventoryApi.post()
+                .uri("/payment/checkPaymentExist")
+                .body(Mono.just(obj), FilterObject.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("checkPaymentExist :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<List<VSale>> paymentReport(PaymentHisKey key) {
         return inventoryApi.post()
                 .uri("/payment/paymentReport")
@@ -2565,7 +2581,7 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
-    
+
     public Mono<List<MillingRawDetail>> getRawDetail(String vouNo, int deptId, boolean local) {
         if (local) {
 //            return h2Repo.getSaleDetail(vouNo, deptId);
@@ -2584,7 +2600,7 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
-    
+
     public Mono<List<MillingExpense>> getExpenseDetail(String vouNo, int deptId, boolean local) {
         if (local) {
 //            return h2Repo.getSaleDetail(vouNo, deptId);
@@ -2603,7 +2619,7 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
-    
+
     public Mono<List<MillingOutDetail>> getOutputDetail(String vouNo, int deptId, boolean local) {
         if (local) {
 //            return h2Repo.getSaleDetail(vouNo, deptId);

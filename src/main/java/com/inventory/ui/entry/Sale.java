@@ -28,8 +28,6 @@ import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.GRN;
 import com.inventory.model.Location;
 import com.inventory.model.OrderHis;
-import com.inventory.model.PurExpense;
-import com.inventory.model.SaleExpense;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.SaleHisKey;
@@ -453,6 +451,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 saleManCompleter.setSaleMan(tt);
             });
         }
+        batchAutoCompeter.setBatch(null);
         txtDueDate.setDate(null);
         progress.setIndeterminate(false);
         txtCurrency.setEnabled(ProUtil.isMultiCur());
@@ -569,6 +568,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             if (sm != null) {
                 saleHis.setSaleManCode(sm.getKey().getSaleManCode());
             }
+            String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
             saleHis.setRemark(txtRemark.getText());
             saleHis.setReference(txtReference.getText());
             saleHis.setDiscP(Util1.getFloat(txtVouDiscP.getValue()));
@@ -579,7 +579,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             saleHis.setBalance(Util1.getFloat(txtVouBalance.getValue()));
             saleHis.setCurCode(currAutoCompleter.getCurrency().getCurCode());
             saleHis.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
-            saleHis.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
             saleHis.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
             saleHis.setGrandTotal(Util1.getFloat(txtGrandTotal.getValue()));
             saleHis.setStatus(lblStatus.getText());
@@ -601,6 +600,12 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 saleHis.setSession(Global.sessionId);
             } else {
                 saleHis.setUpdatedBy(Global.loginUser.getUserCode());
+                String vouNo = saleHis.getKey().getVouNo();
+                boolean exist = inventoryRepo.checkPaymentExist(vouNo, traderCode, "C").block();
+                if (exist) {
+                    JOptionPane.showMessageDialog(this, "This voucher is already paid in Customer Payment.", "Message", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
             }
         }
         return status;

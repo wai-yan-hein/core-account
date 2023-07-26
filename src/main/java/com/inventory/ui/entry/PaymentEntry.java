@@ -269,7 +269,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void savePayment(boolean print) {
-        if (isValidEntry()) {
+        if (isValidEntry() && tableModel.isValidEntry()) {
             observer.selected("save", false);
             progress.setIndeterminate(true);
             ph.setListDetail(tableModel.getPaymentList());

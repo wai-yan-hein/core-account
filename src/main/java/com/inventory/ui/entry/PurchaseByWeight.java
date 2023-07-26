@@ -483,6 +483,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             status = false;
             txtCus.requestFocus();
         } else {
+            String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
             ph.setRemark(txtRemark.getText());
             ph.setDiscP(Util1.getFloat(txtVouDiscP.getValue()));
             ph.setDiscount(Util1.getFloat(txtVouDiscount.getValue()));
@@ -494,7 +495,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             ph.setDeleted(Util1.getNullTo(ph.getDeleted()));
             ph.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             ph.setVouDate(Util1.convertToLocalDateTime(txtPurDate.getDate()));
-            ph.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
+            ph.setTraderCode(traderCode);
             ph.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
             ph.setStatus(lblStatus.getText());
             ph.setReference(txtReference.getText());
@@ -514,6 +515,12 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 ph.setMacId(Global.macId);
             } else {
                 ph.setUpdatedBy(Global.loginUser.getUserCode());
+                String vouNo = ph.getKey().getVouNo();
+                boolean exist = inventoryRepo.checkPaymentExist(vouNo, traderCode, "S").block();
+                if (exist) {
+                    JOptionPane.showMessageDialog(this, "This voucher is already paid in supplier payment.", "Message", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
             }
         }
         return status;
