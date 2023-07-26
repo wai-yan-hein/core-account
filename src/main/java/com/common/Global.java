@@ -41,7 +41,7 @@ public class Global {
     public static String loginDate;
     public static Integer macId;
     public static String machineName;
-    public static Integer deptId = 1;
+    public static Integer deptId;
     public static boolean mqConStatus = false;
     public static int x;
     public static int y;

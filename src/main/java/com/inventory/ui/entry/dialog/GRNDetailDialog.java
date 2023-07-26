@@ -74,6 +74,8 @@ public class GRNDetailDialog extends javax.swing.JDialog {
             }, (e) -> {
                 progress.setIndeterminate(false);
                 JOptionPane.showMessageDialog(this, e.getMessage());
+            }, () -> {
+                setVisible(true);
             });
         }
     }
@@ -124,8 +126,8 @@ public class GRNDetailDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 182, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 182, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();

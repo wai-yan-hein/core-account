@@ -876,8 +876,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
 
     private void printVoucher(PurHis p) {
         String vouNo = p.getKey().getVouNo();
-        String batchNo = p.getBatchNo();
-        Mono<List<VPurchase>> p1 = inventoryRepo.getPurchaseReport(vouNo, batchNo);
+        Mono<List<VPurchase>> p1 = inventoryRepo.getPurchaseReport(vouNo);
         Mono<List<PurExpense>> p2 = inventoryRepo.getPurExpense(vouNo);
         p1.zipWith(p2).hasElement().subscribe((t) -> {
             log.info("" + t);
@@ -975,7 +974,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     private void setVoucherDetail(GRN g) {
         purTableModel.clear();
         String batchNo = g.getBatchNo();
-        Integer deptId = g.getKey().getDeptId();
+        Integer deptId = g.getDeptId();
         boolean detail = Util1.getBoolean(ProUtil.getProperty(ProUtil.P_BATCH_DETAIL));
         inventoryRepo.getSaleByBatch(batchNo, detail).subscribe((t) -> {
             t.forEach((sd) -> {

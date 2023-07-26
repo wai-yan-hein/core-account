@@ -38,6 +38,7 @@ import com.inventory.ui.common.PurExpenseTableModel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.PurchaseWeightTableModel;
 import com.inventory.ui.entry.dialog.BatchSearchDialog;
+import com.inventory.ui.entry.dialog.GRNDetailDialog;
 import com.inventory.ui.entry.dialog.PurchaseAvgPriceDialog;
 import com.inventory.ui.entry.dialog.PurchaseHistoryDialog;
 import com.inventory.ui.setup.dialog.ExpenseSetupDialog;
@@ -109,6 +110,8 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     private PurHis ph = new PurHis();
     private Mono<List<Location>> monoLoc;
     private PurExpenseTableModel expenseTableModel = new PurExpenseTableModel();
+    private BatchSearchDialog batchDialog;
+    private GRNDetailDialog grnDialog;
 
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;
@@ -223,6 +226,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             tblExpense.getColumnModel().getColumn(0).setCellEditor(new ExpenseEditor(t));
         });
         tblExpense.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
+        tblExpense.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
         txtExpense.setFormatterFactory(Util1.getDecimalFormat());
         txtExpense.setFont(Global.amtFont);
         txtExpense.setHorizontalAlignment(JTextField.RIGHT);
@@ -243,6 +247,11 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 expenseTableModel.addObject(p);
             }
             expenseTableModel.addNewRow();
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+            expProgress.setIndeterminate(false);
+        }, () -> {
+            expProgress.setIndeterminate(false);
         });
 
     }
@@ -408,6 +417,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         txtRemark.setText(null);
         txtReference.setText(null);
         txtBatchNo.setText(null);
+        btnBatch.setText("Batch");
     }
 
     private void clear() {
@@ -651,51 +661,72 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             });
             String vouNo = ph.getKey().getVouNo();
             Integer deptId = ph.getKey().getDeptId();
-            Mono<List<PurExpense>> p1 = inventoryRepo.getPurExpense(vouNo);
-            Mono<List<PurHisDetail>> p2 = inventoryRepo.getPurDetail(vouNo, deptId, local);
-            List<PurExpense> listExp = p1.block();
-            List<PurHisDetail> listPur = p2.block();
-            expenseTableModel.setListDetail(listExp);
-            expenseTableModel.addNewRow();
-            purTableModel.setListDetail(listPur);
-            purTableModel.addNewRow();
-            if (ph.isVouLock()) {
-                lblStatus.setText("Voucher is locked.");
-                lblStatus.setForeground(Color.RED);
-                disableForm(false);
-            } else if (!ProUtil.isPurchaseEdit()) {
-                lblStatus.setText("No Permission.");
-                lblStatus.setForeground(Color.RED);
-                disableForm(false);
-            } else if (Util1.getBoolean(ph.getDeleted())) {
-                lblStatus.setText("DELETED");
-                lblStatus.setForeground(Color.RED);
-                disableForm(false);
-            } else {
-                lblStatus.setText("EDIT");
-                lblStatus.setForeground(Color.blue);
-                disableForm(true);
-            }
-            txtVouNo.setText(ph.getKey().getVouNo());
-            txtDueDate.setDate(ph.getDueDate());
-            txtRemark.setText(ph.getRemark());
-            txtPurDate.setDate(Util1.convertToDate(ph.getVouDate()));
-            txtVouTotal.setValue(Util1.getFloat(ph.getVouTotal()));
-            txtVouDiscP.setValue(Util1.getFloat(ph.getDiscP()));
-            txtVouDiscount.setValue(Util1.getFloat(ph.getDiscount()));
-            txtVouTaxP.setValue(Util1.getFloat(ph.getTaxP()));
-            txtTax.setValue(Util1.getFloat(ph.getTaxAmt()));
-            txtVouPaid.setValue(Util1.getFloat(ph.getPaid()));
-            txtVouBalance.setValue(Util1.getFloat(ph.getBalance()));
-            txtGrandTotal.setValue(Util1.getFloat(txtGrandTotal.getValue()));
-            chkPaid.setSelected(Util1.getFloat(ph.getPaid()) > 0);
-            txtReference.setText(ph.getReference());
-            txtBatchNo.setText(ph.getBatchNo());
-            txtComPercent.setValue(Util1.getFloat(ph.getCommP()));
-            txtComAmt.setValue(Util1.getFloat(ph.getCommAmt()));
-            txtExpense.setValue(Util1.getFloat(ph.getExpense()));
-            focusTable();
-            progress.setIndeterminate(false);
+            inventoryRepo.getPurDetail(vouNo, deptId, local)
+                    .subscribe((t) -> {
+                        purTableModel.setListDetail(t);
+                        purTableModel.addNewRow();
+                        if (ph.isVouLock()) {
+                            lblStatus.setText("Voucher is locked.");
+                            lblStatus.setForeground(Color.RED);
+                            disableForm(false);
+                        } else if (!ProUtil.isPurchaseEdit()) {
+                            lblStatus.setText("No Permission.");
+                            lblStatus.setForeground(Color.RED);
+                            disableForm(false);
+                        } else if (Util1.getBoolean(ph.getDeleted())) {
+                            lblStatus.setText("DELETED");
+                            lblStatus.setForeground(Color.RED);
+                            disableForm(false);
+                        } else {
+                            lblStatus.setText("EDIT");
+                            lblStatus.setForeground(Color.blue);
+                            disableForm(true);
+                            btnBatch.setText(ph.getBatchNo() == null ? "Batch" : "View");
+                        }
+                        txtVouNo.setText(ph.getKey().getVouNo());
+                        txtDueDate.setDate(ph.getDueDate());
+                        txtRemark.setText(ph.getRemark());
+                        txtPurDate.setDate(Util1.convertToDate(ph.getVouDate()));
+                        txtVouTotal.setValue(Util1.getFloat(ph.getVouTotal()));
+                        txtVouDiscP.setValue(Util1.getFloat(ph.getDiscP()));
+                        txtVouDiscount.setValue(Util1.getFloat(ph.getDiscount()));
+                        txtVouTaxP.setValue(Util1.getFloat(ph.getTaxP()));
+                        txtTax.setValue(Util1.getFloat(ph.getTaxAmt()));
+                        txtVouPaid.setValue(Util1.getFloat(ph.getPaid()));
+                        txtVouBalance.setValue(Util1.getFloat(ph.getBalance()));
+                        txtGrandTotal.setValue(Util1.getFloat(txtGrandTotal.getValue()));
+                        chkPaid.setSelected(Util1.getFloat(ph.getPaid()) > 0);
+                        txtReference.setText(ph.getReference());
+                        txtBatchNo.setText(ph.getBatchNo());
+                        txtComPercent.setValue(Util1.getFloat(ph.getCommP()));
+                        txtComAmt.setValue(Util1.getFloat(ph.getCommAmt()));
+                        txtExpense.setValue(Util1.getFloat(ph.getExpense()));
+                        focusTable();
+                        progress.setIndeterminate(false);
+                    }, (e) -> {
+                        JOptionPane.showMessageDialog(this, e.getMessage());
+                        progress.setIndeterminate(false);
+                    }, () -> {
+                    });
+            searchExpense(vouNo);
+        }
+    }
+
+    private void searchExpense(String vouNo) {
+        if (panelExpense.isVisible()) {
+            expProgress.setIndeterminate(true);
+            inventoryRepo.getPurExpense(vouNo).subscribe((t) -> {
+                if (t.isEmpty()) {
+                    getExpense();
+                } else {
+                    expenseTableModel.setListDetail(t);
+                    expenseTableModel.addNewRow();
+                    expProgress.setIndeterminate(false);
+                }
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
+                expProgress.setIndeterminate(false);
+            });
         }
     }
 
@@ -739,7 +770,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     private void printVoucher(PurHis p) {
         String vouNo = p.getKey().getVouNo();
         String batchNo = p.getBatchNo();
-        Mono<List<VPurchase>> p1 = inventoryRepo.getPurchaseReport(vouNo, batchNo);
+        Mono<List<VPurchase>> p1 = inventoryRepo.getPurchaseWeightReport(vouNo, batchNo);
         Mono<List<PurExpense>> p2 = inventoryRepo.getPurExpense(vouNo);
         p1.zipWith(p2).hasElement().subscribe((t) -> {
             log.info("" + t);
@@ -752,38 +783,42 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 String key = "report.purchase.voucher";
                 String reportName = ProUtil.getProperty(key);
                 if (reportName != null) {
-                    try {
-                        String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
-                        Map<String, Object> param = new HashMap<>();
-                        param.put("p_print_date", Util1.getTodayDateTime());
-                        param.put("p_comp_name", Global.companyName);
-                        param.put("p_comp_address", Global.companyAddress);
-                        param.put("p_comp_phone", Global.companyPhone);
-                        param.put("p_logo_path", logoPath);
-                        param.put("p_remark", p.getRemark());
-                        param.put("p_vou_no", vouNo);
-                        param.put("p_vou_date", Util1.toDateStr(p.getVouDate(), "dd/MM/yyyy"));
-                        param.put("p_vou_total", p.getVouTotal());
-                        param.put("p_exp", Util1.getFloat(p.getExpense()) * -1);
-                        param.put("p_vou_paid", p.getPaid());
-                        param.put("p_vou_balance", p.getBalance());
-                        param.put("p_batch_no", p.getBatchNo());
-                        param.put("SUBREPORT_DIR", "report/");
-                        String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
-                        ObjectMapper mapper = new ObjectMapper();
-                        JsonNode n1 = mapper.readTree(gson.toJson(list));
-                        JsonDataSource d1 = new JsonDataSource(n1, null) {
-                        };
-                        ObjectMapper m2 = new ObjectMapper();
-                        JsonNode n2 = m2.readTree(gson.toJson(listEx));
-                        JsonDataSource d2 = new JsonDataSource(n2, null) {
-                        };
-                        param.put("p_sub_data", d2);
-                        JasperPrint main = JasperFillManager.fillReport(reportPath, param, d1);
-                        JasperViewer.viewReport(main, false);
-                    } catch (JsonProcessingException | JRException e) {
-                        JOptionPane.showMessageDialog(this, e.getMessage());
-                    }
+                    inventoryRepo.findTrader(p.getTraderCode()).subscribe((trader) -> {
+                        try {
+                            String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
+                            Map<String, Object> param = new HashMap<>();
+                            param.put("p_print_date", Util1.getTodayDateTime());
+                            param.put("p_comp_name", Global.companyName);
+                            param.put("p_comp_address", Global.companyAddress);
+                            param.put("p_comp_phone", Global.companyPhone);
+                            param.put("p_logo_path", logoPath);
+                            param.put("p_remark", p.getRemark());
+                            param.put("p_vou_no", vouNo);
+                            param.put("p_vou_date", Util1.toDateStr(p.getVouDate(), "dd/MM/yyyy"));
+                            param.put("p_vou_total", p.getVouTotal());
+                            param.put("p_exp", Util1.getFloat(p.getExpense()) * -1);
+                            param.put("p_vou_paid", p.getPaid());
+                            param.put("p_vou_balance", p.getBalance());
+                            param.put("p_batch_no", p.getBatchNo());
+                            param.put("p_trader_name", trader.getTraderName());
+                            param.put("SUBREPORT_DIR", "report/");
+                            String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
+                            ObjectMapper mapper = new ObjectMapper();
+                            JsonNode n1 = mapper.readTree(gson.toJson(list));
+                            JsonDataSource d1 = new JsonDataSource(n1, null) {
+                            };
+                            ObjectMapper m2 = new ObjectMapper();
+                            JsonNode n2 = m2.readTree(gson.toJson(listEx));
+                            JsonDataSource d2 = new JsonDataSource(n2, null) {
+                            };
+                            param.put("p_sub_data", d2);
+                            JasperPrint main = JasperFillManager.fillReport(reportPath, param, d1);
+                            JasperViewer.viewReport(main, false);
+                        } catch (JsonProcessingException | JRException e) {
+                            JOptionPane.showMessageDialog(this, e.getMessage());
+                        }
+                    });
+
                 } else {
                     JOptionPane.showMessageDialog(this, "define report in " + key);
                 }
@@ -821,7 +856,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         });
         txtRemark.setText(g.getRemark());
         String vouNo = g.getKey().getVouNo();
-        Integer deptId = g.getKey().getDeptId();
+        Integer deptId = g.getDeptId();
         inventoryRepo.getGRNDetail(vouNo, deptId).subscribe((list) -> {
             list.forEach((t) -> {
                 PurHisDetail pd = new PurHisDetail();
@@ -859,13 +894,26 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     }
 
     private void batchDialog() {
-        BatchSearchDialog d = new BatchSearchDialog(Global.parentForm);
-        d.setInventoryRepo(inventoryRepo);
-        d.setObserver(this);
-        d.initMain();
-        d.setLocationRelativeTo(null);
-        d.setVisible(true);
-
+        String text = btnBatch.getText();
+        if (text.equals("Batch")) {
+            if (batchDialog == null) {
+                batchDialog = new BatchSearchDialog(Global.parentForm);
+                batchDialog.setInventoryRepo(inventoryRepo);
+                batchDialog.setObserver(this);
+                batchDialog.initMain();
+                batchDialog.setLocationRelativeTo(null);
+            }
+            batchDialog.searchBatch();
+        } else if (text.equals("View")) {
+            if (grnDialog == null) {
+                grnDialog = new GRNDetailDialog(Global.parentForm);
+                grnDialog.setSize(Global.width - 30, Global.height / 3);
+                grnDialog.setInventoryRepo(inventoryRepo);
+                grnDialog.initMain();
+                grnDialog.setLocationRelativeTo(null);
+            }
+            grnDialog.searchGRNDetail(txtBatchNo.getText());
+        }
     }
 
     private void observeMain() {
@@ -914,7 +962,8 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         txtExpense = new javax.swing.JFormattedTextField();
         jLabel1 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        expProgress = new javax.swing.JProgressBar();
+        btnBatch = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jLabel13 = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
@@ -1178,18 +1227,24 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             .addGroup(panelExpenseLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(panelExpenseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(expProgress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(panelExpenseLayout.createSequentialGroup()
-                        .addComponent(jButton1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtExpense, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
+                        .addGroup(panelExpenseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addGroup(panelExpenseLayout.createSequentialGroup()
+                                .addComponent(jButton1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtExpense, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addContainerGap())))
         );
         panelExpenseLayout.setVerticalGroup(
             panelExpenseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelExpenseLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(expProgress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelExpenseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1199,11 +1254,11 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 .addContainerGap())
         );
 
-        jButton2.setFont(Global.lableFont);
-        jButton2.setText("Batch");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        btnBatch.setFont(Global.lableFont);
+        btnBatch.setText("Batch");
+        btnBatch.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                btnBatchActionPerformed(evt);
             }
         });
 
@@ -1217,7 +1272,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                     .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton2)
+                .addComponent(btnBatch)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panelExpense, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -1227,14 +1282,15 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jButton2)
-                        .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(panelExpense, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(lblRec)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 201, Short.MAX_VALUE)))
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(lblRec)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(btnBatch))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -1242,7 +1298,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
 
         jLabel13.setFont(Global.lableFont);
         jLabel13.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel13.setText("Vou Total :");
+        jLabel13.setText("Vou Total   :");
 
         jLabel14.setFont(Global.lableFont);
         jLabel14.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -1474,7 +1530,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel8)
                     .addComponent(txtVouBalance, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(21, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         tblPur.setFont(Global.textFont);
@@ -1525,7 +1581,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                 .addGap(6, 6, 6)
                 .addComponent(panelPur, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 20, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1633,10 +1689,10 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         expenseDialog();
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void btnBatchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBatchActionPerformed
         // TODO add your handling code here:
         batchDialog();
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_btnBatchActionPerformed
     private void tabToTable(KeyEvent e) {
         if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_RIGHT) {
             tblPur.requestFocus();
@@ -1831,9 +1887,10 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnBatch;
     private javax.swing.JCheckBox chkPaid;
+    private javax.swing.JProgressBar expProgress;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel13;

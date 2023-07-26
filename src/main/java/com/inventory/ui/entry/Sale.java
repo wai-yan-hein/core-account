@@ -17,6 +17,7 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.inventory.editor.BatchAutoCompeter;
 import com.inventory.editor.ExpenseEditor;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
@@ -27,6 +28,8 @@ import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.GRN;
 import com.inventory.model.Location;
 import com.inventory.model.OrderHis;
+import com.inventory.model.PurExpense;
+import com.inventory.model.SaleExpense;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.SaleHisKey;
@@ -115,13 +118,14 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private SaleManAutoCompleter saleManCompleter;
     private LocationAutoCompleter locationAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
+    private BatchAutoCompeter batchAutoCompeter;
     private SelectionObserver observer;
     private SaleHis saleHis = new SaleHis();
     private JProgressBar progress;
     private Mono<List<Location>> monoLoc;
     private double prvBal = 0;
     private double balance = 0;
-    private SaleExpenseTableModel expenseTableModel;
+    private final SaleExpenseTableModel expenseTableModel = new SaleExpenseTableModel();
     private BatchSearchDialog batchDialog;
     private GRNDetailDialog grnDialog;
 
@@ -366,6 +370,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         });
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
         projectAutoCompleter.setObserver(this);
+        batchAutoCompeter = new BatchAutoCompeter(txtBatchNo, inventoryRepo, null, false);
+        batchAutoCompeter.setObserver(this);
     }
 
     private void initKeyListener() {
@@ -466,6 +472,9 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         saleTableModel.clearDelList();
         saleTableModel.setChange(false);
         stockBalanceTableModel.clearList();
+        txtExpense.setValue(0);
+        expenseTableModel.clear();
+        expenseTableModel.addNewRow();
         initTextBoxValue();
         assignDefaultValue();
         saleHis = new SaleHis();
@@ -497,6 +506,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         if (isValidEntry() && saleTableModel.isValidEntry()) {
             saleHis.setListSH(saleTableModel.getListDetail());
             saleHis.setListDel(saleTableModel.getDelList());
+            saleHis.setListExpense(expenseTableModel.getListDetail());
             saleHis.setBackup(saleTableModel.isChange());
             observer.selected("save", false);
             progress.setIndeterminate(true);
@@ -578,6 +588,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             saleHis.setOrderNo(txtOrderNo.getText());
             Project p = projectAutoCompleter.getProject();
             saleHis.setProjectNo(p == null ? null : p.getKey().getProjectNo());
+            GRN g = batchAutoCompeter.getBatch();
+            saleHis.setGrnVouNo(g == null ? null : g.getKey().getVouNo());
             if (lblStatus.getText().equals("NEW")) {
                 SaleHisKey key = new SaleHisKey();
                 key.setCompCode(Global.compCode);
@@ -638,7 +650,15 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         }
     }
 
+    private void calExpense() {
+        double ttlExp = expenseTableModel.getListDetail().stream()
+                .mapToDouble(e -> Util1.getDouble(e.getAmount()))
+                .sum();
+        txtExpense.setValue(ttlExp);
+    }
+
     private void calculateTotalAmount(boolean partial) {
+        calExpense();
         float totalVouBalance;
         float totalAmount = 0.0f;
         listDetail = saleTableModel.getListDetail();
@@ -664,9 +684,11 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             txtVouTaxP.setValue(Util1.getFloat(taxp));
         }
         //
+        float ttlExp = Util1.getFloat(txtExpense.getValue());
         txtGrandTotal.setValue(totalAmount
                 + Util1.getFloat(txtTax.getValue())
-                - Util1.getFloat(txtVouDiscount.getValue()));
+                - Util1.getFloat(txtVouDiscount.getValue())
+                - ttlExp);
         float grandTotal = Util1.getFloat(txtGrandTotal.getValue());
         float paid = Util1.getFloat(txtVouPaid.getText());
         if (!partial) {
@@ -721,6 +743,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             inventoryRepo.findSaleMan(saleHis.getSaleManCode()).subscribe((t) -> {
                 saleManCompleter.setSaleMan(t);
             });
+            inventoryRepo.findGRN(sh.getGrnVouNo()).subscribe((t) -> {
+                batchAutoCompeter.setBatch(t);
+                btnBatch.setText(t.getBatchNo() == null ? "Batch" : "View");
+            });
             String vouNo = sh.getKey().getVouNo();
             inventoryRepo.getSaleDetail(vouNo, sh.getKey().getDeptId(), saleHis.isLocal()).subscribe((t) -> {
                 saleTableModel.setListDetail(t);
@@ -757,8 +783,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 txtVouPaid.setValue(Util1.getFloat(saleHis.getPaid()));
                 txtVouBalance.setValue(Util1.getFloat(saleHis.getBalance()));
                 txtGrandTotal.setValue(Util1.getFloat(saleHis.getGrandTotal()));
-                txtBatchNo.setText(saleHis.getBatchNo());
-                btnBatch.setText(saleHis.getBatchNo() == null ? "Batch" : "View");
                 chkPaid.setSelected(saleHis.getPaid() > 0);
                 if (saleHis.getProjectNo() != null) {
                     userRepo.find(new ProjectKey(saleHis.getProjectNo(), Global.compCode)).subscribe(t1 -> {
@@ -767,11 +791,26 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 } else {
                     projectAutoCompleter.setProject(null);
                 }
+                searchExpense(vouNo);
                 focusTable();
                 progress.setIndeterminate(false);
             }, (e) -> {
                 progress.setIndeterminate(false);
                 JOptionPane.showMessageDialog(this, e.getMessage());
+            });
+        }
+    }
+
+    private void searchExpense(String vouNo) {
+        if (panelExpense.isVisible()) {
+            expProgress.setIndeterminate(true);
+            inventoryRepo.getSaleExpense(vouNo).subscribe((t) -> {
+                expenseTableModel.setListDetail(t);
+                expenseTableModel.addNewRow();
+                expProgress.setIndeterminate(false);
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
+                expProgress.setIndeterminate(false);
             });
         }
     }
@@ -919,6 +958,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     private void initPanelExpesne() {
         if (Util1.getBoolean(ProUtil.getProperty(ProUtil.SALE_EXPENSE_SHOW))) {
+            expenseTableModel.addNewRow();
             expenseTableModel.setObserver(this);
             expenseTableModel.setTable(tblExpense);
             tblExpense.setModel(expenseTableModel);
@@ -955,16 +995,15 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 batchDialog.setLocationRelativeTo(null);
             }
             batchDialog.searchBatch();
-            batchDialog.setVisible(true);
         } else if (text.equals("View")) {
             if (grnDialog == null) {
                 grnDialog = new GRNDetailDialog(Global.parentForm);
+                grnDialog.setSize(Global.width - 30, Global.height / 3);
                 grnDialog.setInventoryRepo(inventoryRepo);
                 grnDialog.initMain();
                 grnDialog.setLocationRelativeTo(null);
             }
             grnDialog.searchGRNDetail(txtBatchNo.getText());
-            grnDialog.setVisible(true);
         }
     }
 
@@ -1044,6 +1083,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtExpense = new javax.swing.JFormattedTextField();
         jLabel1 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        expProgress = new javax.swing.JProgressBar();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -1192,8 +1232,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         jLabel11.setFont(Global.lableFont);
         jLabel11.setText("Batch No");
 
+        txtBatchNo.setEditable(false);
         txtBatchNo.setFont(Global.textFont);
         txtBatchNo.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+        txtBatchNo.setEnabled(false);
         txtBatchNo.setName("txtCurrency"); // NOI18N
         txtBatchNo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1739,11 +1781,12 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         panelExpense.setLayout(panelExpenseLayout);
         panelExpenseLayout.setHorizontalGroup(
             panelExpenseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(panelExpenseLayout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelExpenseLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(panelExpenseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addGroup(panelExpenseLayout.createSequentialGroup()
+                .addGroup(panelExpenseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(expProgress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, panelExpenseLayout.createSequentialGroup()
                         .addComponent(jButton1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel1)
@@ -1754,6 +1797,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         panelExpenseLayout.setVerticalGroup(
             panelExpenseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelExpenseLayout.createSequentialGroup()
+                .addComponent(expProgress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelExpenseLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1971,7 +2016,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     calDueDate(Util1.getInteger(cus.getCreditDays()));
                 }
             }
-            case "SALE-TOTAL" ->
+            case "SALE-TOTAL", "CAL-TOTAL" ->
                 calculateTotalAmount(false);
             case "Location" ->
                 setAllLocation();
@@ -1999,7 +2044,14 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
             case "Batch" -> {
                 if (selectObj instanceof GRN g) {
-                    //get sale
+                    inventoryRepo.findTrader(g.getTraderCode()).subscribe((t) -> {
+                        traderAutoCompleter.setTrader(t);
+                    });
+                    inventoryRepo.findGRN(g.getKey().getVouNo()).subscribe((t) -> {
+                        batchAutoCompeter.setBatch(t);
+                        btnBatch.setText("View");
+                    });
+
                 }
             }
         }
@@ -2135,6 +2187,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private javax.swing.JCheckBox chkPaid;
     private javax.swing.JCheckBox chkSummary;
     private javax.swing.JCheckBox chkVou;
+    private javax.swing.JProgressBar expProgress;
     private javax.swing.JButton jBtnOrderNo;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;

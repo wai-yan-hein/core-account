@@ -106,6 +106,8 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
     }
 
     private void clear() {
+        progress.setIndeterminate(false);
+        btnSave.setEnabled(true);
         txtName.setText(null);
         txtId.setText(null);
         txtAddress.setText(null);
@@ -148,6 +150,8 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
 
     private void save() {
         if (isValidEntry()) {
+            progress.setIndeterminate(true);
+            btnSave.setEnabled(false);
             inventoryRepo.saveSaleMan(saleMan).subscribe((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
                     listSaleMan.set(selectRow, t);
@@ -156,6 +160,8 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
                 }
                 clear();
             }, (e) -> {
+                progress.setIndeterminate(false);
+                btnSave.setEnabled(true);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             });
 
@@ -202,6 +208,7 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
         btnClear = new javax.swing.JButton();
         btnSave = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
+        progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Sale Man Setup");
@@ -353,16 +360,21 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE)
-                    .addComponent(txtFilter))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE)
+                            .addComponent(txtFilter))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -421,6 +433,7 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblStatus;
+    private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblSaleMan;
     private javax.swing.JTextField txtAddress;
     private javax.swing.JTextField txtFilter;

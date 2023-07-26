@@ -95,8 +95,8 @@ public class SaleHis {
     private String tmpVouNo;
     @Column(name = "car_no")
     private String carNo;
-    @Column(name = "batch_no")
-    private String batchNo;
+    @Column(name = "grn_vou_no")
+    private String grnVouNo;
     @Transient
     private String localVouNo;
     private transient String status = "STATUS";
