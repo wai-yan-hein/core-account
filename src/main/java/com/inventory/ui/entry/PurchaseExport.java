@@ -34,7 +34,6 @@ import com.inventory.model.Trader;
 import com.inventory.model.VPurchase;
 import com.inventory.ui.common.PurchaseExportTableModel;
 import com.repo.InventoryRepo;
-import com.inventory.ui.entry.dialog.BatchSearchDialog;
 import com.inventory.ui.entry.dialog.PurchaseAvgPriceDialog;
 import com.inventory.ui.entry.dialog.PurchaseHistoryDialog;
 import com.inventory.ui.setup.dialog.ExpenseSetupDialog;
@@ -749,8 +748,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
 
     private void printVoucher(PurHis p) {
         String vouNo = p.getKey().getVouNo();
-        String batchNo = p.getBatchNo();
-        Mono<List<VPurchase>> p1 = inventoryRepo.getPurchaseReport(vouNo, batchNo);
+        Mono<List<VPurchase>> p1 = inventoryRepo.getPurchaseReport(vouNo);
         Mono<List<PurExpense>> p2 = inventoryRepo.getPurExpense(vouNo);
         p1.zipWith(p2).hasElement().subscribe((t) -> {
             log.info("" + t);
@@ -832,7 +830,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         });
         txtRemark.setText(g.getRemark());
         String vouNo = g.getKey().getVouNo();
-        Integer deptId = g.getKey().getDeptId();
+        Integer deptId = g.getDeptId();
         inventoryRepo.getGRNDetail(vouNo, deptId).subscribe((list) -> {
             list.forEach((t) -> {
                 PurHisDetail pd = new PurHisDetail();

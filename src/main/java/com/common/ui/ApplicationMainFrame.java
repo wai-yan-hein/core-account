@@ -896,18 +896,23 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         Integer deptId = Global.loginUser.getDeptId();
         if (Util1.isNullOrEmpty(deptId)) {
             userRepo.getDeparment(true).subscribe((t) -> {
-                DepartmentUser dep;
-                if (t.size() > 1) {
-                    DepartmentDialog dialog = new DepartmentDialog(t);
-                    dialog.initMain();
-                    dialog.setLocationRelativeTo(null);
-                    dialog.setVisible(true);
-                    dep = dialog.getDeparment();
+                if (!t.isEmpty()) {
+                    DepartmentUser dep;
+                    if (t.size() > 1) {
+                        DepartmentDialog dialog = new DepartmentDialog(t);
+                        dialog.initMain();
+                        dialog.setLocationRelativeTo(null);
+                        dialog.setVisible(true);
+                        dep = dialog.getDeparment();
+                    } else {
+                        dep = t.get(0);
+                    }
+                    lblDep.setText(dep.getDeptName());
+                    Global.deptId = dep.getDeptId();
                 } else {
-                    dep = t.get(0);
+                    JOptionPane.showMessageDialog(this, "No Active Department.");
+                    menuBar.setEnabled(false);
                 }
-                lblDep.setText(dep.getDeptName());
-                Global.deptId = dep.getDeptId();
             }, (e) -> {
                 log.error(e.getMessage());
             });

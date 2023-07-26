@@ -280,9 +280,9 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                 }
                 GRNKey key = new GRNKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 key.setVouNo(null);
                 grn.setKey(key);
+                grn.setDeptId(Global.deptId);
                 grn.setCreatedDate(LocalDateTime.now());
                 grn.setCreatedBy(Global.loginUser.getUserCode());
             } else {
@@ -362,7 +362,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
             progress.setIndeterminate(true);
             tableModel.clear();
             grn = g;
-            Integer deptId = g.getKey().getDeptId();
+            Integer deptId = g.getDeptId();
             Mono<Trader> trader = inventoryRepo.findTrader(grn.getTraderCode());
             trader.subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);

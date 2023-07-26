@@ -5,6 +5,7 @@
 package com.common;
 
 import java.awt.Component;
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 
@@ -23,6 +24,12 @@ public class ComponentUtil {
             }
         }
         if (component instanceof JToolBar tb) {
+            Component[] childComponents = tb.getComponents();
+            for (Component childComponent : childComponents) {
+                setComponentHierarchyEnabled(childComponent, enabled);
+            }
+        }
+        if (component instanceof JMenuBar tb) {
             Component[] childComponents = tb.getComponents();
             for (Component childComponent : childComponents) {
                 setComponentHierarchyEnabled(childComponent, enabled);

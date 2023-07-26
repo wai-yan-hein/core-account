@@ -55,6 +55,7 @@ import com.inventory.model.RetInHisKey;
 import com.inventory.model.RetOutHis;
 import com.inventory.model.RetOutHisDetail;
 import com.inventory.model.RetOutHisKey;
+import com.inventory.model.SaleExpense;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.SaleHisKey;
@@ -502,6 +503,21 @@ public class InventoryRepo {
                 .queryParam("batchNo", batchNo)
                 .build())
                 .retrieve().bodyToMono(GRN.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<GRN> findGRN(String vouNo) {
+        GRNKey key = new GRNKey();
+        key.setVouNo(vouNo);
+        key.setCompCode(Global.compCode);
+        return inventoryApi.post()
+                .uri("/grn/findGRN")
+                .body(Mono.just(key), GRNKey.class)
+                .retrieve()
+                .bodyToMono(GRN.class)
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -2713,12 +2729,23 @@ public class InventoryRepo {
 
     public Mono<List<PurExpense>> getPurExpense(String vouNo) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/purExpense/get-pur-expense")
+                .uri(builder -> builder.path("/expense/getPurExpense")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
                 .bodyToFlux(PurExpense.class)
+                .collectList();
+    }
+
+    public Mono<List<SaleExpense>> getSaleExpense(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/expense/getSaleExpense")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(SaleExpense.class)
                 .collectList();
     }
 
@@ -2733,11 +2760,10 @@ public class InventoryRepo {
                 .collectList();
     }
 
-    public Mono<List<VPurchase>> getPurchaseReport(String vouNo, String batchNo) {
+    public Mono<List<VPurchase>> getPurchaseReport(String vouNo) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/report/get-purchase-report")
                 .queryParam("vouNo", vouNo)
-                .queryParam("batchNo", batchNo)
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
