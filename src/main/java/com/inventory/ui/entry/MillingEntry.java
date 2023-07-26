@@ -461,7 +461,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         cboProcessType.repaint();
     }
 
-    public void saveSale(boolean print) { //todo
+    public void saveSale(boolean print) {
         if (isValidEntry() && milingRawTableModel.isValidEntry()
                 && milingOutTableModel.isValidEntry() && milingExpenseTableModel.isValidEntry()) {
             milling.setListRaw(milingRawTableModel.getListDetail());
@@ -558,7 +558,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         return status;
     }
 
-    private void deleteSale() { //todo
+    private void deleteSale() {
         String status = lblStatus.getText();
         switch (status) {
             case "EDIT" -> {
@@ -679,7 +679,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
 
     }
 
-    public void historySale() { //todo
+    public void historySale() {
         if (dialog == null) {
             dialog = new MillingHistoryDialog(Global.parentForm);
             dialog.setTitle("Milling Voucher Search");
@@ -716,7 +716,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         });
     }
 
-    public void setSaleVoucher(MillingHis sh) { //todo
+    public void setSaleVoucher(MillingHis sh) {
         if (sh != null) {
             progress.setIndeterminate(true);
             milling = sh;
