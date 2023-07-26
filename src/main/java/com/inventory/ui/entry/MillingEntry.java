@@ -648,7 +648,9 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         txtLoadExpense.setValue(expAmt);
         float costAmt = loadAmt + expAmt;
         txtLoadCost.setValue(costAmt);
-
+        
+        listOutDetail = milingOutTableModel.getListDetail();
+        // calculate price
         if (!firstRow) {
             float knowAmt = listOutDetail.stream()
                     .skip(1) // Skip the first element
@@ -665,8 +667,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         }
         
         //cal output
-        //calculate total
-        listOutDetail = milingOutTableModel.getListDetail();
         float outAmt = listOutDetail.stream().map(sdh -> Util1.getFloat(sdh.getAmount())).reduce(0.0f, (accumulator, _item) -> accumulator + _item);
         float outQty = listOutDetail.stream().map(s -> Util1.getFloat(s.getQty())).reduce(0.0f, (accumulator, _item) -> accumulator + _item);
         float outWt = listOutDetail.stream().map(d -> Util1.getFloat(d.getTotalWeight())).reduce(0.0f, (accumulator, _item) -> accumulator + _item);
@@ -789,12 +789,16 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
 
     private void disableForm(boolean status) {
         tblRaw.setEnabled(status);
+        tblExpense.setEnabled(status);
+        tblOutput.setEnabled(status);
         panelSale.setEnabled(status);
         txtSaleDate.setEnabled(status);
         txtCus.setEnabled(status);
         txtRemark.setEnabled(status);
         txtCurrency.setEnabled(status);
         txtReference.setEnabled(status);
+        txtProjectNo.setEnabled(status);
+        cboProcessType.setEnabled(status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
