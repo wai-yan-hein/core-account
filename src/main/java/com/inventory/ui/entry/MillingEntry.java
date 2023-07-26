@@ -649,17 +649,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         float costAmt = loadAmt + expAmt;
         txtLoadCost.setValue(costAmt);
 
-        //cal output
-        //calculate total
-        listOutDetail = milingOutTableModel.getListDetail();
-        float outAmt = listOutDetail.stream().map(sdh -> Util1.getFloat(sdh.getAmount())).reduce(0.0f, (accumulator, _item) -> accumulator + _item);
-        float outQty = listOutDetail.stream().map(s -> Util1.getFloat(s.getQty())).reduce(0.0f, (accumulator, _item) -> accumulator + _item);
-        float outWt = listOutDetail.stream().map(d -> Util1.getFloat(d.getTotalWeight())).reduce(0.0f, (accumulator, _item) -> accumulator + _item);
-        txtOutputQty.setValue(outQty);
-        txtOutputWeight.setValue(outWt);
-        txtOutputAmt.setValue(outAmt);
-        txtWtLoss.setValue(loadWt - outWt);
-
         if (!firstRow) {
             float knowAmt = listOutDetail.stream()
                     .skip(1) // Skip the first element
@@ -674,6 +663,19 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 milingOutTableModel.setObject(0, mod);
             }
         }
+        
+        //cal output
+        //calculate total
+        listOutDetail = milingOutTableModel.getListDetail();
+        float outAmt = listOutDetail.stream().map(sdh -> Util1.getFloat(sdh.getAmount())).reduce(0.0f, (accumulator, _item) -> accumulator + _item);
+        float outQty = listOutDetail.stream().map(s -> Util1.getFloat(s.getQty())).reduce(0.0f, (accumulator, _item) -> accumulator + _item);
+        float outWt = listOutDetail.stream().map(d -> Util1.getFloat(d.getTotalWeight())).reduce(0.0f, (accumulator, _item) -> accumulator + _item);
+        txtOutputQty.setValue(outQty);
+        txtOutputWeight.setValue(outWt);
+        txtOutputAmt.setValue(outAmt);
+        txtWtLoss.setValue(loadWt - outWt);
+
+        
 
     }
 
