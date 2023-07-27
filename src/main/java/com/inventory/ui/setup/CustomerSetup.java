@@ -26,13 +26,11 @@ import com.inventory.ui.setup.common.CustomerTabelModel;
 import com.inventory.ui.setup.dialog.CustomerImportDialog;
 import com.inventory.ui.setup.dialog.RegionSetup;
 import com.inventory.ui.setup.dialog.TraderGroupDialog;
-import com.user.common.CodeComparator;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.stream.Collectors;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -47,7 +45,6 @@ import javax.swing.RowFilter;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ListSelectionEvent;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
@@ -225,11 +222,10 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         }, (e) -> {
             log.error(e.getMessage());
         });
-        accountRepo.findCOA(customer.getAccount()).subscribe((t) -> {
+        accountRepo.findCOA(customer.getAccount()).doOnSuccess((t) -> {
             cOAAutoCompleter.setCoa(t);
-        }, (e) -> {
-            log.error(e.getMessage());
-        });
+        }).subscribe();
+
     }
 
     private boolean isValidEntry() {

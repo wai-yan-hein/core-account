@@ -48,8 +48,6 @@ public class StockUnitEditor extends AbstractCellEditor implements TableCellEdit
         this.listStockUnit = listStockUnit;
     }
 
-    
-
     @Override
     public java.awt.Component getTableCellEditorComponent(JTable table, Object value,
             boolean isSelected, int rowIndex, int vColIndex) {

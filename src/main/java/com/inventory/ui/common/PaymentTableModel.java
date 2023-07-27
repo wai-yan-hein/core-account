@@ -7,11 +7,11 @@ package com.inventory.ui.common;
 
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.model.GRNDetail;
 import com.inventory.model.PaymentHisDetail;
 import com.inventory.model.PaymentHisDetailKey;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
@@ -113,7 +113,7 @@ public class PaymentTableModel extends AbstractTableModel {
                     b.getSaleVouNo();
                 case 2 ->
                     b.getRemark();
-                case 3->
+                case 3 ->
                     b.getReference();
                 case 4 ->
                     b.getCurCode();
@@ -218,6 +218,20 @@ public class PaymentTableModel extends AbstractTableModel {
         listDetail.clear();
         listDelete.clear();
         fireTableDataChanged();
+    }
+
+    public boolean isValidEntry() {
+        return listDetail.stream()
+                .filter(pd -> Util1.getFloat(pd.getVouBalance()) < 0)
+                .peek(pd -> {
+                    JOptionPane.showMessageDialog(table, "Invalid Pay Amount.");
+                    int index = listDetail.indexOf(pd);
+                    table.setRowSelectionInterval(index, index);
+                    table.setColumnSelectionInterval(7, 7);
+                    table.requestFocus();
+                })
+                .findFirst()
+                .isEmpty();
     }
 
 }

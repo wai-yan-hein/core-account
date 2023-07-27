@@ -194,11 +194,9 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
         }, (e) -> {
             log.error(e.getMessage());
         });
-        accountRepo.findCOA(supplier.getAccount()).subscribe((t) -> {
+        accountRepo.findCOA(supplier.getAccount()).doOnSuccess((t) -> {
             cOAAutoCompleter.setCoa(t);
-        }, (e) -> {
-            log.error(e.getMessage());
-        });
+        }).subscribe();
 
     }
 

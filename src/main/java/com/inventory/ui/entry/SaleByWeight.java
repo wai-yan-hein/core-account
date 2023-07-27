@@ -436,6 +436,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             if (sm != null) {
                 saleHis.setSaleManCode(sm.getKey().getSaleManCode());
             }
+            String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
             saleHis.setRemark(txtRemark.getText());
             saleHis.setReference(txtReference.getText());
             saleHis.setDiscP(Util1.getFloat(txtVouDiscP.getValue()));
@@ -447,7 +448,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             saleHis.setCurCode(currAutoCompleter.getCurrency().getCurCode());
             saleHis.setDeleted(saleHis.isDeleted());
             saleHis.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
-            saleHis.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
+            saleHis.setTraderCode(traderCode);
             saleHis.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
             saleHis.setGrandTotal(Util1.getFloat(txtGrandTotal.getValue()));
             saleHis.setStatus(lblStatus.getText());
@@ -467,6 +468,12 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                 saleHis.setSession(Global.sessionId);
             } else {
                 saleHis.setUpdatedBy(Global.loginUser.getUserCode());
+                String vouNo = saleHis.getKey().getVouNo();
+                boolean exist = inventoryRepo.checkPaymentExist(vouNo, traderCode, "C").block();
+                if (exist) {
+                    JOptionPane.showMessageDialog(this, "This voucher is already paid in Customer Payment.", "Message", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
             }
         }
         return status;
