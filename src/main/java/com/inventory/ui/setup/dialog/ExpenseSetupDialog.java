@@ -198,6 +198,20 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
         txtName.requestFocus();
     }
 
+    private void setExpenseValue() {
+        if (lblStatus.getText().equals("NEW")) {
+            ExpenseKey key = new ExpenseKey();
+            key.setExpenseCode(null);
+            key.setCompCode(Global.compCode);
+            exp.setKey(key);
+        }
+        ChartOfAccount c = (ChartOfAccount) cboAccount.getSelectedItem();
+        exp.setUserCode(txtUserCode.getText());
+        exp.setAccountCode(c.getKey().getCoaCode());
+        exp.setExpenseName(txtName.getText());
+        exp.setPercent(Util1.getFloat(spPercent.getValue()));
+    }
+
     private boolean isValidEntry() {
         boolean status = true;
         if (needAccount) {
@@ -205,19 +219,11 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
                 status = false;
                 JOptionPane.showMessageDialog(this, "Invalid Name");
                 cboAccount.requestFocus();
+            } else {
+                setExpenseValue();
             }
         } else {
-            if (lblStatus.getText().equals("NEW")) {
-                ExpenseKey key = new ExpenseKey();
-                key.setExpenseCode(null);
-                key.setCompCode(Global.compCode);
-                exp.setKey(key);
-            }
-            ChartOfAccount c = (ChartOfAccount) cboAccount.getSelectedItem();
-            exp.setUserCode(txtUserCode.getText());
-            exp.setAccountCode(c.getKey().getCoaCode());
-            exp.setExpenseName(txtName.getText());
-            exp.setPercent(Util1.getFloat(spPercent.getValue()));
+            setExpenseValue();
         }
         return status;
     }
