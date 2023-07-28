@@ -249,6 +249,9 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                     //Qty
                     if (Util1.isNumber(value)) {
                         record.setQty(Util1.getFloat(value));
+                        if (record.getQty() != null && record.getWeight() != null) {
+                            record.setTotalWeight(Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight()));
+                        }
                         parent.setRowSelectionInterval(row, row);
                     }
                 }

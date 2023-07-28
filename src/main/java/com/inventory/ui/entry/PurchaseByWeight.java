@@ -688,7 +688,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
                             lblStatus.setText("EDIT");
                             lblStatus.setForeground(Color.blue);
                             disableForm(true);
-                            btnBatch.setText(ph.getBatchNo() == null ? "Batch" : "View");
+                            btnBatch.setText(Util1.isNullOrEmpty(ph.getBatchNo()) ? "Batch" : "View");
                         }
                         txtVouNo.setText(ph.getKey().getVouNo());
                         txtDueDate.setDate(ph.getDueDate());
