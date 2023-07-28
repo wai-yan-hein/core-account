@@ -2877,6 +2877,22 @@ public class InventoryRepo {
                 .bodyToFlux(VPurchase.class)
                 .collectList();
     }
+    
+    public Mono<byte[]> getGRNReport(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/report/get-grn-report")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToMono(ByteArrayResource.class)
+                .map(ByteArrayResource::getByteArray)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
 
     public Mono<List<VPurchase>> getPurchaseWeightReport(String vouNo, String batchNo) {
         return inventoryApi.get()

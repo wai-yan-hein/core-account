@@ -6,9 +6,15 @@ package com.inventory.ui.entry;
 
 import com.common.DecimalFormatRender;
 import com.common.Global;
+import com.common.JasperReportUtil;
 import com.common.PanelControl;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import static com.common.Util1.gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
 import com.inventory.editor.StockCellEditor;
@@ -17,8 +23,10 @@ import com.inventory.model.GRN;
 import com.inventory.model.GRNDetail;
 import com.inventory.model.GRNKey;
 import com.inventory.model.Location;
+import com.inventory.model.PurExpense;
 import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
+import com.inventory.model.VPurchase;
 import com.inventory.ui.common.GRNTableModel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.GRNHistoryDialog;
@@ -33,8 +41,12 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
@@ -46,6 +58,11 @@ import javax.swing.ListSelectionModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.data.JsonDataSource;
+import net.sf.jasperreports.view.JasperViewer;
 import reactor.core.publisher.Mono;
 
 /**
@@ -219,7 +236,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
 
     }
 
-    public boolean saveGRN() {
+    public boolean saveGRN(boolean print) {
         boolean status = false;
         try {
             if (isValidEntry() && tableModel.isValidEntry()) {
@@ -229,6 +246,10 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                 grn.setListDel(tableModel.getListDel());
                 inventoryRepo.saveGRN(grn).subscribe((t) -> {
                     clear();
+                    progress.setIndeterminate(false);
+                    if (print) {
+                        printVoucher(t.getKey().getVouNo(), "GRNVoucher", false);
+                    }
                 }, (e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
                     progress.setIndeterminate(false);
@@ -331,6 +352,53 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         txtLocation.setEnabled(status);
         observer.selected("save", status);
         observer.selected("print", status);
+    }
+
+    private void printVoucher(String vouNo, String reportName, boolean local) {
+        if (local) {
+//            List<VPurchase> list = h2Repo.getSaleReport(vouNo);
+//            if (!list.isEmpty()) {
+//                viewReport(Util1.listToByteArray(list), reportName);
+//            }
+        } else {
+            inventoryRepo.getGRNReport(vouNo).subscribe((t) -> {
+                viewReport(t, reportName);
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            });
+        }
+    }
+
+    private void viewReport(byte[] t, String reportName) {
+        if (reportName != null) {
+            try {
+                String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
+                Map<String, Object> param = new HashMap<>();
+                param.put("p_print_date", Util1.getTodayDateTime());
+                param.put("p_comp_name", Global.companyName);
+                param.put("p_comp_address", Global.companyAddress);
+                param.put("p_comp_phone", Global.companyPhone);
+                param.put("p_logo_path", logoPath);
+//                param.put("p_balance", balance);
+//                param.put("p_prv_balance", prvBal);
+                String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");
+                ByteArrayInputStream stream = new ByteArrayInputStream(t);
+                JsonDataSource ds = new JsonDataSource(stream);
+                JasperPrint jp = JasperFillManager.fillReport(reportPath, param, ds);
+                log.info(ProUtil.getFontPath());
+                JasperViewer.viewReport(jp, false);
+//                if (chkVou.isSelected()) {
+//                    JasperReportUtil.print(jp);
+//                } else {
+//                    JasperViewer.viewReport(jp, false);
+//                }
+            } catch (JRException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage());
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Select Report Type");
+//            chkVou.requestFocus();
+        }
     }
 
     private void focusTable() {
@@ -459,7 +527,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
-        observer.selected("print", false);
+        observer.selected("print", true);
         observer.selected("history", true);
         observer.selected("delete", true);
         observer.selected("refresh", false);
@@ -758,7 +826,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
 
     @Override
     public void save() {
-        saveGRN();
+        saveGRN(false);
     }
 
     @Override
@@ -778,6 +846,7 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
 
     @Override
     public void print() {
+        saveGRN(true);
     }
 
     @Override

@@ -22,6 +22,7 @@ import com.inventory.model.Category;
 import com.inventory.model.Stock;
 import com.inventory.model.StockBrand;
 import com.inventory.model.StockKey;
+import com.inventory.model.StockType;
 import com.inventory.model.StockUnit;
 import com.repo.InventoryRepo;
 import com.inventory.ui.setup.common.StockTableModel;
@@ -43,7 +44,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -299,7 +299,8 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         typeAutoCompleterF.setObserver(this);
         inventoryRepo.getStockType().subscribe((t) -> {
             typeAutoCompleter.setListStockType(t);
-            typeAutoCompleterF.setListStockType(t);
+            List<StockType> sList = new ArrayList<>(t);
+            typeAutoCompleterF.setListStockType(sList);
         });
         categoryAutoCompleter = new CategoryAutoCompleter(txtCat, null, false);
         categoryAutoCompleter.setCategory(null);
@@ -307,7 +308,8 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         categoryAutoCompleterF.setObserver(this);
         inventoryRepo.getCategory().subscribe((t) -> {
             categoryAutoCompleter.setListCategory(t);
-            categoryAutoCompleterF.setListCategory(t);
+            List<Category> cList = new ArrayList<>(t);
+            categoryAutoCompleterF.setListCategory(cList);
         });
         brandAutoCompleter = new BrandAutoCompleter(txtBrand, null, false);
         brandAutoCompleter.setBrand(null);
@@ -315,7 +317,8 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         brandAutoCompleterF.setObserver(this);
         inventoryRepo.getStockBrand().subscribe((t) -> {
             brandAutoCompleter.setListStockBrand(t);
-            brandAutoCompleterF.setListStockBrand(t);
+            List<StockBrand> bList = new ArrayList<>(t);
+            brandAutoCompleterF.setListStockBrand(bList);
         });
         inventoryRepo.getStockUnit().subscribe((t) -> {
             purUnitCompleter = new UnitAutoCompleter(txtPurUnit, t, null);
