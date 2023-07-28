@@ -2670,6 +2670,22 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<List<VSale>> getSaleByBatchReport(String vouNo, String grnVouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/report/getSaleByBatchReport")
+                .queryParam("vouNo", vouNo)
+                .queryParam("grnVouNo", grnVouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(VSale.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<byte[]> getOrderReport(String vouNo) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/report/get-order-report")

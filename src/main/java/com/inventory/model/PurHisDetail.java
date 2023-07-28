@@ -56,7 +56,6 @@ public class PurHisDetail implements Serializable {
     private Float totalWeight;
     @Column(name = "m_percent")
     private String mPercent;
-
     @Transient
     private String userCode;
     @Transient

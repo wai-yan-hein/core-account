@@ -188,7 +188,7 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                     }
                     //total
                     case 9 -> {
-                        return Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight());
+                        return record.getTotalWeight();
                     }
                     case 10 -> {
                         return record.getPrice();
@@ -364,9 +364,15 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
         float price = Util1.getFloat(pur.getPrice());
         float stdWt = Util1.getFloat(pur.getStdWeight());
         float wt = Util1.getFloat(pur.getWeight());
-        float qty = Util1.getFloat(pur.getQty());
+        float qtyValue = Util1.getFloat(pur.getQty());
+        String qtyStr = Float.toString(qtyValue);
+        String[] parts = qtyStr.split("\\.");
+        int qty = Integer.parseInt(parts[0]);
+        int decimalWt = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+        float ttlWt = (qty * wt) + decimalWt;
         if (pur.getStockCode() != null) {
-            float amount = (qty * wt * price) / stdWt;
+            float amount = (ttlWt * price) / stdWt;
+            pur.setTotalWeight(ttlWt);
             pur.setAmount(amount);
         }
     }

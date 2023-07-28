@@ -777,7 +777,10 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     private void printVoucher(PurHis p) {
         String vouNo = p.getKey().getVouNo();
         String batchNo = p.getBatchNo();
-        Mono<List<VPurchase>> p1 = inventoryRepo.getPurchaseWeightReport(vouNo, batchNo);
+        boolean grn = Util1.getBoolean(ProUtil.getProperty(ProUtil.P_GRN_REPORT));
+        Mono<List<VPurchase>> p1 = grn
+                ? inventoryRepo.getPurchaseWeightReport(vouNo, batchNo)
+                : inventoryRepo.getPurchaseReport(vouNo);
         Mono<List<PurExpense>> p2 = inventoryRepo.getPurExpense(vouNo);
         p1.zipWith(p2).hasElement().subscribe((t) -> {
             log.info("" + t);

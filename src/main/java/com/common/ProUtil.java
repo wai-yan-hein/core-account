@@ -50,6 +50,9 @@ public class ProUtil {
     public static final String DEFAULT_SALEMAN = "default.saleman";
     public static final String DIVIDER = "divider";
     public static final String SALE_EXPENSE_SHOW = "sale.expense.show";
+    public static final String BATCH_SALE = "batch.sale";
+    public static final String BATCH_GRN = "batch.grn";
+    public static final String P_GRN_REPORT = "purchase.grn.report";
 
     public static String getFontPath() {
         return Global.hmRoleProperty.get("font.path");

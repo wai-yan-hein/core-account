@@ -65,7 +65,6 @@ import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -565,69 +564,84 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
         if (sh != null) {
             progress.setIndeterminate(true);
             saleHis = sh;
-            inventoryRepo.findLocation(saleHis.getLocCode()).subscribe((t) -> {
-                locationAutoCompleter.setLocation(t);
-            });
-            inventoryRepo.findTrader(saleHis.getTraderCode()).subscribe((t) -> {
-                traderAutoCompleter.setTrader(t);
-            });
-            userRepo.findCurrency(saleHis.getCurCode()).subscribe((t) -> {
-                currAutoCompleter.setCurrency(t);
-            });
-            inventoryRepo.findSaleMan(saleHis.getSaleManCode()).subscribe((t) -> {
-                saleManCompleter.setSaleMan(t);
-            });
-            String vouNo = sh.getKey().getVouNo();
-            Mono<ResponseEntity<List<SaleHisDetail>>> result = inventoryApi.get()
-                    .uri(builder -> builder.path("/sale/get-sale-detail")
-                    .queryParam("vouNo", vouNo)
-                    .queryParam("compCode", Global.compCode)
-                    .queryParam("deptId", sh.getKey().getDeptId())
-                    .build())
-                    .retrieve().toEntityList(SaleHisDetail.class);
-            result.subscribe((t) -> {
-                saleTableModel.setListDetail(t.getBody());
-                saleTableModel.addNewRow();
-                if (sh.isVouLock()) {
-                    lblStatus.setText("Voucher is locked.");
-                    lblStatus.setForeground(Color.RED);
+            setCompeter(saleHis);
+            searchVoucher(saleHis);
+            searchVoucherDetail(saleHis);
+        }
+    }
+
+    private void setCompeter(SaleHis sh) {
+        inventoryRepo.findLocation(sh.getLocCode()).subscribe((t) -> {
+            locationAutoCompleter.setLocation(t);
+        });
+        inventoryRepo.findTrader(sh.getTraderCode()).subscribe((t) -> {
+            traderAutoCompleter.setTrader(t);
+        });
+        userRepo.findCurrency(sh.getCurCode()).subscribe((t) -> {
+            currAutoCompleter.setCurrency(t);
+        });
+        inventoryRepo.findSaleMan(sh.getSaleManCode()).subscribe((t) -> {
+            saleManCompleter.setSaleMan(t);
+        });
+    }
+
+    private void searchVoucherDetail(SaleHis sh) {
+        String vouNo = sh.getKey().getVouNo();
+        Integer deptId = sh.getKey().getDeptId();
+        inventoryRepo.getSaleDetail(vouNo, deptId, sh.isLocal()).subscribe((t) -> {
+            saleTableModel.setListDetail(t);
+            saleTableModel.addNewRow();
+            focusTable();
+            progress.setIndeterminate(false);
+        }, (e) -> {
+            progress.setIndeterminate(false);
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        });
+    }
+
+    private void searchVoucher(SaleHis sh) {
+        String vouNo = sh.getKey().getVouNo();
+        if (sh.isVouLock()) {
+            lblStatus.setText("Voucher is locked.");
+            lblStatus.setForeground(Color.RED);
+            disableForm(false);
+        } else if (!ProUtil.isSaleEdit()) {
+            lblStatus.setText("No Permission.");
+            lblStatus.setForeground(Color.RED);
+            disableForm(false);
+            observer.selected("print", true);
+        } else if (sh.isDeleted()) {
+            lblStatus.setText("DELETED");
+            lblStatus.setForeground(Color.RED);
+            disableForm(false);
+            observer.selected("delete", true);
+        } else {
+            inventoryRepo.checkPaymentExist(vouNo, sh.getTraderCode(), "C").subscribe((exist) -> {
+                if (exist) {
+                    lblStatus.setText("Voucher is locked because of payment.");
+                    lblStatus.setForeground(Color.red);
                     disableForm(false);
-                } else if (!ProUtil.isSaleEdit()) {
-                    lblStatus.setText("No Permission.");
-                    lblStatus.setForeground(Color.RED);
-                    disableForm(false);
-                    observer.selected("print", true);
-                } else if (sh.isDeleted()) {
-                    lblStatus.setText("DELETED");
-                    lblStatus.setForeground(Color.RED);
-                    disableForm(false);
-                    observer.selected("delete", true);
                 } else {
-                    lblStatus.setText("EDIT");
                     lblStatus.setForeground(Color.blue);
+                    lblStatus.setText("EDIT");
                     disableForm(true);
                 }
-                txtVouNo.setText(saleHis.getKey().getVouNo());
-                txtDueDate.setDate(Util1.convertToDate(saleHis.getCreditTerm()));
-                txtRemark.setText(saleHis.getRemark());
-                txtReference.setText(saleHis.getReference());
-                txtSaleDate.setDate(Util1.convertToDate(saleHis.getVouDate()));
-                txtVouTotal.setValue(Util1.getFloat(saleHis.getVouTotal()));
-                txtVouDiscP.setValue(Util1.getFloat(saleHis.getDiscP()));
-                txtVouDiscount.setValue(Util1.getFloat(saleHis.getDiscount()));
-                txtVouTaxP.setValue(Util1.getFloat(saleHis.getTaxPercent()));
-                txtTax.setValue(Util1.getFloat(saleHis.getTaxAmt()));
-                txtVouPaid.setValue(Util1.getFloat(saleHis.getPaid()));
-                txtVouBalance.setValue(Util1.getFloat(saleHis.getBalance()));
-                txtGrandTotal.setValue(Util1.getFloat(saleHis.getGrandTotal()));
-                chkPaid.setSelected(saleHis.getPaid() > 0);
-                focusTable();
-                progress.setIndeterminate(false);
-            }, (e) -> {
-                progress.setIndeterminate(false);
-                JOptionPane.showMessageDialog(this, e.getMessage());
             });
         }
+        txtVouNo.setText(vouNo);
+        txtDueDate.setDate(Util1.convertToDate(sh.getCreditTerm()));
+        txtRemark.setText(sh.getRemark());
+        txtReference.setText(sh.getReference());
+        txtSaleDate.setDate(Util1.convertToDate(sh.getVouDate()));
+        txtVouTotal.setValue(Util1.getFloat(sh.getVouTotal()));
+        txtVouDiscP.setValue(Util1.getFloat(sh.getDiscP()));
+        txtVouDiscount.setValue(Util1.getFloat(sh.getDiscount()));
+        txtVouTaxP.setValue(Util1.getFloat(sh.getTaxPercent()));
+        txtTax.setValue(Util1.getFloat(sh.getTaxAmt()));
+        txtVouPaid.setValue(Util1.getFloat(sh.getPaid()));
+        txtVouBalance.setValue(Util1.getFloat(sh.getBalance()));
+        txtGrandTotal.setValue(Util1.getFloat(sh.getGrandTotal()));
+        chkPaid.setSelected(sh.getPaid() > 0);
     }
 
     private void disableForm(boolean status) {
@@ -1555,7 +1569,6 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
 
     private void formPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_formPropertyChange
         // TODO add your handling code here:
-        log.info("change.");
     }//GEN-LAST:event_formPropertyChange
 
     private void txtSaleDateFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtSaleDateFocusGained

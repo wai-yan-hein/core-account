@@ -13,7 +13,6 @@ import com.common.KeyPropagate;
 import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
-import com.common.TableCellRender;
 import com.common.Util1;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -699,94 +698,105 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     public void setVoucher(PurHis pur, boolean local) {
-        if (pur != null) {
-            try {
-                purTableModel.clear();
-                expenseTableModel.clear();
-                progress.setIndeterminate(true);
-                ph = pur;
-                Integer deptId = ph.getKey().getDeptId();
-                userRepo.findCurrency(ph.getCurCode()).subscribe((t) -> {
-                    currAutoCompleter.setCurrency(t);
+        purTableModel.clear();
+        expenseTableModel.clear();
+        progress.setIndeterminate(true);
+        ph = pur;
+        setCompeter(ph);
+        searchVoucher(ph);
+        searchVoucherDetail(ph, local);
+    }
+
+    private void searchVoucherDetail(PurHis ph, boolean local) {
+        String vouNo = ph.getKey().getVouNo();
+        inventoryRepo.getPurDetail(vouNo, ph.getKey().getDeptId(), local)
+                .subscribe((t) -> {
+                    purTableModel.setListDetail(t);
+                    purTableModel.addNewRow();
+                    calQty(t);
+                    focusTable();
+                    progress.setIndeterminate(false);
                 }, (e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
+                    progress.setIndeterminate(false);
+                }, () -> {
                 });
-                inventoryRepo.findLocation(ph.getLocCode()).subscribe((t) -> {
-                    locationAutoCompleter.setLocation(t);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                });
-                Mono<Trader> trader = inventoryRepo.findTrader(ph.getTraderCode());
-                trader.subscribe((t) -> {
-                    traderAutoCompleter.setTrader(t);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                });
-                if (pur.getProjectNo() != null) {
-                    userRepo.find(new ProjectKey(pur.getProjectNo(), Global.compCode)).subscribe(t -> {
-                        projectAutoCompleter.setProject(t);
-                    }, (e) -> {
-                        JOptionPane.showMessageDialog(this, e.getMessage());
-                    });
+        searchExpense(vouNo);
+    }
+
+    private void searchVoucher(PurHis ph) {
+        String vouNo = ph.getKey().getVouNo();
+        if (ph.isVouLock()) {
+            lblStatus.setText("Voucher is locked.");
+            lblStatus.setForeground(Color.RED);
+            disableForm(false);
+        } else if (!ProUtil.isPurchaseEdit()) {
+            lblStatus.setText("No Permission.");
+            lblStatus.setForeground(Color.RED);
+            disableForm(false);
+        } else if (Util1.getBoolean(ph.getDeleted())) {
+            lblStatus.setText("DELETED");
+            lblStatus.setForeground(Color.RED);
+            disableForm(false);
+        } else {
+            inventoryRepo.checkPaymentExist(vouNo, ph.getTraderCode(), "S").subscribe((exist) -> {
+                if (exist) {
+                    lblStatus.setText("Voucher is locked because of payment.");
+                    lblStatus.setForeground(Color.red);
+                    disableForm(false);
                 } else {
-                    projectAutoCompleter.setProject(null);
+                    lblStatus.setForeground(Color.blue);
+                    lblStatus.setText("EDIT");
+                    disableForm(true);
                 }
+                btnBatch.setText("View");
+            });
+        }
+        txtVouNo.setText(ph.getKey().getVouNo());
+        txtDueDate.setDate(ph.getDueDate());
+        txtRemark.setText(ph.getRemark());
+        txtPurDate.setDate(Util1.convertToDate(ph.getVouDate()));
+        txtVouTotal.setValue(Util1.getFloat(ph.getVouTotal()));
+        txtVouDiscP.setValue(Util1.getFloat(ph.getDiscP()));
+        txtVouDiscount.setValue(Util1.getFloat(ph.getDiscount()));
+        txtVouTaxP.setValue(Util1.getFloat(ph.getTaxP()));
+        txtTax.setValue(Util1.getFloat(ph.getTaxAmt()));
+        txtVouPaid.setValue(Util1.getFloat(ph.getPaid()));
+        txtVouBalance.setValue(Util1.getFloat(ph.getBalance()));
+        txtGrandTotal.setValue(Util1.getFloat(txtGrandTotal.getValue()));
+        chkPaid.setSelected(Util1.getFloat(ph.getPaid()) > 0);
+        txtReference.setText(ph.getReference());
+        txtBatchNo.setText(ph.getBatchNo());
+        txtComPercent.setValue(Util1.getFloat(ph.getCommP()));
+        txtComAmt.setValue(Util1.getFloat(ph.getCommAmt()));
+        txtExpense.setValue(Util1.getFloat(ph.getExpense()));
+    }
 
-                String vouNo = ph.getKey().getVouNo();
-
-                inventoryRepo.getPurDetail(vouNo, deptId, local)
-                        .subscribe((t) -> {
-                            purTableModel.setListDetail(t);
-                            purTableModel.addNewRow();
-                            if (ph.isVouLock()) {
-                                lblStatus.setText("Voucher is locked.");
-                                lblStatus.setForeground(Color.RED);
-                                disableForm(false);
-                            } else if (!ProUtil.isPurchaseEdit()) {
-                                lblStatus.setText("No Permission.");
-                                lblStatus.setForeground(Color.RED);
-                                disableForm(false);
-                            } else if (Util1.getBoolean(ph.getDeleted())) {
-                                lblStatus.setText("DELETED");
-                                lblStatus.setForeground(Color.RED);
-                                disableForm(false);
-                            } else {
-                                lblStatus.setText("EDIT");
-                                lblStatus.setForeground(Color.blue);
-                                disableForm(true);
-                                btnBatch.setText("View");
-                            }
-                            txtVouNo.setText(ph.getKey().getVouNo());
-                            txtDueDate.setDate(ph.getDueDate());
-                            txtRemark.setText(ph.getRemark());
-                            txtPurDate.setDate(Util1.convertToDate(ph.getVouDate()));
-                            txtVouTotal.setValue(Util1.getFloat(ph.getVouTotal()));
-                            txtVouDiscP.setValue(Util1.getFloat(ph.getDiscP()));
-                            txtVouDiscount.setValue(Util1.getFloat(ph.getDiscount()));
-                            txtVouTaxP.setValue(Util1.getFloat(ph.getTaxP()));
-                            txtTax.setValue(Util1.getFloat(ph.getTaxAmt()));
-                            txtVouPaid.setValue(Util1.getFloat(ph.getPaid()));
-                            txtVouBalance.setValue(Util1.getFloat(ph.getBalance()));
-                            txtGrandTotal.setValue(Util1.getFloat(txtGrandTotal.getValue()));
-                            chkPaid.setSelected(Util1.getFloat(ph.getPaid()) > 0);
-                            txtReference.setText(ph.getReference());
-                            txtBatchNo.setText(ph.getBatchNo());
-                            txtComPercent.setValue(Util1.getFloat(ph.getCommP()));
-                            txtComAmt.setValue(Util1.getFloat(ph.getCommAmt()));
-                            txtExpense.setValue(Util1.getFloat(ph.getExpense()));
-                            calQty(t);
-                            focusTable();
-                            progress.setIndeterminate(false);
-                        }, (e) -> {
-                            JOptionPane.showMessageDialog(this, e.getMessage());
-                            progress.setIndeterminate(false);
-                        }, () -> {
-                        });
-                searchExpense(vouNo);
-            } catch (Exception e) {
-                log.error(e.getMessage());
-            }
-
+    private void setCompeter(PurHis ph) {
+        userRepo.findCurrency(ph.getCurCode()).subscribe((t) -> {
+            currAutoCompleter.setCurrency(t);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        });
+        inventoryRepo.findLocation(ph.getLocCode()).subscribe((t) -> {
+            locationAutoCompleter.setLocation(t);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        });
+        Mono<Trader> trader = inventoryRepo.findTrader(ph.getTraderCode());
+        trader.subscribe((t) -> {
+            traderAutoCompleter.setTrader(t);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        });
+        if (ph.getProjectNo() != null) {
+            userRepo.find(new ProjectKey(ph.getProjectNo(), Global.compCode)).subscribe(t -> {
+                projectAutoCompleter.setProject(t);
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            });
+        } else {
+            projectAutoCompleter.setProject(null);
         }
     }
 
@@ -810,7 +820,11 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
 
     private void disableForm(boolean status) {
         tblPur.setEnabled(status);
+        tblExpense.setEnabled(status);
         panelPur.setEnabled(status);
+        panelExpense.setEnabled(status);
+        txtQty.setEnabled(status);
+        txtComAmt.setEnabled(status);
         txtPurDate.setEnabled(status);
         txtCus.setEnabled(status);
         txtLocation.setEnabled(status);
@@ -826,6 +840,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         txtReference.setEnabled(status);
         txtComAmt.setEnabled(status);
         txtComPercent.setEnabled(status);
+        txtBatchNo.setEnabled(status);
         observer.selected("save", status);
         observer.selected("print", status);
     }
@@ -955,6 +970,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         purTableModel.clear();
         String vouNo = g.getKey().getVouNo();
         Integer deptId = g.getDeptId();
+        String batchNo = g.getBatchNo();
         inventoryRepo.findGRN(vouNo).subscribe((grn) -> {
             batchAutoCompeter.setBatch(grn);
             btnBatch.setText(grn.getBatchNo() == null ? "Batch" : "View");
@@ -963,25 +979,49 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         trader.subscribe((tt) -> {
             traderAutoCompleter.setTrader(tt);
         });
-        inventoryRepo.getGRNDetail(vouNo, deptId).subscribe((t) -> {
-            t.forEach((sd) -> {
-                PurHisDetail pd = new PurHisDetail();
-                pd.setStockCode(sd.getStockCode());
-                pd.setUserCode(sd.getUserCode());
-                pd.setStockName(sd.getStockName());
-                pd.setRelName(sd.getRelName());
-                pd.setAvgQty(0.0f);
-                pd.setQty(sd.getQty());
-                pd.setUnitCode(sd.getUnit());
-                pd.setPrice(0.0f);
-                pd.setAmount(0.0f);
-                pd.setLocCode(sd.getLocCode());
-                pd.setLocName(sd.getLocName());
-                purTableModel.addPurchase(pd);
+        txtRemark.setText(g.getRemark());
+        if (batchDialog.getChkGRN().isSelected()) {
+            inventoryRepo.getGRNDetail(vouNo, deptId).subscribe((t) -> {
+                t.forEach((sd) -> {
+                    PurHisDetail pd = new PurHisDetail();
+                    pd.setStockCode(sd.getStockCode());
+                    pd.setUserCode(sd.getUserCode());
+                    pd.setStockName(sd.getStockName());
+                    pd.setRelName(sd.getRelName());
+                    pd.setAvgQty(0.0f);
+                    pd.setQty(sd.getQty());
+                    pd.setUnitCode(sd.getUnit());
+                    pd.setPrice(0.0f);
+                    pd.setAmount(0.0f);
+                    pd.setLocCode(sd.getLocCode());
+                    pd.setLocName(sd.getLocName());
+                    purTableModel.addPurchase(pd);
+                });
+                purTableModel.addNewRow();
+                calculateTotalAmount(false);
             });
-            purTableModel.addNewRow();
-            calculateTotalAmount(false);
-        });
+        } else if (batchDialog.getChkSale().isSelected()) {
+            boolean detail = Util1.getBoolean(ProUtil.getProperty(ProUtil.P_BATCH_DETAIL));
+            inventoryRepo.getSaleByBatch(batchNo, detail).subscribe((t) -> {
+                t.forEach((sd) -> {
+                    PurHisDetail pd = new PurHisDetail();
+                    pd.setStockCode(sd.getStockCode());
+                    pd.setUserCode(sd.getUserCode());
+                    pd.setStockName(sd.getStockName());
+                    pd.setRelName(sd.getRelName());
+                    pd.setAvgQty(0.0f);
+                    pd.setQty(sd.getQty());
+                    pd.setUnitCode(sd.getUnitCode());
+                    pd.setPrice(sd.getPrice());
+                    pd.setAmount(sd.getAmount());
+                    pd.setLocCode(sd.getLocCode());
+                    pd.setLocName(sd.getLocName());
+                    purTableModel.addPurchase(pd);
+                });
+                purTableModel.addNewRow();
+                calculateTotalAmount(false);
+            });
+        }
 
     }
 

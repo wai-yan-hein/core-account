@@ -256,13 +256,13 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
                             "Authentication error.", JOptionPane.ERROR_MESSAGE);
                     loginAttempt++;
                 }
+                if (loginAttempt >= 3) {
+                    this.dispose();
+                }
             });
 
         }
 
-        if (loginAttempt >= 3) {
-            this.dispose();
-        }
     }
 
     public void clear() {
