@@ -10,6 +10,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  *
@@ -23,7 +24,9 @@ public class SaleExpense {
 
     @EmbeddedId
     private SaleExpenseKey key;
-    private transient String expenseName;
     @Column(name = "amount")
     private Float amount;
+    @Transient
+    private String expenseName;
+
 }

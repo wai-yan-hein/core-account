@@ -97,6 +97,8 @@ public class SaleHis {
     private String carNo;
     @Column(name = "grn_vou_no")
     private String grnVouNo;
+    @Column(name = "expense")
+    private Float expense;
     @Transient
     private String localVouNo;
     private transient String status = "STATUS";

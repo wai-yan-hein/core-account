@@ -405,6 +405,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtVouTaxP.setValue(0);
         txtVouDiscP.setValue(0);
         txtGrandTotal.setValue(0);
+        txtExpense.setValue(0);
     }
 
     private void initTextBoxFormat() {
@@ -530,10 +531,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 clear();
                 if (print) {
                     String reportName = getReportName();
-                    String vouNo = t.getKey().getVouNo();
-                    String grnVouNo = t.getGrnVouNo();
-                    boolean local = t.isLocal();
-                    printVoucher(vouNo, grnVouNo, reportName, local);
+                    printVoucher(t, reportName);
                 }
             }, (e) -> {
                 observer.selected("save", true);
@@ -592,6 +590,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             saleHis.setMacId(Global.macId);
             saleHis.setOrderNo(txtOrderNo.getText());
             saleHis.setTraderCode(traderCode);
+            saleHis.setExpense(Util1.getFloat(txtExpense.getValue()));
             Project p = projectAutoCompleter.getProject();
             saleHis.setProjectNo(p == null ? null : p.getKey().getProjectNo());
             GRN g = batchAutoCompeter.getBatch();
@@ -796,6 +795,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 txtVouBalance.setValue(Util1.getFloat(saleHis.getBalance()));
                 txtGrandTotal.setValue(Util1.getFloat(saleHis.getGrandTotal()));
                 chkPaid.setSelected(saleHis.getPaid() > 0);
+                txtExpense.setValue(Util1.getFloat(saleHis.getExpense()));
                 if (saleHis.getProjectNo() != null) {
                     userRepo.find(new ProjectKey(saleHis.getProjectNo(), Global.compCode)).subscribe(t1 -> {
                         projectAutoCompleter.setProject(t1);
@@ -844,6 +844,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtVouDiscount.setEnabled(status);
         txtGrandTotal.setEnabled(status);
         txtReference.setEnabled(status);
+        txtExpense.setEnabled(status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
@@ -862,26 +863,31 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         saleTableModel.setListDetail(listSaleDetail);
     }
 
-    private void printVoucher(String vouNo, String grnVouNo, String reportName, boolean local) {
+    private void printVoucher(SaleHis sh, String reportName) {
+        String vouNo = sh.getKey().getVouNo();
+        String grnVouNo = sh.getGrnVouNo();
+        boolean local = sh.isLocal();
         if (local) {
             List<VSale> list = h2Repo.getSaleReport(vouNo);
             if (!list.isEmpty()) {
-                viewReport(Util1.listToByteArray(list), reportName);
+                viewReport(Util1.listToByteArray(list), sh, reportName);
             }
         } else {
             if (!Util1.isNullOrEmpty(grnVouNo)) {
                 Mono<List<SaleExpense>> m1 = inventoryRepo.getSaleExpense(vouNo);
                 Mono<List<VSale>> m2 = inventoryRepo.getSaleByBatchReport(vouNo, grnVouNo);
-                Mono.zip(m1, m2).doOnSuccess((tuple) -> {
+                Mono<Trader> m3 = inventoryRepo.findTrader(sh.getTraderCode());
+                Mono.zip(m1, m2, m3).doOnSuccess((tuple) -> {
                     try {
                         String reportPath = ProUtil.getReportPath() + "SaleByGRNReport.jasper";
-                        Map<String, Object> param = getDefaultParam();
+                        Map<String, Object> param = getDefaultParam(sh);
                         JsonNode jn1 = new ObjectMapper().readTree(Util1.gson.toJson(tuple.getT1()));
                         JsonDataSource d1 = new JsonDataSource(jn1, null) {
                         };
                         JsonNode jn2 = new ObjectMapper().readTree(Util1.gson.toJson(tuple.getT2()));
                         JsonDataSource d2 = new JsonDataSource(jn2, null) {
                         };
+                        param.put("p_trader_name", tuple.getT3().getTraderName());
                         param.put("p_sub_data", d1);
                         JasperPrint main = JasperFillManager.fillReport(reportPath, param, d2);
                         JasperViewer.viewReport(main, false);
@@ -892,7 +898,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
             } else {
                 inventoryRepo.getSaleReport(vouNo).subscribe((t) -> {
-                    viewReport(t, reportName);
+                    viewReport(t, sh, reportName);
                 }, (e) -> {
                     JOptionPane.showMessageDialog(this, e.getMessage());
                 });
@@ -900,7 +906,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         }
     }
 
-    private Map<String, Object> getDefaultParam() {
+    private Map<String, Object> getDefaultParam(SaleHis sh) {
         String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
         Map<String, Object> param = new HashMap<>();
         param.put("p_print_date", Util1.getTodayDateTime());
@@ -911,16 +917,23 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         param.put("p_balance", balance);
         param.put("p_prv_balance", prvBal);
         param.put("SUBREPORT_DIR", "report/");
+        param.put("p_vou_total", sh.getVouTotal());
+        param.put("p_vou_paid", sh.getPaid());
+        param.put("p_vou_balance", sh.getBalance());
+        param.put("p_expense", sh.getExpense());
+        param.put("p_vou_no", sh.getKey().getVouNo());
+        param.put("p_remark", sh.getRemark());
+        param.put("p_vou_date", Util1.toDateStr(sh.getVouDate(), Global.dateFormat));
         return param;
     }
 
-    private void viewReport(byte[] t, String reportName) {
+    private void viewReport(byte[] t, SaleHis sh, String reportName) {
         if (reportName != null) {
             try {
                 String reportPath = ProUtil.getReportPath() + reportName.concat(".jasper");
                 ByteArrayInputStream stream = new ByteArrayInputStream(t);
                 JsonDataSource ds = new JsonDataSource(stream);
-                JasperPrint jp = JasperFillManager.fillReport(reportPath, getDefaultParam(), ds);
+                JasperPrint jp = JasperFillManager.fillReport(reportPath, getDefaultParam(sh), ds);
                 log.info(ProUtil.getFontPath());
                 if (chkVou.isSelected()) {
                     JasperReportUtil.print(jp);
