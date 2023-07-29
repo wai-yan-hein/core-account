@@ -480,7 +480,12 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     balance = accountRepo.getTraderBalance(date, traderCode, milling.getCurCode(), Global.compCode);
                 }
             }
-            inventoryRepo.save(milling).subscribe((t) -> {
+            for (int i = 0; i < 10000; i++) {
+                inventoryRepo.save(milling).block();
+                log.info("going.");
+            }
+            log.info("end.");
+            /*inventoryRepo.save(milling).subscribe((t) -> {
                 progress.setIndeterminate(false);
                 clear();
 //                if (print) {
@@ -493,7 +498,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 observer.selected("save", true);
                 JOptionPane.showMessageDialog(this, e.getMessage());
                 progress.setIndeterminate(false);
-            });
+            });*/
         }
     }
 
@@ -648,7 +653,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         txtLoadExpense.setValue(expAmt);
         float costAmt = loadAmt + expAmt;
         txtLoadCost.setValue(costAmt);
-        
+
         listOutDetail = milingOutTableModel.getListDetail();
         // calculate price
         if (!firstRow) {
@@ -665,7 +670,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 milingOutTableModel.setObject(0, mod);
             }
         }
-        
+
         //cal output
         float outAmt = listOutDetail.stream().map(sdh -> Util1.getFloat(sdh.getAmount())).reduce(0.0f, (accumulator, _item) -> accumulator + _item);
         float outQty = listOutDetail.stream().map(s -> Util1.getFloat(s.getQty())).reduce(0.0f, (accumulator, _item) -> accumulator + _item);
@@ -674,8 +679,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         txtOutputWeight.setValue(outWt);
         txtOutputAmt.setValue(outAmt);
         txtWtLoss.setValue(loadWt - outWt);
-
-        
 
     }
 
