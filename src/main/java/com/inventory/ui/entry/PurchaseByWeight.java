@@ -211,6 +211,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     private void initPanelExpesne() {
         expenseTableModel.setObserver(this);
         expenseTableModel.setTable(tblExpense);
+        expenseTableModel.setTxtVouTotal(txtExpense);
         tblExpense.setModel(expenseTableModel);
         tblExpense.getTableHeader().setFont(Global.tblHeaderFont);
         tblExpense.setFont(Global.textFont);
@@ -441,7 +442,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             progress.setIndeterminate(true);
             observer.selected("save", false);
             ph.setListPD(purTableModel.getListDetail());
-            ph.setListExpense(expenseTableModel.getListDetail());
+            ph.setListExpense(expenseTableModel.getExpenseList());
             ph.setListDel(purTableModel.getDelList());
             inventoryRepo.save(ph).subscribe((t) -> {
                 clear();

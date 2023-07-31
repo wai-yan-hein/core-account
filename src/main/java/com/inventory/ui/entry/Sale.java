@@ -887,6 +887,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         JsonNode jn2 = new ObjectMapper().readTree(Util1.gson.toJson(tuple.getT2()));
                         JsonDataSource d2 = new JsonDataSource(jn2, null) {
                         };
+                        param.put("p_expense", Util1.getFloat(sh.getExpense()) * -1);
                         param.put("p_trader_name", tuple.getT3().getTraderName());
                         param.put("p_sub_data", d1);
                         JasperPrint main = JasperFillManager.fillReport(reportPath, param, d2);
