@@ -238,7 +238,6 @@ public final class COA3AutoCompleter implements KeyListener {
         if (popupOpen) {
             if (!popup.isVisible()) {
                 textComp.addKeyListener(this);
-                //popup.setVisible(false); 
                 if (textComp.isEnabled()) {
                     if (textComp instanceof JTextField) {
                         textComp.getDocument().addDocumentListener(documentListener);
@@ -246,13 +245,14 @@ public final class COA3AutoCompleter implements KeyListener {
 
                     textComp.registerKeyboardAction(acceptAction, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
                             JComponent.WHEN_FOCUSED);
+
+                    // Calculate the preferred x and y positions for the popup
                     if (x == 0) {
                         x = textComp.getWidth();
-                        y = textComp.getHeight();
+                        y = -200;
                     }
                     popup.show(textComp, x, y);
                     popupOpen = false;
-
                 } else {
                     popup.setVisible(false);
                     popupOpen = false;
@@ -261,6 +261,7 @@ public final class COA3AutoCompleter implements KeyListener {
         }
         textComp.requestFocus();
     }
+
     Action showAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {

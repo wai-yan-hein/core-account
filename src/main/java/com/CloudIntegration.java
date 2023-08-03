@@ -172,11 +172,11 @@ public class CloudIntegration {
 
     public void startDownload() {
         if (localDatabase) {
-            log.info("download start.");
+            observer.selected("download", "download start.");
             downloadUser();
             downloadInventory();
             downloadAccount();
-            log.info("download end.");
+            observer.selected("download", "download end.");
         }
     }
 
@@ -340,7 +340,7 @@ public class CloudIntegration {
                     key.setDeptId(gl.getKey().getDeptId());
                     glService.updateACK(key);
                 }, (e) -> {
-                    log.error("to uploadGl : " + e.getMessage());
+                    observer.selected("download", "to uploadGl : " + e.getMessage());
                 });
             });
         }
@@ -373,232 +373,232 @@ public class CloudIntegration {
     private void downloadChartofAccount() {
         log.info(coaService.getMaxDate());
         accountRepo.getUpdateChartOfAccountByDate(coaService.getMaxDate()).subscribe((t) -> {
-            log.info("downloadChartOfAccount list : " + t.size());
+            observer.selected("download", "downloadChartOfAccount list : " + t.size());
             t.forEach((coa) -> {
                 coaService.save(coa);
             });
-            log.info("downloadChartOfAccount done.");
+            observer.selected("download", "downloadChartOfAccount done.");
         }, (e) -> {
-            log.error(e.getMessage());
+            observer.selected("download", e.getMessage());
         });
     }
 
     private void downloadTraderAccount() {
         accountRepo.getUpdateTraderByDate(traderService.getMaxDate()).subscribe((t) -> {
-            log.info("downloadTrader list : " + t.size());
+            observer.selected("download", "downloadTrader list : " + t.size());
             t.forEach((tr) -> {
                 traderService.save(tr);
             });
-            log.info("downloadTrader done.");
+            observer.selected("download", "downloadTrader done.");
         }, (e) -> {
-            log.error(e.getMessage());
+            observer.selected("download", e.getMessage());
         });
     }
 
     private void downloadDepartmentAccount() {
         accountRepo.getUpdateDepartmentAByDate(departmentAService.getMaxDate()).subscribe((d) -> {
-            log.info("downloadDepartmentAccount list : " + d.size());
+            observer.selected("download", "downloadDepartmentAccount list : " + d.size());
             d.forEach((da) -> {
                 departmentAService.save(da);
             });
-            log.info("downloadDepartmentAccount done.");
+            observer.selected("download", "downloadDepartmentAccount done.");
         }, (e) -> {
-            log.error(e.getMessage());
+            observer.selected("download", e.getMessage());
         });
     }
 
     private void downloadAppUser() {
         userRepo.getAppUserByDate(userService.getMaxDate()).subscribe((u) -> {
-            log.info("downloadAppUser list : " + u.size());
+            observer.selected("download", "downloadAppUser list : " + u.size());
             u.forEach((a) -> {
                 userService.save(a);
             });
             observer.selected("download", "downloadAppUser done.");
         }, (err) -> {
             observer.selected("download", "offline.");
-            log.error(err.getMessage());
+            observer.selected("download", err.getMessage());
         });
     }
 
     private void downloadBusinessType() {
         userRepo.getBusinessTypeByDate(businessTypeService.getMaxDate()).subscribe((b) -> {
-            log.info("downloadAppUser list : " + b.size());
+            observer.selected("download", "downloadAppUser list : " + b.size());
             b.forEach((a) -> {
                 businessTypeService.save(a);
             });
             observer.selected("download", "downloadAppUser done.");
         }, (err) -> {
             observer.selected("download", "offline.");
-            log.error(err.getMessage());
+            observer.selected("download", err.getMessage());
         });
     }
 
     private void downloadCompanyInfo() {
         userRepo.getCompanyInfoByDate(companyInfoService.getMaxDate()).subscribe((c) -> {
-            log.info("downloadCompanyInfo list : " + c.size());
+            observer.selected("download", "downloadCompanyInfo list : " + c.size());
             c.forEach((a) -> {
                 companyInfoService.save(a);
             });
             observer.selected("download", "downloadCompanyInfo done.");
         }, (err) -> {
             observer.selected("download", "offline.");
-            log.error(err.getMessage());
+            observer.selected("download", err.getMessage());
         });
     }
 
     private void downloadCurrency() {
         userRepo.getCurrencyByDate(currencyService.getMaxDate()).subscribe((c) -> {
-            log.info("downloadCurrency list : " + c.size());
+            observer.selected("download", "downloadCurrency list : " + c.size());
             c.forEach((a) -> {
                 currencyService.save(a);
             });
             observer.selected("download", "downloadCurrency done.");
         }, (err) -> {
             observer.selected("download", "offline.");
-            log.error(err.getMessage());
+            observer.selected("download", err.getMessage());
         });
     }
 
     private void downloadDepartment() {
         userRepo.getDepartmentByDate(departmentService.getMaxDate()).subscribe((d) -> {
-            log.info("downloadDepartment list : " + d.size());
+            observer.selected("download", "downloadDepartment list : " + d.size());
             d.forEach((a) -> {
                 departmentService.save(a);
             });
             observer.selected("download", "downloadDepartment done.");
         }, (err) -> {
             observer.selected("download", "offline.");
-            log.error(err.getMessage());
+            observer.selected("download", err.getMessage());
         });
     }
 
     private void downloadExchangeRate() {
         userRepo.getExchangeRateByDate(exchangeRateService.getMaxDate()).subscribe((ex) -> {
-            log.info("downloadExchangeRate list : " + ex.size());
+            observer.selected("download", "downloadExchangeRate list : " + ex.size());
             ex.forEach((a) -> {
                 exchangeRateService.save(a);
             });
             observer.selected("download", "downloadExchangeRate done.");
         }, (err) -> {
             observer.selected("download", "offline.");
-            log.error(err.getMessage());
+            observer.selected("download", err.getMessage());
         });
     }
 
     private void downloadMachineInfo() {
         userRepo.getMachineInfoByDate(machineInfoService.getMaxDate()).subscribe((m) -> {
-            log.info("downloadMachineInfo list : " + m.size());
+            observer.selected("download", "downloadMachineInfo list : " + m.size());
             m.forEach((a) -> {
                 machineInfoService.save(a);
             });
             observer.selected("download", "downloadMachineInfo done.");
         }, (err) -> {
             observer.selected("download", "offline.");
-            log.error(err.getMessage());
+            observer.selected("download", err.getMessage());
         });
     }
 
     private void downloadMacProperty() {
         userRepo.getMacPropertyByDate(macPropertyService.getMaxDate()).subscribe((m) -> {
-            log.info("downloadMacProperty list : " + m.size());
+            observer.selected("download", "downloadMacProperty list : " + m.size());
             m.forEach((a) -> {
                 macPropertyService.save(a);
             });
             observer.selected("download", "downloadMacProperty done.");
         }, (err) -> {
             observer.selected("download", "offline.");
-            log.error(err.getMessage());
+            observer.selected("download", err.getMessage());
         });
     }
 
     private void downloadMenu() {
         userRepo.getMenuByDate(menuService.getMaxDate()).subscribe((m) -> {
-            log.info("downloadMenu list : " + m.size());
+            observer.selected("download", "downloadMenu list : " + m.size());
             m.forEach((a) -> {
                 menuService.save(a);
             });
             observer.selected("download", "downloadMenu done.");
         }, (err) -> {
             observer.selected("download", "offline.");
-            log.error(err.getMessage());
+            observer.selected("download", err.getMessage());
         });
     }
 
     private void downloadPC() {
         userRepo.getPCByDate(pcService.getMaxDate()).subscribe((p) -> {
-            log.info("downloadPC list : " + p.size());
+            observer.selected("download", "downloadPC list : " + p.size());
             p.forEach((a) -> {
                 pcService.save(a);
             });
             observer.selected("download", "downloadPC done.");
         }, (err) -> {
             observer.selected("download", "offline.");
-            log.error(err.getMessage());
+            observer.selected("download", err.getMessage());
         });
     }
 
     private void downloadPM() {
         userRepo.getPMByDate(pmService.getMaxDate()).subscribe((m) -> {
-            log.info("downloadPM list : " + m.size());
+            observer.selected("download", "downloadPM list : " + m.size());
             m.forEach((a) -> {
                 pmService.save(a);
             });
             observer.selected("download", "downloadPM done.");
         }, (err) -> {
             observer.selected("download", "offline.");
-            log.error(err.getMessage());
+            observer.selected("download", err.getMessage());
         });
     }
 
     private void downloadProject() {
         userRepo.getProjectByDate(pService.getMaxDate()).subscribe((p) -> {
-            log.info("downloadProject list : " + p.size());
+            observer.selected("download", "downloadProject list : " + p.size());
             p.forEach((a) -> {
                 pService.save(a);
             });
             observer.selected("download", "downloadPM done.");
         }, (err) -> {
             observer.selected("download", "offline.");
-            log.error(err.getMessage());
+            observer.selected("download", err.getMessage());
         });
     }
 
     private void downloadRole() {
         userRepo.getRoleByDate(roleService.getMaxDate()).subscribe((r) -> {
-            log.info("downloadRole list : " + r.size());
+            observer.selected("download", "downloadRole list : " + r.size());
             r.forEach((a) -> {
                 roleService.save(a);
             });
             observer.selected("download", "downloadRole done.");
         }, (err) -> {
             observer.selected("download", "offline.");
-            log.error(err.getMessage());
+            observer.selected("download", err.getMessage());
         });
     }
 
     private void downloadRoleProperty() {
         userRepo.getRolePropByDate(rpService.getMaxDate()).subscribe((r) -> {
-            log.info("downloadRoleProperty list : " + r.size());
+            observer.selected("download", "downloadRoleProperty list : " + r.size());
             r.forEach((a) -> {
                 rpService.save(a);
             });
             observer.selected("download", "downloadRoleProperty done.");
         }, (err) -> {
             observer.selected("download", "offline.");
-            log.error(err.getMessage());
+            observer.selected("download", err.getMessage());
         });
     }
 
     private void downloadSystemProperty() {
         userRepo.getSystemPropertyByDate(sysPropertyService.getMaxDate()).subscribe((r) -> {
-            log.info("downloadSystemProperty list : " + r.size());
+            observer.selected("download", "downloadSystemProperty list : " + r.size());
             r.forEach((a) -> {
                 sysPropertyService.save(a);
             });
             observer.selected("download", "downloadSystemProperty done.");
         }, (err) -> {
             observer.selected("download", "offline.");
-            log.error(err.getMessage());
+            observer.selected("download", err.getMessage());
         });
     }
 
@@ -618,134 +618,134 @@ public class CloudIntegration {
 
     private void downloadPriceOption() {
         inventoryRepo.getUpdatePriceOption(priceOptionService.getMaxDate()).subscribe((t) -> {
-            log.info("downloadPriceOption list : " + t.size());
+            observer.selected("download", "downloadPriceOption list : " + t.size());
             t.forEach((s) -> {
                 priceOptionService.save(s);
             });
-            log.info("downloadPriceOption done.");
+            observer.selected("download", "downloadPriceOption done.");
         }, (e) -> {
-            log.error(e.getMessage());
+            observer.selected("download", e.getMessage());
         });
     }
 
     private void downloadVouStatus() {
         inventoryRepo.getUpdateVouStatus(vouStatusService.getMaxDate()).subscribe((t) -> {
-            log.info("downloadVouStatus list : " + t.size());
+            observer.selected("download", "downloadVouStatus list : " + t.size());
             t.forEach((s) -> {
                 vouStatusService.save(s);
             });
-            log.info("downloadVouStatus done.");
+            observer.selected("download", "downloadVouStatus done.");
         }, (e) -> {
-            log.error(e.getMessage());
+            observer.selected("download", e.getMessage());
         });
     }
 
     private void downloadInvTrader() {
         inventoryRepo.getUpdateTrader(traderInvService.getMaxDate()).subscribe((t) -> {
-            log.info("downloadInvTrader list : " + t.size());
+            observer.selected("download", "downloadInvTrader list : " + t.size());
             t.forEach((s) -> {
                 traderInvService.save(s);
             });
-            log.info("downloadInvTrader done.");
+            observer.selected("download", "downloadInvTrader done.");
         }, (e) -> {
-            log.error(e.getMessage());
+            observer.selected("download", e.getMessage());
         });
     }
 
     private void downloadSaleMan() {
         inventoryRepo.getUpdateSaleMan(saleManService.getMaxDate()).subscribe((t) -> {
-            log.info("downloadSaleMan list : " + t.size());
+            observer.selected("download", "downloadSaleMan list : " + t.size());
             t.forEach((s) -> {
                 saleManService.save(s);
             });
-            log.info("downloadSaleMan done.");
+            observer.selected("download", "downloadSaleMan done.");
         }, (e) -> {
-            log.error(e.getMessage());
+            observer.selected("download", e.getMessage());
         });
     }
 
     private void downloadLocation() {
         inventoryRepo.getUpdateLocation(locationService.getMaxDate()).subscribe((t) -> {
-            log.info("downloadLocation list : " + t.size());
+            observer.selected("download", "downloadLocation list : " + t.size());
             t.forEach((s) -> {
                 locationService.save(s);
             });
-            log.info("downloadLocation done.");
+            observer.selected("download", "downloadLocation done.");
         }, (e) -> {
-            log.error(e.getMessage());
+            observer.selected("download", e.getMessage());
         });
     }
 
     private void downloadRelation() {
         inventoryRepo.getUpdateRelation(relationService.getMaxDate()).subscribe((t) -> {
-            log.info("downloadRelation list : " + t.size());
+            observer.selected("download", "downloadRelation list : " + t.size());
             t.forEach((s) -> {
                 relationService.save(s);
             });
-            log.info("downloadRelation done.");
+            observer.selected("download", "downloadRelation done.");
         }, (e) -> {
-            log.error(e.getMessage());
+            observer.selected("download", e.getMessage());
         });
     }
 
     private void downloadUnit() {
         inventoryRepo.getUpdateUnit(stockService.getMaxDate()).subscribe((t) -> {
-            log.info("downloadUnit list : " + t.size());
+            observer.selected("download", "downloadUnit list : " + t.size());
             t.forEach((s) -> {
                 stockUnitService.save(s);
             });
-            log.info("downloadUnit done.");
+            observer.selected("download", "downloadUnit done.");
         }, (e) -> {
-            log.error(e.getMessage());
+            observer.selected("download", e.getMessage());
         });
     }
 
     private void downloadBrand() {
         inventoryRepo.getUpdateBrand(brandService.getMaxDate()).subscribe((t) -> {
-            log.info("downloadBrand list : " + t.size());
+            observer.selected("download", "downloadBrand list : " + t.size());
             t.forEach((s) -> {
                 brandService.save(s);
             });
-            log.info("downloadBrand done.");
+            observer.selected("download", "downloadBrand done.");
         }, (e) -> {
-            log.error(e.getMessage());
+            observer.selected("download", e.getMessage());
         });
     }
 
     private void downloadCategory() {
         inventoryRepo.getUpdateCategory(categoryService.getMaxDate()).subscribe((t) -> {
-            log.info("downloadCategory list : " + t.size());
+            observer.selected("download", "downloadCategory list : " + t.size());
             t.forEach((s) -> {
                 categoryService.save(s);
             });
-            log.info("downloadCategory done.");
+            observer.selected("download", "downloadCategory done.");
         }, (e) -> {
-            log.error(e.getMessage());
+            observer.selected("download", e.getMessage());
         });
     }
 
     private void downloadStockType() {
         inventoryRepo.getUpdateStockType(stockTypeService.getMaDate()).subscribe((t) -> {
-            log.info("downloadStockType list : " + t.size());
+            observer.selected("download", "downloadStockType list : " + t.size());
             t.forEach((s) -> {
                 stockTypeService.save(s);
             });
-            log.info("downloadStockType done.");
+            observer.selected("download", "downloadStockType done.");
         }, (e) -> {
-            log.error(e.getMessage());
+            observer.selected("download", e.getMessage());
         });
     }
 
     private void downloadStock() {
         String maxDate = stockService.getMaxDate();
         inventoryRepo.getUpdateStock(maxDate).subscribe((t) -> {
-            log.info("downloadStock list : " + t.size());
+            observer.selected("download", "downloadStock list : " + t.size());
             t.forEach((s) -> {
                 stockService.save(s);
             });
-            log.info("downloadStock done.");
+            observer.selected("download", "downloadStock done.");
         }, (e) -> {
-            log.error(e.getMessage());
+            observer.selected("download", e.getMessage());
         });
     }
 

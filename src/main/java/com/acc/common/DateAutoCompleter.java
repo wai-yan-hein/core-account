@@ -185,8 +185,7 @@ public final class DateAutoCompleter implements KeyListener, SelectionObserver {
                     String.format("%s%s%s", Util1.toDateStr(startDate, "yyyy-MM-dd", Global.dateFormat),
                             " to ", Util1.toDateStr(endDate, "yyyy-MM-dd", Global.dateFormat)));
         }
-
-        dateTableModel.setDateModel(date, row);
+        setDateModel(date);
         if (selectionObserver != null) {
             selectionObserver.selected("Date", "Date");
         }

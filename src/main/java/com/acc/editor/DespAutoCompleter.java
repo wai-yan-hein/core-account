@@ -12,7 +12,10 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -163,14 +166,16 @@ public final class DespAutoCompleter implements KeyListener {
         if (table.getSelectedRow() != -1) {
             desp = despModel.getRemark(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            ((JTextField) textComp).setText(desp.getDescription());
-            if (editor == null) {
-                if (observer != null) {
-                    observer.selected("Selected", desp.getDescription());
-                }
+        } else {
+            String text = textComp.getText();
+            desp = new VDescription(text);
+        }
+        ((JTextField) textComp).setText(desp.getDescription());
+        if (editor == null) {
+            if (observer != null) {
+                observer.selected("Selected", desp.getDescription());
             }
         }
-
         popup.setVisible(false);
         popupOpen = false;
         if (editor != null) {
@@ -212,7 +217,6 @@ public final class DespAutoCompleter implements KeyListener {
     }
 
     public void showPopup() {
-
         if (popupOpen) {
             if (!popup.isVisible()) {
                 textComp.addKeyListener(this);
@@ -223,13 +227,14 @@ public final class DespAutoCompleter implements KeyListener {
 
                     textComp.registerKeyboardAction(acceptAction, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
                             JComponent.WHEN_FOCUSED);
+
+                    // Get the location of the text component relative to its parent container
                     if (x == 0) {
                         x = textComp.getWidth();
                         y = textComp.getHeight();
                     }
                     popup.show(textComp, x, y);
                     popupOpen = false;
-
                 } else {
                     popup.setVisible(false);
                     popupOpen = false;
@@ -238,6 +243,7 @@ public final class DespAutoCompleter implements KeyListener {
         }
         textComp.requestFocus();
     }
+
     Action showAction = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {

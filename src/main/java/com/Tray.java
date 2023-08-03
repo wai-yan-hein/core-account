@@ -81,7 +81,9 @@ public class Tray {
 
     public void removeTray() {
         tray.remove(trayIcon);
-        Global.parentForm.setVisible(false);
+        if (Global.parentForm != null) {
+            Global.parentForm.setVisible(false);
+        }
     }
 
     public void showMessage(String message) {

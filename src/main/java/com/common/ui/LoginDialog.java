@@ -138,7 +138,6 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
             Global.macId = t.getMacId();
             setLocationRelativeTo(null);
             setVisible(true);
-
         }
     }
 

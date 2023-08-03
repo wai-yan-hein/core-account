@@ -60,7 +60,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class FinancialReport extends javax.swing.JPanel implements PanelControl, SelectionObserver {
 
-    private final ReportTableModel tableModel = new ReportTableModel("Fanancial Report");
+    private final ReportTableModel tableModel = new ReportTableModel("Financial Report");
     @Autowired
     private WebClient accountApi;
     @Autowired
