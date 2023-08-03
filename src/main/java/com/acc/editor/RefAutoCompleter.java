@@ -163,14 +163,15 @@ public final class RefAutoCompleter implements KeyListener {
         if (table.getSelectedRow() != -1) {
             ref = refModel.getRemark(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            ((JTextField) textComp).setText(ref.getDescription());
-            if (editor == null) {
-                if (observer != null) {
-                    observer.selected("Selected", ref.getDescription());
-                }
+        } else {
+            ref = new VDescription(textComp.getText());
+        }
+        ((JTextField) textComp).setText(ref.getDescription());
+        if (editor == null) {
+            if (observer != null) {
+                observer.selected("Selected", ref.getDescription());
             }
         }
-
         popup.setVisible(false);
         popupOpen = false;
         if (editor != null) {
