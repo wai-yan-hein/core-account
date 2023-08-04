@@ -36,7 +36,11 @@ public class OPHisDetail {
     @Column(name = "loc_code")
     private String locCode;
     @Column(name = "unit")
-    private String unitCode;
+    private String unitCode;    
+    @Column(name = "weight")
+    private Float weight;    
+    @Column(name = "weight_unit")
+    private String weightUnit;
     @Transient
     private String userCode;
     @Transient

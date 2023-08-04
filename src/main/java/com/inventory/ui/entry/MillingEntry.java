@@ -480,12 +480,12 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     balance = accountRepo.getTraderBalance(date, traderCode, milling.getCurCode(), Global.compCode);
                 }
             }
-            for (int i = 0; i < 10000; i++) {
-                inventoryRepo.save(milling).block();
-                log.info("going.");
-            }
-            log.info("end.");
-            /*inventoryRepo.save(milling).subscribe((t) -> {
+//            for (int i = 0; i < 10000; i++) {
+//                inventoryRepo.save(milling).block();
+//                log.info("going.");
+//            }
+//            log.info("end.");
+            inventoryRepo.save(milling).subscribe((t) -> {
                 progress.setIndeterminate(false);
                 clear();
 //                if (print) {
@@ -498,7 +498,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 observer.selected("save", true);
                 JOptionPane.showMessageDialog(this, e.getMessage());
                 progress.setIndeterminate(false);
-            });*/
+            });
         }
     }
 
