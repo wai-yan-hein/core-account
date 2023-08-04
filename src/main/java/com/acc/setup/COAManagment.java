@@ -23,11 +23,9 @@ import com.common.Util1;
 import com.user.model.Menu;
 import com.inventory.editor.MenuAutoCompleter;
 import com.inventory.model.CFont;
-import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.repo.UserRepo;
 import com.user.model.MenuKey;
-import java.awt.FileDialog;
 import java.awt.HeadlessException;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -92,8 +90,6 @@ public class COAManagment extends javax.swing.JPanel implements
     private UserRepo userRepo;
     @Autowired
     private AccountRepo accountRepo;
-    @Autowired
-    private InventoryRepo inventoryRepo;
     private MenuAutoCompleter completer;
     private TableRowSorter<TableModel> sorter;
     private JPopupMenu popupmenu;
@@ -570,20 +566,21 @@ public class COAManagment extends javax.swing.JPanel implements
 
     private void searchCOAStandard() {
         log.info("searchCOAStandard");
-        accountRepo.getChartOfAccount()
-                .collectList().subscribe((t) -> {
-                    standardCOATableModel.setListCOA(t);
-                }, (e) -> {
-                });
+        accountRepo.getChartOfAccount().subscribe((t) -> {
+            standardCOATableModel.setListCOA(t);
+        }, (e) -> {
+            log.error("searchCOAStandard : " + e.getMessage());
+        });
     }
 
     private void searchCOAView() {
-        log.info("searchCOAStandard");
-        accountRepo.getChartOfAccount()
-                .collectList().subscribe((t) -> {
-                    cOAViewTableModel.setListCOA(t);
-                }, (e) -> {
-                });
+        log.info("searchCOAView");
+        accountRepo.getChartOfAccount().subscribe((t) -> {
+            cOAViewTableModel.setListCOA(t);
+            txtRecord.setValue(t.size());
+        }, (e) -> {
+            log.error("searchCOAView : " + e.getMessage());
+        });
     }
 
     private void importDialog(ChartOfAccount coa) {
@@ -641,6 +638,9 @@ public class COAManagment extends javax.swing.JPanel implements
         tblCOA = new javax.swing.JTable();
         txtCOASearch = new javax.swing.JTextField();
         jButton2 = new javax.swing.JButton();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
+        txtRecord = new javax.swing.JFormattedTextField();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane3 = new javax.swing.JScrollPane();
         tblStandCOA = new javax.swing.JTable();
@@ -943,16 +943,47 @@ public class COAManagment extends javax.swing.JPanel implements
             }
         });
 
+        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel4.setFont(Global.lableFont);
+        jLabel4.setText("Record : ");
+
+        txtRecord.setEditable(false);
+        txtRecord.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtRecord.setFont(Global.lableFont);
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jScrollPane2)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addComponent(txtCOASearch, javax.swing.GroupLayout.PREFERRED_SIZE, 474, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtCOASearch, javax.swing.GroupLayout.PREFERRED_SIZE, 486, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton2)
                 .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -962,7 +993,9 @@ public class COAManagment extends javax.swing.JPanel implements
                     .addComponent(txtCOASearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 337, Short.MAX_VALUE))
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 304, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         tabMain.addTab("COA View", jPanel2);
@@ -1011,7 +1044,7 @@ public class COAManagment extends javax.swing.JPanel implements
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(tabMain, javax.swing.GroupLayout.DEFAULT_SIZE, 564, Short.MAX_VALUE)
+                .addComponent(tabMain)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -1141,9 +1174,11 @@ public class COAManagment extends javax.swing.JPanel implements
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
@@ -1159,6 +1194,7 @@ public class COAManagment extends javax.swing.JPanel implements
     private javax.swing.JTextField txtCurrency;
     private javax.swing.JTextField txtMenu;
     private javax.swing.JTextField txtName;
+    private javax.swing.JFormattedTextField txtRecord;
     private javax.swing.JTextField txtSysCode;
     private javax.swing.JTextField txtUsrCode;
     // End of variables declaration//GEN-END:variables

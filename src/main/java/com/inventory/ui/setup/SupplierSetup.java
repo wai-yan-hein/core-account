@@ -709,7 +709,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
     private void btnGroupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGroupActionPerformed
         // TODO add your handling code here:
         inventoryRepo.getTraderGroup().subscribe((t) -> {
-            TraderGroupDialog dialog = new TraderGroupDialog();
+            TraderGroupDialog dialog = new TraderGroupDialog(Global.parentForm);
             dialog.setListGroup(t);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.initMain();

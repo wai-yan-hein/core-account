@@ -53,6 +53,7 @@ public class ProUtil {
     public static final String BATCH_SALE = "batch.sale";
     public static final String BATCH_GRN = "batch.grn";
     public static final String P_GRN_REPORT = "purchase.grn.report";
+    public static final String PAYMENT_EDIT = "payment.edit";
 
     public static String getFontPath() {
         return Global.hmRoleProperty.get("font.path");
@@ -64,6 +65,10 @@ public class ProUtil {
 
     public static boolean isSaleEdit() {
         return Util1.getBoolean(Global.hmRoleProperty.get("sale.voucher.edit"));
+    }
+
+    public static boolean isPaymentEdit() {
+        return Util1.getBoolean(Global.hmRoleProperty.get(ProUtil.PAYMENT_EDIT));
     }
 
     public static boolean isPurchaseEdit() {

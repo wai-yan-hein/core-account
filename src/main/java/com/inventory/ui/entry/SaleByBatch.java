@@ -431,6 +431,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
             saleHis.setStatus(lblStatus.getText());
             saleHis.setVouDate(Util1.convertToLocalDateTime(txtSaleDate.getDate()));
             saleHis.setMacId(Global.macId);
+            saleHis.setExpense(0.0f);
             if (lblStatus.getText().equals("NEW")) {
                 SaleHisKey key = new SaleHisKey();
                 key.setCompCode(Global.compCode);

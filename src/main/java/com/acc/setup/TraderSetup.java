@@ -7,6 +7,8 @@ package com.acc.setup;
 
 import com.repo.AccountRepo;
 import com.acc.common.TraderATableModel;
+import com.acc.common.TraderGroupComboModel;
+import com.acc.dialog.TraderImportDialog;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.model.TraderA;
 import com.acc.model.TraderAKey;
@@ -15,7 +17,7 @@ import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.inventory.ui.setup.dialog.CustomerImportDialog;
+import com.inventory.model.TraderGroup;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
@@ -30,6 +32,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.RowFilter;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
@@ -51,11 +54,13 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
     private TraderA trader = new TraderA();
     private final TraderATableModel traderATableModel = new TraderATableModel();
     private COA3AutoCompleter cOAAutoCompleter;
+    private final TraderGroupComboModel comboModel = new TraderGroupComboModel();
     @Autowired
     private AccountRepo accountRepo;
     private SelectionObserver observer;
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
+    private TraderAGroupDialog dialog;
 
     public JProgressBar getProgress() {
         return progress;
@@ -112,6 +117,10 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
     private void initCombo() {
         cOAAutoCompleter = new COA3AutoCompleter(txtAccount, accountRepo, null, false, 3);
         cOAAutoCompleter.setCoa(null);
+        accountRepo.getTraderGroup().subscribe((t) -> {
+            comboModel.setData(t);
+            cboGroup.setModel(comboModel);
+        });
     }
 
     private void initTable() {
@@ -122,6 +131,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         tblCustomer.getColumnModel().getColumn(2).setPreferredWidth(400);// Name
         tblCustomer.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblCustomer.setDefaultRenderer(Object.class, new TableCellRender());
+        tblCustomer.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCustomer.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
             if (e.getValueIsAdjusting()) {
                 if (tblCustomer.getSelectedRow() >= 0) {
@@ -159,11 +169,17 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         txtCusPhone.setText(trader.getPhone());
         txtCusAddress.setText(trader.getAddress());
         chkActive.setSelected(trader.isActive());
+        txtRemark.setText(trader.getRemark());
+        txtNRC.setText(trader.getNrc());
         txtCusName.requestFocus();
         lblStatus.setText("EDIT");
-        accountRepo.findCOA(trader.getAccount()).subscribe((coa) -> {
+        accountRepo.findCOA(trader.getAccount()).doOnSuccess((coa) -> {
             cOAAutoCompleter.setCoa(coa);
-        });
+        }).subscribe();
+        accountRepo.findTraderGroup(trader.getGroupCode()).doOnSuccess((t) -> {
+            comboModel.setSelectedItem(t);
+            cboGroup.repaint();
+        }).subscribe();
     }
 
     private boolean isValidEntry() {
@@ -185,6 +201,11 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
             trader.setActive(chkActive.isSelected());
             trader.setTraderType("T");
             trader.setAccount(cOAAutoCompleter.getCOA().getKey().getCoaCode());
+            trader.setRemark(txtRemark.getText());
+            trader.setNrc(txtNRC.getText());
+            if (comboModel.getSelectedItem() instanceof TraderGroup g) {
+                trader.setGroupCode(g.getKey().getCompCode());
+            }
             if (lblStatus.getText().equals("NEW")) {
                 trader.setMacId(Global.macId);
                 trader.setCreatedBy(Global.loginUser.getUserCode());
@@ -212,7 +233,6 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
                     clear();
                 }
             });
-
         }
     }
 
@@ -229,6 +249,8 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         txtCusCode.requestFocus();
         lblRecord.setText(String.valueOf(traderATableModel.getListTrader().size()));
         cOAAutoCompleter.setCoa(null);
+        comboModel.setSelectedItem(null);
+        cboGroup.repaint();
     }
     private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
         @Override
@@ -247,6 +269,17 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         observer.selected("history", false);
         observer.selected("delete", true);
         observer.selected("refresh", true);
+    }
+
+    private void traderGroupDialog() {
+        if (dialog == null) {
+            dialog = new TraderAGroupDialog(Global.parentForm);
+            dialog.setAccountRepo(accountRepo);
+            dialog.initMain();
+        }
+        dialog.setListGroup(comboModel.getData());
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
     }
 
     /**
@@ -277,11 +310,19 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         jSeparator1 = new javax.swing.JSeparator();
         lblGroup1 = new javax.swing.JLabel();
         txtAccount = new javax.swing.JTextField();
+        lblGroup2 = new javax.swing.JLabel();
+        jButton2 = new javax.swing.JButton();
+        jLabel7 = new javax.swing.JLabel();
+        txtNRC = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
+        txtRemark = new javax.swing.JTextField();
+        cboGroup = new javax.swing.JComboBox<>();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblCustomer = new javax.swing.JTable();
+        txtFilter = new javax.swing.JTextField();
+        jPanel1 = new javax.swing.JPanel();
         jLabel6 = new javax.swing.JLabel();
         lblRecord = new javax.swing.JLabel();
-        txtFilter = new javax.swing.JTextField();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -368,6 +409,36 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         txtAccount.setFont(Global.textFont);
         txtAccount.setName("txtCreditTerm"); // NOI18N
 
+        lblGroup2.setFont(Global.lableFont);
+        lblGroup2.setText("Group");
+
+        jButton2.setFont(Global.lableFont);
+        jButton2.setText("...");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
+        jLabel7.setFont(Global.lableFont);
+        jLabel7.setText("NRC");
+
+        txtNRC.setFont(Global.textFont);
+        txtNRC.setName("txtCusEmail"); // NOI18N
+
+        jLabel8.setFont(Global.lableFont);
+        jLabel8.setText("Remark");
+
+        txtRemark.setFont(Global.textFont);
+        txtRemark.setName("txtCusAddress"); // NOI18N
+        txtRemark.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtRemarkKeyReleased(evt);
+            }
+        });
+
+        cboGroup.setFont(Global.textFont);
+
         javax.swing.GroupLayout panelEntryLayout = new javax.swing.GroupLayout(panelEntry);
         panelEntry.setLayout(panelEntryLayout);
         panelEntryLayout.setHorizontalGroup(
@@ -377,16 +448,20 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jSeparator1)
                     .addGroup(panelEntryLayout.createSequentialGroup()
-                        .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(lblStatus, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
-                            .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lblGroup1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
+                                .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(lblGroup1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE))
+                            .addComponent(lblGroup2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtCusEmail)
                             .addComponent(txtCusPhone)
@@ -396,11 +471,20 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
                             .addComponent(txtSysCode, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(chkActive, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(txtAccount)
+                            .addComponent(txtNRC)
+                            .addComponent(txtRemark)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelEntryLayout.createSequentialGroup()
-                                .addGap(0, 191, Short.MAX_VALUE)
-                                .addComponent(jButton1)))))
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(jButton1))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelEntryLayout.createSequentialGroup()
+                                .addComponent(cboGroup, 0, 213, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButton2)))))
                 .addContainerGap())
         );
+
+        panelEntryLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel1, jLabel10, jLabel2, jLabel3, jLabel4, jLabel5, lblGroup1, lblGroup2});
+
         panelEntryLayout.setVerticalGroup(
             panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelEntryLayout.createSequentialGroup()
@@ -426,12 +510,25 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
                     .addComponent(txtCusEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(txtNRC, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(txtCusAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblGroup1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8)
+                    .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(txtAccount)
+                    .addComponent(lblGroup1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblGroup2)
+                    .addComponent(jButton2)
+                    .addComponent(cboGroup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -440,12 +537,12 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
                 .addGroup(panelEntryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblStatus)
                     .addComponent(jButton1))
-                .addContainerGap(300, Short.MAX_VALUE))
+                .addContainerGap(203, Short.MAX_VALUE))
         );
 
         panelEntryLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {txtCusAddress, txtCusCode, txtCusEmail, txtCusName, txtCusPhone});
 
-        panelEntryLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel1, jLabel10, jLabel2, jLabel3, jLabel4, jLabel5, lblGroup1});
+        panelEntryLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel1, jLabel10, jLabel2, jLabel3, jLabel4, jLabel5});
 
         tblCustomer.setAutoCreateRowSorter(true);
         tblCustomer.setFont(Global.textFont);
@@ -469,12 +566,6 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         });
         jScrollPane2.setViewportView(tblCustomer);
 
-        jLabel6.setFont(Global.lableFont);
-        jLabel6.setText("Record :");
-
-        lblRecord.setFont(Global.lableFont);
-        lblRecord.setText("0");
-
         txtFilter.setFont(Global.textFont);
         txtFilter.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
@@ -487,6 +578,35 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
             }
         });
 
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel6.setFont(Global.lableFont);
+        jLabel6.setText("Record :");
+
+        lblRecord.setFont(Global.lableFont);
+        lblRecord.setText("0");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel6)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lblRecord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel6)
+                    .addComponent(lblRecord))
+                .addContainerGap())
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -494,12 +614,9 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 394, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel6)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(lblRecord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(txtFilter))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+                    .addComponent(txtFilter)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -513,12 +630,9 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 476, Short.MAX_VALUE)
+                        .addComponent(jScrollPane2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel6)
-                            .addComponent(lblRecord))
-                        .addGap(1, 1, 1)))
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -539,7 +653,7 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        CustomerImportDialog dialog = new CustomerImportDialog(Global.parentForm);
+        TraderImportDialog dialog = new TraderImportDialog(Global.parentForm);
         dialog.setAccountRepo(accountRepo);
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
@@ -569,9 +683,20 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         txtFilter.selectAll();
     }//GEN-LAST:event_txtFilterFocusGained
 
+    private void txtRemarkKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtRemarkKeyReleased
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtRemarkKeyReleased
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        traderGroupDialog();
+    }//GEN-LAST:event_jButton2ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox<TraderGroup> cboGroup;
     private javax.swing.JCheckBox chkActive;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
@@ -579,9 +704,13 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblGroup1;
+    private javax.swing.JLabel lblGroup2;
     private javax.swing.JLabel lblRecord;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelEntry;
@@ -593,6 +722,8 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
     private javax.swing.JTextField txtCusName;
     private javax.swing.JTextField txtCusPhone;
     private javax.swing.JTextField txtFilter;
+    private javax.swing.JTextField txtNRC;
+    private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtSysCode;
     // End of variables declaration//GEN-END:variables
 

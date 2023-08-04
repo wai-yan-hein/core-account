@@ -391,7 +391,6 @@ public class InventoryRepo {
         TraderGroupKey key = new TraderGroupKey();
         key.setGroupCode(Util1.isNull(code, "-"));
         key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
         return inventoryApi.post()
                 .uri("/setup/find-trader-group")
                 .body(Mono.just(key), TraderGroupKey.class)
@@ -2877,7 +2876,7 @@ public class InventoryRepo {
                 .bodyToFlux(VPurchase.class)
                 .collectList();
     }
-    
+
     public Mono<byte[]> getGRNReport(String vouNo) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/report/get-grn-report")
@@ -2892,7 +2891,6 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
-
 
     public Mono<List<VPurchase>> getPurchaseWeightReport(String vouNo, String batchNo) {
         return inventoryApi.get()

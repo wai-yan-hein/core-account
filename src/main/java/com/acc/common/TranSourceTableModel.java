@@ -22,8 +22,9 @@ public class TranSourceTableModel extends AbstractTableModel {
     private List<Gl> listAutoText = new ArrayList<>();
     private final String[] columnNames = {"Transource"};
 
-    public TranSourceTableModel(List<Gl> listAutoText) {
+    public void setListAutoText(List<Gl> listAutoText) {
         this.listAutoText = listAutoText;
+        fireTableDataChanged();
     }
 
     @Override

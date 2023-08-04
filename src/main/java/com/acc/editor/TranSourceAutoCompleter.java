@@ -17,7 +17,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
@@ -47,40 +46,42 @@ public final class TranSourceAutoCompleter implements KeyListener {
     private JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private TranSourceTableModel refModel;
+    private TranSourceTableModel refModel = new TranSourceTableModel();
     private Gl ref;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
     boolean popupOpen = false;
-    private SelectionObserver selectionObserver;
+    private SelectionObserver observer;
+    private boolean filter;
 
-    public SelectionObserver getSelectionObserver() {
-        return selectionObserver;
-    }
-
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
-    }
-
-    //private CashFilter cashFilter = Global.allCash;
-    public TranSourceAutoCompleter() {
-    }
-
-    public TranSourceAutoCompleter(JTextComponent comp, List<Gl> list,
-            AbstractCellEditor editor, boolean filter) {
-        this.textComp = comp;
-        this.editor = editor;
+    public void setListGl(List<Gl> list) {
         if (filter) {
-            list = new ArrayList<>(list);
             Gl v = new Gl("All");
             list.add(0, v);
             setAutoText(v);
         }
+        refModel.setListAutoText(list);
+        if (!list.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
+        }
+    }
+
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
+    }
+
+    public TranSourceAutoCompleter() {
+    }
+
+    public TranSourceAutoCompleter(JTextComponent comp,
+            AbstractCellEditor editor, boolean filter) {
+        this.textComp = comp;
+        this.editor = editor;
+        this.filter = filter;
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
-        refModel = new TranSourceTableModel(list);
         table.setModel(refModel);
         table.setSize(25, 25);
         table.getTableHeader().setFont(Global.lableFont);
@@ -88,7 +89,6 @@ public final class TranSourceAutoCompleter implements KeyListener {
         table.setRowHeight(Global.tblRowHeight);
         table.setDefaultRenderer(Object.class, new TableCellRender());
         table.setSelectionForeground(Color.WHITE);
-
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);
@@ -158,12 +158,6 @@ public final class TranSourceAutoCompleter implements KeyListener {
         });
 
         table.setRequestFocusEnabled(false);
-
-        if (list != null) {
-            if (!list.isEmpty()) {
-                table.setRowSelectionInterval(0, 0);
-            }
-        }
     }
 
     public void mouseSelect() {
@@ -172,8 +166,8 @@ public final class TranSourceAutoCompleter implements KeyListener {
                     table.getSelectedRow()));
             ((JTextField) textComp).setText(ref.getTranSource());
             if (editor == null) {
-                if (selectionObserver != null) {
-                    selectionObserver.selected("Selected", ref.getTranSource());
+                if (observer != null) {
+                    observer.selected("Selected", ref.getTranSource());
                 }
             }
         }

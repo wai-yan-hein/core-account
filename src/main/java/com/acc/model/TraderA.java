@@ -58,6 +58,10 @@ public class TraderA {
     private String userCode;
     @Column(name = "deleted")
     private boolean deleted;
+    @Column(name = "group_code")
+    private String groupCode;
+    @Column(name = "nrc")
+    private String nrc;
 
     public TraderA(TraderAKey key, String traderName) {
         this.key = key;
