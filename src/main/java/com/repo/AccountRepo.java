@@ -30,6 +30,8 @@ import com.common.Global;
 import com.common.ProUtil;
 import com.common.ReturnObject;
 import com.common.Util1;
+import com.inventory.model.TraderGroup;
+import com.inventory.model.TraderGroupKey;
 import com.model.VoucherInfo;
 import com.user.model.YearEnd;
 import java.util.List;
@@ -124,15 +126,17 @@ public class AccountRepo {
                 .collectList();
     }
 
-    public Flux<ChartOfAccount> getChartOfAccount() {
+    public Mono<List<ChartOfAccount>> getChartOfAccount() {
         if (localDatabase) {
-            return h2Repo.getChartofAccount();
+            return h2Repo.getChartofAccount().collectList();
         }
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-coa")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().bodyToFlux(ChartOfAccount.class);
+                .retrieve()
+                .bodyToFlux(ChartOfAccount.class)
+                .collectList();
     }
 
     public Flux<ChartOfAccount> getCOATree() {
@@ -741,6 +745,40 @@ public class AccountRepo {
                 .doOnError((e) -> {
                     log.error("getIntegrationVoucher :" + e.getMessage());
                 });
+
+    }
+
+    public Mono<List<TraderGroup>> getTraderGroup() {
+        return accountApi.get()
+                .uri(builder -> builder.path("/account/getTraderGroup")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(TraderGroup.class)
+                .collectList();
+    }
+
+    public Mono<TraderGroup> findTraderGroup(String groupCode) {
+        TraderGroupKey key = new TraderGroupKey();
+        key.setGroupCode(Util1.isNull(groupCode, "-"));
+        key.setCompCode(Global.compCode);
+        return accountApi.post()
+                .uri("/account/findTraderGroup")
+                .body(Mono.just(key), TraderGroupKey.class)
+                .retrieve()
+                .bodyToMono(TraderGroup.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<TraderGroup> saveTraderGroup(TraderGroup t) {
+        return accountApi.post()
+                .uri("/account/saveTraderGroup")
+                .body(Mono.just(t), TraderGroup.class)
+                .retrieve()
+                .bodyToMono(TraderGroup.class);
 
     }
 }

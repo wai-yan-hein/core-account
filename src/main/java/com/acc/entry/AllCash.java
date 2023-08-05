@@ -286,9 +286,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         userRepo.getDefaultCurrency().subscribe((c) -> {
             currencyAutoCompleter.setCurrency(c);
         });
+        tranSourceAutoCompleter = new TranSourceAutoCompleter(txtOption, null, true);
+        tranSourceAutoCompleter.setObserver(this);
         accountRepo.getTranSource().subscribe((t) -> {
-            tranSourceAutoCompleter = new TranSourceAutoCompleter(txtOption, t, null, true);
-            tranSourceAutoCompleter.setSelectionObserver(this);
+            tranSourceAutoCompleter.setListGl(t);
         }, (e) -> {
             log.error(e.getMessage());
         });
@@ -603,7 +604,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private String getTranSource() {
-        if (tranSourceAutoCompleter == null) {
+        if (tranSourceAutoCompleter == null || tranSourceAutoCompleter.getAutoText() == null) {
             return "-";
         }
         return tranSourceAutoCompleter.getAutoText().getTranSource().equals("All") ? "-"

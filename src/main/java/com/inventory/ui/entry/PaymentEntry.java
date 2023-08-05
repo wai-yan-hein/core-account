@@ -387,6 +387,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
         txtDifAmt.setValue(0);
         txtRecord.setValue(0);
         tableModel.clear();
+        lblStatus.setForeground(Color.green);
         lblStatus.setText("NEW");
         lblMessage.setText("");
         enableForm(true);
@@ -433,6 +434,11 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
             lblStatus.setText("DELETED");
             lblStatus.setForeground(Color.red);
             enableForm(false);
+        } else if (!ProUtil.isPaymentEdit()) {
+            lblStatus.setText("No Permission.");
+            lblStatus.setForeground(Color.RED);
+            enableForm(false);
+            observer.selected("print", true);
         } else {
             lblStatus.setText("EDIT");
             lblStatus.setForeground(Color.blue);
@@ -455,7 +461,10 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
         txtVouDate.setEnabled(status);
         cboCash.setEnabled(status);
         tblPayment.setEnabled(status);
+        txtCurrency.setEnabled(status);
         observer.selected("save", status);
+        observer.selected("delete", status);
+        observer.selected("print", status);
     }
 
     private void deletePayment() {

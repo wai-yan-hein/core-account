@@ -2,19 +2,16 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
  */
-package com.inventory.ui.setup.dialog;
+package com.acc.dialog;
 
+import com.acc.common.TraderAImportTableModel;
+import com.acc.model.TraderA;
+import com.acc.model.TraderAKey;
 import com.repo.AccountRepo;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.inventory.model.Region;
-import com.inventory.model.RegionKey;
-import com.inventory.model.Trader;
-import com.inventory.model.TraderKey;
-import com.repo.InventoryRepo;
-import com.inventory.ui.setup.dialog.common.TraderImportTableModel;
 import java.awt.Color;
 import java.awt.FileDialog;
 import java.io.FileReader;
@@ -36,11 +33,10 @@ import org.springframework.core.task.TaskExecutor;
  * @author Lenovo
  */
 @Slf4j
-public class CustomerImportDialog extends javax.swing.JDialog {
+public class TraderImportDialog extends javax.swing.JDialog {
 
-    private InventoryRepo inventoryRepo;
     private AccountRepo accountRepo;
-    private final TraderImportTableModel tableModel = new TraderImportTableModel();
+    private final TraderAImportTableModel tableModel = new TraderAImportTableModel();
     private TaskExecutor taskExecutor;
     private final HashMap<String, String> hmRegion = new HashMap<>();
 
@@ -60,20 +56,12 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         this.taskExecutor = taskExecutor;
     }
 
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
-
     /**
      * Creates new form CustomerImportDialog
      *
      * @param parent
      */
-    public CustomerImportDialog(JFrame parent) {
+    public TraderImportDialog(JFrame parent) {
         super(parent, true);
         initComponents();
         initTable();
@@ -99,12 +87,12 @@ public class CustomerImportDialog extends javax.swing.JDialog {
     }
 
     private void save() {
-        List<Trader> traders = tableModel.getListTrader();
+        List<TraderA> traders = tableModel.getListTrader();
         btnSave.setEnabled(false);
         progress.setIndeterminate(true);
         traders.forEach((trader) -> {
             try {
-                Trader t = inventoryRepo.saveTrader(trader).block();
+                TraderA t = accountRepo.saveTrader(trader).block();
                 lblLog.setText("Importing :" + t.getTraderName());
                 lblLog.setForeground(Color.black);
             } catch (Exception e) {
@@ -119,39 +107,8 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         btnSave.setEnabled(true);
     }
 
-    private String getRegion(String str, Integer deptId) {
-        if (hmRegion.isEmpty()) {
-            List<Region> list = inventoryRepo.getRegion().block();
-            if (list != null) {
-                list.forEach((t) -> {
-                    hmRegion.put(t.getRegionName(), t.getKey().getRegCode());
-                });
-            }
-        }
-        if (hmRegion.get(str) == null && !str.isEmpty()) {
-            Region reg = saveRegion(str, deptId);
-            hmRegion.put(reg.getRegionName(), reg.getKey().getRegCode());
-        }
-        return hmRegion.get(str);
-    }
-
-    private Region saveRegion(String str, Integer deptId) {
-        Region region = new Region();
-        region.setUserCode(Global.loginUser.getUserCode());
-        region.setRegionName(str);
-        RegionKey key = new RegionKey();
-        key.setCompCode(Global.compCode);
-        key.setRegCode(null);
-        region.setKey(key);
-        region.setDeptId(deptId);
-        region.setCreatedBy(Global.loginUser.getUserCode());
-        region.setCreatedDate(Util1.getTodayLocalDateTime());
-        region.setMacId(Global.macId);
-        return inventoryRepo.saveRegion(region).block();
-    }
-
     private void readFile(String path) {
-        List<Trader> listTrader = new ArrayList<>();
+        List<TraderA> listTrader = new ArrayList<>();
         try {
             progress.setIndeterminate(true);
             Reader in = new FileReader(path);
@@ -164,26 +121,23 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                     .build();
             Iterable<CSVRecord> records = csvFormat.parse(in);
             records.forEach((row) -> {
-                Trader t = new Trader();
+                TraderA t = new TraderA();
                 t.setTraderName(row.isMapped("Name") ? Util1.convertToUniCode(row.get("Name")) : "");
                 if (!t.getTraderName().equals("")) {
-                    TraderKey key = new TraderKey();
+                    TraderAKey key = new TraderAKey();
                     key.setCompCode(Global.compCode);
-                    t.setDeptId(Global.deptId);
                     t.setKey(key);
                     t.setUserCode(row.isMapped("UserCode") ? Util1.convertToUniCode(row.get("UserCode")) : "");
                     t.setAddress(row.isMapped("Address") ? Util1.convertToUniCode(row.get("Address")) : "");
                     t.setPhone(row.isMapped("PhoneNo") ? Util1.convertToUniCode(row.get("PhoneNo")) : "");
-                    t.setContactPerson(row.isMapped("ContactPerson") ? Util1.convertToUniCode(row.get("ContactPerson")) : "");
                     t.setEmail(row.isMapped("Email") ? row.get("Email") : "");
-                    t.setRegCode(row.isMapped("Region") ? getRegion(row.get("Region"), t.getDeptId()) : "");
                     t.setRemark(row.isMapped("Remark") ? row.get("Remark") : "");
-                    t.setNrc(row.isMapped("Nrc") ? row.get("Nrc") : "");
+                    t.setNrc(row.isMapped("Nrc") ? Util1.convertToUniCode(row.get("Nrc")) : "");
                     t.setActive(Boolean.TRUE);
                     t.setCreatedDate(LocalDateTime.now());
                     t.setCreatedBy(Global.loginUser.getUserCode());
                     t.setMacId(Global.macId);
-                    t.setType(getImportType());
+                    t.setTraderType(getImportType());
                     t.setAccount(getAccount());
                     listTrader.add(t);
                 }
@@ -214,9 +168,9 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         String type = cboType.getSelectedItem().toString();
         return switch (type) {
             case "Customer" ->
-                "CUS";
+                "C";
             case "Supplier" ->
-                "SUP";
+                "S";
             default ->
                 null;
         };

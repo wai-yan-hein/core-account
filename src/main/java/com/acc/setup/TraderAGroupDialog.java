@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.inventory.ui.setup.dialog;
+package com.acc.setup;
 
 import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.inventory.model.TraderGroup;
 import com.inventory.model.TraderGroupKey;
-import com.repo.InventoryRepo;
 import com.inventory.ui.setup.common.TraderGroupTableModel;
+import com.repo.AccountRepo;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -26,42 +26,38 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
-public class TraderGroupDialog extends javax.swing.JDialog implements KeyListener {
+@Slf4j
+public class TraderAGroupDialog extends javax.swing.JDialog implements KeyListener {
 
     private int selectRow = - 1;
     private TraderGroup group = new TraderGroup();
     private final TraderGroupTableModel tableModel = new TraderGroupTableModel();
-    private InventoryRepo inventoryRepo;
+    private AccountRepo accountRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
     private List<TraderGroup> listGroup = new ArrayList<>();
 
-    public List<TraderGroup> getListGroup() {
-        return listGroup;
-    }
-
     public void setListGroup(List<TraderGroup> listGroup) {
+        tableModel.setListGroup(listGroup);
         this.listGroup = listGroup;
     }
 
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
     }
 
     /**
      * Creates new form ItemTypeSetupDialog
+     *
      * @param frame
      */
-    public TraderGroupDialog(JFrame frame) {
+    public TraderAGroupDialog(JFrame frame) {
         super(frame, false);
         initComponents();
         initKeyListener();
@@ -71,7 +67,6 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
     public void initMain() {
         swrf = new StartWithRowFilter(txtFilter);
         initTable();
-        searchCategory();
         txtUserCode.requestFocus();
     }
 
@@ -117,7 +112,7 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
 
     private void save() {
         if (isValidEntry()) {
-            inventoryRepo.saveTraderGroup(group).subscribe((t) -> {
+            accountRepo.saveTraderGroup(group).subscribe((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
                     listGroup.set(selectRow, t);
                 } else {
@@ -125,7 +120,6 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
                 }
                 clear();
             });
-
         }
     }
 
@@ -133,7 +127,6 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
         txtUserCode.setText(null);
         txtFilter.setText(null);
         txtName.setText(null);
-        txtAccount.setText(null);
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.green);
         group = new TraderGroup();
@@ -182,11 +175,9 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
         jLabel3 = new javax.swing.JLabel();
         txtUserCode = new javax.swing.JTextField();
         jSeparator1 = new javax.swing.JSeparator();
-        jLabel4 = new javax.swing.JLabel();
-        txtAccount = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Group Setup");
+        setTitle("Trader Group Setup");
         setModalityType(java.awt.Dialog.ModalityType.TOOLKIT_MODAL);
 
         tblVou.setFont(Global.textFont);
@@ -268,22 +259,6 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
             }
         });
 
-        jLabel4.setFont(Global.lableFont);
-        jLabel4.setText("Account");
-
-        txtAccount.setFont(Global.textFont);
-        txtAccount.setName("txtName"); // NOI18N
-        txtAccount.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                txtAccountFocusGained(evt);
-            }
-        });
-        txtAccount.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtAccountActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -295,13 +270,11 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(12, 12, 12)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtName, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtUserCode, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtAccount, javax.swing.GroupLayout.Alignment.LEADING)))
+                            .addComponent(txtUserCode, javax.swing.GroupLayout.Alignment.LEADING)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -325,17 +298,13 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
                     .addComponent(jLabel2)
                     .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnClear)
                     .addComponent(btnSave)
                     .addComponent(lblStatus))
-                .addContainerGap(237, Short.MAX_VALUE))
+                .addContainerGap(265, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -409,14 +378,6 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
         // TODO add your handling code here:
     }//GEN-LAST:event_txtUserCodeActionPerformed
 
-    private void txtAccountFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtAccountFocusGained
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtAccountFocusGained
-
-    private void txtAccountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAccountActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtAccountActionPerformed
-
     /**
      * @param args the command line arguments
      */
@@ -426,13 +387,11 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
     private javax.swing.JButton btnSave;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JTable tblVou;
-    private javax.swing.JTextField txtAccount;
     private javax.swing.JTextField txtFilter;
     private javax.swing.JTextField txtName;
     private javax.swing.JTextField txtUserCode;

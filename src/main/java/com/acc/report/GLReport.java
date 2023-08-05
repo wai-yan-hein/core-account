@@ -44,7 +44,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import net.coderazzi.filters.gui.AutoChoices;
 import net.coderazzi.filters.gui.TableFilterHeader;
 import net.sf.jasperreports.engine.JRException;
@@ -224,7 +223,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private String getTranSource() {
-        if (tranSourceAutoCompleter == null) {
+        if (tranSourceAutoCompleter == null || tranSourceAutoCompleter.getAutoText() == null) {
             return "-";
         }
         return tranSourceAutoCompleter.getAutoText().getTranSource().equals("All") ? "-"
@@ -324,9 +323,10 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         cOAAutoCompleter.setSelectionObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
         projectAutoCompleter.setObserver(this);
+        tranSourceAutoCompleter = new TranSourceAutoCompleter(txtOption, null, true);
+        tranSourceAutoCompleter.setObserver(this);
         accountRepo.getTranSource().subscribe((t) -> {
-            tranSourceAutoCompleter = new TranSourceAutoCompleter(txtOption, t, null, true);
-            tranSourceAutoCompleter.setSelectionObserver(this);
+            tranSourceAutoCompleter.setListGl(t);
         }, (e) -> {
             log.error(e.getMessage());
         });
