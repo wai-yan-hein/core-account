@@ -221,7 +221,9 @@ public class OpeningTableModel extends AbstractTableModel {
                 }
                 case 5 -> {
                     if(value!= null) {
-                        record.setWeightUnit(value.toString());
+                        if (value instanceof StockUnit unit) {
+                            record.setWeightUnit(unit.getKey().getUnitCode());
+                        }
                     }
                     parent.setColumnSelectionInterval(6, 6);
                 }
