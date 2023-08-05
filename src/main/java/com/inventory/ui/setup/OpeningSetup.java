@@ -198,7 +198,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     private void saveOpening() {
         if (isValidEntry() && openingTableModel.isValidEntry()) {
             progress.setIndeterminate(true);
-            observer.selected("save", false);
+//            observer.selected("save", false);
             if (lblStatus.getText().equals("NEW")) {
                 OPHisKey key = new OPHisKey();
                 key.setCompCode(Global.compCode);
