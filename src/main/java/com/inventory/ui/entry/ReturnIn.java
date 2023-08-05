@@ -188,19 +188,21 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         tblRet.getColumnModel().getColumn(2).setPreferredWidth(60);//rel
         tblRet.getColumnModel().getColumn(3).setPreferredWidth(60);//Location
         tblRet.getColumnModel().getColumn(4).setPreferredWidth(60);//qty
-        tblRet.getColumnModel().getColumn(5).setPreferredWidth(1);//avg wt
-        tblRet.getColumnModel().getColumn(6).setPreferredWidth(1);//unit
-        tblRet.getColumnModel().getColumn(7).setPreferredWidth(1);//price
-        tblRet.getColumnModel().getColumn(8).setPreferredWidth(40);//amt
+        tblRet.getColumnModel().getColumn(5).setPreferredWidth(1);//unit
+        tblRet.getColumnModel().getColumn(6).setPreferredWidth(60);//weight
+        tblRet.getColumnModel().getColumn(7).setPreferredWidth(1);//weight unit
+        tblRet.getColumnModel().getColumn(8).setPreferredWidth(1);//price
+        tblRet.getColumnModel().getColumn(9).setPreferredWidth(40);//amt
         tblRet.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblRet.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         monoLoc.subscribe((t) -> {
             tblRet.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
         });
         tblRet.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
-        tblRet.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
+        tblRet.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
         inventoryRepo.getStockUnit().subscribe((t) -> {
-            tblRet.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(t));
+            tblRet.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));
+            tblRet.getColumnModel().getColumn(7).setCellEditor(new StockUnitEditor(t));
         });
         tblRet.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
         tblRet.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());

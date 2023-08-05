@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 public class OpeningTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Stock Code", "Stock Name", "Relation",
-        "Qty", "Weight", "Weight Unit", "Unit", "Price", "Amount"};
+        "Qty", "Unit", "Weight", "Weight Unit", "Price", "Amount"};
     private JTable parent;
     private List<OPHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
@@ -91,7 +91,7 @@ public class OpeningTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 3, 4, 7, 8 ->
+            case 3, 5, 7, 8 ->
                 Float.class;
             default ->
                 String.class;
@@ -101,7 +101,7 @@ public class OpeningTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 2, 6 -> {
+            case 2, 8 -> {
                 return false;
             }
         }
@@ -138,15 +138,16 @@ public class OpeningTableModel extends AbstractTableModel {
                     //qty
                     return record.getQty();
                 }
+
                 case 4 -> {
-                    return record.getWeight();
-                }
-                case 5 -> {
-                    return record.getWeightUnit();
-                }
-                case 6 -> {
                     //unit
                     return record.getUnitCode();
+                }
+                case 5 -> {
+                    return record.getWeight();
+                }
+                case 6 -> {
+                    return record.getWeightUnit();
                 }
                 case 7 -> {
                     //price
@@ -200,9 +201,18 @@ public class OpeningTableModel extends AbstractTableModel {
                         parent.setColumnSelectionInterval(column, column);
                     }
                     parent.setRowSelectionInterval(row, row);
-                    parent.setColumnSelectionInterval(6, 6);
+                    parent.setColumnSelectionInterval(5, 5);
                 }
                 case 4 -> {
+                    //Unit
+                    if (value != null) {
+                        if (value instanceof StockUnit unit) {
+                            record.setUnitCode(unit.getKey().getUnitCode());
+                        }
+                    }
+                    parent.setColumnSelectionInterval(6, 6);
+                }
+                case 5 -> {
                     if (value != null) {
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
@@ -216,25 +226,16 @@ public class OpeningTableModel extends AbstractTableModel {
                             parent.setColumnSelectionInterval(column, column);
                         }
                         parent.setRowSelectionInterval(row, row);
-                        parent.setColumnSelectionInterval(5, 5);
+                        parent.setColumnSelectionInterval(6, 6);
                     }
                 }
-                case 5 -> {
-                    if(value!= null) {
+                case 6 -> {
+                    if (value != null) {
                         if (value instanceof StockUnit unit) {
                             record.setWeightUnit(unit.getKey().getUnitCode());
                         }
                     }
-                    parent.setColumnSelectionInterval(6, 6);
-                }
-                case 6 -> {
-                    //Unit
-                    if (value != null) {
-                        if (value instanceof StockUnit unit) {
-                            record.setUnitCode(unit.getKey().getUnitCode());
-                        }
-                    }
-                    parent.setColumnSelectionInterval(6, 6);
+                    parent.setColumnSelectionInterval(7, 7);
                 }
                 case 7 -> {
                     // Price

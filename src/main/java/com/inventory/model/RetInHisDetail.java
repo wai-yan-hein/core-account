@@ -28,8 +28,6 @@ public class RetInHisDetail {
     private String stockCode;
     @Column(name = "qty", nullable = false)
     private Float qty;
-    @Column(name = "avg_qty")
-    private Float avgQty;
     @Column(name = "unit")
     private String unitCode;
     @Column(name = "price", nullable = false)
@@ -38,6 +36,12 @@ public class RetInHisDetail {
     private Float amount;
     @Column(name = "loc_code")
     private String locCode;
+    @Column(name = "weight")
+    private Float weight;
+    @Column(name = "weight_unit")
+    private String weightUnit;
+    @Column(name = "total_weight")
+    private Float totalWeight;
     @Transient
     private String userCode;
     @Transient

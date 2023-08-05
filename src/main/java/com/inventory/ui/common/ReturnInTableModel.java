@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ReturnInTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Code", "Description", "Relation", "Location",
-        "Qty", "Avg Qty", "Unit", "Price", "Amount"};
+        "Qty", "Unit", "Weight", "Weight Unit", "Price", "Amount"};
     private JTable parent;
     private List<RetInHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
@@ -118,7 +118,7 @@ public class ReturnInTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 4, 5, 7, 8 ->
+            case 4, 6, 8, 9 ->
                 Float.class;
             default ->
                 String.class;
@@ -169,18 +169,22 @@ public class ReturnInTableModel extends AbstractTableModel {
                     return record.getQty();
                 }
                 case 5 -> {
-                    //Std-Wt
-                    return record.getAvgQty();
-                }
-                case 6 -> {
                     //unit
                     return record.getUnitCode();
                 }
+                case 6 -> {
+                    //weight
+                    return record.getWeight();
+                }
                 case 7 -> {
+                    //weight unit
+                    return record.getWeightUnit();
+                }
+                case 8 -> {
                     //price
                     return record.getPrice();
                 }
-                case 8 -> {
+                case 9 -> {
                     //amount
                     return record.getAmount();
                 }
@@ -209,7 +213,6 @@ public class ReturnInTableModel extends AbstractTableModel {
                             record.setUserCode(s.getUserCode());
                             record.setRelName(s.getRelName());
                             record.setQty(1.0f);
-                            record.setAvgQty(1.0f);
                             record.setUnitCode(s.getPurUnitCode());
                             addNewRow();
                         }
@@ -228,7 +231,6 @@ public class ReturnInTableModel extends AbstractTableModel {
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 record.setQty(Util1.getFloat(value));
-                                record.setAvgQty(record.getQty());
                                 parent.setColumnSelectionInterval(6, 6);
                             } else {
                                 showMessageBox("Input value must be positive");
@@ -241,27 +243,34 @@ public class ReturnInTableModel extends AbstractTableModel {
                         parent.setRowSelectionInterval(row, row);
                     }
                     case 5 -> {
-                        //avg-qty
+                        //Unit
+                        if (value instanceof StockUnit s) {
+                            record.setUnitCode(s.getKey().getUnitCode());
+                        }
+                        parent.setColumnSelectionInterval(8, 8);
+                    }
+                    case 6 -> {
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
-                                record.setAvgQty(Util1.getFloat(value));
+                                record.setWeight(Util1.getFloat(value));
                             } else {
                                 showMessageBox("Input value must be positive");
                                 parent.setColumnSelectionInterval(column, column);
                             }
                         } else {
-                            showMessageBox("Input value must be positive");
+                            showMessageBox("Input value must be number");
                             parent.setColumnSelectionInterval(column, column);
                         }
-                    }
-                    case 6 -> {
-                        //Unit
-                        if (value instanceof StockUnit s) {
-                            record.setUnitCode(s.getKey().getUnitCode());
-                        }
-                        parent.setColumnSelectionInterval(6, 6);
+                        parent.setRowSelectionInterval(row, row);
+                        parent.setColumnSelectionInterval(7, 7);
                     }
                     case 7 -> {
+                        if (value instanceof StockUnit unit) {
+                            record.setWeightUnit(unit.getKey().getUnitCode());
+                        }
+                        parent.setColumnSelectionInterval(8, 8);
+                    }
+                    case 8 -> {
                         // Price
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
@@ -277,7 +286,7 @@ public class ReturnInTableModel extends AbstractTableModel {
                             parent.setColumnSelectionInterval(column, column);
                         }
                     }
-                    case 8 -> {
+                    case 9 -> {
                         //Amount
                         record.setAmount(Util1.getFloat(value));
 
@@ -355,7 +364,7 @@ public class ReturnInTableModel extends AbstractTableModel {
 
     private void calculateAmount(RetInHisDetail ri) {
         float price = Util1.getFloat(ri.getPrice());
-        float avgQty = Util1.getFloat(ri.getAvgQty());
+        float avgQty = Util1.getFloat(ri.getQty());
         if (ri.getStockCode() != null) {
             float amount = avgQty * price;
             ri.setPrice(price);
@@ -403,7 +412,7 @@ public class ReturnInTableModel extends AbstractTableModel {
 
     public void delete(int row) {
         RetInHisDetail sdh = listDetail.get(row);
-        if (sdh.getKey()!= null) {
+        if (sdh.getKey() != null) {
             deleteList.add(sdh.getKey());
         }
         listDetail.remove(row);
