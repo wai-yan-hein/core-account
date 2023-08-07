@@ -253,6 +253,7 @@ public class ReturnInTableModel extends AbstractTableModel {
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 record.setWeight(Util1.getFloat(value));
+                                parent.setColumnSelectionInterval(7, 7);
                             } else {
                                 showMessageBox("Input value must be positive");
                                 parent.setColumnSelectionInterval(column, column);
@@ -292,7 +293,7 @@ public class ReturnInTableModel extends AbstractTableModel {
 
                     }
                 }
-                if (column != 7) {
+                if (column != 8) {
                     if (Util1.getFloat(record.getPrice()) == 0) {
                         if (record.getStockCode() != null && record.getUnitCode() != null) {
                             inventoryRepo.getSaleRecentPrice(record.getStockCode(),

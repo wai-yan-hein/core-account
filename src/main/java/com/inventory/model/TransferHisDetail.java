@@ -30,6 +30,12 @@ public class TransferHisDetail {
     private Float qty;
     @Column(name = "unit")
     private String unitCode;
+    @Column(name = "weight")
+    private Float weight;
+    @Column(name = "weight_unit")
+    private String weightUnit;
+    @Column(name = "total_weight")
+    private Float totalWeight;
     @Transient
     private String userCode;
     @Transient
