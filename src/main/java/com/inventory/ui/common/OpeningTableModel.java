@@ -185,7 +185,12 @@ public class OpeningTableModel extends AbstractTableModel {
                             addNewRow();
                         }
                     }
-                    parent.setColumnSelectionInterval(3, 3);
+                    String key = "stock.use.weight";
+                    if (Util1.getBoolean(ProUtil.getProperty(key))) {
+                        parent.setColumnSelectionInterval(5, 5);
+                    } else {
+                        parent.setColumnSelectionInterval(3, 3);
+                    }
                 }
                 case 3 -> {
                     // Qty
@@ -212,7 +217,7 @@ public class OpeningTableModel extends AbstractTableModel {
                     }
                     parent.setColumnSelectionInterval(6, 6);
                 }
-                case 5 -> {
+                case 5 -> { // weight
                     if (value != null) {
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {

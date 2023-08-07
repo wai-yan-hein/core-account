@@ -7,6 +7,7 @@ package com.inventory.ui.common;
 
 import com.repo.InventoryRepo;
 import com.common.Global;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
@@ -233,7 +234,8 @@ public class GRNTableModel extends AbstractTableModel {
                             record.setWeightUnit(s.getWeightUnit());
                             record.setStock(s);
                             addNewRow();
-                            if (record.getWeightUnit() != null) {
+                            String key = "stock.use.weight";
+                            if (Util1.getBoolean(ProUtil.getProperty(key))) {
                                 parent.setColumnSelectionInterval(4, 4);
                             } else {
                                 parent.setColumnSelectionInterval(6, 6);

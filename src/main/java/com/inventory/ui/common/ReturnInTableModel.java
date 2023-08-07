@@ -216,7 +216,13 @@ public class ReturnInTableModel extends AbstractTableModel {
                             record.setUnitCode(s.getPurUnitCode());
                             addNewRow();
                         }
-                        parent.setColumnSelectionInterval(4, 4);
+                        String key = "stock.use.weight";
+                        if (Util1.getBoolean(ProUtil.getProperty(key))) {
+                            parent.setColumnSelectionInterval(6, 6);
+                        } else {
+                            parent.setColumnSelectionInterval(4, 4);
+                        }
+
                     }
                     case 3 -> {
                         //Loc
@@ -249,7 +255,7 @@ public class ReturnInTableModel extends AbstractTableModel {
                         }
                         parent.setColumnSelectionInterval(8, 8);
                     }
-                    case 6 -> {
+                    case 6 -> { // weight
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 record.setWeight(Util1.getFloat(value));

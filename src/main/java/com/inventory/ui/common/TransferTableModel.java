@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * @author wai yan
  */
 public class TransferTableModel extends AbstractTableModel {
-    
+
     private static final Logger log = LoggerFactory.getLogger(TransferTableModel.class);
     private String[] columnNames = {"Stock Code", "Stock Name", "Relation", "Qty", "Unit", "Weight", "Weight Unit"};
     private JTable parent;
@@ -40,66 +40,66 @@ public class TransferTableModel extends AbstractTableModel {
     private InventoryRepo inventoryRepo;
     private JDateChooser vouDate;
     private JLabel lblRec;
-    
+
     public JLabel getLblRec() {
         return lblRec;
     }
-    
+
     public void setLblRec(JLabel lblRec) {
         this.lblRec = lblRec;
     }
-    
+
     public JDateChooser getVouDate() {
         return vouDate;
     }
-    
+
     public void setVouDate(JDateChooser vouDate) {
         this.vouDate = vouDate;
     }
-    
+
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
     }
-    
+
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-    
+
     public SelectionObserver getObserver() {
         return observer;
     }
-    
+
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-    
+
     public void setParent(JTable parent) {
         this.parent = parent;
     }
-    
+
     @Override
     public int getRowCount() {
         return listTransfer.size();
     }
-    
+
     @Override
     public String getColumnName(int column) {
         return columnNames[column];
     }
-    
+
     @Override
     public int getColumnCount() {
         return columnNames.length;
     }
-    
+
     public String[] getColumnNames() {
         return columnNames;
     }
-    
+
     public void setColumnNames(String[] columnNames) {
         this.columnNames = columnNames;
     }
-    
+
     @Override
     public Object getValueAt(int row, int column) {
         try {
@@ -121,10 +121,10 @@ public class TransferTableModel extends AbstractTableModel {
                     return stockName;
                 }
                 case 2 -> {
-                    
+
                     return io.getRelName();
                 }
-                
+
                 case 3 -> {
                     return io.getQty();
                 }
@@ -144,7 +144,7 @@ public class TransferTableModel extends AbstractTableModel {
         }
         return null;
     }
-    
+
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
@@ -154,12 +154,12 @@ public class TransferTableModel extends AbstractTableModel {
                 String.class;
         };
     }
-    
+
     @Override
     public boolean isCellEditable(int row, int column) {
         return column != 2;
     }
-    
+
     @Override
     public void setValueAt(Object value, int row, int column) {
         TransferHisDetail io = listTransfer.get(row);
@@ -173,11 +173,16 @@ public class TransferTableModel extends AbstractTableModel {
                             io.setUserCode(s.getUserCode());
                             io.setRelName(s.getRelName());
                             io.setUnitCode(s.getPurUnitCode());
-                            setColumnSelection(3);
+                            String key = "stock.use.weight";
+                            if (Util1.getBoolean(ProUtil.getProperty(key))) {
+                                setColumnSelection(5);
+                            } else {
+                                setColumnSelection(3);
+                            }
                         }
                         addNewRow();
                     }
-                    case 3 -> {
+                    case 3 -> { // qty
                         if (Util1.isNumber(value)) {
                             io.setQty(Util1.getFloat(value));
 //                            parent.setRowSelectionInterval(row + 1, row + 1);
@@ -189,7 +194,7 @@ public class TransferTableModel extends AbstractTableModel {
                             io.setUnitCode(stockUnit.getKey().getUnitCode());
                         }
                     }
-                    case 5 -> {
+                    case 5 -> { // weight
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 io.setWeight(Util1.getFloat(value));
@@ -218,24 +223,24 @@ public class TransferTableModel extends AbstractTableModel {
             log.error("setValueAt :" + e.getMessage());
         }
     }
-    
+
     private void setRecord(int size) {
         lblRec.setText("Records : " + size);
     }
-    
+
     public List<THDetailKey> getDeleteList() {
         return deleteList;
     }
-    
+
     public void setDeleteList(List<THDetailKey> deleteList) {
         this.deleteList = deleteList;
     }
-    
+
     private void setColumnSelection(int column) {
         parent.setColumnSelectionInterval(column, column);
         parent.requestFocus();
     }
-    
+
     public boolean isValidEntry() {
         boolean status = true;
         for (TransferHisDetail od : listTransfer) {
@@ -252,27 +257,27 @@ public class TransferTableModel extends AbstractTableModel {
             }
         }
         return status;
-        
+
     }
-    
+
     public List<TransferHisDetail> getCurrentRow() {
         return this.listTransfer;
     }
-    
+
     public List<TransferHisDetail> getRetInDetailHis() {
         return this.listTransfer;
     }
-    
+
     public List<TransferHisDetail> getListTransfer() {
         return listTransfer;
     }
-    
+
     public void setListTransfer(List<TransferHisDetail> listTransfer) {
         this.listTransfer = listTransfer;
         setRecord(listTransfer.size());
         fireTableDataChanged();
     }
-    
+
     public TransferHisDetail getStockInout(int row) {
         if (listTransfer != null) {
             return listTransfer.get(row);
@@ -280,7 +285,7 @@ public class TransferTableModel extends AbstractTableModel {
             return null;
         }
     }
-    
+
     public void addNewRow() {
         if (listTransfer != null) {
             if (!hasEmptyRow()) {
@@ -290,7 +295,7 @@ public class TransferTableModel extends AbstractTableModel {
             }
         }
     }
-    
+
     private boolean hasEmptyRow() {
         boolean status = false;
         if (listTransfer.size() >= 1) {
@@ -301,14 +306,14 @@ public class TransferTableModel extends AbstractTableModel {
         }
         return status;
     }
-    
+
     public void clear() {
         if (listTransfer != null) {
             listTransfer.clear();
             fireTableDataChanged();
         }
     }
-    
+
     public void delete(int row) {
         TransferHisDetail sdh = listTransfer.get(row);
         if (sdh.getKey() != null) {

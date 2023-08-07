@@ -40,6 +40,12 @@ public class StockInOutDetail implements Serializable {
     private String outUnitCode;
     @Column(name = "cost_price")
     private Float costPrice;
+    @Column(name = "weight")
+    private Float weight;
+    @Column(name = "weight_unit")
+    private String weightUnit;
+    @Column(name = "total_weight")
+    private Float totalWegiht;
     @Transient
     private String userCode;
     @Transient

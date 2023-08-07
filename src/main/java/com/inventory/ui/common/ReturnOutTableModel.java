@@ -217,7 +217,12 @@ public class ReturnOutTableModel extends AbstractTableModel {
                             record.setQty(1.0f);
                             record.setUnitCode(s.getPurUnitCode());
                             addNewRow();
-                            parent.setColumnSelectionInterval(4, 4);
+                            String key = "stock.use.weight";
+                            if (Util1.getBoolean(ProUtil.getProperty(key))) {
+                                parent.setColumnSelectionInterval(6, 6);
+                            } else {
+                                parent.setColumnSelectionInterval(4, 4);
+                            }
                         }
                     }
                 }
@@ -255,8 +260,8 @@ public class ReturnOutTableModel extends AbstractTableModel {
                     parent.setColumnSelectionInterval(6, 6);
                 }
                 case 6 -> {
-                    if(Util1.isNumber(value)) {
-                        if(Util1.isPositive(Util1.getFloat(value))) {
+                    if (Util1.isNumber(value)) {
+                        if (Util1.isPositive(Util1.getFloat(value))) {
                             record.setWeight(Util1.getFloat(value));
                             parent.setColumnSelectionInterval(7, 7);
                         } else {
@@ -269,7 +274,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
                     }
                 }
                 case 7 -> {
-                    if(value instanceof StockUnit unit) {
+                    if (value instanceof StockUnit unit) {
                         record.setWeightUnit(unit.getKey().getUnitCode());
                     }
                     parent.setColumnSelectionInterval(8, 8);
