@@ -146,11 +146,15 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         tblTransfer.getColumnModel().getColumn(2).setPreferredWidth(100);
         tblTransfer.getColumnModel().getColumn(3).setPreferredWidth(100);
         tblTransfer.getColumnModel().getColumn(4).setPreferredWidth(10);
+        tblTransfer.getColumnModel().getColumn(5).setPreferredWidth(100);
+        tblTransfer.getColumnModel().getColumn(6).setPreferredWidth(10);
         tblTransfer.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblTransfer.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         tblTransfer.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
+        tblTransfer.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
         inventoryRepo.getStockUnit().subscribe((t) -> {
             tblTransfer.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));
+            tblTransfer.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(t));
         });
         tblTransfer.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblTransfer.setDefaultRenderer(Float.class, new DecimalFormatRender());

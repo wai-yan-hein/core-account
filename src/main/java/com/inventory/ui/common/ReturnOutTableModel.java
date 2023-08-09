@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ReturnOutTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Code", "Description", "Relation", "Location",
-        "Qty", "Unit", "Price", "Amount"};
+        "Qty", "Unit", "Weight", "Weight Unit", "Price", "Amount"};
     private JTable parent;
     private List<RetOutHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
@@ -121,7 +121,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 4, 6, 7 ->
+            case 4, 6, 8, 9 ->
                 Float.class;
             default ->
                 String.class;
@@ -131,7 +131,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case 2, 7 ->
+            case 2, 9 ->
                 false;
             default ->
                 true;
@@ -178,10 +178,16 @@ public class ReturnOutTableModel extends AbstractTableModel {
                     return record.getUnitCode();
                 }
                 case 6 -> {
+                    return record.getWeight();
+                }
+                case 7 -> {
+                    return record.getWeightUnit();
+                }
+                case 8 -> {
                     //price
                     return record.getPrice();
                 }
-                case 7 -> {
+                case 9 -> {
                     //amount
                     return record.getAmount();
                 }
@@ -211,7 +217,12 @@ public class ReturnOutTableModel extends AbstractTableModel {
                             record.setQty(1.0f);
                             record.setUnitCode(s.getPurUnitCode());
                             addNewRow();
-                            parent.setColumnSelectionInterval(4, 4);
+                            String key = "stock.use.weight";
+                            if (Util1.getBoolean(ProUtil.getProperty(key))) {
+                                parent.setColumnSelectionInterval(6, 6);
+                            } else {
+                                parent.setColumnSelectionInterval(4, 4);
+                            }
                         }
                     }
                 }
@@ -249,6 +260,26 @@ public class ReturnOutTableModel extends AbstractTableModel {
                     parent.setColumnSelectionInterval(6, 6);
                 }
                 case 6 -> {
+                    if (Util1.isNumber(value)) {
+                        if (Util1.isPositive(Util1.getFloat(value))) {
+                            record.setWeight(Util1.getFloat(value));
+                            parent.setColumnSelectionInterval(7, 7);
+                        } else {
+                            parent.setColumnSelectionInterval(column, column);
+                            showMessageBox("Input value must be positive.");
+                        }
+                    } else {
+                        parent.setColumnSelectionInterval(column, column);
+                        showMessageBox("Input value must be number.");
+                    }
+                }
+                case 7 -> {
+                    if (value instanceof StockUnit unit) {
+                        record.setWeightUnit(unit.getKey().getUnitCode());
+                    }
+                    parent.setColumnSelectionInterval(8, 8);
+                }
+                case 8 -> {
                     //Pur Price
                     if (Util1.isNumber(value)) {
                         if (Util1.isPositive(Util1.getFloat(value))) {
@@ -266,7 +297,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
                 }
 
             }
-            if (column != 6) {
+            if (column != 8) {
                 if (Util1.getFloat(record.getPrice()) == 0) {
                     if (record.getStockCode() != null && record.getUnitCode() != null) {
                         inventoryRepo.getPurRecentPrice(record.getStockCode(),

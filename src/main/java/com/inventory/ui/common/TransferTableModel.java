@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 public class TransferTableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(TransferTableModel.class);
-    private String[] columnNames = {"Stock Code", "Stock Name", "Relation", "Qty", "Unit"};
+    private String[] columnNames = {"Stock Code", "Stock Name", "Relation", "Qty", "Unit", "Weight", "Weight Unit"};
     private JTable parent;
     private List<TransferHisDetail> listTransfer = new ArrayList();
     private List<THDetailKey> deleteList = new ArrayList();
@@ -131,7 +131,12 @@ public class TransferTableModel extends AbstractTableModel {
                 case 4 -> {
                     return io.getUnitCode();
                 }
-
+                case 5 -> {
+                    return io.getWeight();
+                }
+                case 6 -> {
+                    return io.getWeightUnit();
+                }
             }
         } catch (Exception e) {
             log.error("getValueAt: " + e.getMessage()
@@ -143,7 +148,7 @@ public class TransferTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 3 ->
+            case 3, 5 ->
                 Float.class;
             default ->
                 String.class;
@@ -161,22 +166,27 @@ public class TransferTableModel extends AbstractTableModel {
         try {
             if (value != null) {
                 switch (column) {
-                    case 0,1 -> {
+                    case 0, 1 -> {
                         if (value instanceof Stock s) {
                             io.setStockName(s.getStockName());
                             io.setStockCode(s.getKey().getStockCode());
                             io.setUserCode(s.getUserCode());
                             io.setRelName(s.getRelName());
                             io.setUnitCode(s.getPurUnitCode());
-                            setColumnSelection(3);
+                            String key = "stock.use.weight";
+                            if (Util1.getBoolean(ProUtil.getProperty(key))) {
+                                setColumnSelection(5);
+                            } else {
+                                setColumnSelection(3);
+                            }
                         }
                         addNewRow();
                     }
-                    case 3 -> {
+                    case 3 -> { // qty
                         if (Util1.isNumber(value)) {
                             io.setQty(Util1.getFloat(value));
-                            parent.setRowSelectionInterval(row + 1, row + 1);
-                            parent.setColumnSelectionInterval(0, 0);
+//                            parent.setRowSelectionInterval(row + 1, row + 1);
+                            parent.setColumnSelectionInterval(4, 4);
                         }
                     }
                     case 4 -> {
@@ -184,7 +194,26 @@ public class TransferTableModel extends AbstractTableModel {
                             io.setUnitCode(stockUnit.getKey().getUnitCode());
                         }
                     }
-
+                    case 5 -> { // weight
+                        if (Util1.isNumber(value)) {
+                            if (Util1.isPositive(Util1.getFloat(value))) {
+                                io.setWeight(Util1.getFloat(value));
+                                parent.setColumnSelectionInterval(6, 6);
+                            } else {
+                                parent.setColumnSelectionInterval(column, column);
+                                JOptionPane.showMessageDialog(Global.parentForm, "Input value must be positive.");
+                            }
+                        } else {
+                            parent.setColumnSelectionInterval(column, column);
+                            JOptionPane.showMessageDialog(Global.parentForm, "Input value must be number.");
+                        }
+                    }
+                    case 6 -> {
+                        if (value instanceof StockUnit unit) {
+                            io.setWeightUnit(unit.getKey().getUnitCode());
+                            parent.setRowSelectionInterval(row + 1, row + 1);
+                        }
+                    }
                 }
             }
             setRecord(listTransfer.size() - 1);
@@ -287,7 +316,7 @@ public class TransferTableModel extends AbstractTableModel {
 
     public void delete(int row) {
         TransferHisDetail sdh = listTransfer.get(row);
-        if (sdh.getKey()!= null) {
+        if (sdh.getKey() != null) {
             deleteList.add(sdh.getKey());
         }
         listTransfer.remove(row);
