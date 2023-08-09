@@ -29,6 +29,7 @@ import com.acc.editor.BatchCellEditor;
 import com.acc.editor.BatchNoAutoCompeter;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.model.ChartOfAccount;
+import com.acc.model.DateModel;
 import com.acc.model.DeleteObj;
 import com.user.model.Currency;
 import com.acc.model.DepartmentA;
@@ -68,7 +69,9 @@ import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
@@ -76,8 +79,12 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 import lombok.extern.slf4j.Slf4j;
 import net.coderazzi.filters.gui.AutoChoices;
+import net.coderazzi.filters.gui.IFilterEditor;
+import net.coderazzi.filters.gui.IFilterHeaderObserver;
 import net.coderazzi.filters.gui.TableFilterHeader;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -128,6 +135,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private final DayBookTableModel dayBookTableModel = new DayBookTableModel();
     private ColumnHeaderListener listener;
     private int selectRow = -1;
+    private final JPopupMenu sumPopup = new JPopupMenu();
 
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
@@ -324,8 +332,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         int rc = tblCash.getRowCount();
         if (rc >= 1) {
             tblCash.setRowSelectionInterval(rc - 1, rc - 1);
-        } else {
-            tblCash.setRowSelectionInterval(0, 0);
         }
         tblCash.setColumnSelectionInterval(0, 0);
         tblCash.requestFocus();
@@ -398,6 +404,48 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         filterHeader.setPosition(TableFilterHeader.Position.TOP);
         filterHeader.setFont(Global.textFont);
         filterHeader.setVisible(false);
+        filterHeader.addHeaderObserver(new IFilterHeaderObserver() {
+            @Override
+            public void tableFilterEditorCreated(TableFilterHeader tfh, IFilterEditor ife, TableColumn tc) {
+                log.info("1");
+            }
+
+            @Override
+            public void tableFilterEditorExcluded(TableFilterHeader tfh, IFilterEditor ife, TableColumn tc) {
+                log.info("2");
+            }
+
+            @Override
+            public void tableFilterUpdated(TableFilterHeader tfh, IFilterEditor ife, TableColumn tc) {
+                double drAmt = sumColumn(tblCash, 10);
+                double crAmt = sumColumn(tblCash, 11);
+                JPopupMenu popupMenu = new JPopupMenu();
+                popupMenu.setFocusable(false);
+                popupMenu.setLightWeightPopupEnabled(true);
+                JFormattedTextField drAmtItem = new JFormattedTextField(Util1.getDecimalFormat1());
+                drAmtItem.setFont(Global.amtFont);
+                drAmtItem.setValue(drAmt);
+                JFormattedTextField crAmtItem = new JFormattedTextField(Util1.getDecimalFormat1());
+                crAmtItem.setFont(Global.amtFont);
+                crAmtItem.setValue(crAmt);
+                popupMenu.add(drAmtItem);
+                popupMenu.addSeparator();
+                popupMenu.add(crAmtItem);
+                int centerX = tblCash.getWidth() / 2;
+                int centerY = tblCash.getHeight() / 2;
+                popupMenu.show(tblCash, centerX, centerY);
+            }
+        });
+    }
+
+    private double sumColumn(JTable table, int columnIndex) {
+        int rowCount = table.getRowCount();
+        double sum = 0.0;
+        for (int i = 0; i < rowCount; i++) {
+            double cellValue = Util1.getDouble(table.getValueAt(i, columnIndex));
+            sum += cellValue;
+        }
+        return sum;
     }
 
     private void actionMapping() {
@@ -1421,10 +1469,14 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             if (source.equals("Date")) {
                 searchCash();
             } else if (source.equals("Date-Search")) {
-                String date = selectObj.toString();
-                dateAutoCompleter.getDateModel().setStartDate(date);
-                dateAutoCompleter.getDateModel().setEndDate(date);
-                txtDate.setText(Util1.toDateStr(date, "yyyy-MM-dd", "dd/MM/yyyy"));
+                if (source.equals("Date-Search")) {
+                    String date = selectObj.toString();
+                    DateModel model = new DateModel();
+                    model.setStartDate(date);
+                    model.setEndDate(date);
+                    model.setDescription(Util1.toDateStr(date, "yyyy-MM-dd", "dd/MM/yyyy"));
+                    dateAutoCompleter.setDateModel(model);
+                }
                 searchCash();
             } else if (source.equals("CAL-TOTAL")) {
                 calDebitCredit();

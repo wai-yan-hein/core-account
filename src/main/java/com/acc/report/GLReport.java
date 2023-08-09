@@ -15,6 +15,7 @@ import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.TranSourceAutoCompleter;
 import com.acc.model.ChartOfAccount;
+import com.acc.model.DateModel;
 import com.acc.model.ReportFilter;
 import com.acc.model.VTriBalance;
 import com.common.Global;
@@ -252,6 +253,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             filter.setListDepartment(getListDep());
             filter.setTranSource(getTranSource());
             filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
+            log.info(filter.getFromDate() + "-" + filter.getToDate());
             decorator.refreshButton(filter.getFromDate());
             accountRepo.getTri(filter).subscribe((t) -> {
                 glListingTableModel.setListTBAL(t);
@@ -871,9 +873,11 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         if (source != null) {
             if (source.equals("Date-Search")) {
                 String date = selectObj.toString();
-                dateAutoCompleter.getDateModel().setStartDate(date);
-                dateAutoCompleter.getDateModel().setEndDate(date);
-                txtDate.setText(Util1.toDateStr(date, "yyyy-MM-dd", "dd/MM/yyyy"));
+                DateModel model = new DateModel();
+                model.setStartDate(date);
+                model.setEndDate(date);
+                model.setDescription(Util1.toDateStr(date, "yyyy-MM-dd", "dd/MM/yyyy"));
+                dateAutoCompleter.setDateModel(model);
             }
             searchGLListing();
         }

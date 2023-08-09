@@ -158,11 +158,12 @@ public final class DateAutoCompleter implements KeyListener, SelectionObserver {
     }
 
     public void mouseSelect() {
-        if (table.getSelectedRow() != -1) {
-            int row = table.convertRowIndexToModel(table.getSelectedRow());
+        int selectRow = table.getSelectedRow();
+        if (selectRow != -1) {
+            int row = table.convertRowIndexToModel(selectRow);
             dateModel = dateTableModel.getDate(row);
             ((JTextField) textComp).setText(dateModel.getDescription());
-            generateDate(dateModel, row);
+            generateDate(dateModel);
         }
         popupOpen = false;
         popup.setVisible(false);
@@ -172,7 +173,7 @@ public final class DateAutoCompleter implements KeyListener, SelectionObserver {
         }
     }
 
-    private void generateDate(DateModel date, int row) {
+    private void generateDate(DateModel date) {
         if (date.getDescription().equals("Custom")) {
             dialog.setIconImage(image);
             dialog.setLocationRelativeTo(null);
@@ -185,7 +186,6 @@ public final class DateAutoCompleter implements KeyListener, SelectionObserver {
                     String.format("%s%s%s", Util1.toDateStr(startDate, "yyyy-MM-dd", Global.dateFormat),
                             " to ", Util1.toDateStr(endDate, "yyyy-MM-dd", Global.dateFormat)));
         }
-        setDateModel(date);
         if (selectionObserver != null) {
             selectionObserver.selected("Date", "Date");
         }

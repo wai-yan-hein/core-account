@@ -847,14 +847,11 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void initDate() {
-        Global.listDate = accounRepo.getDate(true).block();
         if (Global.listDate == null || Global.listDate.isEmpty()) {
-            accounRepo.getDate(false).subscribe((t) -> {
+            accounRepo.getDate().doOnSuccess((t) -> {
                 dateFilterRepo.saveAll(t);
                 Global.listDate = t;
-            }, (e) -> {
-                log.error(e.getMessage());
-            });
+            }).subscribe();
         }
     }
 

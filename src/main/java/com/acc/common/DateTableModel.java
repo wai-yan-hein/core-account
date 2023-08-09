@@ -86,13 +86,7 @@ public class DateTableModel extends AbstractTableModel {
     }
 
     public DateModel getDate(int row) {
-        if (listDate == null) {
-            return null;
-        } else if (listDate.isEmpty()) {
-            return null;
-        } else {
-            return listDate.get(row);
-        }
+        return listDate.get(row);
     }
 
     public int getSize() {

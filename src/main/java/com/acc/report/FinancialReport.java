@@ -10,6 +10,7 @@ import com.acc.common.DateAutoCompleter;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.TraderAAutoCompleter;
+import com.acc.model.TraderA;
 import com.common.FilterObject;
 import com.common.FontCellRender;
 import com.common.Global;
@@ -209,6 +210,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                     param.put("p_comp_phone", Global.companyPhone);
                     param.put("p_currency", Global.currency);
                     param.put("p_department", txtDep.getText());
+                    initTraderParameter(param);
                     printReport(reportUrl, reportUrl, param);
                 }
                 isReport = false;
@@ -221,7 +223,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
     }
 
     private boolean isValidReport(String url) {
-        if (url.equals("CreditDetail")) {
+        if (url.equals("CreditDetail") || url.equals("SharerHolderStatement")) {
             if (traderAutoCompleter.getTrader().getKey().getCode().equals("-")) {
                 JOptionPane.showMessageDialog(this, "Please select Trader.", "Report Validation", JOptionPane.INFORMATION_MESSAGE);
                 txtTrader.requestFocus();
@@ -263,8 +265,6 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                                 param.put("p_np_pc", t.getNpPercent());
                                 param.put("p_opening", t.getOpAmt());
                                 param.put("p_closing", t.getClAmt());
-                                param.put("p_trader_name", txtTrader.getText());
-                                param.put("p_trader_type", traderAutoCompleter.getTrader().getTraderType());
                                 param.put("p_op_date", t.getOpDate());
                                 JasperPrint js = JasperFillManager.fillReport(filePath, param, ds);
                                 JRViewer viwer = new JRViewer(js);
@@ -288,6 +288,19 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                     JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
                     progress.setIndeterminate(false);
                 });
+
+    }
+
+    private void initTraderParameter(Map<String, Object> param) {
+        TraderA t = traderAutoCompleter.getTrader();
+        t = accountRepo.findTrader(t.getKey().getCode()).block();
+        if (t != null) {
+            param.put("p_trader_name", t.getTraderName());
+            param.put("p_trader_type", t.getTraderType());
+            param.put("p_remark", t.getRemark());
+            param.put("p_nrc", t.getNrc());
+            param.put("p_address", t.getAddress());
+        }
 
     }
     private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {

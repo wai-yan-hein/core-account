@@ -658,6 +658,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         jLabel3.setFont(Global.lableFont);
         jLabel3.setText("Net Change");
 
+        jButton2.setFont(Global.lableFont);
         jButton2.setText("Filter");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

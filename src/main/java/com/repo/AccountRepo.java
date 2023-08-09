@@ -299,7 +299,7 @@ public class AccountRepo {
 
     public Mono<List<ChartOfAccount>> saveCOAFromTemplate(Integer busId, String compCode) {
         return accountApi.get()
-                .uri(builder -> builder.path("/account/save-coa-from-template")
+                .uri(builder -> builder.path("/account/saveCOAFromTemplate")
                 .queryParam("busId", busId)
                 .queryParam("compCode", compCode)
                 .build())
@@ -461,12 +461,9 @@ public class AccountRepo {
         }
         return accountApi.post()
                 .uri("/account/find-coa")
-                .body(Mono.just(key), COAKey.class
-                )
-                .accept(MediaType.APPLICATION_JSON)
+                .body(Mono.just(key), COAKey.class)
                 .retrieve()
-                .bodyToMono(ChartOfAccount.class
-                )
+                .bodyToMono(ChartOfAccount.class)
                 .onErrorResume((e) -> {
                     log.error(
                             "findCOA :" + e.getMessage());
@@ -548,6 +545,21 @@ public class AccountRepo {
                     h2Repo.save(trader);
                 }
                 );
+    }
+
+    public Mono<TraderA> findTrader(String traderCode) {
+        TraderAKey key = new TraderAKey();
+        key.setCode(traderCode);
+        key.setCompCode(Global.compCode);
+        return accountApi.post()
+                .uri("/account/findTrader")
+                .body(Mono.just(key), TraderAKey.class)
+                .retrieve()
+                .bodyToMono(TraderA.class)
+                .onErrorResume((e) -> {
+                    log.error("findTrader :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public List<String> deleteTrader(TraderAKey key) {
@@ -710,8 +722,8 @@ public class AccountRepo {
                 .collectList();
     }
 
-    public Mono<List<DateModel>> getDate(boolean local) {
-        if (local) {
+    public Mono<List<DateModel>> getDate() {
+        if (localDatabase) {
             return Mono.just(h2Repo.getDate());
         }
         String startDate = Util1.toDateStrMYSQL(Global.startDate, "dd/MM/yyyy");
