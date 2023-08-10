@@ -135,17 +135,6 @@ public class WebFlexConfig {
         int port = Util1.getInteger(environment.getProperty("user.port"));
         String serialNo = Util1.getBaseboardSerialNumber();
         WebClient webClient = WebClient.builder().baseUrl(getUrl(url, port)).build();
-        AuthenticationResponse data = file.read();
-        if (data != null) {
-            if (data.getAccessToken() != null) {
-                if (System.currentTimeMillis() >= data.getAccessTokenExpired()) {
-                    log.info("token expired.");
-                    return authenticate(webClient, serialNo);
-                } else {
-                    return data.getAccessToken();
-                }
-            }
-        }
         return authenticate(webClient, serialNo);
     }
 
