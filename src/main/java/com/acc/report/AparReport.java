@@ -9,6 +9,7 @@ import com.acc.dialog.TrialBalanceDetailDialog;
 import com.acc.common.APARTableModel;
 import com.repo.AccountRepo;
 import com.acc.common.DateAutoCompleter;
+import com.acc.common.DateTableDecorator;
 import com.acc.common.GLTableCellRender;
 import com.acc.editor.COAAutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
@@ -32,6 +33,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -83,6 +85,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     private SelectionObserver observer;
     private JProgressBar progress;
     private TrialBalanceDetailDialog dialog;
+    private DateTableDecorator decorator;
 
     public JProgressBar getProgress() {
         return progress;
@@ -104,6 +107,12 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         initComponents();
         initKeyListener();
         initTextBoxFormat();
+        initDateDecorator();
+    }
+
+    private void initDateDecorator() {
+        decorator = DateTableDecorator.decorate(panelDate);
+        decorator.setObserver(this);
     }
 
     private final FocusAdapter fa = new FocusAdapter() {
@@ -129,7 +138,23 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     public void initMain() {
         initCombo();
         initTable();
+        createDateFilter();
         searchAPAR();
+    }
+
+    private void createDateFilter() {
+        HashMap<Integer, String> hmDate = new HashMap<>();
+        HashMap<String, Integer> hmPage = new HashMap<>();
+        List<LocalDate> date = Util1.getDaysBetweenDates(Util1.parseLocalDate(Global.startDate, "dd/MM/yyyy"), LocalDate.now());
+        for (int i = 0; i < date.size(); i++) {
+            String str = Util1.toDateStr(date.get(i), "yyyy-MM-dd");
+            int z = i + 1;
+            hmDate.put(z, str);
+            hmPage.put(str, z);
+        }
+        decorator.setHmPage(hmPage);
+        decorator.setHmData(hmDate);
+        decorator.refreshButton(dateAutoCompleter.getDateModel().getStartDate());
     }
 
     private void initTextBoxFormat() {
@@ -229,6 +254,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             filter.setListDepartment(getListDep());
             filter.setCoaCode(getCoaCode());
             filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
+            decorator.refreshButton(filter.getFromDate());
             accountRepo.getArAp(filter).subscribe((t) -> {
                 aPARTableModel.setListAPAR(t);
                 calTotal(t);
@@ -370,7 +396,9 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         lblCalTime = new javax.swing.JLabel();
+        jPanel3 = new javax.swing.JPanel();
         chkZero = new javax.swing.JCheckBox();
+        panelDate = new javax.swing.JPanel();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -562,14 +590,6 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         lblCalTime.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
         lblCalTime.setText("0");
 
-        chkZero.setSelected(true);
-        chkZero.setText("Zero");
-        chkZero.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkZeroActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -585,8 +605,6 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblCalTime, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(chkZero)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtFTotalDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -604,9 +622,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel6)
                             .addComponent(lblCalTime))
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtFTotalDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(chkZero))))
+                        .addComponent(txtFTotalDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtFOFB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -614,16 +630,60 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        chkZero.setSelected(true);
+        chkZero.setText("Zero");
+        chkZero.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkZeroActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(chkZero)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap(8, Short.MAX_VALUE)
+                .addComponent(chkZero)
+                .addContainerGap())
+        );
+
+        panelDate.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        javax.swing.GroupLayout panelDateLayout = new javax.swing.GroupLayout(panelDate);
+        panelDate.setLayout(panelDateLayout);
+        panelDateLayout.setHorizontalGroup(
+            panelDateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        panelDateLayout.setVerticalGroup(
+            panelDateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 34, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(panelDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -632,7 +692,11 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 389, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(panelDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -676,6 +740,14 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         // TODO add your handling code here:
     }//GEN-LAST:event_txtAccountActionPerformed
 
+    private void txtProjectNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtProjectNoFocusGained
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtProjectNoFocusGained
+
+    private void txtProjectNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtProjectNoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtProjectNoActionPerformed
+
     private void chkZeroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkZeroActionPerformed
         // TODO add your handling code here:
         if (chkZero.isSelected()) {
@@ -684,14 +756,6 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
             searchAPAR();
         }
     }//GEN-LAST:event_chkZeroActionPerformed
-
-    private void txtProjectNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtProjectNoFocusGained
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtProjectNoFocusGained
-
-    private void txtProjectNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtProjectNoActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtProjectNoActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -706,8 +770,10 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblCalTime;
+    private javax.swing.JPanel panelDate;
     private javax.swing.JTable tblAPAR;
     private javax.swing.JTextField txtAccount;
     private javax.swing.JTextField txtCurrency;
@@ -723,6 +789,12 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     @Override
     public void selected(Object source, Object selectObj) {
         if (source != null) {
+            if (source.equals("Date-Search")) {
+                String date = selectObj.toString();
+                dateAutoCompleter.getDateModel().setStartDate(date);
+                dateAutoCompleter.getDateModel().setEndDate(date);
+                txtDate.setText(Util1.toDateStr(date, "yyyy-MM-dd", "dd/MM/yyyy"));
+            }
             searchAPAR();
         }
     }
