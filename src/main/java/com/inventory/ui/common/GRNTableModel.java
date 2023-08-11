@@ -220,6 +220,8 @@ public class GRNTableModel extends AbstractTableModel {
     public void setValueAt(Object value, int row, int column) {
         try {
             GRNDetail record = listDetail.get(row);
+
+            String key = "stock.use.weight";
             switch (column) {
                 case 0, 1 -> {
                     //Code
@@ -234,7 +236,6 @@ public class GRNTableModel extends AbstractTableModel {
                             record.setWeightUnit(s.getWeightUnit());
                             record.setStock(s);
                             addNewRow();
-                            String key = "stock.use.weight";
                             if (Util1.getBoolean(ProUtil.getProperty(key))) {
                                 parent.setColumnSelectionInterval(4, 4);
                             } else {
@@ -251,14 +252,22 @@ public class GRNTableModel extends AbstractTableModel {
                     }
                 }
                 case 4 -> {
-                    record.setWeight(Util1.getFloat(value));
-                    String key = "stock.use.weight";
-                    if (Util1.getBoolean(ProUtil.getProperty(key))) {
-                        record.setTotalWeight(Util1.getTotalWeight(Util1.getFloat(record.getWeight()), Util1.getFloat(record.getQty())));
+                    if (Util1.isNumber(value)) {
+                        if (Util1.isPositive(Util1.getFloat(value))) {
+                            record.setWeight(Util1.getFloat(value));
+                            if (Util1.getBoolean(ProUtil.getProperty(key))) {
+                                record.setTotalWeight(Util1.getTotalWeight(Util1.getFloat(record.getWeight()), Util1.getFloat(record.getQty())));
+                            } else {
+                                record.setTotalWeight(Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight()));
+                            }
+                        } else {
+                            showMessageBox("Input value must be positive.");
+                        }
+
                     } else {
-                        record.setTotalWeight(Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight()));
+                        showMessageBox("Input value must be number.");
                     }
-                    parent.setColumnSelectionInterval(6, 6);
+                    parent.setColumnSelectionInterval(5, 5);
                 }
                 case 5 -> {
                     if (value instanceof StockUnit u) {
@@ -272,7 +281,6 @@ public class GRNTableModel extends AbstractTableModel {
                     if (Util1.isNumber(value)) {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             record.setQty(Util1.getFloat(value));
-                            String key = "stock.use.weight";
                             if (Util1.getBoolean(ProUtil.getProperty(key))) {
                                 record.setTotalWeight(Util1.getTotalWeight(Util1.getFloat(record.getWeight()), Util1.getFloat(record.getQty())));
                             } else {
