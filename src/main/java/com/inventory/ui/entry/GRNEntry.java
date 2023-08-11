@@ -221,8 +221,8 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         monoUnit.subscribe((t) -> {
             tblGRN.getColumnModel().getColumn(7).setCellEditor(new StockUnitEditor(t));
         });
-        tblGRN.setDefaultRenderer(Object.class, new DecimalFormatRender());
-        tblGRN.setDefaultRenderer(Float.class, new DecimalFormatRender());
+        tblGRN.setDefaultRenderer(Object.class, new DecimalFormatRender(3));
+        tblGRN.setDefaultRenderer(Float.class, new DecimalFormatRender(3));
         tblGRN.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblGRN.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

@@ -202,7 +202,7 @@ public class GRNTableModel extends AbstractTableModel {
                     }
 
                     case 8 -> {
-                        float ttl = Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight());
+                        float ttl = record.getTotalWeight();
                         return ttl == 0 ? null : ttl;
                     }
                     default -> {
@@ -252,6 +252,12 @@ public class GRNTableModel extends AbstractTableModel {
                 }
                 case 4 -> {
                     record.setWeight(Util1.getFloat(value));
+                    String key = "stock.use.weight";
+                    if (Util1.getBoolean(ProUtil.getProperty(key))) {
+                        record.setTotalWeight(Util1.getTotalWeight(Util1.getFloat(record.getWeight()), Util1.getFloat(record.getQty())));
+                    } else {
+                        record.setTotalWeight(Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight()));
+                    }
                     parent.setColumnSelectionInterval(6, 6);
                 }
                 case 5 -> {
@@ -266,6 +272,12 @@ public class GRNTableModel extends AbstractTableModel {
                     if (Util1.isNumber(value)) {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             record.setQty(Util1.getFloat(value));
+                            String key = "stock.use.weight";
+                            if (Util1.getBoolean(ProUtil.getProperty(key))) {
+                                record.setTotalWeight(Util1.getTotalWeight(Util1.getFloat(record.getWeight()), Util1.getFloat(record.getQty())));
+                            } else {
+                                record.setTotalWeight(Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight()));
+                            }
                             parent.setColumnSelectionInterval(6, 6);
                             parent.setRowSelectionInterval(row, row);
                         } else {

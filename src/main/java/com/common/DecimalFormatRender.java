@@ -17,7 +17,28 @@ import javax.swing.table.DefaultTableCellRenderer;
  */
 public class DecimalFormatRender extends DefaultTableCellRenderer {
 
-    private final DecimalFormat formatter = new DecimalFormat(Util1.DECIMAL_FORMAT);
+    private DecimalFormat formatter = new DecimalFormat(Util1.DECIMAL_FORMAT);
+
+    public DecimalFormatRender() {
+        formatter = new DecimalFormat(Util1.DECIMAL_FORMAT);
+    }
+
+    public DecimalFormatRender(int format) {
+        switch (format) {
+            case 1 -> {
+                formatter = new DecimalFormat(Util1.DECIMAL_FORMAT2);
+            }
+            case 2 -> {
+                formatter = new DecimalFormat(Util1.DECIMAL_FORMAT);
+            }
+            case 3 -> {
+                formatter = new DecimalFormat(Util1.DECIMAL_FORMAT3);
+            }
+            default -> {
+                formatter = new DecimalFormat(Util1.DECIMAL_FORMAT);
+            }
+        }
+    }
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
