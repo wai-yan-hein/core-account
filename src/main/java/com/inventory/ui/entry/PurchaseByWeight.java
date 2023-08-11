@@ -320,7 +320,7 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         tblPur.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());//std weight
         tblPur.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());
-        tblPur.setDefaultRenderer(Object.class, new DecimalFormatRender());
+        tblPur.setDefaultRenderer(String.class, new DecimalFormatRender());
         tblPur.setDefaultRenderer(Float.class, new DecimalFormatRender());
         tblPur.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");

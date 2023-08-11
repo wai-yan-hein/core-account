@@ -25,11 +25,14 @@ public class DecimalFormatRender extends DefaultTableCellRenderer {
 
     public DecimalFormatRender(int format) {
         switch (format) {
+            case 0 -> {
+                formatter = null;
+            }
             case 1 -> {
-                formatter = new DecimalFormat(Util1.DECIMAL_FORMAT2);
+                formatter = new DecimalFormat(Util1.DECIMAL_FORMAT1);
             }
             case 2 -> {
-                formatter = new DecimalFormat(Util1.DECIMAL_FORMAT);
+                formatter = new DecimalFormat(Util1.DECIMAL_FORMAT2);
             }
             case 3 -> {
                 formatter = new DecimalFormat(Util1.DECIMAL_FORMAT3);
@@ -44,13 +47,13 @@ public class DecimalFormatRender extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         if (value instanceof Float f) {
-            String s = formatter.format(f);
+            String s = formatter == null ? String.valueOf(f) : formatter.format(f);
             c = getTableCellRendererComponent(table, s,
                     isSelected, hasFocus, row, column);
             ((JLabel) c).setHorizontalAlignment(SwingConstants.RIGHT);
         }
         if (value instanceof Double d) {
-            String s = formatter.format(d);
+            String s = formatter == null ? String.valueOf(d) : formatter.format(d);
             c = getTableCellRendererComponent(table, s,
                     isSelected, hasFocus, row, column);
             ((JLabel) c).setHorizontalAlignment(SwingConstants.RIGHT);

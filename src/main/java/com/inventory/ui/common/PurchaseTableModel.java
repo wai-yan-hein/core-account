@@ -227,13 +227,6 @@ public class PurchaseTableModel extends AbstractTableModel {
                     if (Util1.isNumber(value)) {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             record.setQty(Util1.getFloat(value));
-                            if (record.getUnitCode() != null) {
-                                if (ProUtil.isWeightOption()) {
-                                    parent.setColumnSelectionInterval(5, 5);
-                                } else {
-                                    parent.setColumnSelectionInterval(6, 6);
-                                }
-                            }
                         } else {
                             showMessageBox("Input value must be positive");
                             parent.setColumnSelectionInterval(column, column);

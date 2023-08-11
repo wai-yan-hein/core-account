@@ -99,7 +99,7 @@ public class ProUtil {
         return Util1.getBoolean(Global.hmRoleProperty.get("sale.price.change"));
     }
 
-    public static boolean isWeightOption() {
+    public static boolean isUseWeight() {
         return Util1.getBoolean(Global.hmRoleProperty.get("stock.use.weight"));
     }
 

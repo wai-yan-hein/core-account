@@ -129,7 +129,7 @@ public class ReturnInTableModel extends AbstractTableModel {
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
             case 5 ->
-                ProUtil.isWeightOption();
+                ProUtil.isUseWeight();
             default ->
                 column != 2;
         };

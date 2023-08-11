@@ -121,10 +121,12 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 0, 1, 2, 3, 7 ->
-                Float.class;
-            default ->
+            case 0, 1, 2, 3 ->
                 String.class;
+            case 7 ->
+                ProUtil.isUseWeight() ? String.class : Float.class;
+            default ->
+                Float.class;
         };
     }
 
@@ -247,12 +249,19 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                 }
                 case 6 -> {
                     //Qty
-                    if (Util1.isNumber(value)) {
+                    if (ProUtil.isUseWeight()) {
+                        String str = String.valueOf(value);
+                        float wt = Util1.getFloat(record.getWeight());
                         record.setQty(Util1.getFloat(value));
-                        if (record.getQty() != null && record.getWeight() != null) {
-                            record.setTotalWeight(Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight()));
+                        record.setTotalWeight(Util1.getTotalWeight(wt, str));
+                    } else {
+                        if (Util1.isNumber(value)) {
+                            record.setQty(Util1.getFloat(value));
+                            if (record.getQty() != null && record.getWeight() != null) {
+                                record.setTotalWeight(Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight()));
+                            }
+                            parent.setRowSelectionInterval(row, row);
                         }
-                        parent.setRowSelectionInterval(row, row);
                     }
                 }
                 case 7 -> {
@@ -366,16 +375,9 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
     private void calculateAmount(PurHisDetail pur) {
         float price = Util1.getFloat(pur.getPrice());
         float stdWt = Util1.getFloat(pur.getStdWeight());
-        float wt = Util1.getFloat(pur.getWeight());
-        float qtyValue = Util1.getFloat(pur.getQty());
-        String qtyStr = Float.toString(qtyValue);
-        String[] parts = qtyStr.split("\\.");
-        int qty = Integer.parseInt(parts[0]);
-        int decimalWt = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
-        float ttlWt = (qty * wt) + decimalWt;
+        float ttlWt = Util1.getFloat(pur.getTotalWeight());
         if (pur.getStockCode() != null) {
             float amount = (ttlWt * price) / stdWt;
-            pur.setTotalWeight(ttlWt);
             pur.setAmount(amount);
         }
     }

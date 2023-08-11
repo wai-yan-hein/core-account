@@ -62,10 +62,11 @@ public class Util1 {
     /**
      *
      */
-    public static final String DECIMAL_FORMAT = "###,###.##;(###,###.##)";
+    public static final String DECIMAL_FORMAT = "###,###.##;(###,###.###)";
+    public static final String DECIMAL_FORMAT1 = "###,##0;(###,##0)";
     public static final String DECIMAL_FORMAT2 = "###,###.#;(###,###.#)";
     public static final String DECIMAL_FORMAT3 = "###,###.000;(###,###.000)";
-    public static final String DECIMAL_FORMAT1 = "###,##0;(###,##0)";
+
     private static final DecimalFormat df2 = new DecimalFormat("0");
     public static String SYNC_DATE;
     public static final Gson gson = new GsonBuilder()
@@ -1020,21 +1021,11 @@ public class Util1 {
         return "";
     }
 
-    public static Float getTotalWeight(Float weight, Float qty) {
-        Float total = 0.0f;
-        String formattedValue = String.format("%.3f", qty);
-        String[] parts = formattedValue.split("\\.");
-
-        if (parts.length == 2) {
-            int integralValue = Integer.parseInt(parts[0]);
-            int decimalValue = Integer.parseInt(parts[1]);
-            if (weight > 0) {
-                total = (weight * integralValue) + decimalValue;
-            }
-        } else {
-            System.out.println("Invalid float value.");
-        }
-
-        return total;
+    public static Float getTotalWeight(Float wt, String qtyStr) {
+        String[] parts = qtyStr.split("\\.");
+        int qty = Integer.parseInt(parts[0]);
+        int decimalWt = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+        float ttlWt = (qty * wt) + decimalWt;
+        return ttlWt;
     }
 }
