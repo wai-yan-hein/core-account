@@ -245,15 +245,9 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                     if (Util1.isNumber(value)) {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             record.setWeight(Util1.getFloat(value));
-                            if (Util1.getBoolean(ProUtil.getProperty(key))) {
-                                record.setTotalWeight(Util1.getTotalWeight(Util1.getFloat(record.getWeight()), Util1.getFloat(record.getQty())));
-                            } else {
-                                record.setTotalWeight(Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight()));
-                            }
                         } else {
                             showMessageBox("Input value must be positive.");
                         }
-
                     } else {
                         showMessageBox("Input value must be number.");
                     }
