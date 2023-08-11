@@ -7,6 +7,8 @@ package com.inventory.ui.entry;
 
 import com.CloudIntegration;
 import com.H2Repo;
+import com.acc.common.COAComboBoxModel;
+import com.acc.model.ChartOfAccount;
 import com.repo.AccountRepo;
 import com.common.DecimalFormatRender;
 import com.common.Global;
@@ -130,6 +132,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private final SaleExpenseTableModel expenseTableModel = new SaleExpenseTableModel();
     private BatchSearchDialog batchDialog;
     private GRNDetailDialog grnDialog;
+    private COAComboBoxModel coaComboModel = new COAComboBoxModel();
 
     public TraderAutoCompleter getTraderAutoCompleter() {
         return traderAutoCompleter;
@@ -374,6 +377,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         projectAutoCompleter.setObserver(this);
         batchAutoCompeter = new BatchAutoCompeter(txtBatchNo, inventoryRepo, null, false);
         batchAutoCompeter.setObserver(this);
+        accountRepo.getCOAByHead(ProUtil.getProperty(ProUtil.INCOME)).subscribe((t) -> {
+            coaComboModel.setData(t);
+            cboAccount.setModel(coaComboModel);
+        });
     }
 
     private void initKeyListener() {
@@ -456,6 +463,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 saleManCompleter.setSaleMan(tt);
             });
         }
+        coaComboModel.setSelectedItem(null);
+        cboAccount.repaint();
         batchAutoCompeter.setBatch(null);
         btnBatch.setText("Batch");
         txtDueDate.setDate(null);
@@ -595,6 +604,9 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             saleHis.setProjectNo(p == null ? null : p.getKey().getProjectNo());
             GRN g = batchAutoCompeter.getBatch();
             saleHis.setGrnVouNo(g == null ? null : g.getKey().getVouNo());
+            if (coaComboModel.getSelectedItem() instanceof ChartOfAccount coa) {
+                saleHis.setAccount(coa.getKey().getCoaCode());
+            }
             if (lblStatus.getText().equals("NEW")) {
                 SaleHisKey key = new SaleHisKey();
                 key.setCompCode(Global.compCode);
@@ -758,6 +770,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 batchAutoCompeter.setBatch(t);
                 btnBatch.setText(t.getBatchNo() == null ? "Batch" : "View");
             });
+            accountRepo.findCOA(sh.getAccount()).doOnSuccess((t) -> {
+                coaComboModel.setSelectedItem(t);
+                cboAccount.repaint();
+            }).subscribe();
             String vouNo = sh.getKey().getVouNo();
             inventoryRepo.getSaleDetail(vouNo, sh.getKey().getDeptId(), saleHis.isLocal()).subscribe((t) -> {
                 saleTableModel.setListDetail(t);
@@ -1093,6 +1109,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtProjectNo = new javax.swing.JTextField();
         jLabel11 = new javax.swing.JLabel();
         txtBatchNo = new javax.swing.JTextField();
+        jLabel12 = new javax.swing.JLabel();
+        cboAccount = new javax.swing.JComboBox<>();
         jPanel2 = new javax.swing.JPanel();
         lblStatus = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
@@ -1297,6 +1315,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
         });
 
+        jLabel12.setText("Account");
+
+        cboAccount.setFont(Global.textFont);
+
         javax.swing.GroupLayout panelSaleLayout = new javax.swing.GroupLayout(panelSale);
         panelSale.setLayout(panelSaleLayout);
         panelSaleLayout.setHorizontalGroup(
@@ -1335,11 +1357,13 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtBatchNo)
-                    .addComponent(txtProjectNo))
+                    .addComponent(txtProjectNo)
+                    .addComponent(cboAccount, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -1381,7 +1405,9 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         .addComponent(jLabel2))
                     .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(txtReference, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel9)))
+                        .addComponent(jLabel9)
+                        .addComponent(jLabel12)
+                        .addComponent(cboAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -2236,6 +2262,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBatch;
+    private javax.swing.JComboBox<ChartOfAccount> cboAccount;
     private javax.swing.JCheckBox chkA4;
     private javax.swing.JCheckBox chkA5;
     private javax.swing.JCheckBox chkPaid;
@@ -2247,6 +2274,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
