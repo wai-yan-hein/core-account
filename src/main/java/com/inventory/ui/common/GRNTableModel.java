@@ -220,6 +220,8 @@ public class GRNTableModel extends AbstractTableModel {
     public void setValueAt(Object value, int row, int column) {
         try {
             GRNDetail record = listDetail.get(row);
+
+            String key = "stock.use.weight";
             switch (column) {
                 case 0, 1 -> {
                     //Code
