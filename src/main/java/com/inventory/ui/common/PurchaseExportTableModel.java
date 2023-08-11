@@ -230,6 +230,7 @@ public class PurchaseExportTableModel extends AbstractTableModel {
                             record.setUnitCode(s.getPurUnitCode());
                             record.setWeightUnit(s.getWeightUnit());
                             record.setStdWeight(s.getWeight());
+                            record.setWeight(s.getWeight());
                             addNewRow();
                         }
                     }

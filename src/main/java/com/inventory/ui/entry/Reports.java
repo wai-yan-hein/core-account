@@ -217,8 +217,9 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         inventoryRepo.getStockBrand().subscribe((t) -> {
             brandAutoCompleter.setListStockBrand(t);
         });
+        regionAutoCompleter = new RegionAutoCompleter(txtRegion, null, true);
         inventoryRepo.getRegion().subscribe((t) -> {
-            regionAutoCompleter = new RegionAutoCompleter(txtRegion, t, null, true, false);
+            regionAutoCompleter.setListRegion(t);
         });
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
@@ -313,7 +314,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     }
 
     private boolean isValidReport(String url) {
-        if (url.equals("StockInOutDetail")) {
+        if (url.equals("StockInOutDetail") || url.equals("StockInOutDetailByWeight")) {
             if (stockAutoCompleter.getStock().getKey().getStockCode().equals("-")) {
                 JOptionPane.showMessageDialog(this, "Please select stock code.", "Report Validation", JOptionPane.INFORMATION_MESSAGE);
                 txtStock.requestFocus();
@@ -380,6 +381,15 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             return tmp1.startsWith(text);
         }
     };
+
+    private void observeMain() {
+        observer.selected("control", this);
+        observer.selected("save", false);
+        observer.selected("print", true);
+        observer.selected("history", false);
+        observer.selected("delete", false);
+        observer.selected("refresh", true);
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -860,7 +870,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         // TODO add your handling code here:
-        observer.selected("control", this);
+        observeMain();
     }//GEN-LAST:event_formComponentShown
 
     private void txtTraderKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtTraderKeyReleased

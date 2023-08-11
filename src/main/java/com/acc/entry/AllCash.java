@@ -737,6 +737,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         filter.setCoaLv2(coaLv2);
         filter.setAcc(accCode);
         filter.setSummary(chkSummary.isSelected());
+        log.info("start date : " + filter.getFromDate());
+        log.info("end date : " + filter.getToDate());
         return filter;
     }
 

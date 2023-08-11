@@ -253,6 +253,7 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                             sd.setRelName(s.getRelName());
                             sd.setQty(1.0f);
                             sd.setStdWeight(s.getWeight());
+                            sd.setWeight(s.getWeight());
                             sd.setWeightUnit(s.getWeightUnit());
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setStock(s);

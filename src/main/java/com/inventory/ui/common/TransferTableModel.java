@@ -173,6 +173,8 @@ public class TransferTableModel extends AbstractTableModel {
                             io.setUserCode(s.getUserCode());
                             io.setRelName(s.getRelName());
                             io.setUnitCode(s.getPurUnitCode());
+                            io.setWeight(s.getWeight());
+                            io.setWeightUnit(s.getWeightUnit());
                             String key = "stock.use.weight";
                             if (Util1.getBoolean(ProUtil.getProperty(key))) {
                                 setColumnSelection(5);

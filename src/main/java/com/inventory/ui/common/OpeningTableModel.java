@@ -20,13 +20,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author wai yan
  */
-@Component
 @Slf4j
 public class OpeningTableModel extends AbstractTableModel {
 
@@ -182,6 +180,8 @@ public class OpeningTableModel extends AbstractTableModel {
                             record.setRelName(s.getRelName());
                             record.setQty(1.0f);
                             record.setUnitCode(s.getPurUnitCode());
+                            record.setWeight(s.getWeight());
+                            record.setWeightUnit(s.getWeightUnit());
                             addNewRow();
                         }
                     }
