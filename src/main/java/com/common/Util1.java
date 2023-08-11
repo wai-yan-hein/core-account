@@ -62,7 +62,7 @@ public class Util1 {
     /**
      *
      */
-    public static final String DECIMAL_FORMAT = "###,###.##;(###,###.###)";
+    public static final String DECIMAL_FORMAT = "###,###.###;(###,###.###)";
     public static final String DECIMAL_FORMAT1 = "###,##0;(###,##0)";
     public static final String DECIMAL_FORMAT2 = "###,###.#;(###,###.#)";
     public static final String DECIMAL_FORMAT3 = "###,###.000;(###,###.000)";

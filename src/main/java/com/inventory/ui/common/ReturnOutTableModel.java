@@ -12,6 +12,7 @@ import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.model.Location;
+import com.inventory.model.RetInHisDetail;
 import com.inventory.model.RetOutHisDetail;
 import com.inventory.model.RetOutKey;
 import com.inventory.model.Stock;
@@ -219,11 +220,10 @@ public class ReturnOutTableModel extends AbstractTableModel {
                             record.setWeight(s.getWeight());
                             record.setWeightUnit(s.getWeightUnit());
                             addNewRow();
-                            String key = "stock.use.weight";
-                            if (Util1.getBoolean(ProUtil.getProperty(key))) {
-                                parent.setColumnSelectionInterval(6, 6);
+                            if (ProUtil.isUseWeight()) {
+                                setSelection(row, 6);
                             } else {
-                                parent.setColumnSelectionInterval(4, 4);
+                                setSelection(row, 4);
                             }
                         }
                     }
@@ -243,13 +243,12 @@ public class ReturnOutTableModel extends AbstractTableModel {
                             record.setQty(Util1.getFloat(value));
                         } else {
                             showMessageBox("Input value must be positive");
-                            parent.setColumnSelectionInterval(column, column);
+                            setSelection(row, column);
                         }
                     } else {
                         showMessageBox("Input value must be number.");
-                        parent.setColumnSelectionInterval(column, column);
+                        setSelection(row, column);
                     }
-                    parent.setRowSelectionInterval(row, row);
                 }
 
                 case 5 -> {
@@ -257,44 +256,43 @@ public class ReturnOutTableModel extends AbstractTableModel {
                     if (value != null) {
                         if (value instanceof StockUnit stockUnit) {
                             record.setUnitCode(stockUnit.getKey().getUnitCode());
+                            setSelection(row, 6);
                         }
                     }
-                    parent.setColumnSelectionInterval(6, 6);
                 }
                 case 6 -> {
                     if (Util1.isNumber(value)) {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             record.setWeight(Util1.getFloat(value));
-                            parent.setColumnSelectionInterval(7, 7);
+                            setSelection(row, 7);
                         } else {
-                            parent.setColumnSelectionInterval(column, column);
+                            setSelection(row, column);
                             showMessageBox("Input value must be positive.");
                         }
                     } else {
-                        parent.setColumnSelectionInterval(column, column);
+                        setSelection(row, column);
                         showMessageBox("Input value must be number.");
                     }
                 }
                 case 7 -> {
                     if (value instanceof StockUnit unit) {
                         record.setWeightUnit(unit.getKey().getUnitCode());
+                        setSelection(row, 8);
                     }
-                    parent.setColumnSelectionInterval(8, 8);
                 }
                 case 8 -> {
                     //Pur Price
                     if (Util1.isNumber(value)) {
                         if (Util1.isPositive(Util1.getFloat(value))) {
                             record.setPrice(Util1.getFloat(value));
-                            parent.setColumnSelectionInterval(0, 0);
-                            parent.setRowSelectionInterval(row + 1, row + 1);
+                            setSelection(row + 1, 0);
                         } else {
                             showMessageBox("Input value must be positive");
-                            parent.setColumnSelectionInterval(column, column);
+                            setSelection(row, column);
                         }
                     } else {
                         showMessageBox("Input value must be number.");
-                        parent.setColumnSelectionInterval(column, column);
+                        setSelection(row, column);
                     }
                 }
 
@@ -315,10 +313,14 @@ public class ReturnOutTableModel extends AbstractTableModel {
             fireTableRowsUpdated(row, row);
             selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
             parent.requestFocusInWindow();
-            //   fireTableCellUpdated(row, 8);
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
+    }
+
+    private void setSelection(int row, int column) {
+        parent.setRowSelectionInterval(row, row);
+        parent.setColumnSelectionInterval(column, column);
     }
 
     private void assignLocation(RetOutHisDetail sd) {
@@ -369,12 +371,19 @@ public class ReturnOutTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
-    private void calculateAmount(RetOutHisDetail ri) {
-        float price = Util1.getFloat(ri.getPrice());
-        float qty = Util1.getFloat(ri.getQty());
-        if (ri.getStockCode() != null) {
-            float amount = qty * price;
-            ri.setAmount(amount);
+    private void calculateAmount(RetOutHisDetail s) {
+        float price = Util1.getFloat(s.getPrice());
+        float wt = Util1.getFloat(s.getWeight());
+        float ttlWt = Util1.getFloat(s.getTotalWeight());
+        float qty = Util1.getFloat(s.getQty());
+        if (s.getStockCode() != null) {
+            if (ttlWt > 0) {
+                float amount = (ttlWt * price) / wt;
+                s.setAmount(amount);
+            } else {
+                float amount = qty * price;
+                s.setAmount(amount);
+            }
         }
     }
 

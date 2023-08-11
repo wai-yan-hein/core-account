@@ -217,14 +217,12 @@ public class ReturnInTableModel extends AbstractTableModel {
                             record.setWeight(s.getWeight());
                             record.setWeightUnit(s.getWeightUnit());
                             addNewRow();
+                            if (ProUtil.isUseWeight()) {
+                                setSelection(row, 6);
+                            } else {
+                                setSelection(row, 4);
+                            }
                         }
-                        String key = "stock.use.weight";
-                        if (Util1.getBoolean(ProUtil.getProperty(key))) {
-                            parent.setColumnSelectionInterval(6, 6);
-                        } else {
-                            parent.setColumnSelectionInterval(4, 4);
-                        }
-
                     }
                     case 3 -> {
                         //Loc
@@ -236,63 +234,67 @@ public class ReturnInTableModel extends AbstractTableModel {
                     }
                     case 4 -> {
                         //Qty
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
-                                record.setQty(Util1.getFloat(value));
-                                parent.setColumnSelectionInterval(6, 6);
-                            } else {
-                                showMessageBox("Input value must be positive");
-                                parent.setColumnSelectionInterval(column, column);
-                            }
+                        if (ProUtil.isUseWeight()) {
+                            String str = String.valueOf(value);
+                            float wt = Util1.getFloat(record.getWeight());
+                            record.setQty(Util1.getFloat(value));
+                            record.setTotalWeight(Util1.getTotalWeight(wt, str));
                         } else {
-                            showMessageBox("Input value must be number.");
-                            parent.setColumnSelectionInterval(column, column);
+                            if (Util1.isNumber(value)) {
+                                if (Util1.isPositive(Util1.getFloat(value))) {
+                                    record.setQty(Util1.getFloat(value));
+                                    setSelection(row, 6);
+                                } else {
+                                    showMessageBox("Input value must be positive");
+                                    setSelection(row, column);
+                                }
+                            } else {
+                                showMessageBox("Input value must be number.");
+                                setSelection(row, column);
+                            }
                         }
-                        parent.setRowSelectionInterval(row, row);
                     }
                     case 5 -> {
                         //Unit
                         if (value instanceof StockUnit s) {
                             record.setUnitCode(s.getKey().getUnitCode());
+                            setSelection(row, 8);
                         }
-                        parent.setColumnSelectionInterval(8, 8);
                     }
                     case 6 -> { // weight
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 record.setWeight(Util1.getFloat(value));
-                                parent.setColumnSelectionInterval(7, 7);
+                                setSelection(row, 7);
                             } else {
                                 showMessageBox("Input value must be positive");
-                                parent.setColumnSelectionInterval(column, column);
+                                setSelection(row, column);
                             }
                         } else {
                             showMessageBox("Input value must be number");
-                            parent.setColumnSelectionInterval(column, column);
+                            setSelection(row, column);
                         }
-                        parent.setRowSelectionInterval(row, row);
-                        parent.setColumnSelectionInterval(7, 7);
+
                     }
                     case 7 -> {
                         if (value instanceof StockUnit unit) {
                             record.setWeightUnit(unit.getKey().getUnitCode());
+                            setSelection(row, 8);
                         }
-                        parent.setColumnSelectionInterval(8, 8);
                     }
                     case 8 -> {
                         // Price
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 record.setPrice(Util1.getFloat(value));
-                                parent.setColumnSelectionInterval(0, 0);
-                                parent.setRowSelectionInterval(row + 1, row + 1);
+                                setSelection(row + 1, 0);
                             } else {
                                 showMessageBox("Input value must be positive");
-                                parent.setColumnSelectionInterval(column, column);
+                                setSelection(row, column);
                             }
                         } else {
                             showMessageBox("Input value must be number.");
-                            parent.setColumnSelectionInterval(column, column);
+                            setSelection(row, column);
                         }
                     }
                     case 9 -> {
@@ -321,6 +323,11 @@ public class ReturnInTableModel extends AbstractTableModel {
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
+    }
+
+    private void setSelection(int row, int column) {
+        parent.setRowSelectionInterval(row, row);
+        parent.setColumnSelectionInterval(column, column);
     }
 
     private void assignLocation(RetInHisDetail sd) {
@@ -371,13 +378,19 @@ public class ReturnInTableModel extends AbstractTableModel {
         fireTableDataChanged();
     }
 
-    private void calculateAmount(RetInHisDetail ri) {
-        float price = Util1.getFloat(ri.getPrice());
-        float avgQty = Util1.getFloat(ri.getQty());
-        if (ri.getStockCode() != null) {
-            float amount = avgQty * price;
-            ri.setPrice(price);
-            ri.setAmount(Util1.getFloat(Math.round(amount)));
+    private void calculateAmount(RetInHisDetail s) {
+        float price = Util1.getFloat(s.getPrice());
+        float wt = Util1.getFloat(s.getWeight());
+        float ttlWt = Util1.getFloat(s.getTotalWeight());
+        float qty = Util1.getFloat(s.getQty());
+        if (s.getStockCode() != null) {
+            if (ttlWt > 0) {
+                float amount = (ttlWt * price) / wt;
+                s.setAmount(amount);
+            } else {
+                float amount = qty * price;
+                s.setAmount(amount);
+            }
         }
     }
 

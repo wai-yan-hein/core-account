@@ -5,6 +5,7 @@
 package com.inventory.ui.common;
 
 import com.common.Global;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.model.Location;
@@ -238,7 +239,7 @@ public class MilingOutTableModel extends AbstractTableModel {
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setStock(s);
                             sd.setPrice(Util1.getFloat(sd.getPrice()) == 0 ? s.getSalePriceN() : sd.getPrice());
-                            setTableSelection(row, 3);
+                            setSelection(row, 3);
                             addNewRow();
                         }
                     }
@@ -260,25 +261,28 @@ public class MilingOutTableModel extends AbstractTableModel {
                     }
                     case 5 -> {
                         //Qty
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
-                                sd.setQty(Util1.getFloat(value));
-
-                                if (sd.getQty() != null && sd.getWeight() != null) {
-                                    sd.setTotalWeight(Util1.getFloat(sd.getQty()) * Util1.getFloat(sd.getWeight()));
-                                }
-                                if (sd.getUnitCode() == null) {
-                                    parent.setColumnSelectionInterval(6, 6);
+                        if (ProUtil.isUseWeight()) {
+                            String str = String.valueOf(value);
+                            float wt = Util1.getFloat(sd.getWeight());
+                            sd.setQty(Util1.getFloat(value));
+                            sd.setTotalWeight(Util1.getTotalWeight(wt, str));
+                        } else {
+                            if (Util1.isNumber(value)) {
+                                if (Util1.isPositive(Util1.getFloat(value))) {
+                                    sd.setQty(Util1.getFloat(value));
+                                    if (sd.getUnitCode() == null) {
+                                        setSelection(row, 6);
+                                    } else {
+                                        setSelection(row, 9);
+                                    }
                                 } else {
-                                    parent.setColumnSelectionInterval(9, 9);
+                                    showMessageBox("Input value must be positive");
+                                    parent.setColumnSelectionInterval(column, column);
                                 }
                             } else {
-                                showMessageBox("Input value must be positive");
+                                showMessageBox("Input value must be number.");
                                 parent.setColumnSelectionInterval(column, column);
                             }
-                        } else {
-                            showMessageBox("Input value must be number.");
-                            parent.setColumnSelectionInterval(column, column);
                         }
                     }
                     case 6 -> {
@@ -296,35 +300,32 @@ public class MilingOutTableModel extends AbstractTableModel {
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 sd.setPrice(Util1.getFloat(value));
-                                parent.setColumnSelectionInterval(0, 0);
-                                parent.setRowSelectionInterval(row + 1, row + 1);
+                                setSelection(row + 1, 0);
                             } else {
                                 showMessageBox("Input value must be positive");
-                                parent.setColumnSelectionInterval(column, column);
+                                setSelection(row, column);
                             }
                         } else {
                             showMessageBox("Input value must be number.");
-                            parent.setColumnSelectionInterval(column, column);
+                            setSelection(row, column);
                         }
                     }
                     case 10 -> {
                         //amt
                         sd.setAmount(Util1.getFloat(value));
-
                     }
 
                 }
                 change = true;
                 assignLocation(sd);
-                calWeightTotal(sd);
                 calculateAmount(sd);
                 fireTableRowsUpdated(row, row);
-                if(row != 0) {
+                if (row != 0) {
                     selectionObserver.selected("SALE-TOTAL-OUT", "SALE-TOTAL-OUT");
                 } else {
                     selectionObserver.selected("SALE-TOTAL-SKIP", "SALE-TOTAL-SKIP");
                 }
-                
+
                 parent.requestFocus();
             }
         } catch (Exception ex) {
@@ -332,7 +333,7 @@ public class MilingOutTableModel extends AbstractTableModel {
         }
     }
 
-    private void setTableSelection(int row, int column) {
+    private void setSelection(int row, int column) {
         parent.setRowSelectionInterval(row, row);
         parent.setColumnSelectionInterval(column, column);
     }
@@ -382,15 +383,12 @@ public class MilingOutTableModel extends AbstractTableModel {
         addNewRow();
     }
 
-    private void calWeightTotal(MillingOutDetail m) {
-        m.setTotalWeight(Util1.getFloat(m.getQty()) * Util1.getFloat(m.getWeight()));
-    }
-
     private void calculateAmount(MillingOutDetail s) {
         float price = Util1.getFloat(s.getPrice());
-        float qty = Util1.getFloat(s.getQty());
+        float wt = Util1.getFloat(s.getWeight());
+        float ttlWt = Util1.getFloat(s.getTotalWeight());
         if (s.getStockCode() != null) {
-            float amount = qty * price;
+            float amount = (ttlWt * price) / wt;
             s.setAmount(amount);
             s.setPercent((s.getTotalWeight() / Util1.getFloat(totalWeight.getValue())) * 100);
         }

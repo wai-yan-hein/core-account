@@ -202,7 +202,7 @@ public class GRNTableModel extends AbstractTableModel {
                     }
 
                     case 8 -> {
-                        float ttl = record.getTotalWeight();
+                        float ttl = Util1.getFloat(record.getTotalWeight());
                         return ttl == 0 ? null : ttl;
                     }
                     default -> {
@@ -231,14 +231,14 @@ public class GRNTableModel extends AbstractTableModel {
                             record.setRelName(s.getRelName());
                             record.setQty(1.0f);
                             record.setUnit(s.getPurUnitCode());
+                            record.setWeight(s.getWeight());
                             record.setWeightUnit(s.getWeightUnit());
                             record.setStock(s);
                             addNewRow();
-                            String key = "stock.use.weight";
-                            if (Util1.getBoolean(ProUtil.getProperty(key))) {
-                                parent.setColumnSelectionInterval(4, 4);
+                            if (ProUtil.isUseWeight()) {
+                                setSelection(row, 4);
                             } else {
-                                parent.setColumnSelectionInterval(6, 6);
+                                setSelection(row, 6);
                             }
                         }
                     }
@@ -252,31 +252,34 @@ public class GRNTableModel extends AbstractTableModel {
                 }
                 case 4 -> {
                     record.setWeight(Util1.getFloat(value));
-                    parent.setColumnSelectionInterval(6, 6);
+                    setSelection(row, 6);
                 }
                 case 5 -> {
                     if (value instanceof StockUnit u) {
                         record.setWeightUnit(u.getKey().getUnitCode());
-                        parent.setColumnSelectionInterval(0, 0);
-                        parent.setRowSelectionInterval(row + 1, row + 1);
+                        setSelection(row + 1, 0);
                     }
                 }
                 case 6 -> {
                     //Qty
-                    if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            record.setQty(Util1.getFloat(value));
-                            parent.setColumnSelectionInterval(6, 6);
-                            parent.setRowSelectionInterval(row, row);
-                        } else {
-                            showMessageBox("Input value must be positive");
-                            parent.setColumnSelectionInterval(column, column);
-                            parent.setRowSelectionInterval(row, row);
-                        }
+                    if (ProUtil.isUseWeight()) {
+                        String str = String.valueOf(value);
+                        float wt = Util1.getFloat(record.getWeight());
+                        record.setQty(Util1.getFloat(value));
+                        record.setTotalWeight(Util1.getTotalWeight(wt, str));
                     } else {
-                        showMessageBox("Input value must be number.");
-                        parent.setColumnSelectionInterval(column, column);
-                        parent.setRowSelectionInterval(row, row);
+                        if (Util1.isNumber(value)) {
+                            if (Util1.isPositive(Util1.getFloat(value))) {
+                                record.setQty(Util1.getFloat(value));
+                                setSelection(row, column);
+                            } else {
+                                showMessageBox("Input value must be positive");
+                                setSelection(row, column);
+                            }
+                        } else {
+                            showMessageBox("Input value must be number.");
+                            setSelection(row, column);
+                        }
                     }
                 }
                 case 7 -> {
@@ -284,9 +287,9 @@ public class GRNTableModel extends AbstractTableModel {
                     if (value != null) {
                         if (value instanceof StockUnit u) {
                             record.setUnit(u.getKey().getUnitCode());
+                            setSelection(row, 6);
                         }
                     }
-                    parent.setColumnSelectionInterval(6, 6);
                 }
 
             }
@@ -297,6 +300,11 @@ public class GRNTableModel extends AbstractTableModel {
         } catch (HeadlessException ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
+    }
+
+    private void setSelection(int row, int column) {
+        parent.setRowSelectionInterval(row, row);
+        parent.setColumnSelectionInterval(column, column);
     }
 
     private void assignLocation(GRNDetail sd) {

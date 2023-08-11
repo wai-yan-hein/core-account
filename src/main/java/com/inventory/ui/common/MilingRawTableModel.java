@@ -244,7 +244,7 @@ public class MilingRawTableModel extends AbstractTableModel {
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setStock(s);
                             sd.setPrice(Util1.getFloat(sd.getPrice()) == 0 ? s.getSalePriceN() : sd.getPrice());
-                            parent.setColumnSelectionInterval(3, 3);
+                            setSelection(row, 3);
                             addNewRow();
                         }
                     }
@@ -266,24 +266,28 @@ public class MilingRawTableModel extends AbstractTableModel {
                     }
                     case 5 -> {
                         //Qty
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
-                                sd.setQty(Util1.getFloat(value));
-                                if (sd.getUnitCode() == null) {
-                                    parent.setColumnSelectionInterval(7, 7);
+                        if (ProUtil.isUseWeight()) {
+                            String str = String.valueOf(value);
+                            float wt = Util1.getFloat(sd.getWeight());
+                            sd.setQty(Util1.getFloat(value));
+                            sd.setTotalWeight(Util1.getTotalWeight(wt, str));
+                        } else {
+                            if (Util1.isNumber(value)) {
+                                if (Util1.isPositive(Util1.getFloat(value))) {
+                                    sd.setQty(Util1.getFloat(value));
+                                    if (sd.getUnitCode() == null) {
+                                        setSelection(row, 7);
+                                    } else {
+                                        setSelection(row, 8);
+                                    }
                                 } else {
-                                    parent.setColumnSelectionInterval(8, 8);
-                                }
-                                if (sd.getQty() != null && sd.getWeight() != null) {
-                                    sd.setTotalWeight(Util1.getFloat(sd.getQty()) * Util1.getFloat(sd.getWeight()));
+                                    showMessageBox("Input value must be positive");
+                                    setSelection(row, column);
                                 }
                             } else {
-                                showMessageBox("Input value must be positive");
-                                parent.setColumnSelectionInterval(column, column);
+                                showMessageBox("Input value must be number.");
+                                setSelection(row, column);
                             }
-                        } else {
-                            showMessageBox("Input value must be number.");
-                            parent.setColumnSelectionInterval(column, column);
                         }
                     }
                     case 6 -> {
@@ -297,15 +301,14 @@ public class MilingRawTableModel extends AbstractTableModel {
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 sd.setPrice(Util1.getFloat(value));
-                                parent.setColumnSelectionInterval(0, 0);
-                                parent.setRowSelectionInterval(row + 1, row + 1);
+                                setSelection(row + 1, 0);
                             } else {
                                 showMessageBox("Input value must be positive");
-                                parent.setColumnSelectionInterval(column, column);
+                                setSelection(row, column);
                             }
                         } else {
                             showMessageBox("Input value must be number.");
-                            parent.setColumnSelectionInterval(column, column);
+                            setSelection(row, column);
                         }
                     }
                     case 9 -> {
@@ -317,7 +320,6 @@ public class MilingRawTableModel extends AbstractTableModel {
                 }
                 change = true;
                 assignLocation(sd);
-                calWeightTotal(sd);
                 calculateAmount(sd);
                 fireTableRowsUpdated(row, row);
                 selectionObserver.selected("SALE-TOTAL", "SALE-TOTAL");
@@ -326,6 +328,11 @@ public class MilingRawTableModel extends AbstractTableModel {
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
+    }
+
+    private void setSelection(int row, int column) {
+        parent.setRowSelectionInterval(row, row);
+        parent.setColumnSelectionInterval(column, column);
     }
 
     private void assignLocation(MillingRawDetail sd) {
@@ -373,15 +380,12 @@ public class MilingRawTableModel extends AbstractTableModel {
         addNewRow();
     }
 
-    private void calWeightTotal(MillingRawDetail m) {
-        m.setTotalWeight(Util1.getFloat(m.getQty()) * Util1.getFloat(m.getWeight()));
-    }
-
     private void calculateAmount(MillingRawDetail s) {
         float price = Util1.getFloat(s.getPrice());
-        float qty = Util1.getFloat(s.getQty());
+        float wt = Util1.getFloat(s.getWeight());
+        float ttlWt = Util1.getFloat(s.getTotalWeight());
         if (s.getStockCode() != null) {
-            float amount = (qty  * price);
+            float amount = (ttlWt * price) / wt;
             s.setAmount(amount);
         }
     }

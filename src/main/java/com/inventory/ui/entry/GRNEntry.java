@@ -205,8 +205,11 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         tblGRN.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
         tblGRN.getColumnModel().getColumn(1).setPreferredWidth(350);//Name
         tblGRN.getColumnModel().getColumn(2).setPreferredWidth(60);//relation
-        tblGRN.getColumnModel().getColumn(3).setPreferredWidth(60);//qty
-        tblGRN.getColumnModel().getColumn(4).setPreferredWidth(1);//unit
+        tblGRN.getColumnModel().getColumn(3).setPreferredWidth(60);//weight
+        tblGRN.getColumnModel().getColumn(4).setPreferredWidth(5);//unit
+        tblGRN.getColumnModel().getColumn(5).setPreferredWidth(60);//qty
+        tblGRN.getColumnModel().getColumn(6).setPreferredWidth(5);//unit
+        tblGRN.getColumnModel().getColumn(7).setPreferredWidth(70);//total
         tblGRN.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblGRN.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         inventoryRepo.getLocation().subscribe((t) -> {
@@ -221,8 +224,8 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         monoUnit.subscribe((t) -> {
             tblGRN.getColumnModel().getColumn(7).setCellEditor(new StockUnitEditor(t));
         });
-        tblGRN.setDefaultRenderer(Object.class, new DecimalFormatRender(3));
-        tblGRN.setDefaultRenderer(Float.class, new DecimalFormatRender(3));
+        tblGRN.setDefaultRenderer(String.class, new DecimalFormatRender());
+        tblGRN.setDefaultRenderer(Float.class, new DecimalFormatRender());
         tblGRN.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblGRN.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
