@@ -10,7 +10,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.myanmartools.TransliterateZ2U;
 import com.google.myanmartools.ZawgyiDetector;
-import com.inventory.model.VSale;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -40,7 +39,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
@@ -65,6 +63,8 @@ public class Util1 {
      *
      */
     public static final String DECIMAL_FORMAT = "###,###.##;(###,###.##)";
+    public static final String DECIMAL_FORMAT2 = "###,###.#;(###,###.#)";
+    public static final String DECIMAL_FORMAT3 = "###,###.000;(###,###.000)";
     public static final String DECIMAL_FORMAT1 = "###,##0;(###,##0)";
     private static final DecimalFormat df2 = new DecimalFormat("0");
     public static String SYNC_DATE;
@@ -1018,5 +1018,23 @@ public class Util1 {
             return str.replaceAll(" ", "").toLowerCase();
         }
         return "";
+    }
+
+    public static Float getTotalWeight(Float weight, Float qty) {
+        Float total = 0.0f;
+        String formattedValue = String.format("%.3f", qty);
+        String[] parts = formattedValue.split("\\.");
+
+        if (parts.length == 2) {
+            int integralValue = Integer.parseInt(parts[0]);
+            int decimalValue = Integer.parseInt(parts[1]);
+            if (weight > 0) {
+                total = (weight * integralValue) + decimalValue;
+            }
+        } else {
+            System.out.println("Invalid float value.");
+        }
+
+        return total;
     }
 }
