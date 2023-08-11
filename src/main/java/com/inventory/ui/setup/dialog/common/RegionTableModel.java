@@ -9,24 +9,19 @@ import com.inventory.model.Region;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class RegionTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(RegionTableModel.class);
     private List<Region> listRegion = new ArrayList<>();
     private final String[] columnNames = {"Code", "Name"};
 
     public RegionTableModel() {
-    }
-
-    public RegionTableModel(List<Region> listRegion) {
-        this.listRegion = listRegion;
     }
 
     @Override
@@ -58,9 +53,12 @@ public class RegionTableModel extends AbstractTableModel {
             Region record = listRegion.get(row);
 
             return switch (column) {
-                case 0 -> record.getUserCode();
-                case 1 -> record.getRegionName();
-                default -> null;
+                case 0 ->
+                    record.getUserCode();
+                case 1 ->
+                    record.getRegionName();
+                default ->
+                    null;
             }; //Code
             //Description
         } catch (Exception ex) {
@@ -92,6 +90,7 @@ public class RegionTableModel extends AbstractTableModel {
     public int getColumnCount() {
         return columnNames.length;
     }
+    
 
     public Region getRegion(int row) {
         if (listRegion == null) {

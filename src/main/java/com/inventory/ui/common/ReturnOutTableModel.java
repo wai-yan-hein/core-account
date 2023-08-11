@@ -216,6 +216,8 @@ public class ReturnOutTableModel extends AbstractTableModel {
                             record.setRelName(s.getRelName());
                             record.setQty(1.0f);
                             record.setUnitCode(s.getPurUnitCode());
+                            record.setWeight(s.getWeight());
+                            record.setWeightUnit(s.getWeightUnit());
                             addNewRow();
                             String key = "stock.use.weight";
                             if (Util1.getBoolean(ProUtil.getProperty(key))) {

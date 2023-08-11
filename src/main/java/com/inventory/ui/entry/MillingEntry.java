@@ -100,8 +100,6 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private AccountRepo accountRepo;
     @Autowired
     private UserRepo userRepo;
-    @Autowired
-    private TaskExecutor taskExecutor;
     private CurrencyAutoCompleter currAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
@@ -1769,16 +1767,14 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void vouStatusSetup() {
-        inventoryRepo.getVoucherStatus().subscribe((t) -> {
-            VouStatusSetupDialog vsDialog = new VouStatusSetupDialog();
-            vsDialog.setIconImage(icon);
-            vsDialog.setInventoryRepo(inventoryRepo);
-            vsDialog.setListVou(t);
-            vsDialog.initMain();
-            vsDialog.setSize(Global.width / 2, Global.height / 2);
-            vsDialog.setLocationRelativeTo(null);
-            vsDialog.setVisible(true);
-        });
+        VouStatusSetupDialog vsDialog = new VouStatusSetupDialog();
+        vsDialog.setIconImage(icon);
+        vsDialog.setInventoryRepo(inventoryRepo);
+        vsDialog.setListVou(vouStatusTableModel.getData());
+        vsDialog.initMain();
+        vsDialog.setSize(Global.width / 2, Global.height / 2);
+        vsDialog.setLocationRelativeTo(null);
+        vsDialog.setVisible(true);
 
     }
 }

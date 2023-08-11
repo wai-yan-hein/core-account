@@ -132,9 +132,9 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     }
 
     private void initCombo() {
+        regionAutoCompleter = new RegionAutoCompleter(txtRegion, null, true);
         inventoryRepo.getRegion().subscribe((t) -> {
-            regionAutoCompleter = new RegionAutoCompleter(txtRegion, t, null, false, false);
-            regionAutoCompleter.setRegion(null);
+            regionAutoCompleter.setListRegion(t);
         });
 
         inventoryRepo.getTraderGroup().subscribe((t) -> {

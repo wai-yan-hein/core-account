@@ -47,62 +47,43 @@ public final class RegionAutoCompleter implements KeyListener {
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private RegionTableModel regionTableModel;
+    private final RegionTableModel regionTableModel = new RegionTableModel();
     private Region region;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
     private boolean popupOpen = false;
-    private SelectionObserver selectionObserver;
-    private List<String> listOption = new ArrayList<>();
-    private OptionDialog optionDialog;
-    private List<Region> listRegion;
-    private boolean custom;
+    private SelectionObserver observer;
+    private boolean filter;
 
-    public List<String> getListOption() {
-        return listOption;
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
     }
 
-    public void setListOption(List<String> listOption) {
-        this.listOption = listOption;
-    }
-
-    private void initOption() {
-        listOption.clear();
-        listRegion.forEach(t -> {
-            listOption.add(t.getKey().getRegCode());
-        });
-    }
-
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
+    public void setListRegion(List<Region> list) {
+        if (filter) {
+            Region sm = new Region("-", "All");
+            list.add(0, sm);
+            setRegion(sm);
+        }
+        regionTableModel.setListRegion(list);;
+        if (!list.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
+        }
     }
 
     public RegionAutoCompleter() {
     }
 
-    public RegionAutoCompleter(JTextComponent comp, List<Region> list,
-            AbstractCellEditor editor, boolean filter, boolean custom) {
+    public RegionAutoCompleter(JTextComponent comp,
+            AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
-        this.listRegion = list;
+        this.filter = filter;
         this.textComp.addKeyListener(this);
-        this.custom = custom;
-        initOption();
-        if (filter) {
-            Region reg = new Region("-", "All");
-            list = new ArrayList<>(list);
-            list.add(0, reg);
-            setRegion(reg);
-        }
-        if (custom) {
-            list = new ArrayList<>(list);
-            list.add(1, new Region("C", "Custom"));
-        }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
-        regionTableModel = new RegionTableModel(list);
         table.setModel(regionTableModel);
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setFont(Global.textFont); // NOI18N
@@ -173,14 +154,6 @@ public final class RegionAutoCompleter implements KeyListener {
                 }
             }
         });
-
-        table.setRequestFocusEnabled(false);
-
-        if (list != null) {
-            if (!list.isEmpty()) {
-                table.setRowSelectionInterval(0, 0);
-            }
-        }
     }
 
     public void mouseSelect() {
@@ -188,37 +161,12 @@ public final class RegionAutoCompleter implements KeyListener {
             region = regionTableModel.getRegion(table.convertRowIndexToModel(
                     table.getSelectedRow()));
             textComp.setText(region.getRegionName());
-            if (custom) {
-                switch (region.getKey().getRegCode()) {
-                    case "C" -> {
-                        optionDialog = new OptionDialog(Global.parentForm, "Region");
-                        List<OptionModel> listOP = new ArrayList<>();
-                        listRegion.forEach(t -> {
-                            listOP.add(new OptionModel(t.getKey().getRegCode(), t.getRegionName()));
-                        });
-                        optionDialog.setOptionList(listOP);
-                        optionDialog.setLocationRelativeTo(null);
-                        optionDialog.setVisible(true);
-                        if (optionDialog.isSelect()) {
-                            listOption = optionDialog.getOptionList();
-                        }
-                        //open
-                    }
-                    case "-" ->
-                        initOption();
-                    default -> {
-                        listOption.clear();
-                        listOption.add(region.getKey().getRegCode());
-                    }
-                }
-            }
             if (editor == null) {
-                if (selectionObserver != null) {
-                    selectionObserver.selected("RegionList", region.getKey().getRegCode());
+                if (observer != null) {
+                    observer.selected("RegionList", region.getKey().getRegCode());
                 }
             }
         }
-
         popup.setVisible(false);
         popupOpen = false;
         if (editor != null) {
@@ -250,7 +198,7 @@ public final class RegionAutoCompleter implements KeyListener {
                 }
 
                 popup.show(textComp, x, y);
-               popupOpen = false;
+                popupOpen = false;
 
             } else {
                 popup.setVisible(false);

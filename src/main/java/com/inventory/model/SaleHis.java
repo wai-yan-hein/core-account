@@ -110,6 +110,7 @@ public class SaleHis {
     private transient List<String> location;
     private transient boolean local = false;
     private transient List<SaleExpense> listExpense;
+    private transient List<SaleExpenseKey> listDelExpense;
 
     public SaleHis() {
     }

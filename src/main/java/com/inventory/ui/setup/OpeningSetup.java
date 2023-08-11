@@ -18,7 +18,6 @@ import com.inventory.model.Location;
 import com.inventory.model.OPHis;
 import com.inventory.model.OPHisDetail;
 import com.inventory.model.OPHisKey;
-import com.inventory.model.StockUnit;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.OpeningTableModel;
 import com.inventory.ui.entry.dialog.OPHistoryDialog;
@@ -51,8 +50,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class OpeningSetup extends javax.swing.JPanel implements PanelControl, SelectionObserver {
 
-    @Autowired
-    private OpeningTableModel openingTableModel;
+    private final OpeningTableModel openingTableModel = new OpeningTableModel();
     private LocationAutoCompleter locationAutoCompleter;
     private CurrencyAutoCompleter currencyAAutoCompleter;
     @Autowired
@@ -159,11 +157,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         tblOpening.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblOpening.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         tblOpening.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
-//        Mono<List<StockUnit>> monoUnit = inventoryRepo.getStockUnit();
-        tblOpening.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//weight
-//        monoUnit.subscribe((t) -> {
-//            //weight_unit
-//        });
+        tblOpening.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());//weight
         inventoryRepo.getStockUnit().subscribe((t) -> {
             tblOpening.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t)); // unit
             tblOpening.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(t)); // weight_unit

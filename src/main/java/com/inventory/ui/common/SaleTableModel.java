@@ -249,6 +249,8 @@ public class SaleTableModel extends AbstractTableModel {
                             sd.setPrice(getTraderPrice(s));
                             sd.setStock(s);
                             sd.setPrice(sd.getPrice() == 0 ? s.getSalePriceN() : sd.getPrice());
+                            sd.setWeight(s.getWeight());
+                            sd.setWeightUnit(s.getWeightUnit());
                             parent.setColumnSelectionInterval(4, 4);
                             addNewRow();
                         }

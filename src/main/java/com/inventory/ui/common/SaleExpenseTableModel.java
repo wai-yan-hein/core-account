@@ -29,6 +29,7 @@ public class SaleExpenseTableModel extends AbstractTableModel {
     private JTable table;
     private SelectionObserver observer;
     private JFormattedTextField txtVouTotal;
+    private List<SaleExpenseKey> deleteList = new ArrayList();
 
     public JFormattedTextField getTxtVouTotal() {
         return txtVouTotal;
@@ -38,20 +39,16 @@ public class SaleExpenseTableModel extends AbstractTableModel {
         this.txtVouTotal = txtVouTotal;
     }
 
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
 
-    public JTable getTable() {
-        return table;
-    }
-
     public void setTable(JTable table) {
         this.table = table;
+    }
+
+    public List<SaleExpenseKey> getDeleteList() {
+        return deleteList;
     }
 
     public SaleExpenseTableModel() {
@@ -230,6 +227,16 @@ public class SaleExpenseTableModel extends AbstractTableModel {
 
     public void clear() {
         listDetail.clear();
+        listDetail.clear();
         fireTableDataChanged();
+    }
+
+    public void delete(int row) {
+        SaleExpense s = listDetail.get(row);
+        if (s.getKey() != null) {
+            deleteList.add(s.getKey());
+        }
+        listDetail.remove(row);
+        fireTableRowsDeleted(row, row);
     }
 }

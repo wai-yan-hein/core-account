@@ -174,9 +174,11 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     private void actionMapping() {
         String solve = "delete";
-        KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
-        tblSale.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
-        tblSale.getActionMap().put(solve, new DeleteAction());
+        KeyStroke delete = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
+        tblSale.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(delete, solve);
+        tblSale.getActionMap().put(solve, new DeleteSale());
+        tblExpense.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(delete, solve);
+        tblExpense.getActionMap().put(solve, new DeleteExpense());
 
     }
 
@@ -251,11 +253,19 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     }
 
-    private class DeleteAction extends AbstractAction {
+    private class DeleteSale extends AbstractAction {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            deleteTran();
+            deleteTranSale();
+        }
+    }
+
+    private class DeleteExpense extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            deleteTranExpense();
         }
     }
 
@@ -521,6 +531,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             saleHis.setListSH(saleTableModel.getListDetail());
             saleHis.setListDel(saleTableModel.getDelList());
             saleHis.setListExpense(expenseTableModel.getListDetail());
+            saleHis.setListDelExpense(expenseTableModel.getDeleteList());
             saleHis.setBackup(saleTableModel.isChange());
             observer.selected("save", false);
             progress.setIndeterminate(true);
@@ -658,7 +669,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         }
     }
 
-    private void deleteTran() {
+    private void deleteTranSale() {
         int row = tblSale.convertRowIndexToModel(tblSale.getSelectedRow());
         if (row >= 0) {
             if (tblSale.getCellEditor() != null) {
@@ -668,6 +679,18 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     "Are you sure to delete?", "Sale Transaction delete.", JOptionPane.YES_NO_OPTION);
             if (yes_no == 0) {
                 saleTableModel.delete(row);
+                calculateTotalAmount(false);
+            }
+        }
+    }
+
+    private void deleteTranExpense() {
+        int row = tblExpense.convertRowIndexToModel(tblExpense.getSelectedRow());
+        if (row >= 0) {
+            int yes_no = JOptionPane.showConfirmDialog(this,
+                    "Are you sure to delete?", "Expense Transaction delete.", JOptionPane.YES_NO_OPTION);
+            if (yes_no == 0) {
+                expenseTableModel.delete(row);
                 calculateTotalAmount(false);
             }
         }
