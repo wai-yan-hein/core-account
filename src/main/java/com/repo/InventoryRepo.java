@@ -2928,4 +2928,16 @@ public class InventoryRepo {
                 )
                 .collectList();
     }
+
+    public Mono<byte[]> getTransferReport(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/report/get-transfer-report")
+                .queryParam("vouNo", vouNo)
+                .queryParam("macId", Global.macId)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToMono(ByteArrayResource.class)
+                .map(ByteArrayResource::getByteArray);
+    }
 }
