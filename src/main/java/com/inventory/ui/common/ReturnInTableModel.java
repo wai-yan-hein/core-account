@@ -309,6 +309,7 @@ public class ReturnInTableModel extends AbstractTableModel {
                             inventoryRepo.getSaleRecentPrice(record.getStockCode(),
                                     Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnitCode()).subscribe((t) -> {
                                 record.setPrice(t.getAmount());
+                                calculateAmount(record);
                             });
                         }
                     }
