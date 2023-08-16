@@ -356,7 +356,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         }, (e) -> {
             log.error("getStockUnit: " + e.getMessage());
         });
-//        tblOutput.getColumnModel().getColumn(9).setCellRenderer(new CustomTableCellRenderer(0, 9, Color.yellow, true));
+        tblOutput.getColumnModel().getColumn(9).setCellRenderer(new CustomTableCellRenderer(0, 9, Color.yellow, true));
         tblOutput.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());//price
         tblOutput.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblOutput.setDefaultRenderer(Float.class, new DecimalFormatRender());
@@ -757,15 +757,15 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             txtReference.setText(milling.getReference());
             txtSaleDate.setDate(Util1.convertToDate(milling.getVouDate()));
 
-            txtLoadQty.setText(String.format("%.00f", milling.getLoadQty()));
-            txtLoadWeight.setText(String.format("%.00f", milling.getLoadWeight()));
-            txtLoadAmt.setText(String.format("%.00f", milling.getLoadAmount()));
-            txtLoadExpense.setText(String.format("%.00f", milling.getLoadExpense()));
-            txtLoadCost.setText(String.format("%.00f", milling.getLoadCost()));
-            txtOutputQty.setText(String.format("%.00f", milling.getOutputQty()));
-            txtOutputWeight.setText(String.format("%.00f", milling.getOutputWeight()));
-            txtOutputAmt.setText(String.format("%.00f", milling.getOutputAmount()));
-            txtWtLoss.setText(String.format("%.00f", milling.getDiffWeight()));
+            txtLoadQty.setValue(milling.getLoadQty());
+            txtLoadWeight.setValue(milling.getLoadWeight());
+            txtLoadAmt.setValue(milling.getLoadAmount());
+            txtLoadExpense.setValue(milling.getLoadExpense());
+            txtLoadCost.setValue(milling.getLoadCost());
+            txtOutputQty.setValue(milling.getOutputQty());
+            txtOutputWeight.setValue(milling.getOutputWeight());
+            txtOutputAmt.setValue(milling.getOutputAmount());
+            txtWtLoss.setValue(milling.getDiffWeight());
             if (milling.getProjectNo() != null) {
                 userRepo.find(new ProjectKey(milling.getProjectNo(), Global.compCode)).subscribe(t1 -> {
                     projectAutoCompleter.setProject(t1);
