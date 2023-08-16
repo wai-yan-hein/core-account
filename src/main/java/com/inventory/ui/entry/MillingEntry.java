@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.common.CustomTableCellRenderer;
 import com.repo.AccountRepo;
 import com.common.DecimalFormatRender;
 import com.common.Global;
@@ -71,7 +72,6 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -356,10 +356,10 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         }, (e) -> {
             log.error("getStockUnit: " + e.getMessage());
         });
+//        tblOutput.getColumnModel().getColumn(9).setCellRenderer(new CustomTableCellRenderer(0, 9, Color.yellow, true));
         tblOutput.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());//price
         tblOutput.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblOutput.setDefaultRenderer(Float.class, new DecimalFormatRender());
-//        tblOutput.getColumnModel().getColumn(9).setCellRenderer(new CustomTableCellRenderer(0, 9, Color.yellow));
         tblOutput.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblOutput.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

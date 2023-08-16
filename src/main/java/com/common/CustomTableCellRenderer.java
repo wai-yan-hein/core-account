@@ -11,11 +11,13 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
     private int targetRow;
     private int targetColumn;
     private Color targetColor;
+    private boolean hasFocus;
 
-    public CustomTableCellRenderer(int targetRow, int targetColumn, Color targetColor) {
+    public CustomTableCellRenderer(int targetRow, int targetColumn, Color targetColor, boolean hasFocus) {
         this.targetRow = targetRow;
         this.targetColumn = targetColumn;
         this.targetColor = targetColor;
+        this.hasFocus = hasFocus;
     }
 
     @Override
