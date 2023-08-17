@@ -320,6 +320,7 @@ public class SaleTableModel extends AbstractTableModel {
                                 inventoryRepo.getSaleRecentPrice(sd.getStockCode(),
                                         Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), sd.getUnitCode()).subscribe((t) -> {
                                     sd.setPrice(t.getAmount());
+                                    calculateAmount(sd);
                                 });
                             }
                         }

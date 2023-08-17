@@ -273,6 +273,9 @@ public class GRNTableModel extends AbstractTableModel {
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 record.setQty(Util1.getFloat(value));
+                                if (record.getQty() != null && record.getWeight() != null) {
+                                    record.setTotalWeight(Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight()));
+                                }
                                 setSelection(row, column);
                             } else {
                                 showMessageBox("Input value must be positive");

@@ -223,7 +223,7 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                             record.setQty(1.0f);
                             record.setUnitCode(s.getPurUnitCode());
                             record.setWeightUnit(s.getWeightUnit());
-                            record.setWeight(s.getWeight());
+                            record.setWeight(Util1.getFloat(s.getWeight()));
                             record.setStdWeight(s.getWeight());
                             addNewRow();
                         }
@@ -322,6 +322,7 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                         inventoryRepo.getPurRecentPrice(record.getStockCode(),
                                 Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnitCode()).subscribe((t) -> {
                             record.setPrice(t.getAmount());
+                            calculateAmount(record);
                         });
                     }
                 }

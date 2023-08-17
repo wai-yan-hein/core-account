@@ -276,6 +276,7 @@ public class PurchaseTableModel extends AbstractTableModel {
                         inventoryRepo.getPurRecentPrice(record.getStockCode(),
                                 Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnitCode()).subscribe((t) -> {
                             record.setPrice(t.getAmount());
+                            calculateAmount(record);
                         });
                     }
                 }

@@ -7,6 +7,7 @@ package com.inventory.ui.setup;
 
 import com.common.Global;
 import com.common.PanelControl;
+import com.common.ProUtil;
 import com.common.ReportFilter;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
@@ -394,6 +395,16 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                     "Department.", JOptionPane.ERROR_MESSAGE);
             status = false;
             cboDept.requestFocus();
+        } else if (ProUtil.isUseWeight() && Util1.getFloat(txtWt.getText()) <= 0) {
+            JOptionPane.showMessageDialog(this, "Weight can not be blank.",
+                    "Weight.", JOptionPane.ERROR_MESSAGE);
+            status = false;
+            txtWt.requestFocus();
+        } else if (ProUtil.isUseWeight() && wlUnitCompleter.getStockUnit() == null) {
+            JOptionPane.showMessageDialog(this, "Weight Unit can not be blank.",
+                    "Weight Unit.", JOptionPane.ERROR_MESSAGE);
+            status = false;
+            txtWeightUnit.requestFocus();
         } else {
             stock.setUserCode(txtUserCode.getText().trim());
             stock.setTypeCode(typeAutoCompleter.getStockType().getKey().getStockTypeCode());

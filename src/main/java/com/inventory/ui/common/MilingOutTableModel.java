@@ -269,7 +269,9 @@ public class MilingOutTableModel extends AbstractTableModel {
                         } else {
                             if (Util1.isNumber(value)) {
                                 if (Util1.isPositive(Util1.getFloat(value))) {
+                                    float wt = Util1.getFloat(sd.getWeight());
                                     sd.setQty(Util1.getFloat(value));
+                                    sd.setTotalWeight(Util1.getTotalWeight(wt, String.valueOf(value)));
                                     if (sd.getUnitCode() == null) {
                                         setSelection(row, 6);
                                     } else {
@@ -390,7 +392,7 @@ public class MilingOutTableModel extends AbstractTableModel {
         if (s.getStockCode() != null) {
             float amount = (ttlWt * price) / wt;
             s.setAmount(amount);
-            s.setPercent((s.getTotalWeight() / Util1.getFloat(totalWeight.getValue())) * 100);
+            s.setPercent((ttlWt / Util1.getFloat(totalWeight.getValue())) * 100);
         }
     }
 
