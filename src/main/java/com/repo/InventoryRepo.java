@@ -22,6 +22,7 @@ import com.inventory.model.GRNKey;
 import com.inventory.model.General;
 import com.inventory.model.Location;
 import com.inventory.model.LocationKey;
+import com.inventory.model.Message;
 import com.inventory.model.MillingExpense;
 import com.inventory.model.MillingHis;
 import com.inventory.model.MillingHisKey;
@@ -69,6 +70,7 @@ import com.inventory.model.StockBrandKey;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
+import com.inventory.model.StockInOutKey;
 import com.inventory.model.StockKey;
 import com.inventory.model.StockType;
 import com.inventory.model.StockTypeKey;
@@ -120,7 +122,8 @@ public class InventoryRepo {
 
     public Mono<Location> getDefaultLocation() {
         String locCode = Global.hmRoleProperty.get(ProUtil.DEFAULT_LOCATION);
-        return findLocation(locCode);
+        String locCodeByUser = Global.loginUser.getLocCode();
+        return findLocation(Util1.isNull(locCodeByUser, locCode));
     }
 
     public Mono<Stock> getDefaultStock() {
@@ -178,7 +181,7 @@ public class InventoryRepo {
             return h2Repo.getCategory();
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-category")
+                .uri(builder -> builder.path("/setup/getCategory")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
@@ -211,7 +214,7 @@ public class InventoryRepo {
             return h2Repo.getSaleMan();
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-saleman")
+                .uri(builder -> builder.path("/setup/getSaleMan")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
@@ -246,7 +249,7 @@ public class InventoryRepo {
             return h2Repo.find(key);
         }
         return inventoryApi.post()
-                .uri("/setup/find-saleman")
+                .uri("/setup/findSaleMan")
                 .body(Mono.just(key), SaleManKey.class)
                 .retrieve()
                 .bodyToMono(SaleMan.class)
@@ -261,7 +264,7 @@ public class InventoryRepo {
             return h2Repo.getBrand();
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-brand")
+                .uri(builder -> builder.path("/setup/getBrand")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
@@ -325,7 +328,7 @@ public class InventoryRepo {
             return h2Repo.getStockUnit();
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-unit")
+                .uri(builder -> builder.path("/setup/getUnit")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
@@ -576,7 +579,7 @@ public class InventoryRepo {
             return h2Repo.find(key);
         }
         return inventoryApi.post()
-                .uri("/setup/find-location")
+                .uri("/setup/findLocation")
                 .body(Mono.just(key), LocationKey.class)
                 .retrieve()
                 .bodyToMono(Location.class)
@@ -594,7 +597,7 @@ public class InventoryRepo {
             return h2Repo.find(key);
         }
         return inventoryApi.post()
-                .uri("/setup/find-brand")
+                .uri("/setup/findBrand")
                 .body(Mono.just(key), StockBrandKey.class)
                 .retrieve()
                 .bodyToMono(StockBrand.class)
@@ -613,7 +616,7 @@ public class InventoryRepo {
         }
 
         return inventoryApi.post()
-                .uri("/setup/find-voucher-status")
+                .uri("/setup/findVouStatus")
                 .body(Mono.just(key), VouStatusKey.class)
                 .retrieve()
                 .bodyToMono(VouStatus.class)
@@ -623,15 +626,11 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<StockInOutDetail>> searchStkIODetail(String vouNo, Integer deptId, boolean local) {
-        if (local) {
-            return h2Repo.searchStkIODetail(vouNo, Global.compCode, deptId);
-        }
+    public Mono<List<StockInOutDetail>> searchStkIODetail(String vouNo, boolean local) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/stockio/get-stockio-detail")
+                .uri(builder -> builder.path("/stockio/getStockIODetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", deptId)
                 .build())
                 .retrieve()
                 .bodyToFlux(StockInOutDetail.class)
@@ -646,7 +645,7 @@ public class InventoryRepo {
             return h2Repo.findUnit(key);
         }
         return inventoryApi.post()
-                .uri("/setup/find-unit")
+                .uri("/setup/findUnit")
                 .body(Mono.just(key), StockUnitKey.class)
                 .retrieve()
                 .bodyToMono(StockUnit.class)
@@ -661,7 +660,7 @@ public class InventoryRepo {
         key.setCompCode(Global.compCode);
         key.setRelCode(relCode);
         return inventoryApi.post()
-                .uri("/setup/find-unit-relation")
+                .uri("/setup/findUnitRelation")
                 .body(Mono.just(key), RelationKey.class)
                 .retrieve()
                 .bodyToMono(UnitRelation.class)
@@ -676,7 +675,7 @@ public class InventoryRepo {
         key.setCompCode(Global.compCode);
         key.setCatCode(catCode);
         return inventoryApi.post()
-                .uri("/setup/find-category")
+                .uri("/setup/findCategory")
                 .body(Mono.just(key), CategoryKey.class)
                 .retrieve()
                 .bodyToMono(Category.class)
@@ -709,7 +708,7 @@ public class InventoryRepo {
         key.setCompCode(Global.compCode);
         key.setStockTypeCode(typeCode);
         return inventoryApi.post()
-                .uri("/setup/find-type")
+                .uri("/setup/findType")
                 .body(Mono.just(key), StockTypeKey.class)
                 .retrieve()
                 .bodyToMono(StockType.class)
@@ -755,7 +754,7 @@ public class InventoryRepo {
             return h2Repo.getLocation();
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-location")
+                .uri(builder -> builder.path("/setup/getLocation")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
@@ -874,9 +873,8 @@ public class InventoryRepo {
             return h2Repo.getVouStatus();
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-voucher-status")
+                .uri(builder -> builder.path("/setup/getVouStatus")
                 .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", ProUtil.getDepId())
                 .build())
                 .retrieve()
                 .bodyToFlux(VouStatus.class)
@@ -955,7 +953,7 @@ public class InventoryRepo {
                 .bodyToMono(Stock.class)
                 .doOnSuccess((t) -> {
                     if (localDatabase) {
-                        h2Repo.save(s);
+                        h2Repo.save(t);
                     }
                 })
                 .onErrorResume((e) -> {
@@ -966,7 +964,7 @@ public class InventoryRepo {
 
     public Mono<Location> saveLocaiton(Location loc) {
         return inventoryApi.post()
-                .uri("/setup/save-location")
+                .uri("/setup/saveLocation")
                 .body(Mono.just(loc), Location.class)
                 .retrieve()
                 .bodyToMono(Location.class)
@@ -1000,7 +998,7 @@ public class InventoryRepo {
 
     public Mono<SaleMan> saveSaleMan(SaleMan s) {
         return inventoryApi.post()
-                .uri("/setup/save-saleman")
+                .uri("/setup/saveSaleMan")
                 .body(Mono.just(s), SaleMan.class)
                 .retrieve()
                 .bodyToMono(SaleMan.class)
@@ -1017,7 +1015,7 @@ public class InventoryRepo {
 
     public Mono<StockBrand> saveBrand(StockBrand s) {
         return inventoryApi.post()
-                .uri("/setup/save-brand")
+                .uri("/setup/saveBrand")
                 .body(Mono.just(s), StockBrand.class)
                 .retrieve()
                 .bodyToMono(StockBrand.class)
@@ -1046,7 +1044,7 @@ public class InventoryRepo {
 
     public Mono<StockType> saveStockType(StockType t) {
         return inventoryApi.post()
-                .uri("/setup/save-type")
+                .uri("/setup/saveType")
                 .body(Mono.just(t), StockType.class)
                 .retrieve()
                 .bodyToMono(StockType.class)
@@ -1063,7 +1061,7 @@ public class InventoryRepo {
 
     public Mono<StockUnit> saveStockUnit(StockUnit unit) {
         return inventoryApi.post()
-                .uri("/setup/save-unit")
+                .uri("/setup/saveUnit")
                 .body(Mono.just(unit), StockUnit.class)
                 .retrieve()
                 .bodyToMono(StockUnit.class)
@@ -1109,7 +1107,7 @@ public class InventoryRepo {
 
     public Mono<Category> saveCategory(Category category) {
         return inventoryApi.post()
-                .uri("/setup/save-category")
+                .uri("/setup/saveCategory")
                 .body(Mono.just(category), Category.class)
                 .retrieve()
                 .bodyToMono(Category.class)
@@ -1372,16 +1370,12 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<StockInOut> findStockIO(String vouNo, Integer deptId, boolean local) {
+    public Mono<StockInOut> findStockIO(String vouNo, boolean local) {
         StockIOKey key = new StockIOKey();
         key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
         key.setVouNo(vouNo);
-        if (local) {
-            return h2Repo.findStkIO(key);
-        }
         return inventoryApi.post()
-                .uri("/stockio/find-stockio")
+                .uri("/stockio/findStockIO")
                 .body(Mono.just(key), StockIOKey.class)
                 .retrieve()
                 .bodyToMono(StockInOut.class)
@@ -1468,9 +1462,6 @@ public class InventoryRepo {
     }
 
     public Mono<OPHis> findOpening(OPHisKey key) {
-        if (localDatabase) {
-            return h2Repo.findOpening(key);
-        }
         return inventoryApi.post()
                 .uri("/setup/find-opening")
                 .body(Mono.just(key), OPHisKey.class)
@@ -1867,7 +1858,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> restore(StockIOKey key) {
         return inventoryApi.post()
-                .uri("/stockio/restore-stockio")
+                .uri("/stockio/restoreStockIO")
                 .body(Mono.just(key), StockIOKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -2406,7 +2397,7 @@ public class InventoryRepo {
 
     public Mono<StockInOut> save(StockInOut sio) {
         return inventoryApi.post()
-                .uri("/stockio/save-stockio")
+                .uri("/stockio/saveStockIO")
                 .body(Mono.just(sio), StockInOut.class)
                 .retrieve()
                 .bodyToMono(StockInOut.class)
@@ -2427,7 +2418,7 @@ public class InventoryRepo {
 
     public Mono<StockInOut> uploadStockInOut(StockInOut sio) {
         return inventoryApi.post()
-                .uri("/stockio/save-stockio")
+                .uri("/stockio/saveStockIO")
                 .body(Mono.just(sio), StockInOut.class)
                 .retrieve()
                 .bodyToMono(StockInOut.class)
@@ -2927,5 +2918,13 @@ public class InventoryRepo {
                 .bodyToFlux(VDescription.class
                 )
                 .collectList();
+    }
+
+    public Mono<String> sendMessage(Message message) {
+        return inventoryApi.post()
+                .uri("/message/send")
+                .body(Mono.just(message), Message.class)
+                .retrieve()
+                .bodyToMono(String.class);
     }
 }

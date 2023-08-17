@@ -146,6 +146,7 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
     }
 
     public void clear() {
+        department = new DepartmentUser();
         txtCode.setText(null);
         txtName.setText(null);
         txtPhone.setText(null);
@@ -260,6 +261,7 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
         jLabel4.setText("Phone");
 
         chkActive.setFont(Global.lableFont);
+        chkActive.setSelected(true);
         chkActive.setText("Active");
         chkActive.setName("chkActive"); // NOI18N
 

@@ -183,7 +183,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         //
         inventoryApi
                 .post()
-                .uri("/stockio/get-stockio")
+                .uri("/stockio/getStockIO")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(VStockIO.class)

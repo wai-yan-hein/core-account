@@ -22,15 +22,4 @@ public interface StockInOutService {
 
     StockInOut findById(StockIOKey id);
 
-    void delete(StockIOKey key) throws Exception;
-
-    void restore(StockIOKey key) throws Exception;
-
-    List<StockInOut> unUpload(String syncDate);
-
-
-    List<StockInOut> search(String updatedDate, List<LocationKey> keys);
-
-    StockInOut updateACK(StockIOKey key);
-
 }

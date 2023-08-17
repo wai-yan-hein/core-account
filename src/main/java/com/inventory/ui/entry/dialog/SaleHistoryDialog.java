@@ -297,6 +297,18 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         }
     }
 
+    private void print() {
+        int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
+        if (row >= 0) {
+            VSale his = saleVouTableModel.getSelectVou(row);
+            his.setLocal(chkLocal.isSelected());
+            observer.selected("PRINT", his);
+        } else {
+            JOptionPane.showMessageDialog(this, "Please select the voucher.",
+                    "No Voucher Selected", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     private void initKeyListener() {
         txtFromDate.getDateEditor().getUiComponent().setName("txtFromDate");
         txtFromDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -407,6 +419,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         txtTotalAmt = new javax.swing.JFormattedTextField();
         txtRecord = new javax.swing.JFormattedTextField();
         lblTtlAmount = new javax.swing.JLabel();
+        btnSearch1 = new javax.swing.JButton();
         progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -777,7 +790,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         txtPaid.setFont(Global.amtFont);
 
         btnSelect.setFont(Global.lableFont);
-        btnSelect.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/checked_20px.png"))); // NOI18N
         btnSelect.setText("Select");
         btnSelect.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -789,7 +801,6 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         lblTtlAmount1.setText("Total Paid :");
 
         btnSearch.setFont(Global.lableFont);
-        btnSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/search.png"))); // NOI18N
         btnSearch.setText("Search");
         btnSearch.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -811,6 +822,14 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         lblTtlAmount.setFont(Global.lableFont);
         lblTtlAmount.setText("Total Amount :");
 
+        btnSearch1.setFont(Global.lableFont);
+        btnSearch1.setText("Print");
+        btnSearch1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearch1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -819,16 +838,18 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                 .addContainerGap()
                 .addComponent(lblTtlRecord)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtRecord, javax.swing.GroupLayout.DEFAULT_SIZE, 65, Short.MAX_VALUE)
+                .addComponent(txtRecord, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblTtlAmount1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtPaid, javax.swing.GroupLayout.DEFAULT_SIZE, 65, Short.MAX_VALUE)
+                .addComponent(txtPaid, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblTtlAmount)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtTotalAmt, javax.swing.GroupLayout.DEFAULT_SIZE, 65, Short.MAX_VALUE)
+                .addComponent(txtTotalAmt, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
                 .addGap(115, 115, 115)
+                .addComponent(btnSearch1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnSearch)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnSelect)
@@ -846,7 +867,8 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
                     .addComponent(txtRecord)
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(btnSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                        .addComponent(btnSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                        .addComponent(btnSelect, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                        .addComponent(btnSearch1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                     .addComponent(txtTotalAmt))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -992,12 +1014,18 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         // TODO add your handling code here:
     }//GEN-LAST:event_formComponentResized
 
+    private void btnSearch1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearch1ActionPerformed
+        // TODO add your handling code here:
+        print();
+    }//GEN-LAST:event_btnSearch1ActionPerformed
+
     /**
      * @param args the command line arguments
      */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSearch;
+    private javax.swing.JButton btnSearch1;
     private javax.swing.JButton btnSelect;
     private javax.swing.JButton btnUpload;
     private javax.swing.JCheckBox chkBatch;

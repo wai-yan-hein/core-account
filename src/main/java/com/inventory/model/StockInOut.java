@@ -31,6 +31,8 @@ public class StockInOut implements Serializable {
 
     @EmbeddedId
     private StockIOKey key;
+    @Column(name = "dept_id")
+    private Integer deptId;
     @Column(name = "remark")
     private String remark;
     @Column(name = "description")

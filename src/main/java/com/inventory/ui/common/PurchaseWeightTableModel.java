@@ -223,6 +223,7 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                             record.setQty(1.0f);
                             record.setUnitCode(s.getPurUnitCode());
                             record.setWeightUnit(s.getWeightUnit());
+                            record.setWeight(s.getWeight());
                             record.setStdWeight(s.getWeight());
                             addNewRow();
                         }

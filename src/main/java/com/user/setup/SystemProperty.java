@@ -1906,10 +1906,11 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             String key = "printer.name";
             String value = printerAutoCompleter.getText();
             save(key, value);
-        } else if (source.equals("CUS") || source.equals("SUP")) {
+        } else if (source.equals("TRADER")) {
+            String type = selectObj.toString();
             String key;
             String value = "-";
-            if (source.equals("CUS")) {
+            if (type.equals("CUS")) {
                 key = txtCustomer.getName();
                 Trader t = cusCompleter.getTrader();
                 if (t != null) {

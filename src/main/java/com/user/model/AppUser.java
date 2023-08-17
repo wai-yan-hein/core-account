@@ -44,6 +44,8 @@ public class AppUser {
     private Integer deptId;
     @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedDate;
+    @Column(name = "loc_code")
+    private String locCode;
 
     public AppUser(String userCode, String userName) {
         this.userCode = userCode;

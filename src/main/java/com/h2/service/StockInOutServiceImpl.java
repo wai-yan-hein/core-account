@@ -9,7 +9,6 @@ import com.common.Util1;
 import com.h2.dao.SeqDao;
 import com.h2.dao.StockInOutDao;
 import com.h2.dao.StockInOutDetailDao;
-import com.inventory.model.LocationKey;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
@@ -40,7 +39,7 @@ public class StockInOutServiceImpl implements StockInOutService {
     public StockInOut save(StockInOut io) {
         io.setVouDate(Util1.toDateTime(io.getVouDate()));
         if (Util1.isNullOrEmpty(io.getKey().getVouNo())) {
-            io.getKey().setVouNo(getVoucherNo(io.getKey().getDeptId(), io.getMacId(), io.getKey().getCompCode()));
+            io.getKey().setVouNo(getVoucherNo(io.getDeptId(), io.getMacId(), io.getKey().getCompCode()));
         }
 
         List<StockInOutDetail> listSD = io.getListSH();
@@ -53,11 +52,11 @@ public class StockInOutServiceImpl implements StockInOutService {
             StockInOutDetail cSd = listSD.get(i);
             if (Util1.isNullOrEmpty(cSd.getKey())) {
                 StockInOutKey key = new StockInOutKey();
-                key.setDeptId(io.getKey().getDeptId());
                 key.setCompCode(io.getKey().getCompCode());
                 key.setVouNo(vouNo);
                 key.setUniqueId(null);
                 cSd.setKey(key);
+                cSd.setDeptId(io.getDeptId());
             }
             if (cSd.getStockCode() != null) {
                 if (cSd.getKey().getUniqueId() == null) {
@@ -86,37 +85,11 @@ public class StockInOutServiceImpl implements StockInOutService {
         return ioDao.findById(id);
     }
 
-    @Override
-    public void delete(StockIOKey key) throws Exception {
-        ioDao.delete(key);
-    }
-
-    @Override
-    public void restore(StockIOKey key) throws Exception {
-        ioDao.restore(key);
-    }
-
-    @Override
-    public List<StockInOut> unUpload(String syncDate) {
-        return ioDao.unUpload(syncDate);
-    }
-
-
-    @Override
-    public List<StockInOut> search(String updatedDate, List<LocationKey> keys) {
-        return ioDao.search(updatedDate, keys);
-    }
-
     private String getVoucherNo(Integer deptId, Integer macId, String compCode) {
         String period = Util1.toDateStr(Util1.getTodayDate(), "MMyy");
         int seqNo = seqDao.getSequence(macId, "STOCKIO", period, compCode);
         String deptCode = String.format("%0" + 2 + "d", deptId) + "-";
         return deptCode + String.format("%0" + 2 + "d", macId) + String.format("%0" + 5 + "d", seqNo) + "-" + period;
-    }
-
-    @Override
-    public StockInOut updateACK(StockIOKey key) {
-        return ioDao.updateACK(key);
     }
 
 }

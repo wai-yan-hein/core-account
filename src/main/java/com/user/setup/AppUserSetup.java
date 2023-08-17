@@ -11,6 +11,9 @@ import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.repo.UserRepo;
 import com.common.Util1;
+import com.inventory.model.Location;
+import com.inventory.ui.setup.common.LocationComboModel;
+import com.repo.InventoryRepo;
 import com.user.common.DepartmentComboBoxModel;
 import com.user.model.AppUser;
 import com.user.common.UserTableModel;
@@ -42,8 +45,12 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
     private AppUser appUser = new AppUser();
     private final UserTableModel userTableModel = new UserTableModel();
     private final DepartmentComboBoxModel departmentComboBoxModel = new DepartmentComboBoxModel();
+    private final LocationComboModel locationComboModel = new LocationComboModel();
+
     @Autowired
     private UserRepo userRepo;
+    @Autowired
+    private InventoryRepo inventoryRepo;
     private RoleAutoCompleter roleAutoCompleter;
     private SelectionObserver observer;
     private JProgressBar progress;
@@ -86,6 +93,11 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
             departmentComboBoxModel.setData(t);
             cboDep.setModel(departmentComboBoxModel);
         });
+        inventoryRepo.getLocation().subscribe((t) -> {
+            locationComboModel.setData(t);
+            cboLocation.setModel(locationComboModel);
+        });
+
     }
     private final FocusAdapter fa = new FocusAdapter() {
         @Override
@@ -136,15 +148,15 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
             roleAutoCompleter.setAppRole(t);
         });
         Integer deptId = user.getDeptId();
-        if (!Util1.isNullOrEmpty(deptId)) {
-            userRepo.findDepartment(deptId).subscribe((t) -> {
-                departmentComboBoxModel.setSelectedItem(t);
-                cboDep.repaint();
-            });
-        } else {
-            departmentComboBoxModel.setSelectedItem(null);
+        userRepo.findDepartment(deptId).doOnSuccess((t) -> {
+            departmentComboBoxModel.setSelectedItem(t);
             cboDep.repaint();
-        }
+        }).subscribe();
+        String locCode = user.getLocCode();
+        inventoryRepo.findLocation(locCode).doOnSuccess((t) -> {
+            locationComboModel.setSelectedItem(t);
+            cboLocation.repaint();
+        }).subscribe();
         lblStatus.setText("EDIT");
     }
 
@@ -183,6 +195,9 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
             if (cboDep.getSelectedItem() instanceof DepartmentUser dep) {
                 appUser.setDeptId(dep.getDeptId());
             }
+            if (cboLocation.getSelectedItem() instanceof Location loc) {
+                appUser.setLocCode(loc.getKey().getLocCode());
+            }
             appUser.setUserCode(txtUserCode.getText());
             appUser.setUserName(txtUserName.getText());
             appUser.setUserShortName(txtUserShort.getText());
@@ -208,6 +223,8 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
         roleAutoCompleter.setAppRole(null);
         departmentComboBoxModel.setSelectedItem(null);
         cboDep.repaint();
+        locationComboModel.setSelectedItem(null);
+        cboLocation.repaint();
     }
 
     /**
@@ -238,6 +255,8 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
         txtPassword = new javax.swing.JPasswordField();
         jLabel12 = new javax.swing.JLabel();
         cboDep = new javax.swing.JComboBox<>();
+        jLabel13 = new javax.swing.JLabel();
+        cboLocation = new javax.swing.JComboBox<>();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -306,6 +325,11 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
 
         cboDep.setFont(Global.textFont);
 
+        jLabel13.setFont(Global.lableFont);
+        jLabel13.setText("Location");
+
+        cboLocation.setFont(Global.textFont);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -320,7 +344,8 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
                     .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -332,7 +357,8 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
                     .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addComponent(chkAtive, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(cboDep, 0, 247, Short.MAX_VALUE)))
+                        .addComponent(cboDep, 0, 247, Short.MAX_VALUE)
+                        .addComponent(cboLocation, 0, 247, Short.MAX_VALUE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -367,10 +393,14 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
                     .addComponent(cboDep)
                     .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(cboLocation)
+                    .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkAtive)
                     .addComponent(lblStatus))
-                .addContainerGap(73, Short.MAX_VALUE))
+                .addContainerGap(45, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -403,10 +433,12 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<DepartmentUser> cboDep;
+    private javax.swing.JComboBox<Location> cboLocation;
     private javax.swing.JCheckBox chkAtive;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;

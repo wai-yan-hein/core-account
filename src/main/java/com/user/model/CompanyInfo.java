@@ -60,6 +60,8 @@ public class CompanyInfo {
     private Date yearEndDate;
     @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedDate;
+    @Column(name = "security_code")
+    private String securityCode;
 
     @Override
     public String toString() {

@@ -143,6 +143,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         txtAddress.setText(companyInfo.getCompAddress());
         txtFromDate.setDate(companyInfo.getStartDate());
         txtToDate.setDate(companyInfo.getEndDate());
+        txtSecurity.setText(companyInfo.getSecurityCode());
         chkActive.setSelected(companyInfo.isActive());
         lblStatus.setText("EDIT");
         txtBusType.setEditable(companyInfo.getBusId() == null);
@@ -211,6 +212,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
             companyInfo.setCompPhone(txtPhone.getText());
             companyInfo.setCompEmail(txtEmail.getText());
             companyInfo.setCompAddress(txtAddress.getText());
+            companyInfo.setSecurityCode(String.valueOf(txtSecurity.getPassword()));
             companyInfo.setStartDate(txtFromDate.getDate());
             companyInfo.setEndDate(txtToDate.getDate());
             companyInfo.setActive(chkActive.isSelected());
@@ -226,7 +228,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         txtName.setText(null);
         txtPhone.setText(null);
         txtEmail.setText(null);
-        txtSecurityCode.setText(null);
+        txtSecurity.setText(null);
         txtAddress.setText(null);
         txtFromDate.setDate(null);
         txtToDate.setDate(null);
@@ -235,6 +237,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         companyInfo = new CompanyInfo();
         txtUserCode.requestFocus();
         txtBusType.setEditable(true);
+        txtSecurity.setText(null);
         currencyAutoCompleter.setCurrency(null);
         businessTypeAutoCompleter.setObject(null);
     }
@@ -256,7 +259,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         txtName.addKeyListener(this);
         txtPhone.addKeyListener(this);
         txtEmail.addKeyListener(this);
-        txtSecurityCode.addKeyListener(this);
+        txtSecurity.addKeyListener(this);
         txtAddress.addKeyListener(this);
         txtFromDate.addKeyListener(this);
         txtToDate.addKeyListener(this);
@@ -317,7 +320,6 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         txtEmail = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
-        txtSecurityCode = new javax.swing.JTextField();
         txtAddress = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
@@ -330,6 +332,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         txtCurrency = new javax.swing.JTextField();
         jLabel13 = new javax.swing.JLabel();
         txtBusType = new javax.swing.JTextField();
+        txtSecurity = new javax.swing.JPasswordField();
         jPanel2 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
@@ -393,9 +396,6 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         jLabel6.setFont(Global.lableFont);
         jLabel6.setText("Security Code");
 
-        txtSecurityCode.setFont(Global.textFont);
-        txtSecurityCode.setName("txtSecurityCode"); // NOI18N
-
         txtAddress.setFont(Global.textFont);
         txtAddress.setName("txtAddress"); // NOI18N
 
@@ -444,6 +444,8 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
             }
         });
 
+        txtSecurity.setFont(Global.textFont);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -468,11 +470,11 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                             .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtSecurityCode, javax.swing.GroupLayout.DEFAULT_SIZE, 344, Short.MAX_VALUE)
                             .addComponent(txtEmail, javax.swing.GroupLayout.DEFAULT_SIZE, 344, Short.MAX_VALUE)
                             .addComponent(txtPhone, javax.swing.GroupLayout.DEFAULT_SIZE, 344, Short.MAX_VALUE)
                             .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 344, Short.MAX_VALUE)
-                            .addComponent(txtAddress, javax.swing.GroupLayout.DEFAULT_SIZE, 344, Short.MAX_VALUE)))
+                            .addComponent(txtAddress, javax.swing.GroupLayout.DEFAULT_SIZE, 344, Short.MAX_VALUE)
+                            .addComponent(txtSecurity)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -524,7 +526,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
-                    .addComponent(txtSecurityCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtSecurity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
@@ -688,7 +690,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
     private com.toedter.calendar.JDateChooser txtFromDate;
     private javax.swing.JTextField txtName;
     private javax.swing.JTextField txtPhone;
-    private javax.swing.JTextField txtSecurityCode;
+    private javax.swing.JPasswordField txtSecurity;
     private com.toedter.calendar.JDateChooser txtToDate;
     private javax.swing.JTextField txtUserCode;
     // End of variables declaration//GEN-END:variables

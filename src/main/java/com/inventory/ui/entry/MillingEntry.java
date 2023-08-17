@@ -71,7 +71,6 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -516,7 +515,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             status = false;
             txtCus.requestFocus();
         } else if (Util1.getFloat(txtOutputAmt.getValue()) <= 0) {
-            JOptionPane.showMessageDialog(this, "Invalid Amount.",
+            JOptionPane.showMessageDialog(this, "Invalid Output Amount.",
                     "No Sale Record.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtOutputAmt.requestFocus();
@@ -717,7 +716,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         });
     }
 
-    public void setSaleVoucher(MillingHis sh) {
+    public void setVoucher(MillingHis sh) {
         if (sh != null) {
             progress.setIndeterminate(true);
             milling = sh;
@@ -756,32 +755,22 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             txtRemark.setText(milling.getRemark());
             txtReference.setText(milling.getReference());
             txtSaleDate.setDate(Util1.convertToDate(milling.getVouDate()));
-
-            txtLoadQty.setText(String.format("%.00f", milling.getLoadQty()));
-            txtLoadWeight.setText(String.format("%.00f", milling.getLoadWeight()));
-            txtLoadAmt.setText(String.format("%.00f", milling.getLoadAmount()));
-            txtLoadExpense.setText(String.format("%.00f", milling.getLoadExpense()));
-            txtLoadCost.setText(String.format("%.00f", milling.getLoadCost()));
-            txtOutputQty.setText(String.format("%.00f", milling.getOutputQty()));
-            txtOutputWeight.setText(String.format("%.00f", milling.getOutputWeight()));
-            txtOutputAmt.setText(String.format("%.00f", milling.getOutputAmount()));
-            txtWtLoss.setText(String.format("%.00f", milling.getDiffWeight()));
-            if (milling.getProjectNo() != null) {
-                userRepo.find(new ProjectKey(milling.getProjectNo(), Global.compCode)).subscribe(t1 -> {
-                    projectAutoCompleter.setProject(t1);
-                });
-            } else {
-                projectAutoCompleter.setProject(null);
-            }
-
-            if (milling.getProcessType() != null) {
-                inventoryRepo.findVouStatus(milling.getVouStatusId()).subscribe(t1 -> {
-                    vouStatusTableModel.setSelectedItem(t1);
-                    cboProcessType.repaint();
-                });
-            } else {
-                projectAutoCompleter.setProject(null);
-            }
+            txtLoadQty.setValue(milling.getLoadQty());
+            txtLoadWeight.setValue(milling.getLoadWeight());
+            txtLoadAmt.setValue(milling.getLoadAmount());
+            txtLoadExpense.setValue(milling.getLoadExpense());
+            txtLoadCost.setValue(milling.getLoadCost());
+            txtOutputQty.setValue(milling.getOutputQty());
+            txtOutputWeight.setValue(milling.getOutputWeight());
+            txtOutputAmt.setValue(milling.getOutputAmount());
+            txtWtLoss.setValue(milling.getDiffWeight());
+            userRepo.find(new ProjectKey(milling.getProjectNo(), Global.compCode)).doOnSuccess(t1 -> {
+                projectAutoCompleter.setProject(t1);
+            }).subscribe();
+            inventoryRepo.findVouStatus(milling.getVouStatusId()).doOnSuccess(t1 -> {
+                vouStatusTableModel.setSelectedItem(t1);
+                cboProcessType.repaint();
+            }).subscribe();
             focusTable();
             progress.setIndeterminate(false);
 
@@ -1577,7 +1566,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     boolean local = s.isLocal();
                     inventoryRepo.findMilling(s.getKey().getVouNo(), s.getDeptId(), local).subscribe((t) -> {
                         t.setLocal(local);
-                        setSaleVoucher(t);
+                        setVoucher(t);
                     }, (e) -> {
                         JOptionPane.showMessageDialog(this, e.getMessage());
                     });

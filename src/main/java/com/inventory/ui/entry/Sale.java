@@ -548,11 +548,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
             inventoryRepo.save(saleHis).subscribe((t) -> {
                 progress.setIndeterminate(false);
-                clear();
                 if (print) {
-                    String reportName = getReportName();
-                    printVoucher(t, reportName);
+                    printVoucher(t);
                 }
+                clear();
             }, (e) -> {
                 observer.selected("save", true);
                 JOptionPane.showMessageDialog(this, e.getMessage());
@@ -902,7 +901,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         saleTableModel.setListDetail(listSaleDetail);
     }
 
-    private void printVoucher(SaleHis sh, String reportName) {
+    private void printVoucher(SaleHis sh) {
+        String reportName = getReportName();
         String vouNo = sh.getKey().getVouNo();
         String grnVouNo = sh.getGrnVouNo();
         boolean local = sh.isLocal();
@@ -974,7 +974,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 ByteArrayInputStream stream = new ByteArrayInputStream(t);
                 JsonDataSource ds = new JsonDataSource(stream);
                 JasperPrint jp = JasperFillManager.fillReport(reportPath, getDefaultParam(sh), ds);
-                log.info(ProUtil.getFontPath());
                 if (chkVou.isSelected()) {
                     JasperReportUtil.print(jp);
                 } else {
@@ -2132,6 +2131,14 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     }, (e) -> {
                         JOptionPane.showMessageDialog(this, e.getMessage());
                     });
+                }
+            }
+            case "PRINT" -> {
+                if (selectObj instanceof VSale s) {
+                    boolean local = s.isLocal();
+                    inventoryRepo.findSale(s.getVouNo(), s.getDeptId(), local).doOnSuccess((t) -> {
+                        printVoucher(t);
+                    }).subscribe();
                 }
             }
             case "ORDER-HISTORY" -> {

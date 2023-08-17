@@ -635,16 +635,18 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="lblTtlRecord" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtRecord" pref="65" max="32767" attributes="0"/>
+                  <Component id="txtRecord" pref="80" max="32767" attributes="0"/>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                   <Component id="lblTtlAmount1" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtPaid" pref="65" max="32767" attributes="0"/>
+                  <Component id="txtPaid" pref="80" max="32767" attributes="0"/>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                   <Component id="lblTtlAmount" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
-                  <Component id="txtTotalAmt" pref="65" max="32767" attributes="0"/>
+                  <Component id="txtTotalAmt" pref="80" max="32767" attributes="0"/>
                   <EmptySpace min="-2" pref="115" max="-2" attributes="0"/>
+                  <Component id="btnSearch1" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
                   <Component id="btnSearch" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="btnSelect" min="-2" max="-2" attributes="0"/>
@@ -665,6 +667,7 @@
                       <Group type="103" alignment="0" groupAlignment="3" attributes="0">
                           <Component id="btnSearch" linkSize="9" alignment="3" pref="0" max="32767" attributes="0"/>
                           <Component id="btnSelect" linkSize="9" alignment="3" pref="0" max="32767" attributes="0"/>
+                          <Component id="btnSearch1" alignment="3" pref="0" max="32767" attributes="0"/>
                       </Group>
                       <Component id="txtTotalAmt" linkSize="9" alignment="0" max="32767" attributes="0"/>
                   </Group>
@@ -688,9 +691,6 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.lableFont" type="code"/>
             </Property>
-            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/images/checked_20px.png"/>
-            </Property>
             <Property name="text" type="java.lang.String" value="Select"/>
           </Properties>
           <Events>
@@ -709,9 +709,6 @@
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.lableFont" type="code"/>
-            </Property>
-            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/images/search.png"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Search"/>
           </Properties>
@@ -752,6 +749,17 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Total Amount :"/>
           </Properties>
+        </Component>
+        <Component class="javax.swing.JButton" name="btnSearch1">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.lableFont" type="code"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Print"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSearch1ActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

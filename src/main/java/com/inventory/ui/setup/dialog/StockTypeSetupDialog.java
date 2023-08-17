@@ -214,7 +214,7 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
                     } catch (IndexOutOfBoundsException e) {
                     }
                     t.setUserCode(userCode);
-                    t.setStockTypeName(typeName);
+                    t.setStockTypeName(Util1.convertToUniCode(typeName));
                     StockTypeKey key = new StockTypeKey();
                     key.setCompCode(Global.compCode);
                     key.setStockTypeCode(null);

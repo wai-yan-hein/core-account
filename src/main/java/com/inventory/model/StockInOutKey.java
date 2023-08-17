@@ -22,8 +22,6 @@ public class StockInOutKey implements Serializable {
 
     @Column(name = "vou_no")
     private String vouNo;
-    @Column(name = "dept_id")
-    private Integer deptId;
     @Column(name = "unique_id")
     private Integer uniqueId;
     @Column(name = "comp_code")

@@ -324,9 +324,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             if (lblStatus.getText().equals("NEW")) {
                 StockIOKey key = new StockIOKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 key.setVouNo(null);
                 io.setKey(key);
+                io.setDeptId(Global.deptId);
                 io.setCreatedBy(Global.loginUser.getUserCode());
                 io.setCreatedDate(LocalDateTime.now());
                 io.setMacId(Global.macId);
@@ -350,7 +350,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 vouStatusAutoCompleter.setVoucher(t);
             });
             String vouNo = io.getKey().getVouNo();
-            inventoryRepo.searchStkIODetail(vouNo, io.getKey().getDeptId(), local)
+            inventoryRepo.searchStkIODetail(vouNo, local)
                     .subscribe((t) -> {
                         t.forEach((a) -> {
                             outTableModel.addObject(a);
@@ -773,7 +773,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     public void selected(Object source, Object selectObj) {
         if (source.toString().equals("IO-HISTORY")) {
             if (selectObj instanceof VStockIO v) {
-                inventoryRepo.findStockIO(v.getVouNo(), v.getDeptId(), false).subscribe((t) -> {
+                inventoryRepo.findStockIO(v.getVouNo(), false).subscribe((t) -> {
                     setVoucher(t, false);
                 });
             }

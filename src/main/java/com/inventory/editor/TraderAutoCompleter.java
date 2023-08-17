@@ -180,7 +180,7 @@ public class TraderAutoCompleter implements KeyListener {
         }
         if (observer != null) {
             if (trader != null) {
-                observer.selected("TRADER", "TRADER");
+                observer.selected("TRADER", trader.getType());
             }
         }
 

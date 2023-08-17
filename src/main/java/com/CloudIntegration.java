@@ -189,7 +189,6 @@ public class CloudIntegration {
 
     public void uploadInvData() {
         uploadOrder();
-        uploadStockInOut();
         uploadTransfer();
         uploadWeightLoss();
         uploadManufacture();
@@ -263,20 +262,6 @@ public class CloudIntegration {
                 inventoryRepo.uploadRetOut(out).subscribe((o) -> {
                     o.setIntgUpdStatus("ACK");
                     retOutService.updateACK(o.getKey());
-                });
-            });
-
-        }
-    }
-
-    public void uploadStockInOut() {
-        List<StockInOut> list = stockInOutService.unUpload(Global.compCode);
-        log.info("need to upload stockinout : " + list.size());
-        if (!list.isEmpty()) {
-            list.forEach((l) -> {
-                inventoryRepo.uploadStockInOut(l).subscribe((r) -> {
-                    r.setIntgUpdStatus("ACK");
-                    stockInOutService.updateACK(r.getKey());
                 });
             });
 
