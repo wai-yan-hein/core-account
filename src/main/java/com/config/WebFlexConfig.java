@@ -135,28 +135,37 @@ public class WebFlexConfig {
         int port = Util1.getInteger(environment.getProperty("user.port"));
         String serialNo = Util1.getBaseboardSerialNumber();
         WebClient webClient = WebClient.builder().baseUrl(getUrl(url, port)).build();
-        return authenticate(webClient, serialNo);
+        return authenticate(webClient, serialNo).block();
     }
 
-    private String authenticate(WebClient client, String seriaNo) {
-        try {
-            var auth = AuthenticationRequest.builder().serialNo(seriaNo).password(Util1.getPassword()).build();
-            AuthenticationResponse response = client.post()
-                    .uri("/auth/authenticate")
-                    .body(Mono.just(auth), AuthenticationRequest.class)
-                    .retrieve()
-                    .bodyToMono(AuthenticationResponse.class).block();
-            if (response != null) {
-                if (response.getAccessToken() != null) {
-                    file.write(response);
-                    log.info("new token : " + response.getAccessToken());
-                    return response.getAccessToken();
-                }
-            }
-        } catch (HeadlessException e) {
-            log.error("authenticate : " + e.getMessage());
-        }
-        return "";
+    private Mono<String> authenticate(WebClient client, String serialNo) {
+        var auth = AuthenticationRequest.builder()
+                .serialNo(serialNo)
+                .password(Util1.getPassword())
+                .build();
+
+        return client.post()
+                .uri("/auth/authenticate")
+                .body(Mono.just(auth), AuthenticationRequest.class)
+                .retrieve()
+                .bodyToMono(AuthenticationResponse.class)
+                .flatMap(response -> {
+                    if (response != null && response.getAccessToken() != null) {
+                        try {
+                            file.write(response); // Assuming this writes the response to a file
+                            log.info("New token: " + response.getAccessToken());
+                        } catch (Exception e) {
+                            log.error("Error writing response to file: " + e.getMessage());
+                        }
+                        return Mono.just(response.getAccessToken());
+                    } else {
+                        return Mono.just("");
+                    }
+                })
+                .onErrorResume(e -> {
+                    log.error("Error during authentication: " + e.getMessage());
+                    return Mono.just(file.read().getAccessToken()); // Return an empty Mono in case of error
+                });
     }
 
     @Bean

@@ -197,8 +197,8 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
             if (lblStatus.getText().equals("NEW")) {
                 OPHisKey key = new OPHisKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 key.setVouNo(null);
+                oPHis.setDeptId(Global.deptId);
                 oPHis.setKey(key);
                 oPHis.setCreatedBy(Global.loginUser.getUserCode());
                 oPHis.setCreatedDate(LocalDateTime.now());
@@ -278,7 +278,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
             oPHis = op;
             String vouNo = op.getKey().getVouNo();
             String compCode = op.getKey().getCompCode();
-            Integer deptId = op.getKey().getDeptId();
+            Integer deptId = op.getDeptId();
             inventoryRepo.findLocation(oPHis.getLocCode()).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
@@ -323,8 +323,11 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
             int yes_no = JOptionPane.showConfirmDialog(Global.parentForm,
                     "Are you sure to delete?", "Opening Voucher delete", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
             if (yes_no == 0) {
-                inventoryRepo.delete(oPHis.getKey());
-                clear();
+                inventoryRepo.delete(oPHis.getKey()).doOnSuccess((t) -> {
+                    if (t) {
+                        clear();
+                    }
+                }).subscribe();
             }
         } else {
             JOptionPane.showMessageDialog(Global.parentForm, "Voucher can't delete.");

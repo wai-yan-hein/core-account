@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.common.Global;
 import com.common.PanelControl;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.repo.UserRepo;
 import com.common.Util1;
@@ -40,14 +41,23 @@ import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyListener;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.data.JsonDataSource;
+import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -236,8 +246,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         }
     }
 
-    public boolean saveVoucher() {
-        boolean status = false;
+    public void saveVoucher(boolean print) {
         if (isValidEntry() && outTableModel.isValidEntry()) {
             observer.selected("save", true);
             progress.setIndeterminate(true);
@@ -247,6 +256,9 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                     .subscribe((t) -> {
                         clear();
                         focusOnTable();
+                        if (print) {
+                            printVoucher(t.getKey().getVouNo());
+                        }
                     }, (e) -> {
                         observer.selected("save", true);
                         JOptionPane.showMessageDialog(this, e.getMessage());
@@ -254,7 +266,32 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                     });
 
         }
-        return status;
+    }
+
+    private void printVoucher(String vouNo) {
+        inventoryRepo.getStockInOutVoucher(vouNo).subscribe((t) -> {
+            try {
+                if (t != null) {
+                    String reportName = "StockInOutVoucher";
+                    String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
+                    Map<String, Object> param = new HashMap<>();
+                    param.put("p_print_date", Util1.getTodayDateTime());
+                    param.put("p_comp_name", Global.companyName);
+                    param.put("p_comp_address", Global.companyAddress);
+                    param.put("p_comp_phone", Global.companyPhone);
+                    param.put("p_logo_path", logoPath);
+                    String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
+                    ByteArrayInputStream jsonDataStream = new ByteArrayInputStream(Util1.listToByteArray(t));
+                    JsonDataSource ds = new JsonDataSource(jsonDataStream);
+                    JasperPrint js = JasperFillManager.fillReport(reportPath, param, ds);
+                    JasperViewer.viewReport(js, false);
+                }
+            } catch (JRException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage());
+            }
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        });
     }
 
     private void clear() {
@@ -416,7 +453,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 .uri(builder -> builder.path("/setup/get-opening-detail")
                 .queryParam("vouNo", op.getKey().getVouNo())
                 .queryParam("compCode", op.getKey().getCompCode())
-                .queryParam("deptId", op.getKey().getDeptId())
+                .queryParam("deptId", op.getDeptId())
                 .build())
                 .retrieve().toEntityList(OPHisDetail.class);
         result.subscribe((t) -> {
@@ -728,7 +765,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     @Override
     public void save() {
-        saveVoucher();
+        saveVoucher(false);
     }
 
     @Override
@@ -759,6 +796,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     @Override
     public void print() {
+        saveVoucher(true);
     }
 
     @Override
