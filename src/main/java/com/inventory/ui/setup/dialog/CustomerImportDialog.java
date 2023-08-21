@@ -186,6 +186,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         TraderGroupKey key = new TraderGroupKey();
         key.setCompCode(Global.compCode);
         key.setGroupCode(null);
+        key.setDeptId(deptId);
         group.setKey(key);
 
         return inventoryRepo.saveTraderGroup(group).block();

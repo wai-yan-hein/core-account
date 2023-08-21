@@ -16,4 +16,5 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class TraderGroupKey {
     private String groupCode;
     private String compCode;
+    private Integer deptId;
 }
