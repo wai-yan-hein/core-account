@@ -181,7 +181,7 @@ public class InventoryRepo {
             return h2Repo.getCategory();
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/getCategory")
+                .uri(builder -> builder.path("/setup/get-category")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
@@ -264,7 +264,7 @@ public class InventoryRepo {
             return h2Repo.getBrand();
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/getBrand")
+                .uri(builder -> builder.path("/setup/get-brand")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
@@ -328,7 +328,7 @@ public class InventoryRepo {
             return h2Repo.getStockUnit();
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/getUnit")
+                .uri(builder -> builder.path("/setup/get-unit")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())

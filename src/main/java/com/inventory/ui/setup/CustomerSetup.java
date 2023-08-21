@@ -26,6 +26,7 @@ import com.inventory.ui.setup.common.CustomerTabelModel;
 import com.inventory.ui.setup.dialog.CustomerImportDialog;
 import com.inventory.ui.setup.dialog.RegionSetup;
 import com.inventory.ui.setup.dialog.TraderGroupDialog;
+import com.repo.UserRepo;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.FileWriter;
@@ -74,6 +75,8 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     private InventoryRepo inventoryRepo;
     @Autowired
     private AccountRepo accountRepo;
+    @Autowired
+    private UserRepo userRepo;
     private RegionAutoCompleter regionAutoCompleter;
     private SelectionObserver observer;
     private JProgressBar progress;
@@ -861,6 +864,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         dialog.setAccountRepo(accountRepo);
         dialog.setTaskExecutor(taskExecutor);
         dialog.setInventoryRepo(inventoryRepo);
+        dialog.setUserRepo(userRepo);
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
 
