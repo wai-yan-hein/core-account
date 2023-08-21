@@ -41,7 +41,7 @@ public class OPHisDaoImpl extends AbstractDao<OPHisKey, OPHis> implements OPHisD
         list.forEach(o -> {
             String compCode = o.getKey().getCompCode();
             String vouNo = o.getKey().getVouNo();
-            Integer deptId = o.getKey().getDeptId();
+            Integer deptId = o.getDeptId();
             o.setDetailList(dao.search(vouNo, compCode, deptId));
         });
         return list;
@@ -49,11 +49,7 @@ public class OPHisDaoImpl extends AbstractDao<OPHisKey, OPHis> implements OPHisD
 
     @Override
     public void delete(OPHisKey key) {
-        String vouNo = key.getVouNo();
-        String compCode = key.getCompCode();
-        Integer deptId = key.getDeptId();
-        String sql = "update op_his set deleted =1 where vou_no ='" + vouNo + "' and comp_code='" + compCode + "' and dept_id =" + deptId + "";
-        execSql(sql);
+
     }
 
     @Override
@@ -68,12 +64,10 @@ public class OPHisDaoImpl extends AbstractDao<OPHisKey, OPHis> implements OPHisD
         list.forEach(o -> {
             String vouNo = o.getKey().getVouNo();
             String compCode = o.getKey().getCompCode();
-            Integer deptId = o.getKey().getDeptId();
+            Integer deptId = o.getDeptId();
             o.setDetailList(dao.search(vouNo, compCode, deptId));
         });
         return list;
     }
-
-
 
 }

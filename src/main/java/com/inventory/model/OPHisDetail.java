@@ -25,6 +25,8 @@ public class OPHisDetail {
 
     @EmbeddedId
     private OPHisDetailKey key;
+    @Column(name = "dept_id")
+    private Integer deptId;
     @Column(name = "stock_code")
     private String stockCode;
     @Column(name = "qty")

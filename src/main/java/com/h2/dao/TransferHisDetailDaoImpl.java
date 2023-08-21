@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,11 +37,11 @@ public class TransferHisDetailDaoImpl extends AbstractDao<THDetailKey, TransferH
                     //td_code, vou_no, stock_code, qty, unit, unique_id, comp_code, dept_id, stock_name, rel_name
                     TransferHisDetail td = new TransferHisDetail();
                     THDetailKey key = new THDetailKey();
-                    key.setDeptId(rs.getInt("dept_id"));
                     key.setVouNo(rs.getString("vou_no"));
                     key.setUniqueId(rs.getInt("unique_id"));
                     key.setCompCode(rs.getString("comp_code"));
                     td.setKey(key);
+                    td.setDeptId(rs.getInt("dept_id"));
                     td.setUserCode(rs.getString("user_code"));
                     td.setStockCode(rs.getString("stock_code"));
                     td.setStockName(rs.getString("stock_name"));
@@ -49,7 +50,7 @@ public class TransferHisDetailDaoImpl extends AbstractDao<THDetailKey, TransferH
                     td.setRelName(rs.getString("rel_name"));
                     list.add(td);
                 }
-            } catch (Exception e) {
+            } catch (SQLException e) {
                 log.error(e.getMessage());
             }
         }

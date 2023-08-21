@@ -25,6 +25,4 @@ public class OPHisDetailKey implements Serializable {
     private Integer uniqueId;
     @Column(name = "comp_code")
     private String compCode;
-    @Column(name = "dept_id")
-    private Integer deptId;
 }

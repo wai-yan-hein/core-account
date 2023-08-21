@@ -106,7 +106,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
         });
         MachineInfo t = userRepo.checkSerialNo(serialNo).block();
         if (t == null) {
-            JOptionPane.showMessageDialog(this, "Core User Api is not running.", "Connection Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Please Check Internet Connection.", "Connection Error", JOptionPane.ERROR_MESSAGE);
             System.exit(0);
         }
         d.setVisible(false);

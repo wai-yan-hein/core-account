@@ -30,8 +30,16 @@ public class VStockIO {
     private Float outQty;
     private String outUnit;
     private Float costPrice;
-    private Float amount;
+    private Float inAmt;
+    private Float outAmt;
     private String createdBy;
     private boolean deleted;
+    private String unit;
+    private Float price;
+    private Float qty;
+    private String stockCode;
+    private String processNo;
     private Integer deptId;
+    private String relName;
+    private Float smallPrice;
 }

@@ -91,6 +91,7 @@ import com.inventory.model.VReturnIn;
 import com.inventory.model.VReturnOut;
 import com.inventory.model.VSale;
 import com.inventory.model.VStockBalance;
+import com.inventory.model.VStockIO;
 import com.inventory.model.VTransfer;
 import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
@@ -1388,13 +1389,12 @@ public class InventoryRepo {
     public Mono<TransferHis> findTransfer(String vouNo, Integer deptId, boolean local) {
         TransferHisKey key = new TransferHisKey();
         key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
         key.setVouNo(vouNo);
         if (local) {
             return h2Repo.findTransfer(key);
         }
         return inventoryApi.post()
-                .uri("/transfer/find-transfer")
+                .uri("/transfer/findTransfer")
                 .body(Mono.just(key), TransferHisKey.class)
                 .retrieve()
                 .bodyToMono(TransferHis.class)
@@ -1690,7 +1690,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> delete(OPHisKey key) {
         return inventoryApi.post()
-                .uri("/setup/delete-opening")
+                .uri("/setup/deleteOpening")
                 .body(Mono.just(key), OPHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -1870,7 +1870,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> delete(TransferHisKey key) {
         return inventoryApi.post()
-                .uri("/transfer/delete-transfer")
+                .uri("/transfer/deleteTransfer")
                 .body(Mono.just(key), TransferHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -1882,7 +1882,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> restore(TransferHisKey key) {
         return inventoryApi.post()
-                .uri("/transfer/restore-transfer")
+                .uri("/transfer/restoreTransfer")
                 .body(Mono.just(key), TransferHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -2333,7 +2333,7 @@ public class InventoryRepo {
     public Mono<TransferHis> save(TransferHis th) {
 
         return inventoryApi.post()
-                .uri("/transfer/save-transfer")
+                .uri("/transfer/saveTransfer")
                 .body(Mono.just(th), TransferHis.class)
                 .retrieve()
                 .bodyToMono(TransferHis.class)
@@ -2373,7 +2373,7 @@ public class InventoryRepo {
         }
         return inventoryApi
                 .post()
-                .uri("/transfer/get-transfer")
+                .uri("/transfer/getTransfer")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(VTransfer.class)
@@ -2386,7 +2386,7 @@ public class InventoryRepo {
 
     public Mono<TransferHis> uploadTransfer(TransferHis th) {
         return inventoryApi.post()
-                .uri("/transfer/save-transfer")
+                .uri("/transfer/saveTransfer")
                 .body(Mono.just(th), TransferHis.class)
                 .retrieve()
                 .bodyToMono(TransferHis.class)
@@ -2928,15 +2928,25 @@ public class InventoryRepo {
                 .bodyToMono(String.class);
     }
 
-    public Mono<byte[]> getTransferReport(String vouNo) {
+    public Mono<List<VTransfer>> getTransferReport(String vouNo) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-transfer-report")
+                .uri(builder -> builder.path("/report/getTransferReport")
                 .queryParam("vouNo", vouNo)
-                .queryParam("macId", Global.macId)
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToMono(ByteArrayResource.class)
-                .map(ByteArrayResource::getByteArray);
+                .bodyToFlux(VTransfer.class)
+                .collectList();
+    }
+
+    public Mono<List<VStockIO>> getStockInOutVoucher(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/report/getStockInOutVoucher")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(VStockIO.class)
+                .collectList();
     }
 }

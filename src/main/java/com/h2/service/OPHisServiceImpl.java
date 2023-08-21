@@ -30,7 +30,7 @@ public class OPHisServiceImpl implements OPHisService {
     @Override
     public OPHis save(OPHis op) {
         if (Util1.isNullOrEmpty(op.getKey().getVouNo())) {
-            op.getKey().setVouNo(getVoucherNo(op.getKey().getDeptId(), op.getMacId(), op.getKey().getCompCode()));
+            op.getKey().setVouNo(getVoucherNo(op.getDeptId(), op.getMacId(), op.getKey().getCompCode()));
         }
         List<OPHisDetail> listSD = op.getDetailList();
         List<OPHisDetailKey> listDel = op.getListDel();
@@ -42,10 +42,10 @@ public class OPHisServiceImpl implements OPHisService {
             OPHisDetail cSd = listSD.get(i);
             if (Util1.isNullOrEmpty(cSd.getKey())) {
                 OPHisDetailKey key = new OPHisDetailKey();
-                key.setDeptId(op.getKey().getDeptId());
                 key.setCompCode(op.getKey().getCompCode());
                 key.setVouNo(vouNo);
                 key.setUniqueId(null);
+                cSd.setDeptId(op.getDeptId());
                 cSd.setKey(key);
             }
             if (cSd.getStockCode() != null) {

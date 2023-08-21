@@ -30,7 +30,7 @@ public class TransferHisServiceImpl implements TransferHisService {
     public TransferHis save(TransferHis th) {
         th.setVouDate(Util1.toDateTime(th.getVouDate()));
         if (Util1.isNullOrEmpty(th.getKey().getVouNo())) {
-            th.getKey().setVouNo(getVoucherNo(th.getKey().getDeptId(), th.getMacId(), th.getKey().getCompCode()));
+            th.getKey().setVouNo(getVoucherNo(th.getDeptId(), th.getMacId(), th.getKey().getCompCode()));
         }
 
         List<TransferHisDetail> listTD = th.getListTD();
@@ -43,10 +43,10 @@ public class TransferHisServiceImpl implements TransferHisService {
             TransferHisDetail cSd = listTD.get(i);
             if (Util1.isNullOrEmpty(cSd.getKey())) {
                 THDetailKey key = new THDetailKey();
-                key.setDeptId(th.getKey().getDeptId());
                 key.setCompCode(th.getKey().getCompCode());
                 key.setVouNo(vouNo);
                 key.setUniqueId(null);
+                cSd.setDeptId(th.getDeptId());
                 cSd.setKey(key);
             }
             if (cSd.getStockCode() != null) {

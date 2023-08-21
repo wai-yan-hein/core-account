@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -39,7 +40,7 @@ public class TransferHisDaoImpl extends AbstractDao<TransferHisKey, TransferHis>
         list.forEach((o) -> {
             String vouNo = o.getKey().getVouNo();
 //            String compCode1 = o.getKey().getCompCode();
-            Integer depId = o.getKey().getDeptId();
+            Integer depId = o.getDeptId();
             o.setListTD(dao.search(vouNo, compCode, depId));
         });
         return list;
@@ -47,20 +48,18 @@ public class TransferHisDaoImpl extends AbstractDao<TransferHisKey, TransferHis>
 
     @Override
     public void delete(TransferHisKey key) {
-        String vouNo = key.getVouNo();
-        String compCode = key.getCompCode();
-        Integer deptId = key.getDeptId();
-        String sql = "update transfer_his set deleted =1 where vou_no ='" + vouNo + "' and comp_code='" + compCode + "' and dept_id =" + deptId + "";
-        execSql(sql);
+        TransferHis th = findById(key);
+        th.setDeleted(true);
+        th.setUpdatedDate(LocalDateTime.now());
+        update(th);
     }
 
     @Override
     public void restore(TransferHisKey key) {
-        String vouNo = key.getVouNo();
-        String compCode = key.getCompCode();
-        Integer deptId = key.getDeptId();
-        String sql = "update transfer_his set deleted =0 where vou_no ='" + vouNo + "' and comp_code='" + compCode + "' and dept_id =" + deptId + "";
-        execSql(sql);
+        TransferHis th = findById(key);
+        th.setDeleted(false);
+        th.setUpdatedDate(LocalDateTime.now());
+        update(th);
     }
 
     @Override
@@ -78,9 +77,9 @@ public class TransferHisDaoImpl extends AbstractDao<TransferHisKey, TransferHis>
                             TransferHis th = new TransferHis();
                             TransferHisKey key = new TransferHisKey();
                             key.setVouNo(rs.getString("vou_no"));
-                            key.setDeptId(rs.getInt("dept_id"));
                             key.setCompCode(rs.getString("comp_code"));
                             th.setKey(key);
+                            th.setDeptId(rs.getInt("dept_id"));
                             th.setCreatedBy(rs.getString("created_by"));
                             th.setCreatedDate(rs.getTimestamp("created_date").toLocalDateTime());
                             th.setDeleted(rs.getBoolean("deleted"));
@@ -96,7 +95,7 @@ public class TransferHisDaoImpl extends AbstractDao<TransferHisKey, TransferHis>
                             list.add(th);
                         }
                     }
-                } catch (Exception e) {
+                } catch (SQLException e) {
                     log.error(e.getMessage());
                 }
             }
@@ -104,7 +103,7 @@ public class TransferHisDaoImpl extends AbstractDao<TransferHisKey, TransferHis>
         list.forEach(o -> {
             String vouNo = o.getKey().getVouNo();
             String compCode = o.getKey().getCompCode();
-            Integer deptId = o.getKey().getDeptId();
+            Integer deptId = o.getDeptId();
             o.setListTD(dao.searchDetail(vouNo, compCode, deptId));
         });
         return list;
@@ -112,12 +111,7 @@ public class TransferHisDaoImpl extends AbstractDao<TransferHisKey, TransferHis>
 
     @Override
     public void truncate(TransferHisKey key) {
-        String vouNo = key.getVouNo();
-        String compCode = key.getCompCode();
-        Integer deptId = key.getDeptId();
-        String sql1 = "delete from transfer_his where vou_no ='" + vouNo + "' and comp_code ='" + compCode + "' and " + deptId + "";
-        String sql2 = "delete from transfer_his where vou_no ='" + vouNo + "' and comp_code ='" + compCode + "' and " + deptId + "";
-        execSql(sql1, sql2);
+
     }
 
     @Override
@@ -156,7 +150,7 @@ public class TransferHisDaoImpl extends AbstractDao<TransferHisKey, TransferHis>
                      """
                 + "\n where comp_code='" + compCode + "' and dept_id = " + deptId
                 + "\n and CAST(vou_date AS DATE) between  '" + fromDate + "' and '" + toDate + "'"
-                + "\n and deleted = " + Boolean.parseBoolean(deleted)
+                + "\n and deleted = " + Boolean.valueOf(deleted)
                 + "\n and intg_upd_status is null)a"
                 + "\n join location l"
                 + "\n on a.loc_code_from = l.loc_code"
@@ -182,7 +176,6 @@ public class TransferHisDaoImpl extends AbstractDao<TransferHisKey, TransferHis>
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
         }
         return openingList;
     }

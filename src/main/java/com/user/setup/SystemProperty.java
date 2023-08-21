@@ -355,6 +355,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkMulti.setSelected(Util1.getBoolean(hmProperty.get(chkMulti.getName())));
         chkDisableAll.setSelected(Util1.getBoolean(hmProperty.get(chkDisableAll.getName())));
         chkSaleExpenseShown.setSelected(Util1.getBoolean(hmProperty.get(chkSaleExpenseShown.getName())));
+        chkPaymentEdit.setSelected(Util1.getBoolean(hmProperty.get(chkPaymentEdit.getName())));
     }
 
     private void initTextBox() {
