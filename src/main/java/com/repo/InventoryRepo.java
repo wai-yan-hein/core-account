@@ -329,7 +329,7 @@ public class InventoryRepo {
             return h2Repo.getStockUnit();
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-unit")
+                .uri(builder -> builder.path("/setup/getUnit")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
@@ -580,7 +580,7 @@ public class InventoryRepo {
             return h2Repo.find(key);
         }
         return inventoryApi.post()
-                .uri("/setup/find-location")
+                .uri("/setup/findLocation")
                 .body(Mono.just(key), LocationKey.class)
                 .retrieve()
                 .bodyToMono(Location.class)
@@ -755,7 +755,7 @@ public class InventoryRepo {
             return h2Repo.getLocation();
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-location")
+                .uri(builder -> builder.path("/setup/getLocation")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())

@@ -261,8 +261,8 @@ public class ReportServiceImpl implements ReportService {
                     s.setTraderName(rs.getString("trader_name"));
                     s.setRemark(rs.getString("remark"));
                     s.setCreatedBy(rs.getString("created_by"));
-                    s.setPaid(rs.getFloat("paid"));
-                    s.setVouTotal(rs.getFloat("vou_total"));
+                    s.setPaid(rs.getDouble("paid"));
+                    s.setVouTotal(rs.getDouble("vou_total"));
                     s.setDeleted(rs.getBoolean("deleted"));
                     s.setDeptId(rs.getInt("dept_id"));
                     s.setIntgUpdStatus(rs.getString("intg_upd_status"));

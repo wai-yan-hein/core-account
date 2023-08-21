@@ -446,24 +446,24 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         } else {
             String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
             ph.setRemark(txtRemark.getText());
-            ph.setDiscP(Util1.getFloat(txtVouDiscP.getValue()));
-            ph.setDiscount(Util1.getFloat(txtVouDiscount.getValue()));
-            ph.setTaxP(Util1.getFloat(txtVouTaxP.getValue()));
-            ph.setTaxAmt(Util1.getFloat(txtTax.getValue()));
-            ph.setPaid(Util1.getFloat(txtVouPaid.getValue()));
-            ph.setBalance(Util1.getFloat(txtVouBalance.getValue()));
+            ph.setDiscP(Util1.getDouble(txtVouDiscP.getValue()));
+            ph.setDiscount(Util1.getDouble(txtVouDiscount.getValue()));
+            ph.setTaxP(Util1.getDouble(txtVouTaxP.getValue()));
+            ph.setTaxAmt(Util1.getDouble(txtTax.getValue()));
+            ph.setPaid(Util1.getDouble(txtVouPaid.getValue()));
+            ph.setBalance(Util1.getDouble(txtVouBalance.getValue()));
             ph.setCurCode(currAutoCompleter.getCurrency().getCurCode());
-            ph.setDeleted(Util1.getNullTo(ph.getDeleted()));
+            ph.setDeleted(ph.isDeleted());
             ph.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             ph.setVouDate(Util1.convertToLocalDateTime(txtPurDate.getDate()));
             ph.setTraderCode(traderCode);
-            ph.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
+            ph.setVouTotal(Util1.getDouble(txtVouTotal.getValue()));
             ph.setStatus(lblStatus.getText());
             ph.setReference(txtReference.getText());
             ph.setBatchNo(txtBatchNo.getText());
-            ph.setCommP(Util1.getFloat(txtComPercent.getValue()));
-            ph.setCommAmt(Util1.getFloat(txtComAmt.getValue()));
-            ph.setExpense(0.0f);
+            ph.setCommP(Util1.getDouble(txtComPercent.getValue()));
+            ph.setCommAmt(Util1.getDouble(txtComAmt.getValue()));
+            ph.setExpense(0.0);
             ph.setCarNo(txtCarNo.getText());
             Project p = projectAutoCompleter.getProject();
             ph.setProjectNo(p == null ? null : p.getKey().getProjectNo());
@@ -654,7 +654,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
                                 lblStatus.setText("No Permission.");
                                 lblStatus.setForeground(Color.RED);
                                 disableForm(false);
-                            } else if (Util1.getBoolean(ph.getDeleted())) {
+                            } else if (ph.isDeleted()) {
                                 lblStatus.setText("DELETED");
                                 lblStatus.setForeground(Color.RED);
                                 disableForm(false);

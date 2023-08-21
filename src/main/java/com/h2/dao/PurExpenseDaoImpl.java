@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,10 +45,10 @@ public class PurExpenseDaoImpl extends AbstractDao<PurExpenseKey, PurExpense> im
                     key.setVouNo(rs.getString("vou_no"));
                     e.setKey(key);
                     e.setExpenseName(rs.getString("expense_name"));
-                    e.setAmount(rs.getFloat("amount"));
+                    e.setAmount(rs.getDouble("amount"));
                     list.add(e);
                 }
-            } catch (Exception e) {
+            } catch (SQLException e) {
                 log.error("search : " + e.getMessage());
             }
         }
