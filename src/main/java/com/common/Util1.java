@@ -52,6 +52,7 @@ import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JasperReportsContext;
+import java.math.BigDecimal;
 
 /**
  * @author WSwe
@@ -474,16 +475,16 @@ public class Util1 {
     }
 
     public static Double getDouble(Object number) {
-        if (number != null) {
-            String str = number.toString();
-            if (!str.isEmpty()) {
-                if (str.contains(",")) {
-                    str = str.replaceAll(",", "");
-                }
-                return Double.valueOf(str);
-            }
+        if (number == null) {
+            return 0.0; // Return default value if input is null
         }
-        return 0.0;
+        String str = number.toString().trim().replace(",", "");
+        try {
+            return Double.valueOf(str); // Convert string to double
+        } catch (NumberFormatException e) {
+            log.error("getDouble : " + e.getMessage());
+            return 0.0; // Return default value if parsing fails
+        }
     }
 
     public static String getString(Object obj) {
@@ -496,21 +497,19 @@ public class Util1 {
     }
 
     public static Float getFloat(Object number) {
-        float value = 0.0f;
+        if (number == null) {
+            return 0.0f; // Return a default value if the input is null
+        }
         try {
-            if (number != null) {
-                String str = number.toString();
-                if (!str.isEmpty()) {
-                    if (str.contains(",")) {
-                        str = str.replaceAll(",", "");
-                    }
-                    value = Float.parseFloat(str);
-                }
+            String str = number.toString().replaceAll(",", ""); // Remove commas
+            if (!str.isEmpty()) {
+                return Float.valueOf(str);
             }
         } catch (NumberFormatException e) {
-            log.error(String.format("getFloat: %s", e.getMessage()));
+            log.error(String.format("getFloat:", number));
         }
-        return value;
+
+        return 0.0f;
     }
 
     public static Float getFloatOne(Object number) {

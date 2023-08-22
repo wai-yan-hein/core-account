@@ -139,21 +139,21 @@ public class PurExpenseTableModel extends AbstractTableModel {
                         }
                         case 1 -> {
                             if (Util1.isNumber(value)) {
-                                e.setAmount(Util1.getFloat(value));
+                                e.setAmount(Util1.getDouble(value));
                                 e.setPercent(null);
                                 checkAndFocus(row + 1);
                             }
                         }
                         case 2 -> {
                             if (Util1.isNumber(value)) {
-                                float percent = Util1.getFloat(value);
+                                double percent = Util1.getDouble(value);
                                 if (percent <= 100) {
                                     e.setPercent(percent);
                                     if (percent > 0) {
-                                        float vouTotal = Util1.getFloat(txtVouTotal.getValue());
+                                        double vouTotal = Util1.getDouble(txtVouTotal.getValue());
                                         e.setAmount(vouTotal * (percent / 100));
                                     } else {
-                                        e.setAmount(0.0f);
+                                        e.setAmount(0.0);
                                     }
                                 }
                             }
