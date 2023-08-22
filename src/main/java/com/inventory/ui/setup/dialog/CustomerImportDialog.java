@@ -48,6 +48,8 @@ public class CustomerImportDialog extends javax.swing.JDialog {
     private final TraderImportTableModel tableModel = new TraderImportTableModel();
     private TaskExecutor taskExecutor;
     private final HashMap<String, String> hmRegion = new HashMap<>();
+    private final HashMap<String, String> hmTraderGp = new HashMap<>();
+    private final HashMap<String, String> hmDepartment = new HashMap<>();
 
     public AccountRepo getAccountRepo() {
         return accountRepo;
@@ -164,19 +166,19 @@ public class CustomerImportDialog extends javax.swing.JDialog {
     }
 
     private String getTraderGroup(String str, Integer deptId) {
-        if (hmRegion.isEmpty()) {
+        if (hmTraderGp.isEmpty()) {
             List<TraderGroup> list = inventoryRepo.getTraderGroup().block();
             if (list != null) {
                 list.forEach((t) -> {
-                    hmRegion.put(t.getGroupName(), t.getKey().getGroupCode());
+                    hmTraderGp.put(t.getGroupName(), t.getKey().getGroupCode());
                 });
             }
         }
-        if (hmRegion.get(str) == null && !str.isEmpty()) {
+        if (hmTraderGp.get(str) == null && !str.isEmpty()) {
             TraderGroup t = saveTraderGroup(str, deptId);
-            hmRegion.put(t.getGroupName(), t.getKey().getGroupCode());
+            hmTraderGp.put(t.getGroupName(), t.getKey().getGroupCode());
         }
-        return hmRegion.get(str);
+        return hmTraderGp.get(str);
     }
 
     private TraderGroup saveTraderGroup(String str, Integer deptId) {
@@ -192,23 +194,24 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         return inventoryRepo.saveTraderGroup(group).block();
     }
 
-    private String getDepartment(String str, Integer deptId) {
-        if (hmRegion.isEmpty()) {
+    private Integer getDepartment(String str) {
+        if (hmDepartment.isEmpty()) {
             List<DepartmentUser> list = userRepo.getDeparment(true).block();
             if (list != null) {
                 list.forEach((t) -> {
-                    hmRegion.put(t.getDeptName(), t.getDeptId().toString());
+                    hmDepartment.put(t.getDeptName(), t.getDeptId().toString());
+                    System.err.println(t.getDeptName());
                 });
             }
         }
-        if (hmRegion.get(str) == null && !str.isEmpty()) {
-            DepartmentUser t = saveDepartment(str, deptId);
-            hmRegion.put(t.getDeptName(), t.getDeptId().toString());
+        if (hmDepartment.get(str) == null && !str.isEmpty()) {
+            DepartmentUser t = saveDepartment(str);
+            hmDepartment.put(t.getDeptName(), t.getDeptId().toString());
         }
-        return hmRegion.get(str);
+        return Integer.valueOf(hmDepartment.get(str));
     }
 
-    private DepartmentUser saveDepartment(String str, Integer deptId) {
+    private DepartmentUser saveDepartment(String str) {
         DepartmentUser user = new DepartmentUser();
         user.setUserCode(Global.loginUser.getUserCode());
         user.setDeptName(str);
@@ -238,7 +241,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                 if (!t.getTraderName().equals("")) {
                     TraderKey key = new TraderKey();
                     key.setCompCode(Global.compCode);
-                    t.setDeptId(Global.deptId);
+//                    t.setDeptId(Global.deptId);
                     t.setKey(key);
                     t.setUserCode(row.isMapped("UserCode") ? Util1.convertToUniCode(row.get("UserCode")) : "");
                     t.setAddress(row.isMapped("Address") ? Util1.convertToUniCode(row.get("Address")) : "");
@@ -246,8 +249,8 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                     t.setContactPerson(row.isMapped("ContactPerson") ? Util1.convertToUniCode(row.get("ContactPerson")) : "");
                     t.setEmail(row.isMapped("Email") ? row.get("Email") : "");
                     t.setRegCode(row.isMapped("Region") ? getRegion(row.get("Region"), t.getDeptId()) : "");
-                    t.setRegCode(row.isMapped("Group") ? getTraderGroup(row.get("Group"), t.getDeptId()) : "");
-                    t.setRegCode(row.isMapped("Department") ? getDepartment(row.get("Department"), t.getDeptId()) : "");
+                    t.setGroupCode(row.isMapped("Group") ? getTraderGroup(row.get("Group"), t.getDeptId()) : "");
+                    t.setDeptId(row.isMapped("Department") ? getDepartment(row.get("Department")) : Global.deptId);
                     t.setRemark(row.isMapped("Remark") ? row.get("Remark") : "");
                     t.setNrc(row.isMapped("Nrc") ? row.get("Nrc") : "");
                     t.setActive(Boolean.TRUE);
