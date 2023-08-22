@@ -329,7 +329,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         tblPur.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
         tblPur.setDefaultRenderer(Object.class, new DecimalFormatRender());
-        tblPur.setDefaultRenderer(Float.class, new DecimalFormatRender());
+        tblPur.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblPur.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblPur.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -988,11 +988,11 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                     pd.setUserCode(sd.getUserCode());
                     pd.setStockName(sd.getStockName());
                     pd.setRelName(sd.getRelName());
-                    pd.setAvgQty(0.0f);
-                    pd.setQty(sd.getQty());
+                    pd.setAvgQty(0.0);
+                    pd.setQty(Util1.getDouble(sd.getQty()));
                     pd.setUnitCode(sd.getUnit());
-                    pd.setPrice(0.0f);
-                    pd.setAmount(0.0f);
+                    pd.setPrice(0.0);
+                    pd.setAmount(0.0);
                     pd.setLocCode(sd.getLocCode());
                     pd.setLocName(sd.getLocName());
                     purTableModel.addPurchase(pd);
@@ -1009,7 +1009,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                     pd.setUserCode(sd.getUserCode());
                     pd.setStockName(sd.getStockName());
                     pd.setRelName(sd.getRelName());
-                    pd.setAvgQty(0.0f);
+                    pd.setAvgQty(0.0);
                     pd.setQty(sd.getQty());
                     pd.setUnitCode(sd.getUnitCode());
                     pd.setPrice(sd.getPrice());

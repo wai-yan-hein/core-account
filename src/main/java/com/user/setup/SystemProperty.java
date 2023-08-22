@@ -466,7 +466,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         });
 
         cashAutoCompleter = new COA3AutoCompleter(txtCash, accountRepo, null, false, 3);
-        cashAutoCompleter.setSelectionObserver(this);
+        cashAutoCompleter.setObserver(this);
         Mono<ChartOfAccount> cash = accountRepo.findCOA(hmProperty.get(txtCash.getName()));
         cash.hasElement().subscribe((element) -> {
             if (element) {
@@ -482,7 +482,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             log.error(e.getMessage());
         });
         plAutoCompleter = new COA3AutoCompleter(txtPlAcc, accountRepo, null, false, 3);
-        plAutoCompleter.setSelectionObserver(this);
+        plAutoCompleter.setObserver(this);
         Mono<ChartOfAccount> pl = accountRepo.findCOA(hmProperty.get(txtPlAcc.getName()));
         pl.hasElement().subscribe((element) -> {
             if (element) {
@@ -498,7 +498,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             log.error(e.getMessage());
         });
         reAutoCompleter = new COA3AutoCompleter(txtREAcc, accountRepo, null, false, 3);
-        reAutoCompleter.setSelectionObserver(this);
+        reAutoCompleter.setObserver(this);
         Mono<ChartOfAccount> re = accountRepo.findCOA(hmProperty.get(txtREAcc.getName()));
         re.hasElement().subscribe((element) -> {
             if (element) {
@@ -515,7 +515,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         });
 
         inventoryAutoCompleter = new COA3AutoCompleter(txtInvGroup, accountRepo, null, false, 2);
-        inventoryAutoCompleter.setSelectionObserver(this);
+        inventoryAutoCompleter.setObserver(this);
         Mono<ChartOfAccount> inv = accountRepo.findCOA(hmProperty.get(txtInvGroup.getName()));
         inv.hasElement().subscribe((element) -> {
             if (element) {
@@ -531,7 +531,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             log.error(e.getMessage());
         });
         cashGroupAutoCompleter = new COA3AutoCompleter(txtCashGroup, accountRepo, null, false, 2);
-        cashGroupAutoCompleter.setSelectionObserver(this);
+        cashGroupAutoCompleter.setObserver(this);
         Mono<ChartOfAccount> cg = accountRepo.findCOA(hmProperty.get(txtCashGroup.getName()));
         cg.hasElement().subscribe((element) -> {
             if (element) {
@@ -548,7 +548,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             log.error(e.getMessage());
         });
         bankGroupAutoCompleter = new COA3AutoCompleter(txtBankGroup, accountRepo, null, false, 2);
-        bankGroupAutoCompleter.setSelectionObserver(this);
+        bankGroupAutoCompleter.setObserver(this);
         Mono<ChartOfAccount> bg = accountRepo.findCOA(hmProperty.get(txtBankGroup.getName()));
         bg.hasElement().subscribe((element) -> {
             if (element) {
@@ -566,7 +566,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         });
 
         fixedAutoCompleter = new COA3AutoCompleter(txtFixed, accountRepo, null, false, 1);
-        fixedAutoCompleter.setSelectionObserver(this);
+        fixedAutoCompleter.setObserver(this);
         Mono<ChartOfAccount> fix = accountRepo.findCOA(hmProperty.get(txtFixed.getName()));
         fix.hasElement().subscribe((element) -> {
             if (element) {
@@ -582,7 +582,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             log.error(e.getMessage());
         });
         currentAutoCompleter = new COA3AutoCompleter(txtCurrent, accountRepo, null, false, 1);
-        currentAutoCompleter.setSelectionObserver(this);
+        currentAutoCompleter.setObserver(this);
         Mono<ChartOfAccount> cur = accountRepo.findCOA(hmProperty.get(txtCurrent.getName()));
         cur.hasElement().subscribe((elemnt) -> {
             if (elemnt) {
@@ -599,7 +599,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         });
 
         liaAutoCompleter = new COA3AutoCompleter(txtLiability, accountRepo, null, false, 1);
-        liaAutoCompleter.setSelectionObserver(this);
+        liaAutoCompleter.setObserver(this);
         Mono<ChartOfAccount> lia = accountRepo.findCOA(hmProperty.get(txtLiability.getName()));
         lia.hasElement().subscribe((element) -> {
             if (element) {
@@ -616,7 +616,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         });
 
         capitalAutoCompleter = new COA3AutoCompleter(txtCapital, accountRepo, null, false, 1);
-        capitalAutoCompleter.setSelectionObserver(this);
+        capitalAutoCompleter.setObserver(this);
         Mono<ChartOfAccount> cp = accountRepo.findCOA(hmProperty.get(txtCapital.getName()));
         cp.hasElement().subscribe((element) -> {
             if (element) {
@@ -633,7 +633,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         });
 
         incomeAutoCompleter = new COA3AutoCompleter(txtIncome, accountRepo, null, false, 1);
-        incomeAutoCompleter.setSelectionObserver(this);
+        incomeAutoCompleter.setObserver(this);
         Mono<ChartOfAccount> income = accountRepo.findCOA(hmProperty.get(txtIncome.getName()));
         income.hasElement().subscribe((element) -> {
             if (element) {
@@ -650,7 +650,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         });
 
         otherIncomeAutoCompleter = new COA3AutoCompleter(txtOtherIncome, accountRepo, null, false, 1);
-        otherIncomeAutoCompleter.setSelectionObserver(this);
+        otherIncomeAutoCompleter.setObserver(this);
         Mono<ChartOfAccount> oi = accountRepo.findCOA(hmProperty.get(txtOtherIncome.getName()));
         oi.hasElement().subscribe((element) -> {
             if (element) {
@@ -667,7 +667,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         });
 
         purchaseAutoCompleter = new COA3AutoCompleter(txtPurchase, accountRepo, null, false, 1);
-        purchaseAutoCompleter.setSelectionObserver(this);
+        purchaseAutoCompleter.setObserver(this);
         Mono<ChartOfAccount> p = accountRepo.findCOA(hmProperty.get(txtPurchase.getName()));
         p.hasElement().subscribe((element) -> {
             if (element) {
@@ -684,7 +684,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         });
 
         expenseAutoCompleter = new COA3AutoCompleter(txtExpense, accountRepo, null, false, 1);
-        expenseAutoCompleter.setSelectionObserver(this);
+        expenseAutoCompleter.setObserver(this);
         Mono<ChartOfAccount> ex = accountRepo.findCOA(hmProperty.get(txtExpense.getName()));
         ex.hasElement().subscribe((eleemnt) -> {
             if (eleemnt) {
@@ -701,7 +701,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         });
 
         debtorGroupAutoCompleter = new COA3AutoCompleter(txtDebtor, accountRepo, null, false, 2);
-        debtorGroupAutoCompleter.setSelectionObserver(this);
+        debtorGroupAutoCompleter.setObserver(this);
         Mono<ChartOfAccount> dbg = accountRepo.findCOA(hmProperty.get(txtDebtor.getName()));
         dbg.hasElement().subscribe((element) -> {
             if (element) {
@@ -718,7 +718,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         });
 
         debtorAccAutoCompleter = new COA3AutoCompleter(txtCus, accountRepo, null, false, 3);
-        debtorAccAutoCompleter.setSelectionObserver(this);
+        debtorAccAutoCompleter.setObserver(this);
         Mono<ChartOfAccount> db = accountRepo.findCOA(hmProperty.get(txtCus.getName()));
         db.hasElement().subscribe((element) -> {
             if (element) {
@@ -735,7 +735,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         });
 
         creditorGroupAutoCompleter = new COA3AutoCompleter(txtCreditor, accountRepo, null, false, 2);
-        creditorGroupAutoCompleter.setSelectionObserver(this);
+        creditorGroupAutoCompleter.setObserver(this);
         Mono<ChartOfAccount> crg = accountRepo.findCOA(hmProperty.get(txtCreditor.getName()));
         crg.hasElement().subscribe((element) -> {
             if (element) {
@@ -752,7 +752,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         });
 
         creditorAccAutoCompleter = new COA3AutoCompleter(txtSup, accountRepo, null, false, 3);
-        creditorAccAutoCompleter.setSelectionObserver(this);
+        creditorAccAutoCompleter.setObserver(this);
         Mono<ChartOfAccount> cr = accountRepo.findCOA(hmProperty.get(txtSup.getName()));
         cr.hasElement().subscribe((element) -> {
             if (element) {

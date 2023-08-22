@@ -244,12 +244,12 @@ public class SaleTableModel extends AbstractTableModel {
                             sd.setStockName(s.getStockName());
                             sd.setUserCode(s.getUserCode());
                             sd.setRelName(s.getRelName());
-                            sd.setQty(1.0f);
+                            sd.setQty(1.0);
                             sd.setUnitCode(s.getSaleUnitCode());
-                            sd.setPrice(getTraderPrice(s));
+                            sd.setPrice(Util1.getDouble(getTraderPrice(s)));
                             sd.setStock(s);
                             sd.setPrice(sd.getPrice() == 0 ? s.getSalePriceN() : sd.getPrice());
-                            sd.setWeight(s.getWeight());
+                            sd.setWeight(Util1.getDouble(s.getWeight()));
                             sd.setWeightUnit(s.getWeightUnit());
                             parent.setColumnSelectionInterval(4, 4);
                             addNewRow();
@@ -267,7 +267,7 @@ public class SaleTableModel extends AbstractTableModel {
                         //Qty
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
-                                sd.setQty(Util1.getFloat(value));
+                                sd.setQty(Util1.getDouble(value));
                                 if (sd.getUnitCode() == null) {
                                     parent.setColumnSelectionInterval(5, 5);
                                 } else {
@@ -294,7 +294,7 @@ public class SaleTableModel extends AbstractTableModel {
                         //price
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
-                                sd.setPrice(Util1.getFloat(value));
+                                sd.setPrice(Util1.getDouble(value));
                                 parent.setColumnSelectionInterval(0, 0);
                                 parent.setRowSelectionInterval(row + 1, row + 1);
                             } else {
@@ -308,7 +308,7 @@ public class SaleTableModel extends AbstractTableModel {
                     }
                     case 7 -> {
                         //amt
-                        sd.setAmount(Util1.getFloat(value));
+                        sd.setAmount(Util1.getDouble(value));
 
                     }
 
@@ -319,7 +319,7 @@ public class SaleTableModel extends AbstractTableModel {
                             if (sd.getStockCode() != null && sd.getUnitCode() != null) {
                                 inventoryRepo.getSaleRecentPrice(sd.getStockCode(),
                                         Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), sd.getUnitCode()).subscribe((t) -> {
-                                    sd.setPrice(t.getAmount());
+                                    sd.setPrice(Util1.getDouble(t.getAmount()));
                                     calculateAmount(sd);
                                 });
                             }
@@ -380,17 +380,17 @@ public class SaleTableModel extends AbstractTableModel {
     public void setListOrderDetail(List<OrderHisDetail> listDetail) {
         for (OrderHisDetail ld : listDetail) {
             SaleHisDetail sdl = new SaleHisDetail();
-            sdl.setAmount(ld.getAmount());
+            sdl.setAmount(Util1.getDouble(ld.getAmount()));
 //            sdl.setBatchNo(ld.getBatchNo());
             sdl.setBrandName(ld.getBrandName());
             sdl.setCatName(ld.getCatName());
             sdl.setGroupName(ld.getGroupName());
             sdl.setLocCode(ld.getLocCode());
             sdl.setLocName(ld.getLocName());
-            sdl.setPrice(ld.getPrice());
-            sdl.setQty(ld.getQty());
+            sdl.setPrice(Util1.getDouble(ld.getPrice()));
+            sdl.setQty(Util1.getDouble(ld.getQty()));
             sdl.setRelName(ld.getRelName());
-            sdl.setStdWeight(ld.getStdWeight());
+            sdl.setStdWeight(Util1.getDouble(ld.getStdWeight()));
 //            sdl.setStock(ld.getStock());
             sdl.setStockCode(ld.getStockCode());
             sdl.setStockName(ld.getStockName());
@@ -421,10 +421,10 @@ public class SaleTableModel extends AbstractTableModel {
 
     private void calculateAmount(SaleHisDetail sale) {
         if (sale.getStockCode() != null) {
-            float saleQty = Util1.getFloat(sale.getQty());
-            float stdSalePrice = Util1.getFloat(sale.getPrice());
-            float amount = saleQty * stdSalePrice;
-            sale.setAmount(Util1.getFloat(Math.round(amount)));
+            double saleQty = Util1.getDouble(sale.getQty());
+            double stdSalePrice = Util1.getDouble(sale.getPrice());
+            double amount = saleQty * stdSalePrice;
+            sale.setAmount(Util1.getDouble(Math.round(amount)));
         }
     }
 

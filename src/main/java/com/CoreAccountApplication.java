@@ -2,7 +2,7 @@ package com;
 
 import com.common.Global;
 import com.common.Util1;
-import com.common.ui.LoginDialog;
+import com.ui.LoginDialog;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import java.awt.Color;
@@ -33,46 +33,79 @@ import javax.swing.UnsupportedLookAndFeelException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.Banner;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.ApplicationContext;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com")
 @Slf4j
 public class CoreAccountApplication {
 
-    private static ConfigurableApplicationContext context;
+    private static ApplicationContext context;
     private static Tray tray;
     private static final Image appIcon = new ImageIcon(CoreAccountApplication.class.getResource("/images/applogo.jpg")).getImage();
     private static ServerThread serverThread;
+    private static Splash splash;
 
     public static void main(String[] args) {
+        initialize();
+        loadSplash();
         loadProperty();
-        //splash
-        Splash splash = new Splash(appIcon);
+        setupContext(args);
+        initUI();
+    }
+
+    private static void initialize() {
+        System.setProperty("spring.main.lazy-initialization", "true");
+    }
+
+    private static void initUI() {
+        setupTray();
+        endSplash();
+        startLogin();
+    }
+
+    private static void loadSplash() {
+        splash = new Splash(appIcon);
         splash.setLocationRelativeTo(null);
         splash.setVisible(true);
-        //create context
-        SpringApplicationBuilder builder = new SpringApplicationBuilder(CoreAccountApplication.class);
-        builder.headless(false);
-        builder.web(WebApplicationType.NONE);
-        builder.bannerMode(Banner.Mode.OFF);
-        context = builder.run(args);
-        tray = context.getBean(Tray.class);
+    }
+
+    private static void endSplash() {
+        splash.setVisible(false);
+    }
+
+    private static void setupContext(String[] args) {
+        log.info("start context.");
+        context = new SpringApplicationBuilder()
+                .headless(false)
+                .web(WebApplicationType.NONE)
+                .bannerMode(Banner.Mode.OFF)
+                .sources(CoreAccountApplication.class)
+                .run(args);
+        log.info("end context.");
+    }
+
+    private static void setupTray() {
+        tray = new Tray();
         tray.startup(appIcon);
-        splash.dispose();
+    }
+
+    private static void startLogin() {
         LoginDialog lg = context.getBean(LoginDialog.class);
         URL imgUrl = CoreAccountApplication.class.getResource("/images/male_user_16px.png");
         lg.setIconImage(new ImageIcon(imgUrl).getImage());
         lg.setAppIcon(appIcon);
         lg.checkMachineRegister();
+        tray.setLoginDialog(lg);
     }
 
     public static void restart() {
         ApplicationArguments args = context.getBean(ApplicationArguments.class);
         Thread thread = new Thread(() -> {
-            context.close();
+            SpringApplication.exit(context, () -> 0);
             tray.removeTray();
             serverThread.shutDown();
             main(args.getSourceArgs());

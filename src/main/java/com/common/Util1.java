@@ -1020,7 +1020,15 @@ public class Util1 {
         return "";
     }
 
-    public static Float getTotalWeight(Float wt, String qtyStr) {
+    public static double getTotalWeight(double wt, String qtyStr) {
+        String[] parts = qtyStr.split("\\.");
+        int qty = Integer.parseInt(parts[0]);
+        int decimalWt = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+        double ttlWt = (qty * wt) + decimalWt;
+        return ttlWt;
+    }
+
+    public static float getTotalWeight(float wt, String qtyStr) {
         String[] parts = qtyStr.split("\\.");
         int qty = Integer.parseInt(parts[0]);
         int decimalWt = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;

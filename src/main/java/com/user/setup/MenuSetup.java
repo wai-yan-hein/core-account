@@ -42,7 +42,7 @@ import org.springframework.stereotype.Component;
  * @author Lenovo
  */
 @Component
-public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListener, PanelControl {
+public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListener, PanelControl, SelectionObserver {
 
     private DefaultMutableTreeNode treeRoot;
     DefaultTreeModel treeModel;
@@ -102,6 +102,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
 
     private void initCombo() {
         cOA3AutoCompleter = new COA3AutoCompleter(txtAccount, accountRepo, null, false, 3);
+        cOA3AutoCompleter.setObserver(this);
     }
 
     public void initMain() {
@@ -115,6 +116,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
             userRepo.delete(menu).subscribe((t) -> {
                 if (t) {
                     treeModel.removeNodeFromParent(selectedNode);
+                    observer.selected("menu", "menu");
                 }
             }, (e) -> {
                 JOptionPane.showMessageDialog(this, e.getMessage());
@@ -226,10 +228,12 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
                     menu.setMenuType("Report");
                 }
             }
+            DefaultMutableTreeNode selectNode = (DefaultMutableTreeNode) treeCOA.getLastSelectedPathComponent();
+            int count = selectNode.getChildCount();
+            menu.setOrderBy(count);
             DefaultTreeModel model = (DefaultTreeModel) treeCOA.getModel();
             DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(menu);
-            DefaultMutableTreeNode selectNode = (DefaultMutableTreeNode) treeCOA.getLastSelectedPathComponent();
-            model.insertNodeInto(newNode, selectNode, selectNode.getChildCount());
+            model.insertNodeInto(newNode, selectNode, count);
             TreePath path = new TreePath(newNode.getPath());
             treeCOA.expandPath(new TreePath(selectNode.getPath()));
             treeCOA.setSelectionPath(path);
@@ -286,11 +290,9 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         txtMenuName.setText(menu.getMenuName());
         txtMenuUrl.setText(menu.getMenuUrl());
         txtOrder.setText(menu.getOrderBy() == null ? null : menu.getOrderBy().toString());
-        accountRepo.findCOA(menu.getAccount()).subscribe((t) -> {
+        accountRepo.findCOA(menu.getAccount()).doOnSuccess((t) -> {
             cOA3AutoCompleter.setCoa(t);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
+        }).subscribe();
         txtMenuType.setText(menu.getMenuType());
         txtClass.setText(menu.getMenuClass());
         enableControl(true);
@@ -338,6 +340,15 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
             }
         }
     };
+
+    private void observeMain() {
+        observer.selected("control", this);
+        observer.selected("save", true);
+        observer.selected("print", false);
+        observer.selected("history", false);
+        observer.selected("delete", false);
+        observer.selected("refresh", true);
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -539,7 +550,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         // TODO add your handling code here:
-        observer.selected("control", this);
+        observeMain();
     }//GEN-LAST:event_formComponentShown
 
     private void txtMenuNameFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtMenuNameFocusGained
@@ -646,5 +657,13 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
     @Override
     public String panelName() {
         return this.getName();
+    }
+
+    @Override
+    public void selected(Object source, Object selectObj) {
+        if (source.toString().equals("COA")) {
+            txtMenuName.setText(cOA3AutoCompleter.getCOA().getCoaNameEng());
+
+        }
     }
 }

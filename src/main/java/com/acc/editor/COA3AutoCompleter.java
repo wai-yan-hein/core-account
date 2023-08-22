@@ -59,15 +59,14 @@ public final class COA3AutoCompleter implements KeyListener {
     private int x = 0;
     private int y = 0;
     boolean popupOpen = false;
-    private SelectionObserver selectionObserver;
+    private SelectionObserver observer;
     private AccountRepo accountRepo;
     private boolean filter;
     private int level;
 
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
     }
-
     public COA3AutoCompleter() {
     }
 
@@ -188,8 +187,8 @@ public final class COA3AutoCompleter implements KeyListener {
 
             ((JTextField) textComp).setText(coa.getCoaNameEng());
             if (editor == null) {
-                if (selectionObserver != null) {
-                    selectionObserver.selected("COA", coa.getKey().getCoaCode());
+                if (observer != null) {
+                    observer.selected("COA", coa.getKey().getCoaCode());
                 }
             }
         }

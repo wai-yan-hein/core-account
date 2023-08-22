@@ -85,6 +85,7 @@ public final class CurrencyAutoCompleter implements KeyListener, SelectionObserv
         table.getTableHeader().setFont(Global.lableFont);
         table.setDefaultRenderer(Object.class, new TableCellRender());
         table.setSelectionForeground(Color.WHITE);
+        
         sorter = new TableRowSorter(table.getModel());
         table.setRowSorter(sorter);
         JScrollPane scroll = new JScrollPane(table);

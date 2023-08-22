@@ -122,7 +122,7 @@ public class PurchaseTableModel extends AbstractTableModel {
     public Class getColumnClass(int column) {
         return switch (column) {
             case 4, 6, 7 ->
-                Float.class;
+                Double.class;
             default ->
                 String.class;
         };
@@ -208,7 +208,7 @@ public class PurchaseTableModel extends AbstractTableModel {
                             record.setStockName(s.getStockName());
                             record.setUserCode(s.getUserCode());
                             record.setRelName(s.getRelName());
-                            record.setQty(1.0f);
+                            record.setQty(1.0);
                             record.setUnitCode(s.getPurUnitCode());
                             addNewRow();
                         }
@@ -225,8 +225,8 @@ public class PurchaseTableModel extends AbstractTableModel {
                 case 4 -> {
                     //Qty
                     if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            record.setQty(Util1.getFloat(value));
+                        if (Util1.isPositive(Util1.getDouble(value))) {
+                            record.setQty(Util1.getDouble(value));
                         } else {
                             showMessageBox("Input value must be positive");
                             parent.setColumnSelectionInterval(column, column);
@@ -249,8 +249,8 @@ public class PurchaseTableModel extends AbstractTableModel {
                 case 6 -> {
                     //Pur Price
                     if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            record.setPrice(Util1.getFloat(value));
+                        if (Util1.isPositive(Util1.getDouble(value))) {
+                            record.setPrice(Util1.getDouble(value));
                             record.setOrgPrice(record.getPrice());
                             parent.setColumnSelectionInterval(0, 0);
                             parent.setRowSelectionInterval(row + 1, row + 1);
@@ -266,16 +266,16 @@ public class PurchaseTableModel extends AbstractTableModel {
                 case 7 -> {
                     //Amount
                     if (value != null) {
-                        record.setAmount(Util1.getFloat(value));
+                        record.setAmount(Util1.getDouble(value));
                     }
                 }
             }
             if (column != 6) {
-                if (Util1.getFloat(record.getPrice()) == 0) {
+                if (Util1.getDouble(record.getPrice()) == 0) {
                     if (record.getStockCode() != null && record.getUnitCode() != null) {
                         inventoryRepo.getPurRecentPrice(record.getStockCode(),
                                 Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnitCode()).subscribe((t) -> {
-                            record.setPrice(t.getAmount());
+                            record.setPrice(Util1.getDouble(t.getAmount()));
                             calculateAmount(record);
                         });
                     }
@@ -343,12 +343,12 @@ public class PurchaseTableModel extends AbstractTableModel {
     }
 
     private void calculateAmount(PurHisDetail pur) {
-        float price = Util1.getFloat(pur.getPrice());
-        float qty = Util1.getFloat(pur.getQty());
+        double price = Util1.getDouble(pur.getPrice());
+        double qty = Util1.getDouble(pur.getQty());
         if (pur.getStockCode() != null) {
-            float amount = qty * price;
+            double amount = qty * price;
             pur.setPrice(price);
-            pur.setAmount(Util1.getFloat(Math.round(amount)));
+            pur.setAmount(Util1.getDouble(Math.round(amount)));
         }
     }
 
@@ -360,7 +360,7 @@ public class PurchaseTableModel extends AbstractTableModel {
         boolean status = true;
         for (PurHisDetail sdh : listDetail) {
             if (sdh.getStockCode() != null) {
-                if (Util1.getFloat(sdh.getAmount()) <= 0) {
+                if (Util1.getDouble(sdh.getAmount()) <= 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
                             "Invalid.", JOptionPane.ERROR_MESSAGE);
                     status = false;

@@ -276,7 +276,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         tblPur.getColumnModel().getColumn(12).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(13).setCellEditor(new AutoClearEditor());
         tblPur.setDefaultRenderer(Object.class, new DecimalFormatRender());
-        tblPur.setDefaultRenderer(Float.class, new DecimalFormatRender());
+        tblPur.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblPur.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblPur.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -845,9 +845,9 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
                 pd.setUserCode(t.getUserCode());
                 pd.setStockName(t.getStockName());
                 pd.setRelName(t.getRelName());
-                pd.setWeight(t.getWeight());
-                pd.setQty(t.getQty());
-                pd.setStdWeight(t.getStdWeight());
+                pd.setWeight(Util1.getDouble(t.getWeight()));
+                pd.setQty(Util1.getDouble(t.getQty()));
+                pd.setStdWeight(Util1.getDouble(t.getStdWeight()));
                 pd.setWeightUnit(t.getWeightUnit());
                 pd.setUnitCode(t.getUnit());
                 pd.setLocCode(t.getLocCode());

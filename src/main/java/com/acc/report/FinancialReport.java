@@ -156,7 +156,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
             departmentAutoCompleter.setObserver(this);
         });
         cOA3AutoCompleter = new COA3AutoCompleter(txtCOA, accountRepo, null, true, 3);
-        cOA3AutoCompleter.setSelectionObserver(this);
+        cOA3AutoCompleter.setObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
         projectAutoCompleter.setObserver(this);
     }

@@ -10,11 +10,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.h2.dao.DepartmentUserDao;
 import com.user.model.DepartmentUser;
 import java.util.List;
+import org.springframework.context.annotation.Lazy;
 
 /**
  *
  * @author Athu Sint
  */
+@Lazy
 @Service
 @Transactional
 public class DepartmentUserServiceImpl implements DepartmentUserService {

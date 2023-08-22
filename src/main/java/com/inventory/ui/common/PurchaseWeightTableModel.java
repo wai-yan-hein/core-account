@@ -124,9 +124,9 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
             case 0, 1, 2, 3 ->
                 String.class;
             case 7 ->
-                ProUtil.isUseWeight() ? String.class : Float.class;
+                ProUtil.isUseWeight() ? String.class : Double.class;
             default ->
-                Float.class;
+                Double.class;
         };
     }
 
@@ -220,11 +220,11 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                             record.setStockName(s.getStockName());
                             record.setUserCode(s.getUserCode());
                             record.setRelName(s.getRelName());
-                            record.setQty(1.0f);
+                            record.setQty(1.0);
                             record.setUnitCode(s.getPurUnitCode());
                             record.setWeightUnit(s.getWeightUnit());
-                            record.setWeight(Util1.getFloat(s.getWeight()));
-                            record.setStdWeight(s.getWeight());
+                            record.setWeight(Util1.getDouble(s.getWeight()));
+                            record.setStdWeight(Util1.getDouble(s.getWeight()));
                             addNewRow();
                         }
                     }
@@ -244,8 +244,8 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                 case 4 -> {
                     //weight
                     if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            record.setWeight(Util1.getFloat(value));
+                        if (Util1.isPositive(Util1.getDouble(value))) {
+                            record.setWeight(Util1.getDouble(value));
                         } else {
                             showMessageBox("Input value must be positive.");
                         }
@@ -264,14 +264,14 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                     //Qty
                     if (ProUtil.isUseWeight()) {
                         String str = String.valueOf(value);
-                        float wt = Util1.getFloat(record.getWeight());
-                        record.setQty(Util1.getFloat(value));
+                        double wt = Util1.getDouble(record.getWeight());
+                        record.setQty(Util1.getDouble(value));
                         record.setTotalWeight(Util1.getTotalWeight(wt, str));
                     } else {
                         if (Util1.isNumber(value)) {
-                            record.setQty(Util1.getFloat(value));
+                            record.setQty(Util1.getDouble(value));
                             if (record.getQty() != null && record.getWeight() != null) {
-                                record.setTotalWeight(Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight()));
+                                record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
                             }
                             parent.setRowSelectionInterval(row, row);
                         }
@@ -289,14 +289,14 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                 case 8 -> {
                     //std weight
                     if (Util1.isNumber(value)) {
-                        record.setStdWeight(Util1.getFloat(value));
+                        record.setStdWeight(Util1.getDouble(value));
                     }
                 }
                 case 10 -> {
                     //Pur Price
                     if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            record.setPrice(Util1.getFloat(value));
+                        if (Util1.isPositive(Util1.getDouble(value))) {
+                            record.setPrice(Util1.getDouble(value));
                             record.setOrgPrice(record.getPrice());
                             parent.setColumnSelectionInterval(0, 0);
                             parent.setRowSelectionInterval(row + 1, row + 1);
@@ -312,16 +312,16 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                 case 11 -> {
                     //Amount
                     if (value != null) {
-                        record.setAmount(Util1.getFloat(value));
+                        record.setAmount(Util1.getDouble(value));
                     }
                 }
             }
             if (column != 9) {
-                if (Util1.getFloat(record.getPrice()) == 0) {
+                if (Util1.getDouble(record.getPrice()) == 0) {
                     if (record.getStockCode() != null && record.getUnitCode() != null) {
                         inventoryRepo.getPurRecentPrice(record.getStockCode(),
                                 Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnitCode()).subscribe((t) -> {
-                            record.setPrice(t.getAmount());
+                            record.setPrice(Util1.getDouble(t.getAmount()));
                             calculateAmount(record);
                         });
                     }
@@ -387,11 +387,11 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
     }
 
     private void calculateAmount(PurHisDetail pur) {
-        float price = Util1.getFloat(pur.getPrice());
-        float stdWt = Util1.getFloat(pur.getStdWeight());
-        float ttlWt = Util1.getFloat(pur.getTotalWeight());
+        double price = Util1.getDouble(pur.getPrice());
+        double stdWt = Util1.getDouble(pur.getStdWeight());
+        double ttlWt = Util1.getDouble(pur.getTotalWeight());
         if (pur.getStockCode() != null) {
-            float amount = (ttlWt * price) / stdWt;
+            double amount = (ttlWt * price) / stdWt;
             pur.setAmount(amount);
         }
     }
@@ -405,7 +405,7 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
         for (int i = 0; i < listDetail.size(); i++) {
             PurHisDetail sdh = listDetail.get(i);
             if (sdh.getStockCode() != null) {
-                if (Util1.getFloat(sdh.getAmount()) <= 0) {
+                if (Util1.getDouble(sdh.getAmount()) <= 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
                             "Invalid.", JOptionPane.ERROR_MESSAGE);
                     focusTable(i);

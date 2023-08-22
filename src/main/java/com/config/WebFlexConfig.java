@@ -9,12 +9,12 @@ import com.common.TokenFile;
 import com.common.Util1;
 import com.user.model.AuthenticationRequest;
 import com.user.model.AuthenticationResponse;
-import java.awt.HeadlessException;
 import java.time.Duration;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
@@ -39,6 +39,7 @@ public class WebFlexConfig {
     private Environment environment;
     private final TokenFile<AuthenticationResponse> file = new TokenFile<>(AuthenticationResponse.class);
 
+    @Lazy
     @Bean
     public WebClient inventoryApi() {
         String url = environment.getProperty("inventory.url");
@@ -55,6 +56,7 @@ public class WebFlexConfig {
                 .build();
     }
 
+    @Lazy
     @Bean
     public WebClient accountApi() {
         String url = environment.getProperty("account.url");
@@ -71,6 +73,7 @@ public class WebFlexConfig {
                 .build();
     }
 
+    @Lazy
     @Bean
     public WebClient userApi() {
         String url = environment.getProperty("user.url");
@@ -87,6 +90,7 @@ public class WebFlexConfig {
                 .build();
     }
 
+    @Lazy
     @Bean
     public WebClient hmsApi() {
         String url = environment.getProperty("hms.url");
@@ -135,10 +139,11 @@ public class WebFlexConfig {
         int port = Util1.getInteger(environment.getProperty("user.port"));
         String serialNo = Util1.getBaseboardSerialNumber();
         WebClient webClient = WebClient.builder().baseUrl(getUrl(url, port)).build();
-        return authenticate(webClient, serialNo).block();
+        String token = authenticate(webClient, serialNo);
+        return token;
     }
 
-    private Mono<String> authenticate(WebClient client, String serialNo) {
+    private String authenticate(WebClient client, String serialNo) {
         var auth = AuthenticationRequest.builder()
                 .serialNo(serialNo)
                 .password(Util1.getPassword())
@@ -149,23 +154,23 @@ public class WebFlexConfig {
                 .body(Mono.just(auth), AuthenticationRequest.class)
                 .retrieve()
                 .bodyToMono(AuthenticationResponse.class)
-                .flatMap(response -> {
+                .doOnSuccess(response -> {
                     if (response != null && response.getAccessToken() != null) {
                         try {
                             file.write(response); // Assuming this writes the response to a file
-                            log.info("New token: " + response.getAccessToken());
+                            log.info("New Token: " + response.getAccessToken());
                         } catch (Exception e) {
                             log.error("Error writing response to file: " + e.getMessage());
                         }
-                        return Mono.just(response.getAccessToken());
-                    } else {
-                        return Mono.just("");
                     }
                 })
                 .onErrorResume(e -> {
                     log.error("Error during authentication: " + e.getMessage());
-                    return Mono.just(file.read().getAccessToken()); // Return an empty Mono in case of error
-                });
+                    // Return a fallback access token here
+                    return Mono.just(file.read());
+                })
+                .map(AuthenticationResponse::getAccessToken) // Extract and return the access token
+                .block();
     }
 
     @Bean

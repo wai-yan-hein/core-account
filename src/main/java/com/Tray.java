@@ -5,28 +5,28 @@
 package com;
 
 import com.common.Global;
-import com.common.ui.LoginDialog;
+import com.ui.LoginDialog;
 import java.awt.*;
 import java.awt.TrayIcon.MessageType;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JFrame;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  *
  * @author Lenovo
  */
 @Slf4j
-@Component
 public class Tray {
 
     private TrayIcon trayIcon;
-    @Autowired
     private LoginDialog loginDialog;
     private SystemTray tray;
+
+    public void setLoginDialog(LoginDialog loginDialog) {
+        this.loginDialog = loginDialog;
+    }
 
     public SystemTray getTray() {
         return tray;

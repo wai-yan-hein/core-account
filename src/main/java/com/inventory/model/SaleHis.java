@@ -45,23 +45,23 @@ public class SaleHis {
     @Column(name = "reference")
     private String reference;
     @Column(name = "vou_total")
-    private Float vouTotal;
+    private Double vouTotal;
     @Column(name = "grand_total")
-    private Float grandTotal;
+    private Double grandTotal;
     @Column(name = "discount")
-    private Float discount;
+    private Double discount;
     @Column(name = "disc_p")
-    private Float discP;
+    private Double discP;
     @Column(name = "tax_amt")
-    private Float taxAmt;
+    private Double taxAmt;
     @Column(name = "tax_p")
-    private Float taxPercent;
+    private Double taxPercent;
     @Column(name = "deleted")
     private boolean deleted;
     @Column(name = "paid")
-    private Float paid;
+    private Double paid;
     @Column(name = "vou_balance")
-    private Float balance;
+    private Double balance;
     @Temporal(TemporalType.DATE)
     @Column(name = "created_date")
     private Date createdDate;
@@ -98,7 +98,7 @@ public class SaleHis {
     @Column(name = "grn_vou_no")
     private String grnVouNo;
     @Column(name = "expense")
-    private Float expense;
+    private Double expense;
     @Column(name = "account")
     private String account;
     @Transient

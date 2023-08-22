@@ -7,9 +7,9 @@ package com.h2.service;
 import com.h2.dao.PriceOptionDao;
 import com.inventory.model.PriceOption;
 import com.inventory.model.PriceOptionKey;
-import com.inventory.model.VouStatusKey;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @author Lenovo
  */
+@Lazy
 @Service
 @Transactional
 public class PriceOptionServiceImpl implements PriceOptionService {

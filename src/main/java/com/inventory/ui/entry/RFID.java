@@ -272,7 +272,7 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         } else {
             saleHis.setDeleted(Util1.getNullTo(saleHis.isDeleted()));
             saleHis.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
-            saleHis.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
+            saleHis.setVouTotal(Util1.getDouble(txtVouTotal.getValue()));
             saleHis.setGrandTotal(saleHis.getVouTotal());
             saleHis.setPaid(saleHis.getVouTotal());
             saleHis.setStatus(lblStatus.getText());
@@ -438,10 +438,10 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     sd.setUserCode(sd.getUserCode());
                     sd.setStockCode(s.getKey().getStockCode());
                     sd.setStockName(s.getStockName());
-                    sd.setQty(1.0f);
+                    sd.setQty(1.0);
                     sd.setUnitCode(s.getSaleUnitCode());
-                    sd.setPrice(s.getSalePriceN());
-                    sd.setAmount(Util1.getFloat(sd.getQty()) * Util1.getFloat(sd.getPrice()));
+                    sd.setPrice(Util1.getDouble(s.getSalePriceN()));
+                    sd.setAmount(Util1.getDouble(sd.getQty()) * Util1.getDouble(sd.getPrice()));
                     sd.setLocCode(locCode);
                     tableModel.addSale(sd);
                     calculateTotalAmount();

@@ -4,12 +4,12 @@
  */
 package com.h2.service;
 
-import com.h2.dao.BrandDao;
 import com.h2.dao.LocationDao;
 import com.inventory.model.Location;
 import com.inventory.model.LocationKey;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @author Lenovo
  */
+@Lazy
 @Service
 @Transactional
 public class LocationServiceImpl implements LocationService {

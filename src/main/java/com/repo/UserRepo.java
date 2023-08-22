@@ -288,8 +288,7 @@ public class UserRepo {
     }
 
     public Mono<Currency> getDefaultCurrency() {
-        String curCode = Global.hmRoleProperty.get("default.currency");
-        return findCurrency(Util1.isNull(curCode, Global.currency));
+        return findCurrency(Global.currency);
     }
 
     public void setupProperty() {

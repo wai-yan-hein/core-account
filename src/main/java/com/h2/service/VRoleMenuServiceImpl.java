@@ -4,8 +4,10 @@ import com.inventory.model.VRoleMenu;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.transaction.annotation.Transactional;
 
+@Lazy
 @Service
 @Transactional
 public class VRoleMenuServiceImpl implements VRoleMenuService{

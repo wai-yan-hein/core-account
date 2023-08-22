@@ -19,6 +19,7 @@ import com.acc.model.TraderA;
 import com.acc.model.VApar;
 import com.common.Global;
 import com.common.PanelControl;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.repo.UserRepo;
@@ -108,6 +109,15 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         initKeyListener();
         initTextBoxFormat();
         initDateDecorator();
+        assingDefaultValue();
+    }
+
+    private void assingDefaultValue() {
+        txtFTotalDrAmt.setFormatterFactory(Util1.getDecimalFormat());
+        txtFTotalCrAmt.setFormatterFactory(Util1.getDecimalFormat());
+        txtFOFB.setFormatterFactory(Util1.getDecimalFormat());
+        progress.setIndeterminate(false);
+        txtCurrency.setEnabled(ProUtil.isMultiCur());
     }
 
     private void initDateDecorator() {
@@ -136,6 +146,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     public void initMain() {
+        assingDefaultValue();
         initCombo();
         initTable();
         createDateFilter();

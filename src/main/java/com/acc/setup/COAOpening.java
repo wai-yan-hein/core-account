@@ -172,7 +172,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
             currencyAutoCompleter.setCurrency(c);
         });
         coaAutoCompleter = new COA3AutoCompleter(txtCOA, accountRepo, null, true, 0);
-        coaAutoCompleter.setSelectionObserver(this);
+        coaAutoCompleter.setObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
         projectAutoCompleter.setObserver(this);
     }

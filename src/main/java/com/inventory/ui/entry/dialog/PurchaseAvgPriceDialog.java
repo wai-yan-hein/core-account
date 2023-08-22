@@ -139,9 +139,9 @@ public class PurchaseAvgPriceDialog extends javax.swing.JDialog {
             String unitCode = unit.getKey().getUnitCode();
             inventoryRepo.getSmallQty(pd.getStockCode(), unitCode).subscribe((t) -> {
                 float qty = t.getQty();
-                float avgQty = Util1.getFloat(txtAvgQty.getValue());
-                float price = Util1.getFloat(txtPrice.getValue());
-                float avgPrice = avgQty / qty * price;
+                double avgQty = Util1.getDouble(txtAvgQty.getValue());
+                double price = Util1.getDouble(txtPrice.getValue());
+                double avgPrice = avgQty / qty * price;
                 pd.setPrice(avgPrice);
                 pd.setAvgQty(avgQty);
                 txtAvgPrice.setValue(avgPrice);

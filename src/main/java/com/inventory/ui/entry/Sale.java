@@ -197,10 +197,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                             sd.setStockName(od.getStockName());
                             sd.setTraderName(od.getTraderName());
                             sd.setRelName(od.getRelName());
-                            sd.setQty(od.getQty());
-                            sd.setAmount(od.getAmount());
+                            sd.setQty(Util1.getDouble(od.getQty()));
+                            sd.setAmount(Util1.getDouble(od.getAmount()));
                             sd.setUnitCode(od.getUnitCode());
-                            sd.setPrice(od.getPrice());
+                            sd.setPrice(Util1.getDouble(od.getPrice()));
                             sd.setLocCode(od.getLocCode());
                             sd.setLocName(od.getLocName());
                             saleTableModel.addSale(sd);
@@ -235,15 +235,15 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         txtRemark.setText(oh.getRemark());
                         txtReference.setText(oh.getReference());
                         txtSaleDate.setDate(Util1.convertToDate(oh.getVouDate()));
-                        txtVouTotal.setValue(Util1.getFloat(oh.getVouTotal()));
-                        txtVouDiscP.setValue(Util1.getFloat(oh.getDiscP()));
-                        txtVouDiscount.setValue(Util1.getFloat(oh.getDiscount()));
-                        txtVouTaxP.setValue(Util1.getFloat(oh.getTaxPercent()));
-                        txtTax.setValue(Util1.getFloat(oh.getTaxAmt()));
-                        txtVouPaid.setValue(Util1.getFloat(oh.getPaid()));
-                        txtVouBalance.setValue(Util1.getFloat(oh.getBalance()));
-                        txtGrandTotal.setValue(Util1.getFloat(oh.getGrandTotal()));
-                        chkPaid.setSelected(Util1.getFloat(oh.getPaid()) > 0);
+                        txtVouTotal.setValue(Util1.getDouble(oh.getVouTotal()));
+                        txtVouDiscP.setValue(Util1.getDouble(oh.getDiscP()));
+                        txtVouDiscount.setValue(Util1.getDouble(oh.getDiscount()));
+                        txtVouTaxP.setValue(Util1.getDouble(oh.getTaxPercent()));
+                        txtTax.setValue(Util1.getDouble(oh.getTaxAmt()));
+                        txtVouPaid.setValue(Util1.getDouble(oh.getPaid()));
+                        txtVouBalance.setValue(Util1.getDouble(oh.getBalance()));
+                        txtGrandTotal.setValue(Util1.getDouble(oh.getGrandTotal()));
+                        chkPaid.setSelected(Util1.getDouble(oh.getPaid()) > 0);
                         txtOrderNo.setText(oh.getKey().getVouNo());
                         saleTableModel.addNewRow();
                         focusTable();
@@ -355,7 +355,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             tblSale.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//price
         }
         tblSale.setDefaultRenderer(Object.class, new DecimalFormatRender());
-        tblSale.setDefaultRenderer(Float.class, new DecimalFormatRender());
+        tblSale.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblSale.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblSale.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -580,7 +580,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     "No Trader.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtLocation.requestFocus();
-        } else if (Util1.getFloat(txtVouTotal.getValue()) <= 0) {
+        } else if (Util1.getDouble(txtVouTotal.getValue()) <= 0) {
             JOptionPane.showMessageDialog(this, "Invalid Amount.",
                     "No Sale Record.", JOptionPane.ERROR_MESSAGE);
             status = false;
@@ -594,22 +594,22 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
             saleHis.setRemark(txtRemark.getText());
             saleHis.setReference(txtReference.getText());
-            saleHis.setDiscP(Util1.getFloat(txtVouDiscP.getValue()));
-            saleHis.setDiscount(Util1.getFloat(txtVouDiscount.getValue()));
-            saleHis.setTaxPercent(Util1.getFloat(txtVouTaxP.getValue()));
-            saleHis.setTaxAmt(Util1.getFloat(txtTax.getValue()));
-            saleHis.setPaid(Util1.getFloat(txtVouPaid.getValue()));
-            saleHis.setBalance(Util1.getFloat(txtVouBalance.getValue()));
+            saleHis.setDiscP(Util1.getDouble(txtVouDiscP.getValue()));
+            saleHis.setDiscount(Util1.getDouble(txtVouDiscount.getValue()));
+            saleHis.setTaxPercent(Util1.getDouble(txtVouTaxP.getValue()));
+            saleHis.setTaxAmt(Util1.getDouble(txtTax.getValue()));
+            saleHis.setPaid(Util1.getDouble(txtVouPaid.getValue()));
+            saleHis.setBalance(Util1.getDouble(txtVouBalance.getValue()));
             saleHis.setCurCode(currAutoCompleter.getCurrency().getCurCode());
             saleHis.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
-            saleHis.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
-            saleHis.setGrandTotal(Util1.getFloat(txtGrandTotal.getValue()));
+            saleHis.setVouTotal(Util1.getDouble(txtVouTotal.getValue()));
+            saleHis.setGrandTotal(Util1.getDouble(txtGrandTotal.getValue()));
             saleHis.setStatus(lblStatus.getText());
             saleHis.setVouDate(Util1.convertToLocalDateTime(txtSaleDate.getDate()));
             saleHis.setMacId(Global.macId);
             saleHis.setOrderNo(txtOrderNo.getText());
             saleHis.setTraderCode(traderCode);
-            saleHis.setExpense(Util1.getFloat(txtExpense.getValue()));
+            saleHis.setExpense(Util1.getDouble(txtExpense.getValue()));
             Project p = projectAutoCompleter.getProject();
             saleHis.setProjectNo(p == null ? null : p.getKey().getProjectNo());
             GRN g = batchAutoCompeter.getBatch();
@@ -704,38 +704,38 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     private void calculateTotalAmount(boolean partial) {
         calExpense();
-        float totalVouBalance;
-        float totalAmount = 0.0f;
+        double totalVouBalance;
+        double totalAmount = 0.0f;
         listDetail = saleTableModel.getListDetail();
-        totalAmount = listDetail.stream().map(sdh -> Util1.getFloat(sdh.getAmount())).reduce(totalAmount, (accumulator, _item) -> accumulator + _item);
+        totalAmount = listDetail.stream().map(sdh -> Util1.getDouble(sdh.getAmount())).reduce(totalAmount, (accumulator, _item) -> accumulator + _item);
         txtVouTotal.setValue(totalAmount);
 
         //cal discAmt
-        float discp = Util1.getFloat(txtVouDiscP.getValue());
+        double discp = Util1.getDouble(txtVouDiscP.getValue());
         if (discp > 0) {
-            float discountAmt = (totalAmount * (discp / 100));
-            txtVouDiscount.setValue(Util1.getFloat(discountAmt));
+            double discountAmt = (totalAmount * (discp / 100));
+            txtVouDiscount.setValue(Util1.getDouble(discountAmt));
         }
         //calculate taxAmt
-        float taxp = Util1.getFloat(txtVouTaxP.getValue());
-        float taxAmt = Util1.getFloat(txtTax.getValue());
+        double taxp = Util1.getDouble(txtVouTaxP.getValue());
+        double taxAmt = Util1.getDouble(txtTax.getValue());
         if (taxp > 0) {
-            float afterDiscountAmt = totalAmount - Util1.getFloat(txtVouDiscount.getValue());
-            float totalTax = (afterDiscountAmt * taxp) / 100;
-            txtTax.setValue(Util1.getFloat(totalTax));
+            double afterDiscountAmt = totalAmount - Util1.getDouble(txtVouDiscount.getValue());
+            double totalTax = (afterDiscountAmt * taxp) / 100;
+            txtTax.setValue(Util1.getDouble(totalTax));
         } else if (taxAmt > 0) {
-            float afterDiscountAmt = totalAmount - Util1.getFloat(txtVouDiscount.getValue());
+            double afterDiscountAmt = totalAmount - Util1.getDouble(txtVouDiscount.getValue());
             taxp = (taxAmt / afterDiscountAmt) * 100;
-            txtVouTaxP.setValue(Util1.getFloat(taxp));
+            txtVouTaxP.setValue(Util1.getDouble(taxp));
         }
         //
-        float ttlExp = Util1.getFloat(txtExpense.getValue());
+        double ttlExp = Util1.getDouble(txtExpense.getValue());
         txtGrandTotal.setValue(totalAmount
-                + Util1.getFloat(txtTax.getValue())
-                - Util1.getFloat(txtVouDiscount.getValue())
+                + Util1.getDouble(txtTax.getValue())
+                - Util1.getDouble(txtVouDiscount.getValue())
                 - ttlExp);
-        float grandTotal = Util1.getFloat(txtGrandTotal.getValue());
-        float paid = Util1.getFloat(txtVouPaid.getText());
+        double grandTotal = Util1.getDouble(txtGrandTotal.getValue());
+        double paid = Util1.getDouble(txtVouPaid.getText());
         if (!partial) {
             if (paid == 0 || paid != grandTotal) {
                 if (chkPaid.isSelected()) {
@@ -745,13 +745,13 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 }
             }
         }
-        paid = Util1.getFloat(txtVouPaid.getText());
+        paid = Util1.getDouble(txtVouPaid.getText());
         if (paid > grandTotal) {
             txtVouPaid.setValue(grandTotal);
             paid = grandTotal;
         }
         totalVouBalance = grandTotal - paid;
-        txtVouBalance.setValue(Util1.getFloat(totalVouBalance));
+        txtVouBalance.setValue(Util1.getDouble(totalVouBalance));
     }
 
     public void historySale() {
@@ -824,16 +824,16 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 txtRemark.setText(saleHis.getRemark());
                 txtReference.setText(saleHis.getReference());
                 txtSaleDate.setDate(Util1.convertToDate(saleHis.getVouDate()));
-                txtVouTotal.setValue(Util1.getFloat(saleHis.getVouTotal()));
-                txtVouDiscP.setValue(Util1.getFloat(saleHis.getDiscP()));
-                txtVouDiscount.setValue(Util1.getFloat(saleHis.getDiscount()));
-                txtVouTaxP.setValue(Util1.getFloat(saleHis.getTaxPercent()));
-                txtTax.setValue(Util1.getFloat(saleHis.getTaxAmt()));
-                txtVouPaid.setValue(Util1.getFloat(saleHis.getPaid()));
-                txtVouBalance.setValue(Util1.getFloat(saleHis.getBalance()));
-                txtGrandTotal.setValue(Util1.getFloat(saleHis.getGrandTotal()));
+                txtVouTotal.setValue(Util1.getDouble(saleHis.getVouTotal()));
+                txtVouDiscP.setValue(Util1.getDouble(saleHis.getDiscP()));
+                txtVouDiscount.setValue(Util1.getDouble(saleHis.getDiscount()));
+                txtVouTaxP.setValue(Util1.getDouble(saleHis.getTaxPercent()));
+                txtTax.setValue(Util1.getDouble(saleHis.getTaxAmt()));
+                txtVouPaid.setValue(Util1.getDouble(saleHis.getPaid()));
+                txtVouBalance.setValue(Util1.getDouble(saleHis.getBalance()));
+                txtGrandTotal.setValue(Util1.getDouble(saleHis.getGrandTotal()));
                 chkPaid.setSelected(saleHis.getPaid() > 0);
-                txtExpense.setValue(Util1.getFloat(saleHis.getExpense()));
+                txtExpense.setValue(Util1.getDouble(saleHis.getExpense()));
                 if (saleHis.getProjectNo() != null) {
                     userRepo.find(new ProjectKey(saleHis.getProjectNo(), Global.compCode)).subscribe(t1 -> {
                         projectAutoCompleter.setProject(t1);
@@ -926,7 +926,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         JsonNode jn2 = new ObjectMapper().readTree(Util1.gson.toJson(tuple.getT2()));
                         JsonDataSource d2 = new JsonDataSource(jn2, null) {
                         };
-                        param.put("p_expense", Util1.getFloat(sh.getExpense()) * -1);
+                        param.put("p_expense", Util1.getDouble(sh.getExpense()) * -1);
                         param.put("p_trader_name", tuple.getT3().getTraderName());
                         param.put("p_sub_data", d1);
                         JasperPrint main = JasperFillManager.fillReport(reportPath, param, d2);
@@ -2242,7 +2242,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
             case "txtVouTaxP" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (Util1.getFloat(txtVouTaxP.getValue()) <= 0) {
+                    if (Util1.getDouble(txtVouTaxP.getValue()) <= 0) {
                         txtTax.setValue(0);
                     }
                     calculateTotalAmount(false);
@@ -2258,7 +2258,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
             case "txtVouDiscount" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (Util1.getFloat(txtVouDiscount.getValue()) >= 0) {
+                    if (Util1.getDouble(txtVouDiscount.getValue()) >= 0) {
                         txtVouDiscP.setValue(0);
                     }
                     calculateTotalAmount(false);
@@ -2267,7 +2267,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
             case "txtVouDiscP" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (Util1.getFloat(txtVouDiscP.getValue()) <= 0) {
+                    if (Util1.getDouble(txtVouDiscP.getValue()) <= 0) {
                         txtVouDiscount.setValue(0);
                     }
                     calculateTotalAmount(false);

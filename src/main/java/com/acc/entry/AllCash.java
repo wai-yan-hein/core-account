@@ -71,7 +71,6 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
@@ -79,7 +78,6 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import lombok.extern.slf4j.Slf4j;
 import net.coderazzi.filters.gui.AutoChoices;
@@ -228,32 +226,38 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             dayBookTableModel.setObserver(this);
             dayBookTableModel.setSourceAccId(sourceAccId);
             dayBookTableModel.setProgress(progress);
-            accountRepo.findCOA(sourceAccId).subscribe((coa) -> {
+            accountRepo.findCOA(sourceAccId).doOnSuccess((coa) -> {
                 if (coa == null) {
                     JOptionPane.showMessageDialog(this, "mapping coa does not exists.");
                     return;
                 }
-                accountRepo.getDefaultDepartment().subscribe((t) -> {
+                accountRepo.getDefaultDepartment().doOnSuccess((t) -> {
                     dayBookTableModel.setDepartment(t);
-                }, (e) -> {
-                    log.error(e.getMessage());
-                });
+                }).subscribe();
                 dayBookTableModel.setCredit(coa.isCredit());
                 dayBookTableModel.addNewRow();
-            });
+            }).subscribe();
         } else {
-            allCashTableModel.setParent(tblCash);
-            allCashTableModel.setAccountRepo(accountRepo);
-            allCashTableModel.setObserver(this);
-            allCashTableModel.setSourceAccId(sourceAccId);
-            allCashTableModel.setProgress(progress);
-            allCashTableModel.addNewRow();
             tblCash.setModel(allCashTableModel);
-            accountRepo.getDefaultDepartment().subscribe((t) -> {
-                allCashTableModel.setDepartment(t);
-            }, (e) -> {
-                log.error(e.getMessage());
-            });
+            accountRepo.findCOA(sourceAccId).doOnSuccess((coa) -> {
+                if (coa == null) {
+                    JOptionPane.showMessageDialog(this, "mapping coa does not exists.");
+                    return;
+                }
+                allCashTableModel.setParent(tblCash);
+                allCashTableModel.setAccountRepo(accountRepo);
+                allCashTableModel.setObserver(this);
+                allCashTableModel.setSourceAccId(sourceAccId);
+                allCashTableModel.setProgress(progress);
+                allCashTableModel.addNewRow();
+                accountRepo.getDefaultDepartment().doOnSuccess((t) -> {
+                    allCashTableModel.setDepartment(t);
+                }).subscribe();
+                userRepo.findCurrency(coa.getCurCode()).doOnSuccess((c) -> {
+                    currencyAutoCompleter.setCurrency(c);
+                }).subscribe();
+            }).subscribe();
+
         }
     }
 
@@ -308,7 +312,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         refAutoCompleter = new RefAutoCompleter(txtRefrence, accountRepo, null, true);
         refAutoCompleter.setObserver(this);
         coaAutoCompleter = new COA3AutoCompleter(txtAccount, accountRepo, null, true, 0);
-        coaAutoCompleter.setSelectionObserver(this);
+        coaAutoCompleter.setObserver(this);
         traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accountRepo, null, true);
         traderAutoCompleter.setObserver(this);
         batchNoAutoCompeter = new BatchNoAutoCompeter(txtBatchNo, accountRepo, null, true);

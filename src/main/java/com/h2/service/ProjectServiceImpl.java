@@ -9,6 +9,7 @@ import com.user.model.Project;
 import com.user.model.ProjectKey;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @author Athu Sint
  */
+@Lazy
 @Service
 @Transactional
 public class ProjectServiceImpl implements ProjectService {

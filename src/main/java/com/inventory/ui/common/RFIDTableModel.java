@@ -96,7 +96,7 @@ public class RFIDTableModel extends AbstractTableModel {
     public Class getColumnClass(int column) {
         return switch (column) {
             case 2, 4, 5 ->
-                Float.class;
+                Double.class;
             default ->
                 String.class;
         };
@@ -169,8 +169,8 @@ public class RFIDTableModel extends AbstractTableModel {
                             sd.setUserCode(s.getUserCode());
                             sd.setStockCode(s.getKey().getStockCode());
                             sd.setStockName(s.getStockName());
-                            sd.setPrice(s.getSalePriceN());
-                            sd.setQty(1.0f);
+                            sd.setPrice(Util1.getDouble(s.getSalePriceN()));
+                            sd.setQty(1.0);
                             sd.setUnitCode(s.getSaleUnitCode());
                             addNewRow();
                             table.setRowSelectionInterval(row + 1, row + 1);
@@ -178,10 +178,10 @@ public class RFIDTableModel extends AbstractTableModel {
                         }
                     }
                     case 2 -> {
-                        sd.setQty(Util1.getFloat(value));
+                        sd.setQty(Util1.getDouble(value));
                     }
                     case 4 -> {
-                        sd.setPrice(Util1.getFloat(value));
+                        sd.setPrice(Util1.getDouble(value));
                     }
                 }
                 calculateAmount(sd);
@@ -200,7 +200,7 @@ public class RFIDTableModel extends AbstractTableModel {
             float saleQty = Util1.getFloat(sale.getQty());
             float stdSalePrice = Util1.getFloat(sale.getPrice());
             float amount = saleQty * stdSalePrice;
-            sale.setAmount(Util1.getFloat(Math.round(amount)));
+            sale.setAmount(Util1.getDouble(Math.round(amount)));
         }
     }
 
@@ -265,8 +265,6 @@ public class RFIDTableModel extends AbstractTableModel {
         }
         return status;
     }
-
-   
 
     public List<SaleDetailKey> getDelList() {
         return deleteList;

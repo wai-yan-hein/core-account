@@ -6,9 +6,9 @@ package com.h2.service;
 
 import com.h2.dao.PrivilegeCompanyDao;
 import com.user.model.PrivilegeCompany;
-import com.user.model.VRoleCompany;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @author Athu Sint
  */
+@Lazy
 @Service
 @Transactional
 public class PrivilegeCompanyServiceImpl implements PrivilegeCompanyService {

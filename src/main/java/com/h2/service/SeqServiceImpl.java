@@ -8,6 +8,7 @@ import com.h2.dao.SeqDao;
 import com.inventory.model.SeqKey;
 import com.inventory.model.SeqTable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @author Lenovo
  */
+@Lazy
 @Service
 @Transactional
 public class SeqServiceImpl implements SeqService {

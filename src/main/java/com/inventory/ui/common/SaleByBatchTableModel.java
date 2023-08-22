@@ -255,7 +255,7 @@ public class SaleByBatchTableModel extends AbstractTableModel {
                             sd.setStockName(s.getStockName());
                             sd.setUserCode(s.getUserCode());
                             sd.setRelName(s.getRelName());
-                            sd.setQty(1.0f);
+                            sd.setQty(1.0);
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setStock(s);
                             sd.setPrice(Util1.getFloat(sd.getPrice()) == 0 ? s.getSalePriceN() : sd.getPrice());
@@ -275,7 +275,7 @@ public class SaleByBatchTableModel extends AbstractTableModel {
                         //Qty
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
-                                sd.setQty(Util1.getFloat(value));
+                                sd.setQty(Util1.getDouble(value));
                                 if (sd.getUnitCode() == null) {
                                     parent.setColumnSelectionInterval(6, 6);
                                 } else {
@@ -302,7 +302,7 @@ public class SaleByBatchTableModel extends AbstractTableModel {
                         //price
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
-                                sd.setPrice(Util1.getFloat(value));
+                                sd.setPrice(Util1.getDouble(value));
                                 parent.setColumnSelectionInterval(0, 0);
                                 parent.setRowSelectionInterval(row + 1, row + 1);
                             } else {
@@ -393,7 +393,7 @@ public class SaleByBatchTableModel extends AbstractTableModel {
             float saleQty = Util1.getFloat(sale.getQty());
             float stdSalePrice = Util1.getFloat(sale.getPrice());
             float amount = saleQty * stdSalePrice;
-            sale.setAmount(Util1.getFloat(Math.round(amount)));
+            sale.setAmount(Util1.getDouble(Math.round(amount)));
         }
     }
 

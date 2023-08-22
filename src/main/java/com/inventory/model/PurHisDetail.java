@@ -29,31 +29,31 @@ public class PurHisDetail implements Serializable {
     @Column(name = "stock_code")
     private String stockCode;
     @Column(name = "qty")
-    private Float qty;
+    private Double qty;
     @Column(name = "avg_qty")
-    private Float avgQty;
+    private Double avgQty;
     @Column(name = "pur_unit")
     private String unitCode;
     @Column(name = "org_price")
-    private Float orgPrice;
+    private Double orgPrice;
     @Column(name = "pur_price")
-    private Float price;
+    private Double price;
     @Column(name = "pur_amt")
-    private Float amount;
+    private Double amount;
     @Column(name = "loc_code")
     private String locCode;
     @Column(name = "weight")
-    private Float weight;
+    private Double weight;
     @Column(name = "weight_unit")
     private String weightUnit;
     @Column(name = "std_weight")
-    private Float stdWeight;
+    private Double stdWeight;
     @Column(name = "length")
-    private Float length;
+    private Double length;
     @Column(name = "width")
-    private Float width;
+    private Double width;
     @Column(name = "total_weight")
-    private Float totalWeight;
+    private Double totalWeight;
     @Column(name = "m_percent")
     private String mPercent;
     @Transient

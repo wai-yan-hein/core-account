@@ -158,7 +158,7 @@ public class SaleByWeightTableModel extends AbstractTableModel {
             case 0, 1, 2, 3, 5 ->
                 String.class;
             default ->
-                Float.class;
+                Double.class;
         };
     }
 
@@ -251,9 +251,9 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                             sd.setStockName(s.getStockName());
                             sd.setUserCode(s.getUserCode());
                             sd.setRelName(s.getRelName());
-                            sd.setQty(1.0f);
-                            sd.setStdWeight(s.getWeight());
-                            sd.setWeight(s.getWeight());
+                            sd.setQty(1.0);
+                            sd.setStdWeight(Util1.getDouble(s.getWeight()));
+                            sd.setWeight(Util1.getDouble(s.getWeight()));
                             sd.setWeightUnit(s.getWeightUnit());
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setStock(s);
@@ -271,7 +271,7 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                         }
                     }
                     case 4 -> {
-                        sd.setWeight(Util1.getFloat(value));
+                        sd.setWeight(Util1.getDouble(value));
                     }
                     case 5 -> {
                         if (value instanceof StockUnit u) {
@@ -282,7 +282,7 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                         //Qty
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
-                                sd.setQty(Util1.getFloat(value));
+                                sd.setQty(Util1.getDouble(value));
                                 if (sd.getUnitCode() == null) {
                                     parent.setColumnSelectionInterval(7, 7);
                                 } else {
@@ -304,14 +304,14 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                         }
                     }
                     case 8 -> {
-                        sd.setStdWeight(Util1.getFloat(value));
+                        sd.setStdWeight(Util1.getDouble(value));
                     }
 
                     case 10 -> {
                         //price
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
-                                sd.setPrice(Util1.getFloat(value));
+                                sd.setPrice(Util1.getDouble(value));
                                 parent.setColumnSelectionInterval(0, 0);
                                 parent.setRowSelectionInterval(row + 1, row + 1);
                             } else {
@@ -325,7 +325,7 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                     }
                     case 11 -> {
                         //amt
-                        sd.setAmount(Util1.getFloat(value));
+                        sd.setAmount(Util1.getDouble(value));
 
                     }
 
@@ -336,7 +336,7 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                             if (sd.getStockCode() != null && sd.getUnitCode() != null) {
                                 inventoryRepo.getSaleRecentPrice(sd.getStockCode(),
                                         Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), sd.getUnitCode()).subscribe((t) -> {
-                                    sd.setPrice(t.getAmount());
+                                    sd.setPrice(Util1.getDouble(t.getAmount()));
                                 });
                             }
                         }
@@ -410,12 +410,12 @@ public class SaleByWeightTableModel extends AbstractTableModel {
     }
 
     private void calculateAmount(SaleHisDetail s) {
-        float price = Util1.getFloat(s.getPrice());
-        float stdWt = Util1.getFloat(s.getStdWeight());
-        float wt = Util1.getFloat(s.getWeight());
-        float qty = Util1.getFloat(s.getQty());
+        double price = Util1.getDouble(s.getPrice());
+        double stdWt = Util1.getDouble(s.getStdWeight());
+        double wt = Util1.getDouble(s.getWeight());
+        double qty = Util1.getDouble(s.getQty());
         if (s.getStockCode() != null) {
-            float amount = (qty * wt * price) / stdWt;
+            double amount = (qty * wt * price) / stdWt;
             s.setAmount(amount);
         }
     }

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.common.ui;
+package com.ui;
 
 import com.CloudIntegration;
 import com.MessageDialog;
@@ -129,15 +129,16 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
                 System.exit(0);
             }
         } else {
+            Global.macId = t.getMacId();
             enableForm(false);
             taskExecutor.execute(() -> {
-                lblStatus.setText("downloading...");
-                integration.setObserver(this);
-                integration.start();
+                setLocationRelativeTo(null);
+                setVisible(true);
             });
-            Global.macId = t.getMacId();
-            setLocationRelativeTo(null);
-            setVisible(true);
+            lblStatus.setText("downloading...");
+            integration.setObserver(this);
+            integration.start();
+
         }
     }
 

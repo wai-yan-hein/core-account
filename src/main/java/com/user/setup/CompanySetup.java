@@ -297,6 +297,15 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         d.setVisible(true);
     }
 
+    private void observeMain() {
+        observer.selected("control", this);
+        observer.selected("save", true);
+        observer.selected("print", false);
+        observer.selected("history", false);
+        observer.selected("delete", false);
+        observer.selected("refresh", true);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -634,7 +643,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
 
     private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
         // TODO add your handling code here:
-        observer.selected("control", this);
+        observeMain();
     }//GEN-LAST:event_formComponentShown
 
     private void txtCurrencyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCurrencyActionPerformed

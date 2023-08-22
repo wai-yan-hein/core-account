@@ -322,7 +322,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setSelectionObserver(this);
         cOAAutoCompleter = new COA3AutoCompleter(txtCOA, accountRepo, null, true, 0);
-        cOAAutoCompleter.setSelectionObserver(this);
+        cOAAutoCompleter.setObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
         projectAutoCompleter.setObserver(this);
         tranSourceAutoCompleter = new TranSourceAutoCompleter(txtOption, null, true);

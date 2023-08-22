@@ -122,7 +122,7 @@ public class PurchaseExportTableModel extends AbstractTableModel {
     public Class getColumnClass(int column) {
         return switch (column) {
             case 0, 2, 3, 4, 7, 8, 9, 11, 12, 13, 14 ->
-                Float.class;
+                Double.class;
             default ->
                 String.class;
         };
@@ -197,7 +197,7 @@ public class PurchaseExportTableModel extends AbstractTableModel {
                     }
                     //total
                     case 12 -> {
-                        return Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight());
+                        return Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight());
                     }
                     case 13 -> {
                         return record.getPrice();
@@ -226,11 +226,11 @@ public class PurchaseExportTableModel extends AbstractTableModel {
                             record.setStockName(s.getStockName());
                             record.setUserCode(s.getUserCode());
                             record.setRelName(s.getRelName());
-                            record.setQty(1.0f);
+                            record.setQty(1.0);
                             record.setUnitCode(s.getPurUnitCode());
                             record.setWeightUnit(s.getWeightUnit());
-                            record.setStdWeight(s.getWeight());
-                            record.setWeight(s.getWeight());
+                            record.setStdWeight(Util1.getDouble(s.getWeight()));
+                            record.setWeight(Util1.getDouble(s.getWeight()));
                             addNewRow();
                         }
                     }
@@ -238,13 +238,13 @@ public class PurchaseExportTableModel extends AbstractTableModel {
                 }
                 case 3 -> {
                     if (Util1.isNumber(value)) {
-                        record.setLength(Util1.getFloat(value));
+                        record.setLength(Util1.getDouble(value));
                     }
                     parent.setColumnSelectionInterval(4, 4);
                 }
                 case 4 -> {
                     if (Util1.isNumber(value)) {
-                        record.setWidth(Util1.getFloat(value));
+                        record.setWidth(Util1.getDouble(value));
                     }
                     parent.setColumnSelectionInterval(5, 5);
                 }
@@ -262,9 +262,9 @@ public class PurchaseExportTableModel extends AbstractTableModel {
                 case 7 -> {
                     //weight
                     if (Util1.isNumber(value)) {
-                        record.setWeight(Util1.getFloat(value));
+                        record.setWeight(Util1.getDouble(value));
                         if (record.getQty() != null && record.getWeight() != null) {
-                            record.setTotalWeight(Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight()));
+                            record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
                         }
                     }
                 }
@@ -277,9 +277,9 @@ public class PurchaseExportTableModel extends AbstractTableModel {
                 case 9 -> {
                     //Qty
                     if (Util1.isNumber(value)) {
-                        record.setQty(Util1.getFloat(value));
+                        record.setQty(Util1.getDouble(value));
                         if (record.getQty() != null && record.getWeight() != null) {
-                            record.setTotalWeight(Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight()));
+                            record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
                         }
                         parent.setRowSelectionInterval(row, row);
                     }
@@ -296,14 +296,14 @@ public class PurchaseExportTableModel extends AbstractTableModel {
                 case 11 -> {
                     //std weight
                     if (Util1.isNumber(value)) {
-                        record.setStdWeight(Util1.getFloat(value));
+                        record.setStdWeight(Util1.getDouble(value));
                     }
                 }
                 case 13 -> {
                     //Pur Price
                     if (Util1.isNumber(value)) {
-                        if (Util1.isPositive(Util1.getFloat(value))) {
-                            record.setPrice(Util1.getFloat(value));
+                        if (Util1.isPositive(Util1.getDouble(value))) {
+                            record.setPrice(Util1.getDouble(value));
                             record.setOrgPrice(record.getPrice());
                             parent.setColumnSelectionInterval(0, 0);
                             parent.setRowSelectionInterval(row + 1, row + 1);
@@ -319,16 +319,16 @@ public class PurchaseExportTableModel extends AbstractTableModel {
                 case 14 -> {
                     //Amount
                     if (value != null) {
-                        record.setAmount(Util1.getFloat(value));
+                        record.setAmount(Util1.getDouble(value));
                     }
                 }
             }
             if (column != 9) {
-                if (Util1.getFloat(record.getPrice()) == 0) {
+                if (Util1.getDouble(record.getPrice()) == 0) {
                     if (record.getStockCode() != null && record.getUnitCode() != null) {
                         inventoryRepo.getPurRecentPrice(record.getStockCode(),
                                 Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnitCode()).subscribe((t) -> {
-                            record.setPrice(t.getAmount());
+                            record.setPrice(Util1.getDouble(t.getAmount()));
                         });
                     }
                 }
@@ -393,12 +393,12 @@ public class PurchaseExportTableModel extends AbstractTableModel {
     }
 
     private void calculateAmount(PurHisDetail pur) {
-        float price = Util1.getFloat(pur.getPrice());
-        float stdWt = Util1.getFloat(pur.getStdWeight());
-        float wt = Util1.getFloat(pur.getWeight());
-        float qty = Util1.getFloat(pur.getQty());
+        double price = Util1.getDouble(pur.getPrice());
+        double stdWt = Util1.getDouble(pur.getStdWeight());
+        double wt = Util1.getDouble(pur.getWeight());
+        double qty = Util1.getDouble(pur.getQty());
         if (pur.getStockCode() != null) {
-            float amount = Math.round((qty * wt * price) / stdWt);
+            double amount = Math.round((qty * wt * price) / stdWt);
             pur.setAmount(amount);
         }
     }
@@ -412,7 +412,7 @@ public class PurchaseExportTableModel extends AbstractTableModel {
         for (int i = 0; i < listDetail.size(); i++) {
             PurHisDetail sdh = listDetail.get(i);
             if (sdh.getStockCode() != null) {
-                if (Util1.getFloat(sdh.getAmount()) <= 0) {
+                if (Util1.getDouble(sdh.getAmount()) <= 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
                             "Invalid.", JOptionPane.ERROR_MESSAGE);
                     focusTable(i);

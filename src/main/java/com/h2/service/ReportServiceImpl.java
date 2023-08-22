@@ -21,6 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Athu Sint
  */
 @Slf4j
+@Lazy
 @Service
 @Transactional
 public class ReportServiceImpl implements ReportService {

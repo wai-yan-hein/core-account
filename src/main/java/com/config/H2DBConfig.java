@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.context.annotation.PropertySource;
@@ -25,7 +26,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 @Conditional(H2DBCondition.class)
 @PropertySource("classpath:application.properties") // Use the same properties file as your main configuration
 public class H2DBConfig {
-
+    @Lazy
     @Bean
     public DataSource dataSource() {
         return new EmbeddedDatabaseBuilder()

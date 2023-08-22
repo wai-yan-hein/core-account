@@ -61,7 +61,7 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
     public Class getColumnClass(int column) {
         switch (column) {
             case 6, 7 -> {
-                return Float.class;
+                return Double.class;
             }
         }
         return String.class;

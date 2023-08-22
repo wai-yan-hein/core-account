@@ -119,8 +119,8 @@ public class SaleHisDaoImpl extends AbstractDao<SaleHisKey, SaleHis> implements 
                     s.setRemark(rs.getString("remark"));
                     s.setReference(rs.getString("reference"));
                     s.setCreatedBy(rs.getString("created_by"));
-                    s.setPaid(rs.getFloat("paid"));
-                    s.setVouTotal(rs.getFloat("vou_total"));
+                    s.setPaid(rs.getDouble("paid"));
+                    s.setVouTotal(rs.getDouble("vou_total"));
                     s.setDeleted(rs.getBoolean("deleted"));
                     s.setDeptId(rs.getInt("dept_id"));
                     saleList.add(s);
@@ -185,18 +185,18 @@ public class SaleHisDaoImpl extends AbstractDao<SaleHisKey, SaleHis> implements 
                 sale.setVouNo(rs.getString("vou_no"));
                 sale.setVouDate(Util1.toDateStr(rs.getTimestamp("vou_date"), "dd/MM/yyyy"));
                 sale.setStockName(rs.getString("stock_name"));
-                sale.setQty(rs.getFloat("qty"));
-                sale.setSalePrice(rs.getFloat("sale_price"));
-                sale.setSaleAmount(rs.getFloat("sale_amt"));
-                sale.setVouTotal(rs.getFloat("vou_total"));
-                sale.setDiscount(rs.getFloat("discount"));
-                sale.setPaid(rs.getFloat("paid"));
-                sale.setVouBalance(rs.getFloat("vou_balance"));
+                sale.setQty(rs.getDouble("qty"));
+                sale.setSalePrice(rs.getDouble("sale_price"));
+                sale.setSaleAmount(rs.getDouble("sale_amt"));
+                sale.setVouTotal(rs.getDouble("vou_total"));
+                sale.setDiscount(rs.getDouble("discount"));
+                sale.setPaid(rs.getDouble("paid"));
+                sale.setVouBalance(rs.getDouble("vou_balance"));
                 sale.setSaleUnit(rs.getString("sale_unit"));
                 sale.setCusAddress(Util1.isNull(rs.getString("phone"), "") + "/" + Util1.isNull(rs.getString("address"), ""));
                 sale.setLocationName(rs.getString("loc_name"));
                 sale.setCompCode(rs.getString("comp_code"));
-                sale.setWeight(rs.getFloat("weight"));
+                sale.setWeight(rs.getDouble("weight"));
                 sale.setWeightUnit(rs.getString("weight_unit"));
                 list.add(sale);
             }

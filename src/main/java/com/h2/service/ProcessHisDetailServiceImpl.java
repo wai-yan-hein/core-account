@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import org.springframework.context.annotation.Lazy;
 
+@Lazy
 @Service
 @Transactional
 public class ProcessHisDetailServiceImpl implements ProcessHisDetailService {
