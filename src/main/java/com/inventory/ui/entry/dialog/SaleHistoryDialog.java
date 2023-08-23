@@ -200,7 +200,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         tblVoucher.getColumnModel().getColumn(6).setPreferredWidth(100);
         tblVoucher.getColumnModel().getColumn(7).setPreferredWidth(100);
         tblVoucher.setDefaultRenderer(Object.class, new TableCellRender());
-        tblVoucher.setDefaultRenderer(Float.class, new TableCellRender());
+        tblVoucher.setDefaultRenderer(Double.class, new TableCellRender());
         tblVoucher.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         sorter = new TableRowSorter<>(tblVoucher.getModel());
         tblFilter = new StartWithRowFilter(txtFilter);
