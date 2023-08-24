@@ -94,7 +94,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         btnSave.setEnabled(lock);
         txtVouDate.setEnabled(lock);
         txtRefrence.setEnabled(lock);
-        btnConversion.setEnabled(lock);
         btnNew.setEnabled(lock);
     }
 
@@ -151,7 +150,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
 
     public void initMain() {
         batchLock(!Global.batchLock);
-        btnConversion.setVisible(ProUtil.isMultiCur());
         initTable();
         initCombo();
     }
@@ -355,7 +353,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         txtFCrdAmt = new javax.swing.JFormattedTextField();
         txtFDrAmt = new javax.swing.JFormattedTextField();
         lblStatus = new javax.swing.JLabel();
-        btnConversion = new javax.swing.JButton();
         btnSave = new javax.swing.JButton();
         btnNew = new javax.swing.JButton();
         progress = new javax.swing.JProgressBar();
@@ -517,14 +514,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         lblStatus.setFont(Global.menuFont);
         lblStatus.setText("NEW");
 
-        btnConversion.setFont(Global.lableFont);
-        btnConversion.setText("Currency Conversion");
-        btnConversion.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnConversionActionPerformed(evt);
-            }
-        });
-
         btnSave.setFont(Global.lableFont);
         btnSave.setText("Save -F5");
         btnSave.setName("btnSave"); // NOI18N
@@ -550,8 +539,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(lblStatus)
-                .addGap(18, 18, 18)
-                .addComponent(btnConversion)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnSave)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -566,17 +553,17 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(txtFCrdAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(txtFDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(lblStatus))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(btnNew)
                             .addComponent(btnSave, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(4, 4, 4))
-                    .addComponent(btnConversion))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(txtFCrdAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtFDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblStatus))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -639,11 +626,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
 
     }//GEN-LAST:event_tblJournalKeyReleased
 
-    private void btnConversionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConversionActionPerformed
-        // TODO add your handling code here:
-
-    }//GEN-LAST:event_btnConversionActionPerformed
-
     private void txtVouDateFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtVouDateFocusLost
         // TODO add your handling code here:
 
@@ -666,7 +648,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
      * @param args the command line arguments
      */
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnConversion;
     private javax.swing.JButton btnNew;
     private javax.swing.JButton btnSave;
     private javax.swing.JLabel jLabel1;

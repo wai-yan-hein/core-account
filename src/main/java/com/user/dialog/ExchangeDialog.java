@@ -145,18 +145,15 @@ public class ExchangeDialog extends javax.swing.JDialog {
             homeComboBoxModel = new CurrencyComboBoxModel(t);
             List<Currency> updatedList = new ArrayList<>(t);
             updatedList.removeIf(c -> c.getCurCode().equals(Global.currency));
-
             targetComboBoxModel = new CurrencyComboBoxModel(updatedList);
 
             cboHC.setModel(homeComboBoxModel);
             cboTC.setModel(targetComboBoxModel);
             cboTC.setSelectedIndex(0);
             cboHC.setEnabled(false);
-            userRepo.findCurrency(Global.currency).subscribe((c) -> {
-                cboHC.setSelectedItem(c);
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+            userRepo.findCurrency(Global.currency).doOnSuccess((c) -> {
+                homeComboBoxModel.setSelectedItem(c);
+            }).subscribe();
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
         });

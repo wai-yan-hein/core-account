@@ -109,7 +109,6 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
         initKeyListener();
         initTextBoxFormat();
         initDateDecorator();
-        assingDefaultValue();
     }
 
     private void assingDefaultValue() {
