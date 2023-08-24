@@ -721,7 +721,6 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         txtVouDate.setDateFormatString("dd/MM/yyyy");
         txtVouDate.setFont(Global.textFont);
 
-        txtCurrency.setEditable(false);
         txtCurrency.setFont(Global.textFont);
         txtCurrency.setDisabledTextColor(new java.awt.Color(0, 0, 0));
         txtCurrency.setEnabled(false);

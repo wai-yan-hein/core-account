@@ -134,7 +134,7 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         btnSave.setEnabled(true);
     }
 
-    private String getRegion(String str, Integer deptId) {
+    private String getRegion(String str) {
         if (hmRegion.isEmpty()) {
             List<Region> list = inventoryRepo.getRegion().block();
             if (list != null) {
@@ -144,13 +144,13 @@ public class CustomerImportDialog extends javax.swing.JDialog {
             }
         }
         if (hmRegion.get(str) == null && !str.isEmpty()) {
-            Region reg = saveRegion(str, deptId);
+            Region reg = saveRegion(str);
             hmRegion.put(reg.getRegionName(), reg.getKey().getRegCode());
         }
         return hmRegion.get(str);
     }
 
-    private Region saveRegion(String str, Integer deptId) {
+    private Region saveRegion(String str) {
         Region region = new Region();
         region.setUserCode(Global.loginUser.getUserCode());
         region.setRegionName(str);
@@ -158,14 +158,14 @@ public class CustomerImportDialog extends javax.swing.JDialog {
         key.setCompCode(Global.compCode);
         key.setRegCode(null);
         region.setKey(key);
-        region.setDeptId(deptId);
+        region.setDeptId(Global.deptId);
         region.setCreatedBy(Global.loginUser.getUserCode());
         region.setCreatedDate(Util1.getTodayLocalDateTime());
         region.setMacId(Global.macId);
         return inventoryRepo.saveRegion(region).block();
     }
 
-    private String getTraderGroup(String str, Integer deptId) {
+    private String getTraderGroup(String str) {
         if (hmTraderGp.isEmpty()) {
             List<TraderGroup> list = inventoryRepo.getTraderGroup().block();
             if (list != null) {
@@ -175,22 +175,20 @@ public class CustomerImportDialog extends javax.swing.JDialog {
             }
         }
         if (hmTraderGp.get(str) == null && !str.isEmpty()) {
-            TraderGroup t = saveTraderGroup(str, deptId);
+            TraderGroup t = saveTraderGroup(str);
             hmTraderGp.put(t.getGroupName(), t.getKey().getGroupCode());
         }
         return hmTraderGp.get(str);
     }
 
-    private TraderGroup saveTraderGroup(String str, Integer deptId) {
+    private TraderGroup saveTraderGroup(String str) {
         TraderGroup group = new TraderGroup();
-        group.setUserCode(Global.loginUser.getUserCode());
-        group.setGroupName(str);
         TraderGroupKey key = new TraderGroupKey();
         key.setCompCode(Global.compCode);
         key.setGroupCode(null);
-        key.setDeptId(deptId);
+        key.setDeptId(Global.deptId);
         group.setKey(key);
-
+        group.setGroupName(str);
         return inventoryRepo.saveTraderGroup(group).block();
     }
 
@@ -248,9 +246,9 @@ public class CustomerImportDialog extends javax.swing.JDialog {
                     t.setPhone(row.isMapped("PhoneNo") ? Util1.convertToUniCode(row.get("PhoneNo")) : "");
                     t.setContactPerson(row.isMapped("ContactPerson") ? Util1.convertToUniCode(row.get("ContactPerson")) : "");
                     t.setEmail(row.isMapped("Email") ? row.get("Email") : "");
-                    t.setRegCode(row.isMapped("Region") ? getRegion(row.get("Region"), t.getDeptId()) : "");
-                    t.setGroupCode(row.isMapped("Group") ? getTraderGroup(row.get("Group"), t.getDeptId()) : "");
                     t.setDeptId(row.isMapped("Department") ? getDepartment(row.get("Department")) : Global.deptId);
+                    t.setRegCode(row.isMapped("Region") ? getRegion(row.get("Region")) : "");
+                    t.setGroupCode(row.isMapped("Group") ? getTraderGroup(row.get("Group")) : "");
                     t.setRemark(row.isMapped("Remark") ? row.get("Remark") : "");
                     t.setNrc(row.isMapped("Nrc") ? row.get("Nrc") : "");
                     t.setActive(Boolean.TRUE);

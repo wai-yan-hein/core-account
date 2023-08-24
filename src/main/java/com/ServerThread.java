@@ -38,8 +38,10 @@ public class ServerThread extends Thread {
                     out.flush();
                 }
                 log.info("Received request to bring main window to front and give it focus.");
-                if (Global.dialog.isVisible()) {
-                    Global.dialog.toFront();
+                if (Global.dialog != null) {
+                    if (Global.dialog.isVisible()) {
+                        Global.dialog.toFront();
+                    }
                 } else {
                     if (Global.parentForm != null) {
                         Global.parentForm.setExtendedState(JFrame.MAXIMIZED_BOTH);

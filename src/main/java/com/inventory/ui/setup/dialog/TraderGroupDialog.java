@@ -32,7 +32,7 @@ import javax.swing.table.TableRowSorter;
  * @author Lenovo
  */
 public class TraderGroupDialog extends javax.swing.JDialog implements KeyListener {
-
+    
     private int selectRow = - 1;
     private TraderGroup group = new TraderGroup();
     private final TraderGroupTableModel tableModel = new TraderGroupTableModel();
@@ -40,25 +40,26 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
     private List<TraderGroup> listGroup = new ArrayList<>();
-
+    
     public List<TraderGroup> getListGroup() {
         return listGroup;
     }
-
+    
     public void setListGroup(List<TraderGroup> listGroup) {
         this.listGroup = listGroup;
     }
-
+    
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
     }
-
+    
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
 
     /**
      * Creates new form ItemTypeSetupDialog
+     *
      * @param frame
      */
     public TraderGroupDialog(JFrame frame) {
@@ -67,14 +68,14 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
         initKeyListener();
         lblStatus.setForeground(Color.green);
     }
-
+    
     public void initMain() {
         swrf = new StartWithRowFilter(txtFilter);
         initTable();
         searchCategory();
         txtUserCode.requestFocus();
     }
-
+    
     private void initKeyListener() {
         txtUserCode.addKeyListener(this);
         txtName.addKeyListener(this);
@@ -82,11 +83,11 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
         btnSave.addKeyListener(this);
         tblVou.addKeyListener(this);
     }
-
+    
     private void searchCategory() {
         tableModel.setListGroup(listGroup);
     }
-
+    
     private void initTable() {
         tblVou.setModel(tableModel);
         sorter = new TableRowSorter<>(tblVou.getModel());
@@ -104,7 +105,7 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
             }
         });
     }
-
+    
     private void setCategory(TraderGroup g) {
         group = g;
         txtName.setText(group.getGroupName());
@@ -112,9 +113,9 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
         txtName.requestFocus();
         lblStatus.setText("EDIT");
         lblStatus.setForeground(Color.blue);
-
+        
     }
-
+    
     private void save() {
         if (isValidEntry()) {
             inventoryRepo.saveTraderGroup(group).subscribe((t) -> {
@@ -125,10 +126,10 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
                 }
                 clear();
             });
-
+            
         }
     }
-
+    
     private void clear() {
         txtUserCode.setText(null);
         txtFilter.setText(null);
@@ -141,7 +142,7 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
         tblVou.requestFocus();
         txtUserCode.requestFocus();
     }
-
+    
     private boolean isValidEntry() {
         boolean status = true;
         if (txtName.getText().isEmpty()) {
@@ -154,6 +155,7 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
             if (lblStatus.getText().equals("NEW")) {
                 TraderGroupKey key = new TraderGroupKey();
                 key.setCompCode(Global.compCode);
+                key.setDeptId(Global.deptId);
                 key.setGroupCode(null);
                 group.setKey(key);
             }
@@ -440,18 +442,18 @@ public class TraderGroupDialog extends javax.swing.JDialog implements KeyListene
 
     @Override
     public void keyTyped(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
         String ctrlName = "-";
-
+        
         if (sourceObj instanceof JTable jTable) {
             ctrlName = jTable.getName();
         } else if (sourceObj instanceof JTextField jTextField) {

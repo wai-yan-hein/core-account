@@ -67,7 +67,7 @@ public class Tray {
     }
 
     public void openMF() {
-        if (loginDialog.isVisible()) {
+        if (loginDialog != null && loginDialog.isVisible()) {
             loginDialog.toFront();
             loginDialog.focus();
         } else {
