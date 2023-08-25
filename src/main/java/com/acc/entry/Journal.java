@@ -266,6 +266,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         txtProjectNo = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         txtAccount = new javax.swing.JTextField();
+        btnEntry1 = new javax.swing.JButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -397,6 +398,16 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
             }
         });
 
+        btnEntry1.setFont(Global.lableFont);
+        btnEntry1.setText("Currency Conversion");
+        btnEntry1.setToolTipText("New Journal");
+        btnEntry1.setName("btnEntry"); // NOI18N
+        btnEntry1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEntry1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -431,6 +442,8 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtProjectNo)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnEntry1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnEntry)
                 .addContainerGap())
         );
@@ -450,7 +463,8 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
                         .addComponent(jLabel7)
                         .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel8)
-                        .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtAccount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnEntry1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -510,9 +524,14 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         // TODO add your handling code here:
     }//GEN-LAST:event_txtAccountActionPerformed
 
+    private void btnEntry1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEntry1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnEntry1ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEntry;
+    private javax.swing.JButton btnEntry1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

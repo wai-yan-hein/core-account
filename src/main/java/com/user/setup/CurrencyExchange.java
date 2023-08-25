@@ -75,11 +75,9 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
         dateAutoCompleter.setSelectionObserver(this);
         currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         currAutoCompleter.setObserver(this);
+        currAutoCompleter.setCurrency(null);
         userRepo.getCurrency().subscribe((t) -> {
             currAutoCompleter.setListCurrency(t);
-        });
-        userRepo.getDefaultCurrency().subscribe((c) -> {
-            currAutoCompleter.setCurrency(c);
         });
     }
 
@@ -98,10 +96,11 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
     }
 
     private void searchExchange() {
+        progress.setIndeterminate(true);
         String fromDate = dateAutoCompleter.getDateModel().getStartDate();
         String toDate = dateAutoCompleter.getDateModel().getEndDate();
         String targetCur = getCurCode();
-        userRepo.searchExchange(fromDate, toDate, targetCur).subscribe((t) -> {
+        userRepo.searchExchange(fromDate, toDate, targetCur).doOnSuccess((t) -> {
             exchangeTableModel.setListEx(t);
             double amt = t.stream()
                     .filter((ex) -> ex.getExRate() != null)
@@ -109,9 +108,11 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
                     .sum();
             txtAvg.setValue(amt / t.size());
             txtRecord.setText("" + t.size());
-        }, (e) -> {
+            progress.setIndeterminate(false);
+        }).doOnError((e) -> {
+            progress.setIndeterminate(false);
             JOptionPane.showMessageDialog(this, e.getMessage());
-        });
+        }).subscribe();
     }
 
     private void selectExchange() {
@@ -158,8 +159,8 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
     }
 
     private String getCurCode() {
-        if (currAutoCompleter == null || currAutoCompleter.getCurrency() == null) {
-            return Global.currency;
+        if (currAutoCompleter.getCurrency() == null) {
+            return "-";
         }
         return currAutoCompleter.getCurrency().getCurCode();
     }
