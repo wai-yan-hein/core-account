@@ -242,6 +242,7 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
         traderAutoCompleter.setTrader(new Trader("-", "All"));
         stockAutoCompleter.setStock(new Stock("-", "All"));
         appUserAutoCompleter.setAppUser(new AppUser("-", "All"));
+        currencyAutoCompleter.setCurrency(null);
     }
 
     /**

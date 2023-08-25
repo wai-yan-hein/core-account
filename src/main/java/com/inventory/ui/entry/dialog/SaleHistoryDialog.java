@@ -330,7 +330,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
         stockAutoCompleter.setStock(new Stock("-", "All"));
         appUserAutoCompleter.setAppUser(new AppUser("-", "All"));
         saleManAutoCompleter.setSaleMan(new SaleMan("-", "All"));
-        batchAutoCompeter.setBatch(new GRN());
+        batchAutoCompeter.setBatch(new GRN("All"));
         currAutoCompleter.setCurrency(null);
     }
 

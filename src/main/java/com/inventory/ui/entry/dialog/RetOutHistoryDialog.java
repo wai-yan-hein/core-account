@@ -179,6 +179,7 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
         traderAutoCompleter.setTrader(new Trader("-", "All"));
         stockAutoCompleter.setStock(new Stock("-", "All"));
         appUserAutoCompleter.setAppUser(new AppUser("-", "All"));
+        currAutoCompleter.setCurrency(null);
     }
 
     private void setTodayDate() {
