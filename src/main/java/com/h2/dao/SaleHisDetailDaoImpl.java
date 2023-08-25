@@ -100,10 +100,10 @@ public class SaleHisDetailDaoImpl extends AbstractDao<SaleDetailKey, SaleHisDeta
                     SaleHisDetail op = new SaleHisDetail();
                     SaleDetailKey key = new SaleDetailKey();
                     key.setCompCode(rs.getString("comp_code"));
-                    key.setDeptId(rs.getInt("dept_id"));
                     key.setUniqueId(rs.getInt("unique_id"));
                     key.setVouNo(rs.getString("vou_no"));
                     op.setKey(key);
+                    op.setDeptId(rs.getInt("dept_id"));
                     op.setStockCode(rs.getString("stock_code"));
                     op.setWeight(rs.getDouble("weight"));
                     op.setWeightUnit(rs.getString("weight_unit"));

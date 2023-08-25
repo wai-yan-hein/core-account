@@ -210,6 +210,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                     param.put("p_comp_phone", Global.companyPhone);
                     param.put("p_currency", Global.currency);
                     param.put("p_department", txtDep.getText());
+                    param.put("p_logo_path", getLogoPath());
                     initTraderParameter(param);
                     printReport(reportUrl, reportUrl, param);
                 }
@@ -220,6 +221,10 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
             progress.setIndeterminate(false);
             JOptionPane.showMessageDialog(Global.parentForm, "Choose Report.");
         }
+    }
+
+    private String getLogoPath() {
+        return String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
     }
 
     private boolean isValidReport(String url) {

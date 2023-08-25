@@ -30,6 +30,8 @@ public class SaleHis {
 
     @EmbeddedId
     private SaleHisKey key;
+    @Column(name = "dept_id")
+    private Integer deptId;
     @Column(name = "trader_code")
     private String traderCode;
     @Column(name = "saleman_code")
@@ -62,9 +64,8 @@ public class SaleHis {
     private Double paid;
     @Column(name = "vou_balance")
     private Double balance;
-    @Temporal(TemporalType.DATE)
-    @Column(name = "created_date")
-    private Date createdDate;
+    @Column(name = "created_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime createdDate;
     @Column(name = "created_by")
     private String createdBy;
     @Column(name = "session_id")

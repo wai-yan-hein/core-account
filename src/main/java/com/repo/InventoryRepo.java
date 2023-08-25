@@ -1169,7 +1169,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> delete(Pattern p) {
         return inventoryApi.post()
-                .uri("/setup/delete-pattern")
+                .uri("/setup/deletePattern")
                 .body(Mono.just(p), Pattern.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -1408,12 +1408,11 @@ public class InventoryRepo {
         SaleHisKey key = new SaleHisKey();
         key.setVouNo(vouNo);
         key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
         if (local) {
             return h2Repo.findSale(key);
         }
         return inventoryApi.post()
-                .uri("/sale/find-sale")
+                .uri("/sale/findSale")
                 .body(Mono.just(key), SaleHisKey.class)
                 .retrieve()
                 .bodyToMono(SaleHis.class)
@@ -1673,7 +1672,7 @@ public class InventoryRepo {
 
     public Mono<List<Pattern>> getPattern(String stockCode, Integer deptId, String vouDate) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-pattern")
+                .uri(builder -> builder.path("/setup/getPattern")
                 .queryParam("stockCode", stockCode)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", deptId)
@@ -1706,7 +1705,7 @@ public class InventoryRepo {
             return h2Repo.deleteSale(key);
         }
         return inventoryApi.post()
-                .uri("/sale/delete-sale")
+                .uri("/sale/deleteSale")
                 .body(Mono.just(key), SaleHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -1734,7 +1733,7 @@ public class InventoryRepo {
             return h2Repo.restoreSale(key);
         }
         return inventoryApi.post()
-                .uri("/sale/restore-sale")
+                .uri("/sale/restoreSale")
                 .body(Mono.just(key), SaleHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -2300,7 +2299,7 @@ public class InventoryRepo {
 
     public Mono<SaleHis> save(SaleHis sh) {
         return inventoryApi.post()
-                .uri("/sale/save-sale")
+                .uri("/sale/saveSale")
                 .body(Mono.just(sh), SaleHis.class)
                 .retrieve()
                 .bodyToMono(SaleHis.class)
@@ -2321,7 +2320,7 @@ public class InventoryRepo {
 
     public Mono<SaleHis> uploadSale(SaleHis sh) {
         return inventoryApi.post()
-                .uri("/sale/save-sale")
+                .uri("/sale/saveSale")
                 .body(Mono.just(sh), SaleHis.class)
                 .retrieve()
                 .bodyToMono(SaleHis.class)
@@ -2559,7 +2558,7 @@ public class InventoryRepo {
             return h2Repo.getSaleDetail(vouNo, deptId);
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/sale/get-sale-detail")
+                .uri(builder -> builder.path("/sale/getSaleDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", deptId)
@@ -2731,7 +2730,7 @@ public class InventoryRepo {
             return h2Repo.getSaleHistory(filter);
         }
         return inventoryApi.post()
-                .uri("/sale/get-sale")
+                .uri("/sale/getSale")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(VSale.class)

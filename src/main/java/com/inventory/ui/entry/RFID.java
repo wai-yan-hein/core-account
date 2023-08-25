@@ -35,6 +35,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -283,10 +284,10 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
             if (lblStatus.getText().equals("NEW")) {
                 SaleHisKey key = new SaleHisKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 key.setVouNo(null);
                 saleHis.setKey(key);
-                saleHis.setCreatedDate(Util1.getTodayDate());
+                saleHis.setDeptId(Global.deptId);
+                saleHis.setCreatedDate(LocalDateTime.now());
                 saleHis.setCreatedBy(Global.loginUser.getUserCode());
                 saleHis.setSession(Global.sessionId);
             } else {
@@ -366,13 +367,13 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         if (sh != null) {
             progress.setIndeterminate(true);
             saleHis = sh;
-            Integer deptId = sh.getKey().getDeptId();
+            Integer deptId = sh.getDeptId();
             Mono<Trader> trader = inventoryRepo.findTrader(saleHis.getTraderCode());
             trader.subscribe((t) -> {
                 traderAutoCompleter.setTrader(t);
             });
             String vouNo = sh.getKey().getVouNo();
-            inventoryRepo.getSaleDetail(vouNo, sh.getKey().getDeptId(), local).subscribe((t) -> {
+            inventoryRepo.getSaleDetail(vouNo, deptId, local).subscribe((t) -> {
                 tableModel.setListDetail(t);
                 tableModel.addNewRow();
                 if (sh.isVouLock()) {

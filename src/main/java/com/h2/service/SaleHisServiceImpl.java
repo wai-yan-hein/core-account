@@ -41,7 +41,7 @@ public class SaleHisServiceImpl implements SaleHisService {
         saleHis.setIntgUpdStatus(null);
         saleHis.setVouDate(Util1.toDateTime(saleHis.getVouDate()));
         if (Util1.isNullOrEmpty(saleHis.getKey().getVouNo())) {
-            saleHis.getKey().setVouNo(getVoucherNo(saleHis.getKey().getDeptId(), saleHis.getMacId(), saleHis.getKey().getCompCode()));
+            saleHis.getKey().setVouNo(getVoucherNo(saleHis.getDeptId(), saleHis.getMacId(), saleHis.getKey().getCompCode()));
         }
         List<SaleHisDetail> listSD = saleHis.getListSH();
         List<SaleDetailKey> listDel = saleHis.getListDel();
@@ -54,10 +54,10 @@ public class SaleHisServiceImpl implements SaleHisService {
             SaleHisDetail cSd = listSD.get(i);
             if (Util1.isNullOrEmpty(cSd.getKey())) {
                 SaleDetailKey key = new SaleDetailKey();
-                key.setDeptId(saleHis.getKey().getDeptId());
                 key.setCompCode(saleHis.getKey().getCompCode());
                 key.setVouNo(vouNo);
                 key.setUniqueId(null);
+                cSd.setDeptId(saleHis.getDeptId());
                 cSd.setKey(key);
             }
             if (cSd.getStockCode() != null) {

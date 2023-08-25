@@ -60,7 +60,7 @@ public class SaleHisDaoImpl extends AbstractDao<SaleHisKey, SaleHis> implements 
         List<SaleHis> list = findHSQL(hsql);
         list.forEach((s) -> {
             s.setListSH(dao.search(s.getKey().getVouNo(),
-                    s.getKey().getCompCode(), s.getKey().getDeptId()));
+                    s.getKey().getCompCode(), s.getDeptId()));
         });
         return list;
     }
@@ -75,20 +75,18 @@ public class SaleHisDaoImpl extends AbstractDao<SaleHisKey, SaleHis> implements 
 
     @Override
     public void delete(SaleHisKey key) {
-        String vouNo = key.getVouNo();
-        String compCode = key.getCompCode();
-        Integer deptId = key.getDeptId();
-        String sql = "update sale_his set deleted = true where vou_no ='" + vouNo + "' and comp_code='" + compCode + "' and dept_id =" + deptId + "";
-        execSql(sql);
+        SaleHis sh = getByKey(key);
+        sh.setDeleted(true);
+        sh.setUpdatedDate(LocalDateTime.now());
+        update(sh);
     }
 
     @Override
     public void restore(SaleHisKey key) {
-        String vouNo = key.getVouNo();
-        String compCode = key.getCompCode();
-        Integer deptId = key.getDeptId();
-        String sql = "update sale_his set deleted = false,intg_upd_status=null where vou_no ='" + vouNo + "' and comp_code='" + compCode + "' and dept_id =" + deptId + "";
-        execSql(sql);
+        SaleHis sh = getByKey(key);
+        sh.setDeleted(false);
+        sh.setUpdatedDate(LocalDateTime.now());
+        update(sh);
     }
 
     @Override

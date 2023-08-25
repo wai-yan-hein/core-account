@@ -2,21 +2,20 @@ package com.theme;
 
 import com.formdev.flatlaf.FlatLightLaf;
 
-public class FlatTheme
-	extends FlatLightLaf
-{
-	public static final String NAME = "FlatTheme";
+public class FlatTheme extends FlatLightLaf {
 
-	public static boolean setup() {
-		return setup( new FlatTheme() );
-	}
+    public static final String NAME = "FlatTheme";
 
-	public static void installLafInfo() {
-		installLafInfo( NAME, FlatTheme.class );
-	}
+    public static boolean setup() {
+        return setup(new FlatTheme());
+    }
 
-	@Override
-	public String getName() {
-		return NAME;
-	}
+    public static void installLafInfo() {
+        installLafInfo(NAME, FlatTheme.class);
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
+    }
 }

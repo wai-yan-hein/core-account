@@ -620,10 +620,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             if (lblStatus.getText().equals("NEW")) {
                 SaleHisKey key = new SaleHisKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 key.setVouNo(null);
                 saleHis.setKey(key);
-                saleHis.setCreatedDate(Util1.getTodayDate());
+                saleHis.setDeptId(Global.deptId);
+                saleHis.setCreatedDate(LocalDateTime.now());
                 saleHis.setCreatedBy(Global.loginUser.getUserCode());
                 saleHis.setSession(Global.sessionId);
             } else {
@@ -797,7 +797,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 cboAccount.repaint();
             }).subscribe();
             String vouNo = sh.getKey().getVouNo();
-            inventoryRepo.getSaleDetail(vouNo, sh.getKey().getDeptId(), saleHis.isLocal()).subscribe((t) -> {
+            inventoryRepo.getSaleDetail(vouNo, sh.getDeptId(), saleHis.isLocal()).subscribe((t) -> {
                 saleTableModel.setListDetail(t);
                 saleTableModel.addNewRow();
                 if (sh.isVouLock()) {
@@ -1337,6 +1337,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
         });
 
+        jLabel12.setFont(Global.lableFont);
         jLabel12.setText("Account");
 
         cboAccount.setFont(Global.textFont);

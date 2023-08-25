@@ -226,16 +226,20 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             dayBookTableModel.setObserver(this);
             dayBookTableModel.setSourceAccId(sourceAccId);
             dayBookTableModel.setProgress(progress);
+            dayBookTableModel.addNewRow();
             accountRepo.findCOA(sourceAccId).doOnSuccess((coa) -> {
                 if (coa == null) {
                     JOptionPane.showMessageDialog(this, "mapping coa does not exists.");
                     return;
                 }
+                dayBookTableModel.setCredit(coa.isCredit());
                 accountRepo.getDefaultDepartment().doOnSuccess((t) -> {
                     dayBookTableModel.setDepartment(t);
                 }).subscribe();
-                dayBookTableModel.setCredit(coa.isCredit());
-                dayBookTableModel.addNewRow();
+                userRepo.findCurrency(Util1.isNull(coa.getCurCode(), Global.currency)).doOnSuccess((c) -> {
+                    currencyAutoCompleter.setCurrency(c);
+                }).subscribe();
+
             }).subscribe();
         } else {
             tblCash.setModel(allCashTableModel);
@@ -253,7 +257,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 accountRepo.getDefaultDepartment().doOnSuccess((t) -> {
                     allCashTableModel.setDepartment(t);
                 }).subscribe();
-                userRepo.findCurrency(coa.getCurCode()).doOnSuccess((c) -> {
+                userRepo.findCurrency(Util1.isNull(coa.getCurCode(), Global.currency)).doOnSuccess((c) -> {
                     currencyAutoCompleter.setCurrency(c);
                 }).subscribe();
             }).subscribe();

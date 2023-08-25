@@ -60,9 +60,6 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
     private BrandAutoCompleter brandAutoCompleter;
     private CategoryAutoCompleter categoryAutoCompleter;
     private StockAutoCompleter stockAutoCompleter;
-
-    @Autowired
-    private WebClient inventoryApi;
     @Autowired
     private InventoryRepo inventoryRepo;
 

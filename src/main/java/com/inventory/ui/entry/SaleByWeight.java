@@ -49,6 +49,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -460,10 +461,10 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             if (lblStatus.getText().equals("NEW")) {
                 SaleHisKey key = new SaleHisKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 key.setVouNo(null);
                 saleHis.setKey(key);
-                saleHis.setCreatedDate(Util1.getTodayDate());
+                saleHis.setDeptId(Global.deptId);
+                saleHis.setCreatedDate(LocalDateTime.now());
                 saleHis.setCreatedBy(Global.loginUser.getUserCode());
                 saleHis.setSession(Global.sessionId);
             } else {
@@ -612,15 +613,8 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                 projectAutoCompleter.setProject(null);
             }
             String vouNo = sh.getKey().getVouNo();
-            Mono<ResponseEntity<List<SaleHisDetail>>> result = inventoryApi.get()
-                    .uri(builder -> builder.path("/sale/get-sale-detail")
-                    .queryParam("vouNo", vouNo)
-                    .queryParam("compCode", Global.compCode)
-                    .queryParam("deptId", sh.getKey().getDeptId())
-                    .build())
-                    .retrieve().toEntityList(SaleHisDetail.class);
-            result.subscribe((t) -> {
-                saleTableModel.setListDetail(t.getBody());
+            inventoryRepo.getSaleDetail(vouNo, saleHis.getDeptId(), saleHis.isLocal()).subscribe((t) -> {
+                saleTableModel.setListDetail(t);
                 saleTableModel.addNewRow();
                 if (sh.isVouLock()) {
                     lblStatus.setText("Voucher is locked.");
