@@ -64,29 +64,25 @@ public class ProgramDownloadDialog extends javax.swing.JDialog {
                     log.info("localDate : " + localTimeStr);
                     if (Util1.compareDate(localTimeStr, updatedDate, dateFormat)) {
                         log.info("program need to update.");
-                        userRepo.downloadProgram(program).subscribe((byteArray) -> {
+                        userRepo.downloadProgram(program).doOnSuccess((byteArray) -> {
                             String filePath = "core-account.jar"; // File path where you want to save the byte array
                             try (FileOutputStream outputStream = new FileOutputStream(filePath)) {
-                                log.info("byteArray : "+byteArray.length);
+                                log.info("byteArray : " + byteArray.length);
                                 outputStream.write(byteArray);
-                                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                                LocalDateTime customDateTime = LocalDateTime.parse(updatedDate, formatter);
+                                Date date = Util1.toDate(updatedDate, dateFormat);
                                 // Convert LocalDateTime to milliseconds since the epocs
-                                long timestamp = customDateTime.toEpochSecond(java.time.ZoneOffset.UTC) * 1000; // Convert to milliseconds
-                                log.info("timestamp : "+timestamp);
+                                long timestamp = date.getTime();
+                                log.info("timestamp : " + timestamp);
                                 FileTime customTimestamp = FileTime.fromMillis(timestamp);
                                 // Set the modification time for the saved file
                                 Path path = Path.of(filePath);
                                 Files.setLastModifiedTime(path, customTimestamp);
+                                setLocationRelativeTo(null);
+                                setVisible(true);
                             } catch (IOException e) {
                                 log.error(e.getMessage());
                             }
-                        }, (e) -> {
-
-                        }, () -> {
-                            setLocationRelativeTo(null);
-                            setVisible(true);
-                        });
+                        }).subscribe();
                     }
                 } else {
                     log.info("local file not found.");

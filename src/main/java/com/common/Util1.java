@@ -1047,7 +1047,8 @@ public class Util1 {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
             LocalDateTime d1 = LocalDateTime.parse(source, formatter);
             LocalDateTime d2 = LocalDateTime.parse(target, formatter);
-            return d1.isBefore(d2);
+            return true;
+            //return d1.isBefore(d2);
         } catch (Exception ex) {
             log.error("compareDate : " + ex.getMessage());
         }
