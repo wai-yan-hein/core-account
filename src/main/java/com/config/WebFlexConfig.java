@@ -162,6 +162,9 @@ public class WebFlexConfig {
                         } catch (Exception e) {
                             log.error("Error writing response to file: " + e.getMessage());
                         }
+                    } else {
+                        log.info("serialNo need register.");
+                        response.setAccessToken("");
                     }
                 })
                 .onErrorResume(e -> {
