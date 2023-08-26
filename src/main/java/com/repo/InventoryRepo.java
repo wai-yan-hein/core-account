@@ -149,7 +149,7 @@ public class InventoryRepo {
 
     public Mono<List<PriceOption>> getPriceOption(String option) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-price-option")
+                .uri(builder -> builder.path("/setup/getPriceOption")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .queryParam("option", option)
@@ -358,7 +358,7 @@ public class InventoryRepo {
 
     public Mono<List<StockUnit>> getUnit(String relCode, Integer deptId) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-relation")
+                .uri(builder -> builder.path("/setup/getRelation")
                 .queryParam("relCode", relCode)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", deptId)
@@ -380,7 +380,7 @@ public class InventoryRepo {
             return h2Repo.find(key);
         }
         return inventoryApi.post()
-                .uri("/setup/find-trader")
+                .uri("/setup/findTrader")
                 .body(Mono.just(key), TraderKey.class)
                 .retrieve()
                 .bodyToMono(Trader.class)
@@ -396,7 +396,7 @@ public class InventoryRepo {
         key.setGroupCode(Util1.isNull(code, "-"));
         key.setCompCode(Global.compCode);
         return inventoryApi.post()
-                .uri("/setup/find-trader-group")
+                .uri("/setup/findTraderGroup")
                 .body(Mono.just(key), TraderGroupKey.class)
                 .retrieve()
                 .bodyToMono(TraderGroup.class)
@@ -410,9 +410,8 @@ public class InventoryRepo {
         RegionKey key = new RegionKey();
         key.setRegCode(Util1.isNull(code, "-"));
         key.setCompCode(Global.compCode);
-//        key.setDeptId(Global.deptId);
         return inventoryApi.post()
-                .uri("/setup/find-region")
+                .uri("/setup/findRegion")
                 .body(Mono.just(key), RegionKey.class)
                 .retrieve()
                 .bodyToMono(Region.class)
@@ -424,7 +423,7 @@ public class InventoryRepo {
 
     public Mono<List<Trader>> getCustomer() {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-customer")
+                .uri(builder -> builder.path("/setup/getCustomer")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
@@ -438,7 +437,7 @@ public class InventoryRepo {
 
     public Mono<List<Trader>> getSupplier() {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-supplier")
+                .uri(builder -> builder.path("/setup/getSupplier")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
@@ -456,7 +455,7 @@ public class InventoryRepo {
             return h2Repo.searchTrader(text, type, Global.compCode, ProUtil.getDepId());
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-trader-list")
+                .uri(builder -> builder.path("/setup/getTraderList")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .queryParam("text", text)
@@ -544,7 +543,7 @@ public class InventoryRepo {
 
     public Mono<Trader> findTraderRFID(String rfId) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/find-trader-rfid")
+                .uri(builder -> builder.path("/setup/findTraderRFID")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .queryParam("rfId", rfId)
@@ -559,7 +558,7 @@ public class InventoryRepo {
 
     public Mono<List<Region>> getRegion() {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-region")
+                .uri(builder -> builder.path("/setup/getRegion")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
@@ -694,7 +693,7 @@ public class InventoryRepo {
             return h2Repo.find(key);
         }
         return inventoryApi.post()
-                .uri("/setup/find-stock")
+                .uri("/setup/findStock")
                 .body(Mono.just(key), StockKey.class)
                 .retrieve()
                 .bodyToMono(Stock.class)
@@ -784,7 +783,7 @@ public class InventoryRepo {
 
     public Mono<List<Stock>> getStock(boolean active) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-stock")
+                .uri(builder -> builder.path("/setup/getStock")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("active", active)
                 .queryParam("deptId", ProUtil.getDepId())
@@ -801,7 +800,7 @@ public class InventoryRepo {
     public Mono<List<Stock>> searchStock(ReportFilter filter) {
         return inventoryApi
                 .post()
-                .uri("/setup/search-stock")
+                .uri("/setup/searchStock")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(Stock.class)
@@ -827,7 +826,7 @@ public class InventoryRepo {
             return h2Repo.getStock(str);
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-stock-list")
+                .uri(builder -> builder.path("/setup/getStockList")
                 .queryParam("text", str)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
@@ -843,7 +842,7 @@ public class InventoryRepo {
 
     public Mono<List<Stock>> getService() {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-service")
+                .uri(builder -> builder.path("/setup/getService")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
@@ -858,7 +857,7 @@ public class InventoryRepo {
 
     public Mono<List<General>> deleteStock(StockKey key) {
         return inventoryApi.post()
-                .uri("/setup/delete-stock")
+                .uri("/setup/deleteStock")
                 .body(Mono.just(key), StockKey.class)
                 .retrieve()
                 .bodyToFlux(General.class)
@@ -902,7 +901,7 @@ public class InventoryRepo {
 
     public Mono<List<UnitRelation>> getUnitRelation() {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-unit-relation")
+                .uri(builder -> builder.path("/setup/getUnitRelation")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .build())
@@ -931,7 +930,7 @@ public class InventoryRepo {
 
     public Mono<Trader> saveTrader(Trader t) {
         return inventoryApi.post()
-                .uri("/setup/save-trader")
+                .uri("/setup/saveTrader")
                 .body(Mono.just(t), Trader.class)
                 .retrieve()
                 .bodyToMono(Trader.class)
@@ -948,7 +947,7 @@ public class InventoryRepo {
 
     public Mono<Stock> saveStock(Stock s) {
         return inventoryApi.post()
-                .uri("/setup/save-stock")
+                .uri("/setup/saveStock")
                 .body(Mono.just(s), Stock.class)
                 .retrieve()
                 .bodyToMono(Stock.class)
@@ -982,7 +981,7 @@ public class InventoryRepo {
 
     public Mono<Region> saveRegion(Region reg) {
         return inventoryApi.post()
-                .uri("/setup/save-region")
+                .uri("/setup/saveRegion")
                 .body(Mono.just(reg), Region.class)
                 .retrieve()
                 .bodyToMono(Region.class)
@@ -1079,7 +1078,7 @@ public class InventoryRepo {
 
     public Mono<VouStatus> saveVouStatus(VouStatus vou) {
         return inventoryApi.post()
-                .uri("/setup/save-voucher-status")
+                .uri("/setup/saveVoucherStatus")
                 .body(Mono.just(vou), VouStatus.class)
                 .retrieve()
                 .bodyToMono(VouStatus.class)
@@ -1125,7 +1124,7 @@ public class InventoryRepo {
 
     public Mono<Pattern> savePattern(Pattern pattern) {
         return inventoryApi.post()
-                .uri("/setup/save-pattern")
+                .uri("/setup/savePattern")
                 .body(Mono.just(pattern), Pattern.class)
                 .retrieve()
                 .bodyToMono(Pattern.class)
@@ -1194,7 +1193,7 @@ public class InventoryRepo {
 
     public Mono<UnitRelation> saveUnitRelation(UnitRelation rel) {
         return inventoryApi.post()
-                .uri("/setup/save-unit-relation")
+                .uri("/setup/saveUnitRelation")
                 .body(Mono.just(rel), UnitRelation.class)
                 .retrieve()
                 .bodyToMono(UnitRelation.class)
@@ -1462,7 +1461,7 @@ public class InventoryRepo {
 
     public Mono<OPHis> findOpening(OPHisKey key) {
         return inventoryApi.post()
-                .uri("/setup/find-opening")
+                .uri("/setup/findOpening")
                 .body(Mono.just(key), OPHisKey.class)
                 .retrieve()
                 .bodyToMono(OPHis.class)
@@ -1620,7 +1619,7 @@ public class InventoryRepo {
 
     public Mono<ReorderLevel> saveReorder(ReorderLevel rl) {
         return inventoryApi.post()
-                .uri("/setup/save-reorder")
+                .uri("/setup/saveReorder")
                 .body(Mono.just(rl), ReorderLevel.class)
                 .retrieve()
                 .bodyToMono(ReorderLevel.class)
@@ -1632,7 +1631,7 @@ public class InventoryRepo {
 
     public Mono<List<General>> deleteTrader(TraderKey key) {
         return inventoryApi.post()
-                .uri("/setup/delete-trader")
+                .uri("/setup/deleteTrader")
                 .body(Mono.just(key), TraderKey.class)
                 .retrieve()
                 .bodyToFlux(General.class)
@@ -1645,7 +1644,7 @@ public class InventoryRepo {
 
     public Mono<TraderGroup> saveTraderGroup(TraderGroup rl) {
         return inventoryApi.post()
-                .uri("/setup/save-trader-group")
+                .uri("/setup/saveTraderGroup")
                 .body(Mono.just(rl), TraderGroup.class)
                 .retrieve()
                 .bodyToMono(TraderGroup.class)
@@ -1657,7 +1656,7 @@ public class InventoryRepo {
 
     public Mono<List<TraderGroup>> getTraderGroup() {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-trader-group")
+                .uri(builder -> builder.path("/setup/getTraderGroup")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", Global.deptId)
                 .build())
@@ -2428,7 +2427,7 @@ public class InventoryRepo {
 
     public Mono<OPHis> save(OPHis op) {
         return inventoryApi.post()
-                .uri("/setup/save-opening")
+                .uri("/setup/saveOpening")
                 .body(Mono.just(op), OPHis.class)
                 .retrieve()
                 .bodyToMono(OPHis.class);
@@ -2743,7 +2742,7 @@ public class InventoryRepo {
 
     public Mono<List<OPHisDetail>> getOpeningDetail(String vouNo, String compCode, Integer deptId) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-opening-detail")
+                .uri(builder -> builder.path("/setup/getOpeningDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", compCode)
                 .queryParam("deptId", deptId)
@@ -2755,7 +2754,7 @@ public class InventoryRepo {
 
     public Mono<List<OPHis>> getOpeningHistory(FilterObject filter) {
         return inventoryApi.post()
-                .uri("/setup/get-opening")
+                .uri("/setup/getOpening")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(OPHis.class)

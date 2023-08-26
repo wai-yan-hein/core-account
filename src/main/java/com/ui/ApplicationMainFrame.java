@@ -80,6 +80,7 @@ import com.inventory.ui.setup.OpeningSetup;
 import com.inventory.ui.setup.PatternSetup;
 import com.user.dialog.CompanyOptionDialog;
 import com.user.dialog.DepartmentDialog;
+import com.user.dialog.ProgramDownloadDialog;
 import com.user.setup.SystemProperty;
 import com.user.setup.AppUserSetup;
 import com.user.setup.CompanySetup;
@@ -100,6 +101,7 @@ import java.util.TimerTask;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
 /**
@@ -215,6 +217,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private HMSIntegration hmsIntegration;
     @Autowired
     private DateFilterRepo dateFilterRepo;
+    @Autowired
+    private TaskScheduler taskScheduler;
     private PanelControl control;
     private final HashMap<String, JPanel> hmPanel = new HashMap<>();
     private final ActionListener menuListener = (java.awt.event.ActionEvent evt) -> {
@@ -877,6 +881,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         Global.parentForm = this;
         scheduleNetwork();
         scheduleExit();
+        scheduleProgramUpdate();
         initUser();
         companyUserRoleAssign();
     }
@@ -1040,6 +1045,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private void logout() {
         dispose();
         CoreAccountApplication.restart();
+    }
+
+    private void scheduleProgramUpdate() {
+        ProgramDownloadDialog d = new ProgramDownloadDialog(Global.parentForm);
+        d.setTaskScheduler(taskScheduler);
+        d.setUserRepo(userRepo);
+        d.start();
     }
 
     private void scheduleNetwork() {

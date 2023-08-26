@@ -9,7 +9,6 @@ import com.acc.model.BusinessType;
 import com.acc.model.DeleteObj;
 import com.common.Global;
 import com.user.model.RoleProperty;
-import com.common.Util1;
 import com.inventory.model.AppRole;
 import com.user.model.AppUser;
 import com.user.model.DepartmentUser;
@@ -32,9 +31,9 @@ import com.user.model.VRoleCompany;
 import com.user.model.YearEnd;
 import java.util.HashMap;
 import java.util.List;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -859,5 +858,22 @@ public class UserRepo {
                         h2Repo.save(pm);
                     }
                 });
+    }
+
+    public Mono<String> getUpdatedProgramDate(String program) {
+        return userApi.get().uri(builder -> builder.path("/download/getUpdatedProgramDate")
+                .queryParam("program", program)
+                .build())
+                .retrieve()
+                .bodyToMono(String.class);
+    }
+
+    public Mono<byte[]> downloadProgram(String program) {
+        return userApi.get().uri(builder -> builder.path("/download/program")
+                .queryParam("program", program)
+                .build())
+                .accept(MediaType.APPLICATION_OCTET_STREAM)
+                .retrieve()
+                .bodyToMono(byte[].class);
     }
 }

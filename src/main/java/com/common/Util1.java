@@ -53,6 +53,8 @@ import net.lingala.zip4j.exception.ZipException;
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JasperReportsContext;
 import java.math.BigDecimal;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author WSwe
@@ -1034,5 +1036,18 @@ public class Util1 {
         int decimalWt = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
         float ttlWt = (qty * wt) + decimalWt;
         return ttlWt;
+    }
+
+    public static boolean compareDate(String source, String target, String pattern) {
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+            LocalDateTime d1 = LocalDateTime.parse(source, formatter);
+            LocalDateTime d2 = LocalDateTime.parse(target, formatter);
+            //return d1.isBefore(d2);
+            return true;
+        } catch (Exception ex) {
+            log.error("compareDate : " + ex.getMessage());
+        }
+        return false;
     }
 }

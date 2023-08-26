@@ -54,7 +54,6 @@ import com.inventory.model.PurHis;
 import com.inventory.model.RetInHis;
 import com.inventory.model.RetOutHis;
 import com.inventory.model.SaleHis;
-import com.inventory.model.StockInOut;
 import com.inventory.model.TransferHis;
 import com.inventory.model.WeightLossHis;
 import com.repo.InventoryRepo;
@@ -154,8 +153,6 @@ public class CloudIntegration {
     RetInService retInService;
     @Autowired
     RetOutService retOutService;
-    @Autowired
-    private StockInOutService stockInOutService;
     @Autowired
     private TransferHisService transferHisService;
     @Autowired
@@ -742,6 +739,5 @@ public class CloudIntegration {
         } else {
             observer.selected("enable", true);
         }
-
     }
 }

@@ -737,9 +737,8 @@ public class AccountRepo {
                 .retrieve()
                 .bodyToFlux(DateModel.class)
                 .collectList()
-                .onErrorResume((e) -> {
+                .doOnError((e) -> {
                     log.info("getDate " + e.getMessage());
-                    return Mono.error(e);
                 });
     }
 
