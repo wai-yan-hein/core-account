@@ -341,7 +341,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
 
         jLabel2.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setText("Login Your Account");
+        jLabel2.setText("Login Your Core Account");
 
         btnLogin.setBackground(UIManager.getDefaults().getColor("Table.selectionBackground"));
         btnLogin.setFont(new java.awt.Font("Arial", 0, 15)); // NOI18N
