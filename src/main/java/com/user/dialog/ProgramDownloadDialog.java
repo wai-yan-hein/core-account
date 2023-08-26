@@ -17,10 +17,10 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.TaskScheduler;
 
@@ -67,12 +67,14 @@ public class ProgramDownloadDialog extends javax.swing.JDialog {
                         userRepo.downloadProgram(program).subscribe((byteArray) -> {
                             String filePath = "core-account.jar"; // File path where you want to save the byte array
                             try (FileOutputStream outputStream = new FileOutputStream(filePath)) {
+                                log.info("byteArray : "+byteArray.length);
                                 outputStream.write(byteArray);
                                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                                 LocalDateTime customDateTime = LocalDateTime.parse(updatedDate, formatter);
                                 // Convert LocalDateTime to milliseconds since the epocs
-                                long customTimestampMillis = customDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-                                FileTime customTimestamp = FileTime.fromMillis(customTimestampMillis);
+                                long timestamp = customDateTime.toEpochSecond(java.time.ZoneOffset.UTC) * 1000; // Convert to milliseconds
+                                log.info("timestamp : "+timestamp);
+                                FileTime customTimestamp = FileTime.fromMillis(timestamp);
                                 // Set the modification time for the saved file
                                 Path path = Path.of(filePath);
                                 Files.setLastModifiedTime(path, customTimestamp);

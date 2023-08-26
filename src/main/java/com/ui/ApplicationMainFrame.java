@@ -879,6 +879,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     public void initMain() {
         Global.parentForm = this;
+        setTitle("Core Account Cloud : " + Util1.getProgramVersion());
         scheduleNetwork();
         scheduleExit();
         scheduleProgramUpdate();

@@ -18,7 +18,9 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -40,6 +42,8 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -52,9 +56,9 @@ import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JasperReportsContext;
-import java.math.BigDecimal;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 /**
  * @author WSwe
@@ -1048,5 +1052,19 @@ public class Util1 {
             log.error("compareDate : " + ex.getMessage());
         }
         return false;
+    }
+
+    public static String getProgramVersion() {
+        try {
+            MavenXpp3Reader reader = new MavenXpp3Reader();
+            Model model = reader.read(new FileReader("pom.xml"));
+            String version = model.getVersion();
+            return version;
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Util1.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException | XmlPullParserException ex) {
+            Logger.getLogger(Util1.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return "";
     }
 }
