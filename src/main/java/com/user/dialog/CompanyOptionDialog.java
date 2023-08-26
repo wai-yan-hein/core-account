@@ -6,18 +6,28 @@ package com.user.dialog;
 
 import com.common.Global;
 import com.common.SelectionObserver;
-import com.common.TableCellRender;
+import com.common.Util1;
 import com.user.common.VRoleCompanyTableModel;
 import com.user.model.VRoleCompany;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.List;
+import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JTable;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.KeyStroke;
-import javax.swing.ListSelectionModel;
 
 /**
  *
@@ -77,8 +87,8 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
     private void actionMapping() {
         String solve = "enter";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
-        tblCompany.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
-        tblCompany.getActionMap().put(solve, new EnterAction());
+//        tblCompany.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
+//        tblCompany.getActionMap().put(solve, new EnterAction());
 
     }
 
@@ -91,23 +101,78 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
     }
 
     public void initMain() {
-        tblCompany.setModel(companyTableModel);
-        tblCompany.getTableHeader().setFont(Global.tblHeaderFont);
-        tblCompany.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblCompany.setRowHeight(Global.tblRowHeight);
-        tblCompany.setDefaultRenderer(Object.class, new TableCellRender());
-        tblCompany.getColumnModel().getColumn(0).setPreferredWidth(1);
-        tblCompany.getColumnModel().getColumn(1).setPreferredWidth(20);
-        tblCompany.getColumnModel().getColumn(2).setPreferredWidth(50);
+//        tblCompany.setModel(companyTableModel);
+//        tblCompany.getTableHeader().setFont(Global.tblHeaderFont);
+//        tblCompany.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+//        tblCompany.setRowHeight(Global.tblRowHeight);
+//        tblCompany.setDefaultRenderer(Object.class, new TableCellRender());
+//        tblCompany.getColumnModel().getColumn(0).setPreferredWidth(1);
+//        tblCompany.getColumnModel().getColumn(1).setPreferredWidth(20);
+//        tblCompany.getColumnModel().getColumn(2).setPreferredWidth(50);
         companyTableModel.setListCompany(listCompany);
+        for (VRoleCompany info : listCompany) {
+            companyInfoPanel(info);
+        }
     }
 
     private void select() {
-        int row = tblCompany.convertRowIndexToModel(tblCompany.getSelectedRow());
+//        int row = tblCompany.convertRowIndexToModel(tblCompany.getSelectedRow());
+        int row = 0;
         if (row >= 0) {
             companyInfo = companyTableModel.getCompany(row);
             this.dispose();
         }
+    }
+
+    private void companyInfoPanel(VRoleCompany info) {
+        // Create a panel for drawing the icon
+        JPanel iconPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                BufferedImage image = null;
+                try {
+                    image = ImageIO.read(getClass().getResource("/images/applogo.jpg"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                // Draw the image
+                if (image != null) {
+                    int iconSize = 30;
+                    int x = (getWidth() - iconSize) / 2;
+                    int y = (getHeight() - iconSize) / 2;
+                    g.drawImage(image, x, y, iconSize, iconSize, this);
+                }
+            }
+        };
+        iconPanel.setPreferredSize(new Dimension(40, 40)); // Set a fixed size for the icon panel
+
+        // Create labels
+        JLabel label1 = new JLabel(info.getCompName());
+        JLabel label2 = new JLabel(Util1.toDateStr(info.getStartDate(), "dd/MM/yyyy")
+                + " to "
+                + Util1.toDateStr(info.getEndDate(), "dd/MM/yyyy"));
+
+        // Create a container for labels
+        JPanel labelPanel = new JPanel();
+        labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
+        labelPanel.add(label1);
+        Font labelFont = label1.getFont(); // Get the default font
+        label1.setFont(labelFont.deriveFont(Font.BOLD, 15));
+        labelPanel.add(label2);
+
+        // Create a container for the whole company info panel
+        JPanel companyInfoPanel = new JPanel(new BorderLayout());
+        companyInfoPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
+        companyInfoPanel.setBackground(Color.white); // Set background color
+        companyInfoPanel.add(iconPanel, BorderLayout.WEST);
+        companyInfoPanel.add(labelPanel, BorderLayout.CENTER);
+
+        // Set layout for the main frame
+        listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
+        listPanel.add(companyInfoPanel);
+
+        setLocationRelativeTo(null);
     }
 
     /**
@@ -121,9 +186,8 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
 
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        tblCompany = new javax.swing.JTable();
         jButton1 = new javax.swing.JButton();
+        listPanel = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Choose Company Dialog");
@@ -140,7 +204,7 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 524, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -150,29 +214,6 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
                 .addComponent(jLabel1)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-
-        tblCompany.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
-        tblCompany.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                tblCompanyMouseClicked(evt);
-            }
-        });
-        tblCompany.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                tblCompanyKeyReleased(evt);
-            }
-        });
-        jScrollPane1.setViewportView(tblCompany);
 
         jButton1.setBackground(Global.selectionColor);
         jButton1.setFont(Global.lableFont);
@@ -184,6 +225,17 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
             }
         });
 
+        javax.swing.GroupLayout listPanelLayout = new javax.swing.GroupLayout(listPanel);
+        listPanel.setLayout(listPanelLayout);
+        listPanelLayout.setHorizontalGroup(
+            listPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        listPanelLayout.setVerticalGroup(
+            listPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 355, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -192,8 +244,8 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 538, Short.MAX_VALUE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(listPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -202,8 +254,8 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 361, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(listPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton1)
                 .addContainerGap())
         );
@@ -216,17 +268,6 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
         select();
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void tblCompanyKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblCompanyKeyReleased
-        // TODO add your handling code here:
-    }//GEN-LAST:event_tblCompanyKeyReleased
-
-    private void tblCompanyMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblCompanyMouseClicked
-        // TODO add your handling code here:
-        if (evt.getClickCount() == 2) {
-            select();
-        }
-    }//GEN-LAST:event_tblCompanyMouseClicked
-
     /**
      * @param args the command line arguments
      */
@@ -235,7 +276,6 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable tblCompany;
+    private javax.swing.JPanel listPanel;
     // End of variables declaration//GEN-END:variables
 }
