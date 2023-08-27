@@ -13,6 +13,7 @@ import com.common.QRUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.inventory.model.Message;
 import com.user.common.CompanyTableModel;
 import com.repo.UserRepo;
 import com.user.dialog.DepartmentSetupDialog;
@@ -306,6 +307,17 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         observer.selected("refresh", true);
     }
 
+    private void updateClient() {
+        int yn = JOptionPane.showConfirmDialog(Global.parentForm, "Do you want release program update?", "Program Update.", JOptionPane.WARNING_MESSAGE);
+        if (yn == JOptionPane.YES_OPTION) {
+            Message message = new Message();
+            message.setHeader("PROGRAM_UPDATE");
+            userRepo.sendMessage(message).doOnSuccess((t) -> {
+                JOptionPane.showMessageDialog(this, t);
+            }).subscribe();
+        }
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -346,6 +358,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -589,6 +602,14 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
             }
         });
 
+        jButton4.setFont(Global.lableFont);
+        jButton4.setText("Update");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -598,7 +619,8 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButton1)
                     .addComponent(jButton2)
-                    .addComponent(jButton3))
+                    .addComponent(jButton3)
+                    .addComponent(jButton4))
                 .addContainerGap(94, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
@@ -610,6 +632,8 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                 .addComponent(jButton2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton4)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -669,12 +693,18 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         qrDialog();
     }//GEN-LAST:event_jButton3ActionPerformed
 
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        // TODO add your handling code here:
+        updateClient();
+    }//GEN-LAST:event_jButton4ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkActive;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel13;

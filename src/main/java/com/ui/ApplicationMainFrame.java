@@ -1054,6 +1054,12 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         d.setUserRepo(userRepo);
         d.setObserver(this);
         d.start();
+        userRepo.receiveMessage().subscribe((message) -> {
+            log.info(message.getHeader());
+            if (message.getHeader().equals("PROGRAM_UPDATE")) {
+                d.start();
+            }
+        });
     }
 
     private void scheduleNetwork() {

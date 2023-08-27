@@ -14,6 +14,7 @@ import com.inventory.model.AppRole;
 import com.user.model.AppUser;
 import com.user.model.DepartmentUser;
 import com.inventory.model.MachineInfo;
+import com.inventory.model.Message;
 import com.inventory.model.VRoleMenu;
 import com.user.model.AuthenticationResponse;
 import com.user.model.SysProperty;
@@ -38,6 +39,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -876,5 +878,21 @@ public class UserRepo {
                 .accept(MediaType.APPLICATION_OCTET_STREAM)
                 .retrieve()
                 .bodyToMono(byte[].class);
+    }
+
+    public Mono<String> sendMessage(Message message) {
+        return userApi.post()
+                .uri("/message/send")
+                .body(Mono.just(message), Message.class)
+                .retrieve()
+                .bodyToMono(String.class);
+    }
+
+    public Flux<Message> receiveMessage() {
+        return userApi.get().uri(builder -> builder.path("/message/receive")
+                .queryParam("messageId", Global.macId)
+                .build())
+                .retrieve()
+                .bodyToFlux(Message.class);
     }
 }
