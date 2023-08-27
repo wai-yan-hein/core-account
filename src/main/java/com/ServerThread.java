@@ -42,12 +42,12 @@ public class ServerThread extends Thread {
                     if (Global.dialog.isVisible()) {
                         Global.dialog.toFront();
                     }
+                } else if (Global.parentForm != null) {
+                    Global.parentForm.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                    Global.parentForm.setVisible(true);
+                    Global.parentForm.toFront();
                 } else {
-                    if (Global.parentForm != null) {
-                        Global.parentForm.setExtendedState(JFrame.MAXIMIZED_BOTH);
-                        Global.parentForm.setVisible(true);
-                        Global.parentForm.toFront();
-                    }
+                    System.exit(0);
                 }
             }
         } catch (IOException e) {

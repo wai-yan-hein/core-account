@@ -6,6 +6,7 @@
 package com.common;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Data;
 
@@ -46,4 +47,6 @@ public class ReturnObject {
     private String tranSource;
     private String opDate;
     private String compCode;
+    private long timestampUtc;
+
 }

@@ -1052,6 +1052,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         ProgramDownloadDialog d = new ProgramDownloadDialog(Global.parentForm);
         d.setTaskScheduler(taskScheduler);
         d.setUserRepo(userRepo);
+        d.setObserver(this);
         d.start();
     }
 
@@ -1133,6 +1134,10 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             }
             case "change-name" -> {
                 lblCompName.setText(Global.companyName);
+            }
+            case "message" -> {
+                lblLock.setForeground(Color.red);
+                lblLock.setText(selectObj.toString());
             }
         }
     }

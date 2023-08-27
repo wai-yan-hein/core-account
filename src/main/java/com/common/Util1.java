@@ -1068,4 +1068,12 @@ public class Util1 {
         }
         return "";
     }
+
+    public static LocalDateTime toLocalDateTime(long timestampUtc) {
+// Convert long timestamp to Instant
+        Instant instant = Instant.ofEpochMilli(timestampUtc);
+// Convert Instant to LocalDateTime in a specific time zone
+        ZoneId zoneId = ZoneId.systemDefault(); // Change to the desired time zone
+        return instant.atZone(zoneId).toLocalDateTime();
+    }
 }

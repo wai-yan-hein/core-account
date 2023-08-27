@@ -8,6 +8,7 @@ import com.H2Repo;
 import com.acc.model.BusinessType;
 import com.acc.model.DeleteObj;
 import com.common.Global;
+import com.common.ReturnObject;
 import com.user.model.RoleProperty;
 import com.inventory.model.AppRole;
 import com.user.model.AppUser;
@@ -860,12 +861,12 @@ public class UserRepo {
                 });
     }
 
-    public Mono<String> getUpdatedProgramDate(String program) {
+    public Mono<ReturnObject> getUpdatedProgramDate(String program) {
         return userApi.get().uri(builder -> builder.path("/download/getUpdatedProgramDate")
                 .queryParam("program", program)
                 .build())
                 .retrieve()
-                .bodyToMono(String.class);
+                .bodyToMono(ReturnObject.class);
     }
 
     public Mono<byte[]> downloadProgram(String program) {

@@ -5,6 +5,7 @@
 package com.user.dialog;
 
 import com.common.Global;
+import com.common.SelectionObserver;
 import com.common.Util1;
 import com.repo.UserRepo;
 import java.io.File;
@@ -13,13 +14,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
-import java.text.SimpleDateFormat;
+import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import javax.swing.JFrame;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.TaskScheduler;
@@ -33,7 +32,11 @@ public class ProgramDownloadDialog extends javax.swing.JDialog {
 
     private UserRepo userRepo;
     private TaskScheduler taskScheduler;
-    private final String dateFormat = "yyyy-MM-dd HH:mm:ss";
+    private SelectionObserver observer;
+
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
+    }
 
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
@@ -57,23 +60,24 @@ public class ProgramDownloadDialog extends javax.swing.JDialog {
         String program = "core-account.jar";
         taskScheduler.scheduleAtFixedRate(() -> {
             userRepo.getUpdatedProgramDate(program).doOnSuccess((t) -> {
-                log.info("updatedDate : " + t);
-                String updatedDate = t.replace("\"", "");
-                String localTimeStr = getProgramDateTime(program);
-                if (localTimeStr != null) {
-                    log.info("localDate : " + localTimeStr);
-                    if (Util1.compareDate(localTimeStr, updatedDate, dateFormat)) {
+                LocalDateTime updatedDate = Util1.toLocalDateTime(t.getTimestampUtc());
+                LocalDateTime localDate = getProgramDateTime(program);
+                if (localDate != null) {
+                    log.info("updatedDate : " + updatedDate.toString());
+                    log.info("localDate : " + localDate.toString());
+                    if (localDate.isBefore(updatedDate)) {
                         log.info("program need to update.");
+                        observer.selected("message", "Program is updating.");
                         userRepo.downloadProgram(program).doOnSuccess((byteArray) -> {
                             String filePath = "core-account.jar"; // File path where you want to save the byte array
                             try (FileOutputStream outputStream = new FileOutputStream(filePath)) {
                                 log.info("byteArray : " + byteArray.length);
                                 outputStream.write(byteArray);
-                                Date date = Util1.toDate(updatedDate, dateFormat);
-                                // Convert LocalDateTime to milliseconds since the epocs
-                                long timestamp = date.getTime();
+                                observer.selected("message", "Program is updated.");
+                                Timestamp timestamp = Timestamp.valueOf(updatedDate);
                                 log.info("timestamp : " + timestamp);
-                                FileTime customTimestamp = FileTime.fromMillis(timestamp);
+                                // Convert LocalDateTime to milliseconds since the epocs
+                                FileTime customTimestamp = FileTime.fromMillis(timestamp.getTime());
                                 // Set the modification time for the saved file
                                 Path path = Path.of(filePath);
                                 Files.setLastModifiedTime(path, customTimestamp);
@@ -91,11 +95,14 @@ public class ProgramDownloadDialog extends javax.swing.JDialog {
         }, Duration.ofMinutes(60));
     }
 
-    private String getProgramDateTime(String program) {
+    private LocalDateTime getProgramDateTime(String program) {
         File file = new File(program);
         if (file.exists()) {
-            SimpleDateFormat df = new SimpleDateFormat(dateFormat);
-            return df.format(new Date(file.lastModified()));
+            LocalDateTime lastModifiedDate = LocalDateTime.ofInstant(
+                    Instant.ofEpochMilli(file.lastModified()),
+                    ZoneId.systemDefault());
+            return lastModifiedDate;
+
         }
         return null;
     }
@@ -147,6 +154,11 @@ public class ProgramDownloadDialog extends javax.swing.JDialog {
 
         jButton2.setFont(Global.lableFont);
         jButton2.setText("Cancel");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         jLabel2.setFont(Global.lableFont);
         jLabel2.setText("An important update is ready for Core Account. Please update to access new features, improvements, and security enhancements.");
@@ -198,6 +210,12 @@ public class ProgramDownloadDialog extends javax.swing.JDialog {
         // TODO add your handling code here:
         restart();
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        observer.selected("message", "Program exit required.");
+        dispose();
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments
