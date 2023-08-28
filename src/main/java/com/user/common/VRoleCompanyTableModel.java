@@ -21,6 +21,16 @@ public class VRoleCompanyTableModel extends AbstractTableModel {
     private List<VRoleCompany> listCompany = new ArrayList();
     private final String[] columnNames = {"No.", "Company Name", "Financial Year"};
 
+    private Integer selectedIndex;
+
+    public Integer getSelectedIndex() {
+        return selectedIndex;
+    }
+
+    public void setSelectedIndex(Integer selectedIndex) {
+        this.selectedIndex = selectedIndex;
+    }
+
     @Override
     public String getColumnName(int column) {
         return columnNames[column];

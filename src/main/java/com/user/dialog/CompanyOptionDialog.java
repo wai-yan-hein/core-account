@@ -16,6 +16,8 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.List;
@@ -24,6 +26,7 @@ import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -39,6 +42,8 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
     private SelectionObserver observer;
     private VRoleCompany companyInfo;
     private List<VRoleCompany> listCompany;
+    private static final Color SELECTED_ROW_COLOR = new Color(173, 216, 249); // Light blue color, you can change it
+    private JPanel selectedPanel = null;
 
     public List<VRoleCompany> getListCompany() {
         return listCompany;
@@ -87,8 +92,8 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
     private void actionMapping() {
         String solve = "enter";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
-//        tblCompany.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
-//        tblCompany.getActionMap().put(solve, new EnterAction());
+        listPanel.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
+        listPanel.getActionMap().put(solve, new EnterAction());
 
     }
 
@@ -110,21 +115,23 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
 //        tblCompany.getColumnModel().getColumn(1).setPreferredWidth(20);
 //        tblCompany.getColumnModel().getColumn(2).setPreferredWidth(50);
         companyTableModel.setListCompany(listCompany);
-        for (VRoleCompany info : listCompany) {
-            companyInfoPanel(info);
+        int index = 0;  // Initialize the index
+        for (VRoleCompany companyInfo : listCompany) {
+            companyInfoPanel(companyInfo, index);
+            index++;
         }
     }
 
     private void select() {
 //        int row = tblCompany.convertRowIndexToModel(tblCompany.getSelectedRow());
-        int row = 0;
+        int row = companyTableModel.getSelectedIndex();
         if (row >= 0) {
             companyInfo = companyTableModel.getCompany(row);
             this.dispose();
         }
     }
 
-    private void companyInfoPanel(VRoleCompany info) {
+    private void companyInfoPanel(VRoleCompany info, int index) {
         // Create a panel for drawing the icon
         JPanel iconPanel = new JPanel() {
             @Override
@@ -163,7 +170,7 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
 
         // Create a container for the whole company info panel
         JPanel companyInfoPanel = new JPanel(new BorderLayout());
-        companyInfoPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // Add padding
+        companyInfoPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10)); // Add padding
         companyInfoPanel.setBackground(Color.white); // Set background color
         companyInfoPanel.add(iconPanel, BorderLayout.WEST);
         companyInfoPanel.add(labelPanel, BorderLayout.CENTER);
@@ -172,7 +179,32 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
         listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
         listPanel.add(companyInfoPanel);
 
+        companyInfoPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // Handle the click event here
+                if (selectedPanel != null) {
+                    selectedPanel.setBackground(Color.white);
+                }
+
+                // Set the background color of the clicked panel
+                companyInfoPanel.setBackground(SELECTED_ROW_COLOR);
+                selectedPanel = companyInfoPanel;
+
+                if (index >= 0) {
+                    companyTableModel.setSelectedIndex(index);
+                }
+
+                if (e.getClickCount() > 1) {
+                    select();
+                }
+                System.out.println("Selected index: " + index);
+            }
+
+        });
         setLocationRelativeTo(null);
+//        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        setVisible(true);
     }
 
     /**
@@ -225,6 +257,8 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
             }
         });
 
+        listPanel.setBackground(new java.awt.Color(255, 255, 255));
+
         javax.swing.GroupLayout listPanelLayout = new javax.swing.GroupLayout(listPanel);
         listPanel.setLayout(listPanelLayout);
         listPanelLayout.setHorizontalGroup(
@@ -233,7 +267,7 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
         );
         listPanelLayout.setVerticalGroup(
             listPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 355, Short.MAX_VALUE)
+            .addGap(0, 361, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -250,12 +284,12 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(listPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButton1)
                 .addContainerGap())
         );
