@@ -6,36 +6,23 @@ package com.user.dialog;
 
 import com.common.Global;
 import com.common.SelectionObserver;
-import com.common.Util1;
 import com.user.common.VRoleCompanyTableModel;
 import com.user.model.VRoleCompany;
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.List;
-import javax.imageio.ImageIO;
-import javax.swing.AbstractAction;
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.KeyStroke;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author DELL
  */
+@Slf4j
 public class CompanyOptionDialog extends javax.swing.JDialog {
 
     private final VRoleCompanyTableModel companyTableModel = new VRoleCompanyTableModel();
@@ -43,7 +30,6 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
     private VRoleCompany companyInfo;
     private List<VRoleCompany> listCompany;
     private static final Color SELECTED_ROW_COLOR = new Color(173, 216, 249); // Light blue color, you can change it
-    private JPanel selectedPanel = null;
 
     public List<VRoleCompany> getListCompany() {
         return listCompany;
@@ -85,41 +71,45 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
     public CompanyOptionDialog(JFrame parent) {
         super(parent, true);
         initComponents();
-        actionMapping();
-
-    }
-
-    private void actionMapping() {
-        String solve = "enter";
-        KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
-        listPanel.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
-        listPanel.getActionMap().put(solve, new EnterAction());
-
-    }
-
-    private class EnterAction extends AbstractAction {
-
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            select();
-        }
     }
 
     public void initMain() {
-//        tblCompany.setModel(companyTableModel);
-//        tblCompany.getTableHeader().setFont(Global.tblHeaderFont);
-//        tblCompany.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-//        tblCompany.setRowHeight(Global.tblRowHeight);
-//        tblCompany.setDefaultRenderer(Object.class, new TableCellRender());
-//        tblCompany.getColumnModel().getColumn(0).setPreferredWidth(1);
-//        tblCompany.getColumnModel().getColumn(1).setPreferredWidth(20);
-//        tblCompany.getColumnModel().getColumn(2).setPreferredWidth(50);
+        panelCompany.setLayout(new BoxLayout(panelCompany, BoxLayout.Y_AXIS));
         companyTableModel.setListCompany(listCompany);
-        int index = 0;  // Initialize the index
-        for (VRoleCompany companyInfo : listCompany) {
-            companyInfoPanel(companyInfo, index);
-            index++;
-        }
+        listCompany.forEach((t) -> {
+            JPanel companyPanel = getCompanyPanel(t);
+            panelCompany.add(companyPanel);
+//            int index = getCompanyPanelIndex(companyPanel);
+//            System.out.println("Index of CompanyPanel: " + index);
+        });
+    }
+
+    private JPanel getCompanyPanel(VRoleCompany info) {
+        JPanel companyPanel = new CompanyPanel(info);
+
+        companyPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (companyPanel instanceof CompanyPanel p) {
+                    System.out.println("Mouse clicked on CompanyPanel: " + p.getInfo().getCompName());
+                    log.info(p.getInfo().getCompName());
+                    int index = panelCompany.getComponentZOrder(companyPanel);
+                    companyTableModel.setSelectedIndex(index);
+                    if (e.getClickCount() > 1) {
+                        select();
+                    }
+                } else {
+                    System.out.println("Mouse clicked on a different panel.");
+                }
+            }
+        });
+
+        return companyPanel;
+    }
+
+    public int getCompanyPanelIndex(JPanel companyPanel) {
+        int index = panelCompany.getComponentZOrder(companyPanel);
+        return index;
     }
 
     private void select() {
@@ -129,82 +119,6 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
             companyInfo = companyTableModel.getCompany(row);
             this.dispose();
         }
-    }
-
-    private void companyInfoPanel(VRoleCompany info, int index) {
-        // Create a panel for drawing the icon
-        JPanel iconPanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                BufferedImage image = null;
-                try {
-                    image = ImageIO.read(getClass().getResource("/images/applogo.jpg"));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                // Draw the image
-                if (image != null) {
-                    int iconSize = 30;
-                    int x = (getWidth() - iconSize) / 2;
-                    int y = (getHeight() - iconSize) / 2;
-                    g.drawImage(image, x, y, iconSize, iconSize, this);
-                }
-            }
-        };
-        iconPanel.setPreferredSize(new Dimension(40, 40)); // Set a fixed size for the icon panel
-
-        // Create labels
-        JLabel label1 = new JLabel(info.getCompName());
-        JLabel label2 = new JLabel(Util1.toDateStr(info.getStartDate(), "dd/MM/yyyy")
-                + " to "
-                + Util1.toDateStr(info.getEndDate(), "dd/MM/yyyy"));
-
-        // Create a container for labels
-        JPanel labelPanel = new JPanel();
-        labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
-        labelPanel.add(label1);
-        Font labelFont = label1.getFont(); // Get the default font
-        label1.setFont(labelFont.deriveFont(Font.BOLD, 15));
-        labelPanel.add(label2);
-
-        // Create a container for the whole company info panel
-        JPanel companyInfoPanel = new JPanel(new BorderLayout());
-        companyInfoPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10)); // Add padding
-        companyInfoPanel.setBackground(Color.white); // Set background color
-        companyInfoPanel.add(iconPanel, BorderLayout.WEST);
-        companyInfoPanel.add(labelPanel, BorderLayout.CENTER);
-
-        // Set layout for the main frame
-        listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
-        listPanel.add(companyInfoPanel);
-
-        companyInfoPanel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                // Handle the click event here
-                if (selectedPanel != null) {
-                    selectedPanel.setBackground(Color.white);
-                }
-
-                // Set the background color of the clicked panel
-                companyInfoPanel.setBackground(SELECTED_ROW_COLOR);
-                selectedPanel = companyInfoPanel;
-
-                if (index >= 0) {
-                    companyTableModel.setSelectedIndex(index);
-                }
-
-                if (e.getClickCount() > 1) {
-                    select();
-                }
-                System.out.println("Selected index: " + index);
-            }
-
-        });
-        setLocationRelativeTo(null);
-//        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//        setVisible(true);
     }
 
     /**
@@ -219,7 +133,7 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
-        listPanel = new javax.swing.JPanel();
+        panelCompany = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Choose Company Dialog");
@@ -257,16 +171,16 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
             }
         });
 
-        listPanel.setBackground(new java.awt.Color(255, 255, 255));
+        panelCompany.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        javax.swing.GroupLayout listPanelLayout = new javax.swing.GroupLayout(listPanel);
-        listPanel.setLayout(listPanelLayout);
-        listPanelLayout.setHorizontalGroup(
-            listPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        javax.swing.GroupLayout panelCompanyLayout = new javax.swing.GroupLayout(panelCompany);
+        panelCompany.setLayout(panelCompanyLayout);
+        panelCompanyLayout.setHorizontalGroup(
+            panelCompanyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 0, Short.MAX_VALUE)
         );
-        listPanelLayout.setVerticalGroup(
-            listPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        panelCompanyLayout.setVerticalGroup(
+            panelCompanyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 361, Short.MAX_VALUE)
         );
 
@@ -279,16 +193,16 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(listPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(panelCompany, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(listPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(panelCompany, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButton1)
                 .addContainerGap())
@@ -310,6 +224,6 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel listPanel;
+    private javax.swing.JPanel panelCompany;
     // End of variables declaration//GEN-END:variables
 }

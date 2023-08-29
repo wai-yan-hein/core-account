@@ -792,4 +792,13 @@ public class AccountRepo {
                 .bodyToMono(TraderGroup.class);
 
     }
+
+    public Mono<String> getShootTriMessage() {
+        return accountApi.get()
+                .uri("/account/shootTri")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(String.class
+                );
+    }
 }
