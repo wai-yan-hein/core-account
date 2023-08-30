@@ -20,6 +20,7 @@ import com.user.model.AuthenticationResponse;
 import com.user.model.SysProperty;
 import com.user.model.CompanyInfo;
 import com.user.model.Currency;
+import com.user.model.DepartmentKey;
 import com.user.model.ExchangeKey;
 import com.user.model.ExchangeRate;
 import com.user.model.MachineProperty;
@@ -261,13 +262,15 @@ public class UserRepo {
     }
 
     public Mono<DepartmentUser> findDepartment(Integer deptId) {
+        DepartmentKey key = new DepartmentKey();
+        key.setDeptId(deptId);
+        key.setCompCode(Global.compCode);
         if (localdatabase) {
             return h2Repo.findDepartment(deptId);
         }
-        return userApi.get()
-                .uri(builder -> builder.path("/user/find-department")
-                .queryParam("deptId", deptId)
-                .build())
+        return userApi.post()
+                .uri("/user/findDepartment")
+                .body(Mono.just(key), DepartmentKey.class)
                 .retrieve()
                 .bodyToMono(DepartmentUser.class)
                 .onErrorResume((e) -> {
