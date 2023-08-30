@@ -30,6 +30,7 @@ public class ProUtil {
     public static final String RE = "re.account";
     public static final String DEBTOR_GROUP = "debtor.group";
     public static final String DEBTOR_ACC = "debtor.account";
+    public static final String CONVERSION_ACC = "conversion.account";
     public static final String CREDITOR_GROUP = "creditor.group";
     public static final String CREDITOR_ACC = "creditor.account";
     public static final String P_SHOW_EXPENSE = "purchase.show.expense";

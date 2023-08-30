@@ -167,17 +167,11 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
         userRepo.getDefaultCurrency().subscribe((c) -> {
             currencyAutoCompleter.setCurrency(c);
         });
-        //cboCash.setRenderer(new ColorComboBoxRender());
-        Mono<List<ChartOfAccount>> m1 = accountRepo.getCOAByGroup(ProUtil.getProperty(ProUtil.CASH_GROUP));
-        Mono<List<ChartOfAccount>> m2 = accountRepo.getCOAByGroup(ProUtil.getProperty(ProUtil.BANK_GROUP));
-        Mono.zip(m1, m2).flatMap((t) -> Flux.fromIterable(t.getT1())
-                .concatWith(Flux.fromIterable(t.getT2()))
-                .collectList())
-                .subscribe((t) -> {
-                    t.add(new ChartOfAccount());
-                    coaComboModel.setData(t);
-                    cboCash.setModel(coaComboModel);
-                });
+        accountRepo.getCashBank().doOnSuccess((t) -> {
+            t.add(new ChartOfAccount());
+            coaComboModel.setData(t);
+            cboCash.setModel(coaComboModel);
+        }).subscribe();
     }
 
     private void initFocusAdapter() {

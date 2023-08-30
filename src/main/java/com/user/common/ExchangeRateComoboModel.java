@@ -4,7 +4,7 @@
  */
 package com.user.common;
 
-import com.user.model.Currency;
+import com.user.model.ExchangeRate;
 import java.util.List;
 import javax.swing.ComboBoxModel;
 import javax.swing.event.ListDataListener;
@@ -13,18 +13,18 @@ import javax.swing.event.ListDataListener;
  *
  * @author Lenovo
  */
-public class CurrencyComboBoxModel implements ComboBoxModel<Currency> {
+public class ExchangeRateComoboModel implements ComboBoxModel<ExchangeRate> {
 
-    private List<Currency> data;
-    private Currency selected;
+    private List<ExchangeRate> data;
+    private ExchangeRate selected;
 
-    public void setData(List<Currency> data) {
+    public void setData(List<ExchangeRate> data) {
         this.data = data;
     }
 
     @Override
     public void setSelectedItem(Object anItem) {
-        selected = (Currency) anItem;
+        selected = (ExchangeRate) anItem;
     }
 
     @Override
@@ -38,7 +38,7 @@ public class CurrencyComboBoxModel implements ComboBoxModel<Currency> {
     }
 
     @Override
-    public Currency getElementAt(int index) {
+    public ExchangeRate getElementAt(int index) {
         return data.get(index);
     }
 

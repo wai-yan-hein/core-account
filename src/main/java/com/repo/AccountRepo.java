@@ -34,6 +34,7 @@ import com.inventory.model.TraderGroup;
 import com.inventory.model.TraderGroupKey;
 import com.model.VoucherInfo;
 import com.user.model.YearEnd;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
 import lombok.extern.slf4j.Slf4j;
@@ -399,6 +400,18 @@ public class AccountRepo {
                 }
                 )
                 .collectList();
+    }
+
+    public Mono<List<ChartOfAccount>> getCashBank() {
+        Mono<List<ChartOfAccount>> m1 = getCOAByGroup(ProUtil.getProperty(ProUtil.CASH_GROUP));
+        Mono<List<ChartOfAccount>> m2 = getCOAByGroup(ProUtil.getProperty(ProUtil.BANK_GROUP));
+        return Mono.zip(m1, m2)
+                .map(tuple -> {
+                    List<ChartOfAccount> combinedList = new ArrayList<>();
+                    combinedList.addAll(tuple.getT1());
+                    combinedList.addAll(tuple.getT2());
+                    return combinedList;
+                });
     }
 
     public Mono<List<ChartOfAccount>> getCOAByHead(String headCode) {

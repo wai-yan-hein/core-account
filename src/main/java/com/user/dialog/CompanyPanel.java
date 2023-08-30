@@ -5,6 +5,7 @@
 package com.user.dialog;
 
 import com.common.Global;
+import com.common.SelectionObserver;
 import com.common.Util1;
 import com.user.model.VRoleCompany;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,12 @@ import lombok.extern.slf4j.Slf4j;
 public class CompanyPanel extends javax.swing.JPanel {
 
     private VRoleCompany info;
+    private SelectionObserver observer;
 
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
+    }
+    
     public VRoleCompany getInfo() {
         return info;
     }
@@ -41,6 +47,9 @@ public class CompanyPanel extends javax.swing.JPanel {
                     Util1.toDateStr(info.getEndDate(), Global.dateFormat)));
         }
     }
+    private void select(){
+        observer.selected("select", info);
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -56,6 +65,7 @@ public class CompanyPanel extends javax.swing.JPanel {
         lblCompanyName = new javax.swing.JLabel();
         lblFinDate = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
+        jButton1 = new javax.swing.JButton();
 
         panel.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         panel.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -75,6 +85,16 @@ public class CompanyPanel extends javax.swing.JPanel {
 
         jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
+        jButton1.setBackground(Global.selectionColor);
+        jButton1.setFont(Global.lableFont);
+        jButton1.setForeground(new java.awt.Color(255, 255, 255));
+        jButton1.setText("Login");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelLayout = new javax.swing.GroupLayout(panel);
         panel.setLayout(panelLayout);
         panelLayout.setHorizontalGroup(
@@ -86,8 +106,11 @@ public class CompanyPanel extends javax.swing.JPanel {
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblFinDate, javax.swing.GroupLayout.DEFAULT_SIZE, 459, Short.MAX_VALUE)
-                    .addComponent(lblCompanyName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(panelLayout.createSequentialGroup()
+                        .addComponent(lblCompanyName, javax.swing.GroupLayout.PREFERRED_SIZE, 385, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
+                        .addComponent(jButton1))
+                    .addComponent(lblFinDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         panelLayout.setVerticalGroup(
@@ -97,7 +120,9 @@ public class CompanyPanel extends javax.swing.JPanel {
                 .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(lblImage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(panelLayout.createSequentialGroup()
-                        .addComponent(lblCompanyName, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(lblCompanyName, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButton1))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblFinDate, javax.swing.GroupLayout.DEFAULT_SIZE, 32, Short.MAX_VALUE))
                     .addComponent(jSeparator1))
@@ -126,8 +151,14 @@ public class CompanyPanel extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_panelMouseClicked
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        select();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblCompanyName;
     private javax.swing.JLabel lblFinDate;

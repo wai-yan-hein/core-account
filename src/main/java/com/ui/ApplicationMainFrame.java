@@ -1174,6 +1174,10 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         }
     }
 
+    private void changeCompany() {
+        companyUserRoleAssign();
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -1404,6 +1408,11 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         lblCompName.setForeground(Global.selectionColor);
         lblCompName.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblCompName.setText("-");
+        lblCompName.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lblCompNameMouseClicked(evt);
+            }
+        });
 
         lblPanelName.setFont(Global.companyFont);
         lblPanelName.setForeground(Global.selectionColor);
@@ -1572,6 +1581,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private void formComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentResized
         // TODO add your handling code here:
     }//GEN-LAST:event_formComponentResized
+
+    private void lblCompNameMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCompNameMouseClicked
+        // TODO add your handling code here:
+        if (evt.getClickCount() > 1) {
+            changeCompany();
+        }
+    }//GEN-LAST:event_lblCompNameMouseClicked
 
     /**
      * @param args the command line arguments

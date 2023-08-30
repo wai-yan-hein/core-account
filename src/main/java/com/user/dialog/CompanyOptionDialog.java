@@ -8,12 +8,8 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.user.common.VRoleCompanyTableModel;
 import com.user.model.VRoleCompany;
-import java.awt.Color;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.List;
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import lombok.extern.slf4j.Slf4j;
@@ -23,13 +19,12 @@ import lombok.extern.slf4j.Slf4j;
  * @author DELL
  */
 @Slf4j
-public class CompanyOptionDialog extends javax.swing.JDialog {
+public class CompanyOptionDialog extends javax.swing.JDialog implements SelectionObserver {
 
     private final VRoleCompanyTableModel companyTableModel = new VRoleCompanyTableModel();
     private SelectionObserver observer;
     private VRoleCompany companyInfo;
     private List<VRoleCompany> listCompany;
-    private static final Color SELECTED_ROW_COLOR = new Color(173, 216, 249); // Light blue color, you can change it
 
     public List<VRoleCompany> getListCompany() {
         return listCompany;
@@ -37,14 +32,6 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
 
     public void setListCompany(List<VRoleCompany> listCompany) {
         this.listCompany = listCompany;
-    }
-
-    public JButton getjButton1() {
-        return jButton1;
-    }
-
-    public void setjButton1(JButton jButton1) {
-        this.jButton1 = jButton1;
     }
 
     public VRoleCompany getCompanyInfo() {
@@ -79,46 +66,18 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
         listCompany.forEach((t) -> {
             JPanel companyPanel = getCompanyPanel(t);
             panelCompany.add(companyPanel);
-//            int index = getCompanyPanelIndex(companyPanel);
-//            System.out.println("Index of CompanyPanel: " + index);
         });
     }
 
     private JPanel getCompanyPanel(VRoleCompany info) {
-        JPanel companyPanel = new CompanyPanel(info);
-
-        companyPanel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (companyPanel instanceof CompanyPanel p) {
-                    System.out.println("Mouse clicked on CompanyPanel: " + p.getInfo().getCompName());
-                    log.info(p.getInfo().getCompName());
-                    int index = panelCompany.getComponentZOrder(companyPanel);
-                    companyTableModel.setSelectedIndex(index);
-                    if (e.getClickCount() > 1) {
-                        select();
-                    }
-                } else {
-                    System.out.println("Mouse clicked on a different panel.");
-                }
-            }
-        });
-
+        CompanyPanel companyPanel = new CompanyPanel(info);
+        companyPanel.setObserver(this);
         return companyPanel;
     }
 
     public int getCompanyPanelIndex(JPanel companyPanel) {
         int index = panelCompany.getComponentZOrder(companyPanel);
         return index;
-    }
-
-    private void select() {
-//        int row = tblCompany.convertRowIndexToModel(tblCompany.getSelectedRow());
-        int row = companyTableModel.getSelectedIndex();
-        if (row >= 0) {
-            companyInfo = companyTableModel.getCompany(row);
-            this.dispose();
-        }
     }
 
     /**
@@ -132,7 +91,6 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
 
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
         panelCompany = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -161,18 +119,6 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jButton1.setBackground(Global.selectionColor);
-        jButton1.setFont(Global.lableFont);
-        jButton1.setForeground(new java.awt.Color(255, 255, 255));
-        jButton1.setText("Select");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-
-        panelCompany.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
-
         javax.swing.GroupLayout panelCompanyLayout = new javax.swing.GroupLayout(panelCompany);
         panelCompany.setLayout(panelCompanyLayout);
         panelCompanyLayout.setHorizontalGroup(
@@ -181,7 +127,7 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
         );
         panelCompanyLayout.setVerticalGroup(
             panelCompanyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 361, Short.MAX_VALUE)
+            .addGap(0, 392, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -192,7 +138,6 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(panelCompany, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -203,27 +148,29 @@ public class CompanyOptionDialog extends javax.swing.JDialog {
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panelCompany, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton1)
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-        select();
-    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
      */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel panelCompany;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public void selected(Object source, Object selectObj) {
+        if (source.toString().endsWith("select")) {
+            if (selectObj instanceof VRoleCompany v) {
+                companyInfo = v;
+                this.dispose();
+            }
+        }
+    }
 }

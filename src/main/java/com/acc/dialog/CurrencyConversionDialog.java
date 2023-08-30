@@ -4,7 +4,17 @@
  */
 package com.acc.dialog;
 
+import com.acc.common.COAComboBoxModel;
+import com.acc.model.ChartOfAccount;
 import com.common.Global;
+import com.common.ProUtil;
+import com.common.Util1;
+import com.repo.AccountRepo;
+import com.repo.UserRepo;
+import com.user.common.CurrencyComboBoxModel;
+import com.user.common.ExchangeRateComoboModel;
+import com.user.model.Currency;
+import com.user.model.ExchangeRate;
 import javax.swing.JFrame;
 
 /**
@@ -13,13 +23,60 @@ import javax.swing.JFrame;
  */
 public class CurrencyConversionDialog extends javax.swing.JDialog {
 
+    private COAComboBoxModel srcComboBoxModel = new COAComboBoxModel();
+    private COAComboBoxModel targetComboBoxModel = new COAComboBoxModel();
+    private COAComboBoxModel conComboBoxModel = new COAComboBoxModel();
+    private CurrencyComboBoxModel srcCurrencyComboBoxModel = new CurrencyComboBoxModel();
+    private CurrencyComboBoxModel targerCurrencyComboBoxModel = new CurrencyComboBoxModel();
+    private AccountRepo accountRepo;
+    private ExchangeRateComoboModel exchangeRateComoboModel = new ExchangeRateComoboModel();
+    private UserRepo userRepo;
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+
     /**
      * Creates new form CurrencyConversionDialog
+     *
      * @param frame
      */
     public CurrencyConversionDialog(JFrame frame) {
         super(frame, true);
         initComponents();
+    }
+
+    public void initMain() {
+        assignDefaultValue();
+        initData();
+    }
+
+    private void initData() {
+        userRepo.getCurrency().doOnSuccess((t) -> {
+            srcCurrencyComboBoxModel.setData(t);
+            targerCurrencyComboBoxModel.setData(t);
+            cboSourceCur.setModel(srcCurrencyComboBoxModel);
+            cboTargetCur.setModel(targerCurrencyComboBoxModel);
+        });
+        accountRepo.findCOA(ProUtil.CONVERSION_ACC).doOnSuccess((t) -> {
+            conComboBoxModel.setSelectedItem(t);
+            cboConversion.setModel(conComboBoxModel);
+        }).subscribe();
+        accountRepo.getCashBank().doOnSuccess((t) -> {
+            t.add(new ChartOfAccount());
+            srcComboBoxModel.setData(t);
+            targetComboBoxModel.setData(t);
+            cboSource.setModel(srcComboBoxModel);
+            cboTarget.setModel(targetComboBoxModel);
+        }).subscribe();
+    }
+
+    private void assignDefaultValue() {
+        txtDate.setDate(Util1.getTodayDate());
     }
 
     /**
@@ -35,14 +92,14 @@ public class CurrencyConversionDialog extends javax.swing.JDialog {
         jLabel1 = new javax.swing.JLabel();
         cboConversion = new javax.swing.JComboBox<>();
         jLabel2 = new javax.swing.JLabel();
-        cboConversion1 = new javax.swing.JComboBox<>();
-        cboConversion2 = new javax.swing.JComboBox<>();
+        cboSource = new javax.swing.JComboBox<>();
+        cboTarget = new javax.swing.JComboBox<>();
         jLabel3 = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
-        cboConversion3 = new javax.swing.JComboBox<>();
-        cboConversion4 = new javax.swing.JComboBox<>();
+        cboSourceCur = new javax.swing.JComboBox<>();
+        cboTargetCur = new javax.swing.JComboBox<>();
         jLabel4 = new javax.swing.JLabel();
-        cboConversion5 = new javax.swing.JComboBox<>();
+        cboRate = new javax.swing.JComboBox<>();
         jLabel5 = new javax.swing.JLabel();
         jFormattedTextField1 = new javax.swing.JFormattedTextField();
         jButton1 = new javax.swing.JButton();
@@ -50,7 +107,7 @@ public class CurrencyConversionDialog extends javax.swing.JDialog {
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
-        jDateChooser1 = new com.toedter.calendar.JDateChooser();
+        txtDate = new com.toedter.calendar.JDateChooser();
         jTextField1 = new javax.swing.JTextField();
         jTextField2 = new javax.swing.JTextField();
         jProgressBar1 = new javax.swing.JProgressBar();
@@ -66,24 +123,26 @@ public class CurrencyConversionDialog extends javax.swing.JDialog {
 
         jLabel2.setText("Source  A/C ");
 
-        cboConversion1.setFont(Global.textFont);
+        cboSource.setFont(Global.textFont);
 
-        cboConversion2.setFont(Global.textFont);
+        cboTarget.setFont(Global.textFont);
 
         jLabel3.setText("Target A/C");
 
-        cboConversion3.setFont(Global.textFont);
+        cboSourceCur.setFont(Global.textFont);
 
-        cboConversion4.setFont(Global.textFont);
+        cboTargetCur.setFont(Global.textFont);
 
         jLabel4.setText("Exchange Rate");
 
-        cboConversion5.setFont(Global.textFont);
+        cboRate.setFont(Global.textFont);
 
         jLabel5.setText("Exchange Amt");
 
+        jButton1.setFont(Global.lableFont);
         jButton1.setText("Save");
 
+        jButton2.setFont(Global.lableFont);
         jButton2.setText("Cancel");
 
         jLabel6.setText("Reference");
@@ -92,9 +151,12 @@ public class CurrencyConversionDialog extends javax.swing.JDialog {
 
         jLabel8.setText("Date");
 
-        jTextField1.setText("jTextField1");
+        txtDate.setDateFormatString("dd/MM/yyyy");
+        txtDate.setFont(Global.textFont);
 
-        jTextField2.setText("jTextField2");
+        jTextField1.setFont(Global.textFont);
+
+        jTextField2.setFont(Global.textFont);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -111,15 +173,17 @@ public class CurrencyConversionDialog extends javax.swing.JDialog {
                             .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(cboConversion1, 0, 252, Short.MAX_VALUE)
-                            .addComponent(cboConversion2, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(cboConversion5, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jFormattedTextField1))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(cboConversion3, 0, 35, Short.MAX_VALUE)
-                            .addComponent(cboConversion4, javax.swing.GroupLayout.Alignment.TRAILING, 0, 1, Short.MAX_VALUE)))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(cboSource, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(cboTarget, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(cboSourceCur, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(cboTargetCur, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addComponent(cboRate, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jFormattedTextField1)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jButton2)
@@ -133,7 +197,7 @@ public class CurrencyConversionDialog extends javax.swing.JDialog {
                             .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jDateChooser1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 317, Short.MAX_VALUE)
                             .addComponent(cboConversion, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jTextField1)
                             .addComponent(jTextField2))))
@@ -143,9 +207,9 @@ public class CurrencyConversionDialog extends javax.swing.JDialog {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel8)
-                    .addComponent(jDateChooser1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel7)
@@ -163,22 +227,22 @@ public class CurrencyConversionDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(cboConversion1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cboConversion3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cboSource, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cboSourceCur, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
-                    .addComponent(cboConversion2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cboConversion4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cboTarget, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cboTargetCur, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel4)
-                    .addComponent(cboConversion5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cboRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(jFormattedTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 83, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 76, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButton1, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jButton2, javax.swing.GroupLayout.Alignment.TRAILING))
@@ -214,15 +278,14 @@ public class CurrencyConversionDialog extends javax.swing.JDialog {
      */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<String> cboConversion;
-    private javax.swing.JComboBox<String> cboConversion1;
-    private javax.swing.JComboBox<String> cboConversion2;
-    private javax.swing.JComboBox<String> cboConversion3;
-    private javax.swing.JComboBox<String> cboConversion4;
-    private javax.swing.JComboBox<String> cboConversion5;
+    private javax.swing.JComboBox<ChartOfAccount> cboConversion;
+    private javax.swing.JComboBox<String> cboRate;
+    private javax.swing.JComboBox<ChartOfAccount> cboSource;
+    private javax.swing.JComboBox<Currency> cboSourceCur;
+    private javax.swing.JComboBox<ChartOfAccount> cboTarget;
+    private javax.swing.JComboBox<Currency> cboTargetCur;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
-    private com.toedter.calendar.JDateChooser jDateChooser1;
     private javax.swing.JFormattedTextField jFormattedTextField1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -237,5 +300,6 @@ public class CurrencyConversionDialog extends javax.swing.JDialog {
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
+    private com.toedter.calendar.JDateChooser txtDate;
     // End of variables declaration//GEN-END:variables
 }

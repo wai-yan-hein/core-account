@@ -34,8 +34,8 @@ public class ExchangeDialog extends javax.swing.JDialog {
     private String status;
     private ExchangeRate exchange = new ExchangeRate();
     private SelectionObserver observer;
-    private CurrencyComboBoxModel homeComboBoxModel;
-    private CurrencyComboBoxModel targetComboBoxModel;
+    private CurrencyComboBoxModel homeComboBoxModel = new CurrencyComboBoxModel();
+    private CurrencyComboBoxModel targetComboBoxModel = new CurrencyComboBoxModel();
     private UserRepo userRepo;
 
     public UserRepo getUserRepo() {
@@ -142,11 +142,10 @@ public class ExchangeDialog extends javax.swing.JDialog {
 
     private void initCombo() {
         userRepo.getCurrency().subscribe((t) -> {
-            homeComboBoxModel = new CurrencyComboBoxModel(t);
+            homeComboBoxModel.setData(t);
             List<Currency> updatedList = new ArrayList<>(t);
             updatedList.removeIf(c -> c.getCurCode().equals(Global.currency));
-            targetComboBoxModel = new CurrencyComboBoxModel(updatedList);
-
+            targetComboBoxModel.setData(t);
             cboHC.setModel(homeComboBoxModel);
             cboTC.setModel(targetComboBoxModel);
             cboTC.setSelectedIndex(0);
