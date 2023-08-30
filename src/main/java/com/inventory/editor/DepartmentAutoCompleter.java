@@ -178,7 +178,7 @@ public class DepartmentAutoCompleter implements KeyListener, SelectionObserver {
             textComp.setText(department.getDeptName());
             if (editor == null) {
                 if (observer != null) {
-                    observer.selected("Department", department.getDeptId());
+                    observer.selected("Department", department.getKey().getDeptId());
                 }
             }
         }

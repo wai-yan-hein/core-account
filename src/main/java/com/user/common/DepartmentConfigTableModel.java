@@ -62,7 +62,7 @@ public class DepartmentConfigTableModel extends AbstractTableModel {
             DepartmentUser p = listDepartment.get(row);
             switch (column) {
                 case 0 -> {
-                    return p.getDeptId();
+                    return p.getKey().getDeptId();
                 }
                 case 1 -> {
                     return p.getUserCode();
@@ -89,7 +89,7 @@ public class DepartmentConfigTableModel extends AbstractTableModel {
         if (value != null) {
             switch (column) {
                 case 0 -> {
-                    p.setDeptId(Integer.valueOf(value.toString()));
+                    p.getKey().setDeptId(Integer.valueOf(value.toString()));
                 }
                 case 1 -> {
                     p.setUserCode(value.toString());
@@ -118,7 +118,7 @@ public class DepartmentConfigTableModel extends AbstractTableModel {
     }
 
     private boolean isValidEntry(DepartmentUser d) {
-        if (d.getDeptId() == null) {
+        if (d.getKey().getDeptId() == null) {
             return false;
         } else if (d.getUserCode() == null) {
             return false;

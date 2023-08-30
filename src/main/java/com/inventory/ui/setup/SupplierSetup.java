@@ -240,7 +240,7 @@ public class SupplierSetup extends javax.swing.JPanel implements KeyListener, Pa
             supplier.setActive(chkActive.isSelected());
             supplier.setCreditDays(Util1.getInteger(spPercent.getValue()));
             if (cboDept.getSelectedItem() instanceof DepartmentUser user) {
-                supplier.setDeptId(user.getDeptId());
+                supplier.setDeptId(user.getKey().getDeptId());
             }
             Region r = regionAutoCompleter.getRegion();
             if (r != null) {

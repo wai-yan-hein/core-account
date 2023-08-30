@@ -6,8 +6,8 @@ package com.user.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.*;
@@ -22,9 +22,8 @@ import lombok.*;
 @Table(name = "department_user")
 public class DepartmentUser {
 
-    @Id
-    @Column(name = "dept_id")
-    private Integer deptId;
+    @EmbeddedId
+    private DepartmentKey key;
     @Column(name = "user_code")
     private String userCode;
     @Column(name = "dept_name")
@@ -51,12 +50,12 @@ public class DepartmentUser {
         return deptName;
     }
 
-    public DepartmentUser(Integer deptId) {
-        this.deptId = deptId;
-    }
-
+//    public DepartmentUser(Integer deptId) {
+//        this.deptId = deptId;
+//    }
     public DepartmentUser(Integer deptId, String deptName) {
-        this.deptId = deptId;
+        this.key = new DepartmentKey();
+        this.key.setDeptId(deptId);
         this.deptName = deptName;
     }
 

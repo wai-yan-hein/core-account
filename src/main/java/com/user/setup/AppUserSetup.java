@@ -193,7 +193,7 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
             return false;
         } else {
             if (cboDep.getSelectedItem() instanceof DepartmentUser dep) {
-                appUser.setDeptId(dep.getDeptId());
+                appUser.setDeptId(dep.getKey().getDeptId());
             }
             if (cboLocation.getSelectedItem() instanceof Location loc) {
                 appUser.setLocCode(loc.getKey().getLocCode());

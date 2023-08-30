@@ -227,7 +227,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     }
 
     private Integer getDepId() {
-        return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
+        return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getKey().getDeptId();
     }
 
     private String getCurCode() {
