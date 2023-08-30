@@ -233,12 +233,26 @@ public class OpeningBalanceTableModel extends AbstractTableModel {
                     }
                 }
                 case 7 -> {
-                    opening.setDrAmt(Util1.getDouble(value));
-                    opening.setCrAmt(null);
+                    double drAmt = Util1.getDouble(value);
+                    if (drAmt > 0) {
+                        opening.setDrAmt(drAmt);
+                        opening.setCrAmt(null);
+                    } else {
+                        opening.setCrAmt(drAmt);
+                        opening.setDrAmt(null);
+                    }
+
                 }
                 case 8 -> {
-                    opening.setCrAmt(Util1.getDouble(value));
-                    opening.setDrAmt(null);
+                    double crAmt = Util1.getDouble(value);
+                    if (crAmt > 0) {
+                        opening.setCrAmt(crAmt);
+                        opening.setDrAmt(null);
+                    } else {
+                        opening.setDrAmt(crAmt);
+                        opening.setCrAmt(null);
+                    }
+
                 }
             }
             opening.setOpDate(opDate.getDate());

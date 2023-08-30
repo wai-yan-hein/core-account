@@ -54,6 +54,7 @@ public class ProUtil {
     public static final String BATCH_GRN = "batch.grn";
     public static final String P_GRN_REPORT = "purchase.grn.report";
     public static final String PAYMENT_EDIT = "payment.edit";
+    public static final String AUTO_UPDATE = "auto.update";
 
     public static String getFontPath() {
         return Global.hmRoleProperty.get("font.path");

@@ -62,4 +62,5 @@ public class Global {
     public static Map<String, String> hmUser = new HashMap<>();
     public static String currency;
     public static List<DateModel> listDate;
+    public static double version = 2.0;
 }

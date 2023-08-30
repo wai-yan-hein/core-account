@@ -23,6 +23,7 @@ import com.acc.setup.TraderSetup;
 import com.common.ComponentUtil;
 import com.common.Global;
 import com.common.PanelControl;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.repo.UserRepo;
 import com.common.Util1;
@@ -879,7 +880,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
 
     public void initMain() {
         Global.parentForm = this;
-        setTitle("Core Account Cloud : " + Util1.getProgramVersion());
+        setTitle("Core Account Cloud : " + Global.version);
         scheduleNetwork();
         scheduleExit();
         scheduleProgramUpdate();
@@ -947,12 +948,12 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     public void initMenu() {
         progress.setIndeterminate(true);
         menuBar.removeAll();
-        userRepo.getRoleMenu(Global.roleCode).subscribe((t) -> {
+        userRepo.getRoleMenu(Global.roleCode).doOnSuccess((t) -> {
             createMenu(t);
-        }, (e) -> {
+        }).doOnError((e) -> {
             progress.setIndeterminate(false);
             JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-        });
+        }).subscribe();
     }
 
     private void createMenu(List<VRoleMenu> listVRM) {
@@ -1049,17 +1050,21 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void scheduleProgramUpdate() {
-        ProgramDownloadDialog d = new ProgramDownloadDialog(Global.parentForm);
-        d.setTaskScheduler(taskScheduler);
-        d.setUserRepo(userRepo);
-        d.setObserver(this);
-        d.start();
-        userRepo.receiveMessage().subscribe((message) -> {
-            log.info(message.getHeader());
-            if (message.getHeader().equals("PROGRAM_UPDATE")) {
-                d.start();
-            }
-        });
+        boolean update = Util1.getBoolean(ProUtil.getProperty(ProUtil.AUTO_UPDATE));
+        if (update) {
+            log.info("auto update on.");
+            ProgramDownloadDialog d = new ProgramDownloadDialog(Global.parentForm);
+            d.setTaskScheduler(taskScheduler);
+            d.setUserRepo(userRepo);
+            d.setObserver(this);
+            d.start();
+            userRepo.receiveMessage().subscribe((message) -> {
+                log.info(message.getHeader());
+                if (message.getHeader().equals("PROGRAM_UPDATE")) {
+                    d.start();
+                }
+            });
+        }
     }
 
     private void scheduleNetwork() {

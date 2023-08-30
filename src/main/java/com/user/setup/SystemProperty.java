@@ -200,6 +200,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkBatchGRN.setName(ProUtil.BATCH_GRN);
         chkPurGRNReport.setName(ProUtil.P_GRN_REPORT);
         chkPaymentEdit.setName(ProUtil.PAYMENT_EDIT);
+        chkAutoUpdate.setName(ProUtil.AUTO_UPDATE);
         txtPlAcc.setName(ProUtil.PL);
         txtREAcc.setName(ProUtil.RE);
         txtFixed.setName(ProUtil.FIXED);
@@ -216,6 +217,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtSup.setName(ProUtil.CREDITOR_ACC);
         txtComAmt.setName(ProUtil.P_COM_AMT);
         txtDivider.setName(ProUtil.DIVIDER);
+       
 
     }
 
@@ -289,6 +291,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkBatchSale.addActionListener(action);
         chkPurGRNReport.addActionListener(action);
         chkPaymentEdit.addActionListener(action);
+        chkAutoUpdate.addActionListener(action);
         //txt
         txtA4Report.addActionListener(action);
         txtA5Report.addActionListener(action);
@@ -356,6 +359,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkDisableAll.setSelected(Util1.getBoolean(hmProperty.get(chkDisableAll.getName())));
         chkSaleExpenseShown.setSelected(Util1.getBoolean(hmProperty.get(chkSaleExpenseShown.getName())));
         chkPaymentEdit.setSelected(Util1.getBoolean(hmProperty.get(chkPaymentEdit.getName())));
+        chkAutoUpdate.setSelected(Util1.getBoolean(hmProperty.get(chkAutoUpdate.getName())));
     }
 
     private void initTextBox() {
@@ -889,6 +893,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         jLabel21 = new javax.swing.JLabel();
         txtPages = new javax.swing.JTextField();
         chkMulti = new javax.swing.JCheckBox();
+        chkAutoUpdate = new javax.swing.JCheckBox();
         jPanel1 = new javax.swing.JPanel();
         chkSA4 = new javax.swing.JCheckBox();
         chkSA5 = new javax.swing.JCheckBox();
@@ -1162,6 +1167,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         chkMulti.setText("Multi Currency");
 
+        chkAutoUpdate.setText("Auto Update");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -1169,7 +1176,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(chkPrint, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkSWB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jSeparator2)
                     .addGroup(jPanel2Layout.createSequentialGroup()
@@ -1190,14 +1196,21 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     .addComponent(chkDisableStockIO, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkDepFilter, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkDepOption, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkMulti, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(chkMulti, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(chkPrint)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(chkAutoUpdate)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(chkPrint)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkPrint)
+                    .addComponent(chkAutoUpdate))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkSWB)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1780,6 +1793,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox chkAutoUpdate;
     private javax.swing.JCheckBox chkBalance;
     private javax.swing.JCheckBox chkBatchGRN;
     private javax.swing.JCheckBox chkBatchSale;

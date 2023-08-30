@@ -272,12 +272,14 @@ public class PurchaseTableModel extends AbstractTableModel {
             }
             if (column != 6) {
                 if (Util1.getDouble(record.getPrice()) == 0) {
-                    if (record.getStockCode() != null && record.getUnitCode() != null) {
-                        inventoryRepo.getPurRecentPrice(record.getStockCode(),
-                                Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnitCode()).subscribe((t) -> {
+                    String stockCode = record.getStockCode();
+                    if (stockCode != null && record.getUnitCode() != null) {
+                        inventoryRepo.getPurRecentPrice(stockCode,
+                                Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnitCode()).doOnSuccess((t) -> {
                             record.setPrice(Util1.getDouble(t.getAmount()));
                             calculateAmount(record);
-                        });
+                            fireTableRowsUpdated(row, row);
+                        }).subscribe();
                     }
                 }
             }

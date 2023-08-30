@@ -260,19 +260,15 @@ public class StockInOutTableModel extends AbstractTableModel {
             }
             if (column != 7) {
                 if (Util1.getFloat(io.getCostPrice()) == 0) {
-                    if (io.getStockCode() != null) {
+                    String stockCode = io.getStockCode();
+                    if (stockCode != null) {
                         if (io.getInUnitCode() != null || io.getOutUnitCode() != null) {
                             String unit = Util1.isNull(io.getInUnitCode(), io.getOutUnitCode());
-                            inventoryRepo.getPurRecentPrice(io.getStockCode(),
-                                    Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), unit).subscribe((t) -> {
+                            String vouDateStr = Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd");
+                            inventoryRepo.getPrice(stockCode, vouDateStr, unit).doOnSuccess((t) -> {
                                 io.setCostPrice(t.getAmount());
-                            });
-                            if (io.getCostPrice() == 0) {
-                                inventoryRepo.getStockIORecentPrice(io.getStockCode(),
-                                        Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), unit).subscribe((t) -> {
-                                    io.setCostPrice(t.getAmount());
-                                });
-                            }
+                                fireTableRowsUpdated(row, row);
+                            }).subscribe();
                         }
                     }
                 }

@@ -1208,6 +1208,17 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<General> getPrice(String stockCode, String vouDate, String unit) {
+        return getPurRecentPrice(stockCode, vouDate, unit)
+                .flatMap(t -> {
+                    if (t.getAmount() == 0) {
+                        return getStockIORecentPrice(stockCode, vouDate, unit);
+                    } else {
+                        return Mono.just(t);
+                    }
+                });
+    }
+
     public Mono<General> getPrice(String stockCode, String vouDate, String unit, String type) {
         return switch (type) {
             case "PUR-R" ->
@@ -1844,7 +1855,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> delete(StockIOKey key) {
         return inventoryApi.post()
-                .uri("/stockio/delete-stockio")
+                .uri("/stockio/deleteStockIO")
                 .body(Mono.just(key), StockIOKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)

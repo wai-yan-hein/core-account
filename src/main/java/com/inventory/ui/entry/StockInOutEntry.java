@@ -208,9 +208,11 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                 int yes_no = JOptionPane.showConfirmDialog(Global.parentForm,
                         "Are you sure to delete?", "Stock In/Out Voucher delete.", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
                 if (yes_no == 0) {
-                    inventoryRepo.delete(io.getKey()).subscribe((t) -> {
-                        clear();
-                    });
+                    inventoryRepo.delete(io.getKey()).doOnSuccess((t) -> {
+                        if (t) {
+                            clear();
+                        }
+                    }).subscribe();
                 }
             }
             case "DELETED" -> {
@@ -218,11 +220,11 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
                         "Are you sure to restore?", "Stock In/Out Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
                     io.setDeleted(false);
-                    inventoryRepo.restore(io.getKey()).subscribe((t) -> {
+                    inventoryRepo.restore(io.getKey()).doOnSuccess((t) -> {
                         lblStatus.setText("EDIT");
                         lblStatus.setForeground(Color.blue);
                         disableForm(true);
-                    });
+                    }).subscribe();
 
                 }
             }

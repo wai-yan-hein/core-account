@@ -82,6 +82,10 @@ public final class RegionAutoCompleter implements KeyListener {
         this.editor = editor;
         this.filter = filter;
         this.textComp.addKeyListener(this);
+        if (this.filter) {
+            Region sm = new Region("-", "All");
+            setRegion(sm);
+        }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         table.setModel(regionTableModel);
