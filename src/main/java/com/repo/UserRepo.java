@@ -293,11 +293,11 @@ public class UserRepo {
         return findCurrency(Global.currency);
     }
 
-    public void setupProperty() {
+    public Mono<HashMap> setupProperty() {
         if (localdatabase) {
-            Global.hmRoleProperty = h2Repo.getProperty(Global.compCode, Global.roleCode, Global.macId);
+            return Mono.just(h2Repo.getProperty(Global.compCode, Global.roleCode, Global.macId));
         } else {
-            Mono<HashMap> result = userApi.get()
+            return userApi.get()
                     .uri(builder -> builder.path("/user/get-property")
                     .queryParam("compCode", Global.compCode)
                     .queryParam("roleCode", Global.roleCode)
@@ -305,10 +305,7 @@ public class UserRepo {
                     .build())
                     .retrieve()
                     .bodyToMono(HashMap.class);
-            result.subscribe((t) -> {
-                Global.hmRoleProperty = t;
-                log.info("setupProperty.");
-            });
+
         }
 
     }

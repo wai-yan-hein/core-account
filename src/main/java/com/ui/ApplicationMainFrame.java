@@ -814,7 +814,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void companyUserRoleAssign() {
-        userRepo.getRoleCompany(Global.roleCode).subscribe((t) -> {
+        userRepo.getRoleCompany(Global.roleCode).doOnSuccess((t) -> {
             if (t.isEmpty()) {
                 JOptionPane.showMessageDialog(new JFrame(),
                         "No company assign to the user",
@@ -844,10 +844,11 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             initMenu();
             lblCompName.setText(Global.companyName);
             lblUserName.setText(Global.loginUser.getUserName());
-            userRepo.setupProperty();
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
+            userRepo.setupProperty().doOnSuccess((u) -> {
+                Global.hmRoleProperty = u;
+                scheduleProgramUpdate();
+            }).subscribe();
+        }).subscribe();
 
     }
 
@@ -883,7 +884,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         setTitle("Core Account Cloud : " + Global.version);
         scheduleNetwork();
         scheduleExit();
-        scheduleProgramUpdate();
         initUser();
         companyUserRoleAssign();
     }
