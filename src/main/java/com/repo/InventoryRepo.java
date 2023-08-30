@@ -2366,7 +2366,7 @@ public class InventoryRepo {
             return h2Repo.getTransferDetail(vouNo, deptId);
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/transfer/get-transfer-detail")
+                .uri(builder -> builder.path("/transfer/getTrasnferDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", deptId)

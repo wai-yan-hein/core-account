@@ -61,6 +61,10 @@ public class CurrencyConversionDialog extends javax.swing.JDialog {
             targerCurrencyComboBoxModel.setData(t);
             cboSourceCur.setModel(srcCurrencyComboBoxModel);
             cboTargetCur.setModel(targerCurrencyComboBoxModel);
+        }).subscribe();
+        userRepo.getExchangeRate().doOnSuccess((t) -> {
+            exchangeRateComoboModel.setData(t);
+            cboRate.setModel(exchangeRateComoboModel);
         });
         accountRepo.findCOA(ProUtil.CONVERSION_ACC).doOnSuccess((t) -> {
             conComboBoxModel.setSelectedItem(t);
@@ -73,6 +77,7 @@ public class CurrencyConversionDialog extends javax.swing.JDialog {
             cboSource.setModel(srcComboBoxModel);
             cboTarget.setModel(targetComboBoxModel);
         }).subscribe();
+        
     }
 
     private void assignDefaultValue() {
@@ -279,7 +284,7 @@ public class CurrencyConversionDialog extends javax.swing.JDialog {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<ChartOfAccount> cboConversion;
-    private javax.swing.JComboBox<String> cboRate;
+    private javax.swing.JComboBox<ExchangeRate> cboRate;
     private javax.swing.JComboBox<ChartOfAccount> cboSource;
     private javax.swing.JComboBox<Currency> cboSourceCur;
     private javax.swing.JComboBox<ChartOfAccount> cboTarget;

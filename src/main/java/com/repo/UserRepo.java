@@ -692,6 +692,15 @@ public class UserRepo {
                 .collectList();
     }
 
+    public Mono<List<ExchangeRate>> getExchangeRate() {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getExchangeRate")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve().bodyToFlux(ExchangeRate.class)
+                .collectList();
+    }
+
     public Mono<List<MachineProperty>> getMacPropertyByDate(String updatedDate) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/getMacPropertyByDate")

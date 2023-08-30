@@ -7,6 +7,7 @@ package com.acc.entry;
 import com.repo.AccountRepo;
 import com.acc.common.DateAutoCompleter;
 import com.acc.common.JournalTableModel;
+import com.acc.dialog.CurrencyConversionDialog;
 import com.acc.dialog.JournalEntryDialog;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
@@ -51,6 +52,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     private JProgressBar progress;
     private SelectionObserver observer;
     private JournalEntryDialog dialog;
+    private CurrencyConversionDialog conversionDialog;
     private int selectRow = 0;
     @Autowired
     private AccountRepo accountRepo;
@@ -234,6 +236,17 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         observer.selected("history", false);
         observer.selected("delete", true);
         observer.selected("refresh", true);
+    }
+
+    private void conversionDialog() {
+        if (conversionDialog == null) {
+            conversionDialog = new CurrencyConversionDialog(Global.parentForm);
+            conversionDialog.setUserRepo(userRepo);
+            conversionDialog.setAccountRepo(accountRepo);
+            conversionDialog.setLocationRelativeTo(null);
+            conversionDialog.initMain();
+        }
+        conversionDialog.setVisible(true);
     }
 
     /**
@@ -526,6 +539,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
 
     private void btnEntry1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEntry1ActionPerformed
         // TODO add your handling code here:
+        conversionDialog();
     }//GEN-LAST:event_btnEntry1ActionPerformed
 
 

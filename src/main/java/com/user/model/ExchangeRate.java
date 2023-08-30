@@ -4,6 +4,8 @@
  */
 package com.user.model;
 
+import com.common.Global;
+import com.common.Util1;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
@@ -11,7 +13,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
-import java.util.Date;
 import lombok.Data;
 
 /**
@@ -49,4 +50,12 @@ public class ExchangeRate {
     private String updatedBy;
     @Column(name = "deleted")
     private boolean deleted;
+
+    @Override
+    public String toString() {
+        String date = Util1.toDateStr(exDate, Global.dateFormat);
+        String format = String.format("%s - %s->%s -%s", date, homeCur, targetCur, homeFactor / targetFactor);
+        return format;
+    }
+
 }
