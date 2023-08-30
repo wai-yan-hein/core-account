@@ -912,7 +912,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                         dep = t.get(0);
                     }
                     lblDep.setText(dep.getDeptName());
-                    Global.deptId = dep.getDeptId();
+                    Global.deptId = dep.getKey().getDeptId();
                 } else {
                     JOptionPane.showMessageDialog(this, "No Active Department.");
                     menuBar.setEnabled(false);

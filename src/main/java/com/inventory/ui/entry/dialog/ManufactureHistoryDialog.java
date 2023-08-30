@@ -191,7 +191,7 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
     }
 
     private Integer getDepId() {
-        return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
+        return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getKey().getDeptId();
     }
 
     public void searchProcess() {

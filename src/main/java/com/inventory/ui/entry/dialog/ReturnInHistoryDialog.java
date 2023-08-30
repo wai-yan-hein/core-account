@@ -200,7 +200,7 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
     }
 
     private Integer getDepId() {
-        return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
+        return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getKey().getDeptId();
     }
 
     private String getCurCode() {

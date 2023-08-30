@@ -174,7 +174,7 @@ public class OPHistoryDialog extends javax.swing.JDialog implements KeyListener 
     }
 
     private Integer getDepId() {
-        return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
+        return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getKey().getDeptId();
     }
 
     private String getLocCode() {

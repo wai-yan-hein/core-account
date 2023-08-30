@@ -21,7 +21,7 @@ public class DepartmentUserDaoImpl extends AbstractDao<Integer, DepartmentUser> 
 
     @Override
     public DepartmentUser save(DepartmentUser dept) {
-        saveOrUpdate(dept, dept.getDeptId());
+        saveOrUpdate(dept, dept.getKey().getDeptId());
         return dept;
     }
 

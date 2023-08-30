@@ -161,7 +161,7 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     }
 
     private Integer getDepId() {
-        return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getDeptId();
+        return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getKey().getDeptId();
     }
 
     public void search() {

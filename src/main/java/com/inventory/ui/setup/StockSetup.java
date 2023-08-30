@@ -280,7 +280,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         progress.setIndeterminate(true);
         Integer deptId = 0;
         if (cboDept1.getSelectedItem() instanceof DepartmentUser dep) {
-            deptId = dep.getDeptId();
+            deptId = dep.getKey().getDeptId();
         }
         ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, deptId);
         filter.setBrandCode(getBrand());
@@ -437,7 +437,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             stock.setCalculate(chkCal.isSelected());
             stock.setExplode(chkEx.isSelected());
             if (cboDept.getSelectedItem() instanceof DepartmentUser dep) {
-                stock.setDeptId(dep.getDeptId());
+                stock.setDeptId(dep.getKey().getDeptId());
             }
             if (lblStatus.getText().equals("NEW")) {
                 StockKey key = new StockKey();
