@@ -56,7 +56,12 @@ public class ProUtil {
     public static final String P_GRN_REPORT = "purchase.grn.report";
     public static final String PAYMENT_EDIT = "payment.edit";
     public static final String AUTO_UPDATE = "auto.update";
-
+    public static final String WEIGHT_POINT = "weight.point";
+    public static final String CHECK_SALE_A4 = "check.sale.A4";
+    public static final String CHECK_SALE_A5 = "check.sale.A5";
+    public static final String CHECK_SALE_VOUCHER = "check.sale.voucher";
+    public static final String SALE_LAST_PRICE = "sale.last.price";
+    public static final String STOCK_NAME_WITH_BRAND = "stock.name.with.brand";
     public static String getFontPath() {
         return Global.hmRoleProperty.get("font.path");
     }

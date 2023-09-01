@@ -402,7 +402,6 @@
                               <Component id="txtPages" max="32767" attributes="0"/>
                           </Group>
                       </Group>
-                      <Component id="chkWeight" max="32767" attributes="0"/>
                       <Component id="chkDisableSale" max="32767" attributes="0"/>
                       <Component id="chkDisablePur" max="32767" attributes="0"/>
                       <Component id="chkDisableRI" max="32767" attributes="0"/>
@@ -411,10 +410,19 @@
                       <Component id="chkDepFilter" alignment="1" max="32767" attributes="0"/>
                       <Component id="chkDepOption" alignment="1" max="32767" attributes="0"/>
                       <Component id="chkMulti" alignment="1" max="32767" attributes="0"/>
-                      <Group type="102" alignment="0" attributes="0">
-                          <Component id="chkPrint" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                          <Component id="chkAutoUpdate" min="-2" max="-2" attributes="0"/>
+                      <Group type="102" attributes="0">
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Group type="102" alignment="0" attributes="0">
+                                  <Component id="chkPrint" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                  <Component id="chkAutoUpdate" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <Component id="chkWeight" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="chkWeightPoint" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                          </Group>
                           <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                       </Group>
                   </Group>
@@ -433,7 +441,10 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="chkSWB" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="chkWeight" min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="chkWeight" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="chkWeightPoint" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="chkDisableSale" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
@@ -569,6 +580,11 @@
         <Component class="javax.swing.JCheckBox" name="chkAutoUpdate">
           <Properties>
             <Property name="text" type="java.lang.String" value="Auto Update"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="chkWeightPoint">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Weight Point"/>
           </Properties>
         </Component>
       </SubComponents>

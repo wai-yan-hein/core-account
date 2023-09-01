@@ -125,7 +125,7 @@ public class MyDataModel extends MyAbstractTreeTableModel {
             PrivilegeMenu privilege = new PrivilegeMenu();
             privilege.setKey(key);
             privilege.setAllow(allow);
-            userRepo.savePM(privilege).subscribe((t) -> {
+            userRepo.savePrivilegeMenu(privilege).subscribe((t) -> {
                 if (observer != null) {
                     observer.selected("Menu-Change", "-");
                 }

@@ -80,7 +80,7 @@ public class RoleCompany extends javax.swing.JPanel {
 
     public void searchCompany(String roleCode) {
         tableModel.clear();
-        userRepo.searchCompany(roleCode)
+        userRepo.getPrivilegeCompany(roleCode)
                 .subscribe((t) -> {
                     tableModel.setRoleCode(roleCode);
                     tableModel.setListProperty(t);
