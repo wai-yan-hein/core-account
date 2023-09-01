@@ -220,7 +220,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
                             record.setWeight(s.getWeight());
                             record.setWeightUnit(s.getWeightUnit());
                             addNewRow();
-                            if (ProUtil.isUseWeight()) {
+                            if (ProUtil.isUseWeightPoint()) {
                                 setSelection(row, 6);
                             } else {
                                 setSelection(row, 4);

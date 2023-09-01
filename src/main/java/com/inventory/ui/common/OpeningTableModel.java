@@ -193,27 +193,28 @@ public class OpeningTableModel extends AbstractTableModel {
                 }
                 case 3 -> {
                     // Qty
-                    if (ProUtil.isUseWeight()) {
-                        String str = String.valueOf(value);
-                        float wt = Util1.getFloat(record.getWeight());
-                        record.setQty(Util1.getFloat(value));
-                        record.setTotalWeight(Util1.getTotalWeight(wt, str));
-                        setSelection(row, 5);
-                    } else {
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
+                    if (Util1.isNumber(value)) {
+                        if (Util1.isPositive(Util1.getFloat(value))) {
+                            if (ProUtil.isUseWeightPoint()) {
+                                String str = String.valueOf(value);
+                                float wt = Util1.getFloat(record.getWeight());
                                 record.setQty(Util1.getFloat(value));
+                                record.setTotalWeight(Util1.getTotalWeight(wt, str));
+                                setSelection(row, 5);
                             } else {
-                                showMessageBox("Input value must be positive");
-                                setSelection(row, column);
+                                record.setQty(Util1.getFloat(value));
+                                record.setTotalWeight(Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight()));
                             }
+
                         } else {
-                            showMessageBox("Input value must be number.");
+                            showMessageBox("Input value must be positive");
                             setSelection(row, column);
                         }
-                        setSelection(row, 5);
-
+                    } else {
+                        showMessageBox("Input value must be number.");
+                        setSelection(row, column);
                     }
+                    setSelection(row, 5);
                 }
                 case 4 -> {
                     //Unit

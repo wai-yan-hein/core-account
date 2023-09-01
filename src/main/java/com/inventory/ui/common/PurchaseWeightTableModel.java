@@ -124,7 +124,7 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
             case 0, 1, 2, 3 ->
                 String.class;
             case 7 ->
-                ProUtil.isUseWeight() ? String.class : Double.class;
+                ProUtil.isUseWeightPoint() ? String.class : Double.class;
             default ->
                 Double.class;
         };
@@ -262,19 +262,27 @@ public class PurchaseWeightTableModel extends AbstractTableModel {
                 }
                 case 6 -> {
                     //Qty
-                    if (ProUtil.isUseWeight()) {
-                        String str = String.valueOf(value);
-                        double wt = Util1.getDouble(record.getWeight());
-                        record.setQty(Util1.getDouble(value));
-                        record.setTotalWeight(Util1.getTotalWeight(wt, str));
-                    } else {
-                        if (Util1.isNumber(value)) {
-                            record.setQty(Util1.getDouble(value));
-                            if (record.getQty() != null && record.getWeight() != null) {
-                                record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
+                    if (Util1.isNumber(value)) {
+                        if (Util1.isPositive(Util1.getFloat(value))) {
+                            if (ProUtil.isUseWeightPoint()) {
+                                String str = String.valueOf(value);
+                                double wt = Util1.getDouble(record.getWeight());
+                                record.setQty(Util1.getDouble(value));
+                                record.setTotalWeight(Util1.getTotalWeight(wt, str));
+                            } else {
+                                record.setQty(Util1.getDouble(value));
+                                if (record.getQty() != null && record.getWeight() != null) {
+                                    record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
+                                }
                             }
-                            parent.setRowSelectionInterval(row, row);
+                        } else {
+                            showMessageBox("Input value must be positive");
+                            parent.setRowSelectionInterval(row, column);
                         }
+                        parent.setRowSelectionInterval(row, row);
+                    } else {
+                        showMessageBox("Input value must be number.");
+                        parent.setRowSelectionInterval(row, column);
                     }
                 }
                 case 7 -> {

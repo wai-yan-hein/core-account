@@ -266,30 +266,31 @@ public class MilingRawTableModel extends AbstractTableModel {
                     }
                     case 5 -> {
                         //Qty
-                        if (ProUtil.isUseWeight()) {
-                            String str = String.valueOf(value);
-                            float wt = Util1.getFloat(sd.getWeight());
-                            sd.setQty(Util1.getFloat(value));
-                            sd.setTotalWeight(Util1.getTotalWeight(wt, str));
-                        } else {
-                            if (Util1.isNumber(value)) {
-                                if (Util1.isPositive(Util1.getFloat(value))) {
+                        if (Util1.isNumber(value)) {
+                            if (Util1.isPositive(Util1.getFloat(value))) {
+                                if (ProUtil.isUseWeightPoint()) {
+                                    String str = String.valueOf(value);
                                     float wt = Util1.getFloat(sd.getWeight());
                                     sd.setQty(Util1.getFloat(value));
-                                    sd.setTotalWeight(Util1.getTotalWeight(wt, String.valueOf(value)));
-                                    if (sd.getUnitCode() == null) {
-                                        setSelection(row, 7);
-                                    } else {
-                                        setSelection(row, 8);
-                                    }
+                                    sd.setTotalWeight(Util1.getTotalWeight(wt, str));
                                 } else {
-                                    showMessageBox("Input value must be positive");
-                                    setSelection(row, column);
+                                    float wt = Util1.getFloat(sd.getWeight());
+                                    sd.setQty(Util1.getFloat(value));
+                                    sd.setTotalWeight(Util1.getFloat(sd.getQty()) * Util1.getFloat(sd.getWeight()));
+                                }
+
+                                if (sd.getUnitCode() == null) {
+                                    setSelection(row, 7);
+                                } else {
+                                    setSelection(row, 8);
                                 }
                             } else {
-                                showMessageBox("Input value must be number.");
+                                showMessageBox("Input value must be positive");
                                 setSelection(row, column);
                             }
+                        } else {
+                            showMessageBox("Input value must be number.");
+                            setSelection(row, column);
                         }
                     }
                     case 6 -> {

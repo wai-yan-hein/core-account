@@ -109,6 +109,10 @@ public class ProUtil {
     public static boolean isUseWeight() {
         return Util1.getBoolean(Global.hmRoleProperty.get("stock.use.weight"));
     }
+    
+    public static boolean isUseWeightPoint() {
+        return Util1.getBoolean(Global.hmRoleProperty.get(WEIGHT_POINT));
+    }
 
     public static boolean isStockNameWithCategory() {
         return Util1.getBoolean(Global.hmRoleProperty.get("stock.name.with.category"));
