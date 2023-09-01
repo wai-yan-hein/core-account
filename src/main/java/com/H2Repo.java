@@ -138,6 +138,7 @@ import com.inventory.model.VReturnIn;
 import com.inventory.model.VReturnOut;
 import com.inventory.model.VTransfer;
 import com.inventory.model.WeightLossHis;
+import com.user.model.DepartmentKey;
 import com.user.model.PrivilegeMenu;
 import java.util.HashMap;
 import java.util.List;
@@ -622,12 +623,12 @@ public class H2Repo {
         return Mono.justOrEmpty(roleService.findById(roleCode));
     }
 
-    public Mono<DepartmentUser> findDepartment(Integer deptId) {
-        return Mono.justOrEmpty(deptUserService.findById(deptId));
+    public Mono<DepartmentUser> findDepartment(DepartmentKey key) {
+        return Mono.justOrEmpty(deptUserService.findById(key));
     }
 
-    public Mono<List<DepartmentUser>> getDeparment(Boolean active) {
-        return Mono.justOrEmpty(deptUserService.findAll(active));
+    public Mono<List<DepartmentUser>> getDeparment(Boolean active,String compCode) {
+        return Mono.justOrEmpty(deptUserService.findAll(active,compCode));
     }
 
     public Mono<BusinessType> find(Integer id) {

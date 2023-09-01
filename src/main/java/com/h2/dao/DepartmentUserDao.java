@@ -4,6 +4,7 @@
  */
 package com.h2.dao;
 
+import com.user.model.DepartmentKey;
 import com.user.model.DepartmentUser;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public interface DepartmentUserDao {
 
     String getMaxDate();
     
-    DepartmentUser findById(Integer id);
+    DepartmentUser findById(DepartmentKey key);
     
-    List<DepartmentUser> findAll(Boolean active);
+    List<DepartmentUser> findAll(Boolean active,String compCode);
 }

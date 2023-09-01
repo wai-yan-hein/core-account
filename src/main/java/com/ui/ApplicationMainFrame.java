@@ -814,7 +814,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     }
 
     private void companyUserRoleAssign() {
-        userRepo.getRoleCompany(Global.roleCode).doOnSuccess((t) -> {
+        userRepo.getPrivilegeRoleCompany(Global.roleCode).doOnSuccess((t) -> {
             if (t.isEmpty()) {
                 JOptionPane.showMessageDialog(new JFrame(),
                         "No company assign to the user",
@@ -934,12 +934,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                     }
                     lblDep.setText(dep.getDeptName());
                 } else {
-                    JOptionPane.showMessageDialog(this, "Department no found.");
-                    System.exit(1);
+                    JOptionPane.showMessageDialog(this, "Department not found.");
+                    System.exit(0);
                 }
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, "Department no found.");
-                System.exit(1);
             });
         }
 

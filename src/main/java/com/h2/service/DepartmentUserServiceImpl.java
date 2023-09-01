@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.h2.dao.DepartmentUserDao;
+import com.user.model.DepartmentKey;
 import com.user.model.DepartmentUser;
 import java.util.List;
 import org.springframework.context.annotation.Lazy;
@@ -35,13 +36,13 @@ public class DepartmentUserServiceImpl implements DepartmentUserService {
     }
 
     @Override
-    public DepartmentUser findById(Integer id) {
+    public DepartmentUser findById(DepartmentKey id) {
         return deptDao.findById(id);
     }
 
     @Override
-    public List<DepartmentUser> findAll(Boolean active) {
-        return deptDao.findAll(active);
+    public List<DepartmentUser> findAll(Boolean active,String compCode) {
+        return deptDao.findAll(active,compCode);
     }
 
 }

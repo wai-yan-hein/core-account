@@ -63,7 +63,7 @@ public class UserRepo {
             return h2Repo.getCurrency();
         }
         return userApi.get()
-                .uri(builder -> builder.path("/user/get-currency")
+                .uri(builder -> builder.path("/user/getCurrency")
                 .build())
                 .retrieve()
                 .bodyToFlux(Currency.class)
@@ -80,7 +80,7 @@ public class UserRepo {
             return h2Repo.getCompany(active);
         }
         return userApi.get()
-                .uri(builder -> builder.path("/user/get-company")
+                .uri(builder -> builder.path("/user/getCompany")
                 .queryParam("active", active)
                 .build())
                 .retrieve()
@@ -93,7 +93,7 @@ public class UserRepo {
             return h2Repo.getAppUser();
         }
         return userApi.get()
-                .uri(builder -> builder.path("/user/get-appuser")
+                .uri(builder -> builder.path("/user/getAppUser")
                 .build())
                 .retrieve().bodyToFlux(AppUser.class)
                 .collectList();
@@ -104,7 +104,7 @@ public class UserRepo {
             return h2Repo.getMacList();
         }
         return userApi.get()
-                .uri(builder -> builder.path("/user/get-mac-list")
+                .uri(builder -> builder.path("/user/getMacList")
                 .build())
                 .retrieve().bodyToFlux(MachineInfo.class).collectList();
     }
@@ -114,7 +114,7 @@ public class UserRepo {
             return h2Repo.getAppRole(Global.compCode);
         }
         return userApi.get()
-                .uri(builder -> builder.path("/user/get-role")
+                .uri(builder -> builder.path("/user/getRole")
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve().bodyToFlux(AppRole.class).collectList();
@@ -156,7 +156,7 @@ public class UserRepo {
 
     public Mono<CompanyInfo> saveCompany(CompanyInfo app) {
         return userApi.post()
-                .uri("/user/save-company")
+                .uri("/user/saveCompany")
                 .body(Mono.just(app), CompanyInfo.class)
                 .retrieve()
                 .bodyToMono(CompanyInfo.class)
@@ -169,7 +169,7 @@ public class UserRepo {
 
     public Mono<Currency> saveCurrency(Currency app) {
         return userApi.post()
-                .uri("/user/save-currency")
+                .uri("/user/saveCurrency")
                 .body(Mono.just(app), Currency.class)
                 .retrieve()
                 .bodyToMono(Currency.class)
@@ -186,7 +186,7 @@ public class UserRepo {
 
     public Mono<AppRole> saveAppRole(AppRole app) {
         return userApi.post()
-                .uri("/user/save-role")
+                .uri("/user/saveRole")
                 .body(Mono.just(app), AppRole.class)
                 .retrieve()
                 .bodyToMono(AppRole.class)
@@ -197,9 +197,9 @@ public class UserRepo {
                 });
     }
 
-    public Mono<PrivilegeCompany> saveCompRole(PrivilegeCompany app) {
+    public Mono<PrivilegeCompany> savePrivilegeCompany(PrivilegeCompany app) {
         return userApi.post()
-                .uri("/user/save-privilege-company")
+                .uri("/user/savePrivilegeCompany")
                 .body(Mono.just(app), PrivilegeCompany.class)
                 .retrieve()
                 .bodyToMono(PrivilegeCompany.class)
@@ -212,7 +212,7 @@ public class UserRepo {
 
     public Mono<AppUser> saveUser(AppUser app) {
         return userApi.post()
-                .uri("/user/save-user")
+                .uri("/user/saveUser")
                 .body(Mono.just(app), AppUser.class)
                 .retrieve()
                 .bodyToMono(AppUser.class)
@@ -228,7 +228,7 @@ public class UserRepo {
             return h2Repo.findCurrency(curCode);
         }
         return userApi.get()
-                .uri(builder -> builder.path("/user/find-currency")
+                .uri(builder -> builder.path("/user/findCurrency")
                 .queryParam("curCode", curCode)
                 .build())
                 .retrieve()
@@ -255,7 +255,7 @@ public class UserRepo {
             return h2Repo.finRole(roleCode);
         }
         return userApi.get()
-                .uri(builder -> builder.path("/user/find-role")
+                .uri(builder -> builder.path("/user/findRole")
                 .queryParam("roleCode", roleCode)
                 .build())
                 .retrieve().bodyToMono(AppRole.class);
@@ -266,7 +266,7 @@ public class UserRepo {
         key.setDeptId(deptId);
         key.setCompCode(Global.compCode);
         if (localdatabase) {
-            return h2Repo.findDepartment(deptId);
+            return h2Repo.findDepartment(key);
         }
         return userApi.post()
                 .uri("/user/findDepartment")
@@ -281,7 +281,7 @@ public class UserRepo {
 
     public Mono<DepartmentUser> saveDepartment(DepartmentUser d) {
         return userApi.post()
-                .uri("/user/save-department")
+                .uri("/user/saveDepartment")
                 .body(Mono.just(d), DepartmentUser.class)
                 .retrieve()
                 .bodyToMono(DepartmentUser.class)
@@ -301,7 +301,7 @@ public class UserRepo {
             return Mono.just(h2Repo.getProperty(Global.compCode, Global.roleCode, Global.macId));
         } else {
             return userApi.get()
-                    .uri(builder -> builder.path("/user/get-property")
+                    .uri(builder -> builder.path("/user/getProperty")
                     .queryParam("compCode", Global.compCode)
                     .queryParam("roleCode", Global.roleCode)
                     .queryParam("macId", Global.macId)
@@ -313,12 +313,12 @@ public class UserRepo {
 
     }
 
-    public Mono<List<SysProperty>> getSystProperty() {
+    public Mono<List<SysProperty>> getSystemProperty() {
         if (localdatabase) {
             return h2Repo.getSysProperty(Global.compCode);
         }
         return userApi.get()
-                .uri(builder -> builder.path("/user/get-system-property")
+                .uri(builder -> builder.path("/user/getSystemProperty")
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
@@ -333,7 +333,7 @@ public class UserRepo {
             prop = h2Repo.getRoleProperty(roleCode);
         } else {
             Mono<ResponseEntity<List<RoleProperty>>> result = userApi.get()
-                    .uri(builder -> builder.path("/user/get-role-property")
+                    .uri(builder -> builder.path("/user/getRoleProperty")
                     .queryParam("roleCode", roleCode)
                     .build())
                     .retrieve().toEntityList(RoleProperty.class);
@@ -355,7 +355,7 @@ public class UserRepo {
             prop = h2Repo.getMacProperty(macId);
         } else {
             Mono<ResponseEntity<List<MachineProperty>>> result = userApi.get()
-                    .uri(builder -> builder.path("/user/get-mac-property")
+                    .uri(builder -> builder.path("/user/getMacProperty")
                     .queryParam("macId", macId)
                     .build())
                     .retrieve().toEntityList(MachineProperty.class);
@@ -369,7 +369,7 @@ public class UserRepo {
 
     public Mono<SysProperty> saveSys(SysProperty prop) {
         return userApi.post()
-                .uri("/user/save-system-property")
+                .uri("/user/saveSystemProperty")
                 .body(Mono.just(prop), SysProperty.class)
                 .retrieve()
                 .bodyToMono(SysProperty.class)
@@ -382,7 +382,7 @@ public class UserRepo {
 
     public Mono<RoleProperty> saveRoleProperty(RoleProperty prop) {
         return userApi.post()
-                .uri("/user/save-role-property")
+                .uri("/user/saveRoleProperty")
                 .body(Mono.just(prop), RoleProperty.class)
                 .retrieve()
                 .bodyToMono(RoleProperty.class)
@@ -395,7 +395,7 @@ public class UserRepo {
 
     public Mono<MachineProperty> saveMacProp(MachineProperty prop) {
         return userApi.post()
-                .uri("/user/save-mac-property")
+                .uri("/user/saveMacProperty")
                 .body(Mono.just(prop), MachineProperty.class)
                 .retrieve()
                 .bodyToMono(MachineProperty.class)
@@ -408,12 +408,13 @@ public class UserRepo {
 
     public Mono<List<DepartmentUser>> getDeparment(Boolean active) {
         if (localdatabase) {
-            return h2Repo.getDeparment(active);
+            return h2Repo.getDeparment(active,Global.compCode);
         }
         return userApi.get()
-                .uri(builder -> builder.path("/user/get-department")
+                .uri(builder -> builder.path("/user/getDepartment")
                 .queryParam("active", active)
-                .build())
+                .queryParam("compCode", Global.compCode)
+               .build())
                 .retrieve().bodyToFlux(DepartmentUser.class)
                 .collectList()
                 .onErrorResume((e) -> {
@@ -427,7 +428,7 @@ public class UserRepo {
             return h2Repo.getReport(Global.roleCode, menuClass, Global.compCode);
         }
         return userApi.get()
-                .uri(builder -> builder.path("/user/get-report")
+                .uri(builder -> builder.path("/user/getReport")
                 .queryParam("roleCode", Global.roleCode)
                 .queryParam("menuClass", menuClass)
                 .queryParam("compCode", Global.compCode)
@@ -482,7 +483,7 @@ public class UserRepo {
 
     public Mono<Menu> save(Menu menu) {
         return userApi.post()
-                .uri("/user/save-menu")
+                .uri("/user/saveMenu")
                 .body(Mono.just(menu), Menu.class)
                 .retrieve()
                 .bodyToMono(Menu.class)
@@ -498,7 +499,7 @@ public class UserRepo {
             return h2Repo.getMenuTree(Global.compCode);
         }
         return userApi.get()
-                .uri(builder -> builder.path("/user/get-menu-tree")
+                .uri(builder -> builder.path("/user/getMenuTree")
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
@@ -508,7 +509,7 @@ public class UserRepo {
 
     public Mono<Boolean> delete(Menu menu) {
         return userApi.post()
-                .uri("/user/delete-menu")
+                .uri("/user/deleteMenu")
                 .body(Mono.just(menu), Menu.class)
                 .retrieve()
                 .bodyToMono(Boolean.class);
@@ -519,7 +520,7 @@ public class UserRepo {
             return h2Repo.getMenuParent(Global.compCode);
         }
         return userApi.get()
-                .uri(builder -> builder.path("/user/get-menu-parent")
+                .uri(builder -> builder.path("/user/getMenuParent")
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
@@ -797,9 +798,9 @@ public class UserRepo {
                 });
     }
 
-    public Mono<List<VRoleCompany>> getRoleCompany(String roleCode) {
+    public Mono<List<VRoleCompany>> getPrivilegeRoleCompany(String roleCode) {
         return userApi.get()
-                .uri(builder -> builder.path("/user/get-privilege-role-company")
+                .uri(builder -> builder.path("/user/getPrivilegeRoleCompany")
                 .queryParam("roleCode", roleCode)
                 .build())
                 .retrieve()
@@ -816,7 +817,7 @@ public class UserRepo {
 
     public Mono<List<VRoleMenu>> getRoleMenu(String roleCode) {
         return userApi.get()
-                .uri(builder -> builder.path("/user/get-privilege-role-menu-tree")
+                .uri(builder -> builder.path("/user/getPrivilegeRoleMenuTree")
                 .queryParam("roleCode", roleCode)
                 .queryParam("compCode", Global.compCode)
                 .build())
@@ -836,7 +837,7 @@ public class UserRepo {
             return h2Repo.getRoleMenu(roleCode, Global.compCode);
         }
         return userApi.get()
-                .uri(builder -> builder.path("/user/get-role-menu-tree")
+                .uri(builder -> builder.path("/user/getRoleMenuTree")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("roleCode", roleCode)
                 .build())
@@ -845,12 +846,12 @@ public class UserRepo {
                 .collectList();
     }
 
-    public Mono<List<PrivilegeCompany>> searchCompany(String roleCode) {
+    public Mono<List<PrivilegeCompany>> getPrivilegeCompany(String roleCode) {
         if (localdatabase) {
             return h2Repo.searchCompany(roleCode);
         }
         return userApi.get()
-                .uri(builder -> builder.path("/user/get-privilege-company")
+                .uri(builder -> builder.path("/user/getPrivilegeCompany")
                 .queryParam("roleCode", roleCode)
                 .build())
                 .retrieve()
@@ -859,9 +860,9 @@ public class UserRepo {
 
     }
 
-    public Mono<PrivilegeMenu> savePM(PrivilegeMenu pm) {
+    public Mono<PrivilegeMenu> savePrivilegeMenu(PrivilegeMenu pm) {
         return userApi.post()
-                .uri("/user/save-privilege-menu")
+                .uri("/user/savePrivilegeMenu")
                 .body(Mono.just(pm), PrivilegeMenu.class)
                 .retrieve()
                 .bodyToMono(PrivilegeMenu.class)

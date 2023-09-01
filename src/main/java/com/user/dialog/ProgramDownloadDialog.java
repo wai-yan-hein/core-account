@@ -22,6 +22,7 @@ import java.time.ZoneId;
 import javax.swing.JFrame;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.TaskScheduler;
+import reactor.core.publisher.Mono;
 
 /**
  *
@@ -91,7 +92,7 @@ public class ProgramDownloadDialog extends javax.swing.JDialog {
                 } else {
                     log.info("local file not found.");
                 }
-            }).subscribe();
+            }).onErrorResume((t) -> Mono.empty()).subscribe();
         }, Duration.ofMinutes(60));
     }
 

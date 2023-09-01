@@ -1339,7 +1339,7 @@ public class InventoryRepo {
 
     public Mono<List<UnitRelationDetail>> getRelationDetail(String code, Integer deptId) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-unit-relation-detail")
+                .uri(builder -> builder.path("/setup/getUnitRelationDetail")
                 .queryParam("code", code)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", deptId)
@@ -2361,12 +2361,12 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<TransferHisDetail>> getTrasnferDetail(String vouNo, Integer deptId, boolean local) {
+    public Mono<List<TransferHisDetail>> getTransferDetail(String vouNo, Integer deptId, boolean local) {
         if (local) {
             return h2Repo.getTransferDetail(vouNo, deptId);
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/transfer/getTrasnferDetail")
+                .uri(builder -> builder.path("/transfer/getTransferDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", deptId)

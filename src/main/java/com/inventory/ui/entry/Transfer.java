@@ -328,7 +328,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             toLocaitonCompleter.setLocation(t);
         });
         String vouNo = io.getKey().getVouNo();
-        inventoryRepo.getTrasnferDetail(vouNo, deptId, local).subscribe((t) -> {
+        inventoryRepo.getTransferDetail(vouNo, deptId, local).subscribe((t) -> {
             tranTableModel.setListTransfer(t);
             tranTableModel.addNewRow();
             txtVou.setText(vouNo);
