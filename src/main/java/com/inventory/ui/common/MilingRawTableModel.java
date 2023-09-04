@@ -389,6 +389,8 @@ public class MilingRawTableModel extends AbstractTableModel {
         float ttlWt = Util1.getFloat(s.getTotalWeight());
         if (s.getStockCode() != null) {
             float amount = (ttlWt * price) / wt;
+            String formattedAmount = String.format("%,.0f", amount); // Format with commas and no decimal places
+            System.out.println(formattedAmount);
             s.setAmount(amount);
         }
     }
