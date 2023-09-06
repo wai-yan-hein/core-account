@@ -256,24 +256,26 @@ public class ReturnInTableModel extends AbstractTableModel {
                     }
                     case 6 -> {
                         //Qty
-                        if (ProUtil.isUseWeight()) {
-                            String str = String.valueOf(value);
-                            float wt = Util1.getFloat(record.getWeight());
-                            record.setQty(Util1.getFloat(value));
-                            record.setTotalWeight(Util1.getTotalWeight(wt, str));
-                        } else {
-                            if (Util1.isNumber(value)) {
-                                if (Util1.isPositive(Util1.getFloat(value))) {
+                        if (Util1.isNumber(value)) {
+                            if (Util1.isPositive(Util1.getFloat(value))) {
+                                if (ProUtil.isUseWeightPoint()) {
+                                    String str = String.valueOf(value);
+                                    float wt = Util1.getFloat(record.getWeight());
                                     record.setQty(Util1.getFloat(value));
-                                    setSelection(row, 6);
+                                    record.setTotalWeight(Util1.getTotalWeight(wt, str));
                                 } else {
-                                    showMessageBox("Input value must be positive");
-                                    setSelection(row, column);
+                                    record.setQty(Util1.getFloat(value));
+                                    record.setTotalWeight(Util1.getFloat(record.getQty()) * Util1.getFloat(record.getWeight()));
                                 }
+
+                                setSelection(row, 6);
                             } else {
-                                showMessageBox("Input value must be number.");
+                                showMessageBox("Input value must be positive");
                                 setSelection(row, column);
                             }
+                        } else {
+                            showMessageBox("Input value must be number.");
+                            setSelection(row, column);
                         }
                     }
                     case 7 -> {
