@@ -32,6 +32,7 @@ import com.user.model.Project;
 import com.user.model.ProjectKey;
 import com.user.model.VRoleCompany;
 import com.user.model.YearEnd;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -408,13 +409,13 @@ public class UserRepo {
 
     public Mono<List<DepartmentUser>> getDeparment(Boolean active) {
         if (localdatabase) {
-            return h2Repo.getDeparment(active,Global.compCode);
+            return h2Repo.getDeparment(active, Global.compCode);
         }
         return userApi.get()
                 .uri(builder -> builder.path("/user/getDepartment")
                 .queryParam("active", active)
                 .queryParam("compCode", Global.compCode)
-               .build())
+                .build())
                 .retrieve().bodyToFlux(DepartmentUser.class)
                 .collectList()
                 .onErrorResume((e) -> {
@@ -595,6 +596,17 @@ public class UserRepo {
                         h2Repo.save(t);
                     }
                 });
+    }
+
+    public Mono<ExchangeRate> findExchange(String exCode) {
+        ExchangeKey key = new ExchangeKey();
+        key.setExCode(exCode);
+        key.setCompCode(Global.compCode);
+        return userApi.post()
+                .uri("/user/findExchange")
+                .body(Mono.just(key), ExchangeKey.class)
+                .retrieve()
+                .bodyToMono(ExchangeRate.class);
     }
 
     public Mono<List<Project>> searchProjectByCode(String code) {
@@ -794,7 +806,7 @@ public class UserRepo {
                     if (localdatabase) {
                         return h2Repo.login(userName, password);
                     }
-                    return Mono.error(e);
+                    return Mono.empty();
                 });
     }
 
@@ -816,6 +828,9 @@ public class UserRepo {
     }
 
     public Mono<List<VRoleMenu>> getRoleMenu(String roleCode) {
+        if (localdatabase) {
+            return h2Repo.getPRoleMenu(roleCode, Global.compCode);
+        }
         return userApi.get()
                 .uri(builder -> builder.path("/user/getPrivilegeRoleMenuTree")
                 .queryParam("roleCode", roleCode)
@@ -825,10 +840,8 @@ public class UserRepo {
                 .bodyToFlux(VRoleMenu.class)
                 .collectList()
                 .onErrorResume((e) -> {
-                    if (localdatabase) {
-                        return h2Repo.getPRoleMenu(roleCode, Global.compCode);
-                    }
-                    return Mono.error(e);
+                    log.error("getRoleMenu : " + e.getMessage());
+                    return Mono.empty();
                 });
     }
 
@@ -904,5 +917,17 @@ public class UserRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(Message.class);
+    }
+
+    public Mono<List<Currency>> getCurrency(String homeCur, String exCur) {
+        Mono<Currency> m1 = findCurrency(homeCur);
+        Mono<Currency> m2 = findCurrency(exCur);
+        return Mono.zip(m1, m2)
+                .map(tuple -> {
+                    List<Currency> combinedList = new ArrayList<>();
+                    combinedList.add(tuple.getT1());
+                    combinedList.add(tuple.getT2());
+                    return combinedList;
+                });
     }
 }

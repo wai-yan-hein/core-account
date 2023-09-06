@@ -35,8 +35,10 @@ import org.slf4j.LoggerFactory;
  * @author DELL
  */
 public class OrderTableModel extends AbstractTableModel {
+
     private static final Logger log = LoggerFactory.getLogger(OrderTableModel.class);
-    private String[] columnNames = {"Code", "Description", "Relation", "Location", "Weight", "Weight Unit", "Qty", "Unit","Total Qty", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Description", "Relation", "Location", "Weight", "Weight Unit",
+        "Qty", "Unit", "Price", "Amount"};
     private JTable parent;
     private List<OrderHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
@@ -44,38 +46,20 @@ public class OrderTableModel extends AbstractTableModel {
     private StockBalanceTableModel sbTableModel;
     private OrderEntry orderEntry;
     private InventoryRepo inventoryRepo;
-    private JLabel lblStockName;
-    private JButton btnProgress;
     private JDateChooser vouDate;
     private boolean change = false;
     private JLabel lblRecord;
 
-    public OrderEntry getOrderEntry() {
-        return orderEntry;
-    }
-
     public void setOrderEntry(OrderEntry orderEntry) {
         this.orderEntry = orderEntry;
-    }
-
-    public StockBalanceTableModel getSbTableModel() {
-        return sbTableModel;
     }
 
     public void setSbTableModel(StockBalanceTableModel sbTableModel) {
         this.sbTableModel = sbTableModel;
     }
 
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
-    }
-
-    public JLabel getLblRecord() {
-        return lblRecord;
     }
 
     public void setLblRecord(JLabel lblRecord) {
@@ -90,40 +74,12 @@ public class OrderTableModel extends AbstractTableModel {
         this.change = change;
     }
 
-    public JDateChooser getVouDate() {
-        return vouDate;
-    }
-
     public void setVouDate(JDateChooser vouDate) {
         this.vouDate = vouDate;
     }
 
-    public JLabel getLblStockName() {
-        return lblStockName;
-    }
-
-    public void setLblStockName(JLabel lblStockName) {
-        this.lblStockName = lblStockName;
-    }
-
-    public JButton getBtnProgress() {
-        return btnProgress;
-    }
-
-    public void setBtnProgress(JButton btnProgress) {
-        this.btnProgress = btnProgress;
-    }
-
-    public JTable getParent() {
-        return parent;
-    }
-
     public void setParent(JTable parent) {
         this.parent = parent;
-    }
-
-    public SelectionObserver getSelectionObserver() {
-        return selectionObserver;
     }
 
     public void setSelectionObserver(SelectionObserver selectionObserver) {
@@ -156,20 +112,20 @@ public class OrderTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-             case 0, 1, 2, 3, 5 ->
-                String.class;
-            default ->
+            case 4, 6, 8, 9 ->
                 Float.class;
+            default ->
+                String.class;
         };
     }
 
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-//            case 9 -> {//price
-//                return ProUtil.isSalePriceChange();
-//            }
-            case 2, 8, 10 -> {//relation,totalqty,amt
+            case 4 -> {//wt
+                return ProUtil.isUseWeight();
+            }
+            case 2, 9 -> {//relation,totalqty,amt
                 return false;
             }
         }
@@ -218,13 +174,10 @@ public class OrderTableModel extends AbstractTableModel {
                     return sd.getUnitCode();
                 }
                 case 8 -> {
-                    return Util1.getFloat(sd.getWeight()) * Util1.getFloat(sd.getQty());
-                }
-                case 9 -> {
                     //price
                     return sd.getPrice();
                 }
-                case 10 -> {
+                case 9 -> {
                     //amount
                     return sd.getAmount();
                 }
@@ -242,7 +195,7 @@ public class OrderTableModel extends AbstractTableModel {
     public void setValueAt(Object value, int row, int column) {
         try {
             OrderHisDetail sd = listDetail.get(row);
-           if (value != null) {
+            if (value != null) {
                 switch (column) {
                     case 0, 1 -> {
                         //Code
@@ -252,7 +205,7 @@ public class OrderTableModel extends AbstractTableModel {
                             sd.setStockName(s.getStockName());
                             sd.setUserCode(s.getUserCode());
                             sd.setRelName(s.getRelName());
-                            sd.setQty(1.0f);
+                            sd.setQty(1.0);
                             sd.setWeightUnit(s.getWeightUnit());
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setPrice(getTraderPrice(s));
@@ -271,7 +224,7 @@ public class OrderTableModel extends AbstractTableModel {
                         }
                     }
                     case 4 -> {
-                        sd.setWeight(Util1.getFloat(value));
+                        sd.setWeight(Util1.getDouble(value));
                     }
                     case 5 -> {
                         if (value instanceof StockUnit u) {
@@ -282,7 +235,7 @@ public class OrderTableModel extends AbstractTableModel {
                         //Qty
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
-                                sd.setQty(Util1.getFloat(value));
+                                sd.setQty(Util1.getDouble(value));
                                 if (sd.getUnitCode() == null) {
                                     parent.setColumnSelectionInterval(7, 7);
                                 } else {
@@ -304,13 +257,13 @@ public class OrderTableModel extends AbstractTableModel {
                         }
 
                     }
-                    case 9 -> {
+                    case 8 -> {
                         //price
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
-                                sd.setPrice(Util1.getFloat(value));
+                                sd.setPrice(Util1.getDouble(value));
                                 parent.setColumnSelectionInterval(0, 0);
-                                parent.setRowSelectionInterval(row + 1, row +1);
+                                parent.setRowSelectionInterval(row + 1, row + 1);
                             } else {
                                 showMessageBox("Input value must be positive");
                                 parent.setColumnSelectionInterval(column, column);
@@ -320,20 +273,23 @@ public class OrderTableModel extends AbstractTableModel {
                             parent.setColumnSelectionInterval(column, column);
                         }
                     }
-                    case 10 -> {
+                    case 9 -> {
                         //amt
-                        sd.setAmount(Util1.getFloat(value));
+                        sd.setAmount(Util1.getDouble(value));
                     }
 
                 }
-                if (column != 9) {
+                if (column != 8) {
                     if (Util1.getFloat(sd.getPrice()) == 0) {
                         if (ProUtil.isSaleLastPrice()) {
                             if (sd.getStockCode() != null && sd.getUnitCode() != null) {
                                 inventoryRepo.getSaleRecentPrice(sd.getStockCode(),
-                                        Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), sd.getUnitCode()).subscribe((t) -> {
-                                    sd.setPrice(t.getAmount());
-                                });
+                                        Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), sd.getUnitCode())
+                                        .doOnSuccess((t) -> {
+                                            sd.setPrice(Util1.getDouble(t.getAmount()));
+                                            calculateAmount(sd);
+                                            fireTableCellUpdated(row, 8);
+                                        }).subscribe();
                             }
                         }
                     }
@@ -350,6 +306,7 @@ public class OrderTableModel extends AbstractTableModel {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
     }
+
     private void assignLocation(OrderHisDetail sd) {
         if (sd.getLocCode() == null) {
             LocationAutoCompleter completer = orderEntry.getLocationAutoCompleter();
@@ -416,7 +373,7 @@ public class OrderTableModel extends AbstractTableModel {
             float saleQty = Util1.getFloat(orderEntry.getQty());
             float stdSalePrice = Util1.getFloat(orderEntry.getPrice());
             float amount = saleQty * stdSalePrice;
-            orderEntry.setAmount(Util1.getFloat(Math.round(amount)));
+            orderEntry.setAmount(Util1.getDouble(Math.round(amount)));
         }
     }
 
@@ -450,8 +407,8 @@ public class OrderTableModel extends AbstractTableModel {
         return status;
     }
 
-    private float getTraderPrice(Stock s) {
-        float price = 0.0f;
+    private double getTraderPrice(Stock s) {
+        Float price = 0.0f;
         String priceType = getTraderType();
         switch (priceType) {
             case "N" -> {
@@ -473,7 +430,7 @@ public class OrderTableModel extends AbstractTableModel {
                 price = s.getSalePriceE();
             }
         }
-        return price;
+        return Util1.getDouble(price);
     }
 
     public List<OrderDetailKey> getDelList() {
@@ -527,5 +484,5 @@ public class OrderTableModel extends AbstractTableModel {
         }
         return "N";
     }
-    
+
 }

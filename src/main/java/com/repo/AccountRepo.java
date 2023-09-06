@@ -426,6 +426,7 @@ public class AccountRepo {
                     return combinedList;
                 });
     }
+    
 
     public Mono<List<ChartOfAccount>> getCOAByHead(String headCode) {
         return accountApi.get()
@@ -444,15 +445,15 @@ public class AccountRepo {
                 .collectList();
     }
 
-    public Flux<Gl> getJournal(String vouNo) {
+    public Mono<List<Gl>> getJournal(String vouNo) {
         return accountApi.get()
                 .uri(builder -> builder.path("/account/get-journal")
                 .queryParam("glVouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToFlux(Gl.class
-                );
+                .bodyToFlux(Gl.class)
+                .collectList();
     }
 
     public Mono<List<Gl>> getVoucher(String vouNo) {

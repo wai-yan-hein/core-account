@@ -221,7 +221,14 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
                     if (tblJournal.getSelectedRow() >= 0) {
                         selectRow = tblJournal.convertRowIndexToModel(tblJournal.getSelectedRow());
                         Gl vGl = tableModel.getGl(selectRow);
-                        openJournalEntryDialog(vGl.getGlVouNo(), "EDIT");
+                        String tranSource = vGl.getTranSource();
+                        String vouNo = vGl.getGlVouNo();
+                        switch (tranSource) {
+                            case "GV" ->
+                                openJournalEntryDialog(vouNo, "EDIT");
+                            case "EX" ->
+                                conversionDialog(vouNo);
+                        }
                     }
                 }
             }
@@ -238,7 +245,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         observer.selected("refresh", true);
     }
 
-    private void conversionDialog() {
+    private void conversionDialog(String vouNo) {
         if (conversionDialog == null) {
             conversionDialog = new CurrencyConversionDialog(Global.parentForm);
             conversionDialog.setUserRepo(userRepo);
@@ -246,6 +253,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
             conversionDialog.setLocationRelativeTo(null);
             conversionDialog.initMain();
         }
+        conversionDialog.search(vouNo);
         conversionDialog.setVisible(true);
     }
 
@@ -539,7 +547,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
 
     private void btnEntry1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEntry1ActionPerformed
         // TODO add your handling code here:
-        conversionDialog();
+        conversionDialog(null);
     }//GEN-LAST:event_btnEntry1ActionPerformed
 
 

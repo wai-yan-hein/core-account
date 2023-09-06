@@ -224,6 +224,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtSup.setName(ProUtil.CREDITOR_ACC);
         txtComAmt.setName(ProUtil.P_COM_AMT);
         txtDivider.setName(ProUtil.DIVIDER);
+        txtConversionAcc.setName(ProUtil.CONVERSION_ACC);
 
     }
 
@@ -1812,6 +1813,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             ChartOfAccount dba = debtorAccAutoCompleter.getCOA();
             if (dba != null) {
                 save(txtCus.getName(), dba.getKey().getCoaCode());
+            }
+             ChartOfAccount cona = conversionAccAutoCompleter.getCOA();
+            if (cona != null) {
+                save(txtConversionAcc.getName(), cona.getKey().getCoaCode());
             }
 
         } else if (source.equals("STOCK")) {

@@ -54,8 +54,6 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     private LocationAutoCompleter locationAutoCompleter;
     private CurrencyAutoCompleter currencyAAutoCompleter;
     @Autowired
-    private WebClient inventoryApi;
-    @Autowired
     private InventoryRepo inventoryRepo;
     @Autowired
     private UserRepo userRepo;
@@ -123,17 +121,16 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         monoLoc.subscribe((t) -> {
             locationAutoCompleter.setListLocation(t);
         });
-        inventoryRepo.getDefaultLocation().subscribe((tt) -> {
+        inventoryRepo.getDefaultLocation().doOnSuccess((tt) -> {
             locationAutoCompleter.setLocation(tt);
-        });
+        }).subscribe();
         currencyAAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
             currencyAAutoCompleter.setListCurrency(t);
         });
-        userRepo.getDefaultCurrency().subscribe((c) -> {
+        userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currencyAAutoCompleter.setCurrency(c);
-        });
-
+        }).subscribe();
     }
 
     private void initTable() {
@@ -173,21 +170,17 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     private void clear() {
         txtOPDate.setDate(Util1.getTodayDate());
-        inventoryRepo.getDefaultLocation().subscribe((t) -> {
-            locationAutoCompleter.setLocation(t);
-        });
         txtRemark.setText(null);
         openingTableModel.clear();
         openingTableModel.addNewRow();
         lblStatus.setText("NEW");
+        lblStatus.setForeground(Color.green);
         oPHis = new OPHis();
         txtVouNo.setText(null);
-        userRepo.getDefaultCurrency().subscribe((t) -> {
-            currencyAAutoCompleter.setCurrency(t);
-        });
         progress.setIndeterminate(false);
         disableForm(true);
         calculatAmount();
+        observeMain();
     }
 
     private void saveOpening() {
@@ -213,13 +206,13 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
             oPHis.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             oPHis.setDetailList(openingTableModel.getListDetail());
             oPHis.setListDel(openingTableModel.getDelList());
-            inventoryRepo.save(oPHis).subscribe((t) -> {
+            inventoryRepo.save(oPHis).doOnSuccess((t) -> {
                 clear();
-            }, (e) -> {
+            }).doOnError((e) -> {
                 JOptionPane.showMessageDialog(this, e.getMessage());
                 progress.setIndeterminate(false);
                 observer.selected("save", true);
-            });
+            }).subscribe();
         }
     }
 
@@ -250,7 +243,6 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                 vouSearchDialog = new OPHistoryDialog(Global.parentForm);
                 vouSearchDialog.setUserRepo(userRepo);
                 vouSearchDialog.setInventoryRepo(inventoryRepo);
-                vouSearchDialog.setWebClient(inventoryApi);
                 vouSearchDialog.setObserver(this);
                 vouSearchDialog.initMain();
                 vouSearchDialog.setSize(Global.width - 200, Global.height - 200);
@@ -316,21 +308,37 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         txtOPDate.setEnabled(status);
         txtRemark.setEnabled(status);
         txtVouNo.setEnabled(status);
+        tblOpening.setEnabled(status);
     }
 
     private void deleteVoucher() {
-        if (lblStatus.getText().equals("EDIT")) {
-            int yes_no = JOptionPane.showConfirmDialog(Global.parentForm,
-                    "Are you sure to delete?", "Opening Voucher delete", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
-            if (yes_no == 0) {
-                inventoryRepo.delete(oPHis.getKey()).doOnSuccess((t) -> {
-                    if (t) {
-                        clear();
-                    }
-                }).subscribe();
+        String status = lblStatus.getText();
+        switch (status) {
+            case "EDIT" -> {
+                int yes_no = JOptionPane.showConfirmDialog(Global.parentForm,
+                        "Are you sure to delete?", "Opening Voucher delete", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+                if (yes_no == 0) {
+                    inventoryRepo.delete(oPHis.getKey()).doOnSuccess((t) -> {
+                        if (t) {
+                            clear();
+                        }
+                    }).subscribe();
+                }
             }
-        } else {
-            JOptionPane.showMessageDialog(Global.parentForm, "Voucher can't delete.");
+            case "DELETED" -> {
+                int yes_no = JOptionPane.showConfirmDialog(this,
+                        "Are you sure to restore?", "Opening Voucher Restore.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (yes_no == 0) {
+                    oPHis.setDeleted(false);
+                    inventoryRepo.restore(oPHis.getKey()).doOnSuccess((t) -> {
+                        lblStatus.setText("EDIT");
+                        lblStatus.setForeground(Color.blue);
+                        disableForm(true);
+                    }).subscribe();
+                }
+            }
+            default ->
+                JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }
     }
 

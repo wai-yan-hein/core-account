@@ -8,10 +8,8 @@ package com.inventory.ui.entry.dialog.common;
 import com.common.Global;
 import com.common.Util1;
 import com.inventory.model.VOrder;
-import com.inventory.model.VSale;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,18 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 public class OrderVouSearchTableModel extends AbstractTableModel {
 
     private List<VOrder> listOrderHis = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Ref:", "Created By", "Paid Amt", "V-Total"};
-
-    private JTable parent;
-
-    public JTable getParent() {
-        return parent;
-    }
-
-    public void setParent(JTable parent) {
-        this.parent = parent;
-    }
-
+    private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Ref:", "Created By", "Status", "V-Total"};
+  
     @Override
     public String getColumnName(int column) {
         return columnNames[column];
@@ -61,7 +49,7 @@ public class OrderVouSearchTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         switch (column) {
-            case 6, 7 -> {
+            case 7 -> {
                 return Float.class;
             }
         }
@@ -106,7 +94,7 @@ public class OrderVouSearchTableModel extends AbstractTableModel {
                     }
                     case 6 -> {
                         //paid
-                        return his.getPaid();
+                        return his.getOrderStatus();
                     }
                     case 7 -> {
                         return his.getVouTotal();

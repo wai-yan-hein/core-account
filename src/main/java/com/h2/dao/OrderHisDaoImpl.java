@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -92,20 +93,18 @@ public class OrderHisDaoImpl extends AbstractDao<OrderHisKey, OrderHis> implemen
 
     @Override
     public void delete(OrderHisKey key) throws Exception {
-        String vouNo = key.getVouNo();
-        String compCode = key.getCompCode();
-        Integer deptId = key.getDeptId();
-        String sql = "update order_his set deleted =1 where vou_no ='" + vouNo + "' and comp_code='" + compCode + "' and dept_id =" + deptId + "";
-        execSql(sql);
+        OrderHis obj = findById(key);
+        obj.setDeleted(true);
+        obj.setUpdatedDate(LocalDateTime.now());
+        update(obj);
     }
 
     @Override
     public void restore(OrderHisKey key) {
-        String vouNo = key.getVouNo();
-        String compCode = key.getCompCode();
-        Integer deptId = key.getDeptId();
-        String sql = "update order_his set deleted =0,intg_upd_status=null where vou_no ='" + vouNo + "' and comp_code='" + compCode + "' and dept_id =" + deptId + "";
-        execSql(sql);
+        OrderHis obj = findById(key);
+        obj.setDeleted(false);
+        obj.setUpdatedDate(LocalDateTime.now());
+        update(obj);
     }
 
     @Override
@@ -114,7 +113,7 @@ public class OrderHisDaoImpl extends AbstractDao<OrderHisKey, OrderHis> implemen
         List<OrderHis> list = findHSQL(hsql);
         list.forEach((s) -> {
             s.setListSH(dao.search(s.getKey().getVouNo(),
-                    s.getKey().getCompCode(), s.getKey().getDeptId()));
+                    s.getKey().getCompCode(), s.getDeptId()));
         });
         return list;
     }
@@ -138,28 +137,20 @@ public class OrderHisDaoImpl extends AbstractDao<OrderHisKey, OrderHis> implemen
                             OrderHisKey k = new OrderHisKey();
                             k.setVouNo(rs.getString("vou_no"));
                             k.setCompCode(rs.getString("comp_code"));
-                            k.setDeptId(rs.getInt("dept_id"));
                             sh.setKey(k);
+                            sh.setDeptId(rs.getInt("dept_id"));
                             sh.setTraderCode(rs.getString("trader_code"));
                             sh.setSaleManCode(rs.getString("saleman_code"));
                             sh.setVouDate(rs.getTimestamp("vou_date").toLocalDateTime());
                             sh.setCreditTerm(rs.getTimestamp("credit_term").toLocalDateTime());
                             sh.setCurCode(rs.getString("cur_code"));
                             sh.setRemark(rs.getString("remark"));
-                            sh.setVouTotal(rs.getFloat("vou_total"));
-                            sh.setGrandTotal(rs.getFloat("grand_total"));
-                            sh.setDiscount(rs.getFloat("discount"));
-                            sh.setDiscP(rs.getFloat("disc_p"));
-                            sh.setTaxAmt(rs.getFloat("tax_amt"));
-                            sh.setTaxPercent(rs.getFloat("tax_p"));
-                            sh.setCreatedDate(rs.getTimestamp("created_date"));
+                            sh.setVouTotal(rs.getDouble("vou_total"));
+                            sh.setCreatedDate(rs.getTimestamp("created_date").toLocalDateTime());
                             sh.setCreatedBy(rs.getString("created_by"));
                             sh.setDeleted(rs.getBoolean("deleted"));
-                            sh.setPaid(rs.getFloat("paid"));
-                            sh.setBalance(rs.getFloat("vou_balance"));
                             sh.setUpdatedBy(rs.getString("updated_by"));
                             sh.setUpdatedDate(rs.getTimestamp("updated_date").toLocalDateTime());
-                            sh.setAddress(rs.getString("address"));
                             sh.setLocCode(rs.getString("loc_code"));
                             sh.setMacId(rs.getInt("mac_id"));
                             sh.setIntgUpdStatus(rs.getString("intg_upd_status"));
@@ -176,7 +167,7 @@ public class OrderHisDaoImpl extends AbstractDao<OrderHisKey, OrderHis> implemen
         list.forEach(o -> {
             String vouNo = o.getKey().getVouNo();
             String compCode = o.getKey().getCompCode();
-            Integer deptId = o.getKey().getDeptId();
+            Integer deptId = o.getDeptId();
             o.setListSH(dao.searchDetail(vouNo, compCode, deptId));
         });
         return list;
@@ -184,12 +175,7 @@ public class OrderHisDaoImpl extends AbstractDao<OrderHisKey, OrderHis> implemen
 
     @Override
     public void truncate(OrderHisKey key) {
-        String vouNo = key.getVouNo();
-        String compCode = key.getCompCode();
-        Integer deptId = key.getDeptId();
-        String sql1 = "delete from order_his where vou_no ='" + vouNo + "' and comp_code ='" + compCode + "' and " + deptId + "";
-        String sql2 = "delete from order_his_detail where vou_no ='" + vouNo + "' and comp_code ='" + compCode + "' and " + deptId + "";
-        execSql(sql1, sql2);
+
     }
 
     @Override

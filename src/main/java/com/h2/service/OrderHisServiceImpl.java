@@ -44,7 +44,7 @@ public class OrderHisServiceImpl implements OrderHisService {
     public OrderHis save(OrderHis orderHis) {
         orderHis.setVouDate(Util1.toDateTime(orderHis.getVouDate()));
         if (Util1.isNullOrEmpty(orderHis.getKey().getVouNo())) {
-            orderHis.getKey().setVouNo(getVoucherNo(orderHis.getKey().getDeptId(), orderHis.getMacId(), orderHis.getKey().getCompCode()));
+            orderHis.getKey().setVouNo(getVoucherNo(orderHis.getDeptId(), orderHis.getMacId(), orderHis.getKey().getCompCode()));
         }
         List<OrderHisDetail> listSD = orderHis.getListSH();
         List<OrderDetailKey> listDel = orderHis.getListDel();
@@ -57,10 +57,10 @@ public class OrderHisServiceImpl implements OrderHisService {
             OrderHisDetail cSd = listSD.get(i);
             if (Util1.isNullOrEmpty(cSd.getKey())) {
                 OrderDetailKey key = new OrderDetailKey();
-                key.setDeptId(orderHis.getKey().getDeptId());
                 key.setCompCode(orderHis.getKey().getCompCode());
                 key.setVouNo(vouNo);
                 key.setUniqueId(null);
+                cSd.setDeptId(orderHis.getDeptId());
                 cSd.setKey(key);
             }
             if (cSd.getStockCode() != null) {
@@ -117,7 +117,6 @@ public class OrderHisServiceImpl implements OrderHisService {
         return shDao.unUploadVoucher(syncDate);
     }
 
-
     @Override
     public List<OrderHis> search(String updatedDate, List<String> location) {
         return shDao.search(updatedDate, location);
@@ -145,7 +144,7 @@ public class OrderHisServiceImpl implements OrderHisService {
 
     @Override
     public List<VOrder> getOrder(FilterObject filter) {
-    String fromDate = Util1.isNull(filter.getFromDate(), "-");
+        String fromDate = Util1.isNull(filter.getFromDate(), "-");
         String toDate = Util1.isNull(filter.getToDate(), "-");
         String vouNo = Util1.isNull(filter.getVouNo(), "-");
         String userCode = Util1.isNull(filter.getUserCode(), "-");
@@ -163,7 +162,7 @@ public class OrderHisServiceImpl implements OrderHisService {
         String projectNo = Util1.isAll(filter.getProjectNo());
         String curCode = Util1.isAll(filter.getCurCode());
         List<VOrder> orderList = shDao.getOrderHistory(fromDate, toDate, cusCode, saleManCode, vouNo, remark,
-                reference, userCode, stockCode, locCode, compCode, deptId, deleted, nullBatch, batchNo, projectNo,curCode);
+                reference, userCode, stockCode, locCode, compCode, deptId, deleted, nullBatch, batchNo, projectNo, curCode);
         return orderList;
     }
 

@@ -114,10 +114,6 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         this.observer = observer;
     }
 
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
