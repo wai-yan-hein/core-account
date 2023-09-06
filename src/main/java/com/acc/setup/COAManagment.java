@@ -332,7 +332,7 @@ public class COAManagment extends javax.swing.JPanel implements
     }
 
     private void createTreeNode(DefaultMutableTreeNode treeRoot) {
-        accountRepo.getCOATree().collectList().subscribe((t) -> {
+        accountRepo.getCOATree().subscribe((t) -> {
             if (!t.isEmpty()) {
                 t.forEach((menu) -> {
                     if (menu.getChild() != null) {
@@ -353,8 +353,11 @@ public class COAManagment extends javax.swing.JPanel implements
                 });
                 treeModel.setRoot(treeRoot);
                 treeModel.reload(treeRoot);
-                progress.setIndeterminate(false);
             }
+            progress.setIndeterminate(false);
+        }, e -> {
+            progress.setIndeterminate(false);
+            log.info(e.getMessage());
         });
 
     }

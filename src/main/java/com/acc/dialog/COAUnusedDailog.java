@@ -23,7 +23,7 @@ import reactor.core.publisher.Mono;
 public class COAUnusedDailog extends javax.swing.JDialog {
 
     private final COAOptionTableModel model = new COAOptionTableModel();
-    private WebClient inventoryApi;
+//    private WebClient inventoryApi;
     private SelectionObserver observer;
     private final String title = "COA Unused Dialog";
 
@@ -35,13 +35,13 @@ public class COAUnusedDailog extends javax.swing.JDialog {
         this.observer = observer;
     }
 
-    public WebClient getWebClient() {
-        return inventoryApi;
-    }
-
-    public void setWebClient(WebClient inventoryApi) {
-        this.inventoryApi = inventoryApi;
-    }
+//    public WebClient getWebClient() {
+//        return inventoryApi;
+//    }
+//
+//    public void setWebClient(WebClient inventoryApi) {
+//        this.inventoryApi = inventoryApi;
+//    }
 
     /**
      * Creates new form COAOptionDialog
@@ -62,23 +62,23 @@ public class COAUnusedDailog extends javax.swing.JDialog {
     private void searchHead() {
         this.setTitle("Analyzing...");
         model.clear();
-        Mono<ResponseEntity<List<ChartOfAccount>>> result = inventoryApi.get()
-                .uri(builder -> builder.path("/account/get-coa")
-                .queryParam("compCode", Global.compCode)
-                .build())
-                .retrieve().toEntityList(ChartOfAccount.class);
-        result.subscribe((t) -> {
-            if (!t.getBody().isEmpty()) {
-                t.getBody().forEach(coa -> {
-                    coa.setActive(Boolean.TRUE);
-                });
-                model.setListCoaHead(t.getBody());
-                this.setTitle(title);
-            } else {
-                this.setTitle(title + "- No unused coa.");
-            }
-        }, (e) -> {
-        });
+//        Mono<ResponseEntity<List<ChartOfAccount>>> result = inventoryApi.get()
+//                .uri(builder -> builder.path("/account/get-coa")
+//                .queryParam("compCode", Global.compCode)
+//                .build())
+//                .retrieve().toEntityList(ChartOfAccount.class);
+//        result.subscribe((t) -> {
+//            if (!t.getBody().isEmpty()) {
+//                t.getBody().forEach(coa -> {
+//                    coa.setActive(Boolean.TRUE);
+//                });
+//                model.setListCoaHead(t.getBody());
+//                this.setTitle(title);
+//            } else {
+//                this.setTitle(title + "- No unused coa.");
+//            }
+//        }, (e) -> {
+//        });
 
     }
 
