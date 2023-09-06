@@ -186,7 +186,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         saleTableModel.clear();
         if (oh != null) {
             progress.setIndeterminate(true);
-            Integer deptId = oh.getKey().getDeptId();
+            Integer deptId = oh.getDeptId();
             String vouNo = oh.getKey().getVouNo();
             inventoryRepo.getOrderDetail(vouNo, deptId, local)
                     .subscribe((list) -> {
@@ -236,14 +236,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         txtReference.setText(oh.getReference());
                         txtSaleDate.setDate(Util1.convertToDate(oh.getVouDate()));
                         txtVouTotal.setValue(Util1.getDouble(oh.getVouTotal()));
-                        txtVouDiscP.setValue(Util1.getDouble(oh.getDiscP()));
-                        txtVouDiscount.setValue(Util1.getDouble(oh.getDiscount()));
-                        txtVouTaxP.setValue(Util1.getDouble(oh.getTaxPercent()));
-                        txtTax.setValue(Util1.getDouble(oh.getTaxAmt()));
-                        txtVouPaid.setValue(Util1.getDouble(oh.getPaid()));
-                        txtVouBalance.setValue(Util1.getDouble(oh.getBalance()));
-                        txtGrandTotal.setValue(Util1.getDouble(oh.getGrandTotal()));
-                        chkPaid.setSelected(Util1.getDouble(oh.getPaid()) > 0);
                         txtOrderNo.setText(oh.getKey().getVouNo());
                         saleTableModel.addNewRow();
                         focusTable();
@@ -2144,11 +2136,9 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
             case "ORDER-HISTORY" -> {
                 VOrder s = (VOrder) selectObj;
-                inventoryRepo.findOrder(s.getVouNo(), s.getDeptId(), s.isLocal()).subscribe((t) -> {
+                inventoryRepo.findOrder(s.getVouNo(), s.isLocal()).doOnSuccess((t) -> {
                     setSaleVoucherDetail(t, s.isLocal());
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                });
+                }).subscribe();
             }
             case "Select" -> {
                 calculateTotalAmount(false);

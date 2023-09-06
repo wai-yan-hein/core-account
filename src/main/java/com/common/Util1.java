@@ -681,7 +681,7 @@ public class Util1 {
     }
 
     public static boolean isPositive(Object value) {
-        return Util1.getFloat(value) > 0;
+        return Util1.getFloat(value) >= 0;
     }
 
     public static Date toDate(String str, String format) {

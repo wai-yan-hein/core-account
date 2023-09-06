@@ -5,6 +5,7 @@
 package com.acc.common;
 
 import com.acc.model.DepartmentA;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
@@ -16,7 +17,7 @@ import javax.swing.event.ListDataListener;
  */
 public class DepartmentAccComboBoxModel extends AbstractListModel<DepartmentA> implements ComboBoxModel<DepartmentA> {
 
-    private List<DepartmentA> data;
+    private List<DepartmentA> data = new ArrayList<>();
     private DepartmentA selected;
 
     public List<DepartmentA> getData() {

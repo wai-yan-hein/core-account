@@ -9,7 +9,6 @@ import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.model.OPHisDetail;
 import com.inventory.model.OPHisDetailKey;
 import com.inventory.model.Stock;
@@ -29,31 +28,14 @@ import lombok.extern.slf4j.Slf4j;
 public class OpeningTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Stock Code", "Stock Name", "Relation",
-        "Qty", "Unit", "Weight", "Weight Unit", "Price", "Amount"};
+        "Weight", "Weight Unit", "Qty", "Unit", "Price", "Amount"};
     private JTable parent;
     private List<OPHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
     private final List<OPHisDetailKey> deleteList = new ArrayList();
-    private LocationAutoCompleter locationAutoCompleter;
-
-    public JTable getParent() {
-        return parent;
-    }
 
     public void setParent(JTable parent) {
         this.parent = parent;
-    }
-
-    public LocationAutoCompleter getLocationAutoCompleter() {
-        return locationAutoCompleter;
-    }
-
-    public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
-        this.locationAutoCompleter = locationAutoCompleter;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -131,29 +113,30 @@ public class OpeningTableModel extends AbstractTableModel {
                 case 2 -> {
                     return record.getRelName();
                 }
-
                 case 3 -> {
+                    return Util1.getFloat(record.getWeight()) == 0 ? null : record.getWeight();
+                }
+                case 4 -> {
+                    return record.getWeightUnit();
+                }
+
+                case 5 -> {
                     //qty
                     return record.getQty();
                 }
 
-                case 4 -> {
+                case 6 -> {
                     //unit
                     return record.getUnitCode();
                 }
-                case 5 -> {
-                    return record.getWeight();
-                }
-                case 6 -> {
-                    return record.getWeightUnit();
-                }
+
                 case 7 -> {
                     //price
-                    return record.getPrice();
+                    return Util1.getFloat(record.getPrice()) == 0 ? null : record.getPrice();
                 }
                 case 8 -> {
                     //amount
-                    return record.getAmount();
+                    return Util1.getFloat(record.getAmount()) == 0 ? null : record.getAmount();
                 }
                 default -> {
                     return new Object();
@@ -186,12 +169,35 @@ public class OpeningTableModel extends AbstractTableModel {
                         }
                     }
                     if (ProUtil.isUseWeight()) {
-                        setSelection(row, 5);
-                    } else {
                         setSelection(row, 3);
+                    } else {
+                        setSelection(row, 5);
                     }
                 }
-                case 3 -> {
+                case 3 -> { // weight
+                    if (value != null) {
+                        if (Util1.isNumber(value)) {
+                            if (Util1.isPositive(Util1.getFloat(value))) {
+                                record.setWeight(Util1.getFloat(value));
+                            } else {
+                                showMessageBox("Input value must be positive");
+                                setSelection(row, column);
+                            }
+                        } else {
+                            showMessageBox("Input value must be number");
+                            setSelection(row, column);
+                        }
+                    }
+                }
+                case 4 -> {
+                    if (value != null) {
+                        if (value instanceof StockUnit unit) {
+                            record.setWeightUnit(unit.getKey().getUnitCode());
+                            setSelection(row, 7);
+                        }
+                    }
+                }
+                case 5 -> {
                     // Qty
                     if (ProUtil.isUseWeight()) {
                         String str = String.valueOf(value);
@@ -215,7 +221,7 @@ public class OpeningTableModel extends AbstractTableModel {
 
                     }
                 }
-                case 4 -> {
+                case 6 -> {
                     //Unit
                     if (value != null) {
                         if (value instanceof StockUnit unit) {
@@ -224,29 +230,7 @@ public class OpeningTableModel extends AbstractTableModel {
                         }
                     }
                 }
-                case 5 -> { // weight
-                    if (value != null) {
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
-                                record.setWeight(Util1.getFloat(value));
-                            } else {
-                                showMessageBox("Input value must be positive");
-                                setSelection(row, column);
-                            }
-                        } else {
-                            showMessageBox("Input value must be number");
-                            setSelection(row, column);
-                        }
-                    }
-                }
-                case 6 -> {
-                    if (value != null) {
-                        if (value instanceof StockUnit unit) {
-                            record.setWeightUnit(unit.getKey().getUnitCode());
-                            setSelection(row, 7);
-                        }
-                    }
-                }
+
                 case 7 -> {
                     // Price
                     if (Util1.isNumber(value)) {
@@ -280,7 +264,6 @@ public class OpeningTableModel extends AbstractTableModel {
             fireTableRowsUpdated(row, row);
             observer.selected("CAL-TOTAL", "CAL-TOTAL");
             parent.requestFocusInWindow();
-            //   fireTableCellUpdated(row, 8);
         } catch (Exception ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }

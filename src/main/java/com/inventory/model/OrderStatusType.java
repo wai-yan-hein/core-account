@@ -9,6 +9,16 @@ package com.inventory.model;
  * @author Pann
  */
 public enum OrderStatusType {
-    Pending,
-    Delievered    
+    OPEN,
+    PENDING,
+    PROCESSING,
+    SHIPPED,
+    DELIVERED,
+    PARTIALLY_SHIPPED,
+    BACKORDERED,
+    CANCELED,
+    ON_HOLD,
+    COMPLETED,
+    RETURNED,
+    ARCHIVED
 }

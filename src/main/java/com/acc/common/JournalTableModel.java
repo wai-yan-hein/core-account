@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JournalTableModel extends AbstractTableModel {
 
     private List<Gl> listGV = new ArrayList();
-    private final String[] columnNames = {"Date", "Voucher No", "Description", "Refrence", "Project No", "Amount"};
+    private final String[] columnNames = {"Date", "Voucher No", "Description", "Refrence", "Project No", "Amount", "Type"};
     private JTable parent;
 
     @Override
@@ -59,6 +59,8 @@ public class JournalTableModel extends AbstractTableModel {
                     gv.getProjectNo();
                 case 5 ->
                     gv.getDrAmt() == 0 ? null : gv.getDrAmt();
+                case 6 ->
+                    getType(gv.getTranSource());
                 default ->
                     null;
             }; //Date
@@ -68,6 +70,10 @@ public class JournalTableModel extends AbstractTableModel {
             log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
         return null;
+    }
+
+    private String getType(String tranSource) {
+        return tranSource.equals("GV") ? "Journal" : "Conversion";
     }
 
     @Override

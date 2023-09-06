@@ -103,38 +103,38 @@ public class OrderHisDetailDaoImpl extends AbstractDao<OrderDetailKey, OrderHisD
     @Override
     public List<OrderHisDetail> searchDetail(String vouNo, String compCode, Integer deptId) {
         List<OrderHisDetail> listOP = new ArrayList<>();
-        String sql = "select op.*,s.user_code,s.stock_name,cat.cat_name,st.stock_type_name,sb.brand_name,rel.rel_name,l.loc_name,t.trader_name\n" +
-                "from order_his_detail op\n" +
-                "join location l on op.loc_code = l.loc_code\n" +
-                "and op.comp_code = l.comp_code\n" +
-                "and op.dept_id = l.dept_id\n" +
-                "join stock s on op.stock_code = s.stock_code\n" +
-                "and op.comp_code = s.comp_code\n" +
-                "and op.dept_id = s.dept_id\n" +
-                "join unit_relation rel on s.rel_code = rel.rel_code\n" +
-                "and op.comp_code = rel.comp_code\n" +
-                "and op.dept_id = rel.dept_id\n" +
-                "left join stock_type st  on s.stock_type_code = st.stock_type_code\n" +
-                "and op.comp_code = st.comp_code\n" +
-                "and op.dept_id = st.dept_id\n" +
-                "left join category cat on s.category_code = cat.cat_code\n" +
-                "and op.comp_code = cat.comp_code\n" +
-                "and op.dept_id = cat.dept_id\n" +
-                "left join stock_brand sb on s.brand_code = sb.brand_code\n" +
-                "and op.comp_code = sb.comp_code\n" +
-                "and op.dept_id = sb.dept_id\n" +
-                "left join grn g on " +
-//                "op.batch_no = g.batch_no and\n" +
-                "op.comp_code = g.comp_code\n" +
-                "and op.dept_id = g.dept_id\n" +
-                "and g.deleted = false\n" +
-                "left join trader t on g.trader_code = t.code\n" +
-                "and g.comp_code = t.comp_code\n" +
-                "and g.dept_id = t.dept_id\n" +
-                "where op.vou_no ='" + vouNo + "'\n" +
-                "and op.comp_code ='" + compCode + "'\n" +
-                "and op.dept_id = " + deptId + "\n" +
-                "order by unique_id";
+        String sql = "select op.*,s.user_code,s.stock_name,cat.cat_name,st.stock_type_name,sb.brand_name,rel.rel_name,l.loc_name,t.trader_name\n"
+                + "from order_his_detail op\n"
+                + "join location l on op.loc_code = l.loc_code\n"
+                + "and op.comp_code = l.comp_code\n"
+                + "and op.dept_id = l.dept_id\n"
+                + "join stock s on op.stock_code = s.stock_code\n"
+                + "and op.comp_code = s.comp_code\n"
+                + "and op.dept_id = s.dept_id\n"
+                + "join unit_relation rel on s.rel_code = rel.rel_code\n"
+                + "and op.comp_code = rel.comp_code\n"
+                + "and op.dept_id = rel.dept_id\n"
+                + "left join stock_type st  on s.stock_type_code = st.stock_type_code\n"
+                + "and op.comp_code = st.comp_code\n"
+                + "and op.dept_id = st.dept_id\n"
+                + "left join category cat on s.category_code = cat.cat_code\n"
+                + "and op.comp_code = cat.comp_code\n"
+                + "and op.dept_id = cat.dept_id\n"
+                + "left join stock_brand sb on s.brand_code = sb.brand_code\n"
+                + "and op.comp_code = sb.comp_code\n"
+                + "and op.dept_id = sb.dept_id\n"
+                + "left join grn g on "
+                + //                "op.batch_no = g.batch_no and\n" +
+                "op.comp_code = g.comp_code\n"
+                + "and op.dept_id = g.dept_id\n"
+                + "and g.deleted = false\n"
+                + "left join trader t on g.trader_code = t.code\n"
+                + "and g.comp_code = t.comp_code\n"
+                + "and g.dept_id = t.dept_id\n"
+                + "where op.vou_no ='" + vouNo + "'\n"
+                + "and op.comp_code ='" + compCode + "'\n"
+                + "and op.dept_id = " + deptId + "\n"
+                + "order by unique_id";
         ResultSet rs = getResult(sql);
         if (rs != null) {
             try {
@@ -143,17 +143,16 @@ public class OrderHisDetailDaoImpl extends AbstractDao<OrderDetailKey, OrderHisD
                     OrderHisDetail op = new OrderHisDetail();
                     OrderDetailKey key = new OrderDetailKey();
                     key.setCompCode(rs.getString("comp_code"));
-                    key.setDeptId(rs.getInt("dept_id"));
                     key.setVouNo(rs.getString("vou_no"));
                     key.setUniqueId(rs.getInt("unique_id"));
                     op.setKey(key);
+                    op.setDeptId(rs.getInt("dept_id"));
                     op.setStockCode(rs.getString("stock_code"));
-                    op.setWeight(rs.getFloat("weight"));
+                    op.setWeight(rs.getDouble("weight"));
                     op.setWeightUnit(rs.getString("weight_unit"));
-                    op.setStdWeight(rs.getFloat("std_weight"));
-                    op.setQty(rs.getFloat("qty"));
-                    op.setPrice(rs.getFloat("price"));
-                    op.setAmount(rs.getFloat("amt"));
+                    op.setQty(rs.getDouble("qty"));
+                    op.setPrice(rs.getDouble("price"));
+                    op.setAmount(rs.getDouble("amt"));
                     op.setLocCode(rs.getString("loc_code"));
                     op.setLocName(rs.getString("loc_name"));
                     op.setUnitCode(rs.getString("unit"));

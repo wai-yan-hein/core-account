@@ -1451,16 +1451,15 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<OrderHis> findOrder(String vouNo, Integer deptId, boolean local) {
+    public Mono<OrderHis> findOrder(String vouNo, boolean local) {
         OrderHisKey key = new OrderHisKey();
         key.setVouNo(vouNo);
         key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
         if (local) {
             return h2Repo.findOrder(key);
         }
         return inventoryApi.post()
-                .uri("/order/find-order")
+                .uri("/order/findOrder")
                 .body(Mono.just(key), OrderHisKey.class)
                 .retrieve()
                 .bodyToMono(OrderHis.class)
@@ -1709,6 +1708,18 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<Boolean> restore(OPHisKey key) {
+        return inventoryApi.post()
+                .uri("/setup/restoreOpening")
+                .body(Mono.just(key), OPHisKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<Boolean> delete(SaleHis sh) {
         SaleHisKey key = sh.getKey();
         if (sh.isLocal()) {
@@ -1727,7 +1738,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> delete(OrderHisKey key) {
         return inventoryApi.post()
-                .uri("/order/delete-order")
+                .uri("/order/deleteOrder")
                 .body(Mono.just(key), OrderHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -2446,7 +2457,7 @@ public class InventoryRepo {
 
     public Mono<OrderHis> save(OrderHis sh) {
         return inventoryApi.post()
-                .uri("/order/save-order")
+                .uri("/order/saveOrder")
                 .body(Mono.just(sh), OrderHis.class)
                 .retrieve()
                 .bodyToMono(OrderHis.class)
@@ -2467,7 +2478,7 @@ public class InventoryRepo {
 
     public Mono<OrderHis> uploadOrder(OrderHis sh) {
         return inventoryApi.post()
-                .uri("/order/save-order")
+                .uri("/order/saveOrder")
                 .body(Mono.just(sh), OrderHis.class)
                 .retrieve()
                 .bodyToMono(OrderHis.class)
@@ -2705,7 +2716,7 @@ public class InventoryRepo {
             return h2Repo.getOrderHistory(filter);
         }
         return inventoryApi.post()
-                .uri("/order/get-order")
+                .uri("/order/getOrder")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(VOrder.class)
@@ -2721,7 +2732,7 @@ public class InventoryRepo {
             return h2Repo.getOrderDetail(vouNo, deptId);
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/order/get-order-detail")
+                .uri(builder -> builder.path("/order/getOrderDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", deptId)

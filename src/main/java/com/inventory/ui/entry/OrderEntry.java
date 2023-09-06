@@ -49,6 +49,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -97,7 +98,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     private SelectionObserver observer;
     private OrderHis orderHis = new OrderHis();
     private JProgressBar progress;
-    private Mono<List<Location>> monoLoc;
     private double prvBal = 0;
     private double balance = 0;
 
@@ -215,30 +215,20 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         tblOrder.getColumnModel().getColumn(5).setPreferredWidth(30);//unit
         tblOrder.getColumnModel().getColumn(6).setPreferredWidth(50);//qty
         tblOrder.getColumnModel().getColumn(7).setPreferredWidth(30);//unit
-        tblOrder.getColumnModel().getColumn(8).setPreferredWidth(50);//total
-        tblOrder.getColumnModel().getColumn(9).setPreferredWidth(50);//price
-        tblOrder.getColumnModel().getColumn(10).setPreferredWidth(60);//amt
+        tblOrder.getColumnModel().getColumn(8).setPreferredWidth(50);//price
+        tblOrder.getColumnModel().getColumn(9).setPreferredWidth(50);//amt
         tblOrder.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblOrder.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
-        monoLoc.subscribe((t) -> {
-            tblOrder.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
-        });
-        Mono<List<StockUnit>> monoUnit = inventoryRepo.getStockUnit();
         tblOrder.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//weight
-        monoUnit.subscribe((t) -> {
+        inventoryRepo.getStockUnit().doOnSuccess((t) -> {
             tblOrder.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));//unit
-        });
-        tblOrder.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//qty
-        inventoryRepo.getStockUnit().subscribe((t) -> {
-            tblOrder.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));
-        });
-        tblOrder.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//
-        monoUnit.subscribe((t) -> {
             tblOrder.getColumnModel().getColumn(7).setCellEditor(new StockUnitEditor(t));//unit
-        });
+        }).subscribe();
+        inventoryRepo.getLocation().doOnSuccess((t) -> {
+            tblOrder.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
+        }).subscribe();
+        tblOrder.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//
         tblOrder.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());//wt
-        tblOrder.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());//price
-        tblOrder.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());//
         tblOrder.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblOrder.setDefaultRenderer(Float.class, new DecimalFormatRender());
         tblOrder.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -249,18 +239,14 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
-        monoLoc = inventoryRepo.getLocation();
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
         locationAutoCompleter.setObserver(this);
-        monoLoc.subscribe((t) -> {
+        inventoryRepo.getLocation().subscribe((t) -> {
             locationAutoCompleter.setListLocation(t);
         });
         currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
             currAutoCompleter.setListCurrency(t);
-        });
-        userRepo.getDefaultCurrency().subscribe((c) -> {
-            currAutoCompleter.setCurrency(c);
         });
         saleManCompleter = new SaleManAutoCompleter(txtSaleman, null, false);
         inventoryRepo.getSaleMan().subscribe((t) -> {
@@ -282,33 +268,14 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         txtSaleman.addKeyListener(this);
         txtCurrency.addKeyListener(this);
         tblOrder.addKeyListener(this);
-        txtVouDiscP.addKeyListener(this);
-        txtVouDiscount.addKeyListener(this);
-        txtTax.addKeyListener(this);
-        txtVouTaxP.addKeyListener(this);
-        txtVouPaid.addKeyListener(this);
     }
 
     private void initTextBoxValue() {
         txtVouTotal.setValue(0);
-        txtVouDiscount.setValue(0);
-        txtTax.setValue(0);
-        txtVouPaid.setValue(0);
-        txtVouBalance.setValue(0);
-        txtVouTaxP.setValue(0);
-        txtVouDiscP.setValue(0);
-        txtGrandTotal.setValue(0);
     }
 
     private void initTextBoxFormat() {
-        txtVouBalance.setFormatterFactory(Util1.getDecimalFormat());
-        txtVouDiscount.setFormatterFactory(Util1.getDecimalFormat());
-        txtVouPaid.setFormatterFactory(Util1.getDecimalFormat());
         txtVouTotal.setFormatterFactory(Util1.getDecimalFormat());
-        txtVouDiscP.setFormatterFactory(Util1.getDecimalFormat());
-        txtVouTaxP.setFormatterFactory(Util1.getDecimalFormat());
-        txtGrandTotal.setFormatterFactory(Util1.getDecimalFormat());
-        txtTax.setFormatterFactory(Util1.getDecimalFormat());
     }
 
     private void initStockBalanceTable() {
@@ -327,31 +294,22 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void assignDefaultValue() {
-        inventoryRepo.getDefaultCustomer().subscribe((t) -> {
+        inventoryRepo.getDefaultCustomer().doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
-        });
-        if (saleManCompleter != null) {
-            inventoryRepo.getDefaultSaleMan().subscribe((tt) -> {
-                saleManCompleter.setSaleMan(tt);
-            });
-        }
-        if (currAutoCompleter != null) {
-            userRepo.getDefaultCurrency().subscribe((t) -> {
-                currAutoCompleter.setCurrency(t);
-            });
-        }
-        if (locationAutoCompleter != null) {
-            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
-                locationAutoCompleter.setLocation(tt);
-            }, (e) -> {
-                log.error(e.getMessage());
-            });
-        }
+        }).subscribe();
+        inventoryRepo.getDefaultSaleMan().doOnSuccess((tt) -> {
+            saleManCompleter.setSaleMan(tt);
+        }).subscribe();
+        userRepo.getDefaultCurrency().doOnSuccess((t) -> {
+            currAutoCompleter.setCurrency(t);
+        }).subscribe();
+        inventoryRepo.getDefaultLocation().doOnSuccess((tt) -> {
+            locationAutoCompleter.setLocation(tt);
+        }).subscribe();
         txtDueDate.setDate(null);
         progress.setIndeterminate(false);
         txtCurrency.setEnabled(ProUtil.isMultiCur());
         txtVouNo.setText(null);
-        chkPaid.setSelected(ProUtil.isSalePaid());
         chkVou.setSelected(true);
         chkA4.setSelected(Util1.getBoolean(ProUtil.getProperty("check.sale.A4")));
         chkA5.setSelected(Util1.getBoolean(ProUtil.getProperty("check.sale.A5")));
@@ -376,7 +334,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         txtReference.setText(null);
         txtCus.requestFocus();
         projectAutoCompleter.setProject(null);
-        cboOrderStatusType.setSelectedIndex(OrderStatusType.valueOf("Pending").ordinal());
+        cboOrderStatusType.setSelectedIndex(OrderStatusType.valueOf(OrderStatusType.OPEN.name()).ordinal());
     }
 
     public void saveOrder(boolean print) {
@@ -385,17 +343,17 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             orderHis.setListSH(orderTableModel.getListDetail());
             orderHis.setListDel(orderTableModel.getDelList());
             orderHis.setBackup(orderTableModel.isChange());
-            inventoryRepo.save(orderHis).subscribe((t) -> {
+            inventoryRepo.save(orderHis).doOnSuccess((t) -> {
                 clear();
                 if (print) {
                     String reportName = "OrderVoucher";
                     printVoucher(t.getKey().getVouNo(), reportName, chkVou.isSelected());
                 }
-            }, (e) -> {
+            }).doOnError((e) -> {
                 JOptionPane.showMessageDialog(this, e.getMessage());
                 progress.setIndeterminate(false);
                 observer.selected("save", true);
-            });
+            }).subscribe();
 
         }
     }
@@ -433,18 +391,11 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             }
             orderHis.setRemark(txtRemark.getText());
             orderHis.setReference(txtReference.getText());
-            orderHis.setDiscP(Util1.getFloat(txtVouDiscP.getValue()));
-            orderHis.setDiscount(Util1.getFloat(txtVouDiscount.getValue()));
-            orderHis.setTaxPercent(Util1.getFloat(txtVouTaxP.getValue()));
-            orderHis.setTaxAmt(Util1.getFloat(txtTax.getValue()));
-            orderHis.setPaid(Util1.getFloat(txtVouPaid.getValue()));
-            orderHis.setBalance(Util1.getFloat(txtVouBalance.getValue()));
             orderHis.setCurCode(currAutoCompleter.getCurrency().getCurCode());
             orderHis.setDeleted(orderHis.isDeleted());
             orderHis.setLocCode(locationAutoCompleter.getLocation().getKey().getLocCode());
             orderHis.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());
-            orderHis.setVouTotal(Util1.getFloat(txtVouTotal.getValue()));
-            orderHis.setGrandTotal(Util1.getFloat(txtGrandTotal.getValue()));
+            orderHis.setVouTotal(Util1.getDouble(txtVouTotal.getValue()));
             orderHis.setStatus(lblStatus.getText());
             orderHis.setVouDate(Util1.convertToLocalDateTime(txtOrderDate.getDate()));
             orderHis.setMacId(Global.macId);
@@ -456,12 +407,11 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             if (lblStatus.getText().equals("NEW")) {
                 OrderHisKey key = new OrderHisKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 key.setVouNo(null);
+                orderHis.setDeptId(Global.deptId);
                 orderHis.setKey(key);
-                orderHis.setCreatedDate(Util1.getTodayDate());
+                orderHis.setCreatedDate(LocalDateTime.now());
                 orderHis.setCreatedBy(Global.loginUser.getUserCode());
-//                orderHis.setSession(Global.sessionId);
             } else {
                 orderHis.setUpdatedBy(Global.loginUser.getUserCode());
             }
@@ -508,57 +458,13 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                     "Are you sure to delete?", "Order Transaction delete.", JOptionPane.YES_NO_OPTION);
             if (yes_no == 0) {
                 orderTableModel.delete(row);
-                calculateTotalAmount(false);
+                calculateTotalAmount();
             }
         }
     }
 
-    private void calculateTotalAmount(boolean partial) {
-        float totalVouBalance;
-        float totalAmount = 0.0f;
-        listDetail = orderTableModel.getListDetail();
-        totalAmount = listDetail.stream().map(sdh -> Util1.getFloat(sdh.getAmount())).reduce(totalAmount, (accumulator, _item) -> accumulator + _item);
-        txtVouTotal.setValue(totalAmount);
-        //cal discAmt
-        float discp = Util1.getFloat(txtVouDiscP.getValue());
-        if (discp > 0) {
-            float discountAmt = (totalAmount * (discp / 100));
-            txtVouDiscount.setValue(Util1.getFloat(discountAmt));
-        }
-        //calculate taxAmt
-        float taxp = Util1.getFloat(txtVouTaxP.getValue());
-        float taxAmt = Util1.getFloat(txtTax.getValue());
-        if (taxp > 0) {
-            float afterDiscountAmt = totalAmount - Util1.getFloat(txtVouDiscount.getValue());
-            float totalTax = (afterDiscountAmt * taxp) / 100;
-            txtTax.setValue(Util1.getFloat(totalTax));
-        } else if (taxAmt > 0) {
-            float afterDiscountAmt = totalAmount - Util1.getFloat(txtVouDiscount.getValue());
-            taxp = (taxAmt / afterDiscountAmt) * 100;
-            txtVouTaxP.setValue(Util1.getFloat(taxp));
-        }
-        //
-        txtGrandTotal.setValue(totalAmount
-                + Util1.getFloat(txtTax.getValue())
-                - Util1.getFloat(txtVouDiscount.getValue()));
-        float grandTotal = Util1.getFloat(txtGrandTotal.getValue());
-        float paid = Util1.getFloat(txtVouPaid.getText());
-        if (!partial) {
-            if (paid == 0 || paid != grandTotal) {
-                if (chkPaid.isSelected()) {
-                    txtVouPaid.setValue(grandTotal);
-                } else {
-                    txtVouPaid.setValue(0);
-                }
-            }
-        }
-        paid = Util1.getFloat(txtVouPaid.getText());
-        if (paid > grandTotal) {
-            txtVouPaid.setValue(grandTotal);
-            paid = grandTotal;
-        }
-        totalVouBalance = grandTotal - paid;
-        txtVouBalance.setValue(Util1.getFloat(totalVouBalance));
+    private void calculateTotalAmount() {
+        txtVouTotal.setValue(orderTableModel.getListDetail().stream().mapToDouble((o) -> o.getAmount()).sum());
     }
 
     public void historyOrder() {
@@ -578,30 +484,24 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         if (sh != null) {
             progress.setIndeterminate(true);
             orderHis = sh;
-            Integer deptId = sh.getKey().getDeptId();
             String vouNo = sh.getKey().getVouNo();
-            inventoryRepo.findLocation(orderHis.getLocCode()).subscribe((t) -> {
+            inventoryRepo.findLocation(orderHis.getLocCode()).doOnSuccess((t) -> {
                 locationAutoCompleter.setLocation(t);
-            });
-            Mono<Trader> trader = inventoryRepo.findTrader(orderHis.getTraderCode());
-            trader.subscribe((t) -> {
+            }).subscribe();
+            inventoryRepo.findTrader(orderHis.getTraderCode()).doOnSuccess((t) -> {
                 traderAutoCompleter.setTrader(t);
-            });
-            userRepo.findCurrency(orderHis.getCurCode()).subscribe((t) -> {
+            }).subscribe();
+            userRepo.findCurrency(orderHis.getCurCode()).doOnSuccess((t) -> {
                 currAutoCompleter.setCurrency(t);
-            });
-            inventoryRepo.findSaleMan(orderHis.getSaleManCode()).subscribe((t) -> {
+            }).subscribe();
+            inventoryRepo.findSaleMan(orderHis.getSaleManCode()).doOnSuccess((t) -> {
                 saleManCompleter.setSaleMan(t);
-            });
-            if (orderHis.getProjectNo() != null) {
-                userRepo.find(new ProjectKey(orderHis.getProjectNo(), Global.compCode)).subscribe(t1 -> {
-                    projectAutoCompleter.setProject(t1);
-                });
-            } else {
-                projectAutoCompleter.setProject(null);
-            }
-            cboOrderStatusType.setSelectedIndex(OrderStatusType.valueOf(orderHis.getOrderStatus()).ordinal());
-            inventoryRepo.getOrderDetail(vouNo, sh.getKey().getDeptId(), local)
+            }).subscribe();
+            userRepo.find(new ProjectKey(orderHis.getProjectNo(), Global.compCode)).doOnSuccess(t1 -> {
+                projectAutoCompleter.setProject(t1);
+            }).subscribe();
+            cboOrderStatusType.setSelectedIndex(OrderStatusType.valueOf(Util1.isNull(orderHis.getOrderStatus(), OrderStatusType.OPEN.name())).ordinal());
+            inventoryRepo.getOrderDetail(vouNo, sh.getDeptId(), local)
                     .subscribe((t) -> {
                         orderTableModel.setListDetail(t);
                         orderTableModel.addNewRow();
@@ -630,14 +530,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                         txtReference.setText(orderHis.getReference());
                         txtOrderDate.setDate(Util1.convertToDate(orderHis.getVouDate()));
                         txtVouTotal.setValue(Util1.getFloat(orderHis.getVouTotal()));
-                        txtVouDiscP.setValue(Util1.getFloat(orderHis.getDiscP()));
-                        txtVouDiscount.setValue(Util1.getFloat(orderHis.getDiscount()));
-                        txtVouTaxP.setValue(Util1.getFloat(orderHis.getTaxPercent()));
-                        txtTax.setValue(Util1.getFloat(orderHis.getTaxAmt()));
-                        txtVouPaid.setValue(Util1.getFloat(orderHis.getPaid()));
-                        txtVouBalance.setValue(Util1.getFloat(orderHis.getBalance()));
-                        txtGrandTotal.setValue(Util1.getFloat(orderHis.getGrandTotal()));
-                        chkPaid.setSelected(orderHis.getPaid() > 0);
                         focusTable();
                         progress.setIndeterminate(false);
                     }, (e) -> {
@@ -657,17 +549,10 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         txtRemark.setEnabled(status);
         txtCurrency.setEnabled(status);
         txtDueDate.setEnabled(status);
-        txtVouPaid.setEnabled(status);
-        txtTax.setEnabled(status);
-        txtVouTaxP.setEnabled(status);
-        txtVouDiscP.setEnabled(status);
-        txtVouDiscount.setEnabled(status);
-        txtGrandTotal.setEnabled(status);
         txtReference.setEnabled(status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
-
     }
 
     private void setAllLocation() {
@@ -721,20 +606,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             JOptionPane.showMessageDialog(this, "Select Report Type");
             chkVou.requestFocus();
         }
-    }
-
-    private String getReportName() {
-        String name = null;
-        if (chkVou.isSelected()) {
-            name = ProUtil.getProperty("report.sale.voucher");
-        }
-        if (chkA4.isSelected()) {
-            name = ProUtil.getProperty("report.sale.A4");
-        }
-        if (chkA5.isSelected()) {
-            name = ProUtil.getProperty("report.sale.A5");
-        }
-        return name;
     }
 
     private void searchOrder(Order order) {
@@ -812,33 +683,15 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         chkA4 = new javax.swing.JCheckBox();
         lblRec = new javax.swing.JLabel();
         lblRec1 = new javax.swing.JLabel();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        jPanel3 = new javax.swing.JPanel();
-        jLabel13 = new javax.swing.JLabel();
-        jLabel14 = new javax.swing.JLabel();
-        jLabel16 = new javax.swing.JLabel();
-        jLabel19 = new javax.swing.JLabel();
-        txtVouTotal = new javax.swing.JFormattedTextField();
-        jLabel7 = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
-        jLabel15 = new javax.swing.JLabel();
-        txtVouDiscP = new javax.swing.JFormattedTextField();
-        txtVouDiscount = new javax.swing.JFormattedTextField();
-        txtVouTaxP = new javax.swing.JFormattedTextField();
-        txtTax = new javax.swing.JFormattedTextField();
-        txtVouPaid = new javax.swing.JFormattedTextField();
-        txtVouBalance = new javax.swing.JFormattedTextField();
-        jSeparator1 = new javax.swing.JSeparator();
-        jLabel20 = new javax.swing.JLabel();
-        txtGrandTotal = new javax.swing.JFormattedTextField();
-        jSeparator2 = new javax.swing.JSeparator();
-        chkPaid = new javax.swing.JCheckBox();
         sbPanel = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblStockBalance = new javax.swing.JTable();
         sbProgress = new javax.swing.JProgressBar();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblOrder = new javax.swing.JTable();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel13 = new javax.swing.JLabel();
+        txtVouTotal = new javax.swing.JFormattedTextField();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -994,19 +847,19 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                     .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2)
                     .addComponent(jLabel4))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtCus)
-                    .addComponent(txtOrderDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 154, Short.MAX_VALUE)
+                    .addComponent(txtOrderDate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)
                     .addComponent(txtVouNo, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(jLabel22, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
+                    .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 147, Short.MAX_VALUE)
                     .addComponent(txtSaleman)
                     .addComponent(txtLocation))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -1016,21 +869,21 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                     .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(txtDueDate, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 154, Short.MAX_VALUE)
+                    .addComponent(txtDueDate, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)
                     .addComponent(txtCurrency, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtReference))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE))
+                    .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(cboOrderStatusType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtProjectNo, javax.swing.GroupLayout.DEFAULT_SIZE, 131, Short.MAX_VALUE))
+                    .addComponent(txtProjectNo, javax.swing.GroupLayout.DEFAULT_SIZE, 148, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
-        panelSaleLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel17, jLabel2, jLabel21, jLabel22, jLabel3, jLabel4, jLabel5, jLabel6, jLabel9});
+        panelSaleLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel17, jLabel2, jLabel4, jLabel5, jLabel6, jLabel9});
 
         panelSaleLayout.setVerticalGroup(
             panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1143,13 +996,12 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, 173, Short.MAX_VALUE))
-                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                        .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
             .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(jPanel2Layout.createSequentialGroup()
                     .addGap(69, 69, 69)
-                    .addComponent(lblRec1, javax.swing.GroupLayout.DEFAULT_SIZE, 193, Short.MAX_VALUE)
+                    .addComponent(lblRec1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGap(70, 70, 70)))
         );
         jPanel2Layout.setVerticalGroup(
@@ -1159,7 +1011,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblRec))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 42, Short.MAX_VALUE)
                 .addComponent(lblStatus)
                 .addContainerGap())
             .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1168,236 +1020,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                     .addComponent(lblRec1)
                     .addContainerGap(88, Short.MAX_VALUE)))
         );
-
-        jLabel13.setFont(Global.lableFont);
-        jLabel13.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel13.setText("Vou Total :");
-
-        jLabel14.setFont(Global.lableFont);
-        jLabel14.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel14.setText("Discount :");
-
-        jLabel16.setFont(Global.lableFont);
-        jLabel16.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel16.setText("Tax( + ) :");
-
-        jLabel19.setFont(Global.lableFont);
-        jLabel19.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel19.setText("Paid :");
-
-        txtVouTotal.setEditable(false);
-        txtVouTotal.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
-        txtVouTotal.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtVouTotal.setFont(Global.amtFont);
-
-        jLabel7.setFont(Global.lableFont);
-        jLabel7.setForeground(Global.selectionColor);
-        jLabel7.setText("%");
-
-        jLabel8.setFont(Global.lableFont);
-        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel8.setText("Vou Balance :");
-
-        jLabel15.setFont(Global.lableFont);
-        jLabel15.setForeground(Global.selectionColor);
-        jLabel15.setText("%");
-
-        txtVouDiscP.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
-        txtVouDiscP.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtVouDiscP.setFont(Global.amtFont);
-        txtVouDiscP.setName("txtVouDiscP"); // NOI18N
-        txtVouDiscP.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtVouDiscPActionPerformed(evt);
-            }
-        });
-
-        txtVouDiscount.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
-        txtVouDiscount.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtVouDiscount.setFont(Global.amtFont);
-        txtVouDiscount.setName("txtVouDiscount"); // NOI18N
-        txtVouDiscount.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtVouDiscountActionPerformed(evt);
-            }
-        });
-
-        txtVouTaxP.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
-        txtVouTaxP.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtVouTaxP.setFont(Global.amtFont);
-        txtVouTaxP.setName("txtVouTaxP"); // NOI18N
-        txtVouTaxP.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtVouTaxPActionPerformed(evt);
-            }
-        });
-
-        txtTax.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
-        txtTax.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtTax.setFont(Global.amtFont);
-        txtTax.setName("txtTax"); // NOI18N
-        txtTax.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtTaxActionPerformed(evt);
-            }
-        });
-
-        txtVouPaid.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
-        txtVouPaid.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtVouPaid.setFont(Global.amtFont);
-        txtVouPaid.setName("txtVouPaid"); // NOI18N
-        txtVouPaid.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                txtVouPaidFocusGained(evt);
-            }
-        });
-        txtVouPaid.addInputMethodListener(new java.awt.event.InputMethodListener() {
-            public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
-            }
-            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
-                txtVouPaidInputMethodTextChanged(evt);
-            }
-        });
-        txtVouPaid.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtVouPaidActionPerformed(evt);
-            }
-        });
-        txtVouPaid.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                txtVouPaidKeyReleased(evt);
-            }
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                txtVouPaidKeyTyped(evt);
-            }
-        });
-
-        txtVouBalance.setEditable(false);
-        txtVouBalance.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
-        txtVouBalance.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtVouBalance.setFont(Global.amtFont);
-        txtVouBalance.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtVouBalanceActionPerformed(evt);
-            }
-        });
-
-        jLabel20.setFont(Global.lableFont);
-        jLabel20.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel20.setText("Grand Total :");
-
-        txtGrandTotal.setEditable(false);
-        txtGrandTotal.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
-        txtGrandTotal.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        txtGrandTotal.setFont(Global.amtFont);
-        txtGrandTotal.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtGrandTotalActionPerformed(evt);
-            }
-        });
-
-        chkPaid.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkPaidActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jSeparator1)
-                            .addComponent(jSeparator2)))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                    .addGroup(jPanel3Layout.createSequentialGroup()
-                                        .addGap(8, 8, 8)
-                                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                .addComponent(jLabel16, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(jLabel14, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addComponent(jLabel13, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                            .addComponent(jLabel20))
-                                        .addGap(0, 0, Short.MAX_VALUE)))
-                                .addGap(18, 18, 18))
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(chkPaid)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtVouTotal)
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtVouDiscP)
-                                    .addComponent(txtVouTaxP))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, 22, Short.MAX_VALUE)
-                                    .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtVouDiscount)
-                                    .addComponent(txtTax)))
-                            .addComponent(txtGrandTotal)
-                            .addComponent(txtVouPaid, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtVouBalance))))
-                .addContainerGap())
-        );
-
-        jPanel3Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel13, jLabel14, jLabel16, jLabel8});
-
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel13)
-                    .addComponent(txtVouTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel14)
-                    .addComponent(jLabel7)
-                    .addComponent(txtVouDiscP, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtVouDiscount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel16)
-                    .addComponent(jLabel15)
-                    .addComponent(txtVouTaxP, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtTax, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtGrandTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel20))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(txtVouPaid, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(chkPaid, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel19, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 3, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel8)
-                    .addComponent(txtVouBalance, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        jScrollPane3.setViewportView(jPanel3);
 
         sbPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Stock Balance", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, Global.lableFont));
 
@@ -1460,6 +1082,38 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         });
         jScrollPane1.setViewportView(tblOrder);
 
+        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel13.setFont(Global.lableFont);
+        jLabel13.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jLabel13.setText("Vou Total :");
+
+        txtVouTotal.setEditable(false);
+        txtVouTotal.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
+        txtVouTotal.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtVouTotal.setFont(Global.amtFont);
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtVouTotal, javax.swing.GroupLayout.DEFAULT_SIZE, 76, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel13)
+                    .addComponent(txtVouTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -1468,17 +1122,14 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(sbPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane1)
-                            .addComponent(panelSale, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(6, 6, 6)))
-                .addContainerGap())
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1)
+                    .addComponent(panelSale, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(6, 6, 6))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1489,9 +1140,9 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 258, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(sbPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -1539,48 +1190,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         // TODO add your handling code here:
     }//GEN-LAST:event_txtCurrencyActionPerformed
 
-    private void txtVouDiscPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVouDiscPActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtVouDiscPActionPerformed
-
-    private void txtVouTaxPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVouTaxPActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtVouTaxPActionPerformed
-
-    private void txtVouDiscountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVouDiscountActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtVouDiscountActionPerformed
-
-    private void txtTaxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTaxActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtTaxActionPerformed
-
-    private void txtVouPaidActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVouPaidActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtVouPaidActionPerformed
-
-    private void txtGrandTotalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtGrandTotalActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtGrandTotalActionPerformed
-
-    private void txtVouBalanceActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVouBalanceActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtVouBalanceActionPerformed
-
-    private void txtVouPaidKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtVouPaidKeyTyped
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtVouPaidKeyTyped
-
-    private void txtVouPaidKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtVouPaidKeyReleased
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtVouPaidKeyReleased
-
-    private void chkPaidActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkPaidActionPerformed
-        // TODO add your handling code here:
-        txtVouPaid.setValue(0);
-        calculateTotalAmount(false);
-    }//GEN-LAST:event_chkPaidActionPerformed
-
     private void txtReferenceFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtReferenceFocusGained
         // TODO add your handling code here:
     }//GEN-LAST:event_txtReferenceFocusGained
@@ -1599,16 +1208,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         // TODO add your handling code here:
 
     }//GEN-LAST:event_chkA5ActionPerformed
-
-    private void txtVouPaidFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtVouPaidFocusGained
-        // TODO add your handling code here:
-        txtVouPaid.selectAll();
-    }//GEN-LAST:event_txtVouPaidFocusGained
-
-    private void txtVouPaidInputMethodTextChanged(java.awt.event.InputMethodEvent evt) {//GEN-FIRST:event_txtVouPaidInputMethodTextChanged
-        // TODO add your handling code here:
-        calculateTotalAmount(false);
-    }//GEN-LAST:event_txtVouPaidInputMethodTextChanged
 
     private void formPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_formPropertyChange
         // TODO add your handling code here:
@@ -1649,7 +1248,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 }
             }
             case "ORDER-TOTAL" ->
-                calculateTotalAmount(false);
+                calculateTotalAmount();
             case "Location" ->
                 setAllLocation();
             case "ORDER" -> {
@@ -1658,13 +1257,13 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             }
             case "ORDER-HISTORY" -> {
                 if (selectObj instanceof VOrder s) {
-                    inventoryRepo.findOrder(s.getVouNo(), s.getDeptId(), s.isLocal()).subscribe((t) -> {
+                    inventoryRepo.findOrder(s.getVouNo(), s.isLocal()).doOnSuccess((t) -> {
                         setOrderVoucher(t, s.isLocal());
-                    });
+                    }).subscribe();
                 }
             }
             case "Select" -> {
-                calculateTotalAmount(false);
+                calculateTotalAmount();
             }
         }
     }
@@ -1738,46 +1337,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                     txtRemark.requestFocus();
                 }
             }
-            case "txtVouTaxP" -> {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (Util1.getFloat(txtVouTaxP.getValue()) <= 0) {
-                        txtTax.setValue(0);
-                    }
-                    calculateTotalAmount(false);
-                    focusTable();
-                }
-            }
-            case "txtTax" -> {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    txtVouTaxP.setValue(0);
-                    calculateTotalAmount(false);
-                    focusTable();
-                }
-            }
-            case "txtVouDiscount" -> {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (Util1.getFloat(txtVouDiscount.getValue()) >= 0) {
-                        txtVouDiscP.setValue(0);
-                    }
-                    calculateTotalAmount(false);
-                    focusTable();
-                }
-            }
-            case "txtVouDiscP" -> {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (Util1.getFloat(txtVouDiscP.getValue()) <= 0) {
-                        txtVouDiscount.setValue(0);
-                    }
-                    calculateTotalAmount(false);
-                    focusTable();
-                }
-            }
-            case "txtVouPaid" -> {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    calculateTotalAmount(true);
-                    focusTable();
-                }
-            }
         }
     }
 
@@ -1794,35 +1353,24 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JComboBox<OrderStatusType> cboOrderStatusType;
     private javax.swing.JCheckBox chkA4;
     private javax.swing.JCheckBox chkA5;
-    private javax.swing.JCheckBox chkPaid;
     private javax.swing.JCheckBox chkVou;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel13;
-    private javax.swing.JLabel jLabel14;
-    private javax.swing.JLabel jLabel15;
-    private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
-    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JSeparator jSeparator2;
     private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblRec1;
     private javax.swing.JLabel lblStatus;
@@ -1834,20 +1382,13 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JTextField txtCurrency;
     private javax.swing.JTextField txtCus;
     private com.toedter.calendar.JDateChooser txtDueDate;
-    private javax.swing.JFormattedTextField txtGrandTotal;
     private javax.swing.JTextField txtLocation;
     private com.toedter.calendar.JDateChooser txtOrderDate;
     private javax.swing.JTextField txtProjectNo;
     private javax.swing.JTextField txtReference;
     private javax.swing.JTextField txtRemark;
     private javax.swing.JTextField txtSaleman;
-    private javax.swing.JFormattedTextField txtTax;
-    private javax.swing.JFormattedTextField txtVouBalance;
-    private javax.swing.JFormattedTextField txtVouDiscP;
-    private javax.swing.JFormattedTextField txtVouDiscount;
     private javax.swing.JFormattedTextField txtVouNo;
-    private javax.swing.JFormattedTextField txtVouPaid;
-    private javax.swing.JFormattedTextField txtVouTaxP;
     private javax.swing.JFormattedTextField txtVouTotal;
     // End of variables declaration//GEN-END:variables
 

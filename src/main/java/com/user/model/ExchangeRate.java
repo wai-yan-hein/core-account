@@ -54,7 +54,9 @@ public class ExchangeRate {
     @Override
     public String toString() {
         String date = Util1.toDateStr(exDate, Global.dateFormat);
-        String format = String.format("%s - %s->%s -%s", date, homeCur, targetCur, homeFactor / targetFactor);
+        String hf = Util1.toFormatPattern(homeFactor);
+        String tf = Util1.toFormatPattern(targetFactor);
+        String format = String.format("%s - %s %s -> %s %s", date, hf, homeCur, tf, targetCur);
         return format;
     }
 

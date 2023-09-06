@@ -182,15 +182,15 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         tblRet.getTableHeader().setFont(Global.tblHeaderFont);
         tblRet.setCellSelectionEnabled(true);
         tblRet.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
-        tblRet.getColumnModel().getColumn(1).setPreferredWidth(450);//Name
-        tblRet.getColumnModel().getColumn(2).setPreferredWidth(60);//Relation
+        tblRet.getColumnModel().getColumn(1).setPreferredWidth(400);//Name
+        tblRet.getColumnModel().getColumn(2).setPreferredWidth(50);//Relation
         tblRet.getColumnModel().getColumn(3).setPreferredWidth(60);//Location
-        tblRet.getColumnModel().getColumn(4).setPreferredWidth(60);//qty
+        tblRet.getColumnModel().getColumn(4).setPreferredWidth(50);//weight
         tblRet.getColumnModel().getColumn(5).setPreferredWidth(1);//unit
-        tblRet.getColumnModel().getColumn(6).setPreferredWidth(60);//weight
-        tblRet.getColumnModel().getColumn(7).setPreferredWidth(1);//weight unit
-        tblRet.getColumnModel().getColumn(8).setPreferredWidth(1);//price
-        tblRet.getColumnModel().getColumn(9).setPreferredWidth(40);//amt
+        tblRet.getColumnModel().getColumn(6).setPreferredWidth(50);//qty
+        tblRet.getColumnModel().getColumn(7).setPreferredWidth(1);// unit
+        tblRet.getColumnModel().getColumn(8).setPreferredWidth(70);//price
+        tblRet.getColumnModel().getColumn(9).setPreferredWidth(100);//amt
         tblRet.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblRet.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         monoLoc.subscribe((t) -> {

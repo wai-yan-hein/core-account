@@ -5,6 +5,7 @@
 package com.user.common;
 
 import com.user.model.Currency;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.ComboBoxModel;
 import javax.swing.event.ListDataListener;
@@ -15,7 +16,7 @@ import javax.swing.event.ListDataListener;
  */
 public class CurrencyComboBoxModel implements ComboBoxModel<Currency> {
 
-    private List<Currency> data;
+    private List<Currency> data = new ArrayList<>();
     private Currency selected;
 
     public void setData(List<Currency> data) {

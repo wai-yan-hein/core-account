@@ -80,4 +80,5 @@ public class VOrder {
     private String address;
     private String projectNo;
     private boolean local;
+    private String orderStatus;
 }

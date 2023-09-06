@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ReturnInTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Code", "Description", "Relation", "Location",
-        "Qty", "Unit", "Weight", "Weight Unit", "Price", "Amount"};
+        "Weight", "Weight Unit", "Qty", "Unit", "Price", "Amount"};
     private JTable parent;
     private List<RetInHisDetail> listDetail = new ArrayList();
     private SelectionObserver selectionObserver;
@@ -128,7 +128,7 @@ public class ReturnInTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         return switch (column) {
-            case 5 ->
+            case 4 ->
                 ProUtil.isUseWeight();
             default ->
                 column != 2;
@@ -165,21 +165,22 @@ public class ReturnInTableModel extends AbstractTableModel {
                     return record.getLocName();
                 }
                 case 4 -> {
-                    //qty
-                    return record.getQty();
+                    //weight
+                    return Util1.getFloat(record.getWeight()) == 0 ? null : record.getWeight();
                 }
                 case 5 -> {
-                    //unit
-                    return record.getUnitCode();
-                }
-                case 6 -> {
-                    //weight
-                    return record.getWeight();
-                }
-                case 7 -> {
                     //weight unit
                     return record.getWeightUnit();
                 }
+                case 6 -> {
+                    //qty
+                    return record.getQty();
+                }
+                case 7 -> {
+                    //unit
+                    return record.getUnitCode();
+                }
+
                 case 8 -> {
                     //price
                     return record.getPrice();
@@ -218,9 +219,9 @@ public class ReturnInTableModel extends AbstractTableModel {
                             record.setWeightUnit(s.getWeightUnit());
                             addNewRow();
                             if (ProUtil.isUseWeight()) {
-                                setSelection(row, 6);
-                            } else {
                                 setSelection(row, 4);
+                            } else {
+                                setSelection(row, 6);
                             }
                         }
                     }
@@ -232,7 +233,28 @@ public class ReturnInTableModel extends AbstractTableModel {
 
                         }
                     }
-                    case 4 -> {
+                    case 4 -> { // weight
+                        if (Util1.isNumber(value)) {
+                            if (Util1.isPositive(Util1.getFloat(value))) {
+                                record.setWeight(Util1.getFloat(value));
+                                setSelection(row, 7);
+                            } else {
+                                showMessageBox("Input value must be positive");
+                                setSelection(row, column);
+                            }
+                        } else {
+                            showMessageBox("Input value must be number");
+                            setSelection(row, column);
+                        }
+
+                    }
+                    case 5 -> {
+                        if (value instanceof StockUnit unit) {
+                            record.setWeightUnit(unit.getKey().getUnitCode());
+                            setSelection(row, 8);
+                        }
+                    }
+                    case 6 -> {
                         //Qty
                         if (ProUtil.isUseWeight()) {
                             String str = String.valueOf(value);
@@ -254,34 +276,14 @@ public class ReturnInTableModel extends AbstractTableModel {
                             }
                         }
                     }
-                    case 5 -> {
+                    case 7 -> {
                         //Unit
                         if (value instanceof StockUnit s) {
                             record.setUnitCode(s.getKey().getUnitCode());
                             setSelection(row, 8);
                         }
                     }
-                    case 6 -> { // weight
-                        if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
-                                record.setWeight(Util1.getFloat(value));
-                                setSelection(row, 7);
-                            } else {
-                                showMessageBox("Input value must be positive");
-                                setSelection(row, column);
-                            }
-                        } else {
-                            showMessageBox("Input value must be number");
-                            setSelection(row, column);
-                        }
 
-                    }
-                    case 7 -> {
-                        if (value instanceof StockUnit unit) {
-                            record.setWeightUnit(unit.getKey().getUnitCode());
-                            setSelection(row, 8);
-                        }
-                    }
                     case 8 -> {
                         // Price
                         if (Util1.isNumber(value)) {
@@ -306,11 +308,15 @@ public class ReturnInTableModel extends AbstractTableModel {
                 if (column != 8) {
                     if (Util1.getFloat(record.getPrice()) == 0) {
                         if (record.getStockCode() != null && record.getUnitCode() != null) {
-                            inventoryRepo.getSaleRecentPrice(record.getStockCode(),
-                                    Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), record.getUnitCode()).subscribe((t) -> {
-                                record.setPrice(t.getAmount());
-                                calculateAmount(record);
-                            });
+                            inventoryRepo.getSaleRecentPrice(
+                                    record.getStockCode(),
+                                    Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"),
+                                    record.getUnitCode())
+                                    .doOnSuccess((t) -> {
+                                        record.setPrice(t.getAmount());
+                                        calculateAmount(record);
+                                        fireTableRowsUpdated(row, row);
+                                    }).subscribe();
                         }
                     }
                 }
@@ -381,18 +387,9 @@ public class ReturnInTableModel extends AbstractTableModel {
 
     private void calculateAmount(RetInHisDetail s) {
         float price = Util1.getFloat(s.getPrice());
-        float wt = Util1.getFloat(s.getWeight());
-        float ttlWt = Util1.getFloat(s.getTotalWeight());
         float qty = Util1.getFloat(s.getQty());
-        if (s.getStockCode() != null) {
-            if (ttlWt > 0) {
-                float amount = (ttlWt * price) / wt;
-                s.setAmount(amount);
-            } else {
-                float amount = qty * price;
-                s.setAmount(amount);
-            }
-        }
+        float amount = qty * price;
+        s.setAmount(amount);
     }
 
     private void showMessageBox(String text) {

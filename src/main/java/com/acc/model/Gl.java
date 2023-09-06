@@ -80,6 +80,10 @@ public class Gl {
     private String batchNo;
     @Column(name = "project_no")
     private String projectNo;
+    @Column(name = "ex_code")
+    private String exCode;
+    @Column(name = "order_id")
+    private Integer orderId;
     @Transient
     private String glDateStr;
     @Transient
