@@ -72,7 +72,7 @@ public class COAUnusedDailog extends javax.swing.JDialog {
                 t.getBody().forEach(coa -> {
                     coa.setActive(Boolean.TRUE);
                 });
-                model.setListCoaHead(t.getBody());
+                model.setListCOA(t.getBody());
                 this.setTitle(title);
             } else {
                 this.setTitle(title + "- No unused coa.");

@@ -178,7 +178,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         roTableModel.setLblRec(lblRec);
         roTableModel.setReturnOut(this);
         roTableModel.addNewRow();
-        roTableModel.setSelectionObserver(this);
+        roTableModel.setObserver(this);
         tblRet.getTableHeader().setFont(Global.tblHeaderFont);
         tblRet.setCellSelectionEnabled(true);
         tblRet.getColumnModel().getColumn(0).setPreferredWidth(50);//Code

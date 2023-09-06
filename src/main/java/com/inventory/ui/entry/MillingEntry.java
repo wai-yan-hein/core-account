@@ -253,7 +253,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         milingRawTableModel.setParent(tblRaw);
         milingRawTableModel.setSale(this);
         milingRawTableModel.addNewRow();
-        milingRawTableModel.setSelectionObserver(this);
+        milingRawTableModel.setObserver(this);
         milingRawTableModel.setVouDate(txtSaleDate);
         milingRawTableModel.setInventoryRepo(inventoryRepo);
         milingRawTableModel.setSbTableModel(stockBalanceTableModel);
@@ -297,7 +297,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     private void initExpenseTable() {
         tblExpense.setModel(milingExpenseTableModel);
         milingExpenseTableModel.setTable(tblExpense);
-        milingExpenseTableModel.setSelectionObserver(this);
+        milingExpenseTableModel.setObserver(this);
         milingExpenseTableModel.addNewRow();
         milingExpenseTableModel.setInventoryRepo(inventoryRepo);
         tblExpense.getTableHeader().setFont(Global.tblHeaderFont);
@@ -325,7 +325,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
         tblOutput.setModel(milingOutTableModel);
         milingOutTableModel.setParent(tblOutput);
         milingOutTableModel.addNewRow();
-        milingOutTableModel.setSelectionObserver(this);
+        milingOutTableModel.setObserver(this);
         milingOutTableModel.setVouDate(txtSaleDate);
         milingOutTableModel.setInventoryRepo(inventoryRepo);
         milingOutTableModel.setSbTableModel(stockBalanceTableModel);

@@ -303,7 +303,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
 
     private void initCombo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate);
-        dateAutoCompleter.setSelectionObserver(this);
+        dateAutoCompleter.setObserver(this);
         accountRepo.getDepartment().subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDep,
                     t, null, true, true);

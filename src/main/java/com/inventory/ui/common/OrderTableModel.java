@@ -4,7 +4,6 @@
  */
 package com.inventory.ui.common;
 
-import com.repo.InventoryRepo;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
@@ -14,15 +13,12 @@ import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.OrderDetailKey;
 import com.inventory.model.OrderHisDetail;
-import com.inventory.model.SaleHisDetail;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
 import com.inventory.ui.entry.OrderEntry;
-import com.toedter.calendar.JDateChooser;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -41,12 +37,10 @@ public class OrderTableModel extends AbstractTableModel {
         "Qty", "Unit", "Price", "Amount"};
     private JTable parent;
     private List<OrderHisDetail> listDetail = new ArrayList();
-    private SelectionObserver selectionObserver;
+    private SelectionObserver observer;
     private final List<OrderDetailKey> deleteList = new ArrayList();
     private StockBalanceTableModel sbTableModel;
     private OrderEntry orderEntry;
-    private InventoryRepo inventoryRepo;
-    private JDateChooser vouDate;
     private boolean change = false;
     private JLabel lblRecord;
 
@@ -56,10 +50,6 @@ public class OrderTableModel extends AbstractTableModel {
 
     public void setSbTableModel(StockBalanceTableModel sbTableModel) {
         this.sbTableModel = sbTableModel;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
     }
 
     public void setLblRecord(JLabel lblRecord) {
@@ -74,16 +64,12 @@ public class OrderTableModel extends AbstractTableModel {
         this.change = change;
     }
 
-    public void setVouDate(JDateChooser vouDate) {
-        this.vouDate = vouDate;
-    }
-
     public void setParent(JTable parent) {
         this.parent = parent;
     }
 
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
     }
 
     @Override
@@ -209,7 +195,7 @@ public class OrderTableModel extends AbstractTableModel {
                             sd.setWeightUnit(s.getWeightUnit());
                             sd.setUnitCode(s.getSaleUnitCode());
                             sd.setPrice(getTraderPrice(s));
-//                            sd.setStock(s);
+                            sd.setStock(s);
                             sd.setPrice(sd.getPrice() == 0 ? s.getSalePriceN() : sd.getPrice());
                             parent.setColumnSelectionInterval(4, 4);
                             addNewRow();
@@ -279,27 +265,12 @@ public class OrderTableModel extends AbstractTableModel {
                     }
 
                 }
-                if (column != 8) {
-                    if (Util1.getFloat(sd.getPrice()) == 0) {
-                        if (ProUtil.isSaleLastPrice()) {
-                            if (sd.getStockCode() != null && sd.getUnitCode() != null) {
-                                inventoryRepo.getSaleRecentPrice(sd.getStockCode(),
-                                        Util1.toDateStr(vouDate.getDate(), "yyyy-MM-dd"), sd.getUnitCode())
-                                        .doOnSuccess((t) -> {
-                                            sd.setPrice(Util1.getDouble(t.getAmount()));
-                                            calculateAmount(sd);
-                                            fireTableCellUpdated(row, 8);
-                                        }).subscribe();
-                            }
-                        }
-                    }
-                }
                 change = true;
                 assignLocation(sd);
                 calculateAmount(sd);
                 fireTableRowsUpdated(row, row);
                 setRecord(listDetail.size() - 1);
-                selectionObserver.selected("ORDER-TOTAL", "ORDER-TOTAL");
+                observer.selected("ORDER-TOTAL", "ORDER-TOTAL");
                 parent.requestFocusInWindow();
             }
         } catch (Exception ex) {
@@ -361,19 +332,10 @@ public class OrderTableModel extends AbstractTableModel {
         addNewRow();
     }
 
-    private void calculateAmount(OrderHisDetail orderEntry) {
-        if (orderEntry.getStockCode() != null) {
-//            float price = Util1.getFloat(orderEntry.getPrice());
-//            float wt = Util1.getFloat(orderEntry.getWeight());
-//            float qty = Util1.getFloat(orderEntry.getQty());
-//            if (orderEntry.getStockCode() != null) {
-//                float amount = (qty * wt * price) / stdWt;
-//                orderEntry.setAmount(Util1.getFloat(Math.round(amount)));
-//            }
-            float saleQty = Util1.getFloat(orderEntry.getQty());
-            float stdSalePrice = Util1.getFloat(orderEntry.getPrice());
-            float amount = saleQty * stdSalePrice;
-            orderEntry.setAmount(Util1.getDouble(Math.round(amount)));
+    private void calculateAmount(OrderHisDetail oh) {
+        if (oh.getStockCode() != null) {
+            double amount = Util1.getDouble(oh.getQty()) * Util1.getDouble(oh.getPrice());
+            oh.setAmount(Util1.getDouble(Math.round(amount)));
         }
     }
 
@@ -385,19 +347,13 @@ public class OrderTableModel extends AbstractTableModel {
         boolean status = true;
         for (OrderHisDetail sdh : listDetail) {
             if (sdh.getStockCode() != null) {
-                if (Util1.getFloat(sdh.getAmount()) <= 0) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.",
-                            "Invalid.", JOptionPane.ERROR_MESSAGE);
-                    status = false;
-                    parent.requestFocus();
-                    break;
-                } else if (sdh.getLocCode() == null) {
+                if (sdh.getLocCode() == null) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Location.");
                     status = false;
                     parent.requestFocus();
                     break;
                 } else if (sdh.getUnitCode() == null) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Sale Unit.");
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Order Unit.");
                     status = false;
                     parent.requestFocus();
                     break;

@@ -43,6 +43,8 @@ public class OrderHisDetail {
     @Column(name = "weight_unit")
     private String weightUnit;
     @Transient
+    private Stock stock;
+    @Transient
     private String userCode;
     @Transient
     private String stockName;

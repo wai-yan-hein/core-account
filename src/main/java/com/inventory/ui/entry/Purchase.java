@@ -305,7 +305,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         purTableModel.setParent(tblPur);
         purTableModel.setPurchase(this);
         purTableModel.addNewRow();
-        purTableModel.setSelectionObserver(this);
+        purTableModel.setObserver(this);
         tblPur.getTableHeader().setFont(Global.tblHeaderFont);
         tblPur.setCellSelectionEnabled(true);
         tblPur.getColumnModel().getColumn(0).setPreferredWidth(50);//Code

@@ -72,7 +72,7 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
 
     private void initComobo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate);
-        dateAutoCompleter.setSelectionObserver(this);
+        dateAutoCompleter.setObserver(this);
         currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         currAutoCompleter.setObserver(this);
         currAutoCompleter.setCurrency(null);

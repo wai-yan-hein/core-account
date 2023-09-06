@@ -155,7 +155,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
 
     private void initCombo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate);
-        dateAutoCompleter.setSelectionObserver(this);
+        dateAutoCompleter.setObserver(this);
         Mono<List<DepartmentA>> monoDep = accountRepo.getDepartment();
         monoDep.subscribe((t) -> {
             departmentAutoCompleter = new DepartmentAutoCompleter(txtDept, t, null, true, true);

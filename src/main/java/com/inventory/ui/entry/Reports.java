@@ -231,7 +231,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, inventoryRepo, null, true);
         dateAutoCompleter = new DateAutoCompleter(txtDate);
-        dateAutoCompleter.setSelectionObserver(this);
+        dateAutoCompleter.setObserver(this);
         batchAutoCompeter = new BatchAutoCompeter(txtBatchNo, inventoryRepo, null, true);
         batchAutoCompeter.setObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);

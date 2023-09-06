@@ -310,7 +310,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             log.error(e.getMessage());
         });
         dateAutoCompleter = new DateAutoCompleter(txtDate);
-        dateAutoCompleter.setSelectionObserver(this);
+        dateAutoCompleter.setObserver(this);
         despAutoCompleter = new DespAutoCompleter(txtDesp, accountRepo, null, true);
         despAutoCompleter.setObserver(this);
         refAutoCompleter = new RefAutoCompleter(txtRefrence, accountRepo, null, true);

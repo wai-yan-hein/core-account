@@ -57,7 +57,7 @@ public class MilingExpenseTableModel extends AbstractTableModel {
         return selectionObserver;
     }
 
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
+    public void setObserver(SelectionObserver selectionObserver) {
         this.selectionObserver = selectionObserver;
     }
 

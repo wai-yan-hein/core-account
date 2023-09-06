@@ -169,7 +169,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
 
     private void initCombo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate);
-        dateAutoCompleter.setSelectionObserver(this);
+        dateAutoCompleter.setObserver(this);
         despAutoCompleter = new DespAutoCompleter(txtDesp, accountRepo, null, true);
         despAutoCompleter.setObserver(this);
         refAutoCompleter = new RefAutoCompleter(txtReference, accountRepo, null, true);

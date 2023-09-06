@@ -266,7 +266,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         coaAutoCompleter = new COA3AutoCompleter(txtAccount, accountRepo, null, true, 0);
         coaAutoCompleter.setObserver(this);
         dateAutoCompleter = new DateAutoCompleter(txtDate);
-        dateAutoCompleter.setSelectionObserver(this);
+        dateAutoCompleter.setObserver(this);
         despAutoCompleter = new DespAutoCompleter(txtDesp, accountRepo, null, true);
         despAutoCompleter.setObserver(this);
         refAutoCompleter = new RefAutoCompleter(txtRefrence, accountRepo, null, true);

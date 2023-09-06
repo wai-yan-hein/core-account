@@ -56,7 +56,7 @@ public class MachineInfoAutoCompleter implements KeyListener, SelectionObserver 
     private int y = 0;
     private SelectionObserver selectionObserver;
 
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
+    public void setObserver(SelectionObserver selectionObserver) {
         this.selectionObserver = selectionObserver;
     }
 

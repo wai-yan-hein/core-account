@@ -187,7 +187,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
             departmentAutoCompleter.setObserver(this);
         });
         dateAutoCompleter = new DateAutoCompleter(txtDate);
-        dateAutoCompleter.setSelectionObserver(this);
+        dateAutoCompleter.setObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
         projectAutoCompleter.setObserver(this);
         currencyAAutoCompleter = new CurrencyAutoCompleter(txtCur, null);

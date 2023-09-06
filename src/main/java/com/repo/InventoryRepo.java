@@ -2935,8 +2935,7 @@ public class InventoryRepo {
                 .queryParam("tranType", tranType)
                 .build())
                 .retrieve()
-                .bodyToFlux(VDescription.class
-                )
+                .bodyToFlux(VDescription.class)
                 .collectList();
     }
 

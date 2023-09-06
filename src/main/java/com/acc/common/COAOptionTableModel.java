@@ -9,25 +9,24 @@ import com.acc.model.ChartOfAccount;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class COAOptionTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(COAOptionTableModel.class);
-    private List<ChartOfAccount> listCoaHead = new ArrayList();
-    private final String[] columnNames = {"Code", "Name", "Select"};
+    private List<ChartOfAccount> listCOA = new ArrayList();
+    private final String[] columnNames = {"Code", "Name", "Group", "Select"};
 
     @Override
     public int getRowCount() {
-        if (listCoaHead == null) {
+        if (listCOA == null) {
             return 0;
         }
-        return listCoaHead.size();
+        return listCOA.size();
     }
 
     @Override
@@ -42,17 +41,15 @@ public class COAOptionTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return column == 2;
+        return column == 3;
     }
 
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 0 ->
+            case 0, 1, 2 ->
                 String.class;
-            case 1 ->
-                String.class;
-            case 2 ->
+            case 3 ->
                 Boolean.class;
             default ->
                 Object.class;
@@ -63,7 +60,7 @@ public class COAOptionTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int column) {
         try {
-            ChartOfAccount coa = listCoaHead.get(row);
+            ChartOfAccount coa = listCOA.get(row);
 
             return switch (column) {
                 case 0 ->
@@ -71,6 +68,8 @@ public class COAOptionTableModel extends AbstractTableModel {
                 case 1 ->
                     coa.getCoaNameEng();
                 case 2 ->
+                    coa.getGroupName();
+                case 3 ->
                     coa.isActive();
                 default ->
                     null;
@@ -86,11 +85,11 @@ public class COAOptionTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object value, int row, int column) {
         try {
-            if (!listCoaHead.isEmpty()) {
-                ChartOfAccount coa = listCoaHead.get(row);
+            if (!listCOA.isEmpty()) {
+                ChartOfAccount coa = listCOA.get(row);
                 if (value != null) {
                     switch (column) {
-                        case 2 ->
+                        case 3 ->
                             coa.setActive((Boolean) value);
                     }
                 }
@@ -101,23 +100,23 @@ public class COAOptionTableModel extends AbstractTableModel {
         }
     }
 
-    public List<ChartOfAccount> getListCoaHead() {
-        return listCoaHead;
-    }
-
-    public void setListCoaHead(List<ChartOfAccount> listCoaHead) {
-        this.listCoaHead = listCoaHead;
-        fireTableDataChanged();
-
-    }
-
     public ChartOfAccount getChartOfAccount(int row) {
-        return listCoaHead.get(row);
+        return listCOA.get(row);
     }
 
     public void clear() {
-        listCoaHead.clear();
+        listCOA.clear();
         fireTableDataChanged();
     }
+
+    public List<ChartOfAccount> getListCOA() {
+        return listCOA;
+    }
+
+    public void setListCOA(List<ChartOfAccount> listCOA) {
+        this.listCOA = listCOA;
+        fireTableDataChanged();
+    }
+    
 
 }

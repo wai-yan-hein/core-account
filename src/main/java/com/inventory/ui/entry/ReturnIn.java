@@ -173,7 +173,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         retInTableModel.setParent(tblRet);
         retInTableModel.setReturnIn(this);
         retInTableModel.addNewRow();
-        retInTableModel.setSelectionObserver(this);
+        retInTableModel.setObserver(this);
         retInTableModel.setInventoryRepo(inventoryRepo);
         retInTableModel.setVouDate(txtVouDate);
         retInTableModel.setLblRec(lblRec);

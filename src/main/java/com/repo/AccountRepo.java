@@ -434,7 +434,7 @@ public class AccountRepo {
 
     public Mono<List<Gl>> getJournal(String vouNo) {
         return accountApi.get()
-                .uri(builder -> builder.path("/account/get-journal")
+                .uri(builder -> builder.path("/account/getJournal")
                 .queryParam("glVouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .build())
@@ -729,7 +729,7 @@ public class AccountRepo {
     public Mono<List<Gl>> searchVoucher(ReportFilter filter) {
         return accountApi
                 .post()
-                .uri("/account/search-voucher")
+                .uri("/account/searchVoucher")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(Gl.class)

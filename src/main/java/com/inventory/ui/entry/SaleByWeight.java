@@ -197,7 +197,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         saleTableModel.setParent(tblSale);
         saleTableModel.setSale(this);
         saleTableModel.addNewRow();
-        saleTableModel.setSelectionObserver(this);
+        saleTableModel.setObserver(this);
         saleTableModel.setVouDate(txtSaleDate);
         saleTableModel.setInventoryRepo(inventoryRepo);
         saleTableModel.setSbTableModel(stockBalanceTableModel);

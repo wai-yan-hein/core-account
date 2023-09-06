@@ -148,7 +148,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
 
     private void initCombo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate);
-        dateAutoCompleter.setSelectionObserver(this);
+        dateAutoCompleter.setObserver(this);
         traderAutoCompleter = new TraderAAutoCompleter(txtTrader, accountRepo, null, true);
         traderAutoCompleter.setObserver(this);
         accountRepo.getDepartment().subscribe((t) -> {

@@ -64,7 +64,7 @@ public class ReturnOutTableModel extends AbstractTableModel {
         this.returnOut = returnOut;
     }
 
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
+    public void setObserver(SelectionObserver selectionObserver) {
         this.selectionObserver = selectionObserver;
     }
 

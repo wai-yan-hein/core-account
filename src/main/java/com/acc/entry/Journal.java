@@ -190,7 +190,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
 
     private void initCompleter() {
         dateAutoCompleter = new DateAutoCompleter(txtDate);
-        dateAutoCompleter.setSelectionObserver(this);
+        dateAutoCompleter.setObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
         projectAutoCompleter.setObserver(this);
         cOA3AutoCompleter = new COA3AutoCompleter(txtAccount, accountRepo, null, true, 3);

@@ -58,7 +58,7 @@ public final class SaleManAutoCompleter implements KeyListener, SelectionObserve
     private List<SaleMan> listSaleMan;
     private boolean filter;
 
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
+    public void setObserver(SelectionObserver selectionObserver) {
         this.selectionObserver = selectionObserver;
     }
 

@@ -57,12 +57,13 @@ public final class DateAutoCompleter implements KeyListener, SelectionObserver {
     private int x = 0;
     private boolean popupOpen = true;
     private final DatePickerDialog dialog = new DatePickerDialog();
-    private SelectionObserver selectionObserver;
+    private SelectionObserver observer;
     private final Image image = new ImageIcon(this.getClass().getResource("/images/date.png")).getImage();
 
-    public void setSelectionObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
     }
+
 
     public DateAutoCompleter() {
     }
@@ -186,8 +187,8 @@ public final class DateAutoCompleter implements KeyListener, SelectionObserver {
                     String.format("%s%s%s", Util1.toDateStr(startDate, "yyyy-MM-dd", Global.dateFormat),
                             " to ", Util1.toDateStr(endDate, "yyyy-MM-dd", Global.dateFormat)));
         }
-        if (selectionObserver != null) {
-            selectionObserver.selected("Date", "Date");
+        if (observer != null) {
+            observer.selected("Date", "Date");
         }
     }
 
@@ -366,8 +367,8 @@ public final class DateAutoCompleter implements KeyListener, SelectionObserver {
         if (source != null) {
             if (source.toString().equals("DatePickerDialog")) {
                 ((JTextField) textComp).setText(selectObj.toString());
-                if (selectionObserver != null) {
-                    selectionObserver.selected("Date", selectObj);
+                if (observer != null) {
+                    observer.selected("Date", selectObj);
                     popup.setVisible(false);
                     if (editor != null) {
                         editor.stopCellEditing();

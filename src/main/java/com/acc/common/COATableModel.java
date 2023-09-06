@@ -10,16 +10,15 @@ import com.common.Util1;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class COATableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(COATableModel.class);
     private List<ChartOfAccount> listCOA = new ArrayList<>();
     private final String[] columnNames = {"Code", "Name", "Group"};
 

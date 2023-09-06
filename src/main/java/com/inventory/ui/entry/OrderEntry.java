@@ -26,7 +26,6 @@ import com.inventory.model.OrderHisDetail;
 import com.inventory.model.OrderHisKey;
 import com.inventory.model.OrderStatusType;
 import com.inventory.model.SaleMan;
-import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
 import com.inventory.model.VOrder;
 import com.repo.InventoryRepo;
@@ -72,7 +71,6 @@ import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -201,9 +199,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         orderTableModel.setLblRecord(lblRec);
         orderTableModel.setOrderEntry(this);
         orderTableModel.addNewRow();
-        orderTableModel.setSelectionObserver(this);
-        orderTableModel.setVouDate(txtOrderDate);
-        orderTableModel.setInventoryRepo(inventoryRepo);
+        orderTableModel.setObserver(this);
         orderTableModel.setSbTableModel(stockBalanceTableModel);
         tblOrder.getTableHeader().setFont(Global.tblHeaderFont);
         tblOrder.setCellSelectionEnabled(true);
@@ -464,7 +460,8 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void calculateTotalAmount() {
-        txtVouTotal.setValue(orderTableModel.getListDetail().stream().mapToDouble((o) -> o.getAmount()).sum());
+        double ttlAmt = orderTableModel.getListDetail().stream().mapToDouble((o) -> Util1.getDouble(o.getAmount())).sum();
+        txtVouTotal.setValue(ttlAmt);
     }
 
     public void historyOrder() {
@@ -474,7 +471,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             dialog.setUserRepo(userRepo);
             dialog.setObserver(this);
             dialog.initMain();
-            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setSize(Global.width - 50, Global.height - 50);
             dialog.setLocationRelativeTo(null);
         }
         dialog.search();

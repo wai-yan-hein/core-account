@@ -310,7 +310,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         saleTableModel.setParent(tblSale);
         saleTableModel.setSale(this);
         saleTableModel.addNewRow();
-        saleTableModel.setSelectionObserver(this);
+        saleTableModel.setObserver(this);
         saleTableModel.setVouDate(txtSaleDate);
         saleTableModel.setInventoryRepo(inventoryRepo);
         saleTableModel.setSbTableModel(stockBalanceTableModel);
@@ -511,7 +511,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             orderDialog.setUserRepo(userRepo);
             orderDialog.setObserver(this);
             orderDialog.initMain();
-            orderDialog.setSize(Global.width - 100, Global.height - 100);
+            orderDialog.setSize(Global.width - 50, Global.height - 50);
             orderDialog.setLocationRelativeTo(null);
         }
         orderDialog.search();
