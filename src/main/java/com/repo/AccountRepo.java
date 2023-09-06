@@ -140,7 +140,7 @@ public class AccountRepo {
                 .collectList();
     }
 
-    public Flux<ChartOfAccount> getCOATree() {
+    public Mono<List<ChartOfAccount>> getCOATree() {
         if (localDatabase) {
             return h2Repo.getCOATree();
         }
@@ -148,7 +148,20 @@ public class AccountRepo {
                 .uri(builder -> builder.path("/account/get-coa-tree")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().bodyToFlux(ChartOfAccount.class);
+                .retrieve()
+                .bodyToFlux(ChartOfAccount.class)
+                .collectList();
+    }
+
+    public Mono<List<COATemplate>> getCOATemplateTree(Integer busId, String compCode) {
+        return accountApi.get()
+                .uri(builder -> builder.path("/template/get-coa-template-tree")
+                .queryParam("coaCode", compCode)
+                .queryParam("busId", busId)
+                .build())
+                .retrieve()
+                .bodyToFlux(COATemplate.class)
+                .collectList();
     }
 
     public Flux<ChartOfAccount> getTraderAccount() {

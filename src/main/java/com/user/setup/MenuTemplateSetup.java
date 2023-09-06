@@ -44,7 +44,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelectionListener, PanelControl {
-
+    
     private DefaultMutableTreeNode treeRoot;
     private UserRepo userRepo;
     private DefaultTreeModel treeModel;
@@ -54,39 +54,39 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
     private JProgressBar progress;
     private JComboBox<BusinessType> busType;
     private JPopupMenu popupmenu;
-
+    
     public SelectionObserver getObserver() {
         return observer;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public JProgressBar getProgress() {
         return progress;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public JComboBox<BusinessType> getBusType() {
         return busType;
     }
-
+    
     public void setBusType(JComboBox<BusinessType> busType) {
         this.busType = busType;
     }
-
+    
     public UserRepo getUserRepo() {
         return userRepo;
     }
-
+    
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-
+    
     private final ActionListener menuListener = (ActionEvent evt) -> {
         if (evt.getSource() instanceof JMenuItem actionMenu) {
             String menuName = actionMenu.getText();
@@ -109,15 +109,15 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
         initKeyListener();
         initPopup();
     }
-
+    
     public void initMain() {
         initTree();
     }
-
+    
     private void exportMenu() {
         if (busType.getSelectedItem() instanceof BusinessType type) {
+            progress.setIndeterminate(true);
             userRepo.getMenuTemplate(type.getBusId()).subscribe(mList -> {
-                progress.setIndeterminate(true);
                 try {
                     Util1.writeJsonFile(mList, "menu.json");
                 } catch (IOException ex) {
@@ -129,14 +129,15 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
             });
         }
     }
-
+    
     private void importMenu(List<MenuTemplate> menuList) {
         log.info("Start import");
+        progress.setIndeterminate(true);
         processMenu(menuList);
-
+        progress.setIndeterminate(false);
         log.info("End import");
     }
-
+    
     private void processMenu(List<MenuTemplate> listMenu) {
         if (busType.getSelectedItem() instanceof BusinessType type) {
             if (!listMenu.isEmpty()) {
@@ -155,13 +156,13 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
             }
         }
     }
-
+    
     private void chooseFile() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Choose json file");
-
+        
         int userSelection = fileChooser.showOpenDialog(null);
-
+        
         if (userSelection == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
             try {
@@ -174,7 +175,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
             }
         }
     }
-
+    
     private void searchMenu() {
         if (busType.getSelectedItem() instanceof BusinessType type) {
             progress.setIndeterminate(true);
@@ -195,7 +196,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
                                     DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
                                     treeRoot.add(parent);
                                 }
-
+                                
                             });
                         }
                         treeModel.setRoot(treeRoot);
@@ -205,9 +206,9 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
                         progress.setIndeterminate(false);
                     });
         }
-
+        
     }
-
+    
     private void addChildMenu(DefaultMutableTreeNode parent, List<MenuTemplate> listVRM) {
         listVRM.forEach((menu) -> {
             if (menu.getChild() != null) {
@@ -225,7 +226,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
             }
         });
     }
-
+    
     private void initKeyListener() {
         treeCOA.addTreeSelectionListener(this);
         treeCOA.addMouseListener(new MouseAdapter() {
@@ -235,10 +236,10 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
                     popupmenu.show(treeCOA, e.getX(), e.getY());
                 }
             }
-
+            
         });
     }
-
+    
     private void initTree() {
         treeModel = (DefaultTreeModel) treeCOA.getModel();
         treeModel.setRoot(null);
@@ -247,7 +248,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
         treeRoot = new DefaultMutableTreeNode(root);
         searchMenu();
     }
-
+    
     private void initPopup() {
         popupmenu = new JPopupMenu("Edit");
         popupmenu.setFont(Global.textFont);
@@ -261,7 +262,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
         popupmenu.add(newReport);
         popupmenu.add(delete);
     }
-
+    
     private void newMenu(String menuType) {
         if (selectedNode.getUserObject() instanceof MenuTemplate obj) {
             if (busType.getSelectedItem() instanceof BusinessType type) {
@@ -274,7 +275,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
                     case "Menu" -> {
                         menu.setMenuName("New Menu");
                         menu.setMenuType("Menu");
-
+                        
                     }
                     case "Report" -> {
                         menu.setMenuName("New Report");
@@ -291,9 +292,9 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
                 txtMenuName.requestFocus();
             }
         }
-
+        
     }
-
+    
     private void saveMenu() {
         Integer parentId = 0;
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectedNode.getParent();
@@ -329,7 +330,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
             });
         }
     }
-
+    
     private void setMenu(MenuTemplate menu) {
         txtMenuName.setText(menu.getMenuName());
         txtMenuUrl.setText(menu.getMenuUrl());
@@ -339,7 +340,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
         txtClass.setText(menu.getMenuClass());
         enableControl(true);
     }
-
+    
     private void clear() {
         txtMenuName.setText(null);
         txtMenuUrl.setText(null);
@@ -350,7 +351,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
         txtMenuMM.setText(null);
         enableControl(false);
     }
-
+    
     private void enableControl(boolean status) {
         txtMenuName.setEditable(status);
         txtMenuUrl.setEditable(status);
@@ -358,7 +359,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
         txtAccount.setEditable(status);
         txtMenuType.setEditable(status);
     }
-
+    
     private void removeSpace() {
         txtMenuUrl.setText(txtMenuUrl.getText().replaceAll(" ", ""));
     }
@@ -674,37 +675,37 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
             }
         }
     }
-
+    
     @Override
     public void save() {
         saveMenu();
     }
-
+    
     @Override
     public void newForm() {
     }
-
+    
     @Override
     public void history() {
     }
-
+    
     @Override
     public void print() {
     }
-
+    
     @Override
     public void delete() {
     }
-
+    
     @Override
     public void refresh() {
         initTree();
     }
-
+    
     @Override
     public void filter() {
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();

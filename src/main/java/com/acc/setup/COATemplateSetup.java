@@ -6,7 +6,6 @@
 package com.acc.setup;
 
 import com.repo.AccountRepo;
-import com.acc.common.BusinessTypeComboBoxModel;
 import com.acc.common.COATemplateGroupTableModel;
 import com.acc.common.COATemplateHeadTableModel;
 import com.acc.common.COATemplateTableModel;
@@ -17,12 +16,21 @@ import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.common.Util1;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -38,7 +46,7 @@ import net.coderazzi.filters.gui.TableFilterHeader;
  */
 @Slf4j
 public class COATemplateSetup extends javax.swing.JPanel implements KeyListener, PanelControl {
-
+    
     private int selectRow = -1;
     private final COATemplateHeadTableModel coaHeadTableModel = new COATemplateHeadTableModel();
     private final COATemplateGroupTableModel coaGroupTableModel = new COATemplateGroupTableModel();
@@ -48,35 +56,35 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
     private JProgressBar progress;
     private SelectionObserver observer;
     private JComboBox<BusinessType> cboBusType;
-
+    
     public SelectionObserver getObserver() {
         return observer;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public AccountRepo getAccountRepo() {
         return accountRepo;
     }
-
+    
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
-
+    
     public JComboBox<BusinessType> getCboBusType() {
         return cboBusType;
     }
-
+    
     public void setCboBusType(JComboBox<BusinessType> cboBusType) {
         this.cboBusType = cboBusType;
     }
-
+    
     public JProgressBar getProgress() {
         return progress;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
@@ -87,19 +95,19 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
     public COATemplateSetup() {
         initComponents();
     }
-
+    
     public void initMain() {
         initKeyListener();
         initTable();
     }
-
+    
     private void initTable() {
         tblCOAHead();
         tblCOAGroup();
         tblCOA();
 //        searchCOA();
     }
-
+    
     private void tblCOAHead() {
 //        tblCoaHead.setModel(coaHeadTableModel);
 //        tblCoaHead.getTableHeader().setFont(Global.tblHeaderFont);
@@ -132,7 +140,7 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
         filterHeader.setVisible(false);
         searchCOA();
     }
-
+    
     private void searchCOA() {
         coaGroupTableModel.clear();
         coaTemplateTableModel.clear();
@@ -151,7 +159,7 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
                     });
         }
     }
-
+    
     private void tblCOAGroup() {
         tblCoaGroup.setCellSelectionEnabled(true);
         tblCoaGroup.setShowGrid(true);
@@ -182,9 +190,9 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
         filterHeader.setPosition(TableFilterHeader.Position.TOP);
         filterHeader.setFont(Global.textFont);
         filterHeader.setVisible(false);
-
+        
     }
-
+    
     private void tblCOA() {
         tblCOAGroupChild.setCellSelectionEnabled(true);
         tblCOAGroupChild.setShowGrid(true);
@@ -211,15 +219,15 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
         tblCOAGroupChild.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblCOAGroupChild.getActionMap().put(solve, new DeleteAction());
     }
-
+    
     private class DeleteAction extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteLv3();
         }
     }
-
+    
     private void deleteLv3() {
         int row = tblCOAGroupChild.convertRowIndexToModel(tblCOAGroupChild.getSelectedRow());
         if (row >= 0) {
@@ -236,7 +244,7 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
             }
         }
     }
-
+    
     private void getCOAGroup(int row) {
         clear();
         COATemplate c = coaHeadTableModel.getCOATemplate(row);
@@ -270,7 +278,7 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
             tblCoaHead.requestFocus();
         }
     }
-
+    
     private void reqCoaGroup() {
         int row = tblCoaGroup.getRowCount();
         if (row > 0) {
@@ -283,7 +291,7 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
             tblCoaGroup.requestFocus();
         }
     }
-
+    
     private void getCOAGroupChild(int row) {
         coaTemplateTableModel.clear();
         COATemplate c = coaGroupTableModel.getChartOfAccount(row);
@@ -302,10 +310,10 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
                             reqCOAGroupChild();
                         });
             }
-
+            
         }
     }
-
+    
     private void reqCOAGroupChild() {
         int row = tblCOAGroupChild.getRowCount();
         if (row > 0) {
@@ -318,12 +326,67 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
             tblCOAGroupChild.requestFocus();
         }
     }
-
+    
     private void clear() {
         coaGroupTableModel.clear();
         coaTemplateTableModel.clear();
         lblCoaChild.setText("...");
         lblCoaGroup.setText("...");
+    }
+    
+    private void exportCOATemplate() {
+        if (cboBusType.getSelectedItem() instanceof BusinessType bus) {
+            progress.setIndeterminate(true);
+            accountRepo.getCOATemplateTree(bus.getBusId(), "#")
+                    .subscribe(list -> {
+                        try {
+                            Util1.writeJsonFile(list, "coa_template.json");
+                        } catch (IOException ex) {
+                            Logger.getLogger(COATemplateSetup.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        progress.setIndeterminate(false);
+                    }, (error) -> {
+                        progress.setIndeterminate(false);
+                    });
+        }
+    }
+    
+    private void importTemplate(List<COATemplate> list) {
+        log.info("Start import");
+        progress.setIndeterminate(true);
+        processMenu(list);
+        progress.setIndeterminate(false);
+        log.info("End import");
+    }
+    
+    private void processMenu(List<COATemplate> list) {
+        if (cboBusType.getSelectedItem() instanceof BusinessType type) {
+            if (!list.isEmpty()) {
+                list.forEach((coa) -> {
+                    coa.getKey().setBusId(type.getBusId());
+                    accountRepo.save(coa).block();
+                });
+            }
+        }
+    }
+    
+    private void chooseFile() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Choose json file");
+        
+        int userSelection = fileChooser.showOpenDialog(null);
+        
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                List<COATemplate> coaTemplate = mapper.readValue(selectedFile, new TypeReference<List<COATemplate>>() {
+                });
+                importTemplate(coaTemplate);
+            } catch (IOException io) {
+                io.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -348,6 +411,8 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
         jSeparator2 = new javax.swing.JSeparator();
         jSeparator3 = new javax.swing.JSeparator();
         jSeparator4 = new javax.swing.JSeparator();
+        jButton4 = new javax.swing.JButton();
+        jButton5 = new javax.swing.JButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -442,6 +507,20 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
 
         jSeparator3.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
+        jButton4.setText("Export");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+
+        jButton5.setText("Import");
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -461,7 +540,12 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(lblCoaGroup, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblCoaChild, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jSeparator2))
+                    .addComponent(jSeparator2)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jButton4)
+                        .addGap(11, 11, 11)
+                        .addComponent(jButton5)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -487,7 +571,11 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jButton4)
+                            .addComponent(jButton5))))
                 .addGap(10, 10, 10))
         );
 
@@ -525,8 +613,18 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
         // TODO add your handling code here:
     }//GEN-LAST:event_tblCoaHeadMouseClicked
 
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        exportCOATemplate();        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+        chooseFile();        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton5ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButton5;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
@@ -544,53 +642,53 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
 
     @Override
     public void keyTyped(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
-
+        
     }
-
+    
     private void initKeyListener() {
         tblCoaHead.addKeyListener(this);
         tblCoaGroup.addKeyListener(this);
         tblCOAGroupChild.addKeyListener(this);
     }
-
+    
     @Override
     public void save() {
     }
-
+    
     @Override
     public void delete() {
     }
-
+    
     @Override
     public void newForm() {
     }
-
+    
     @Override
     public void history() {
     }
-
+    
     @Override
     public void print() {
     }
-
+    
     @Override
     public void refresh() {
     }
-
+    
     @Override
     public void filter() {
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();

@@ -671,8 +671,8 @@ public class H2Repo {
         return Mono.justOrEmpty(coaService.searchCOA(str, level, Global.compCode));
     }
 
-    public Flux<ChartOfAccount> getCOATree() {
-        return Flux.fromIterable(coaService.getCOATree(Global.compCode));
+    public Mono<List<ChartOfAccount>> getCOATree() {
+        return Mono.just(coaService.getCOATree(Global.compCode));
     }
 
     public Flux<ChartOfAccount> getTraderCOA() {
