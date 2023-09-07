@@ -16,6 +16,7 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
+import com.inventory.editor.OrderStatusAutoCompleter;
 import com.inventory.editor.SaleManAutoCompleter;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
@@ -24,7 +25,6 @@ import com.inventory.model.Order;
 import com.inventory.model.OrderHis;
 import com.inventory.model.OrderHisDetail;
 import com.inventory.model.OrderHisKey;
-import com.inventory.model.OrderStatusType;
 import com.inventory.model.SaleMan;
 import com.inventory.model.Trader;
 import com.inventory.model.VOrder;
@@ -93,6 +93,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     private SaleManAutoCompleter saleManCompleter;
     private LocationAutoCompleter locationAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
+    private OrderStatusAutoCompleter orderStatusAutoCompleter;
     private SelectionObserver observer;
     private OrderHis orderHis = new OrderHis();
     private JProgressBar progress;
@@ -250,6 +251,8 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         });
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
         projectAutoCompleter.setObserver(this);
+        orderStatusAutoCompleter = new OrderStatusAutoCompleter(txtOrderStatus, inventoryRepo, null, false);
+        orderStatusAutoCompleter.setOrderStatus(null);
     }
 
     private void initKeyListener() {
@@ -264,6 +267,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         txtSaleman.addKeyListener(this);
         txtCurrency.addKeyListener(this);
         tblOrder.addKeyListener(this);
+        txtOrderStatus.addKeyListener(this);
     }
 
     private void initTextBoxValue() {
@@ -330,7 +334,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         txtReference.setText(null);
         txtCus.requestFocus();
         projectAutoCompleter.setProject(null);
-        cboOrderStatusType.setSelectedIndex(OrderStatusType.valueOf(OrderStatusType.OPEN.name()).ordinal());
+        txtOrderStatus.setText(null);
     }
 
     public void saveOrder(boolean print) {
@@ -397,9 +401,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             orderHis.setMacId(Global.macId);
             Project p = projectAutoCompleter.getProject();
             orderHis.setProjectNo(p == null ? null : p.getKey().getProjectNo());
-            if (cboOrderStatusType.getSelectedItem() instanceof OrderStatusType type) {
-                orderHis.setOrderStatus(type.name());
-            }
+            orderHis.setOrderStatus(orderStatusAutoCompleter.getOrderStatus().getKey().getCode());
             if (lblStatus.getText().equals("NEW")) {
                 OrderHisKey key = new OrderHisKey();
                 key.setCompCode(Global.compCode);
@@ -497,7 +499,9 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             userRepo.find(new ProjectKey(orderHis.getProjectNo(), Global.compCode)).doOnSuccess(t1 -> {
                 projectAutoCompleter.setProject(t1);
             }).subscribe();
-            cboOrderStatusType.setSelectedIndex(OrderStatusType.valueOf(Util1.isNull(orderHis.getOrderStatus(), OrderStatusType.OPEN.name())).ordinal());
+            inventoryRepo.findOrderStatus(orderHis.getOrderStatus()).doOnSuccess((o) -> {
+                orderStatusAutoCompleter.setOrderStatus(o);
+            }).subscribe();
             inventoryRepo.getOrderDetail(vouNo, sh.getDeptId(), local)
                     .subscribe((t) -> {
                         orderTableModel.setListDetail(t);
@@ -670,8 +674,8 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
         txtProjectNo = new javax.swing.JTextField();
-        cboOrderStatusType = new javax.swing.JComboBox<>(OrderStatusType.values());
         jLabel11 = new javax.swing.JLabel();
+        txtOrderStatus = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         lblStatus = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
@@ -829,8 +833,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             }
         });
 
-        cboOrderStatusType.setFont(Global.textFont);
-
         jLabel11.setFont(Global.lableFont);
         jLabel11.setText("Order Status");
 
@@ -866,7 +868,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                     .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(txtDueDate, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)
+                    .addComponent(txtDueDate, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 164, Short.MAX_VALUE)
                     .addComponent(txtCurrency, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtReference))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -875,8 +877,8 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                     .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(cboOrderStatusType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtProjectNo, javax.swing.GroupLayout.DEFAULT_SIZE, 148, Short.MAX_VALUE))
+                    .addComponent(txtProjectNo, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE)
+                    .addComponent(txtOrderStatus))
                 .addContainerGap())
         );
 
@@ -908,7 +910,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                             .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel11)
-                        .addComponent(cboOrderStatusType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(txtOrderStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1347,7 +1349,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<OrderStatusType> cboOrderStatusType;
     private javax.swing.JCheckBox chkA4;
     private javax.swing.JCheckBox chkA5;
     private javax.swing.JCheckBox chkVou;
@@ -1381,6 +1382,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     private com.toedter.calendar.JDateChooser txtDueDate;
     private javax.swing.JTextField txtLocation;
     private com.toedter.calendar.JDateChooser txtOrderDate;
+    private javax.swing.JTextField txtOrderStatus;
     private javax.swing.JTextField txtProjectNo;
     private javax.swing.JTextField txtReference;
     private javax.swing.JTextField txtRemark;

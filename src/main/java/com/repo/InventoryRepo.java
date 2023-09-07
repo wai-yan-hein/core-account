@@ -34,6 +34,8 @@ import com.inventory.model.OPHisKey;
 import com.inventory.model.OrderHis;
 import com.inventory.model.OrderHisDetail;
 import com.inventory.model.OrderHisKey;
+import com.inventory.model.OrderStatus;
+import com.inventory.model.OrderStatusKey;
 import com.inventory.model.Pattern;
 import com.inventory.model.PaymentHis;
 import com.inventory.model.PaymentHisDetail;
@@ -70,7 +72,6 @@ import com.inventory.model.StockBrandKey;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
-import com.inventory.model.StockInOutKey;
 import com.inventory.model.StockKey;
 import com.inventory.model.StockType;
 import com.inventory.model.StockTypeKey;
@@ -626,6 +627,25 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<OrderStatus> findOrderStatus(String code) {
+        OrderStatusKey key = new OrderStatusKey();
+        key.setCompCode(Global.compCode);
+        key.setCode(code);
+        if (localDatabase) {
+//            return h2Repo.find(key);
+        }
+
+        return inventoryApi.post()
+                .uri("/setup/findOrderStatus")
+                .body(Mono.just(key), OrderStatusKey.class)
+                .retrieve()
+                .bodyToMono(OrderStatus.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<List<StockInOutDetail>> searchStkIODetail(String vouNo, boolean local) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/stockio/getStockIODetail")
@@ -899,6 +919,37 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<List<OrderStatus>> getOrderStatus() {
+        if (localDatabase) {
+//            return h2Repo.getVouStatus();
+        }
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getOrderStatus")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(OrderStatus.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<OrderStatus>> getUpdateOrderStatus(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdateOrderStatus")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(OrderStatus.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<List<UnitRelation>> getUnitRelation() {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getUnitRelation")
@@ -1085,6 +1136,23 @@ public class InventoryRepo {
                 .doOnSuccess((t) -> {
                     if (localDatabase) {
                         h2Repo.save(t);
+                    }
+                })
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<OrderStatus> saveOrderStatus(OrderStatus vou) {
+        return inventoryApi.post()
+                .uri("/setup/saveOrderStatus")
+                .body(Mono.just(vou), OrderStatus.class)
+                .retrieve()
+                .bodyToMono(OrderStatus.class)
+                .doOnSuccess((t) -> {
+                    if (localDatabase) {
+//                        h2Repo.save(t);
                     }
                 })
                 .onErrorResume((e) -> {

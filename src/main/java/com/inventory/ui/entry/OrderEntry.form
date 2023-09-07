@@ -101,7 +101,7 @@
                   </Group>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="1" attributes="0">
-                      <Component id="txtDueDate" alignment="0" pref="166" max="32767" attributes="0"/>
+                      <Component id="txtDueDate" alignment="0" pref="164" max="32767" attributes="0"/>
                       <Component id="txtCurrency" alignment="0" max="32767" attributes="0"/>
                       <Component id="txtReference" max="32767" attributes="0"/>
                   </Group>
@@ -112,8 +112,8 @@
                   </Group>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="cboOrderStatusType" max="32767" attributes="0"/>
-                      <Component id="txtProjectNo" pref="148" max="32767" attributes="0"/>
+                      <Component id="txtProjectNo" pref="150" max="32767" attributes="0"/>
+                      <Component id="txtOrderStatus" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -149,7 +149,7 @@
                       </Group>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="jLabel11" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="cboOrderStatusType" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="txtOrderStatus" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -393,20 +393,6 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtProjectNoActionPerformed"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JComboBox" name="cboOrderStatusType">
-          <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="Global.textFont" type="code"/>
-            </Property>
-            <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
-              <StringArray count="0"/>
-            </Property>
-          </Properties>
-          <AuxValues>
-            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new javax.swing.JComboBox&lt;&gt;(OrderStatusType.values())"/>
-            <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;OrderStatusType&gt;"/>
-          </AuxValues>
-        </Component>
         <Component class="javax.swing.JLabel" name="jLabel11">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
@@ -414,6 +400,8 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Order Status"/>
           </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtOrderStatus">
         </Component>
       </SubComponents>
     </Container>

@@ -231,7 +231,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
 
     private void calAmount() {
         List<VOrder> list = orderVouTableModel.getListOrderHis();
-        txtPaid.setValue(list.stream().mapToDouble(VOrder::getPaid).sum());
+//        txtPaid.setValue(list.stream().mapToDouble(VOrder::getPaid).sum());
         txtTotalAmt.setValue(list.stream().mapToDouble(VOrder::getVouTotal).sum());
         txtRecord.setValue(list.size());
         tblVoucher.requestFocus();
