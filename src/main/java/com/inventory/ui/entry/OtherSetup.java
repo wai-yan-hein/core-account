@@ -9,6 +9,7 @@ import com.repo.AccountRepo;
 import com.common.Global;
 import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.LocationSetupDialog;
+import com.inventory.ui.setup.dialog.OrderStatusSetupDialog;
 import com.inventory.ui.setup.dialog.ProcessTypeSetupDialog;
 import com.inventory.ui.setup.dialog.RegionSetup;
 import com.inventory.ui.setup.dialog.RelationSetupDialog;
@@ -34,6 +35,7 @@ public class OtherSetup extends javax.swing.JPanel {
     private ProcessTypeSetupDialog processTypeDialog;
     private SaleManSetupDialog smDialog;
     private VouStatusSetupDialog vsDialog;
+    private OrderStatusSetupDialog osDialog;
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
@@ -99,6 +101,20 @@ public class OtherSetup extends javax.swing.JPanel {
 
     }
 
+    private void orderStatusSetup() {
+        inventoryRepo.getOrderStatus().subscribe((t) -> {
+            osDialog = new OrderStatusSetupDialog();
+            osDialog.setIconImage(icon);
+            osDialog.setInventoryRepo(inventoryRepo);
+            osDialog.setListVou(t);
+            osDialog.initMain();
+            osDialog.setSize(Global.width / 2, Global.height / 2);
+            osDialog.setLocationRelativeTo(null);
+            osDialog.setVisible(true);
+        });
+
+    }
+
     private void relationSetup() {
         inventoryRepo.getUnitRelation().subscribe((t) -> {
             relationSetupDialog = new RelationSetupDialog();
@@ -142,6 +158,7 @@ public class OtherSetup extends javax.swing.JPanel {
         btnRegion = new javax.swing.JButton();
         jButton6 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
+        jButton7 = new javax.swing.JButton();
 
         jButton5.setFont(Global.lableFont);
         jButton5.setText("Voucher Status");
@@ -183,6 +200,14 @@ public class OtherSetup extends javax.swing.JPanel {
             }
         });
 
+        jButton7.setFont(Global.lableFont);
+        jButton7.setText("Order Status");
+        jButton7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton7ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -198,7 +223,10 @@ public class OtherSetup extends javax.swing.JPanel {
                         .addComponent(btnLocation)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton4))
-                    .addComponent(jButton5))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jButton5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton7)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -216,7 +244,8 @@ public class OtherSetup extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(85, 85, 85))
         );
 
@@ -263,6 +292,10 @@ public class OtherSetup extends javax.swing.JPanel {
         relationSetup();
     }//GEN-LAST:event_jButton6ActionPerformed
 
+    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+        orderStatusSetup();        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton7ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnLocation;
@@ -270,6 +303,7 @@ public class OtherSetup extends javax.swing.JPanel {
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButton7;
     private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
 }
