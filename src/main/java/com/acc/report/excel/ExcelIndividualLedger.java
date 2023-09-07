@@ -2,25 +2,32 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
-package com.acc.report;
+package com.acc.report.excel;
 
 import com.acc.common.COAOptionTableModel;
 import com.acc.common.DateAutoCompleter;
+import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.repo.AccountRepo;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
 
 /**
  *
  * @author Lenovo
  */
-public class IndividualLedger extends javax.swing.JPanel implements SelectionObserver {
+public class ExcelIndividualLedger extends javax.swing.JPanel implements SelectionObserver {
 
     private JProgressBar progress;
+    private SelectionObserver observer;
     private DateAutoCompleter dateAutoCompleter;
     private AccountRepo accountRepo;
     private COAOptionTableModel cOATableModel = new COAOptionTableModel();
@@ -33,10 +40,14 @@ public class IndividualLedger extends javax.swing.JPanel implements SelectionObs
         this.progress = progress;
     }
 
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
+    }
+
     /**
      * Creates new form IndividualLedger
      */
-    public IndividualLedger() {
+    public ExcelIndividualLedger() {
         initComponents();
     }
 
@@ -72,6 +83,53 @@ public class IndividualLedger extends javax.swing.JPanel implements SelectionObs
         }).subscribe();
     }
 
+    private void select() {
+        List<ChartOfAccount> list = cOATableModel.getListCOA();
+        list.forEach((t) -> {
+            t.setActive(chkSelect.isSelected());
+        });
+        cOATableModel.fireTableDataChanged();
+    }
+
+    private void exportToExcel(List<String> headers,
+            List<List<String>> data,
+            String sheetName,
+            String outputPath) {
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet(sheetName);
+
+            // Create the header row
+            Row headerRow = sheet.createRow(0);
+            for (int i = 0; i < headers.size(); i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers.get(i));
+            }
+
+            // Create data rows
+            int rowNum = 1;
+            for (List<String> rowData : data) {
+                Row row = sheet.createRow(rowNum++);
+                for (int i = 0; i < rowData.size(); i++) {
+                    Cell cell = row.createCell(i);
+                    cell.setCellValue(rowData.get(i));
+                }
+            }
+
+            try (FileOutputStream outputStream = new FileOutputStream(outputPath)) {
+                workbook.write(outputStream);
+            }
+        } catch (IOException e) {
+        }
+    }
+
+    private void process() {
+        cOATableModel.getListCOA().forEach((t) -> {
+            if (t.isActive()) {
+
+            }
+        });
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -99,6 +157,11 @@ public class IndividualLedger extends javax.swing.JPanel implements SelectionObs
         jLabel1.setText("Date");
 
         jButton1.setText("Export");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -110,7 +173,7 @@ public class IndividualLedger extends javax.swing.JPanel implements SelectionObs
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE))
+                        .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 69, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -132,6 +195,11 @@ public class IndividualLedger extends javax.swing.JPanel implements SelectionObs
 
         chkSelect.setFont(Global.lableFont);
         chkSelect.setText("Select All");
+        chkSelect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkSelectActionPerformed(evt);
+            }
+        });
 
         tblCOA.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -187,11 +255,14 @@ public class IndividualLedger extends javax.swing.JPanel implements SelectionObs
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addContainerGap(209, Short.MAX_VALUE))
         );
+
+        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jPanel1, jPanel2});
+
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
@@ -202,6 +273,16 @@ public class IndividualLedger extends javax.swing.JPanel implements SelectionObs
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
+
+    private void chkSelectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkSelectActionPerformed
+        // TODO add your handling code here:
+        select();
+    }//GEN-LAST:event_chkSelectActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        process();
+    }//GEN-LAST:event_jButton1ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

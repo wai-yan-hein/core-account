@@ -78,7 +78,7 @@ public class AccountRepo {
             return h2Repo.find(key);
         }
         return accountApi.post()
-                .uri("/account/find-department")
+                .uri("/account/findDepartment")
                 .body(Mono.just(key), DepartmentAKey.class)
                 .retrieve()
                 .bodyToMono(DepartmentA.class)
@@ -93,7 +93,7 @@ public class AccountRepo {
             return h2Repo.getDepartmentAccount();
         }
         return accountApi.get()
-                .uri(builder -> builder.path("/account/get-department")
+                .uri(builder -> builder.path("/account/getDepartment")
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
@@ -106,7 +106,7 @@ public class AccountRepo {
             return h2Repo.getTraderAccount();
         }
         return accountApi.get()
-                .uri(builder -> builder.path("/account/get-trader")
+                .uri(builder -> builder.path("/account/getTrader")
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
@@ -118,7 +118,7 @@ public class AccountRepo {
             return h2Repo.getTrader(text);
         }
         return accountApi.get()
-                .uri(builder -> builder.path("/account/search-trader")
+                .uri(builder -> builder.path("/account/searchTrader")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("text", text)
                 .build())
@@ -132,7 +132,7 @@ public class AccountRepo {
             return h2Repo.getChartofAccount().collectList();
         }
         return accountApi.get()
-                .uri(builder -> builder.path("/account/get-coa")
+                .uri(builder -> builder.path("/account/getCoa")
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
@@ -145,7 +145,7 @@ public class AccountRepo {
             return h2Repo.getCOATree();
         }
         return accountApi.get()
-                .uri(builder -> builder.path("/account/get-coa-tree")
+                .uri(builder -> builder.path("/account/getCOATree")
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
@@ -169,7 +169,7 @@ public class AccountRepo {
             return h2Repo.getTraderCOA();
         }
         return accountApi.get()
-                .uri(builder -> builder.path("/account/get-trader-coa")
+                .uri(builder -> builder.path("/account/getTraderCOA")
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve().bodyToFlux(ChartOfAccount.class);
@@ -177,7 +177,7 @@ public class AccountRepo {
 
     public Mono<List<Gl>> getTranSource() {
         return accountApi.get()
-                .uri(builder -> builder.path("/account/get-tran-source")
+                .uri(builder -> builder.path("/account/getTranSource")
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
@@ -187,7 +187,7 @@ public class AccountRepo {
 
     public Mono<Gl> save(Gl gl) {
         return accountApi.post()
-                .uri("/account/save-gl")
+                .uri("/account/saveGl")
                 .body(Mono.just(gl), Gl.class)
                 .retrieve()
                 .bodyToMono(Gl.class)
@@ -208,7 +208,7 @@ public class AccountRepo {
 
     public Mono<Gl> uploadGL(Gl gl) {
         return accountApi.post()
-                .uri("/account/save-gl")
+                .uri("/account/saveGl")
                 .body(Mono.just(gl), Gl.class)
                 .retrieve()
                 .bodyToMono(Gl.class);
@@ -216,7 +216,7 @@ public class AccountRepo {
 
     public Mono<ReturnObject> saveGl(List<Gl> gl) {
         return accountApi.post()
-                .uri("/account/save-gl-list")
+                .uri("/account/saveGlList")
                 .body(Mono.just(gl), List.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class)
@@ -245,7 +245,7 @@ public class AccountRepo {
 
     public Mono<Boolean> delete(DeleteObj obj) {
         return accountApi.post()
-                .uri("/account/delete-gl")
+                .uri("/account/deleteGl")
                 .body(Mono.just(obj), DeleteObj.class)
                 .retrieve()
                 .bodyToMono(Boolean.class);
@@ -253,7 +253,7 @@ public class AccountRepo {
 
     public Mono<Boolean> delete(OpeningKey key) {
         return accountApi.post()
-                .uri("/account/delete-op")
+                .uri("/account/deleteOP")
                 .body(Mono.just(key), DeleteObj.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
@@ -262,7 +262,7 @@ public class AccountRepo {
 
     public Mono<Boolean> delete(COAKey key) {
         return accountApi.post()
-                .uri("/account/delete-coa")
+                .uri("/account/deleteCOA")
                 .body(Mono.just(key), COAKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class);
@@ -270,7 +270,7 @@ public class AccountRepo {
 
     public Mono<Boolean> deleteVoucher(DeleteObj gl) {
         return accountApi.post()
-                .uri("/account/delete-voucher")
+                .uri("/account/deleteVoucher")
                 .body(Mono.just(gl), DeleteObj.class)
                 .retrieve()
                 .bodyToMono(Boolean.class);
@@ -278,7 +278,7 @@ public class AccountRepo {
 
     public Mono<Boolean> delete(StockOPKey key) {
         return accountApi.post()
-                .uri("/account/delete-stock-op")
+                .uri("/account/deleteStockOP")
                 .body(Mono.just(key), StockOPKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class);
@@ -294,7 +294,7 @@ public class AccountRepo {
 
     public Mono<ChartOfAccount> saveCOA(ChartOfAccount coa) {
         return accountApi.post()
-                .uri("/account/save-coa")
+                .uri("/account/saveCOA")
                 .body(Mono.just(coa), ChartOfAccount.class)
                 .retrieve()
                 .bodyToMono(ChartOfAccount.class)
@@ -385,7 +385,7 @@ public class AccountRepo {
 
         }
         return accountApi.get()
-                .uri(builder -> builder.path("/account/get-coa-child")
+                .uri(builder -> builder.path("/account/getCOAChild")
                 .queryParam("coaCode", coaCode)
                 .queryParam("compCode", Global.compCode)
                 .build())
@@ -426,7 +426,6 @@ public class AccountRepo {
                     return combinedList;
                 });
     }
-    
 
     public Mono<List<ChartOfAccount>> getCOAByHead(String headCode) {
         return accountApi.get()
@@ -458,7 +457,7 @@ public class AccountRepo {
 
     public Mono<List<Gl>> getVoucher(String vouNo) {
         return accountApi.get()
-                .uri(builder -> builder.path("/account/get-voucher")
+                .uri(builder -> builder.path("/account/getVoucher")
                 .queryParam("glVouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .build())
@@ -487,7 +486,7 @@ public class AccountRepo {
 
         }
         return accountApi.post()
-                .uri("/account/find-coa")
+                .uri("/account/findCOA")
                 .body(Mono.just(key), COAKey.class)
                 .retrieve()
                 .bodyToMono(ChartOfAccount.class)
@@ -501,18 +500,14 @@ public class AccountRepo {
 
     public Mono<DepartmentA> saveDepartment(DepartmentA dep) {
         return accountApi.post()
-                .uri("/account/save-department")
-                .body(Mono.just(dep), DepartmentA.class
-                )
+                .uri("/account/saveDepartment")
+                .body(Mono.just(dep), DepartmentA.class)
                 .retrieve()
-                .bodyToMono(DepartmentA.class
-                )
+                .bodyToMono(DepartmentA.class)
                 .onErrorResume((e) -> {
-                    log.error(
-                            "saveDepartment : " + e.getMessage());
-                    return Mono.error(e);
-                }
-                )
+                    log.error("saveDepartment : " + e.getMessage());
+                    return Mono.empty();
+                })
                 .doOnSuccess((t) -> {
                     h2Repo.save(t);
                 });
@@ -520,7 +515,7 @@ public class AccountRepo {
 
     public Flux<DepartmentA> getDepartmentTree() {
         return accountApi.get()
-                .uri(builder -> builder.path("/account/get-department-tree")
+                .uri(builder -> builder.path("/account/getDepartmentTree")
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
@@ -530,17 +525,15 @@ public class AccountRepo {
 
     public Mono<OpeningBalance> saveCOAOpening(OpeningBalance opening) {
         return accountApi.post()
-                .uri("/account/save-opening")
-                .body(Mono.just(opening), OpeningBalance.class
-                )
+                .uri("/account/saveOpening")
+                .body(Mono.just(opening), OpeningBalance.class)
                 .retrieve()
-                .bodyToMono(OpeningBalance.class
-                );
+                .bodyToMono(OpeningBalance.class);
     }
 
     public Mono<TmpOpening> getOpening(ReportFilter filter) {
         return accountApi.post()
-                .uri("/account/get-coa-opening")
+                .uri("/account/getCOAOpening")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToMono(TmpOpening.class)
@@ -552,26 +545,21 @@ public class AccountRepo {
 
     public Mono<StockOP> save(StockOP op) {
         return accountApi.post()
-                .uri("/account/save-stock-op")
-                .body(Mono.just(op), StockOP.class
-                )
+                .uri("/account/saveStockOP")
+                .body(Mono.just(op), StockOP.class)
                 .retrieve()
-                .bodyToMono(StockOP.class
-                );
+                .bodyToMono(StockOP.class);
     }
 
     public Mono<TraderA> saveTrader(TraderA t) {
         return accountApi.post()
-                .uri("/account/save-trader")
-                .body(Mono.just(t), TraderA.class
-                )
+                .uri("/account/saveTrader")
+                .body(Mono.just(t), TraderA.class)
                 .retrieve()
-                .bodyToMono(TraderA.class
-                )
+                .bodyToMono(TraderA.class)
                 .doOnSuccess((trader) -> {
                     h2Repo.save(trader);
-                }
-                );
+                });
     }
 
     public Mono<TraderA> findTrader(String traderCode) {
@@ -619,7 +607,7 @@ public class AccountRepo {
 
         }
         return accountApi.get()
-                .uri(builder -> builder.path("/account/search-coa")
+                .uri(builder -> builder.path("/account/searchCOA")
                 .queryParam("str", str)
                 .queryParam("level", level)
                 .queryParam("compCode", Global.compCode)
@@ -632,19 +620,18 @@ public class AccountRepo {
 
     public Mono<List<VDescription>> getDescription(String str) {
         return accountApi.get()
-                .uri(builder -> builder.path("/account/get-description")
+                .uri(builder -> builder.path("/account/getDescription")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("str", str)
                 .build())
                 .retrieve()
-                .bodyToFlux(VDescription.class
-                )
+                .bodyToFlux(VDescription.class)
                 .collectList();
     }
 
     public Mono<List<VDescription>> getReference(String str) {
         return accountApi.get()
-                .uri(builder -> builder.path("/account/get-reference")
+                .uri(builder -> builder.path("/account/getReference")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("str", str)
                 .build())
@@ -656,7 +643,7 @@ public class AccountRepo {
 
     public Mono<List<VDescription>> getBatchNo(String str) {
         return accountApi.get()
-                .uri(builder -> builder.path("/account/get-batch-no")
+                .uri(builder -> builder.path("/account/getBatchNo")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("str", str)
                 .build())
@@ -668,7 +655,7 @@ public class AccountRepo {
 
     public Mono<List<Gl>> searchJournal(ReportFilter filter) {
         return accountApi.post()
-                .uri("/account/search-journal")
+                .uri("/account/searchJournal")
                 .body(Mono.just(filter), ReportFilter.class
                 )
                 .retrieve()
@@ -679,7 +666,7 @@ public class AccountRepo {
 
     public Mono<List<StockOP>> searchOP(ReportFilter filter) {
         return accountApi.post()
-                .uri("/account/search-stock-op")
+                .uri("/account/searchStockOP")
                 .body(Mono.just(filter), ReportFilter.class
                 )
                 .retrieve()
@@ -690,7 +677,7 @@ public class AccountRepo {
 
     public Mono<List<OpeningBalance>> getOpeningBalance(ReportFilter filter) {
         return accountApi.post()
-                .uri("/account/get-opening")
+                .uri("/account/getOpening")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(OpeningBalance.class)
@@ -732,7 +719,7 @@ public class AccountRepo {
 
         }
         return accountApi.post()
-                .uri("/account/search-gl")
+                .uri("/account/searchGl")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(Gl.class)
@@ -829,7 +816,6 @@ public class AccountRepo {
                 .uri("/account/shootTri")
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono(String.class
-                );
+                .bodyToMono(String.class);
     }
 }

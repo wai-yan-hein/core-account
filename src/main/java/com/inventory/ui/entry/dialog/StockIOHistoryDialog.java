@@ -13,7 +13,7 @@ import com.common.TableCellRender;
 import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
-import com.inventory.editor.DepartmentAutoCompleter;
+import com.user.editor.DepartmentAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.VouStatusAutoCompleter;
@@ -32,8 +32,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -46,7 +44,6 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
      * Creates new form SaleVouSearchDialog
      */
     private final StockIOVouSearchTableModel tableModel = new StockIOVouSearchTableModel();
-    private WebClient inventoryApi;
     private UserRepo userRepo;
     private InventoryRepo inventoryRepo;
     private AppUserAutoCompleter appUserAutoCompleter;
@@ -66,28 +63,12 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         this.inventoryRepo = inventoryRepo;
     }
 
-    public WebClient getInventoryApi() {
-        return inventoryApi;
-    }
-
-    public void setInventoryApi(WebClient inventoryApi) {
-        this.inventoryApi = inventoryApi;
-    }
-
     public UserRepo getUserRepo() {
         return userRepo;
     }
 
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
-    }
-
-    public WebClient getWebClient() {
-        return inventoryApi;
-    }
-
-    public void setWebClient(WebClient inventoryApi) {
-        this.inventoryApi = inventoryApi;
     }
 
     public SelectionObserver getObserver() {
@@ -114,17 +95,21 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         userRepo.getAppUser().subscribe((t) -> {
             appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
         });
-        userRepo.getDeparment(true).subscribe((t) -> {
-            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true);
-            userRepo.findDepartment(Global.deptId).subscribe((tt) -> {
-                departmentAutoCompleter.setDepartment(tt);
-            });
-        });
-        locationAutoCompleter = new LocationAutoCompleter(txtLocation,null, true, false);
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true);
+        userRepo.getDeparment(true).doOnSuccess((t) -> {
+            departmentAutoCompleter.setListDepartment(t);
+        }).subscribe();
+        userRepo.findDepartment(Global.deptId).doOnSuccess((t) -> {
+            departmentAutoCompleter.setDepartment(t);
+        }).subscribe();
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, false);
         inventoryRepo.getLocation().subscribe((t) -> {
             locationAutoCompleter.setListLocation(t);
         });
-        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, inventoryRepo, null, true);
+        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, null, true);
+        inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
+            vouStatusAutoCompleter.setListVouStatus(t);
+        }).subscribe();
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
     }
 
@@ -153,15 +138,19 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     }
 
     private String getUserCode() {
-        return appUserAutoCompleter == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
+        return appUserAutoCompleter.getAppUser() == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
     }
 
     private String getLocCode() {
-        return locationAutoCompleter == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
+        return locationAutoCompleter.getLocation() == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
+    }
+
+    private String getVouStatus() {
+        return vouStatusAutoCompleter.getVouStatus() == null ? "-" : vouStatusAutoCompleter.getVouStatus().getKey().getCode();
     }
 
     private Integer getDepId() {
-        return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getKey().getDeptId();
+        return departmentAutoCompleter.getDepartment() == null ? 0 : departmentAutoCompleter.getDepartment().getKey().getDeptId();
     }
 
     public void search() {
@@ -175,29 +164,21 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
         filter.setVouNo(txtVouNo.getText());
         filter.setRemark(Util1.isNull(txtRemark.getText(), "-"));
         filter.setDescription(Util1.isNull(txtDesp.getText(), "-"));
-        filter.setVouStatus(vouStatusAutoCompleter.getVouStatus().getKey().getCode());
+        filter.setVouStatus(getVouStatus());
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         filter.setLocCode(getLocCode());
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(getDepId());
-        //
-        inventoryApi
-                .post()
-                .uri("/stockio/getStockIO")
-                .body(Mono.just(filter), FilterObject.class)
-                .retrieve()
-                .bodyToFlux(VStockIO.class)
-                .collectList()
-                .subscribe((t) -> {
-                    tableModel.setListDetail(t);
-                    calAmount();
-                    progess.setIndeterminate(false);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                    progess.setIndeterminate(false);
-                }, () -> {
-                    setVisible(true);
-                });
+        inventoryRepo.getStockIO(filter).doOnSuccess((t) -> {
+            tableModel.setListDetail(t);
+            calAmount();
+            progess.setIndeterminate(false);
+        }).doOnError((e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+            progess.setIndeterminate(false);
+        }).doOnTerminate(() -> {
+            setVisible(true);
+        }).subscribe();
     }
 
     private void calAmount() {

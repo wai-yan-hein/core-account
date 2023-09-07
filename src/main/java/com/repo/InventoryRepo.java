@@ -3036,4 +3036,14 @@ public class InventoryRepo {
                 .bodyToFlux(VStockIO.class)
                 .collectList();
     }
+
+    public Mono<List<VStockIO>> getStockIO(FilterObject filter) {
+        return inventoryApi
+                .post()
+                .uri("/stockio/getStockIO")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToFlux(VStockIO.class)
+                .collectList();
+    }
 }

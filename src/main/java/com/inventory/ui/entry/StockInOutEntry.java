@@ -58,8 +58,6 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
@@ -72,8 +70,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     private final StockInOutTableModel outTableModel = new StockInOutTableModel();
     private StockIOHistoryDialog dialog;
-    @Autowired
-    private WebClient inventoryApi;
     @Autowired
     private InventoryRepo inventoryRepo;
     @Autowired
@@ -154,8 +150,11 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
     }
 
     private void initCombo() {
-        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, inventoryRepo, null, false);
+        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, null, false);
         vouStatusAutoCompleter.setVoucher(null);
+        inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
+            vouStatusAutoCompleter.setListVouStatus(t);
+        }).subscribe();
     }
 
     private void initTable() {
@@ -450,39 +449,28 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     private void importOP(OPHis op) {
         outTableModel.clear();
-        Mono<ResponseEntity<List<OPHisDetail>>> result = inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-opening-detail")
-                .queryParam("vouNo", op.getKey().getVouNo())
-                .queryParam("compCode", op.getKey().getCompCode())
-                .queryParam("deptId", op.getDeptId())
-                .build())
-                .retrieve().toEntityList(OPHisDetail.class);
-        result.subscribe((t) -> {
-            List<OPHisDetail> list = t.getBody();
-            for (int i = 0; i < list.size(); i++) {
-                OPHisDetail his = list.get(i);
-                StockInOutDetail iod = new StockInOutDetail();
-                StockInOutKey key = new StockInOutKey();
-                iod.setStockCode(his.getStockCode());
-                iod.setStockName(his.getStockName());
-                iod.setInQty(his.getQty());
-                iod.setCostPrice(his.getPrice());
-                iod.setInUnitCode(his.getUnitCode());
-                iod.setLocCode(op.getLocCode());
-                iod.setLocName(op.getLocName());
-                key.setUniqueId(i + 1);
-                iod.setKey(key);
-//                iod.setUniqueId(i + 1);
-                outTableModel.addObject(iod);
-            }
-            calTotalAmt();
-            outTableModel.setNegative(true);
-            focusOnTable();
-            progress.setIndeterminate(false);
-        }, (e) -> {
-            progress.setIndeterminate(false);
-            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-        });
+        inventoryRepo.getOpeningDetail(op.getKey().getVouNo(), op.getKey().getCompCode(), op.getDeptId())
+                .doOnSuccess((list) -> {
+                    for (int i = 0; i < list.size(); i++) {
+                        OPHisDetail his = list.get(i);
+                        StockInOutDetail iod = new StockInOutDetail();
+                        StockInOutKey key = new StockInOutKey();
+                        iod.setStockCode(his.getStockCode());
+                        iod.setStockName(his.getStockName());
+                        iod.setInQty(his.getQty());
+                        iod.setCostPrice(his.getPrice());
+                        iod.setInUnitCode(his.getUnitCode());
+                        iod.setLocCode(op.getLocCode());
+                        iod.setLocName(op.getLocName());
+                        key.setUniqueId(i + 1);
+                        iod.setKey(key);
+                        outTableModel.addObject(iod);
+                    }
+                    calTotalAmt();
+                    outTableModel.setNegative(true);
+                    focusOnTable();
+                    progress.setIndeterminate(false);
+                }).subscribe();
     }
 
     private void observeMain() {
@@ -786,7 +774,6 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setUserRepo(userRepo);
             dialog.setIconImage(new ImageIcon(getClass().getResource("/images/search.png")).getImage());
-            dialog.setWebClient(inventoryApi);
             dialog.setObserver(this);
             dialog.initMain();
             dialog.setSize(Global.width - 100, Global.height - 100);

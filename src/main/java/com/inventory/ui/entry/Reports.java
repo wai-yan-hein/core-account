@@ -183,15 +183,14 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
 
     private void getReport() {
         progress.setIndeterminate(true);
-        userRepo.getReport("Inventory")
-                .subscribe((t) -> {
-                    tableModel.setListReport(t);
-                    lblRecord.setText(String.valueOf(t.size()));
-                    progress.setIndeterminate(false);
-                }, (e) -> {
-                    progress.setIndeterminate(false);
-                    JOptionPane.showConfirmDialog(Global.parentForm, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-                });
+        userRepo.getReport("Inventory").doOnSuccess((t) -> {
+            tableModel.setListReport(t);
+            lblRecord.setText(String.valueOf(t.size()));
+            progress.setIndeterminate(false);
+        }).doOnError((e) -> {
+            progress.setIndeterminate(false);
+            JOptionPane.showConfirmDialog(Global.parentForm, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }).subscribe();
     }
 
     private void initCombo() {
@@ -225,11 +224,14 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         userRepo.getCurrency().subscribe((t) -> {
             currencyAutoCompleter.setListCurrency(t);
         });
-        userRepo.getDefaultCurrency().subscribe((c) -> {
+        userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currencyAutoCompleter.setCurrency(c);
-        });
+        }).subscribe();
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
-        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, inventoryRepo, null, true);
+        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtVouType, null, true);
+        inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
+            vouStatusAutoCompleter.setListVouStatus(t);
+        }).subscribe();
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setObserver(this);
         batchAutoCompeter = new BatchAutoCompeter(txtBatchNo, inventoryRepo, null, true);
@@ -331,7 +333,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToMono(ReturnObject.class)
-                .subscribe((t) -> {
+                .doOnSuccess((t) -> {
                     try {
                         observer.selected("save", true);
                         if (t != null) {
@@ -367,10 +369,10 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                         progress.setIndeterminate(false);
                         JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
                     }
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-                    progress.setIndeterminate(false);
-                });
+                }).doOnError((e) -> {
+            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+            progress.setIndeterminate(false);
+        }).subscribe();
 
     }
     private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {

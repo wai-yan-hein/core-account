@@ -15,6 +15,7 @@ import com.acc.entry.TraderAdjustment;
 import com.acc.report.AparReport;
 import com.acc.report.FinancialReport;
 import com.acc.report.GLReport;
+import com.acc.report.excel.ExcelReport;
 import com.acc.setup.COAManagment;
 import com.acc.setup.COAOpening;
 import com.acc.setup.COASetup;
@@ -196,6 +197,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private COAOpening coaOpening;
     @Autowired
     private DrCrVoucher drcrVoucher;
+    @Autowired
+    private ExcelReport excelReport;
 
 //user
     @Autowired
@@ -776,6 +779,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 adj.setUserRepo(userRepo);
                 adj.initMain();
                 return adj;
+            }
+            case "Excel Report" -> {
+                excelReport.setName(menuName);
+                excelReport.setObserver(this);
+                excelReport.setProgress(progress);
+                excelReport.initMain();
+                return excelReport;
             }
             default -> {
                 switch (cName) {
