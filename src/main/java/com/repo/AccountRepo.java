@@ -155,7 +155,7 @@ public class AccountRepo {
 
     public Mono<List<COATemplate>> getCOATemplateTree(Integer busId, String compCode) {
         return accountApi.get()
-                .uri(builder -> builder.path("/template/get-coa-template-tree")
+                .uri(builder -> builder.path("/template/getCOATemplateTree")
                 .queryParam("coaCode", compCode)
                 .queryParam("busId", busId)
                 .build())
@@ -237,7 +237,7 @@ public class AccountRepo {
 
     public Mono<Boolean> delete(COATemplateKey obj) {
         return accountApi.post()
-                .uri("/account/delete-coa-template")
+                .uri("/template/deleteCOATemplate")
                 .body(Mono.just(obj), COATemplateKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class);
@@ -355,7 +355,7 @@ public class AccountRepo {
     public Double getTraderBalance(String date, String traderCode, String curCode, String compCode) {
         try {
             return accountApi.get()
-                    .uri(builder -> builder.path("/report/get-trader-balance")
+                    .uri(builder -> builder.path("/report/getTraderBalance")
                     .queryParam("date", date)
                     .queryParam("traderCode", traderCode)
                     .queryParam("curCode", curCode)
@@ -468,13 +468,10 @@ public class AccountRepo {
 
     public Mono<COATemplate> findCOATemplate(COATemplateKey key) {
         return accountApi.post()
-                .uri("/template/find-coa-template")
-                .body(Mono.just(key), COATemplateKey.class
-                )
-                .accept(MediaType.APPLICATION_JSON)
+                .uri("/template/findCOATemplate")
+                .body(Mono.just(key), COATemplateKey.class)
                 .retrieve()
-                .bodyToMono(COATemplate.class
-                );
+                .bodyToMono(COATemplate.class);
     }
 
     public Mono<ChartOfAccount> findCOA(String coaCode) {
@@ -687,7 +684,7 @@ public class AccountRepo {
     public Mono<ReturnObject> getReport(ReportFilter filter) {
         return accountApi
                 .post()
-                .uri("/report/get-report")
+                .uri("/report/getReport")
                 .body(Mono.just(filter), FilterObject.class
                 )
                 .retrieve()
@@ -697,7 +694,7 @@ public class AccountRepo {
 
     public Mono<List<VApar>> getArAp(ReportFilter filter) {
         return accountApi.post()
-                .uri("/report/get-arap")
+                .uri("/report/getArAp")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(VApar.class)
@@ -706,7 +703,7 @@ public class AccountRepo {
 
     public Mono<List<VTriBalance>> getTri(ReportFilter filter) {
         return accountApi.post()
-                .uri("/report/get-tri-balance")
+                .uri("/report/getTriBalance")
                 .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
                 .bodyToFlux(VTriBalance.class)
