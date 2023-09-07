@@ -11,7 +11,7 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.inventory.editor.DepartmentAutoCompleter;
+import com.user.editor.DepartmentAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.VouStatusAutoCompleter;
@@ -128,21 +128,24 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
     }
 
     private void initCompleter() {
-        locationAutoCompleter = new LocationAutoCompleter(txtLoc,null, true, false);
+        locationAutoCompleter = new LocationAutoCompleter(txtLoc, null, true, false);
         locationAutoCompleter.setObserver(this);
         inventoryRepo.getLocation().subscribe((t) -> {
             locationAutoCompleter.setListLocation(t);
         });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         stockAutoCompleter.setObserver(this);
-        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtPT, inventoryRepo, null, true);
+        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtPT, null, true);
         vouStatusAutoCompleter.setObserver(this);
-        userRepo.getDeparment(true).subscribe((t) -> {
-            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true);
-            userRepo.findDepartment(Global.deptId).subscribe((tt) -> {
-                departmentAutoCompleter.setDepartment(tt);
-            });
-        });
+        inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
+            vouStatusAutoCompleter.setListVouStatus(t);
+        }).subscribe();
+        userRepo.getDeparment(true).doOnSuccess((t) -> {
+            departmentAutoCompleter.setListDepartment(t);
+        }).subscribe();
+        userRepo.findDepartment(Global.deptId).doOnSuccess((t) -> {
+            departmentAutoCompleter.setDepartment(t);
+        }).subscribe();
         if (inventoryRepo.localDatabase) {
             chkLocal.setVisible(true);
             btnUpload.setVisible(true);

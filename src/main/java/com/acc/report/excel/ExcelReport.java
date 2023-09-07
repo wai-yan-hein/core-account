@@ -2,8 +2,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
-package com.acc.report;
+package com.acc.report.excel;
 
+import com.common.SelectionObserver;
+import com.repo.AccountRepo;
+import javax.swing.JProgressBar;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,11 +17,38 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExcelReport extends javax.swing.JPanel {
 
+    @Autowired
+    private AccountRepo accountRepo;
+    private JProgressBar progress;
+    private SelectionObserver observer;
+
+    public void setProgress(JProgressBar progress) {
+        this.progress = progress;
+    }
+
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
+    }
+    
+
     /**
      * Creates new form ExcelReport
      */
     public ExcelReport() {
         initComponents();
+    }
+
+    public void initMain() {
+        addExcelIndividualLedger();
+    }
+
+    private void addExcelIndividualLedger() {
+        ExcelIndividualLedger ledger = new ExcelIndividualLedger();
+        ledger.setAccountRepo(accountRepo);
+        ledger.setProgress(progress);
+        ledger.setObserver(observer);
+        ledger.initMain();
+        tabMain.add("IndividualLedger", ledger);
     }
 
     /**

@@ -17,8 +17,13 @@ import com.acc.model.Gl;
 import com.common.Global;
 import com.acc.model.ReportFilter;
 import com.common.PanelControl;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.common.Util1;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.repo.UserRepo;
 import com.user.editor.ProjectAutoCompleter;
 import java.awt.event.ActionEvent;
@@ -28,11 +33,19 @@ import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import lombok.extern.slf4j.Slf4j;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.data.JsonDataSource;
+import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -42,6 +55,7 @@ import reactor.core.publisher.Mono;
  * @author DELL
  */
 @Component
+@Slf4j
 public class Journal extends javax.swing.JPanel implements SelectionObserver, PanelControl {
 
     private final JournalTableModel tableModel = new JournalTableModel();
@@ -178,6 +192,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
             dialog = new JournalEntryDialog(Global.parentForm);
             dialog.setAccountRepo(accountRepo);
             dialog.setUserRepo(userRepo);
+            dialog.setObserver(this);
             dialog.initMain();
             dialog.setSize(Global.width - 100, Global.height - 100);
             dialog.setIconImage(Global.parentForm.getIconImage());
@@ -255,6 +270,40 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         }
         conversionDialog.search(vouNo);
         conversionDialog.setVisible(true);
+    }
+
+    private void printVoucher(Gl gl) {
+        progress.setIndeterminate(true);
+        String glVouNo = gl.getGlVouNo();
+        accountRepo.getJournal(glVouNo).doOnSuccess((list) -> {
+            try {
+                String rpPath = Global.accountRP + "JournalVoucher.jasper";
+                Map<String, Object> p = new HashMap();
+                p.put("p_report_name", "Journal Voucher");
+                p.put("p_date", String.format("Between %s and %s", dateAutoCompleter.getDateModel().getStartDate(), dateAutoCompleter.getDateModel().getEndDate()));
+                p.put("p_print_date", Util1.getTodayDateTime());
+                p.put("p_comp_name", Global.companyName);
+                p.put("p_comp_address", Global.companyAddress);
+                p.put("p_comp_phone", Global.companyPhone);
+                p.put("p_vou_type", gl.getTranSource());
+                Util1.initJasperContext();
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode node = mapper.readTree(ProUtil.gson.toJson(list));
+                JsonDataSource ds = new JsonDataSource(node, null) {
+                };
+                JasperPrint js = JasperFillManager.fillReport(rpPath, p, ds);
+                JasperViewer.viewReport(js, false);
+                progress.setIndeterminate(false);
+            } catch (JsonProcessingException | JRException ex) {
+                progress.setIndeterminate(false);
+                log.error("printVoucher : " + ex.getMessage());
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }).doOnError((e) -> {
+            progress.setIndeterminate(false);
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }).subscribe();
+
     }
 
     /**
@@ -579,12 +628,19 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     @Override
     public void selected(Object source, Object selectObj) {
         if (source != null) {
-            searchJournal();
+            if (source.equals("print")) {
+                if (selectObj instanceof Gl gl) {
+                    printVoucher(gl);
+                }
+            } else {
+                searchJournal();
+            }
         }
     }
 
     @Override
     public void save() {
+
     }
 
     @Override
@@ -602,6 +658,10 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
 
     @Override
     public void print() {
+        int row = tblJournal.convertRowIndexToModel(tblJournal.getSelectedRow());
+        if (row >= 0) {
+            printVoucher(tableModel.getGl(row));
+        }
     }
 
     @Override

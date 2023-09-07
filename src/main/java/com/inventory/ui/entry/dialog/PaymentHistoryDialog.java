@@ -71,7 +71,6 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
     private AccountRepo accountRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
-    private LocationAutoCompleter locationAutoCompleter;
     private COA3AutoCompleter cOA3AutoCompleter;
     private CurrencyAutoCompleter currencyAutoCompleter;
     private String tranOption;
@@ -165,18 +164,11 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
     }
 
     private String getUserCode() {
-        return appUserAutoCompleter == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
-    }
-
-    private String getLocCode() {
-        return locationAutoCompleter == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
+        return appUserAutoCompleter.getAppUser() == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
     }
 
     private String getCurCode() {
-        if (currencyAutoCompleter == null || currencyAutoCompleter.getCurrency() == null) {
-            return Global.currency;
-        }
-        return currencyAutoCompleter.getCurrency().getCurCode();
+        return currencyAutoCompleter.getCurrency() == null ? Global.currency : currencyAutoCompleter.getCurrency().getCurCode();
     }
 
     public void search() {
@@ -191,7 +183,6 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
         filter.setSaleVouNo(txtSaleVouNo.getText());
         filter.setRemark(Util1.isNull(txtRemark.getText(), "-"));
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
-        filter.setLocCode(getLocCode());
         filter.setDeleted(chkDel.isSelected());
         filter.setCurCode(getCurCode());
         filter.setAccount(cOA3AutoCompleter.getCOA().getKey().getCoaCode());

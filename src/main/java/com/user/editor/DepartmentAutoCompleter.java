@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.inventory.editor;
+package com.user.editor;
 
 import com.user.model.DepartmentUser;
 import com.common.Global;
@@ -55,37 +55,37 @@ public class DepartmentAutoCompleter implements KeyListener, SelectionObserver {
     private int x = 0;
     private int y = 0;
     private SelectionObserver observer;
-    private List<String> listOption = new ArrayList<>();
-
-    public SelectionObserver getObserver() {
-        return observer;
-    }
+    private boolean filter;
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
 
-    
+    public void setListDepartment(List<DepartmentUser> list) {
+        if (filter) {
+            DepartmentUser sb = new DepartmentUser(0, "All");
+            list = new ArrayList<>(list);
+            list.add(0, sb);
+            setDepartment(sb);
+        }
+        departmentTableModel.setListDepartment(list);
+        if (!list.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
+        }
+    }
 
     public DepartmentAutoCompleter() {
     }
 
-    public DepartmentAutoCompleter(JTextComponent comp, List<DepartmentUser> list,
-            AbstractCellEditor editor, boolean filter) {
+    public DepartmentAutoCompleter(JTextComponent comp, AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
-        if (filter) {
-            DepartmentUser loc = new DepartmentUser(0, "All");
-            list = new ArrayList<>(list);
-            list.add(0, loc);
-            setDepartment(loc);
-        }
+        this.filter = filter;
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
         textComp.getDocument().addDocumentListener(documentListener);
         table.setModel(departmentTableModel);
-        departmentTableModel.setListDepartment(list);
         table.setSize(50, 50);
         table.setFont(Global.textFont); // NOI18N
         table.getTableHeader().setFont(Global.tblHeaderFont);
@@ -152,10 +152,6 @@ public class DepartmentAutoCompleter implements KeyListener, SelectionObserver {
         });
 
         table.setRequestFocusEnabled(false);
-
-        if (!list.isEmpty()) {
-            table.setRowSelectionInterval(0, 0);
-        }
     }
 
     public DepartmentUser getDepartment() {

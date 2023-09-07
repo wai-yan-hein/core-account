@@ -14,6 +14,7 @@ import com.acc.model.Gl;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.ProUtil;
+import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
@@ -51,25 +52,18 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
     private String status;
     private AccountRepo accountRepo;
     private UserRepo userRepo;
+    private SelectionObserver observer;
 
-    public UserRepo getUserRepo() {
-        return userRepo;
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
     }
 
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
 
-    public AccountRepo getAccountRepo() {
-        return accountRepo;
-    }
-
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
-    }
-
-    public String getStatus() {
-        return status;
     }
 
     public void setStatus(String status) {
@@ -138,7 +132,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
     private final Action actionSave = new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            saveGeneralVoucher();
+            saveGeneralVoucher(false);
         }
     };
     private final Action actionPrint = new AbstractAction() {
@@ -224,7 +218,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
 
     }
 
-    private boolean saveGeneralVoucher() {
+    private boolean saveGeneralVoucher(boolean print) {
         if (isValidEntry() && isValidData()) {
             List<Gl> list = journalTablModel.getListGV();
             if (lblStatus.getText().equals("EDIT")) {
@@ -233,13 +227,22 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
             }
             progress.setIndeterminate(true);
             btnSave.setEnabled(false);
-            accountRepo.saveGl(list).subscribe((t) -> {
+            accountRepo.saveGl(list).doOnSuccess((t) -> {
+                if (print) {
+                    String tranSource = t.getTranSource();
+                    String glVouNo = t.getGlVouNo();
+                    Gl gl = new Gl();
+                    gl.setTranSource(tranSource);
+                    gl.setGlVouNo(glVouNo);
+                    this.dispose();
+                    observer.selected("print", gl);
+                }
                 clear();
-            }, (e) -> {
+            }).doOnError((e) -> {
                 progress.setIndeterminate(false);
                 btnSave.setEnabled(true);
                 JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+            }).subscribe();
 
         }
         return true;
@@ -355,6 +358,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         lblStatus = new javax.swing.JLabel();
         btnSave = new javax.swing.JButton();
         btnNew = new javax.swing.JButton();
+        btnSave1 = new javax.swing.JButton();
         progress = new javax.swing.JProgressBar();
 
         jLabel3.setText("jLabel3");
@@ -515,7 +519,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         lblStatus.setText("NEW");
 
         btnSave.setFont(Global.lableFont);
-        btnSave.setText("Save -F5");
+        btnSave.setText("Save");
         btnSave.setName("btnSave"); // NOI18N
         btnSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -532,6 +536,15 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
             }
         });
 
+        btnSave1.setFont(Global.lableFont);
+        btnSave1.setText("S & P");
+        btnSave1.setName("btnSave"); // NOI18N
+        btnSave1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSave1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -539,7 +552,9 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(lblStatus)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 493, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 418, Short.MAX_VALUE)
+                .addComponent(btnSave1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnSave)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnNew)
@@ -557,7 +572,8 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(btnNew)
-                            .addComponent(btnSave, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(btnSave, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnSave1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -619,7 +635,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         // TODO add your handling code here:
-        saveGeneralVoucher();
+        saveGeneralVoucher(false);
     }//GEN-LAST:event_btnSaveActionPerformed
 
     private void tblJournalKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblJournalKeyReleased
@@ -645,12 +661,18 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         // TODO add your handling code here:
     }//GEN-LAST:event_txtProjectNoActionPerformed
 
+    private void btnSave1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSave1ActionPerformed
+        // TODO add your handling code here:
+        saveGeneralVoucher(true);
+    }//GEN-LAST:event_btnSave1ActionPerformed
+
     /**
      * @param args the command line arguments
      */
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnNew;
     private javax.swing.JButton btnSave;
+    private javax.swing.JButton btnSave1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

@@ -64,7 +64,7 @@ public class COAOptionTableModel extends AbstractTableModel {
 
             return switch (column) {
                 case 0 ->
-                    coa.getKey().getCoaCode();
+                    coa.getCoaCodeUsr();
                 case 1 ->
                     coa.getCoaNameEng();
                 case 2 ->

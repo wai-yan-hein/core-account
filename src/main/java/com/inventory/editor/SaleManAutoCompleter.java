@@ -8,10 +8,8 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.model.OptionModel;
 import com.inventory.model.SaleMan;
 import com.inventory.ui.common.SaleManCompleterTableModel;
-import com.inventory.ui.setup.dialog.OptionDialog;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -55,7 +53,6 @@ public final class SaleManAutoCompleter implements KeyListener, SelectionObserve
     private int x = 0;
     private int y = 0;
     private SelectionObserver selectionObserver;
-    private List<SaleMan> listSaleMan;
     private boolean filter;
 
     public void setObserver(SelectionObserver selectionObserver) {
@@ -72,7 +69,6 @@ public final class SaleManAutoCompleter implements KeyListener, SelectionObserve
         if (!list.isEmpty()) {
             table.setRowSelectionInterval(0, 0);
         }
-        this.listSaleMan = list;
     }
 
     public SaleManAutoCompleter() {

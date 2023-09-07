@@ -50,9 +50,6 @@ public class DepartmentUser {
         return deptName;
     }
 
-//    public DepartmentUser(Integer deptId) {
-//        this.deptId = deptId;
-//    }
     public DepartmentUser(Integer deptId, String deptName) {
         this.key = new DepartmentKey();
         this.key.setDeptId(deptId);

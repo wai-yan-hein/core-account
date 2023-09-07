@@ -124,8 +124,11 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             unitAutoCompleter = new UnitAutoCompleter(txtUnit, t, null);
             unitAutoCompleter.setObserver(this);
         });
-        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtPt, inventoryRepo, null, false);
+        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtPt,  null, false);
         vouStatusAutoCompleter.setObserver(this);
+        inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
+            vouStatusAutoCompleter.setListVouStatus(t);
+        }).subscribe();
 
     }
 

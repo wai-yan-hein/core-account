@@ -59,55 +59,34 @@ public class VouStatusAutoCompleter implements KeyListener, SelectionObserver {
     private int y = 0;
     private SelectionObserver observer;
     private boolean filter = false;
-    private InventoryRepo inventoryRepo;
-    private FocusAdapter fa = new FocusAdapter() {
-        @Override
-        public void focusGained(FocusEvent e) {
-            inventoryRepo.getVoucherStatus().subscribe((t) -> {
-                if (filter) {
-                    VouStatus loc = new VouStatus("-", "All");
-                    t.add(0, loc);
-                    setVoucher(loc);
-                }
-                vouStatusTableModel.setListVou(t);
-                if (!t.isEmpty()) {
-                    table.setRowSelectionInterval(0, 0);
-                }
-            });
-
-        }
-
-    };
-
-    public SelectionObserver getObserver() {
-        return observer;
-    }
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
 
+    public void setListVouStatus(List<VouStatus> list) {
+        if (filter) {
+            VouStatus sb = new VouStatus("-", "All");
+            list = new ArrayList<>(list);
+            list.add(0, sb);
+            setVoucher(sb);
+        }
+        vouStatusTableModel.setListVou(list);
+        if (!list.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
+        }
+    }
+
     public VouStatusAutoCompleter() {
     }
 
-    public VouStatusAutoCompleter(JTextComponent comp, InventoryRepo inventoryRepo,
-            AbstractCellEditor editor, boolean filter) {
+    public VouStatusAutoCompleter(JTextComponent comp, AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
         this.filter = filter;
-        this.inventoryRepo = inventoryRepo;
-
-        List<VouStatus> list = new ArrayList<>();
-        if (filter) {
-            VouStatus loc = new VouStatus("-", "All");
-            list.add(0, loc);
-            setVoucher(loc);
-            vouStatusTableModel.setListVou(list);
-        }
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
-        textComp.addFocusListener(fa);
         textComp.getDocument().addDocumentListener(documentListener);
         table.setModel(vouStatusTableModel);
         table.setSize(50, 50);

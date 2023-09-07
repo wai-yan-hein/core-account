@@ -250,7 +250,9 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="lblStatus" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace pref="493" max="32767" attributes="0"/>
+                  <EmptySpace pref="418" max="32767" attributes="0"/>
+                  <Component id="btnSave1" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
                   <Component id="btnSave" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="btnNew" min="-2" max="-2" attributes="0"/>
@@ -271,6 +273,7 @@
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="btnNew" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="btnSave" alignment="3" max="32767" attributes="0"/>
+                              <Component id="btnSave1" alignment="3" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace max="32767" attributes="0"/>
                       </Group>
@@ -337,7 +340,7 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.lableFont" type="code"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Save -F5"/>
+            <Property name="text" type="java.lang.String" value="Save"/>
             <Property name="name" type="java.lang.String" value="btnSave" noResource="true"/>
           </Properties>
           <Events>
@@ -354,6 +357,18 @@
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnNewActionPerformed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JButton" name="btnSave1">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.lableFont" type="code"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="S &amp; P"/>
+            <Property name="name" type="java.lang.String" value="btnSave" noResource="true"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSave1ActionPerformed"/>
           </Events>
         </Component>
       </SubComponents>

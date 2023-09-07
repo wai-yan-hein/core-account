@@ -220,24 +220,22 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
                 list.get(0).setEdit(tableModel.isEdit());
                 list.get(0).setDelList(tableModel.getDelList());
             }
-            accountRepo.saveGl(list).subscribe((t) -> {
-                if (t != null) {
-                    if (print) {
-                        String tranSource = t.getTranSource();
-                        String glVouNo = t.getGlVouNo();
-                        Gl gl = new Gl();
-                        gl.setTranSource(tranSource);
-                        gl.setGlVouNo(glVouNo);
-                        this.dispose();
-                        observer.selected("print", gl);
-                    }
-                    clear();
+            accountRepo.saveGl(list).doOnSuccess((t) -> {
+                if (print) {
+                    String tranSource = t.getTranSource();
+                    String glVouNo = t.getGlVouNo();
+                    Gl gl = new Gl();
+                    gl.setTranSource(tranSource);
+                    gl.setGlVouNo(glVouNo);
+                    this.dispose();
+                    observer.selected("print", gl);
                 }
-            }, (e) -> {
+                clear();
+            }).doOnError((e) -> {
                 progress.setIndeterminate(false);
                 btnSave.setEnabled(true);
                 JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+            }).subscribe();
 
         }
         return true;

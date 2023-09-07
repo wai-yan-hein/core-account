@@ -209,28 +209,21 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         progress.setIndeterminate(false);
                         JOptionPane.showMessageDialog(this, e.getMessage());
                     }, () -> {
-                        inventoryRepo.findLocation(oh.getLocCode()).subscribe((t) -> {
+                        inventoryRepo.findLocation(oh.getLocCode()).doOnSuccess((t) -> {
                             locationAutoCompleter.setLocation(t);
-                        });
-                        Mono<Trader> trader = inventoryRepo.findTrader(oh.getTraderCode());
-                        trader.subscribe((t) -> {
+                        }).subscribe();
+                        inventoryRepo.findTrader(oh.getTraderCode()).doOnSuccess((t) -> {
                             traderAutoCompleter.setTrader(t);
-                        });
-
-                        userRepo.findCurrency(oh.getCurCode()).subscribe((t) -> {
+                        }).subscribe();
+                        userRepo.findCurrency(oh.getCurCode()).doOnSuccess((t) -> {
                             currAutoCompleter.setCurrency(t);
-                        });
-                        inventoryRepo.findSaleMan(oh.getSaleManCode()).subscribe((t) -> {
+                        }).subscribe();
+                        inventoryRepo.findSaleMan(oh.getSaleManCode()).doOnSuccess((t) -> {
                             saleManCompleter.setSaleMan(t);
-                        });
-                        if (oh.getProjectNo() != null) {
-                            userRepo.find(new ProjectKey(oh.getProjectNo(), Global.compCode)).subscribe(t1 -> {
-                                projectAutoCompleter.setProject(t1);
-                            });
-                        } else {
-                            projectAutoCompleter.setProject(null);
-                        }
-
+                        }).subscribe();
+                        userRepo.find(new ProjectKey(oh.getProjectNo(), Global.compCode)).doOnSuccess(t1 -> {
+                            projectAutoCompleter.setProject(t1);
+                        }).subscribe();
                         txtDueDate.setDate(Util1.convertToDate(oh.getCreditTerm()));
                         txtRemark.setText(oh.getRemark());
                         txtReference.setText(oh.getReference());

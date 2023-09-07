@@ -14,7 +14,7 @@ import com.common.TableCellRender;
 import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
-import com.inventory.editor.DepartmentAutoCompleter;
+import com.user.editor.DepartmentAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
@@ -129,12 +129,12 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
         inventoryRepo.getLocation().subscribe((t) -> {
             locationAutoCompleter.setListLocation(t);
         });
-        userRepo.getDeparment(true).subscribe((t) -> {
-            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true);
-            userRepo.findDepartment(Global.deptId).subscribe((tt) -> {
-                departmentAutoCompleter.setDepartment(tt);
-            });
-        });
+        userRepo.getDeparment(true).doOnSuccess((t) -> {
+            departmentAutoCompleter.setListDepartment(t);
+        }).subscribe();
+        userRepo.findDepartment(Global.deptId).doOnSuccess((t) -> {
+            departmentAutoCompleter.setDepartment(t);
+        }).subscribe();
         currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
             currAutoCompleter.setListCurrency(t);
@@ -190,11 +190,11 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
     }
 
     private String getUserCode() {
-        return appUserAutoCompleter == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
+        return appUserAutoCompleter.getAppUser() == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
     }
 
     private String getLocCode() {
-        return locationAutoCompleter == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
+        return locationAutoCompleter.getLocation() == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
     }
 
     private Integer getDepId() {
@@ -202,14 +202,11 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
     }
 
     private String getProjectNo() {
-        return projectAutoCompleter == null ? "-" : projectAutoCompleter.getProject().getKey().getProjectNo();
+        return projectAutoCompleter.getProject() == null ? "-" : projectAutoCompleter.getProject().getKey().getProjectNo();
     }
 
     private String getCurCode() {
-        if (currAutoCompleter == null || currAutoCompleter.getCurrency() == null) {
-            return Global.currency;
-        }
-        return currAutoCompleter.getCurrency().getCurCode();
+        return currAutoCompleter.getCurrency() == null ? Global.currency : currAutoCompleter.getCurrency().getCurCode();
     }
 
     public void search() {

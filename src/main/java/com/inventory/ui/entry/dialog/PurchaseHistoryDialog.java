@@ -6,7 +6,7 @@
 package com.inventory.ui.entry.dialog;
 
 import com.CloudIntegration;
-import com.inventory.editor.DepartmentAutoCompleter;
+import com.user.editor.DepartmentAutoCompleter;
 import com.common.FilterObject;
 import com.common.Global;
 import com.common.SelectionObserver;
@@ -36,7 +36,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
@@ -119,12 +118,12 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
             appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
         });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
-        userRepo.getDeparment(true).subscribe((t) -> {
-            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true);
-            userRepo.findDepartment(Global.deptId).subscribe((tt) -> {
-                departmentAutoCompleter.setDepartment(tt);
-            });
-        });
+        userRepo.getDeparment(true).doOnSuccess((t) -> {
+            departmentAutoCompleter.setListDepartment(t);
+        }).subscribe();
+        userRepo.findDepartment(Global.deptId).doOnSuccess((t) -> {
+            departmentAutoCompleter.setDepartment(t);
+        }).subscribe();
         currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         userRepo.getCurrency().subscribe((t) -> {
             currAutoCompleter.setListCurrency(t);
@@ -170,22 +169,19 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
     }
 
     private String getUserCode() {
-        return appUserAutoCompleter == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
+        return appUserAutoCompleter.getAppUser() == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
     }
 
     private String getLocCode() {
-        return locationAutoCompleter == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
+        return locationAutoCompleter.getLocation() == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
     }
 
     private Integer getDepId() {
-        return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getKey().getDeptId();
+        return departmentAutoCompleter.getDepartment() == null ? 0 : departmentAutoCompleter.getDepartment().getKey().getDeptId();
     }
 
     private String getCurCode() {
-        if (currAutoCompleter == null || currAutoCompleter.getCurrency() == null) {
-            return Global.currency;
-        }
-        return currAutoCompleter.getCurrency().getCurCode();
+        return currAutoCompleter.getCurrency() == null ? Global.currency : currAutoCompleter.getCurrency().getCurCode();
     }
 
     public void search() {
