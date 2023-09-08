@@ -19,6 +19,7 @@ import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockCellEditor;
+import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
 import com.inventory.model.TransferHis;
 import com.inventory.model.TransferHisKey;
@@ -56,7 +57,7 @@ import net.sf.jasperreports.view.JasperViewer;
  */
 @Component
 public class Transfer extends javax.swing.JPanel implements PanelControl, SelectionObserver, KeyListener {
-
+    
     private final TransferTableModel tranTableModel = new TransferTableModel();
     private TransferHistoryDialog dialog;
     @Autowired
@@ -65,24 +66,33 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private UserRepo userRepo;
     private LocationAutoCompleter fromLocaitonCompleter;
     private LocationAutoCompleter toLocaitonCompleter;
+    private TraderAutoCompleter traderAutoCompleter;
     private TransferHis io = new TransferHis();
     private SelectionObserver observer;
     private JProgressBar progress;
-
+    
     public SelectionObserver getObserver() {
         return observer;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public JProgressBar getProgress() {
         return progress;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
+    }
+    
+    public TraderAutoCompleter getTraderAutoCompleter() {
+        return traderAutoCompleter;
+    }
+    
+    public void setTraderAutoCompleter(TraderAutoCompleter traderAutoCompleter) {
+        this.traderAutoCompleter = traderAutoCompleter;
     }
 
     /**
@@ -93,13 +103,13 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         initDateListner();
         actionMapping();
     }
-
+    
     public void initMain() {
         initTable();
         initCombo();
         clear();
     }
-
+    
     private void initDateListner() {
         txtDate.getDateEditor().getUiComponent().setName("txtDate");
         txtDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -116,23 +126,23 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             ((JTextFieldDateEditor) e.getSource()).selectAll();
         }
     };
-
+    
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblTransfer.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblTransfer.getActionMap().put(solve, new DeleteAction());
-
+        
     }
-
+    
     private class DeleteAction extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
         }
     }
-
+    
     private void initCombo() {
         fromLocaitonCompleter = new LocationAutoCompleter(txtFrom, null, false, false);
         toLocaitonCompleter = new LocationAutoCompleter(txtTo, null, false, false);
@@ -140,8 +150,10 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             fromLocaitonCompleter.setListLocation(t);
             toLocaitonCompleter.setListLocation(t);
         });
+        traderAutoCompleter = new TraderAutoCompleter(txtCustomer, inventoryRepo, null, false, "CUS");
+        traderAutoCompleter.setObserver(this);
     }
-
+    
     private void initTable() {
         tranTableModel.setVouDate(txtDate);
         tranTableModel.setLblRec(lblRec);
@@ -174,7 +186,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         tblTransfer.changeSelection(0, 0, false, false);
         tblTransfer.requestFocus();
     }
-
+    
     private void deleteVoucher() {
         String status = lblStatus.getText();
         switch (status) {
@@ -197,14 +209,14 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                         lblStatus.setForeground(Color.blue);
                         disableForm(true);
                     });
-
+                    
                 }
             }
             default ->
                 JOptionPane.showMessageDialog(Global.parentForm, "Voucher can't delete.");
         }
     }
-
+    
     private void deleteTran() {
         int row = tblTransfer.convertRowIndexToModel(tblTransfer.getSelectedRow());
         if (row >= 0) {
@@ -218,7 +230,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             }
         }
     }
-
+    
     public boolean saveVoucher(boolean print) {
         boolean status = false;
         if (isValidEntry() && tranTableModel.isValidEntry()) {
@@ -241,13 +253,16 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         }
         return status;
     }
-
+    
     private void assingnDefault() {
         inventoryRepo.getDefaultLocation().subscribe((tt) -> {
             fromLocaitonCompleter.setLocation(tt);
         });
+        inventoryRepo.getDefaultCustomer().subscribe((t) -> {
+            traderAutoCompleter.setTrader(t);
+        });
     }
-
+    
     private void clear() {
         assingnDefault();
         io = new TransferHis();
@@ -260,9 +275,10 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         txtDate.setDate(Util1.getTodayDate());
         progress.setIndeterminate(false);
         txtVou.setText(null);
+        traderAutoCompleter.setTrader(null);
         disableForm(true);
     }
-
+    
     private void focusOnTable() {
         int rc = tblTransfer.getRowCount();
         if (rc > 1) {
@@ -273,7 +289,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             txtDate.requestFocusInWindow();
         }
     }
-
+    
     private boolean isValidEntry() {
         boolean status = true;
         Location fromLoc = fromLocaitonCompleter.getLocation();
@@ -300,6 +316,8 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             io.setLocCodeFrom(fromLocaitonCompleter.getLocation().getKey().getLocCode());
             io.setLocCodeTo(toLocaitonCompleter.getLocation().getKey().getLocCode());
             io.setStatus(lblStatus.getText());
+            String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
+            io.setTraderCode(traderCode);
             if (lblStatus.getText().equals("NEW")) {
                 TransferHisKey key = new TransferHisKey();
                 key.setCompCode(Global.compCode);
@@ -316,7 +334,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         }
         return status;
     }
-
+    
     private void setVoucher(TransferHis s, boolean local) {
         progress.setIndeterminate(true);
         io = s;
@@ -327,6 +345,9 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         inventoryRepo.findLocation(io.getLocCodeTo()).subscribe((t) -> {
             toLocaitonCompleter.setLocation(t);
         });
+        inventoryRepo.findTrader(s.getTraderCode()).doOnSuccess((t) -> {
+            traderAutoCompleter.setTrader(t);
+        }).subscribe();
         String vouNo = io.getKey().getVouNo();
         inventoryRepo.getTransferDetail(vouNo, deptId, local).subscribe((t) -> {
             tranTableModel.setListTransfer(t);
@@ -357,9 +378,9 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             progress.setIndeterminate(false);
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
-
+        
     }
-
+    
     private void disableForm(boolean status) {
         txtDate.setEnabled(status);
         txtRemark.setEnabled(status);
@@ -371,7 +392,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         observer.selected("delete", status);
         observer.selected("print", status);
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -380,7 +401,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         observer.selected("delete", true);
         observer.selected("refresh", false);
     }
-
+    
     private void printVoucher(String vouNo) {
         inventoryRepo.getTransferReport(vouNo).subscribe((t) -> {
             try {
@@ -431,6 +452,8 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         txtFrom = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
         txtTo = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
+        txtCustomer = new javax.swing.JTextField();
         lblStatus = new javax.swing.JLabel();
         lblRec = new javax.swing.JLabel();
 
@@ -502,57 +525,82 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         txtTo.setFont(Global.textFont);
         txtTo.setName("txtTo"); // NOI18N
 
+        jLabel8.setFont(Global.lableFont);
+        jLabel8.setText("Customer");
+
+        txtCustomer.setFont(Global.textFont);
+        txtCustomer.setName("txtRefNo"); // NOI18N
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel6)
-                .addGap(18, 18, 18)
-                .addComponent(txtVou, javax.swing.GroupLayout.DEFAULT_SIZE, 83, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
-                .addComponent(jLabel3)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel6)
+                    .addComponent(jLabel3))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtDate, javax.swing.GroupLayout.DEFAULT_SIZE, 119, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtVou, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel7)
-                .addGap(18, 18, 18)
-                .addComponent(txtFrom, javax.swing.GroupLayout.DEFAULT_SIZE, 83, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
-                .addComponent(jLabel9)
-                .addGap(18, 18, 18)
-                .addComponent(txtTo, javax.swing.GroupLayout.DEFAULT_SIZE, 83, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
-                .addComponent(jLabel4)
-                .addGap(18, 18, 18)
-                .addComponent(txtRefNo, javax.swing.GroupLayout.DEFAULT_SIZE, 83, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
-                .addComponent(jLabel5)
-                .addGap(18, 18, 18)
-                .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 86, Short.MAX_VALUE)
-                .addContainerGap())
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtFrom, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel9)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtTo, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel4)
+                    .addComponent(jLabel5))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(txtRefNo, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel8)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtCustomer, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(211, Short.MAX_VALUE))
         );
+
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel3, jLabel4, jLabel5, jLabel6, jLabel7, jLabel8, jLabel9});
+
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel4)
-                        .addComponent(txtRefNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel5)
-                        .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel7)
-                        .addComponent(txtFrom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel9)
-                        .addComponent(txtTo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel6)
-                        .addComponent(txtVou, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel3)))
-                .addContainerGap(7, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel4)
+                            .addComponent(txtRefNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel8)
+                            .addComponent(txtCustomer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel5)
+                            .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel6)
+                            .addComponent(txtVou, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel7)
+                            .addComponent(txtFrom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel3)
+                            .addComponent(txtDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel9)
+                                .addComponent(txtTo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {txtDate, txtVou});
@@ -584,7 +632,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 201, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(lblStatus)
@@ -609,12 +657,14 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JTable tblTransfer;
+    private javax.swing.JTextField txtCustomer;
     private com.toedter.calendar.JDateChooser txtDate;
     private javax.swing.JTextField txtFrom;
     private javax.swing.JTextField txtRefNo;
@@ -627,17 +677,17 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     public void save() {
         saveVoucher(false);
     }
-
+    
     @Override
     public void delete() {
         deleteVoucher();
     }
-
+    
     @Override
     public void newForm() {
         clear();
     }
-
+    
     @Override
     public void history() {
         if (dialog == null) {
@@ -652,20 +702,20 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         }
         dialog.search();
     }
-
+    
     @Override
     public void print() {
         saveVoucher(true);
     }
-
+    
     @Override
     public void refresh() {
     }
-
+    
     @Override
     public void filter() {
     }
-
+    
     @Override
     public void selected(Object source, Object selectObj) {
         if (source.toString().equals("TR-HISTORY")) {
@@ -675,22 +725,22 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                 });
             }
         }
-
+        
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
     @Override
     public void keyTyped(KeyEvent e) {
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
