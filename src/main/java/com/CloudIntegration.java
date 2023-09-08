@@ -28,6 +28,7 @@ import com.h2.service.MacPropertyService;
 import com.h2.service.MachineInfoService;
 import com.h2.service.MenuService;
 import com.h2.service.OrderHisService;
+import com.h2.service.OrderStatusService;
 import com.h2.service.PrivilegeCompanyService;
 import com.h2.service.PrivilegeMenuService;
 import com.h2.service.ProcessHisService;
@@ -37,7 +38,6 @@ import com.h2.service.RetInService;
 import com.h2.service.RetOutService;
 import com.h2.service.RolePropertyService;
 import com.h2.service.RoleService;
-import com.h2.service.StockInOutService;
 import com.h2.service.StockService;
 import com.h2.service.StockTypeService;
 import com.h2.service.StockUnitService;
@@ -113,6 +113,8 @@ public class CloudIntegration {
     private TraderInvService traderInvService;
     @Autowired
     private VouStatusService vouStatusService;
+    @Autowired
+    private OrderStatusService orderStatusService;
     @Autowired
     private PriceOptionService priceOptionService;
     @Autowired
@@ -587,6 +589,7 @@ public class CloudIntegration {
     private void downloadInventory() {
         downloadPriceOption();
         downloadVouStatus();
+        downloadOrderStatus();
         downloadInvTrader();
         downloadSaleMan();
         downloadLocation();
@@ -617,6 +620,19 @@ public class CloudIntegration {
                 vouStatusService.save(s);
             });
             observer.selected("download", "downloadVouStatus done.");
+        }, (e) -> {
+            observer.selected("download", e.getMessage());
+        });
+    }
+
+    private void downloadOrderStatus() {
+        inventoryRepo.getUpdateOrderStatus(orderStatusService.getMaxDate()).subscribe((t) -> {
+            observer.selected("download", "downloadOrderStatus list : " + t.size());
+            log.info("download orderstatus = " + t.size());
+            t.forEach((s) -> {
+                orderStatusService.save(s);
+            });
+            observer.selected("download", "downloadOrderStatus done.");
         }, (e) -> {
             observer.selected("download", e.getMessage());
         });

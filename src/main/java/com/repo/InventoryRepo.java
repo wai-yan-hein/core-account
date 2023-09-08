@@ -632,7 +632,7 @@ public class InventoryRepo {
         key.setCompCode(Global.compCode);
         key.setCode(code);
         if (localDatabase) {
-//            return h2Repo.find(key);
+            return h2Repo.find(key);
         }
 
         return inventoryApi.post()
@@ -921,7 +921,7 @@ public class InventoryRepo {
 
     public Mono<List<OrderStatus>> getOrderStatus() {
         if (localDatabase) {
-//            return h2Repo.getVouStatus();
+            return h2Repo.getOrderStatus();
         }
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getOrderStatus")
@@ -1152,7 +1152,7 @@ public class InventoryRepo {
                 .bodyToMono(OrderStatus.class)
                 .doOnSuccess((t) -> {
                     if (localDatabase) {
-//                        h2Repo.save(t);
+                        h2Repo.save(t);
                     }
                 })
                 .onErrorResume((e) -> {
