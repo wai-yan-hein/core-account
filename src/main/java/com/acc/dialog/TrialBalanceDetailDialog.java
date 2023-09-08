@@ -216,7 +216,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         Mono<TmpOpening> m1 = getOpening();
         Mono<List<Gl>> m2 = accountRepo.searchGl(getFilter());
         Mono<Tuple2<TmpOpening, List<Gl>>> zip = m1.zipWith(m2);
-        zip.subscribe((t) -> {
+        zip.doOnSuccess((t) -> {
             drAmtTableModel.clear();
             crAmtTableModel.clear();
             TmpOpening op = t.getT1();
@@ -247,13 +247,12 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
             crAmtTableModel.fireTableDataChanged();
             progress.setIndeterminate(false);
             log.info("process.");
-        }, (e) -> {
+        }).doOnError((e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
             progress.setIndeterminate(false);
-        }, () -> {
-            log.info("finished.");
+        }).doOnTerminate(() -> {
             setVisible(true);
-        });
+        }).subscribe();
     }
 
     private ReportFilter getFilter() {
