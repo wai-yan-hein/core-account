@@ -16,7 +16,6 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
-import com.inventory.editor.OrderStatusAutoCompleter;
 import com.inventory.editor.SaleManAutoCompleter;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
@@ -25,9 +24,11 @@ import com.inventory.model.Order;
 import com.inventory.model.OrderHis;
 import com.inventory.model.OrderHisDetail;
 import com.inventory.model.OrderHisKey;
+import com.inventory.model.OrderStatus;
 import com.inventory.model.SaleMan;
 import com.inventory.model.Trader;
 import com.inventory.model.VOrder;
+import com.inventory.ui.common.OrderStatusComboBoxModel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.OrderTableModel;
 import com.inventory.ui.common.StockBalanceTableModel;
@@ -79,7 +80,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class OrderEntry extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
-
+    
     private List<OrderHisDetail> listDetail = new ArrayList();
     private final OrderTableModel orderTableModel = new OrderTableModel();
     private OrderHistoryDialog dialog;
@@ -93,41 +94,42 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     private SaleManAutoCompleter saleManCompleter;
     private LocationAutoCompleter locationAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
-    private OrderStatusAutoCompleter orderStatusAutoCompleter;
+//    private OrderStatusAutoCompleter orderStatusAutoCompleter;
+    private OrderStatusComboBoxModel orderStatusComboModel = new OrderStatusComboBoxModel();
     private SelectionObserver observer;
     private OrderHis orderHis = new OrderHis();
     private JProgressBar progress;
     private double prvBal = 0;
     private double balance = 0;
-
+    
     public TraderAutoCompleter getTraderAutoCompleter() {
         return traderAutoCompleter;
     }
-
+    
     public void setTraderAutoCompleter(TraderAutoCompleter traderAutoCompleter) {
         this.traderAutoCompleter = traderAutoCompleter;
     }
-
+    
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;
     }
-
+    
     public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
         this.locationAutoCompleter = locationAutoCompleter;
     }
-
+    
     public JProgressBar getProgress() {
         return progress;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public SelectionObserver getObserver() {
         return observer;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -145,23 +147,23 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         initDateListner();
         actionMapping();
     }
-
+    
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
         tblOrder.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
         tblOrder.getActionMap().put(solve, new DeleteAction());
-
+        
     }
-
+    
     private class DeleteAction extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTran();
         }
     }
-
+    
     private void initDateListner() {
         txtOrderDate.getDateEditor().getUiComponent().setName("txtSaleDate");
         txtOrderDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -175,16 +177,16 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         public void focusGained(FocusEvent e) {
             ((JTextFieldDateEditor) e.getSource()).selectAll();
         }
-
+        
     };
-
+    
     private void initButtonGroup() {
         ButtonGroup g = new ButtonGroup();
         g.add(chkVou);
         g.add(chkA4);
         g.add(chkA5);
     }
-
+    
     public void initMain() {
         initCombo();
         initStockBalanceTable();
@@ -193,7 +195,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         txtOrderDate.setDate(Util1.getTodayDate());
         txtCus.requestFocus();
     }
-
+    
     private void initOrderTable() {
         tblOrder.setModel(orderTableModel);
         orderTableModel.setParent(tblOrder);
@@ -232,7 +234,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblOrder.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
-
+    
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
@@ -249,12 +251,16 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         inventoryRepo.getSaleMan().subscribe((t) -> {
             saleManCompleter.setListSaleMan(t);
         });
+        inventoryRepo.getOrderStatus().subscribe((t) -> {
+            orderStatusComboModel.setList(t);
+            cboOrderStatus.setModel(orderStatusComboModel);
+        });
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
         projectAutoCompleter.setObserver(this);
-        orderStatusAutoCompleter = new OrderStatusAutoCompleter(txtOrderStatus, inventoryRepo, null, false);
-        orderStatusAutoCompleter.setOrderStatus(null);
+//        orderStatusAutoCompleter = new OrderStatusAutoCompleter(txtOrderStatus, inventoryRepo, null, false);
+//        orderStatusAutoCompleter.setOrderStatus(null);
     }
-
+    
     private void initKeyListener() {
         txtOrderDate.getDateEditor().getUiComponent().setName("txtOrderDate");
         txtOrderDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -267,17 +273,17 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         txtSaleman.addKeyListener(this);
         txtCurrency.addKeyListener(this);
         tblOrder.addKeyListener(this);
-        txtOrderStatus.addKeyListener(this);
+//        txtOrderStatus.addKeyListener(this);
     }
-
+    
     private void initTextBoxValue() {
         txtVouTotal.setValue(0);
     }
-
+    
     private void initTextBoxFormat() {
         txtVouTotal.setFormatterFactory(Util1.getDecimalFormat());
     }
-
+    
     private void initStockBalanceTable() {
         if (ProUtil.isCalStock()) {
             stockBalanceTableModel.setInventoryRepo(inventoryRepo);
@@ -292,7 +298,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         }
         sbPanel.setVisible(ProUtil.isCalStock());
     }
-
+    
     private void assignDefaultValue() {
         inventoryRepo.getDefaultCustomer().doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
@@ -316,8 +322,9 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         if (!lblStatus.getText().equals("NEW")) {
             txtOrderDate.setDate(Util1.getTodayDate());
         }
+        cboOrderStatus.setSelectedItem(null);
     }
-
+    
     private void clear() {
         disableForm(true);
         orderTableModel.removeListDetail();
@@ -334,9 +341,9 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         txtReference.setText(null);
         txtCus.requestFocus();
         projectAutoCompleter.setProject(null);
-        txtOrderStatus.setText(null);
+//        txtOrderStatus.setText(null);
     }
-
+    
     public void saveOrder(boolean print) {
         if (isValidEntry() && orderTableModel.isValidEntry()) {
             progress.setIndeterminate(true);
@@ -354,10 +361,10 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 progress.setIndeterminate(false);
                 observer.selected("save", true);
             }).subscribe();
-
+            
         }
     }
-
+    
     private boolean isValidEntry() {
         boolean status = true;
         if (lblStatus.getText().equals("DELETED")) {
@@ -401,7 +408,9 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             orderHis.setMacId(Global.macId);
             Project p = projectAutoCompleter.getProject();
             orderHis.setProjectNo(p == null ? null : p.getKey().getProjectNo());
-            orderHis.setOrderStatus(orderStatusAutoCompleter.getOrderStatus().getKey().getCode());
+            if (orderStatusComboModel.getSelectedItem() instanceof OrderStatus ord) {
+                orderHis.setOrderStatus(ord.getKey().getCode());
+            }
             if (lblStatus.getText().equals("NEW")) {
                 OrderHisKey key = new OrderHisKey();
                 key.setCompCode(Global.compCode);
@@ -416,7 +425,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         }
         return status;
     }
-
+    
     private void deleteOrder() {
         String status = lblStatus.getText();
         switch (status) {
@@ -445,7 +454,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }
     }
-
+    
     private void deleteTran() {
         int row = tblOrder.convertRowIndexToModel(tblOrder.getSelectedRow());
         if (row >= 0) {
@@ -460,12 +469,12 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             }
         }
     }
-
+    
     private void calculateTotalAmount() {
         double ttlAmt = orderTableModel.getListDetail().stream().mapToDouble((o) -> Util1.getDouble(o.getAmount())).sum();
         txtVouTotal.setValue(ttlAmt);
     }
-
+    
     public void historyOrder() {
         if (dialog == null) {
             dialog = new OrderHistoryDialog(Global.parentForm);
@@ -478,7 +487,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         }
         dialog.search();
     }
-
+    
     public void setOrderVoucher(OrderHis sh, boolean local) {
         if (sh != null) {
             progress.setIndeterminate(true);
@@ -500,7 +509,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 projectAutoCompleter.setProject(t1);
             }).subscribe();
             inventoryRepo.findOrderStatus(orderHis.getOrderStatus()).doOnSuccess((o) -> {
-                orderStatusAutoCompleter.setOrderStatus(o);
+                orderStatusComboModel.setSelectedItem(o);
             }).subscribe();
             inventoryRepo.getOrderDetail(vouNo, sh.getDeptId(), local)
                     .subscribe((t) -> {
@@ -539,7 +548,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                     });
         }
     }
-
+    
     private void disableForm(boolean status) {
         tblOrder.setEnabled(status);
         panelSale.setEnabled(status);
@@ -555,7 +564,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         observer.selected("delete", status);
         observer.selected("print", status);
     }
-
+    
     private void setAllLocation() {
         List<OrderHisDetail> listSaleDetail = orderTableModel.getListDetail();
         Location loc = locationAutoCompleter.getLocation();
@@ -567,7 +576,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         }
         orderTableModel.setListDetail(listSaleDetail);
     }
-
+    
     private void printVoucher(String vouNo, String reportName, boolean print) {
         clear();
         inventoryRepo.getOrderReport(vouNo).subscribe((t) -> {
@@ -575,9 +584,9 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
-
+        
     }
-
+    
     private void viewReport(byte[] t, String reportName, boolean print) {
         if (reportName != null) {
             try {
@@ -608,14 +617,14 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             chkVou.requestFocus();
         }
     }
-
+    
     private void searchOrder(Order order) {
         traderAutoCompleter.setTrader(order.getTrader());
         txtRemark.setText(order.getDesp());
         lblStatus.setText("NEW");
-
+        
     }
-
+    
     private void focusTable() {
         int rc = tblOrder.getRowCount();
         if (rc >= 1) {
@@ -626,15 +635,15 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             txtCus.requestFocus();
         }
     }
-
+    
     public void addTrader(Trader t) {
         traderAutoCompleter.addTrader(t);
     }
-
+    
     public void setTrader(Trader t, int row) {
         traderAutoCompleter.setTrader(t, row);
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -675,7 +684,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         jLabel10 = new javax.swing.JLabel();
         txtProjectNo = new javax.swing.JTextField();
         jLabel11 = new javax.swing.JLabel();
-        txtOrderStatus = new javax.swing.JTextField();
+        cboOrderStatus = new javax.swing.JComboBox<>();
         jPanel2 = new javax.swing.JPanel();
         lblStatus = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
@@ -878,7 +887,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtProjectNo, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE)
-                    .addComponent(txtOrderStatus))
+                    .addComponent(cboOrderStatus, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -910,7 +919,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                             .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel11)
-                        .addComponent(txtOrderStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(cboOrderStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(panelSaleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1227,12 +1236,12 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             calDueDate(Util1.getInteger(t.getCreditDays()));
         }
     }//GEN-LAST:event_txtOrderDatePropertyChange
-
+    
     @Override
     public void keyEvent(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void selected(Object source, Object selectObj) {
         switch (source.toString()) {
@@ -1266,17 +1275,17 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             }
         }
     }
-
+    
     @Override
     public void keyTyped(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
@@ -1338,7 +1347,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             }
         }
     }
-
+    
     private void calDueDate(Integer day) {
         Date vouDate = txtOrderDate.getDate();
         Calendar calendar = Calendar.getInstance();
@@ -1349,6 +1358,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox<OrderStatus> cboOrderStatus;
     private javax.swing.JCheckBox chkA4;
     private javax.swing.JCheckBox chkA5;
     private javax.swing.JCheckBox chkVou;
@@ -1382,7 +1392,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     private com.toedter.calendar.JDateChooser txtDueDate;
     private javax.swing.JTextField txtLocation;
     private com.toedter.calendar.JDateChooser txtOrderDate;
-    private javax.swing.JTextField txtOrderStatus;
     private javax.swing.JTextField txtProjectNo;
     private javax.swing.JTextField txtReference;
     private javax.swing.JTextField txtRemark;
@@ -1395,35 +1404,35 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
     public void delete() {
         deleteOrder();
     }
-
+    
     @Override
     public void print() {
         saveOrder(true);
     }
-
+    
     @Override
     public void save() {
         saveOrder(false);
     }
-
+    
     @Override
     public void newForm() {
         clear();
     }
-
+    
     @Override
     public void history() {
         historyOrder();
     }
-
+    
     @Override
     public void refresh() {
     }
-
+    
     @Override
     public void filter() {
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();

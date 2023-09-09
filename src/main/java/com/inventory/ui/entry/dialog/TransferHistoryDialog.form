@@ -100,6 +100,7 @@
                               <Component id="jLabel4" alignment="1" max="32767" attributes="0"/>
                               <Component id="jLabel6" max="32767" attributes="0"/>
                               <Component id="jLabel7" alignment="0" max="32767" attributes="0"/>
+                              <Component id="jLabel14" alignment="1" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="jSeparator2" min="-2" max="-2" attributes="0"/>
@@ -131,6 +132,7 @@
                                   </Group>
                                   <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                               </Group>
+                              <Component id="txtCustomer" alignment="1" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -188,6 +190,11 @@
                               <Component id="txtDep" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="jLabel14" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="txtCustomer" alignment="3" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="chkDel" min="-2" max="-2" attributes="0"/>
                               <Component id="chkLocal" min="-2" max="-2" attributes="0"/>
@@ -200,7 +207,7 @@
                       <Component id="jSeparator3" min="-2" max="-2" attributes="0"/>
                       <Component id="jButton1" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace pref="89" max="32767" attributes="0"/>
+                  <EmptySpace pref="63" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -404,6 +411,25 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Local"/>
           </Properties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel14">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.lableFont" type="code"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Customer"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="txtCustomer">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.textFont" type="code"/>
+            </Property>
+            <Property name="name" type="java.lang.String" value="txtUser" noResource="true"/>
+          </Properties>
+          <Events>
+            <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtCustomerFocusGained"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

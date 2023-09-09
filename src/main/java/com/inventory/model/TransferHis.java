@@ -54,6 +54,8 @@ public class TransferHis {
     private String intgUpdStatus;
     @Column(name = "vou_lock")
     private boolean vouLock;
+    @Column(name = "trader_code")
+    private String traderCode;
     @Transient
     private List<TransferHisDetail> listTD;
     @Transient

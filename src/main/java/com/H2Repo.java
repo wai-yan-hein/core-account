@@ -93,6 +93,7 @@ import com.user.model.RoleProperty;
 import com.user.model.SysProperty;
 import com.user.model.VRoleCompany;
 import com.h2.service.OrderHisService;
+import com.h2.service.OrderStatusService;
 import com.h2.service.PrivilegeMenuService;
 import com.h2.service.ProcessHisDetailService;
 import com.h2.service.ProcessHisService;
@@ -112,6 +113,8 @@ import com.inventory.model.OPHis;
 import com.inventory.model.OPHisKey;
 import com.inventory.model.OrderHisDetail;
 import com.inventory.model.OrderHisKey;
+import com.inventory.model.OrderStatus;
+import com.inventory.model.OrderStatusKey;
 import com.inventory.model.ProcessHis;
 import com.inventory.model.ProcessHisDetail;
 import com.inventory.model.ProcessHisKey;
@@ -174,6 +177,8 @@ public class H2Repo {
     private TraderInvService traderInvService;
     @Autowired
     private VouStatusService vouStatusService;
+    @Autowired
+    private OrderStatusService orderStatusService;
     @Autowired
     private SaleHisService saleHisService;
     @Autowired
@@ -333,6 +338,14 @@ public class H2Repo {
         return Mono.justOrEmpty(vouStatusService.find(key));
     }
 
+    public Mono<List<OrderStatus>> getOrderStatus() {
+        return Mono.justOrEmpty(orderStatusService.findAll(Global.compCode));
+    }
+
+    public Mono<OrderStatus> find(OrderStatusKey key) {
+        return Mono.justOrEmpty(orderStatusService.find(key));
+    }
+
     public Mono<List<StockInOutDetail>> searchStkIODetail(String vouNo, String compCode, Integer deptId) {
         return Mono.justOrEmpty(stkIODetailService.search(vouNo, compCode, deptId));
     }
@@ -475,6 +488,10 @@ public class H2Repo {
 
     public VouStatus save(VouStatus obj) {
         return vouStatusService.save(obj);
+    }
+
+    public OrderStatus save(OrderStatus obj) {
+        return orderStatusService.save(obj);
     }
 
     public UnitRelation save(UnitRelation obj) {
@@ -627,8 +644,8 @@ public class H2Repo {
         return Mono.justOrEmpty(deptUserService.findById(key));
     }
 
-    public Mono<List<DepartmentUser>> getDeparment(Boolean active,String compCode) {
-        return Mono.justOrEmpty(deptUserService.findAll(active,compCode));
+    public Mono<List<DepartmentUser>> getDeparment(Boolean active, String compCode) {
+        return Mono.justOrEmpty(deptUserService.findAll(active, compCode));
     }
 
     public Mono<BusinessType> find(Integer id) {

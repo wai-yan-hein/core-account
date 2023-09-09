@@ -238,7 +238,7 @@ public class OrderHisDaoImpl extends AbstractDao<OrderHisKey, OrderHis> implemen
                     s.setRemark(rs.getString("remark"));
                     s.setReference(rs.getString("reference"));
                     s.setCreatedBy(rs.getString("created_by"));
-                    s.setPaid(rs.getFloat("paid"));
+//                    s.setPaid(rs.getFloat("paid"));
                     s.setVouTotal(rs.getFloat("vou_total"));
                     s.setDeleted(rs.getBoolean("deleted"));
                     s.setDeptId(rs.getInt("dept_id"));
