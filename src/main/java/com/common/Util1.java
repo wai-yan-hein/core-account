@@ -12,6 +12,7 @@ import com.google.myanmartools.TransliterateZ2U;
 import com.google.myanmartools.ZawgyiDetector;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -40,6 +41,8 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -1055,4 +1058,47 @@ public class Util1 {
         ZoneId zoneId = ZoneId.systemDefault(); // Change to the desired time zone
         return instant.atZone(zoneId).toLocalDateTime();
     }
+
+    public static String autoCorrectSheetName(String input) {
+        // Replace invalid characters with spaces
+        // Limit the sheet name to a maximum of 31 characters
+        if (input.length() > 31) {
+            input = input.substring(0, 31);
+        }
+        return input;
+    }
+
+    public static void openFolder(String folderPath) {
+        File folder = new File(folderPath);
+
+        // Check if the folder exists
+        if (folder.exists() && folder.isDirectory()) {
+            try {
+                // Open the folder using the default file manager
+                Desktop.getDesktop().open(folder);
+            } catch (IOException e) {
+                log.error("openFolder : " + e.getMessage());
+                // Handle the exception as needed
+            }
+        } else {
+            log.error("openFolder : " + "Folder does not exit.");
+        }
+    }
+
+    public static String replaceSpecialCharactersWithSpace(String input) {
+        // Define a regular expression pattern to match the specified special characters
+        String regex = "[~!@#$%^&*()\\-+={}\\[\\]:;'\"<>?/\\\\]";
+
+        // Create a Pattern object
+        Pattern pattern = Pattern.compile(regex);
+
+        // Create a Matcher object for the input string
+        Matcher matcher = pattern.matcher(input);
+
+        // Replace matched special characters with spaces
+        String result = matcher.replaceAll("");
+
+        return result;
+    }
+
 }

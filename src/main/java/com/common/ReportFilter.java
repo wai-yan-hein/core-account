@@ -73,6 +73,21 @@ public class ReportFilter {
     private float creditAmt;
     private String fromDueDate;
     private String toDueDate;
+    private String desp;
+    private String coaLv1;
+    private String coaLv2;
+    private String coaLv3;
+    private String reference;
+    private String acc;
+    private boolean summary;
+    private String openingDate;
+    private String deptCode;
+    private String traderType;
+    private boolean closing;
+    private String tranSource;
+    private String glVouNo;
+    private boolean local;
+    
     public ReportFilter(Integer macId, String compCode, Integer deptId) {
         this.macId = macId;
         this.compCode = compCode;

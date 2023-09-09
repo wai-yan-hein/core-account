@@ -128,6 +128,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         inventoryRepo.getLocation().subscribe((t) -> {
             locationAutoCompleter.setListLocation(t);
         });
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true);
         userRepo.getDeparment(true).doOnSuccess((t) -> {
             departmentAutoCompleter.setListDepartment(t);
         }).subscribe();

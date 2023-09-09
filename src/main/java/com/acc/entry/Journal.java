@@ -15,9 +15,9 @@ import com.acc.model.DeleteObj;
 import com.acc.model.DepartmentA;
 import com.acc.model.Gl;
 import com.common.Global;
-import com.acc.model.ReportFilter;
 import com.common.PanelControl;
 import com.common.ProUtil;
+import com.common.ReportFilter;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
@@ -171,7 +171,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
 
     private void searchJournal() {
         progress.setIndeterminate(true);
-        ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
+        ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setFromDate(dateAutoCompleter.getDateModel().getStartDate());
         filter.setToDate(dateAutoCompleter.getDateModel().getEndDate());
         filter.setListDepartment(getListDep());

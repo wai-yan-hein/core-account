@@ -9,7 +9,6 @@ import com.acc.common.OpeningBalanceTableModel;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.model.OpeningBalance;
 import com.acc.model.ChartOfAccount;
-import com.acc.model.ReportFilter;
 import com.acc.editor.COA3CellEditor;
 import com.acc.editor.TraderCellEditor;
 import com.acc.editor.DepartmentCellEditor;
@@ -22,6 +21,7 @@ import com.common.PanelControl;
 import com.common.Global;
 import com.common.Util1;
 import com.common.DecimalFormatRender;
+import com.common.ReportFilter;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
@@ -266,7 +266,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     // search openig balance with filtered data for table
     private void searchOpening() {
         progress.setIndeterminate(true);
-        ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
+        ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setOpeningDate(Util1.toDateStr(txtDate.getDate(), "yyyy-MM-dd"));
         filter.setCurCode(getCurCode());
         filter.setDeptCode(getDepCode());
@@ -323,7 +323,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
 
     private void printOpening() {
         progress.setIndeterminate(true);
-        ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
+        ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setReportName("OpeningTri");
         filter.setOpeningDate(Util1.toDateStr(txtDate.getDate(), "yyyy-MM-dd"));
         filter.setDeptCode(departmenttAutoCompleter.getDepartment().getKey().getDeptCode());

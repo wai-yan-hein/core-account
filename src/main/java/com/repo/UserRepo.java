@@ -276,7 +276,7 @@ public class UserRepo {
                 .bodyToMono(DepartmentUser.class)
                 .onErrorResume((e) -> {
                     log.error("findDepartment : " + e.getMessage());
-                    return Mono.error(e);
+                    return Mono.empty();
                 });
     }
 

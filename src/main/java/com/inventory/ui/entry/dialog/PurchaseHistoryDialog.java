@@ -118,6 +118,8 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
             appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
         });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true);
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true);
         userRepo.getDeparment(true).doOnSuccess((t) -> {
             departmentAutoCompleter.setListDepartment(t);
         }).subscribe();

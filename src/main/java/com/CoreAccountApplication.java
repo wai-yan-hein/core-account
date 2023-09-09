@@ -186,6 +186,7 @@ public class CoreAccountApplication {
             UIManager.put("Table.arc", 20);
             UIManager.put("Component.arc", 20);
             UIManager.put("ProgressBar.arc", 20);
+            UIManager.put("CheckBox.arc", 20);
             UIManager.put("TextComponent.arc", 20);
             UIManager.put("TabbedPane.showTabSeparators", true);
             UIManager.put("TableHeader.foreground", Color.white);

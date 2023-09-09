@@ -144,9 +144,9 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
         txtEmail.setText(appUser.getEmail());
         txtPassword.setText(appUser.getPassword());
         chkAtive.setSelected(Util1.getBoolean(appUser.isActive()));
-        userRepo.finRole(appUser.getRoleCode()).subscribe((t) -> {
+        userRepo.finRole(appUser.getRoleCode()).doOnSuccess((t) -> {
             roleAutoCompleter.setAppRole(t);
-        });
+        }).subscribe();
         Integer deptId = user.getDeptId();
         userRepo.findDepartment(deptId).doOnSuccess((t) -> {
             departmentComboBoxModel.setSelectedItem(t);
@@ -193,7 +193,11 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
             return false;
         } else {
             if (cboDep.getSelectedItem() instanceof DepartmentUser dep) {
-                appUser.setDeptId(dep.getKey().getDeptId());
+                if (dep.getKey() != null) {
+                    appUser.setDeptId(dep.getKey().getDeptId());
+                }else{
+                    appUser.setDeptId(null);
+                }
             }
             if (cboLocation.getSelectedItem() instanceof Location loc) {
                 appUser.setLocCode(loc.getKey().getLocCode());

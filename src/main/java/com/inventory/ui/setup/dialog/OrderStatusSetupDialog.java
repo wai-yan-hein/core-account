@@ -114,6 +114,7 @@ public class OrderStatusSetupDialog extends javax.swing.JDialog implements KeyLi
         ord.setKey(cat.getKey());
         txtName.setText(ord.getDescription());
         txtUserCode.setText(ord.getUserCode());
+        spinnerOrderBy.setValue(ord.getOrderBy());
         txtName.requestFocus();
         lblStatus.setText("EDIT");
         lblStatus.setForeground(Color.blue);
@@ -207,7 +208,7 @@ public class OrderStatusSetupDialog extends javax.swing.JDialog implements KeyLi
         progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Voucher Status Setup");
+        setTitle("Order Status Setup");
         setModalityType(java.awt.Dialog.ModalityType.TOOLKIT_MODAL);
 
         tblVou.setFont(Global.textFont);

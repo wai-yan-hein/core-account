@@ -18,9 +18,9 @@ import com.acc.editor.DespAutoCompleter;
 import com.acc.editor.RefAutoCompleter;
 import com.acc.model.DeleteObj;
 import com.acc.model.DepartmentA;
-import com.acc.model.ReportFilter;
 import com.acc.model.TmpOpening;
 import com.common.ProUtil;
+import com.common.ReportFilter;
 import com.common.Util1;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -190,7 +190,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         if (progress != null) {
             progress.setIndeterminate(true);
             calOpening();
-            ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
+            ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
             filter.setFromDate(dateAutoCompleter.getDateModel().getStartDate());
             filter.setToDate(dateAutoCompleter.getDateModel().getEndDate());
             filter.setListDepartment(getListDep());
@@ -224,7 +224,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
         accountRepo.getDefaultCash().subscribe((coa) -> {
             if (coa != null) {
                 String startDate = dateAutoCompleter.getDateModel().getStartDate();
-                ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
+                ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
                 filter.setFromDate(startDate);
                 filter.setCurCode(Global.currency);
                 filter.setListDepartment(getListDep());

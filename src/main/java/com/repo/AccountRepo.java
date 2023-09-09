@@ -16,7 +16,6 @@ import com.acc.model.DepartmentAKey;
 import com.acc.model.Gl;
 import com.acc.model.OpeningBalance;
 import com.acc.model.OpeningKey;
-import com.acc.model.ReportFilter;
 import com.acc.model.StockOP;
 import com.acc.model.TmpOpening;
 import com.acc.model.TraderA;
@@ -25,9 +24,9 @@ import com.acc.model.StockOPKey;
 import com.acc.model.VApar;
 import com.acc.model.VDescription;
 import com.acc.model.VTriBalance;
-import com.common.FilterObject;
 import com.common.Global;
 import com.common.ProUtil;
+import com.common.ReportFilter;
 import com.common.ReturnObject;
 import com.common.Util1;
 import com.inventory.model.TraderGroup;
@@ -488,11 +487,9 @@ public class AccountRepo {
                 .retrieve()
                 .bodyToMono(ChartOfAccount.class)
                 .onErrorResume((e) -> {
-                    log.error(
-                            "findCOA :" + e.getMessage());
+                    log.error("findCOA :" + e.getMessage());
                     return Mono.empty();
-                }
-                );
+                });
     }
 
     public Mono<DepartmentA> saveDepartment(DepartmentA dep) {
@@ -516,8 +513,7 @@ public class AccountRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToFlux(DepartmentA.class
-                );
+                .bodyToFlux(DepartmentA.class);
     }
 
     public Mono<OpeningBalance> saveCOAOpening(OpeningBalance opening) {
@@ -583,19 +579,16 @@ public class AccountRepo {
                 .uri(builder -> builder.path("/gl/receive")
                 .queryParam("compCode", Global.compCode)
                 .build())
-                .retrieve().bodyToFlux(Gl.class
-                );
+                .retrieve().bodyToFlux(Gl.class);
     }
 
     public Mono<YearEnd> yearEnd(YearEnd t) {
         return accountApi.post()
                 .uri("/account/yearEnd")
                 .accept(MediaType.APPLICATION_JSON)
-                .body(Mono.just(t), YearEnd.class
-                )
+                .body(Mono.just(t), YearEnd.class)
                 .retrieve()
-                .bodyToMono(YearEnd.class
-                );
+                .bodyToMono(YearEnd.class);
     }
 
     public Mono<List<ChartOfAccount>> searchCOA(String str, int level) {
@@ -610,8 +603,7 @@ public class AccountRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToFlux(ChartOfAccount.class
-                )
+                .bodyToFlux(ChartOfAccount.class)
                 .collectList();
     }
 
@@ -633,8 +625,7 @@ public class AccountRepo {
                 .queryParam("str", str)
                 .build())
                 .retrieve()
-                .bodyToFlux(VDescription.class
-                )
+                .bodyToFlux(VDescription.class)
                 .collectList();
     }
 
@@ -645,30 +636,25 @@ public class AccountRepo {
                 .queryParam("str", str)
                 .build())
                 .retrieve()
-                .bodyToFlux(VDescription.class
-                )
+                .bodyToFlux(VDescription.class)
                 .collectList();
     }
 
     public Mono<List<Gl>> searchJournal(ReportFilter filter) {
         return accountApi.post()
                 .uri("/account/searchJournal")
-                .body(Mono.just(filter), ReportFilter.class
-                )
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToFlux(Gl.class
-                )
+                .bodyToFlux(Gl.class)
                 .collectList();
     }
 
     public Mono<List<StockOP>> searchOP(ReportFilter filter) {
         return accountApi.post()
                 .uri("/account/searchStockOP")
-                .body(Mono.just(filter), ReportFilter.class
-                )
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToFlux(StockOP.class
-                )
+                .bodyToFlux(StockOP.class)
                 .collectList();
     }
 
@@ -682,14 +668,11 @@ public class AccountRepo {
     }
 
     public Mono<ReturnObject> getReport(ReportFilter filter) {
-        return accountApi
-                .post()
+        return accountApi.post()
                 .uri("/report/getReport")
-                .body(Mono.just(filter), FilterObject.class
-                )
+                .body(Mono.just(filter), ReportFilter.class)
                 .retrieve()
-                .bodyToMono(ReturnObject.class
-                );
+                .bodyToMono(ReturnObject.class);
     }
 
     public Mono<List<VApar>> getArAp(ReportFilter filter) {
@@ -815,4 +798,5 @@ public class AccountRepo {
                 .retrieve()
                 .bodyToMono(String.class);
     }
+
 }

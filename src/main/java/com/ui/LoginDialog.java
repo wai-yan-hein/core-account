@@ -39,7 +39,6 @@ import reactor.core.publisher.Mono;
 @Component
 @Slf4j
 public class LoginDialog extends javax.swing.JDialog implements KeyListener, SelectionObserver {
-
     private int loginAttempt = 0;
     private int enableCount = 0;
     private String APP_NAME = "Core Account";

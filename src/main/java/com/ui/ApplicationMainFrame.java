@@ -774,7 +774,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 adj.setObserver(this);
                 adj.setProgress(progress);
                 adj.setTaskExecutor(taskExecutor);
-                adj.setAccountApi(accountApi);
                 adj.setAccounRepo(accounRepo);
                 adj.setUserRepo(userRepo);
                 adj.initMain();
@@ -795,7 +794,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                         cash.setObserver(this);
                         cash.setProgress(progress);
                         cash.setTaskExecutor(taskExecutor);
-                        cash.setAccountApi(accountApi);
                         cash.setSourceAccId(srcAcc);
                         cash.setAccounRepo(accounRepo);
                         cash.setUserRepo(userRepo);
@@ -808,7 +806,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                         db.setObserver(this);
                         db.setProgress(progress);
                         db.setTaskExecutor(taskExecutor);
-                        db.setAccountApi(accountApi);
                         db.setSourceAccId(srcAcc);
                         db.setAccounRepo(accounRepo);
                         db.setUserRepo(userRepo);

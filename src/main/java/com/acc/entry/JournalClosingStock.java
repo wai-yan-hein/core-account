@@ -15,8 +15,8 @@ import com.acc.editor.DepartmentCellEditor;
 import com.acc.model.DepartmentA;
 import com.acc.model.StockOP;
 import com.common.Global;
-import com.acc.model.ReportFilter;
 import com.common.PanelControl;
+import com.common.ReportFilter;
 import com.common.SelectionObserver;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.repo.UserRepo;
@@ -164,7 +164,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
 
     private void searchJournal() {
         progress.setIndeterminate(true);
-        ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
+        ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setFromDate(dateAutoCompleter.getDateModel().getStartDate());
         filter.setToDate(dateAutoCompleter.getDateModel().getEndDate());
         filter.setDeptCode(getDeptCode());

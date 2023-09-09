@@ -242,6 +242,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         txtSecurity.setText(null);
         currencyAutoCompleter.setCurrency(null);
         businessTypeAutoCompleter.setObject(null);
+        observeMain();
     }
 
     private void updateCompany(CompanyInfo info) {

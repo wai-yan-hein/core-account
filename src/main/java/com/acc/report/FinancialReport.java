@@ -11,13 +11,11 @@ import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.TraderAAutoCompleter;
 import com.acc.model.TraderA;
-import com.common.FilterObject;
 import com.common.FontCellRender;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.ReportFilter;
-import com.common.ReturnObject;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
@@ -50,8 +48,6 @@ import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.swing.JRViewer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -62,8 +58,6 @@ import reactor.core.publisher.Mono;
 public class FinancialReport extends javax.swing.JPanel implements PanelControl, SelectionObserver {
 
     private final ReportTableModel tableModel = new ReportTableModel("Financial Report");
-    @Autowired
-    private WebClient accountApi;
     @Autowired
     private AccountRepo accountRepo;
     @Autowired
@@ -247,13 +241,8 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
     private void printReport(String reportUrl, String reportName, Map<String, Object> param) {
         filter.setReportName(reportName);
         long start = new GregorianCalendar().getTimeInMillis();
-
-        accountApi.post()
-                .uri("/report/get-report")
-                .body(Mono.just(filter), FilterObject.class)
-                .retrieve()
-                .bodyToMono(ReturnObject.class)
-                .subscribe((t) -> {
+        accountRepo.getReport(filter)
+                .doOnSuccess((t) -> {
                     try {
                         if (t != null) {
                             String filePath = String.format("%s%s%s", Global.accountRP, File.separator, reportUrl.concat(".jasper"));
@@ -289,10 +278,11 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                         progress.setIndeterminate(false);
                         JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
                     }
-                }, (e) -> {
+                })
+                .doOnError((e) -> {
                     JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
                     progress.setIndeterminate(false);
-                });
+                }).subscribe();
 
     }
 

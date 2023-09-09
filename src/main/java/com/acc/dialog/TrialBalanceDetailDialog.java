@@ -15,11 +15,11 @@ import com.acc.editor.DespAutoCompleter;
 import com.acc.editor.RefAutoCompleter;
 import com.acc.editor.TranSourceAutoCompleter;
 import com.acc.model.DateModel;
-import com.acc.model.ReportFilter;
 import com.acc.model.Gl;
 import com.acc.model.TmpOpening;
 import com.common.Global;
 import com.common.ProUtil;
+import com.common.ReportFilter;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
@@ -185,16 +185,14 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         userRepo.getCurrency().subscribe((t) -> {
             currencyAAutoCompleter.setListCurrency(t);
         });
-        userRepo.getDefaultCurrency().subscribe((c) -> {
+        userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currencyAAutoCompleter.setCurrency(c);
-        });
+        }).subscribe();
         tranSourceAutoCompleter = new TranSourceAutoCompleter(txtTranSource, null, true);
         tranSourceAutoCompleter.setObserver(this);
-        accountRepo.getTranSource().subscribe((t) -> {
+        accountRepo.getTranSource().doOnSuccess((t) -> {
             tranSourceAutoCompleter.setListGl(t);
-        }, (e) -> {
-            log.error(e.getMessage());
-        });
+        }).subscribe();
     }
 
     private void initFormat() {
@@ -256,7 +254,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     }
 
     private ReportFilter getFilter() {
-        ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
+        ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setFromDate(dateAutoCompleter.getDateModel().getStartDate());
         filter.setToDate(dateAutoCompleter.getDateModel().getEndDate());
         filter.setSrcAcc(coaCode);
@@ -272,9 +270,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     }
 
     private String getCurrency() {
-        if (currencyAAutoCompleter == null) {
-            return Global.currency;
-        }
         return currencyAAutoCompleter.getCurrency() == null ? curCode : currencyAAutoCompleter.getCurrency().getCurCode();
     }
 
@@ -289,7 +284,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     private Mono<TmpOpening> getOpening() {
         log.info("calulate opening.");
         String startDate = dateAutoCompleter.getDateModel().getStartDate();
-        ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
+        ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setFromDate(startDate);
         filter.setCurCode(getCurrency());
         filter.setListDepartment(getListDep());

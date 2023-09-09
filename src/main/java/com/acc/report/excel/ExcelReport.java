@@ -6,6 +6,7 @@ package com.acc.report.excel;
 
 import com.common.SelectionObserver;
 import com.repo.AccountRepo;
+import com.repo.UserRepo;
 import javax.swing.JProgressBar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,8 @@ public class ExcelReport extends javax.swing.JPanel {
 
     @Autowired
     private AccountRepo accountRepo;
+    @Autowired
+    private UserRepo userRepo;
     private JProgressBar progress;
     private SelectionObserver observer;
 
@@ -45,6 +48,7 @@ public class ExcelReport extends javax.swing.JPanel {
     private void addExcelIndividualLedger() {
         ExcelIndividualLedger ledger = new ExcelIndividualLedger();
         ledger.setAccountRepo(accountRepo);
+        ledger.setUserRepo(userRepo);
         ledger.setProgress(progress);
         ledger.setObserver(observer);
         ledger.initMain();

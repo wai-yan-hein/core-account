@@ -33,13 +33,13 @@ import com.acc.model.DateModel;
 import com.acc.model.DeleteObj;
 import com.user.model.Currency;
 import com.acc.model.DepartmentA;
-import com.acc.model.ReportFilter;
 import com.acc.model.TmpOpening;
 import com.acc.model.Gl;
 import com.common.ComponentUtil;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
+import com.common.ReportFilter;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -90,7 +90,6 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
@@ -103,7 +102,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         PanelControl {
 
     private TaskExecutor taskExecutor;
-    private WebClient accountApi;
     private DateAutoCompleter dateAutoCompleter;
     private TraderAAutoCompleter traderAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
@@ -145,14 +143,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     public void setTaskExecutor(TaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
-    }
-
-    public WebClient getAccountApi() {
-        return accountApi;
-    }
-
-    public void setAccountApi(WebClient accountApi) {
-        this.accountApi = accountApi;
     }
 
     public void setProgress(JProgressBar progress) {
@@ -672,7 +662,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         clearModel();
         Mono<TmpOpening> monoOp = accountRepo.getOpening(getOPFilter());
         ReportFilter filter = getFilter();
-        Mono<List<Gl>> monoGl = getGl(filter);
+        Mono<List<Gl>> monoGl = accountRepo.searchGl(filter);
         Mono<Tuple2<TmpOpening, List<Gl>>> monoZip = monoOp.zipWith(monoGl);
         monoZip.hasElement().subscribe((element) -> {
             if (element) {
@@ -709,21 +699,12 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         ComponentUtil.setComponentHierarchyEnabled(panelOption, status);
     }
 
-    private Mono<List<Gl>> getGl(ReportFilter filter) {
-        return accountApi.post()
-                .uri("/account/search-gl")
-                .body(Mono.just(filter), ReportFilter.class)
-                .retrieve()
-                .bodyToFlux(Gl.class)
-                .collectList();
-    }
-
     private String getProjectNo() {
         return projectAutoCompleter == null ? "-" : projectAutoCompleter.getProject().getKey().getProjectNo();
     }
 
     private ReportFilter getFilter() {
-        ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
+        ReportFilter filter = new ReportFilter(Global.macId,Global.compCode, Global.deptId);
         filter.setFromDate(dateAutoCompleter.getDateModel().getStartDate());
         filter.setToDate(dateAutoCompleter.getDateModel().getEndDate());
         filter.setDesp(despAutoCompleter.getAutoText().getDescription().equals("All") ? "-" : despAutoCompleter.getAutoText().getDescription());
@@ -752,7 +733,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     private ReportFilter getOPFilter() {
         String clDate = dateAutoCompleter.getDateModel().getStartDate();
-        ReportFilter filter = new ReportFilter(Global.compCode, Global.macId);
+        ReportFilter filter = new ReportFilter(Global.macId,Global.compCode, Global.deptId);
         filter.setFromDate(clDate);
         filter.setCurCode(getCurCode());
         filter.setListDepartment(getListDep());
