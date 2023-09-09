@@ -46,6 +46,7 @@ public class FilterObject {
     private boolean local;
     private String saleVouNo;
     private String tranOption;
+    private String orderStatus;
     
     public FilterObject(String compCode, Integer deptId) {
         this.compCode = compCode;
