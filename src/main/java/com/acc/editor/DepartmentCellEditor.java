@@ -86,7 +86,8 @@ public class DepartmentCellEditor extends AbstractCellEditor implements TableCel
             jtf.setText(value.toString());
             jtf.selectAll();
         }
-        completer = new DepartmentAutoCompleter(jtf, listDepartment, this, false, false);
+        completer = new DepartmentAutoCompleter(jtf, this, false, false);
+        completer.setListDepartment(listDepartment);
         return component;
     }
 

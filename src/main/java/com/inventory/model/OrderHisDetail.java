@@ -28,6 +28,8 @@ public class OrderHisDetail {
     private Integer deptId;
     @Column(name = "stock_code")
     private String stockCode;
+    @Column(name = "order_qty", nullable = false)
+    private Double orderQty;
     @Column(name = "qty", nullable = false)
     private Double qty;
     @Column(name = "unit")

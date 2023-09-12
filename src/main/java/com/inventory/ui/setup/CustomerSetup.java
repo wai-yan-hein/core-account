@@ -17,6 +17,7 @@ import com.common.Util1;
 import com.inventory.editor.RegionAutoCompleter;
 import com.inventory.editor.TraderGroupAutoCompleter;
 import com.inventory.model.General;
+import com.inventory.model.MessageType;
 import com.inventory.model.Region;
 import com.inventory.model.Trader;
 import com.inventory.model.TraderGroup;
@@ -294,20 +295,28 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         if (isValidEntry()) {
             progress.setIndeterminate(true);
             observer.selected("save", false);
-            inventoryRepo.saveTrader(customer).subscribe((t) -> {
+            inventoryRepo.saveTrader(customer).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("EDIT")) {
                     customerTabelModel.setCustomer(selectRow, customer);
                 } else {
                     customerTabelModel.addCustomer(customer);
                 }
                 clear();
-            }, (e) -> {
+                sendMessage(t.getTraderName());
+            }).doOnError((e) -> {
                 observer.selected("save", true);
                 progress.setIndeterminate(false);
                 JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+            }).subscribe();
 
         }
+    }
+
+    private void sendMessage(String mes) {
+        inventoryRepo.sendDownloadMessage(MessageType.TRADER, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     public void clear() {

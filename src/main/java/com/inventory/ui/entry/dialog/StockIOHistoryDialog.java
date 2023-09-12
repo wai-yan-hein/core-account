@@ -92,9 +92,10 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     }
 
     private void initCombo() {
-        userRepo.getAppUser().subscribe((t) -> {
-            appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
-        });
+        appUserAutoCompleter = new AppUserAutoCompleter(txtUser, null, true);
+        userRepo.getAppUser().doOnSuccess((t) -> {
+            appUserAutoCompleter.setListUser(t);
+        }).subscribe();
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true);
         userRepo.getDeparment(true).doOnSuccess((t) -> {
             departmentAutoCompleter.setListDepartment(t);

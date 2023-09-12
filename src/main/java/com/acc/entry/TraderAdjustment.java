@@ -224,11 +224,11 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
         monoDep = accountRepo.getDepartment();
         traderAutoCompleter = new TraderAAutoCompleter(txtPerson, accountRepo, null, true);
         traderAutoCompleter.setObserver(this);
-        monoDep.subscribe((t) -> {
-            departmentAutoCompleter = new DepartmentAutoCompleter(txtDepartment, t, null, true, true);
-            departmentAutoCompleter.setObserver(this);
-        });
-
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDepartment, null, true, true);
+        departmentAutoCompleter.setObserver(this);
+        monoDep.doOnSuccess((t) -> {
+            departmentAutoCompleter.setListDepartment(t);
+        }).subscribe();
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         currencyAutoCompleter.setObserver(this);
         monoCur.subscribe((t) -> {
@@ -468,7 +468,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
     }
 
     private List<String> getListDep() {
-        return departmentAutoCompleter == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
+        return departmentAutoCompleter.getDepartment() == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
     }
 
     private ReportFilter getOPFilter() {

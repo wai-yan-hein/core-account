@@ -30,7 +30,7 @@ import javax.swing.table.TableRowSorter;
  * @author Lenovo
  */
 public class AccountSettingEntry extends javax.swing.JPanel {
-    
+
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
     private AccSetting setting = new AccSetting();
@@ -42,20 +42,20 @@ public class AccountSettingEntry extends javax.swing.JPanel {
     private COA3AutoCompleter disCompleter;
     private COA3AutoCompleter taxCompleter;
     private COA3AutoCompleter balCompleter;
-    private DepartmentAutoCompleter deptCompleter;
-    
+    private DepartmentAutoCompleter departmentAutoCompleter;
+
     public AccountRepo getAccountRepo() {
         return accountRepo;
     }
-    
+
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
-    
+
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
     }
-    
+
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
@@ -67,12 +67,12 @@ public class AccountSettingEntry extends javax.swing.JPanel {
         initComponents();
         initFoucsAdapter();
     }
-    
+
     public void initMain() {
         initAccTable();
         initComobo();
     }
-    
+
     private void initFoucsAdapter() {
         txtSrc.addFocusListener(fa);
         txtCash.addFocusListener(fa);
@@ -90,20 +90,19 @@ public class AccountSettingEntry extends javax.swing.JPanel {
             }
         }
     };
-    
+
     private void initComobo() {
         sourceCompleter = new COA3AutoCompleter(txtSrc, accountRepo, null, false, 3);
         cashCompleter = new COA3AutoCompleter(txtCash, accountRepo, null, false, 3);
         disCompleter = new COA3AutoCompleter(txtDiscount, accountRepo, null, false, 3);
         taxCompleter = new COA3AutoCompleter(txtTax, accountRepo, null, false, 3);
         balCompleter = new COA3AutoCompleter(txtBal, accountRepo, null, false, 3);
-        accountRepo.getDepartment().subscribe((t) -> {
-            deptCompleter = new DepartmentAutoCompleter(txtDep, t, null, false, true);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true, true);
+        accountRepo.getDepartment().doOnSuccess((t) -> {
+            departmentAutoCompleter.setListDepartment(t);
+        }).subscribe();
     }
-    
+
     private void initAccTable() {
         swrf = new StartWithRowFilter(txtFilter);
         tblSetting.setModel(settingTableModel);
@@ -123,13 +122,13 @@ public class AccountSettingEntry extends javax.swing.JPanel {
         tblSetting.setRowHeight(Global.tblRowHeight);
         tblSetting.setDefaultRenderer(Object.class, new TableCellRender());
     }
-    
+
     public void searchAccSetting() {
         inventoryRepo.getAccSetting().subscribe((t) -> {
             settingTableModel.setListSetting(t);
         });
     }
-    
+
     private void setAccSetting(AccSetting cat) {
         setting = cat;
         txtSrc.requestFocus();
@@ -142,38 +141,26 @@ public class AccountSettingEntry extends javax.swing.JPanel {
         txtTax.setText(setting.getTaxAcc());
         txtBal.setText(setting.getBalanceAcc());
         txtDep.setText(setting.getDeptCode());
-        accountRepo.findCOA(cat.getSourceAcc()).subscribe((t) -> {
+        accountRepo.findCOA(cat.getSourceAcc()).doOnSuccess((t) -> {
             sourceCompleter.setCoa(t);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
-        accountRepo.findCOA(cat.getPayAcc()).subscribe((t) -> {
+        }).subscribe();
+        accountRepo.findCOA(cat.getPayAcc()).doOnSuccess((t) -> {
             cashCompleter.setCoa(t);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
-        accountRepo.findCOA(cat.getDiscountAcc()).subscribe((t) -> {
+        }).subscribe();
+        accountRepo.findCOA(cat.getDiscountAcc()).doOnSuccess((t) -> {
             disCompleter.setCoa(t);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
-        accountRepo.findCOA(cat.getTaxAcc()).subscribe((t) -> {
+        }).subscribe();
+        accountRepo.findCOA(cat.getTaxAcc()).doOnSuccess((t) -> {
             taxCompleter.setCoa(t);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
-        accountRepo.findCOA(cat.getBalanceAcc()).subscribe((t) -> {
+        }).subscribe();
+        accountRepo.findCOA(cat.getBalanceAcc()).doOnSuccess((t) -> {
             balCompleter.setCoa(t);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
-        accountRepo.findDepartment(cat.getDeptCode()).subscribe((t) -> {
-            deptCompleter.setDepartment(t);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
+        }).subscribe();
+        accountRepo.findDepartment(cat.getDeptCode()).doOnSuccess((t) -> {
+            departmentAutoCompleter.setDepartment(t);
+        }).subscribe();
     }
-    
+
     private void saveSetting() {
         if (isValidEntry()) {
             inventoryRepo.save(setting).subscribe((t) -> {
@@ -187,7 +174,7 @@ public class AccountSettingEntry extends javax.swing.JPanel {
             });
         }
     }
-    
+
     private void clearSetting() {
 //        txtType.setText(null);
 //        txtType.setEnabled(true);
@@ -198,14 +185,14 @@ public class AccountSettingEntry extends javax.swing.JPanel {
         disCompleter.setCoa(null);
         taxCompleter.setCoa(null);
         balCompleter.setCoa(null);
-        deptCompleter.setDepartment(null);
+        departmentAutoCompleter.setDepartment(null);
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.green);
         setting = new AccSetting();
         tblSetting.requestFocus();
 //        txtType.requestFocus();
     }
-    
+
     private boolean isValidEntry() {
         boolean status = true;
         if (txtSrc.getText().isEmpty()) {
@@ -248,7 +235,7 @@ public class AccountSettingEntry extends javax.swing.JPanel {
             setting.setDiscountAcc(disCompleter.getCOA().getKey().getCoaCode());
             setting.setTaxAcc(taxCompleter.getCOA().getKey().getCoaCode());
             setting.setBalanceAcc(balCompleter.getCOA().getKey().getCoaCode());
-            setting.setDeptCode(deptCompleter.getDepartment().getKey().getDeptCode());
+            setting.setDeptCode(departmentAutoCompleter.getDepartment().getKey().getDeptCode());
         }
         return status;
     }

@@ -38,20 +38,21 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public final class DepartmentAutoCompleter implements KeyListener {
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(DepartmentAutoCompleter.class);
     private JTable table = new JTable();
     private JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private DepartmentTableModel depTableModel;
+    private DepartmentTableModel depTableModel = new DepartmentTableModel();
     private DepartmentA department;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
@@ -62,6 +63,8 @@ public final class DepartmentAutoCompleter implements KeyListener {
     private List<String> listOption = new ArrayList<>();
     private OptionDialog optionDialog;
     private List<DepartmentA> listDepartment;
+    private SelectionObserver observer;
+    private boolean filter;
 
     public List<String> getListOption() {
         return listOption;
@@ -71,18 +74,8 @@ public final class DepartmentAutoCompleter implements KeyListener {
         this.listOption = listOption;
     }
 
-    public boolean isCustom() {
-        return custom;
-    }
-
     public void setCustom(boolean custom) {
         this.custom = custom;
-    }
-
-    private SelectionObserver observer;
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -96,29 +89,34 @@ public final class DepartmentAutoCompleter implements KeyListener {
         });
     }
 
-    public DepartmentAutoCompleter() {
-    }
-
-    public DepartmentAutoCompleter(JTextComponent comp, List<DepartmentA> list,
-            AbstractCellEditor editor, boolean filter, boolean custom) {
-        this.textComp = comp;
-        this.editor = editor;
-        this.custom = custom;
-        this.listDepartment = list;
-        textComp.putClientProperty(AUTOCOMPLETER, this);
-        textComp.setFont(Global.textFont);
-        initOption();
+    public void setListDepartment(List<DepartmentA> list) {
         if (filter) {
-            list = new ArrayList<>(list);
             DepartmentA dep = new DepartmentA("-", "All");
             list.add(0, dep);
             setDepartment(dep);
         }
         if (custom) {
-            list = new ArrayList<>(list);
             list.add(1, new DepartmentA("C", "Custom"));
         }
-        depTableModel = new DepartmentTableModel(list);
+        depTableModel.setListDep(list);
+        if (!list.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
+        }
+        this.listDepartment = list;
+        initOption();
+    }
+
+    public DepartmentAutoCompleter() {
+    }
+
+    public DepartmentAutoCompleter(JTextComponent comp,
+            AbstractCellEditor editor, boolean filter, boolean custom) {
+        this.textComp = comp;
+        this.editor = editor;
+        this.custom = custom;
+        this.filter = filter;
+        textComp.putClientProperty(AUTOCOMPLETER, this);
+        textComp.setFont(Global.textFont);
         depTableModel.setTable(table);
         table.setModel(depTableModel);
         table.getTableHeader().setFont(Global.textFont);
@@ -195,10 +193,6 @@ public final class DepartmentAutoCompleter implements KeyListener {
         });
 
         table.setRequestFocusEnabled(false);
-
-        if (!list.isEmpty()) {
-            table.setRowSelectionInterval(0, 0);
-        }
     }
 
     public void mouseSelect() {

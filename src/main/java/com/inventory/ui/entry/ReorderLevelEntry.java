@@ -18,7 +18,6 @@ import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.StockTypeAutoCompleter;
-import com.inventory.model.ReorderLevel;
 import com.inventory.model.StockUnit;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.ReorderTableModel;
@@ -42,7 +41,6 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
@@ -53,8 +51,6 @@ import reactor.core.publisher.Mono;
 public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionObserver, PanelControl {
 
     private final ButtonGroup g = new ButtonGroup();
-    @Autowired
-    private WebClient inventoryApi;
     @Autowired
     private InventoryRepo inventoryRepo;
     private final ReorderTableModel reorderTableModel = new ReorderTableModel();
@@ -226,23 +222,23 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
     };
 
     private String getBrandCode() {
-        return brandAutoCompleter == null ? "-" : brandAutoCompleter.getBrand().getKey().getBrandCode();
+        return brandAutoCompleter.getBrand() == null ? "-" : brandAutoCompleter.getBrand().getKey().getBrandCode();
     }
 
     private String getCatCode() {
-        return categoryAutoCompleter == null ? "-" : categoryAutoCompleter.getCategory().getKey().getCatCode();
+        return categoryAutoCompleter.getCategory() == null ? "-" : categoryAutoCompleter.getCategory().getKey().getCatCode();
     }
 
     private String getTypeCode() {
-        return typeAutoCompleter == null ? "-" : typeAutoCompleter.getStockType().getKey().getStockTypeCode();
+        return typeAutoCompleter.getStockType() == null ? "-" : typeAutoCompleter.getStockType().getKey().getStockTypeCode();
     }
 
     private String getStockCode() {
-        return stockAutoCompleter == null ? "-" : stockAutoCompleter.getStock().getKey().getStockCode();
+        return stockAutoCompleter.getStock() == null ? "-" : stockAutoCompleter.getStock().getKey().getStockCode();
     }
 
     private String getLocCode() {
-        return locationAutoCompleter == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
+        return locationAutoCompleter.getLocation() == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
     }
 
     private void getReorderLevel() {
@@ -257,21 +253,14 @@ public class ReorderLevelEntry extends javax.swing.JPanel implements SelectionOb
         filter.setCalPur(Util1.getBoolean(ProUtil.getProperty("disable.calculate.purchase.stock")));
         filter.setCalRI(Util1.getBoolean(ProUtil.getProperty("disable.calculate.returin.stock")));
         filter.setCalRO(Util1.getBoolean(ProUtil.getProperty("disable.calculate.retunout.stock")));
-        inventoryApi
-                .post()
-                .uri("/report/get-reorder-level")
-                .body(Mono.just(filter), ReportFilter.class)
-                .retrieve()
-                .bodyToFlux(ReorderLevel.class)
-                .collectList()
-                .subscribe((t) -> {
-                    reorderTableModel.setListPattern(t);
-                    calQty();
-                    progress.setIndeterminate(false);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
-                    progress.setIndeterminate(false);
-                });
+        inventoryRepo.getReorderLevel(filter).subscribe((t) -> {
+            reorderTableModel.setListPattern(t);
+            calQty();
+            progress.setIndeterminate(false);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
+            progress.setIndeterminate(false);
+        });
     }
 
     private void calQty() {

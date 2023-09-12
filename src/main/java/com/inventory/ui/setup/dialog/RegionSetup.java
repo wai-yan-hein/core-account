@@ -9,6 +9,7 @@ import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.inventory.model.MessageType;
 import com.inventory.model.Region;
 import com.inventory.model.RegionKey;
 import com.repo.InventoryRepo;
@@ -130,6 +131,7 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
                     listRegion.add(t);
                 }
                 clear();
+                sendMessage(t.getRegionName());
             }, (e) -> {
                 progress.setIndeterminate(false);
                 btnSave.setEnabled(true);
@@ -137,6 +139,13 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
             });
 
         }
+    }
+
+    private void sendMessage(String mes) {
+        inventoryRepo.sendDownloadMessage(MessageType.REGION, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     private void clear() {

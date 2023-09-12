@@ -174,12 +174,11 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
         despAutoCompleter.setObserver(this);
         refAutoCompleter = new RefAutoCompleter(txtReference, accountRepo, null, true);
         refAutoCompleter.setObserver(this);
-        accountRepo.getDepartment().subscribe((t) -> {
-            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true, true);
-            departmentAutoCompleter.setObserver(this);
-            departmentAutoCompleter.setListOption(department);
-
-        });
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true, true);
+        departmentAutoCompleter.setObserver(this);
+        accountRepo.getDepartment().doOnSuccess((t) -> {
+            departmentAutoCompleter.setListDepartment(t);
+        }).subscribe();
         currencyAAutoCompleter = new CurrencyAutoCompleter(txtCur, null);
         currencyAAutoCompleter.setObserver(this);
         userRepo.getCurrency().subscribe((t) -> {
@@ -204,7 +203,7 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
     }
 
     private List<String> getListDep() {
-        return departmentAutoCompleter == null ? null : department;
+        return departmentAutoCompleter.getDepartment() == null ? null : department;
     }
 
     public void searchTriBalDetail() {

@@ -76,7 +76,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     @Autowired
     private UserRepo userRepo;
 
-    private DepartmentAutoCompleter departmenttAutoCompleter;
+    private DepartmentAutoCompleter departmentAutoCompleter;
     private CurrencyAutoCompleter currencyAutoCompleter;
     private COA3AutoCompleter coaAutoCompleter;
     private TraderAAutoCompleter tradeAutoCompleter;
@@ -159,10 +159,11 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
 
     // initialize data for combo box
     private void initComboBox() {
-        accountRepo.getDepartment().subscribe((t) -> {
-            departmenttAutoCompleter = new DepartmentAutoCompleter(txtDept, t, null, true, true);
-            departmenttAutoCompleter.setObserver(this);
-        });
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDept, null, true, true);
+        departmentAutoCompleter.setObserver(this);
+        accountRepo.getDepartment().doOnSuccess((t) -> {
+            departmentAutoCompleter.setListDepartment(t);
+        }).subscribe();
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         currencyAutoCompleter.setObserver(this);
         userRepo.getCurrency().subscribe((t) -> {
@@ -260,7 +261,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private String getDepCode() {
-        return departmenttAutoCompleter == null ? "-" : departmenttAutoCompleter.getDepartment().getKey().getDeptCode();
+        return departmentAutoCompleter.getDepartment() == null ? "-" : departmentAutoCompleter.getDepartment().getKey().getDeptCode();
     }
 
     // search openig balance with filtered data for table
@@ -326,7 +327,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setReportName("OpeningTri");
         filter.setOpeningDate(Util1.toDateStr(txtDate.getDate(), "yyyy-MM-dd"));
-        filter.setDeptCode(departmenttAutoCompleter.getDepartment().getKey().getDeptCode());
+        filter.setDeptCode(departmentAutoCompleter.getDepartment().getKey().getDeptCode());
         filter.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
         accountRepo.getReport(filter).subscribe((t) -> {
             try {

@@ -13,14 +13,12 @@ import com.common.TableCellRender;
 import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.editor.AppUserAutoCompleter;
-import com.inventory.editor.BatchAutoCompeter;
 import com.user.editor.DepartmentAutoCompleter;
 import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.SaleManAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.user.model.AppUser;
-import com.inventory.model.GRN;
 import com.inventory.model.OrderStatus;
 import com.inventory.model.SaleMan;
 import com.inventory.model.Stock;
@@ -30,7 +28,6 @@ import com.inventory.ui.common.OrderStatusComboBoxModel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.common.OrderVouSearchTableModel;
 import com.user.editor.CurrencyAutoCompleter;
-import com.user.editor.ProjectAutoCompleter;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
@@ -63,27 +60,25 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
     private SaleManAutoCompleter saleManAutoCompleter;
     private DepartmentAutoCompleter departmentAutoCompleter;
     private CurrencyAutoCompleter currAutoCompleter;
-    private BatchAutoCompeter batchAutoCompeter;
-    private ProjectAutoCompleter projectAutoCompleter;
     private SelectionObserver observer;
     private UserRepo userRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
     private OrderStatusComboBoxModel orderStatusComboBoxModel = new OrderStatusComboBoxModel();
-    
+
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
-    
+
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-    
+
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-    
+
     public OrderHistoryDialog(JFrame frame) {
         super(frame, true);
         initComponents();
@@ -91,12 +86,12 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         initFocous();
         initFormatFactory();
     }
-    
+
     private void initFormatFactory() {
         txtTotalAmt.setFormatterFactory(Util1.getDecimalFormat());
         txtPaid.setFormatterFactory(Util1.getDecimalFormat());
     }
-    
+
     public void initMain() {
         initCombo();
         initTableVoucher();
@@ -106,23 +101,24 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         @Override
         public void focusLost(FocusEvent e) {
         }
-        
+
         @Override
         public void focusGained(FocusEvent e) {
             JTextField jtf = (JTextField) e.getSource();
             jtf.selectAll();
         }
-        
+
     };
-    
+
     private void initFocous() {
         txtStock.addFocusListener(fa);
     }
-    
+
     private void initCombo() {
-        userRepo.getAppUser().subscribe((t) -> {
-            appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
-        });
+        appUserAutoCompleter = new AppUserAutoCompleter(txtUser, null, true);
+        userRepo.getAppUser().doOnSuccess((t) -> {
+            appUserAutoCompleter.setListUser(t);
+        }).subscribe();
         saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, null, true);
         inventoryRepo.getSaleMan().subscribe((t) -> {
             saleManAutoCompleter.setListSaleMan(t);
@@ -142,9 +138,9 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         userRepo.getCurrency().subscribe((t) -> {
             currAutoCompleter.setListCurrency(t);
         });
-        userRepo.getDefaultCurrency().subscribe((c) -> {
+        userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currAutoCompleter.setCurrency(c);
-        });
+        }).subscribe();
         inventoryRepo.getOrderStatus().subscribe((o) -> {
             OrderStatus ord = new OrderStatus("-", "All");
             o.add(0, ord);
@@ -154,10 +150,8 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         });
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "CUS");
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
-        batchAutoCompeter = new BatchAutoCompeter(txtBatchNo, inventoryRepo, null, true);
-        projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
     }
-    
+
     private void initTableVoucher() {
         tblVoucher.setModel(orderVouTableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
@@ -176,32 +170,32 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         tblFilter = new StartWithRowFilter(txtFilter);
         tblVoucher.setRowSorter(sorter);
     }
-    
+
     private void setTodayDate() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
     }
-    
+
     private String getUserCode() {
         return appUserAutoCompleter.getAppUser() == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
     }
-    
+
     private String getSaleMancode() {
         return saleManAutoCompleter.getSaleMan() == null ? "-" : saleManAutoCompleter.getSaleMan().getKey().getSaleManCode();
     }
-    
+
     private String getLocCode() {
         return locationAutoCompleter.getLocation() == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
     }
-    
+
     private Integer getDepId() {
         return departmentAutoCompleter.getDepartment() == null ? 0 : departmentAutoCompleter.getDepartment().getKey().getDeptId();
     }
-    
+
     private String getCurCode() {
         return currAutoCompleter.getCurrency() == null ? Global.currency : currAutoCompleter.getCurrency().getCurCode();
     }
-    
+
     public void search() {
         progress.setIndeterminate(true);
         FilterObject filter = new FilterObject(Global.compCode, Global.deptId);
@@ -217,12 +211,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         filter.setStockCode(stockAutoCompleter.getStock().getKey().getStockCode());
         filter.setReference(txtRef.getText());
         filter.setDeleted(chkDel.isSelected());
-        String batchNo = batchAutoCompeter.getBatch().getBatchNo();
-        filter.setBatchNo(batchNo.equals("All") ? "-" : batchNo);
-        String projectNo = projectAutoCompleter.getProject().getKey().getProjectNo();
-        filter.setProjectNo(projectNo.equals("All") ? "-" : projectNo);
         filter.setCurCode(getCurCode());
-        filter.setNullBatch(chkBatch.isSelected());
         filter.setLocal(chkLocal.isSelected());
         if (orderStatusComboBoxModel.getSelectedItem() instanceof OrderStatus ord) {
             filter.setOrderStatus(ord.getKey().getCode());
@@ -240,9 +229,9 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
             progress.setIndeterminate(false);
             setVisible(true);
         });
-        
+
     }
-    
+
     private void calAmount() {
         List<VOrder> list = orderVouTableModel.getListOrderHis();
 //        txtPaid.setValue(list.stream().mapToDouble(VOrder::getPaid).sum());
@@ -250,7 +239,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         txtRecord.setValue(list.size());
         tblVoucher.requestFocus();
     }
-    
+
     private void select() {
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
         if (row >= 0) {
@@ -263,7 +252,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
                     "No Voucher Selected", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     private void initKeyListener() {
         txtFromDate.getDateEditor().getUiComponent().setName("txtFromDate");
         txtFromDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -274,7 +263,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         txtUser.addKeyListener(this);
         txtCurrency.addKeyListener(this);
     }
-    
+
     private void clearFilter() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
@@ -285,7 +274,6 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         stockAutoCompleter.setStock(new Stock("-", "All"));
         appUserAutoCompleter.setAppUser(new AppUser("-", "All"));
         saleManAutoCompleter.setSaleMan(new SaleMan("-", "All"));
-        batchAutoCompeter.setBatch(new GRN("All"));
         currAutoCompleter.setCurrency(null);
         cboOrderStatus.setSelectedItem(0);
     }
@@ -311,7 +299,6 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         txtVouNo = new javax.swing.JTextField();
         txtUser = new javax.swing.JTextField();
         jSeparator2 = new javax.swing.JSeparator();
-        jSeparator3 = new javax.swing.JSeparator();
         jLabel5 = new javax.swing.JLabel();
         txtRemark = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
@@ -326,11 +313,6 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         chkDel = new javax.swing.JCheckBox();
         jLabel12 = new javax.swing.JLabel();
         txtDep = new javax.swing.JTextField();
-        chkBatch = new javax.swing.JCheckBox();
-        jLabel13 = new javax.swing.JLabel();
-        txtBatchNo = new javax.swing.JTextField();
-        jLabel14 = new javax.swing.JLabel();
-        txtProjectNo = new javax.swing.JTextField();
         jLabel16 = new javax.swing.JLabel();
         txtCurrency = new javax.swing.JTextField();
         chkLocal = new javax.swing.JCheckBox();
@@ -481,36 +463,6 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
             }
         });
 
-        chkBatch.setFont(Global.lableFont);
-        chkBatch.setText("No Batch No");
-        chkBatch.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkBatchActionPerformed(evt);
-            }
-        });
-
-        jLabel13.setFont(Global.lableFont);
-        jLabel13.setText("Batch No");
-
-        txtBatchNo.setFont(Global.textFont);
-        txtBatchNo.setName("txtVouNo"); // NOI18N
-        txtBatchNo.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                txtBatchNoFocusGained(evt);
-            }
-        });
-
-        jLabel14.setFont(Global.lableFont);
-        jLabel14.setText("Project No");
-
-        txtProjectNo.setFont(Global.textFont);
-        txtProjectNo.setName("txtVouNo"); // NOI18N
-        txtProjectNo.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                txtProjectNoFocusGained(evt);
-            }
-        });
-
         jLabel16.setFont(Global.lableFont);
         jLabel16.setText("Currency");
 
@@ -546,29 +498,25 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel10, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, 78, Short.MAX_VALUE)
+                    .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel10, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, 78, Short.MAX_VALUE)
-                            .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel17, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGap(6, 6, 6)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 4, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jSeparator3))
+                            .addComponent(jLabel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel17, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(6, 6, 6))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 75, Short.MAX_VALUE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 4, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jButton1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -580,12 +528,9 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
                     .addComponent(txtRef)
                     .addComponent(txtLocation)
                     .addComponent(txtDep)
-                    .addComponent(txtBatchNo)
                     .addComponent(txtToDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(txtFromDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkBatch, javax.swing.GroupLayout.DEFAULT_SIZE, 131, Short.MAX_VALUE)
                     .addComponent(chkDel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(txtProjectNo)
                     .addComponent(txtCurrency, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(txtVouNo)
                     .addComponent(chkLocal, javax.swing.GroupLayout.DEFAULT_SIZE, 131, Short.MAX_VALUE)
@@ -609,14 +554,6 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel4)
                             .addComponent(txtVouNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel13)
-                            .addComponent(txtBatchNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel14)
-                            .addComponent(txtProjectNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel5)
@@ -653,28 +590,23 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel16)
                             .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jLabel17)
-                                .addGap(12, 12, 12))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(cboOrderStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(6, 6, 6))))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jSeparator2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
-                .addComponent(chkDel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkBatch)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkLocal)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton1)
-                    .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGap(64, 64, 64))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(6, 6, 6)
+                                .addComponent(cboOrderStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addComponent(chkDel)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(chkLocal))
+                        .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 410, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 139, Short.MAX_VALUE)
+                .addComponent(jButton1)
+                .addContainerGap())
         );
 
         jPanel1Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel11, jLabel3, txtFromDate, txtToDate});
@@ -823,7 +755,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
                             .addComponent(txtFilter, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel1))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 524, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
@@ -906,18 +838,6 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
         // TODO add your handling code here:
     }//GEN-LAST:event_txtDepFocusGained
 
-    private void chkBatchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkBatchActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_chkBatchActionPerformed
-
-    private void txtBatchNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtBatchNoFocusGained
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtBatchNoFocusGained
-
-    private void txtProjectNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtProjectNoFocusGained
-        txtProjectNo.selectAll();        // TODO add your handling code here:
-    }//GEN-LAST:event_txtProjectNoFocusGained
-
     private void txtCurrencyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCurrencyActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtCurrencyActionPerformed
@@ -938,7 +858,6 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnSelect;
     private javax.swing.JComboBox<OrderStatus> cboOrderStatus;
-    private javax.swing.JCheckBox chkBatch;
     private javax.swing.JCheckBox chkDel;
     private javax.swing.JCheckBox chkLocal;
     private javax.swing.JButton jButton1;
@@ -946,8 +865,6 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
-    private javax.swing.JLabel jLabel13;
-    private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel2;
@@ -962,13 +879,11 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator2;
-    private javax.swing.JSeparator jSeparator3;
     private javax.swing.JLabel lblTtlAmount;
     private javax.swing.JLabel lblTtlAmount1;
     private javax.swing.JLabel lblTtlRecord;
     private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblVoucher;
-    private javax.swing.JTextField txtBatchNo;
     private javax.swing.JTextField txtCurrency;
     private javax.swing.JTextField txtCus;
     private javax.swing.JTextField txtDep;
@@ -976,7 +891,6 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
     private com.toedter.calendar.JDateChooser txtFromDate;
     private javax.swing.JTextField txtLocation;
     private javax.swing.JFormattedTextField txtPaid;
-    private javax.swing.JTextField txtProjectNo;
     private javax.swing.JFormattedTextField txtRecord;
     private javax.swing.JTextField txtRef;
     private javax.swing.JTextField txtRemark;
@@ -991,13 +905,13 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
     @Override
     public void keyTyped(KeyEvent e) {
     }
-    
+
     @Override
     public void keyPressed(KeyEvent e) {
     }
-    
+
     @Override
     public void keyReleased(KeyEvent e) {
-        
+
     }
 }

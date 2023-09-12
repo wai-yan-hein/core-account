@@ -100,7 +100,7 @@ public class AccountRepo {
                 .collectList();
     }
 
-    public Flux<TraderA> getTrader() {
+    public Mono<List<TraderA>> getTrader() {
         if (localDatabase) {
             return h2Repo.getTraderAccount();
         }
@@ -109,7 +109,8 @@ public class AccountRepo {
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
-                .bodyToFlux(TraderA.class);
+                .bodyToFlux(TraderA.class)
+                .collectList();
     }
 
     public Mono<List<TraderA>> getTrader(String text) {

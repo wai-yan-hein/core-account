@@ -10,6 +10,7 @@ import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.inventory.model.Category;
 import com.inventory.model.CategoryKey;
+import com.inventory.model.MessageType;
 import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.CategoryTableModel;
 import java.awt.Color;
@@ -119,6 +120,7 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
                     listCategory.add(t);
                 }
                 clear();
+                sendMessage(t.getCatName());
             }, (e) -> {
                 progress.setIndeterminate(false);
                 btnSave.setEnabled(true);
@@ -126,6 +128,13 @@ public class CategorySetupDialog extends javax.swing.JDialog implements KeyListe
             });
 
         }
+    }
+
+    private void sendMessage(String mes) {
+        inventoryRepo.sendDownloadMessage(MessageType.CATEGORY, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     private void clear() {

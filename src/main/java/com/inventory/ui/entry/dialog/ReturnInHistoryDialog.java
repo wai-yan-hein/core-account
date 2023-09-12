@@ -122,9 +122,10 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         inventoryRepo.getLocation().subscribe((t) -> {
             locationAutoCompleter.setListLocation(t);
         });
-        userRepo.getAppUser().subscribe((t) -> {
-            appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
-        });
+        appUserAutoCompleter = new AppUserAutoCompleter(txtUser, null, true);
+        userRepo.getAppUser().doOnSuccess((t) -> {
+            appUserAutoCompleter.setListUser(t);
+        }).subscribe();
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true);
         userRepo.getDeparment(true).doOnSuccess((t) -> {
             departmentAutoCompleter.setListDepartment(t);

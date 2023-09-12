@@ -16,7 +16,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
@@ -50,21 +49,28 @@ public final class AppUserAutoCompleter implements KeyListener {
     private final TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
+    private boolean filter;
 
-    public AppUserAutoCompleter(JTextComponent comp, List<AppUser> list,
-            AbstractCellEditor editor, boolean filter) {
-        this.textComp = comp;
-        this.editor = editor;
-        textComp.putClientProperty(AUTOCOMPLETER, this);
-        textComp.setFont(Global.textFont);
-        textComp.addKeyListener(this);
+    public void setListUser(List<AppUser> list) {
         if (filter) {
-            list = new ArrayList<>(list);
             AppUser user = new AppUser("-", "All");
-            list.add(0,user);
+            list.add(0, user);
             setAppUser(user);
         }
         userTableModel.setListUser(list);
+        if (!list.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
+        }
+    }
+
+    public AppUserAutoCompleter(JTextComponent comp,
+            AbstractCellEditor editor, boolean filter) {
+        this.textComp = comp;
+        this.editor = editor;
+        this.filter = filter;
+        textComp.putClientProperty(AUTOCOMPLETER, this);
+        textComp.setFont(Global.textFont);
+        textComp.addKeyListener(this);
         table.setModel(userTableModel);
         table.setSize(50, 50);
         table.getTableHeader().setFont(Global.tblHeaderFont);
@@ -135,9 +141,6 @@ public final class AppUserAutoCompleter implements KeyListener {
 
         table.setRequestFocusEnabled(false);
 
-        if (!list.isEmpty()) {
-            table.setRowSelectionInterval(0, 0);
-        }
     }
 
     public void mouseSelect() {

@@ -11,32 +11,22 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class DepartmentTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(DepartmentTableModel.class);
     private List<DepartmentA> listDep = new ArrayList<>();
     private final String[] columnNames = {"Code", "Name"};
     private JTable table;
 
-    public JTable getTable() {
-        return table;
-    }
-
     public void setTable(JTable table) {
         this.table = table;
     }
-
-    public DepartmentTableModel(List<DepartmentA> listDep) {
-        this.listDep = listDep;
-    }
-
     public DepartmentTableModel() {
     }
 

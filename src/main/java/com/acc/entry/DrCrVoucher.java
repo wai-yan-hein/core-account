@@ -156,11 +156,11 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     private void initCombo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setObserver(this);
-        Mono<List<DepartmentA>> monoDep = accountRepo.getDepartment();
-        monoDep.subscribe((t) -> {
-            departmentAutoCompleter = new DepartmentAutoCompleter(txtDept, t, null, true, true);
-            departmentAutoCompleter.setObserver(this);
-        });
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDept, null, true, true);
+        departmentAutoCompleter.setObserver(this);
+        accountRepo.getDepartment().doOnSuccess((t) -> {
+            departmentAutoCompleter.setListDepartment(t);
+        }).subscribe();
         despAutoCompleter = new DespAutoCompleter(txtDesp, accountRepo, null, true);
         despAutoCompleter.setObserver(this);
         refAutoCompleter = new RefAutoCompleter(txtRef, accountRepo, null, true);
@@ -183,7 +183,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
     }
 
     private List<String> getListDep() {
-        return departmentAutoCompleter == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
+        return departmentAutoCompleter.getDepartment() == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
     }
 
     private void search() {

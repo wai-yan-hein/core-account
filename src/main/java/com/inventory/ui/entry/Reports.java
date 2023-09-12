@@ -6,13 +6,11 @@
 package com.inventory.ui.entry;
 
 import com.acc.common.DateAutoCompleter;
-import com.common.FilterObject;
 import com.common.FontCellRender;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.ReportFilter;
-import com.common.ReturnObject;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
@@ -61,8 +59,6 @@ import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.swing.JRViewer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -73,8 +69,6 @@ import reactor.core.publisher.Mono;
 public class Reports extends javax.swing.JPanel implements PanelControl, SelectionObserver {
 
     private final ReportTableModel tableModel = new ReportTableModel("Inventory Report");
-    @Autowired
-    private WebClient inventoryApi;
     @Autowired
     private InventoryRepo inventoryRepo;
     @Autowired
@@ -328,48 +322,43 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
 
     private void printReport(String reportUrl, String reportName, Map<String, Object> param) {
         filter.setReportName(reportName);
-        inventoryApi.post()
-                .uri("/report/get-report")
-                .body(Mono.just(filter), FilterObject.class)
-                .retrieve()
-                .bodyToMono(ReturnObject.class)
-                .doOnSuccess((t) -> {
-                    try {
-                        observer.selected("save", true);
-                        if (t != null) {
-                            String filePath = String.format("%s%s%s", Global.reportPath, File.separator, reportUrl.concat(".jasper"));
-                            if (t.getFile().length > 0) {
-                                JasperReportsContext jc = DefaultJasperReportsContext.getInstance();
-                                jc.setProperty("net.sf.jasperreports.default.font.name", Global.fontName.concat(".ttf"));
-                                jc.setProperty("net.sf.jasperreports.default.pdf.font.name", Global.fontName.concat(".ttf"));
-                                jc.setProperty("net.sf.jasperreports.default.pdf.encoding", "Identity-H");
-                                jc.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
-                                jc.setProperty("net.sf.jasperreports.viewer.zoom", "1");
-                                jc.setProperty("net.sf.jasperreports.export.xlsx.detect.cell.type", "true");
-                                jc.setProperty("net.sf.jasperreports.export.xlsx.white.page.background", "false");
-                                jc.setProperty("net.sf.jasperreports.export.xlsx.auto.fit.page.width", "true");
-                                jc.setProperty("net.sf.jasperreports.export.xlsx.ignore.graphics", "false");
-                                InputStream input = new ByteArrayInputStream(t.getFile());
-                                JsonDataSource ds = new JsonDataSource(input);
-                                JasperPrint js = JasperFillManager.fillReport(filePath, param, ds);
-                                JRViewer viwer = new JRViewer(js);
-                                JFrame frame = new JFrame("Core Value Report");
-                                frame.setIconImage(Global.parentForm.getIconImage());
-                                frame.getContentPane().add(viwer);
-                                frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-                                frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                                frame.setVisible(true);
-                            } else {
-                                JOptionPane.showMessageDialog(this, "Report Does Not Exists.");
-                            }
-                        }
-                        progress.setIndeterminate(false);
-                    } catch (JRException ex) {
-                        log.error("printVoucher : " + ex.getMessage());
-                        progress.setIndeterminate(false);
-                        JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
+        inventoryRepo.getReport(filter).doOnSuccess((t) -> {
+            try {
+                observer.selected("save", true);
+                if (t != null) {
+                    String filePath = String.format("%s%s%s", Global.reportPath, File.separator, reportUrl.concat(".jasper"));
+                    if (t.getFile().length > 0) {
+                        JasperReportsContext jc = DefaultJasperReportsContext.getInstance();
+                        jc.setProperty("net.sf.jasperreports.default.font.name", Global.fontName.concat(".ttf"));
+                        jc.setProperty("net.sf.jasperreports.default.pdf.font.name", Global.fontName.concat(".ttf"));
+                        jc.setProperty("net.sf.jasperreports.default.pdf.encoding", "Identity-H");
+                        jc.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
+                        jc.setProperty("net.sf.jasperreports.viewer.zoom", "1");
+                        jc.setProperty("net.sf.jasperreports.export.xlsx.detect.cell.type", "true");
+                        jc.setProperty("net.sf.jasperreports.export.xlsx.white.page.background", "false");
+                        jc.setProperty("net.sf.jasperreports.export.xlsx.auto.fit.page.width", "true");
+                        jc.setProperty("net.sf.jasperreports.export.xlsx.ignore.graphics", "false");
+                        InputStream input = new ByteArrayInputStream(t.getFile());
+                        JsonDataSource ds = new JsonDataSource(input);
+                        JasperPrint js = JasperFillManager.fillReport(filePath, param, ds);
+                        JRViewer viwer = new JRViewer(js);
+                        JFrame frame = new JFrame("Core Value Report");
+                        frame.setIconImage(Global.parentForm.getIconImage());
+                        frame.getContentPane().add(viwer);
+                        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                        frame.setVisible(true);
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Report Does Not Exists.");
                     }
-                }).doOnError((e) -> {
+                }
+                progress.setIndeterminate(false);
+            } catch (JRException ex) {
+                log.error("printVoucher : " + ex.getMessage());
+                progress.setIndeterminate(false);
+                JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
+            }
+        }).doOnError((e) -> {
             JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
             progress.setIndeterminate(false);
         }).subscribe();

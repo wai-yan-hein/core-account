@@ -94,7 +94,7 @@ public class OrderVouSearchTableModel extends AbstractTableModel {
                     }
                     case 6 -> {
                         //paid
-                        return his.getOrderStatus();
+                        return his.getOrderStatusName();
                     }
                     case 7 -> {
                         return his.getVouTotal();

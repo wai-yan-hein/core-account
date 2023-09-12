@@ -145,10 +145,11 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         dateAutoCompleter.setObserver(this);
         traderAutoCompleter = new TraderAAutoCompleter(txtTrader, accountRepo, null, true);
         traderAutoCompleter.setObserver(this);
-        accountRepo.getDepartment().subscribe((t) -> {
-            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true, true);
-            departmentAutoCompleter.setObserver(this);
-        });
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true, true);
+        departmentAutoCompleter.setObserver(this);
+        accountRepo.getDepartment().doOnSuccess((t) -> {
+            departmentAutoCompleter.setListDepartment(t);
+        }).subscribe();
         cOA3AutoCompleter = new COA3AutoCompleter(txtCOA, accountRepo, null, true, 3);
         cOA3AutoCompleter.setObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
@@ -156,7 +157,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
     }
 
     private List<String> getDepartment() {
-        return departmentAutoCompleter == null ? null : departmentAutoCompleter.getListOption();
+        return departmentAutoCompleter.getDepartment() == null ? null : departmentAutoCompleter.getListOption();
     }
 
     private void report() {
