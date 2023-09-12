@@ -19,7 +19,7 @@ import javax.swing.ListSelectionModel;
  *
  * @author Lenovo
  */
-public class GRNDetailDialog extends javax.swing.JDialog {
+public class OrderDetailDialog extends javax.swing.JDialog {
 
     private final GRNTableModel grnTableModel = new GRNTableModel();
     private InventoryRepo inventoryRepo;
@@ -33,7 +33,7 @@ public class GRNDetailDialog extends javax.swing.JDialog {
      *
      * @param frame
      */
-    public GRNDetailDialog(JFrame frame) {
+    public OrderDetailDialog(JFrame frame) {
         super(frame, true);
         initComponents();
     }
