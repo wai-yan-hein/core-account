@@ -15,6 +15,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MenuTemplateKey {
 
-    private Integer menuId;
+    private String menuId;
     private Integer busId;
 }

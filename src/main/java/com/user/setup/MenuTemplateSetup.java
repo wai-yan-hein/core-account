@@ -296,7 +296,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
     }
     
     private void saveMenu() {
-        Integer parentId = 0;
+        String parentId = "0";
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectedNode.getParent();
         if (parentNode.getUserObject() instanceof MenuTemplate tmp) {
             if (!tmp.getMenuName().equals(rootName)) {
