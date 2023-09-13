@@ -10,6 +10,7 @@ import lombok.Data;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -55,4 +56,6 @@ public class PaymentHis {
     private List<PaymentHisDetailKey> listDelete;
     @Transient
     private String traderName;
+    @Transient
+    private ZonedDateTime vouDateTime;
 }

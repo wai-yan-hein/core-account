@@ -7,7 +7,7 @@ package com.acc.dialog;
 
 import com.repo.AccountRepo;
 import com.acc.common.CrAmtTableModel;
-import com.acc.common.DateAutoCompleter;
+import com.acc.editor.DateAutoCompleter;
 import com.acc.common.DrAmtTableModel;
 import com.user.editor.CurrencyAutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;

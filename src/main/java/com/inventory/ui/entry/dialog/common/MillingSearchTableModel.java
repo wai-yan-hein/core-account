@@ -6,6 +6,7 @@
 package com.inventory.ui.entry.dialog.common;
 
 import com.common.Global;
+import com.common.Util1;
 import com.inventory.model.MillingHis;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,15 +23,6 @@ public class MillingSearchTableModel extends AbstractTableModel {
 
     private List<MillingHis> listDetail = new ArrayList();
     private final String[] columnNames = {"Date", "Vou No", "Trader", "Remark", "Created By", "Reference", "Process Type"};
-    private JTable parent;
-
-    public JTable getParent() {
-        return parent;
-    }
-
-    public void setParent(JTable parent) {
-        this.parent = parent;
-    }
 
     @Override
     public String getColumnName(int column) {
@@ -54,11 +46,6 @@ public class MillingSearchTableModel extends AbstractTableModel {
 
     @Override
     public Class getColumnClass(int column) {
-//        switch (column) {
-//            case 4, 5, 6, 7, 8, 9, 10 -> {
-//                return Float.class;
-//            }
-//        }
         return String.class;
     }
 
@@ -70,7 +57,7 @@ public class MillingSearchTableModel extends AbstractTableModel {
                 switch (column) {
                     case 0 -> {
                         //date
-                        return his.getVouDateStr();
+                        return Util1.convertToLocalStorage(his.getVouDateTime());
                     }
                     case 1 -> {
                         //vou-no

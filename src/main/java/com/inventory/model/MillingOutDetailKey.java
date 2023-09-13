@@ -23,7 +23,7 @@ public class MillingOutDetailKey implements Serializable {
     @Column(name = "comp_code")
     private String compCode;
     @Column(name = "unique_id")
-    private Integer uniqueId;
+    private int uniqueId;
     @Column(name = "vou_no")
     private String vouNo;
 

@@ -10,7 +10,6 @@ import com.common.Util1;
 import com.inventory.model.VSale;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,16 +22,6 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
 
     private List<VSale> listSaleHis = new ArrayList();
     private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Ref:", "Created By", "Paid Amt", "V-Total"};
-
-    private JTable parent;
-
-    public JTable getParent() {
-        return parent;
-    }
-
-    public void setParent(JTable parent) {
-        this.parent = parent;
-    }
 
     @Override
     public String getColumnName(int column) {
@@ -75,7 +64,7 @@ public class SaleVouSearchTableModel extends AbstractTableModel {
                 switch (column) {
                     case 0 -> {
                         //date
-                        return his.getVouDate();
+                        return Util1.convertToLocalStorage(his.getVouDateTime());
                     }
                     case 1 -> {
                         //vou-no

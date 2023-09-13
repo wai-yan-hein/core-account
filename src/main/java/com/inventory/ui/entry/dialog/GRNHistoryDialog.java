@@ -59,7 +59,6 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
 
     };
     private final GRNHistoryTableModel tableModel = new GRNHistoryTableModel();
-    private WebClient inventoryApi;
     private InventoryRepo inventoryRepo;
     private TraderAutoCompleter traderAutoCompleter;
     private AppUserAutoCompleter appUserAutoCompleter;
@@ -69,14 +68,6 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
-
-    public WebClient getInventoryApi() {
-        return inventoryApi;
-    }
-
-    public void setInventoryApi(WebClient inventoryApi) {
-        this.inventoryApi = inventoryApi;
-    }
 
     public InventoryRepo getInventoryRepo() {
         return inventoryRepo;
@@ -133,10 +124,9 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
     }
 
     private void initTableVoucher() {
-        tableModel.setParent(tblVoucher);
         tblVoucher.setModel(tableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
-        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(20);
+        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(40);
         tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(80);
         tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(180);
         tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(180);

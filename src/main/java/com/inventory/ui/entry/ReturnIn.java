@@ -64,9 +64,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
@@ -81,8 +79,6 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
     private List<RetInHisDetail> listDetail = new ArrayList();
     private final ReturnInTableModel retInTableModel = new ReturnInTableModel();
     private ReturnInHistoryDialog dialog;
-    @Autowired
-    private WebClient inventoryApi;
     @Autowired
     private InventoryRepo inventoryRepo;
     @Autowired
@@ -458,7 +454,6 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         if (dialog == null) {
             dialog = new ReturnInHistoryDialog(Global.parentForm);
             dialog.setUserRepo(userRepo);
-            dialog.setInventoryApi(inventoryApi);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setIconImage(searchIcon);
             dialog.setCloudIntegration(integration);

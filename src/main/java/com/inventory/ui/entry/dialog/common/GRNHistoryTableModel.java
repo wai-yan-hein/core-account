@@ -24,16 +24,6 @@ public class GRNHistoryTableModel extends AbstractTableModel {
     private List<GRN> listDetail = new ArrayList();
     private final String[] columnNames = {"Date", "Vou No", "Trader", "Batch No", "Remark", "Created By"};
 
-    private JTable parent;
-
-    public JTable getParent() {
-        return parent;
-    }
-
-    public void setParent(JTable parent) {
-        this.parent = parent;
-    }
-
     @Override
     public String getColumnName(int column) {
         return columnNames[column];
@@ -70,7 +60,7 @@ public class GRNHistoryTableModel extends AbstractTableModel {
                 switch (column) {
                     case 0 -> {
                         //date
-                        return Util1.toDateStr(his.getVouDate(), Global.dateFormat);
+                        return Util1.convertToLocalStorage(his.getVouDateTime());
                     }
                     case 1 -> {
                         //vou-no

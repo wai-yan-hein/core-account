@@ -6,6 +6,7 @@ package com.inventory.model;
 
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.time.ZonedDateTime;
 
 /**
  *
@@ -39,10 +40,11 @@ public class VReturnOut {
     private Float price;
     private Float amount;
     private String locCode;
-    private Integer uniqueId;
+    private int uniqueId;
     private String traderName;
     private String stockName;
     private String locationName;
     private Integer deptId;
     private boolean local;
+    private ZonedDateTime vouDateTime;
 }

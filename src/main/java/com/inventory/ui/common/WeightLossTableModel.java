@@ -8,7 +8,6 @@ package com.inventory.ui.common;
 import com.repo.InventoryRepo;
 import com.common.Global;
 import com.common.Util1;
-import com.inventory.model.General;
 import com.inventory.model.Location;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
@@ -19,7 +18,6 @@ import java.awt.HeadlessException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -318,8 +316,8 @@ public class WeightLossTableModel extends AbstractTableModel {
             WeightLossDetail p = new WeightLossDetail();
             WeightLossDetailKey key = new WeightLossDetailKey();
             key.setCompCode(Global.compCode);
-            key.setDeptId(Global.deptId);
             p.setKey(key);
+            p.setDeptId(Global.deptId);
             WeightLossDetail obj = aboveObject();
             if (obj != null) {
                 p.setLocCode(obj.getLocCode());

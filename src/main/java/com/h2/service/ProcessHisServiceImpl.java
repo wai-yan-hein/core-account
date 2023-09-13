@@ -37,7 +37,7 @@ public class ProcessHisServiceImpl implements ProcessHisService {
         for (int i = 0; i < list.size(); i++) {
             ProcessHisDetail cSd = list.get(i);
             if (cSd.getKey().getStockCode() != null) {
-                if (cSd.getKey().getUniqueId() == null) {
+                if (cSd.getKey().getUniqueId() == 0) {
                     if (i == 0) {
                         cSd.getKey().setUniqueId(1);
                     } else {

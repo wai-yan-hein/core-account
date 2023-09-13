@@ -49,7 +49,7 @@ public class VMilling {
     private Float purPrice;
     private Float purAmount;
     private String locationCode;
-    private Integer uniqueId;
+    private int uniqueId;
     private String createdName;
     private String updatedName;
     private String curName;

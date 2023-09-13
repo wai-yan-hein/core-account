@@ -5,7 +5,7 @@
 package com.acc.report.excel;
 
 import com.acc.common.COAOptionTableModel;
-import com.acc.common.DateAutoCompleter;
+import com.acc.editor.DateAutoCompleter;
 import com.acc.common.TraderAReportTableModel;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.Gl;
@@ -25,12 +25,12 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingWorker;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.springframework.core.task.TaskExecutor;
 
 /**
  *
@@ -51,7 +51,9 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
     private TableRowSorter<TableModel> sorterTrader;
     private StartWithRowFilter swrfCOA;
     private StartWithRowFilter swrfTrader;
+    private TaskExecutor taskExecutor;
     private static final String OUTPUT_FILE_PATH = System.getProperty("user.home") + "/Downloads/";
+    private String lastPath = "";
     private static final String[] HEADERS_COA = {
         "Date", "Dep :", "Description", "Reference", "Ref No", "Trader Name",
         "Account", "Currency", "Dr Amt", "Cr Amt", "Opening", "Closing"
@@ -74,6 +76,10 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
 
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
+    }
+
+    public void setTaskExecutor(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
     }
 
     /**
@@ -179,110 +185,72 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
     private void exportCOAExcels() {
         btnExport.setEnabled(false);
         String outputPath = OUTPUT_FILE_PATH + "IndividualLedgerExcel.xlsx";
-        SwingWorker<Void, Integer> worker = new SwingWorker<Void, Integer>() {
-            @Override
-            protected Void doInBackground() throws Exception {
-                try (Workbook workbook = new XSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(outputPath)) {
-                    Font font = workbook.createFont();
-                    font.setFontName("Pyidaungsu");
-                    font.setFontHeightInPoints((short) 12);
-                    CellStyle cellStyle = workbook.createCellStyle();
-                    cellStyle.setFont(font);
-                    List<ChartOfAccount> coaList = cOATableModel.getListCOA();
-                    int completedCOAs = 0;
-
-                    for (ChartOfAccount t : coaList) {
-                        if (t.isActive()) {
-                            publish(completedCOAs);
-                            String coaCode = t.getKey().getCoaCode();
-                            List<Gl> data = accountRepo.searchGl(getFilter(coaCode, null)).block();
-                            String sheetName = Util1.replaceSpecialCharactersWithSpace(t.getCoaNameEng());
-                            createCOASheet(workbook, data, coaCode, Util1.autoCorrectSheetName(sheetName), cellStyle);
-                            completedCOAs++;
-                        }
+        taskExecutor.execute(() -> {
+            try (SXSSFWorkbook workbook = new SXSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(outputPath)) {
+                workbook.setCompressTempFiles(true); // Enable temporary file compression for improved performance
+                Font font = workbook.createFont();
+                font.setFontName("Pyidaungsu");
+                font.setFontHeightInPoints((short) 12);
+                CellStyle cellStyle = workbook.createCellStyle();
+                cellStyle.setFont(font);
+                List<ChartOfAccount> coaList = cOATableModel.getListCOA();
+                coaList.forEach((t) -> {
+                    if (t.isActive()) {
+                        String coaCode = t.getKey().getCoaCode();
+                        String coaName = t.getCoaNameEng();
+                        lblMessage.setText("Data requesting for " + coaName);
+                        List<Gl> data = accountRepo.searchGl(getFilter(coaCode, null)).block();
+                        lblMessage.setText("Data ready for " + coaName + " Record : " + data.size());
+                        String sheetName = Util1.replaceSpecialCharactersWithSpace(coaName);
+                        createCOASheet(workbook, data, coaCode, Util1.autoCorrectSheetName(sheetName), cellStyle);
                     }
-
-                    workbook.write(outputStream);
-                } catch (IOException e) {
-                    JOptionPane.showMessageDialog(null, e.getMessage());
-                }
-
-                return null;
-            }
-
-            @Override
-            protected void process(List<Integer> chunks) {
-                int completedCOAs = chunks.get(chunks.size() - 1);
-                int totalCOAs = cOATableModel.getListCOA().size();
-                int progress = (int) (((double) completedCOAs / totalCOAs) * 100);
-                progressExcel.setValue(progress);
-                lblMessage.setText("Progress: " + progress + "%");
-            }
-
-            @Override
-            protected void done() {
-                lblMessage.setText("Complete.");
-                progressExcel.setValue(100);
+                });
+                lblMessage.setText("Exporting File... Please wait.");
+                workbook.write(outputStream);
+                lastPath = outputPath;
+                lblMessage.setText("complete.");
                 btnExport.setEnabled(true);
-                JOptionPane.showMessageDialog(Global.parentForm, "Complete.");
+            } catch (IOException e) {
+                btnExport.setEnabled(true);
+                JOptionPane.showMessageDialog(null, e.getMessage());
             }
-        };
-
-        worker.execute();
+        });
     }
 
     private void exportTraderExcels() {
         btnExport.setEnabled(false);
         String outputPath = OUTPUT_FILE_PATH + "TraderIndividualLedgerExcel.xlsx";
-        SwingWorker<Void, Integer> worker = new SwingWorker<Void, Integer>() {
-            @Override
-            protected Void doInBackground() throws Exception {
-                try (Workbook workbook = new XSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(outputPath)) {
-                    Font font = workbook.createFont();
-                    font.setFontName("Pyidaungsu");
-                    font.setFontHeightInPoints((short) 12);
-                    CellStyle cellStyle = workbook.createCellStyle();
-                    cellStyle.setFont(font);
-                    List<TraderA> listTrader = traderTableModel.getListTrader();
-                    int completedCOAs = 0;
-
-                    for (TraderA t : listTrader) {
-                        if (t.isActive()) {
-                            publish(completedCOAs);
-                            String traderCode = t.getKey().getCode();
-                            String account = t.getAccount();
-                            List<Gl> data = accountRepo.searchGl(getFilter(account, traderCode)).block();
-                            log.info(data.size() + "");
-                            String sheetName = Util1.replaceSpecialCharactersWithSpace(t.getTraderName());
-                            createTraderSheet(workbook, data, account, traderCode, Util1.autoCorrectSheetName(sheetName), cellStyle);
-                            completedCOAs++;
-                        }
+        taskExecutor.execute(() -> {
+            try (SXSSFWorkbook workbook = new SXSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(outputPath)) {
+                workbook.setCompressTempFiles(true); // Enable temporary file compression for improved performance
+                Font font = workbook.createFont();
+                font.setFontName("Pyidaungsu");
+                font.setFontHeightInPoints((short) 12);
+                CellStyle cellStyle = workbook.createCellStyle();
+                cellStyle.setFont(font);
+                List<TraderA> listTrader = traderTableModel.getListTrader();
+                listTrader.forEach((t) -> {
+                    if (t.isActive()) {
+                        String traderCode = t.getKey().getCode();
+                        String traderName = t.getTraderName();
+                        String coaCode = t.getAccount();
+                        lblMessage.setText("Data requesting for " + traderName);
+                        List<Gl> data = accountRepo.searchGl(getFilter(coaCode, traderCode)).block();
+                        lblMessage.setText("Data ready for " + traderName + " Record : " + data.size());
+                        String sheetName = Util1.replaceSpecialCharactersWithSpace(traderName);
+                        createTraderSheet(workbook, data, coaCode, traderCode, Util1.autoCorrectSheetName(sheetName), cellStyle);
                     }
-                    workbook.write(outputStream);
-                } catch (IOException e) {
-                    JOptionPane.showMessageDialog(null, e.getMessage());
-                }
-                return null;
-            }
-
-            @Override
-            protected void process(List<Integer> chunks) {
-                int completedCOAs = chunks.get(chunks.size() - 1);
-                int totalCOAs = cOATableModel.getListCOA().size();
-                int progress = (int) (((double) completedCOAs / totalCOAs) * 100);
-                progressExcel.setValue(progress);
-                lblMessage.setText("Progress: " + progress + "%");
-            }
-
-            @Override
-            protected void done() {
-                lblMessage.setText("Complete.");
-                progressExcel.setValue(100);
+                });
+                lblMessage.setText("Exporting File... Please wait.");
+                workbook.write(outputStream);
+                lastPath = outputPath;
+                lblMessage.setText("complete.");
                 btnExport.setEnabled(true);
+            } catch (IOException e) {
+                btnExport.setEnabled(true);
+                JOptionPane.showMessageDialog(null, e.getMessage());
             }
-        };
-
-        worker.execute();
+        });
     }
 
     private void createCOASheet(Workbook workbook, List<Gl> data,
@@ -306,6 +274,7 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
 
         int rowNum = 1;
         for (Gl gl : data) {
+            lblMessage.setText(rowNum + " / " + data.size());
             Row row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(Util1.toDateStr(gl.getGlDate(), Global.dateFormat));
             row.createCell(1).setCellValue(gl.getDeptUsrCode());
@@ -317,11 +286,11 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
             row.createCell(7).setCellValue(gl.getCurCode());
             row.createCell(8).setCellValue(Util1.getDouble(gl.getDrAmt()));
             row.createCell(9).setCellValue(Util1.getDouble(gl.getCrAmt()));
-
             for (Cell cell : row) {
                 cell.setCellStyle(cellStyle);
             }
         }
+        lblMessage.setText("calculating opening.");
         double drAmt = data.stream().mapToDouble((t) -> Util1.getDouble(t.getDrAmt())).sum();
         double crAmt = data.stream().mapToDouble((t) -> Util1.getDouble(t.getCrAmt())).sum();
         double opening = accountRepo.getOpening(getOPFilter(coaCode, null)).block().getOpening();
@@ -334,10 +303,13 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
         for (Cell cell : row) {
             cell.setCellStyle(headerStyle);
         }
-        for (int i = 0; i < HEADERS_COA.length; i++) {
-            sheet.autoSizeColumn(i);
+        try {
+            for (int i = 0; i < HEADERS_COA.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+        } catch (Exception e) {
+            log.info("autoResize ‌: " + e.getMessage());
         }
-
     }
 
     private void createTraderSheet(Workbook workbook, List<Gl> data,
@@ -376,6 +348,7 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
                 cell.setCellStyle(cellStyle);
             }
         }
+        lblMessage.setText("calculating opening.");
         double drAmt = data.stream().mapToDouble((t) -> Util1.getDouble(t.getDrAmt())).sum();
         double crAmt = data.stream().mapToDouble((t) -> Util1.getDouble(t.getCrAmt())).sum();
         double opening = accountRepo.getOpening(getOPFilter(coaCode, traderCode)).block().getOpening();
@@ -388,8 +361,12 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
         for (Cell cell : row) {
             cell.setCellStyle(headerStyle);
         }
-        for (int i = 0; i < HEADERS_TRADER.length; i++) {
-            sheet.autoSizeColumn(i);
+        try {
+            for (int i = 0; i < HEADERS_TRADER.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+        } catch (Exception e) {
+            log.info("autoResize ‌: " + e.getMessage());
         }
 
     }
@@ -432,7 +409,7 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
     }
 
     private void showInFolder() {
-        Util1.openFolder(OUTPUT_FILE_PATH);
+        Util1.openFolder(lastPath);
     }
 
     private void export() {
@@ -458,7 +435,6 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
         jLabel1 = new javax.swing.JLabel();
         txtDate = new javax.swing.JTextField();
         btnExport = new javax.swing.JButton();
-        progressExcel = new javax.swing.JProgressBar();
         lblMessage = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         txtCurrency = new javax.swing.JTextField();
@@ -495,9 +471,6 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
             }
         });
 
-        progressExcel.setFont(Global.textFont);
-        progressExcel.setStringPainted(true);
-
         lblMessage.setFont(Global.lableFont);
         lblMessage.setText("-");
 
@@ -518,7 +491,6 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(progressExcel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(jButton2)
@@ -550,8 +522,6 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(btnExport)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(progressExcel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblMessage))
                     .addComponent(jButton2))
@@ -798,7 +768,6 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
     private javax.swing.JLabel lblCOARecord;
     private javax.swing.JLabel lblMessage;
     private javax.swing.JLabel lblTraderRecord;
-    private javax.swing.JProgressBar progressExcel;
     private javax.swing.JTabbedPane tabMain;
     private javax.swing.JTable tblCOA;
     private javax.swing.JTable tblTrader;

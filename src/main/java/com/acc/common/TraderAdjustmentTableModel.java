@@ -4,6 +4,7 @@
  */
 package com.acc.common;
 
+import com.acc.editor.DateAutoCompleter;
 import com.repo.AccountRepo;
 import com.acc.editor.TraderAAutoCompleter;
 import com.acc.model.ChartOfAccount;

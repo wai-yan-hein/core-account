@@ -12,6 +12,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.Data;
 
@@ -94,6 +95,8 @@ public class MillingHis {
     private transient String traderName = "";
     private transient String processType = "";
     private transient String vouDateStr = "";
+    @Transient
+    private ZonedDateTime vouDateTime;
 
     public MillingHis() {
     }

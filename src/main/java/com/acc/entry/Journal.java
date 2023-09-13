@@ -5,7 +5,7 @@
 package com.acc.entry;
 
 import com.repo.AccountRepo;
-import com.acc.common.DateAutoCompleter;
+import com.acc.editor.DateAutoCompleter;
 import com.acc.common.JournalTableModel;
 import com.acc.dialog.CurrencyConversionDialog;
 import com.acc.dialog.JournalEntryDialog;

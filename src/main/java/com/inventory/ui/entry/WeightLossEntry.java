@@ -9,12 +9,9 @@ import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.LocationCellEditor;
-import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.model.StockUnit;
-import com.inventory.model.WeightLossDetail;
 import com.inventory.model.WeightLossHis;
 import com.inventory.model.WeightLossHisKey;
 import com.repo.InventoryRepo;
@@ -37,9 +34,7 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
@@ -52,8 +47,6 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
 
     @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
-    private WebClient inventoryApi;
     @Autowired
     private UserRepo userRepo;
     private final WeightLossTableModel tableModel = new WeightLossTableModel();
@@ -256,8 +249,8 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
             if (lblStatus.getText().equals("NEW")) {
                 WeightLossHisKey key = new WeightLossHisKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 key.setVouNo(null);
+                his.setDeptId(Global.deptId);
                 his.setKey(key);
                 his.setCreatedBy(userCode);
             } else {
@@ -274,7 +267,6 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
     public void historyWeight() {
         if (dialog == null) {
             dialog = new WeightLossHistoryDialog(Global.parentForm);
-            dialog.setInventoryApi(inventoryApi);
             dialog.setInventoryRepo(inventoryRepo);
             dialog.setUserRepo(userRepo);
             dialog.setIconImage(searchIcon);
@@ -289,17 +281,10 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
     private void setVoucher(WeightLossHis his) {
         this.his = his;
         String vouNo = his.getKey().getVouNo();
-        Mono<ResponseEntity<List<WeightLossDetail>>> result = inventoryApi.get()
-                .uri(builder -> builder.path("/weight/get-weight-loss-detail")
-                .queryParam("vouNo", vouNo)
-                .queryParam("compCode", Global.compCode)
-                .queryParam("deptId", his.getKey().getDeptId())
-                .build())
-                .retrieve().toEntityList(WeightLossDetail.class);
-        result.subscribe((t) -> {
-            List<WeightLossDetail> list = t.getBody();
-            lblRecord.setText("Records : " + list.size());
-            tableModel.setListDetail(list);
+        Integer deptId = his.getDeptId();
+        inventoryRepo.getWeightLossDetail(vouNo, deptId).subscribe((t) -> {
+            lblRecord.setText("Records : " + t.size());
+            tableModel.setListDetail(t);
             tableModel.addNewRow();
             txtVouNo.setText(his.getKey().getVouNo());
             txtDate.setDate(Util1.convertToDate(his.getVouDate()));
@@ -517,7 +502,7 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
         if (source != null) {
             if (source.equals("WL-HISTORY")) {
                 if (selectObj instanceof WeightLossHisKey key) {
-                    inventoryRepo.findWeightLoss(key.getVouNo(), key.getDeptId()).subscribe((t) -> {
+                    inventoryRepo.findWeightLoss(key).subscribe((t) -> {
                         setVoucher(t);
                     });
                 }

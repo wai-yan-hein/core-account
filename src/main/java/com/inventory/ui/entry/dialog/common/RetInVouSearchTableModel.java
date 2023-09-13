@@ -11,7 +11,6 @@ import com.inventory.model.VReturnIn;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFormattedTextField;
-import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,8 +23,6 @@ public class RetInVouSearchTableModel extends AbstractTableModel {
 
     private List<VReturnIn> listDetail = new ArrayList();
     private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Created By", "Paid Amt", "V-Total"};
-    private JTable parent;
-
     private JFormattedTextField txtPaid;
     private JFormattedTextField txtAmt;
     private JFormattedTextField txtRecord;
@@ -52,14 +49,6 @@ public class RetInVouSearchTableModel extends AbstractTableModel {
 
     public void setTxtRecord(JFormattedTextField txtRecord) {
         this.txtRecord = txtRecord;
-    }
-
-    public JTable getParent() {
-        return parent;
-    }
-
-    public void setParent(JTable parent) {
-        this.parent = parent;
     }
 
     @Override
@@ -100,7 +89,7 @@ public class RetInVouSearchTableModel extends AbstractTableModel {
                 switch (column) {
                     case 0 -> {
                         //date
-                        return his.getVouDate();
+                        return Util1.convertToLocalStorage(his.getVouDateTime());
                     }
                     case 1 -> {
                         //vou-no

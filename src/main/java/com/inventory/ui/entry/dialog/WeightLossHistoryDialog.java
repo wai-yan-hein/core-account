@@ -47,7 +47,6 @@ public class WeightLossHistoryDialog extends javax.swing.JDialog implements KeyL
      * Creates new form SaleVouSearchDialog
      */
     private final WeightLossSearchTableModel tableModel = new WeightLossSearchTableModel();
-    private WebClient inventoryApi;
     private UserRepo userRepo;
     private InventoryRepo inventoryRepo;
     private AppUserAutoCompleter appUserAutoCompleter;
@@ -58,40 +57,12 @@ public class WeightLossHistoryDialog extends javax.swing.JDialog implements KeyL
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
 
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
 
-    public WebClient getInventoryApi() {
-        return inventoryApi;
-    }
-
-    public void setInventoryApi(WebClient inventoryApi) {
-        this.inventoryApi = inventoryApi;
-    }
-
-    public UserRepo getUserRepo() {
-        return userRepo;
-    }
-
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
-    }
-
-    public WebClient getWebClient() {
-        return inventoryApi;
-    }
-
-    public void setWebClient(WebClient inventoryApi) {
-        this.inventoryApi = inventoryApi;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -148,10 +119,9 @@ public class WeightLossHistoryDialog extends javax.swing.JDialog implements KeyL
     }
 
     private void initTableVoucher() {
-        tableModel.setParent(tblVoucher);
         tblVoucher.setModel(tableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
-        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(5);
+        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(40);
         tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(15);
         tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(200);
         tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(200);

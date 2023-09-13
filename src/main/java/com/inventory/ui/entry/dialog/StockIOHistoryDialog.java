@@ -55,24 +55,12 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
 
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
 
-    public UserRepo getUserRepo() {
-        return userRepo;
-    }
-
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -115,10 +103,9 @@ public class StockIOHistoryDialog extends javax.swing.JDialog implements KeyList
     }
 
     private void initTableVoucher() {
-        tableModel.setParent(tblVoucher);
         tblVoucher.setModel(tableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
-        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(30);
+        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(40);
         tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(150);
         tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(150);
         tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(50);

@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Writer;
 import java.lang.management.ManagementFactory;
@@ -39,6 +40,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -1101,4 +1103,23 @@ public class Util1 {
         return result;
     }
 
+    public static String convertToLocalStorage(ZonedDateTime inputDateTime) {
+        // Get the system's default time zone (local time zone)
+        ZoneId localZoneId = ZoneId.systemDefault();
+        // Convert the input ZonedDateTime to LocalDateTime in the local time zone
+        LocalDateTime localDateTime = inputDateTime.withZoneSameInstant(localZoneId).toLocalDateTime();
+        return Util1.toDateStr(localDateTime, "dd/MM/yyyy hh:mm a");
+    }
+
+    public static <T> List<T> readJsonToList(InputStream inputStream, Class<T> targetType) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            // Use the TypeReference to specify the target type (List<T>)
+            return objectMapper.readValue(inputStream, objectMapper.getTypeFactory().constructCollectionType(List.class, targetType));
+        } catch (IOException e) {
+            log.error("readJsonToList : "+e.getMessage());
+            return null; // Handle the exception or return an appropriate value
+        }
+    }
 }

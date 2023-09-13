@@ -19,5 +19,5 @@ public class PurExpenseKey implements Serializable{
     private String expenseCode;
     private String vouNo;
     private String compCode;
-    private Integer uniqueId;
+    private int uniqueId;
 }

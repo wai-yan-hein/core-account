@@ -31,7 +31,7 @@ public class WeightLossServiceImpl implements WeightLossService {
     public WeightLossHis save(WeightLossHis l) {
         l.setVouDate(Util1.toDateTime(l.getVouDate()));
         if (Util1.isNullOrEmpty(l.getKey().getVouNo())) {
-            l.getKey().setVouNo(getVoucherNo(l.getKey().getDeptId(), l.getMacId(), l.getKey().getCompCode()));
+            l.getKey().setVouNo(getVoucherNo(l.getDeptId(), l.getMacId(), l.getKey().getCompCode()));
         }
         String vouNo = l.getKey().getVouNo();
         List<WeightLossDetailKey> delKeys = l.getDelKeys();
@@ -42,7 +42,7 @@ public class WeightLossServiceImpl implements WeightLossService {
         for (int i = 0; i < list.size(); i++) {
             WeightLossDetail cSd = list.get(i);
             if (cSd.getStockCode() != null) {
-                if (cSd.getKey().getUniqueId() == null) {
+                if (cSd.getKey().getUniqueId() == 0) {
                     if (i == 0) {
                         cSd.getKey().setUniqueId(1);
                     } else {

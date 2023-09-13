@@ -10,7 +10,6 @@ import com.common.Global;
 import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.LocationSetupDialog;
 import com.inventory.ui.setup.dialog.OrderStatusSetupDialog;
-import com.inventory.ui.setup.dialog.ProcessTypeSetupDialog;
 import com.inventory.ui.setup.dialog.RegionSetup;
 import com.inventory.ui.setup.dialog.RelationSetupDialog;
 import com.inventory.ui.setup.dialog.SaleManSetupDialog;
@@ -32,7 +31,6 @@ public class OtherSetup extends javax.swing.JPanel {
     private RegionSetup regionSetup;
     private LocationSetupDialog locationSetup;
     private RelationSetupDialog relationSetupDialog;
-    private ProcessTypeSetupDialog processTypeDialog;
     private SaleManSetupDialog smDialog;
     private VouStatusSetupDialog vsDialog;
     private OrderStatusSetupDialog osDialog;
@@ -125,20 +123,6 @@ public class OtherSetup extends javax.swing.JPanel {
             relationSetupDialog.setSize(Global.width / 2, Global.height / 2);
             relationSetupDialog.setLocationRelativeTo(null);
             relationSetupDialog.setVisible(true);
-        });
-
-    }
-
-    private void processType() {
-        inventoryRepo.getProcessType().subscribe((t) -> {
-            processTypeDialog = new ProcessTypeSetupDialog();
-            processTypeDialog.setInventoryRepo(inventoryRepo);
-            processTypeDialog.setListType(t);
-            processTypeDialog.setIconImage(icon);
-            processTypeDialog.initMain();
-            processTypeDialog.setSize(Global.width / 2, Global.height / 2);
-            processTypeDialog.setLocationRelativeTo(null);
-            processTypeDialog.setVisible(true);
         });
 
     }

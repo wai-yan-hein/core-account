@@ -141,10 +141,9 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
     }
 
     private void initTableVoucher() {
-        tableModel.setParent(tblVoucher);
         tblVoucher.setModel(tableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
-        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(20);//date
+        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(40);//date
         tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(80);//vou
         tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(180);//cus
         tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(180);//remark

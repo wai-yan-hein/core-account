@@ -2,6 +2,7 @@ package com.h2.dao;
 
 import com.inventory.model.WeightLossHis;
 import com.inventory.model.WeightLossHisKey;
+import java.time.LocalDateTime;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -26,14 +27,18 @@ public class WeightLossDaoImpl extends AbstractDao<WeightLossHisKey, WeightLossH
 
     @Override
     public void delete(WeightLossHisKey key) {
-        String sql = "update weight_loss_his set deleted =1 where vou_no = '" + key.getVouNo() + "' and comp_code =" + key.getCompCode() + " and dept_id =" + key.getDeptId() + " ";
-        execSql(sql);
+        WeightLossHis th = findById(key);
+        th.setDeleted(true);
+        th.setUpdatedDate(LocalDateTime.now());
+        update(th);
     }
 
     @Override
     public void restore(WeightLossHisKey key) {
-        String sql = "update weight_loss_his set deleted =0 where vou_no = '" + key.getVouNo() + "' and comp_code =" + key.getCompCode() + " and dept_id =" + key.getDeptId() + " ";
-        execSql(sql);
+        WeightLossHis th = findById(key);
+        th.setDeleted(false);
+        th.setUpdatedDate(LocalDateTime.now());
+        update(th);
     }
 
     @Override
@@ -55,7 +60,7 @@ public class WeightLossDaoImpl extends AbstractDao<WeightLossHisKey, WeightLossH
         List<WeightLossHis> list = findHSQL(hsql);
         list.forEach((s) -> {
             s.setListDetail(dao.search(s.getKey().getVouNo(),
-                    s.getKey().getCompCode(), s.getKey().getDeptId()));
+                    s.getKey().getCompCode(), s.getDeptId()));
         });
         return list;
     }

@@ -47,32 +47,17 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
     private SelectionObserver observer;
     private CloudIntegration integration;
 
-    public CloudIntegration getIntegration() {
-        return integration;
-    }
 
     public void setIntegration(CloudIntegration integration) {
         this.integration = integration;
-    }
-
-    public UserRepo getUserRepo() {
-        return userRepo;
     }
 
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
 
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
-    }
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
     }
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
@@ -163,7 +148,7 @@ public class ManufactureHistoryDialog extends javax.swing.JDialog implements Sel
     private void initTblProcess() {
         tblProcess.setModel(processHisTableModel);
         tblProcess.getTableHeader().setFont(Global.tblHeaderFont);
-        tblProcess.getColumnModel().getColumn(0).setPreferredWidth(30);//date
+        tblProcess.getColumnModel().getColumn(0).setPreferredWidth(40);//date
         tblProcess.getColumnModel().getColumn(1).setPreferredWidth(20);//code
         tblProcess.getColumnModel().getColumn(2).setPreferredWidth(200);//name
         tblProcess.getColumnModel().getColumn(3).setPreferredWidth(40);//type

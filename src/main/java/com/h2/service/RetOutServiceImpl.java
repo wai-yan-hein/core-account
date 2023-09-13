@@ -56,11 +56,11 @@ public class RetOutServiceImpl implements RetOutService {
                 key.setDeptId(rin.getKey().getDeptId());
                 key.setCompCode(rin.getKey().getCompCode());
                 key.setVouNo(vouNo);
-                key.setUniqueId(null);
+                key.setUniqueId(0);
                 cSd.setKey(key);
             }
             if (cSd.getStockCode() != null) {
-                if (cSd.getKey().getUniqueId() == null) {
+                if (cSd.getKey().getUniqueId() == 0) {
                     if (i == 0) {
                         cSd.getKey().setUniqueId(1);
                     } else {

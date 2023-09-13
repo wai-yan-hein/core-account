@@ -35,7 +35,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
@@ -48,7 +47,6 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
      * Creates new form SaleVouSearchDialog
      */
     private final RetInVouSearchTableModel tableModel = new RetInVouSearchTableModel();
-    private WebClient inventoryApi;
     private InventoryRepo inventoryRepo;
     private UserRepo userRepo;
     private TraderAutoCompleter traderAutoCompleter;
@@ -67,36 +65,12 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         this.integration = integration;
     }
 
-    public CloudIntegration getCloudIntegration() {
-        return integration;
-    }
-
-    public WebClient getInventoryApi() {
-        return inventoryApi;
-    }
-
-    public void setInventoryApi(WebClient inventoryApi) {
-        this.inventoryApi = inventoryApi;
-    }
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
 
-    public UserRepo getUserRepo() {
-        return userRepo;
-    }
-
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -156,10 +130,9 @@ public class ReturnInHistoryDialog extends javax.swing.JDialog implements KeyLis
         tableModel.setTxtAmt(txtAmt);
         tableModel.setTxtPaid(txtPaid);
         tableModel.setTxtRecord(txtRecord);
-        tableModel.setParent(tblVoucher);
         tblVoucher.setModel(tableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
-        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(20);
+        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(40);
         tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(50);
         tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(180);
         tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(180);

@@ -66,28 +66,13 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         this.integration = integration;
     }
 
-    public CloudIntegration getCloudIntegration() {
-        return integration;
-    }
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
 
-    public UserRepo getUserRepo() {
-        return userRepo;
-    }
-
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -145,11 +130,10 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
     }
 
     private void initTableVoucher() {
-        tableModel.setParent(tblVoucher);
         tblVoucher.setModel(tableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
-        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(20);
+        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(40);
         tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(80);
         tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(180);
         tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(180);

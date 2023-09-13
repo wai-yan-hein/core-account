@@ -30,7 +30,7 @@ public class PriceOption {
     @Column(name = "desp")
     private String description;
     @Column(name = "unique_id")
-    private Integer uniqueId;
+    private int uniqueId;
     @Column(name = "tran_option")
     private String tranOption;
     @Column(name = "updated_date", columnDefinition = "TIMESTAMP")

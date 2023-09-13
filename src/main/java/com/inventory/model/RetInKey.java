@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class RetInKey implements Serializable{
 
     @Column(name = "unique_id")
-    private Integer uniqueId;
+    private int uniqueId;
     @Column(name = "comp_code")
     private String compCode;
     @Column(name = "vou_no")

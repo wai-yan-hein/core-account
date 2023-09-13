@@ -9,11 +9,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.Data;
 
@@ -29,6 +27,8 @@ public class WeightLossHis {
 
     @EmbeddedId
     private WeightLossHisKey key;
+    @Column(name = "dept_id")
+    private Integer deptId;
     @Column(name = "vou_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime vouDate;
     @Column(name = "ref_no")
@@ -51,4 +51,6 @@ public class WeightLossHis {
     private List<WeightLossDetail> listDetail;
     @Transient
     private List<WeightLossDetailKey> delKeys;
+    @Transient
+    private ZonedDateTime vouDateTime;
 }

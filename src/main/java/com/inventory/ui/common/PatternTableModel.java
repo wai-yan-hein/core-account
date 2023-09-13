@@ -221,7 +221,7 @@ public class PatternTableModel extends AbstractTableModel {
                     }
                 }
                 p.getKey().setMapStockCode(stockCode);
-                if (p.getKey().getUniqueId() == null) {
+                if (p.getKey().getUniqueId() == 0) {
                     p.getKey().setUniqueId(row + 1);
                 }
                 calAmt(p);

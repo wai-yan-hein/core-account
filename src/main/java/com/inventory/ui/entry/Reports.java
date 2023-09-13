@@ -5,7 +5,8 @@
  */
 package com.inventory.ui.entry;
 
-import com.acc.common.DateAutoCompleter;
+import com.acc.editor.DateAutoCompleter;
+import com.common.ExcelExporter;
 import com.common.FontCellRender;
 import com.common.Global;
 import com.common.PanelControl;
@@ -14,6 +15,7 @@ import com.common.ReportFilter;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventory.editor.BatchAutoCompeter;
 import com.inventory.editor.BrandAutoCompleter;
 import com.inventory.editor.CategoryAutoCompleter;
@@ -24,6 +26,7 @@ import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.StockTypeAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.editor.VouStatusAutoCompleter;
+import com.inventory.model.ClosingBalance;
 import com.inventory.model.VRoleMenu;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.ReportTableModel;
@@ -40,7 +43,10 @@ import java.io.File;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -58,6 +64,7 @@ import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.swing.JRViewer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
 /**
@@ -73,6 +80,8 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private InventoryRepo inventoryRepo;
     @Autowired
     private UserRepo userRepo;
+    @Autowired
+    private TaskExecutor taskExecutor;
     private boolean isReport = false;
     private String stDate;
     private String enDate;
@@ -95,6 +104,8 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private SelectionObserver observer;
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
+    private final ExcelExporter exporter = new ExcelExporter();
+    private Set<String> excelReport = new HashSet<>();
 
     public SelectionObserver getObserver() {
         return observer;
@@ -150,9 +161,17 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     }
 
     public void initMain() {
+        initExcel();
         initTableReport();
         initCombo();
         initDate();
+    }
+
+    private void initExcel() {
+        exporter.setObserver(this);
+        exporter.setTaskExecutor(taskExecutor);
+        //add report url 
+        excelReport.add("StockInOutDetail");
     }
 
     private void initDate() {
@@ -163,10 +182,12 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     }
 
     private void initTableReport() {
+        tableModel.setExcelReport(excelReport);
         tblReport.setModel(tableModel);
         tblReport.getTableHeader().setFont(Global.tblHeaderFont);
         tblReport.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblReport.setDefaultRenderer(Object.class, new TableCellRender());
+        tblReport.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblReport.getColumnModel().getColumn(0).setCellRenderer(new FontCellRender());
         tblReport.getColumnModel().getColumn(0).setPreferredWidth(50);
         tblReport.getColumnModel().getColumn(1).setPreferredWidth(900);
@@ -234,7 +255,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         projectAutoCompleter.setObserver(this);
     }
 
-    private void report() {
+    private void report(boolean excel) {
         int row = tblReport.getSelectedRow();
         if (row >= 0) {
             int selectRow = tblReport.convertRowIndexToModel(row);
@@ -290,7 +311,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     param.put("p_stock_type", stockTypeAutoCompleter.getStockType().getStockTypeName());
                     param.put("p_location", txtLocation.getText());
                     param.put("p_divider", new BigDecimal(Util1.getFloatOne(ProUtil.getProperty(ProUtil.DIVIDER))));
-                    printReport(reportUrl, reportUrl, param);
+                    printReport(reportUrl, reportUrl, param, excel);
                 }
                 isReport = false;
             }
@@ -320,7 +341,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         return true;
     }
 
-    private void printReport(String reportUrl, String reportName, Map<String, Object> param) {
+    private void printReport(String reportUrl, String reportName, Map<String, Object> param, boolean excel) {
         filter.setReportName(reportName);
         inventoryRepo.getReport(filter).doOnSuccess((t) -> {
             try {
@@ -328,26 +349,30 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                 if (t != null) {
                     String filePath = String.format("%s%s%s", Global.reportPath, File.separator, reportUrl.concat(".jasper"));
                     if (t.getFile().length > 0) {
-                        JasperReportsContext jc = DefaultJasperReportsContext.getInstance();
-                        jc.setProperty("net.sf.jasperreports.default.font.name", Global.fontName.concat(".ttf"));
-                        jc.setProperty("net.sf.jasperreports.default.pdf.font.name", Global.fontName.concat(".ttf"));
-                        jc.setProperty("net.sf.jasperreports.default.pdf.encoding", "Identity-H");
-                        jc.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
-                        jc.setProperty("net.sf.jasperreports.viewer.zoom", "1");
-                        jc.setProperty("net.sf.jasperreports.export.xlsx.detect.cell.type", "true");
-                        jc.setProperty("net.sf.jasperreports.export.xlsx.white.page.background", "false");
-                        jc.setProperty("net.sf.jasperreports.export.xlsx.auto.fit.page.width", "true");
-                        jc.setProperty("net.sf.jasperreports.export.xlsx.ignore.graphics", "false");
-                        InputStream input = new ByteArrayInputStream(t.getFile());
-                        JsonDataSource ds = new JsonDataSource(input);
-                        JasperPrint js = JasperFillManager.fillReport(filePath, param, ds);
-                        JRViewer viwer = new JRViewer(js);
-                        JFrame frame = new JFrame("Core Value Report");
-                        frame.setIconImage(Global.parentForm.getIconImage());
-                        frame.getContentPane().add(viwer);
-                        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-                        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                        frame.setVisible(true);
+                        if (excel) {
+                            excel(t.getFile());
+                        } else {
+                            JasperReportsContext jc = DefaultJasperReportsContext.getInstance();
+                            jc.setProperty("net.sf.jasperreports.default.font.name", Global.fontName.concat(".ttf"));
+                            jc.setProperty("net.sf.jasperreports.default.pdf.font.name", Global.fontName.concat(".ttf"));
+                            jc.setProperty("net.sf.jasperreports.default.pdf.encoding", "Identity-H");
+                            jc.setProperty("net.sf.jasperreports.default.pdf.embedded", "true");
+                            jc.setProperty("net.sf.jasperreports.viewer.zoom", "1");
+                            jc.setProperty("net.sf.jasperreports.export.xlsx.detect.cell.type", "true");
+                            jc.setProperty("net.sf.jasperreports.export.xlsx.white.page.background", "false");
+                            jc.setProperty("net.sf.jasperreports.export.xlsx.auto.fit.page.width", "true");
+                            jc.setProperty("net.sf.jasperreports.export.xlsx.ignore.graphics", "false");
+                            InputStream input = new ByteArrayInputStream(t.getFile());
+                            JsonDataSource ds = new JsonDataSource(input);
+                            JasperPrint js = JasperFillManager.fillReport(filePath, param, ds);
+                            JRViewer viwer = new JRViewer(js);
+                            JFrame frame = new JFrame("Core Value Report");
+                            frame.setIconImage(Global.parentForm.getIconImage());
+                            frame.getContentPane().add(viwer);
+                            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                            frame.setVisible(true);
+                        }
                     } else {
                         JOptionPane.showMessageDialog(this, "Report Does Not Exists.");
                     }
@@ -362,7 +387,6 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
             progress.setIndeterminate(false);
         }).subscribe();
-
     }
     private final RowFilter<Object, Object> startsWithFilter = new RowFilter<Object, Object>() {
         @Override
@@ -380,6 +404,33 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         observer.selected("history", false);
         observer.selected("delete", false);
         observer.selected("refresh", true);
+    }
+
+    private void excel(byte[] file) {
+        int row = tblReport.convertRowIndexToModel(tblReport.getSelectedRow());
+        if (row >= 0) {
+            btnExcel.setEnabled(false);
+            VRoleMenu report = tableModel.getReport(row);
+            String reportName = report.getMenuName();
+            String reportUrl = report.getMenuUrl();
+            switch (reportUrl) {
+                case "StockInOutDetail" -> {
+                    String stockName = stockAutoCompleter.getStock().getStockName();
+                    InputStream input = new ByteArrayInputStream(file);
+                    List<ClosingBalance> list = Util1.readJsonToList(input, ClosingBalance.class);
+                    exporter.exportStockInOutDetail(list, stockName);
+                    // Use the TypeReference to specify the target type (List<Person>)
+                }
+                default -> {
+                    btnExcel.setEnabled(true);
+                    JOptionPane.showMessageDialog(this, String.format("%s report can't export excel.",
+                            reportName), "Excel Validation", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } else {
+            btnExcel.setEnabled(true);
+            JOptionPane.showMessageDialog(Global.parentForm, "Choose Report.");
+        }
     }
 
     /**
@@ -433,6 +484,9 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         jPanel3 = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
         lblRecord = new javax.swing.JLabel();
+        btnExcel = new javax.swing.JButton();
+        lblMessage = new javax.swing.JLabel();
+        btnExcel1 = new javax.swing.JButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -801,6 +855,26 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         lblRecord.setFont(Global.lableFont);
         lblRecord.setText("0");
 
+        btnExcel.setFont(Global.lableFont);
+        btnExcel.setText("Excel");
+        btnExcel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExcelActionPerformed(evt);
+            }
+        });
+
+        lblMessage.setFont(Global.lableFont);
+        lblMessage.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblMessage.setText("-");
+
+        btnExcel1.setFont(Global.lableFont);
+        btnExcel1.setText("Show In Folder");
+        btnExcel1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExcel1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -810,7 +884,13 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                 .addComponent(jLabel12)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 409, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lblMessage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnExcel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnExcel)
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -818,7 +898,10 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel12)
-                    .addComponent(lblRecord))
+                    .addComponent(lblRecord)
+                    .addComponent(btnExcel)
+                    .addComponent(lblMessage)
+                    .addComponent(btnExcel1))
                 .addContainerGap())
         );
 
@@ -980,8 +1063,20 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         txtProjectNo.selectAll();        // TODO add your handling code here:
     }//GEN-LAST:event_txtProjectNoFocusGained
 
+    private void btnExcelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExcelActionPerformed
+        // TODO add your handling code here:
+        report(true);
+    }//GEN-LAST:event_btnExcelActionPerformed
+
+    private void btnExcel1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExcel1ActionPerformed
+        // TODO add your handling code here:
+        Util1.openFolder(exporter.getLastPath());
+    }//GEN-LAST:event_btnExcel1ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnExcel;
+    private javax.swing.JButton btnExcel1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -1004,6 +1099,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lblMessage;
     private javax.swing.JLabel lblRecord;
     private javax.swing.JTable tblReport;
     private javax.swing.JTextField txtBatchNo;
@@ -1044,7 +1140,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
 
     @Override
     public void print() {
-        report();
+        report(false);
     }
 
     @Override
@@ -1068,6 +1164,14 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             txtToDate.setDate(Util1.toDate(dateAutoCompleter.getDateModel().getEndDate(), "yyyy-MM-dd"));
             txtFromDueDate.setDate(Util1.toDate(dateAutoCompleter.getDateModel().getStartDate(), "yyyy-MM-dd"));
             txtToDueDate.setDate(Util1.toDate(dateAutoCompleter.getDateModel().getEndDate(), "yyyy-MM-dd"));
+        } else if (source.equals(ExcelExporter.MESSAGE)) {
+            lblMessage.setText(selectObj.toString());
+        } else if (source.equals(ExcelExporter.FINISH)) {
+            btnExcel.setEnabled(true);
+            lblMessage.setText(selectObj.toString());
+        } else if (source.equals(ExcelExporter.ERROR)) {
+            btnExcel.setEnabled(true);
+            lblMessage.setText(selectObj.toString());
         }
     }
 

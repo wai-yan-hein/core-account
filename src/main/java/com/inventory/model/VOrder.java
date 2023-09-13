@@ -6,6 +6,7 @@
 package com.inventory.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.time.ZonedDateTime;
 import lombok.Data;
 
 /**
@@ -20,6 +21,7 @@ public class VOrder {
     private String rfId;
     private String saleManCode;
     private String vouDate;
+    private ZonedDateTime vouDateTime;
     private String creditTerm;
     private String curCode;
     private String remark;
@@ -50,7 +52,7 @@ public class VOrder {
     private Float salePrice;
     private Float saleAmount;
     private String locCode;
-    private Integer uniqueId;
+    private int uniqueId;
     private String traderName;
     private String saleManName;
     private String stockName;

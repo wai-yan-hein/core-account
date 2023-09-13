@@ -87,7 +87,7 @@ public class TraderAReportTableModel extends AbstractTableModel {
                 TraderA coa = listTrader.get(row);
                 if (value != null) {
                     switch (column) {
-                        case 3 ->
+                        case 2 ->
                             coa.setActive((Boolean) value);
                     }
                 }

@@ -6,7 +6,7 @@ package com.acc.entry;
 
 import com.repo.AccountRepo;
 import com.acc.common.ColumnHeaderListener;
-import com.acc.common.DateAutoCompleter;
+import com.acc.editor.DateAutoCompleter;
 import com.acc.common.JournalClosingStockTableModel;
 import com.acc.editor.COA3CellEditor;
 import com.user.editor.CurrencyAutoCompleter;

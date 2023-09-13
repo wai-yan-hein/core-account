@@ -56,12 +56,12 @@ public class SaleHisServiceImpl implements SaleHisService {
                 SaleDetailKey key = new SaleDetailKey();
                 key.setCompCode(saleHis.getKey().getCompCode());
                 key.setVouNo(vouNo);
-                key.setUniqueId(null);
+                key.setUniqueId(0);
                 cSd.setDeptId(saleHis.getDeptId());
                 cSd.setKey(key);
             }
             if (cSd.getStockCode() != null) {
-                if (cSd.getKey().getUniqueId() == null) {
+                if (cSd.getKey().getUniqueId() == 0) {
                     if (i == 0) {
                         cSd.getKey().setUniqueId(1);
                     } else {

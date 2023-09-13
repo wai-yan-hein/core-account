@@ -155,10 +155,9 @@ public class RetOutHistoryDialog extends javax.swing.JDialog implements KeyListe
     }
 
     private void initTableVoucher() {
-        tableModel.setParent(tblVoucher);
         tblVoucher.setModel(tableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
-        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(20);
+        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(40);
         tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(80);
         tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(180);
         tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(180);

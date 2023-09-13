@@ -865,8 +865,10 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private void initDate() {
         if (Global.listDate == null || Global.listDate.isEmpty()) {
             accounRepo.getDate().doOnSuccess((t) -> {
-                dateFilterRepo.saveAll(t);
-                Global.listDate = t;
+                if (t != null) {
+                    dateFilterRepo.saveAll(t);
+                    Global.listDate = t;
+                }
             }).subscribe();
         }
     }

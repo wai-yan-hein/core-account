@@ -23,5 +23,5 @@ public class ProcessDetail {
     private StockUnit unit;
     private Float amount;
     private String vouNo;
-    private Integer uniqueId;
+    private int uniqueId;
 }

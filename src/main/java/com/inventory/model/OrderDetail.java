@@ -22,7 +22,7 @@ public class OrderDetail implements Serializable {
     private Float qty;
     private Float price;
     private Float amount;
-    private Integer uniqueId;
+    private int uniqueId;
     private String orderCode;
     
 

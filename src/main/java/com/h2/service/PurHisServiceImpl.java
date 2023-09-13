@@ -58,7 +58,7 @@ public class PurHisServiceImpl implements PurHisService {
                 PurExpense e = listExp.get(i);
                 if (Util1.getFloat(e.getAmount()) > 0) {
                     if (e.getKey().getExpenseCode() != null) {
-                        if (e.getKey().getUniqueId() == null) {
+                        if (e.getKey().getUniqueId() == 0) {
                             if (i == 0) {
                                 e.getKey().setUniqueId(1);
                             } else {
@@ -79,11 +79,11 @@ public class PurHisServiceImpl implements PurHisService {
                 key.setDeptId(ph.getKey().getDeptId());
                 key.setCompCode(ph.getKey().getCompCode());
                 key.setVouNo(vouNo);
-                key.setUniqueId(null);
+                key.setUniqueId(0);
                 cSd.setKey(key);
             }
             if (cSd.getStockCode() != null) {
-                if (cSd.getKey().getUniqueId() == null) {
+                if (cSd.getKey().getUniqueId() == 0) {
                     if (i == 0) {
                         cSd.getKey().setUniqueId(1);
                     } else {

@@ -155,7 +155,7 @@ public class OrderHistoryDialog extends javax.swing.JDialog implements KeyListen
     private void initTableVoucher() {
         tblVoucher.setModel(orderVouTableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
-        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(20);
+        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(50);
         tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(50);
         tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(180);
         tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(180);

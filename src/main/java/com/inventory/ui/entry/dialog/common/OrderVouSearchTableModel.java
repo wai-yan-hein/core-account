@@ -62,9 +62,8 @@ public class OrderVouSearchTableModel extends AbstractTableModel {
             if (!listOrderHis.isEmpty()) {
                 VOrder his = listOrderHis.get(row);
                 switch (column) {
-                    case 0 -> {
-                        //date
-                        return his.getVouDate();
+                    case 0 -> {                        //date
+                        return Util1.convertToLocalStorage(his.getVouDateTime());
                     }
                     case 1 -> {
                         //vou-no

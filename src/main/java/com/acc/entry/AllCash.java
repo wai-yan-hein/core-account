@@ -21,7 +21,7 @@ import com.acc.common.AllCashTableModel;
 import com.acc.common.CashInOutTableModel;
 import com.acc.common.CashOpeningTableModel;
 import com.acc.common.ColumnHeaderListener;
-import com.acc.common.DateAutoCompleter;
+import com.acc.editor.DateAutoCompleter;
 import com.acc.common.DateTableDecorator;
 import com.acc.common.DayBookTableModel;
 import com.acc.common.OpeningCellRender;

@@ -6,6 +6,7 @@ package com.inventory.model;
 
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.time.ZonedDateTime;
 
 /**
  *
@@ -36,4 +37,5 @@ public class VTransfer {
     private String traderName;
     private Float weight;
     private String weightUnit;
+    private ZonedDateTime vouDateTime;
 }

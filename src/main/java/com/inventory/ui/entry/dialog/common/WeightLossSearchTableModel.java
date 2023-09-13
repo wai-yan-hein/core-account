@@ -23,15 +23,6 @@ public class WeightLossSearchTableModel extends AbstractTableModel {
 
     private List<WeightLossHis> listDetail = new ArrayList();
     private final String[] columnNames = {"Date", "Vou No", "Ref No", "Remark", "Created By"};
-    private JTable parent;
-
-    public JTable getParent() {
-        return parent;
-    }
-
-    public void setParent(JTable parent) {
-        this.parent = parent;
-    }
 
     @Override
     public String getColumnName(int column) {
@@ -66,7 +57,7 @@ public class WeightLossSearchTableModel extends AbstractTableModel {
                 switch (column) {
                     case 0 -> {
                         //date
-                        return Util1.toDateStr(his.getVouDate(), Global.dateFormat);
+                        return Util1.convertToLocalStorage(his.getVouDateTime());
                     }
                     case 1 -> {
                         //vou-no

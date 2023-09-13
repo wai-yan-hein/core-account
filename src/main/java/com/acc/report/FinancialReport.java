@@ -6,7 +6,7 @@
 package com.acc.report;
 
 import com.repo.AccountRepo;
-import com.acc.common.DateAutoCompleter;
+import com.acc.editor.DateAutoCompleter;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.TraderAAutoCompleter;
@@ -124,6 +124,7 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         tblReport.getTableHeader().setFont(Global.tblHeaderFont);
         tblReport.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblReport.setDefaultRenderer(Object.class, new TableCellRender());
+        tblReport.setDefaultRenderer(Boolean.class, new TableCellRender());
         tblReport.getColumnModel().getColumn(0).setPreferredWidth(30);
         tblReport.getColumnModel().getColumn(1).setPreferredWidth(900);
         tblReport.getColumnModel().getColumn(0).setCellRenderer(new FontCellRender());

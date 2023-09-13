@@ -7,7 +7,7 @@ package com.acc.report;
 
 import com.acc.dialog.TrialBalanceDetailDialog;
 import com.repo.AccountRepo;
-import com.acc.common.DateAutoCompleter;
+import com.acc.editor.DateAutoCompleter;
 import com.acc.common.DateTableDecorator;
 import com.acc.common.GLListingTableModel;
 import com.acc.common.GLTableCellRender;

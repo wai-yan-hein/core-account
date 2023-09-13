@@ -46,10 +46,9 @@ public class ProcessHisTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
         try {
             ProcessHis med = listDetail.get(row);
-
             return switch (column) {
                 case 0 ->
-                    Util1.toDateStr(med.getVouDate(), "dd/MM/yyyy");
+                    Util1.convertToLocalStorage(med.getVouDateTime());
                 case 1 ->
                     med.getStockUsrCode() == null ? med.getStockCode() : med.getStockUsrCode();
                 case 2 ->

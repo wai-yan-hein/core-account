@@ -13,6 +13,7 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 import lombok.Data;
@@ -73,4 +74,6 @@ public class ProcessHis {
     private String locName;
     @Transient
     private boolean local;
+    @Transient
+    private ZonedDateTime vouDateTime;
 }

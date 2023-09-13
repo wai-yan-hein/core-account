@@ -6,7 +6,7 @@
 package com.user.setup;
 
 import com.acc.common.CurExchangeRateTableModel;
-import com.acc.common.DateAutoCompleter;
+import com.acc.editor.DateAutoCompleter;
 import com.user.dialog.ExchangeDialog;
 import com.common.Global;
 import com.common.PanelControl;

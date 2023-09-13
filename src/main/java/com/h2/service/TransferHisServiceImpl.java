@@ -47,12 +47,12 @@ public class TransferHisServiceImpl implements TransferHisService {
                 THDetailKey key = new THDetailKey();
                 key.setCompCode(th.getKey().getCompCode());
                 key.setVouNo(vouNo);
-                key.setUniqueId(null);
+                key.setUniqueId(0);
                 cSd.setDeptId(th.getDeptId());
                 cSd.setKey(key);
             }
             if (cSd.getStockCode() != null) {
-                if (cSd.getKey().getUniqueId() == null) {
+                if (cSd.getKey().getUniqueId() == 0) {
                     if (i == 0) {
                         cSd.getKey().setUniqueId(1);
                     } else {

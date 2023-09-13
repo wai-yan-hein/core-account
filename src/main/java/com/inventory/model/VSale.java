@@ -6,6 +6,8 @@ package com.inventory.model;
 
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Transient;
+import java.time.ZonedDateTime;
 
 /**
  *
@@ -51,7 +53,7 @@ public class VSale {
     private Double salePrice;
     private Double saleAmount;
     private String locCode;
-    private Integer uniqueId;
+    private int uniqueId;
     private String traderName;
     private String saleManName;
     private String stockName;
@@ -89,4 +91,5 @@ public class VSale {
     private Integer vouCount;
     private Double totalQty;
     private boolean local;
+    private ZonedDateTime vouDateTime;
 }

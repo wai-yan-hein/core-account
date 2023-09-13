@@ -64,10 +64,6 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
         this.userRepo = userRepo;
     }
 
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -109,7 +105,7 @@ public class TransferHistoryDialog extends javax.swing.JDialog implements KeyLis
     private void initTableVoucher() {
         tblVoucher.setModel(tableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
-        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(5);
+        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(40);
         tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(15);
         tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(10);
         tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(10);

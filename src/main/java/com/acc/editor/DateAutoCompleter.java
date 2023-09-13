@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.acc.common;
+package com.acc.editor;
 
+import com.acc.common.DateTableModel;
 import com.acc.dialog.DatePickerDialog;
 import com.acc.model.DateModel;
 import com.common.Global;

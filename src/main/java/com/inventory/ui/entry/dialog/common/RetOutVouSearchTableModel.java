@@ -6,6 +6,7 @@
 package com.inventory.ui.entry.dialog.common;
 
 import com.common.Global;
+import com.common.Util1;
 import com.inventory.model.VReturnOut;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,15 +23,6 @@ public class RetOutVouSearchTableModel extends AbstractTableModel {
 
     private List<VReturnOut> listDetail = new ArrayList();
     private final String[] columnNames = {"Date", "Vou No", "Customer", "Remark", "Created By", "Paid Amt", "V-Total"};
-    private JTable parent;
-
-    public JTable getParent() {
-        return parent;
-    }
-
-    public void setParent(JTable parent) {
-        this.parent = parent;
-    }
 
     @Override
     public String getColumnName(int column) {
@@ -70,7 +62,7 @@ public class RetOutVouSearchTableModel extends AbstractTableModel {
             switch (column) {
                 case 0 -> {
                     //date
-                    return his.getVouDate();
+                    return Util1.convertToLocalStorage(his.getVouDateTime());
                 }
                 case 1 -> {
                     //vou-no

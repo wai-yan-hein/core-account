@@ -98,6 +98,7 @@ import com.inventory.model.VStockIO;
 import com.inventory.model.VTransfer;
 import com.inventory.model.VouStatus;
 import com.inventory.model.VouStatusKey;
+import com.inventory.model.WeightLossDetail;
 import com.inventory.model.WeightLossHis;
 import com.inventory.model.WeightLossHisKey;
 import java.util.List;
@@ -741,20 +742,28 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<WeightLossHis> findWeightLoss(String vouNo, Integer deptId) {
-        WeightLossHisKey key = new WeightLossHisKey();
-        key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
-        key.setVouNo(vouNo);
+    public Mono<WeightLossHis> findWeightLoss(WeightLossHisKey key) {
         return inventoryApi.post()
-                .uri("/weight/find-weight-loss")
-                .body(Mono.just(key), StockTypeKey.class)
+                .uri("/weight/findWeightLoss")
+                .body(Mono.just(key), WeightLossHisKey.class)
                 .retrieve()
                 .bodyToMono(WeightLossHis.class)
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
                 });
+    }
+
+    public Mono<List<WeightLossDetail>> getWeightLossDetail(String vouNo, Integer deptId) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/weight/getWeightLossDetail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .queryParam("deptId", deptId)
+                .build())
+                .retrieve()
+                .bodyToFlux(WeightLossDetail.class)
+                .collectList();
     }
 
     public Mono<ProcessHis> findProcess(ProcessHisKey key, boolean local) {
@@ -1016,9 +1025,9 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<Location> saveLocaiton(Location loc) {
+    public Mono<Location> saveLocation(Location loc) {
         return inventoryApi.post()
-                .uri("/setup/save-location")
+                .uri("/setup/saveLocation")
                 .body(Mono.just(loc), Location.class)
                 .retrieve()
                 .bodyToMono(Location.class)
@@ -1164,17 +1173,6 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<ProcessType> saveProcessType(ProcessType vou) {
-        return inventoryApi.post()
-                .uri("/setup/save-process-type")
-                .body(Mono.just(vou), ProcessType.class)
-                .retrieve()
-                .bodyToMono(ProcessType.class)
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
-                });
-    }
 
     public Mono<Category> saveCategory(Category category) {
         return inventoryApi.post()
@@ -1207,7 +1205,7 @@ public class InventoryRepo {
 
     public Mono<WeightLossHis> saveWeightLoss(WeightLossHis loss) {
         return inventoryApi.post()
-                .uri("/weight/save-weight-loss")
+                .uri("/weight/saveWeightLoss")
                 .body(Mono.just(loss), WeightLossHis.class)
                 .retrieve()
                 .bodyToMono(WeightLossHis.class)
@@ -1228,7 +1226,7 @@ public class InventoryRepo {
 
     public Mono<WeightLossHis> uploadWeightLoss(WeightLossHis loss) {
         return inventoryApi.post()
-                .uri("/weight/save-weight-loss")
+                .uri("/weight/saveWeightLoss")
                 .body(Mono.just(loss), WeightLossHis.class)
                 .retrieve()
                 .bodyToMono(WeightLossHis.class)
@@ -1417,20 +1415,6 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(UnitRelationDetail.class)
-                .collectList()
-                .onErrorResume((e) -> {
-                    log.error("error :" + e.getMessage());
-                    return Mono.empty();
-                });
-    }
-
-    public Mono<List<ProcessType>> getProcessType() {
-        return inventoryApi.get()
-                .uri(builder -> builder.path("/setup/get-process-type")
-                .queryParam("compCode", Global.compCode)
-                .build())
-                .retrieve()
-                .bodyToFlux(ProcessType.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
@@ -1849,7 +1833,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> restore(OrderHisKey key) {
         return inventoryApi.post()
-                .uri("/sale/restore-sale")
+                .uri("/sale/restoreSale")
                 .body(Mono.just(key), OrderHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -2049,7 +2033,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> delete(WeightLossHisKey key) {
         return inventoryApi.post()
-                .uri("/weight/delete-weight-loss")
+                .uri("/weight/deleteWeightLoss")
                 .body(Mono.just(key), WeightLossHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -2061,7 +2045,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> restore(WeightLossHisKey key) {
         return inventoryApi.post()
-                .uri("/weight/restore-weight-loss")
+                .uri("/weight/restoreWeightLoss")
                 .body(Mono.just(key), WeightLossHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -2094,7 +2078,7 @@ public class InventoryRepo {
 
     public Mono<ProcessHis> uploadProcess(ProcessHis his) {
         return inventoryApi.post()
-                .uri("/process/save-process")
+                .uri("/process/saveProcess")
                 .body(Mono.just(his), ProcessHis.class)
                 .retrieve()
                 .bodyToMono(ProcessHis.class)
@@ -2376,7 +2360,7 @@ public class InventoryRepo {
 
     public Mono<RetOutHis> uploadRetOut(RetOutHis ro) {
         return inventoryApi.post()
-                .uri("/retout/save-retout")
+                .uri("/retout/saveReturnOut")
                 .body(Mono.just(ro), RetInHis.class)
                 .retrieve()
                 .bodyToMono(RetOutHis.class)
@@ -2881,7 +2865,7 @@ public class InventoryRepo {
     public Mono<List<WeightLossHis>> getWeightLoss(FilterObject filter) {
         return inventoryApi
                 .post()
-                .uri("/weight/get-weight-loss")
+                .uri("/weight/getWeightLoss")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(WeightLossHis.class)
