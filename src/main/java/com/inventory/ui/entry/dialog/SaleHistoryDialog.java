@@ -144,11 +144,10 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     }
 
     private void initCombo() {
-        userRepo.getAppUser().subscribe((t) -> {
-            appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
-        }, (e) -> {
-            log.error(e.getMessage());
-        });
+        appUserAutoCompleter = new AppUserAutoCompleter(txtUser, null, true);
+        userRepo.getAppUser().doOnSuccess((t) -> {
+            appUserAutoCompleter.setListUser(t);
+        }).subscribe();
         saleManAutoCompleter = new SaleManAutoCompleter(txtSaleMan, null, true);
         inventoryRepo.getSaleMan().subscribe((t) -> {
             saleManAutoCompleter.setListSaleMan(t);
@@ -221,11 +220,11 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     }
 
     private String getLocCode() {
-        return locationAutoCompleter == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
+        return locationAutoCompleter.getLocation() == null ? "-" : locationAutoCompleter.getLocation().getKey().getLocCode();
     }
 
     private Integer getDepId() {
-        return departmentAutoCompleter == null ? 0 : departmentAutoCompleter.getDepartment().getKey().getDeptId();
+        return departmentAutoCompleter.getDepartment() == null ? 0 : departmentAutoCompleter.getDepartment().getKey().getDeptId();
     }
 
     private String getCurCode() {

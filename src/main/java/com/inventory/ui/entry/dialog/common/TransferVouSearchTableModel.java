@@ -22,16 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TransferVouSearchTableModel extends AbstractTableModel {
 
     private List<VTransfer> listDetail = new ArrayList();
-    private final String[] columnNames = {"Date", "Vou No", "Location From", "Location To", "Remark", "Ref No", "Created By"};
-    private JTable parent;
-
-    public JTable getParent() {
-        return parent;
-    }
-
-    public void setParent(JTable parent) {
-        this.parent = parent;
-    }
+    private final String[] columnNames = {"Date", "Vou No", "Location From", "Location To", "Remark", "Ref No", "Trader", "Created By"};
 
     @Override
     public String getColumnName(int column) {
@@ -91,7 +82,9 @@ public class TransferVouSearchTableModel extends AbstractTableModel {
                     return his.getRefNo();
                 }
                 case 6 -> {
-                    //v-total
+                    return his.getTraderName();
+                }
+                case 7 -> {
                     return Global.hmUser.get(his.getCreatedBy());
                 }
             }
@@ -112,7 +105,8 @@ public class TransferVouSearchTableModel extends AbstractTableModel {
 
     public VTransfer getSelectVou(int row) {
         return listDetail.get(row);
-    }    
+    }
+
     public void clear() {
         listDetail.clear();
         fireTableDataChanged();

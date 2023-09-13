@@ -124,9 +124,10 @@ public class PaymentHistoryDialog extends javax.swing.JDialog implements KeyList
 
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, true, "-");
-        userRepo.getAppUser().subscribe((t) -> {
-            appUserAutoCompleter = new AppUserAutoCompleter(txtUser, t, null, true);
-        });
+        appUserAutoCompleter = new AppUserAutoCompleter(txtUser, null, true);
+        userRepo.getAppUser().doOnSuccess((t) -> {
+            appUserAutoCompleter.setListUser(t);
+        }).subscribe();
         stockAutoCompleter = new StockAutoCompleter(txtAccount, inventoryRepo, null, true);
         cOA3AutoCompleter = new COA3AutoCompleter(txtAccount, accountRepo, null, true, 3);
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);

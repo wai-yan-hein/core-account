@@ -159,7 +159,7 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
     }
 
     private String getDeptCode() {
-        return departmentAutoCompleter == null ? "-" : departmentAutoCompleter.getDepartment().getKey().getDeptCode();
+        return departmentAutoCompleter.getDepartment() == null ? "-" : departmentAutoCompleter.getDepartment().getKey().getDeptCode();
     }
 
     private void searchJournal() {
@@ -182,10 +182,11 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
     private void initCompleter() {
         monoDep = accountRepo.getDepartment();
         monoCur = userRepo.getCurrency();
-        monoDep.subscribe((t) -> {
-            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true, false);
-            departmentAutoCompleter.setObserver(this);
-        });
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true, true);
+        departmentAutoCompleter.setObserver(this);
+        monoDep.doOnSuccess((t) -> {
+            departmentAutoCompleter.setListDepartment(t);
+        }).subscribe();
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);

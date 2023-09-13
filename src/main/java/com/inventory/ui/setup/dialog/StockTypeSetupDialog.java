@@ -9,6 +9,7 @@ import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.inventory.model.MessageType;
 import com.inventory.model.StockType;
 import com.inventory.model.StockTypeKey;
 import com.repo.InventoryRepo;
@@ -132,12 +133,20 @@ public class StockTypeSetupDialog extends javax.swing.JDialog implements KeyList
                     listStockType.add(t);
                 }
                 clear();
+                sendMessage(t.getStockTypeName());
             }, (e) -> {
                 progress.setIndeterminate(false);
                 btnSave.setEnabled(true);
             });
 
         }
+    }
+
+    private void sendMessage(String mes) {
+        inventoryRepo.sendDownloadMessage(MessageType.GROUP, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     private void clear() {

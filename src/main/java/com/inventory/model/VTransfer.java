@@ -33,4 +33,7 @@ public class VTransfer {
     private boolean deleted;
     private Integer deptId;
     private boolean local;
+    private String traderName;
+    private Float weight;
+    private String weightUnit;
 }

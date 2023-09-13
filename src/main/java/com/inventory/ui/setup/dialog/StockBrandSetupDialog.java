@@ -8,6 +8,7 @@ package com.inventory.ui.setup.dialog;
 import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
+import com.inventory.model.MessageType;
 import com.inventory.model.StockBrand;
 import com.inventory.model.StockBrandKey;
 import com.repo.InventoryRepo;
@@ -121,6 +122,7 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
                     listStockBrand.add(t);
                 }
                 clear();
+                sendMessage(t.getBrandName());
             }, (e) -> {
                 progress.setIndeterminate(false);
                 btnSave.setEnabled(true);
@@ -128,6 +130,13 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
             });
 
         }
+    }
+
+    private void sendMessage(String mes) {
+        inventoryRepo.sendDownloadMessage(MessageType.BRAND, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     private void clear() {
@@ -308,7 +317,7 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(txtCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -320,7 +329,7 @@ public class StockBrandSetupDialog extends javax.swing.JDialog implements KeyLis
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(btnClear)
                         .addComponent(btnSave)))
-                .addContainerGap(257, Short.MAX_VALUE))
+                .addContainerGap(263, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());

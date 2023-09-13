@@ -1072,10 +1072,10 @@ public class Util1 {
         File folder = new File(folderPath);
 
         // Check if the folder exists
-        if (folder.exists() && folder.isDirectory()) {
+        if (folder.exists()) {
             try {
                 // Open the folder using the default file manager
-                Desktop.getDesktop().open(folder);
+                Desktop.getDesktop().edit(folder);
             } catch (IOException e) {
                 log.error("openFolder : " + e.getMessage());
                 // Handle the exception as needed

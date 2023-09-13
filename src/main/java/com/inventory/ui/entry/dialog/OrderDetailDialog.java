@@ -6,11 +6,10 @@ package com.inventory.ui.entry.dialog;
 
 import com.common.Global;
 import com.common.TableCellRender;
-import com.inventory.ui.common.GRNTableModel;
+import com.inventory.ui.common.OrderTableModel;
 import com.repo.InventoryRepo;
 import java.awt.event.KeyEvent;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
@@ -21,7 +20,7 @@ import javax.swing.ListSelectionModel;
  */
 public class OrderDetailDialog extends javax.swing.JDialog {
 
-    private final GRNTableModel grnTableModel = new GRNTableModel();
+    private final OrderTableModel orderTableModel = new OrderTableModel();
     private InventoryRepo inventoryRepo;
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
@@ -43,8 +42,8 @@ public class OrderDetailDialog extends javax.swing.JDialog {
     }
 
     private void initTable() {
-        grnTableModel.setEditable(false);
-        tblGRN.setModel(grnTableModel);
+        orderTableModel.setLblRecord(lblRecord);
+        tblGRN.setModel(orderTableModel);
         tblGRN.getTableHeader().setFont(Global.tblHeaderFont);
         tblGRN.setCellSelectionEnabled(true);
         tblGRN.setRowHeight(Global.tblRowHeight);
@@ -65,18 +64,15 @@ public class OrderDetailDialog extends javax.swing.JDialog {
         tblGRN.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
 
-    public void searchGRNDetail(String batchNo) {
-        if (!batchNo.isEmpty()) {
+    public void searchOrderDetail(String vouNo, Integer deptId) {
+        if (!vouNo.isEmpty()) {
             progress.setIndeterminate(true);
-            inventoryRepo.getGRNDetailBatch(batchNo, 0).subscribe((t) -> {
-                grnTableModel.setListDetail(t);
+            inventoryRepo.getOrderDetail(vouNo, deptId, false).doOnSuccess((t) -> {
+                orderTableModel.setListDetail(t);
+            }).doOnTerminate(() -> {
                 progress.setIndeterminate(false);
-            }, (e) -> {
-                progress.setIndeterminate(false);
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            }, () -> {
                 setVisible(true);
-            });
+            }).subscribe();
         }
     }
 
@@ -92,9 +88,11 @@ public class OrderDetailDialog extends javax.swing.JDialog {
         jScrollPane1 = new javax.swing.JScrollPane();
         tblGRN = new javax.swing.JTable();
         progress = new javax.swing.JProgressBar();
+        jLabel1 = new javax.swing.JLabel();
+        lblRecord = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("GRN Detail Dialog");
+        setTitle("Order Detail Dialog");
 
         tblGRN.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -109,6 +107,12 @@ public class OrderDetailDialog extends javax.swing.JDialog {
         ));
         jScrollPane1.setViewportView(tblGRN);
 
+        jLabel1.setFont(Global.lableFont);
+        jLabel1.setText("Records : ");
+
+        lblRecord.setFont(Global.lableFont);
+        lblRecord.setText("0");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -116,8 +120,12 @@ public class OrderDetailDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 388, Short.MAX_VALUE)
-                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 518, Short.MAX_VALUE)
+                    .addComponent(progress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lblRecord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -126,7 +134,11 @@ public class OrderDetailDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 182, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 208, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(lblRecord))
                 .addContainerGap())
         );
 
@@ -138,7 +150,9 @@ public class OrderDetailDialog extends javax.swing.JDialog {
      */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lblRecord;
     private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblGRN;
     // End of variables declaration//GEN-END:variables

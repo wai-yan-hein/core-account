@@ -668,8 +668,8 @@ public class H2Repo {
         return Mono.justOrEmpty(departmentAccService.find(key));
     }
 
-    public Flux<TraderA> getTraderAccount() {
-        return Flux.fromIterable(traderAccService.findAll(Global.compCode));
+    public Mono<List<TraderA>> getTraderAccount() {
+        return Mono.just(traderAccService.findAll(Global.compCode));
     }
 
     public Mono<List<TraderA>> getTrader(String str) {
@@ -677,7 +677,7 @@ public class H2Repo {
     }
 
     public Flux<ChartOfAccount> getChartofAccount() {
-        return Flux.fromIterable(coaService.findAll(Global.compCode));
+        return Flux.fromIterable(coaService.getCOA(Global.compCode));
     }
 
     public Mono<ChartOfAccount> find(COAKey key) {

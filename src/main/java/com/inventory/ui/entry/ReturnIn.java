@@ -562,16 +562,7 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     private void printSaveVoucher(String vouNo) {
-        Mono<byte[]> result = inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-return-in-report")
-                .queryParam("vouNo", vouNo)
-                .queryParam("macId", Global.macId)
-                .queryParam("compCode", Global.compCode)
-                .build())
-                .retrieve()
-                .bodyToMono(ByteArrayResource.class)
-                .map(ByteArrayResource::getByteArray);
-        result.subscribe((t) -> {
+        inventoryRepo.getReturnInReport(vouNo).subscribe((t) -> {
             try {
                 if (t != null) {
                     String reportName = "ReturnInVoucher";

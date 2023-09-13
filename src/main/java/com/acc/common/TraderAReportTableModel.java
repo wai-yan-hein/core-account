@@ -17,16 +17,16 @@ import lombok.extern.slf4j.Slf4j;
  * @author Lenovo
  */
 @Slf4j
-public class TraderATableModel extends AbstractTableModel {
+public class TraderAReportTableModel extends AbstractTableModel {
 
     private List<TraderA> listTrader = new ArrayList<>();
-    private final String[] columnNames = {"No.", "Code", "Name"};
+    private final String[] columnNames = {"Code", "Name", "Active"};
 
-    public TraderATableModel(List<TraderA> listTrader) {
+    public TraderAReportTableModel(List<TraderA> listTrader) {
         this.listTrader = listTrader;
     }
 
-    public TraderATableModel() {
+    public TraderAReportTableModel() {
     }
 
     @Override
@@ -36,12 +36,12 @@ public class TraderATableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return column == 3;
+        return column == 2;
     }
 
     @Override
     public Class getColumnClass(int column) {
-        return column == 3 ? Boolean.class : String.class;
+        return column == 2 ? Boolean.class : String.class;
     }
 
     public List<TraderA> getListTrader() {
@@ -64,11 +64,11 @@ public class TraderATableModel extends AbstractTableModel {
                 TraderA trader = listTrader.get(row);
                 return switch (column) {
                     case 0 ->
-                        String.valueOf(row + 1 + ". ");
-                    case 1 ->
                         Util1.isNull(trader.getUserCode(), trader.getKey().getCode());
-                    case 2 ->
+                    case 1 ->
                         trader.getTraderName();
+                    case 2 ->
+                        trader.isActive();
                     default ->
                         null;
                 }; //Code
@@ -82,6 +82,20 @@ public class TraderATableModel extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object value, int row, int column) {
+        try {
+            if (!listTrader.isEmpty()) {
+                TraderA coa = listTrader.get(row);
+                if (value != null) {
+                    switch (column) {
+                        case 3 ->
+                            coa.setActive((Boolean) value);
+                    }
+                }
+                fireTableRowsUpdated(row, row);
+            }
+        } catch (Exception e) {
+            log.error("setValueAt : " + e.getMessage());
+        }
     }
 
     @Override

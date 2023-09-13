@@ -147,16 +147,14 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
     private void searchTrader() {
         progress.setIndeterminate(true);
         traderATableModel.clear();
-        accountRepo.getTrader()
-                .collectList()
-                .subscribe((t) -> {
-                    traderATableModel.setListTrader(t);
-                    lblRecord.setText(String.valueOf(traderATableModel.getListTrader().size() + ""));
-                    progress.setIndeterminate(false);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                    progress.setIndeterminate(false);
-                });
+        accountRepo.getTrader().subscribe((t) -> {
+            traderATableModel.setListTrader(t);
+            lblRecord.setText(String.valueOf(traderATableModel.getListTrader().size() + ""));
+            progress.setIndeterminate(false);
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+            progress.setIndeterminate(false);
+        });
 
     }
 

@@ -82,10 +82,6 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         return locationAutoCompleter;
     }
 
-    public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
-        this.locationAutoCompleter = locationAutoCompleter;
-    }
-
     public SelectionObserver getObserver() {
         return observer;
     }
@@ -113,9 +109,9 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
     }
 
     public void initMain() {
-        assignDefaultValue();
         initCombo();
         initTable();
+        assignDefaultValue();
     }
 
     private void initFocusAdapter() {

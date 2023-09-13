@@ -9,6 +9,7 @@ import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.inventory.model.MessageType;
 import com.inventory.model.StockUnit;
 import com.inventory.model.StockUnitKey;
 import com.repo.InventoryRepo;
@@ -126,12 +127,20 @@ public class StockUnitSetupDailog extends javax.swing.JDialog implements KeyList
                     listStockUnit.add(t);
                 }
                 clear();
+                sendMessage(t.getUnitName());
             }, (e) -> {
                 progress.setIndeterminate(false);
                 btnSave.setEnabled(true);
             });
 
         }
+    }
+
+    private void sendMessage(String mes) {
+        inventoryRepo.sendDownloadMessage(MessageType.UNIT, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     private void clear() {

@@ -278,12 +278,11 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private void initFilter() {
         monoDep = accountRepo.getDepartment();
         monoCur = userRepo.getCurrency();
-        monoDep.subscribe((t) -> {
-            departmentAutoCompleter = new DepartmentAutoCompleter(txtDepartment, t, null, true, true);
-            departmentAutoCompleter.setObserver(this);
-        }, (e) -> {
-            log.error(e.getMessage());
-        });
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDepartment, null, true, true);
+        departmentAutoCompleter.setObserver(this);
+        monoDep.doOnSuccess((t) -> {
+            departmentAutoCompleter.setListDepartment(t);
+        }).subscribe();
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         currencyAutoCompleter.setObserver(this);
         monoCur.subscribe((t) -> {
@@ -646,7 +645,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private List<String> getListDep() {
-        return departmentAutoCompleter == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
+        return departmentAutoCompleter.getDepartment() == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
     }
 
     private String getTranSource() {
@@ -704,7 +703,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private ReportFilter getFilter() {
-        ReportFilter filter = new ReportFilter(Global.macId,Global.compCode, Global.deptId);
+        ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setFromDate(dateAutoCompleter.getDateModel().getStartDate());
         filter.setToDate(dateAutoCompleter.getDateModel().getEndDate());
         filter.setDesp(despAutoCompleter.getAutoText().getDescription().equals("All") ? "-" : despAutoCompleter.getAutoText().getDescription());
@@ -733,7 +732,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
 
     private ReportFilter getOPFilter() {
         String clDate = dateAutoCompleter.getDateModel().getStartDate();
-        ReportFilter filter = new ReportFilter(Global.macId,Global.compCode, Global.deptId);
+        ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setFromDate(clDate);
         filter.setCurCode(getCurCode());
         filter.setListDepartment(getListDep());

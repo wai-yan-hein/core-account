@@ -6,6 +6,7 @@
 package com.ui;
 
 import com.CoreAccountApplication;
+import com.SSEListener;
 import com.repo.AccountRepo;
 import com.acc.entry.AllCash;
 import com.acc.entry.DrCrVoucher;
@@ -223,6 +224,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private DateFilterRepo dateFilterRepo;
     @Autowired
     private TaskScheduler taskScheduler;
+    @Autowired
+    private SSEListener sseListener;
     private PanelControl control;
     private final HashMap<String, JPanel> hmPanel = new HashMap<>();
     private final ActionListener menuListener = (java.awt.event.ActionEvent evt) -> {
@@ -889,6 +892,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     public void initMain() {
         Global.parentForm = this;
         setTitle("Core Account Cloud : " + Global.version);
+        sseListener.start();
         scheduleNetwork();
         scheduleExit();
         initUser();

@@ -10,6 +10,7 @@ import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.UnitFormatRender;
 import com.inventory.editor.StockUnitEditor;
+import com.inventory.model.MessageType;
 import com.inventory.model.RelationKey;
 import com.inventory.model.UnitRelationDetail;
 import com.inventory.model.UnitRelation;
@@ -164,9 +165,17 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
                 }
                 relationTableModel.setListRelation(listUnitRelation);
                 clear();
+                sendMessage(t.getRelName());
             });
 
         }
+    }
+
+    private void sendMessage(String mes) {
+        inventoryRepo.sendDownloadMessage(MessageType.RELATION, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     private void clear() {

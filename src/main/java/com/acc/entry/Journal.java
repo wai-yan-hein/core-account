@@ -73,10 +73,6 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     @Autowired
     private UserRepo userRepo;
 
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
@@ -162,7 +158,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     };
 
     private List<String> getListDep() {
-        return departmentAutoCompleter == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
+        return departmentAutoCompleter.getDepartment() == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
     }
 
     private String getProjectNo() {
@@ -210,11 +206,11 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         projectAutoCompleter.setObserver(this);
         cOA3AutoCompleter = new COA3AutoCompleter(txtAccount, accountRepo, null, true, 3);
         cOA3AutoCompleter.setObserver(this);
-        Mono<List<DepartmentA>> monoDep = accountRepo.getDepartment();
-        monoDep.subscribe((t) -> {
-            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true, true);
-            departmentAutoCompleter.setObserver(this);
-        });
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true, true);
+        departmentAutoCompleter.setObserver(this);
+        accountRepo.getDepartment().doOnSuccess((t) -> {
+            departmentAutoCompleter.setListDepartment(t);
+        }).subscribe();
     }
 
     private void initTable() {

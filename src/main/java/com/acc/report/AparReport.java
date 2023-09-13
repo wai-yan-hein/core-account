@@ -228,7 +228,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private List<String> getListDep() {
-        return departmentAutoCompleter == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
+        return departmentAutoCompleter.getDepartment() == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
     }
 
     private String getCoaCode() {
@@ -304,11 +304,11 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     private void initCombo() {
         dateAutoCompleter = new DateAutoCompleter(txtDate);
         dateAutoCompleter.setObserver(this);
-        accountRepo.getDepartment().subscribe((t) -> {
-            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep,
-                    t, null, true, true);
-            departmentAutoCompleter.setObserver(this);
-        });
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true, true);
+        departmentAutoCompleter.setObserver(this);
+        accountRepo.getDepartment().doOnSuccess((t) -> {
+            departmentAutoCompleter.setListDepartment(t);
+        }).subscribe();
         cOAAutoCompleter = new COAAutoCompleter(txtAccount, null, true);
         cOAAutoCompleter.setObserver(this);
         accountRepo.getTraderAccount().collectList().subscribe((t) -> {

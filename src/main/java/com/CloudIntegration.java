@@ -58,7 +58,6 @@ import com.inventory.model.TransferHis;
 import com.inventory.model.WeightLossHis;
 import com.repo.InventoryRepo;
 import com.repo.UserRepo;
-import java.time.Duration;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -263,7 +262,6 @@ public class CloudIntegration {
                     retOutService.updateACK(o.getKey());
                 });
             });
-
         }
     }
 
@@ -638,7 +636,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadInvTrader() {
+    public void downloadInvTrader() {
         inventoryRepo.getUpdateTrader(traderInvService.getMaxDate()).subscribe((t) -> {
             observer.selected("download", "downloadInvTrader list : " + t.size());
             t.forEach((s) -> {
@@ -662,7 +660,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadLocation() {
+    public void downloadLocation() {
         inventoryRepo.getUpdateLocation(locationService.getMaxDate()).subscribe((t) -> {
             observer.selected("download", "downloadLocation list : " + t.size());
             t.forEach((s) -> {
@@ -674,7 +672,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadRelation() {
+    public void downloadRelation() {
         inventoryRepo.getUpdateRelation(relationService.getMaxDate()).subscribe((t) -> {
             observer.selected("download", "downloadRelation list : " + t.size());
             t.forEach((s) -> {
@@ -686,7 +684,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadUnit() {
+    public void downloadUnit() {
         inventoryRepo.getUpdateUnit(stockService.getMaxDate()).subscribe((t) -> {
             observer.selected("download", "downloadUnit list : " + t.size());
             t.forEach((s) -> {
@@ -698,7 +696,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadBrand() {
+    public void downloadBrand() {
         inventoryRepo.getUpdateBrand(brandService.getMaxDate()).subscribe((t) -> {
             observer.selected("download", "downloadBrand list : " + t.size());
             t.forEach((s) -> {
@@ -710,7 +708,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadCategory() {
+    public void downloadCategory() {
         inventoryRepo.getUpdateCategory(categoryService.getMaxDate()).subscribe((t) -> {
             observer.selected("download", "downloadCategory list : " + t.size());
             t.forEach((s) -> {
@@ -722,7 +720,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadStockType() {
+    public void downloadStockType() {
         inventoryRepo.getUpdateStockType(stockTypeService.getMaDate()).subscribe((t) -> {
             observer.selected("download", "downloadStockType list : " + t.size());
             t.forEach((s) -> {
@@ -734,7 +732,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadStock() {
+    public void downloadStock() {
         String maxDate = stockService.getMaxDate();
         inventoryRepo.getUpdateStock(maxDate).subscribe((t) -> {
             observer.selected("download", "downloadStock list : " + t.size());
@@ -749,9 +747,7 @@ public class CloudIntegration {
 
     public void start() {
         if (localDatabase) {
-            taskScheduler.scheduleAtFixedRate(() -> {
-                startDownload();
-            }, Duration.ofMinutes(15));
+            startDownload();
         } else {
             observer.selected("enable", true);
         }

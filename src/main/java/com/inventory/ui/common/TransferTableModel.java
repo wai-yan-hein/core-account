@@ -132,7 +132,7 @@ public class TransferTableModel extends AbstractTableModel {
                     return io.getUnitCode();
                 }
                 case 5 -> {
-                    return io.getWeight();
+                    return Util1.getFloat(io.getWeight()) == 0 ? null : io.getWeight();
                 }
                 case 6 -> {
                     return io.getWeightUnit();
@@ -175,8 +175,7 @@ public class TransferTableModel extends AbstractTableModel {
                             io.setUnitCode(s.getPurUnitCode());
                             io.setWeight(s.getWeight());
                             io.setWeightUnit(s.getWeightUnit());
-                            String key = "stock.use.weight";
-                            if (Util1.getBoolean(ProUtil.getProperty(key))) {
+                            if (ProUtil.isUseWeight()) {
                                 setColumnSelection(5);
                             } else {
                                 setColumnSelection(3);

@@ -6,11 +6,14 @@ package com.acc.report.excel;
 
 import com.acc.common.COAOptionTableModel;
 import com.acc.common.DateAutoCompleter;
+import com.acc.common.TraderAReportTableModel;
 import com.acc.model.ChartOfAccount;
 import com.acc.model.Gl;
+import com.acc.model.TraderA;
 import com.common.Global;
 import com.common.ReportFilter;
 import com.common.SelectionObserver;
+import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.repo.AccountRepo;
@@ -23,6 +26,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingWorker;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
@@ -40,11 +45,19 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
     private AccountRepo accountRepo;
     private UserRepo userRepo;
     private COAOptionTableModel cOATableModel = new COAOptionTableModel();
+    private TraderAReportTableModel traderTableModel = new TraderAReportTableModel();
     private CurrencyAutoCompleter currencyAutoCompleter;
-    private static final String OUTPUT_FILE_PATH = System.getProperty("user.home") + "/Downloads/IndividualLedgerExcel.xlsx";
-    private static final String[] HEADERS = {
+    private TableRowSorter<TableModel> sorterCOA;
+    private TableRowSorter<TableModel> sorterTrader;
+    private StartWithRowFilter swrfCOA;
+    private StartWithRowFilter swrfTrader;
+    private static final String OUTPUT_FILE_PATH = System.getProperty("user.home") + "/Downloads/";
+    private static final String[] HEADERS_COA = {
         "Date", "Dep :", "Description", "Reference", "Ref No", "Trader Name",
         "Account", "Currency", "Dr Amt", "Cr Amt", "Opening", "Closing"
+    };
+    private static final String[] HEADERS_TRADER = {
+        "Date", "Dep :", "Description", "Reference", "Ref No", "Account", "Currency", "Dr Amt", "Cr Amt", "Opening", "Closing"
     };
 
     public void setAccountRepo(AccountRepo accountRepo) {
@@ -72,8 +85,8 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
 
     public void initMain() {
         initCombo();
-        initTable();
-        searchCOA();
+        initTableCOA();
+        initTableTrader();
     }
 
     private void initCombo() {
@@ -89,7 +102,7 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
         }).subscribe();
     }
 
-    private void initTable() {
+    private void initTableCOA() {
         tblCOA.setModel(cOATableModel);
         tblCOA.setFont(Global.textFont);
         tblCOA.getTableHeader().setFont(Global.tblHeaderFont);
@@ -97,12 +110,38 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
         tblCOA.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCOA.setDefaultRenderer(Object.class, new TableCellRender());
         tblCOA.setDefaultRenderer(Boolean.class, new TableCellRender());
+        tblCOA.getColumnModel().getColumn(0).setPreferredWidth(50);// Code
+        tblCOA.getColumnModel().getColumn(1).setPreferredWidth(200);// Name
+        tblCOA.getColumnModel().getColumn(2).setPreferredWidth(200);// Group
+        tblCOA.getColumnModel().getColumn(3).setPreferredWidth(50);// Select
+        sorterCOA = new TableRowSorter<>(tblCOA.getModel());
+        tblCOA.setRowSorter(sorterCOA);
+        swrfCOA = new StartWithRowFilter(txtSearch);
+        searchCOA();
+    }
+
+    private void initTableTrader() {
+        tblTrader.setModel(traderTableModel);
+        tblTrader.setFont(Global.textFont);
+        tblTrader.getTableHeader().setFont(Global.tblHeaderFont);
+        tblTrader.setRowHeight(Global.tblRowHeight);
+        tblTrader.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblTrader.setDefaultRenderer(Object.class, new TableCellRender());
+        tblTrader.setDefaultRenderer(Boolean.class, new TableCellRender());
+        tblTrader.getTableHeader().setFont(Global.textFont);
+        tblTrader.getColumnModel().getColumn(0).setPreferredWidth(30);// Code
+        tblTrader.getColumnModel().getColumn(1).setPreferredWidth(200);// Name
+        tblTrader.getColumnModel().getColumn(2).setPreferredWidth(20);// Name
+        sorterTrader = new TableRowSorter<>(tblTrader.getModel());
+        tblTrader.setRowSorter(sorterTrader);
+        swrfTrader = new StartWithRowFilter(txtTraderSearch);
+        searchTrader();
     }
 
     private void searchCOA() {
         progress.setIndeterminate(true);
         accountRepo.getChartOfAccount().doOnSuccess((t) -> {
-            cOATableModel.setListCOA(t);
+            selectCOA(t);
             progress.setIndeterminate(false);
         }).doOnError((e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
@@ -110,17 +149,36 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
         }).subscribe();
     }
 
-    private void select() {
-        List<ChartOfAccount> list = cOATableModel.getListCOA();
+    private void searchTrader() {
+        progress.setIndeterminate(true);
+        accountRepo.getTrader().doOnSuccess((t) -> {
+            selectTrader(t);
+            progress.setIndeterminate(false);
+        }).doOnError((e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+            progress.setIndeterminate(false);
+        }).subscribe();
+    }
+
+    private void selectCOA(List<ChartOfAccount> list) {
         list.forEach((t) -> {
             t.setActive(chkSelect.isSelected());
         });
-        cOATableModel.fireTableDataChanged();
+        cOATableModel.setListCOA(list);
+        lblCOARecord.setText(list.size() + "");
     }
 
-    private void exportExcels(String outputPath) {
-        btnExport.setEnabled(false);
+    private void selectTrader(List<TraderA> list) {
+        list.forEach((t) -> {
+            t.setActive(chkTraderSelect.isSelected());
+        });
+        traderTableModel.setListTrader(list);
+        lblTraderRecord.setText(list.size() + "");
+    }
 
+    private void exportCOAExcels() {
+        btnExport.setEnabled(false);
+        String outputPath = OUTPUT_FILE_PATH + "IndividualLedgerExcel.xlsx";
         SwingWorker<Void, Integer> worker = new SwingWorker<Void, Integer>() {
             @Override
             protected Void doInBackground() throws Exception {
@@ -137,9 +195,9 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
                         if (t.isActive()) {
                             publish(completedCOAs);
                             String coaCode = t.getKey().getCoaCode();
-                            List<Gl> data = accountRepo.searchGl(getFilter(coaCode)).block();
+                            List<Gl> data = accountRepo.searchGl(getFilter(coaCode, null)).block();
                             String sheetName = Util1.replaceSpecialCharactersWithSpace(t.getCoaNameEng());
-                            createSheet(workbook, data, coaCode, Util1.autoCorrectSheetName(sheetName), cellStyle);
+                            createCOASheet(workbook, data, coaCode, Util1.autoCorrectSheetName(sheetName), cellStyle);
                             completedCOAs++;
                         }
                     }
@@ -166,18 +224,75 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
                 lblMessage.setText("Complete.");
                 progressExcel.setValue(100);
                 btnExport.setEnabled(true);
+                JOptionPane.showMessageDialog(Global.parentForm, "Complete.");
             }
         };
 
         worker.execute();
     }
 
-    private void createSheet(Workbook workbook, List<Gl> data, String coaCode, String sheetName, CellStyle cellStyle) {
+    private void exportTraderExcels() {
+        btnExport.setEnabled(false);
+        String outputPath = OUTPUT_FILE_PATH + "TraderIndividualLedgerExcel.xlsx";
+        SwingWorker<Void, Integer> worker = new SwingWorker<Void, Integer>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                try (Workbook workbook = new XSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(outputPath)) {
+                    Font font = workbook.createFont();
+                    font.setFontName("Pyidaungsu");
+                    font.setFontHeightInPoints((short) 12);
+                    CellStyle cellStyle = workbook.createCellStyle();
+                    cellStyle.setFont(font);
+                    List<TraderA> listTrader = traderTableModel.getListTrader();
+                    int completedCOAs = 0;
+
+                    for (TraderA t : listTrader) {
+                        if (t.isActive()) {
+                            publish(completedCOAs);
+                            String traderCode = t.getKey().getCode();
+                            String account = t.getAccount();
+                            List<Gl> data = accountRepo.searchGl(getFilter(account, traderCode)).block();
+                            log.info(data.size() + "");
+                            String sheetName = Util1.replaceSpecialCharactersWithSpace(t.getTraderName());
+                            createTraderSheet(workbook, data, account, traderCode, Util1.autoCorrectSheetName(sheetName), cellStyle);
+                            completedCOAs++;
+                        }
+                    }
+                    workbook.write(outputStream);
+                } catch (IOException e) {
+                    JOptionPane.showMessageDialog(null, e.getMessage());
+                }
+                return null;
+            }
+
+            @Override
+            protected void process(List<Integer> chunks) {
+                int completedCOAs = chunks.get(chunks.size() - 1);
+                int totalCOAs = cOATableModel.getListCOA().size();
+                int progress = (int) (((double) completedCOAs / totalCOAs) * 100);
+                progressExcel.setValue(progress);
+                lblMessage.setText("Progress: " + progress + "%");
+            }
+
+            @Override
+            protected void done() {
+                lblMessage.setText("Complete.");
+                progressExcel.setValue(100);
+                btnExport.setEnabled(true);
+            }
+        };
+
+        worker.execute();
+    }
+
+    private void createCOASheet(Workbook workbook, List<Gl> data,
+            String coaCode, String sheetName,
+            CellStyle cellStyle) {
         String uniqueSheetName = generateUniqueSheetName(workbook, sheetName);
         Sheet sheet = workbook.createSheet(uniqueSheetName);
         Row headerRow = sheet.createRow(0);
-        for (int i = 0; i < HEADERS.length; i++) {
-            headerRow.createCell(i).setCellValue(HEADERS[i]);
+        for (int i = 0; i < HEADERS_COA.length; i++) {
+            headerRow.createCell(i).setCellValue(HEADERS_COA[i]);
         }
         Font font = workbook.createFont();
         font.setFontName("Pyidaungsu");
@@ -209,7 +324,7 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
         }
         double drAmt = data.stream().mapToDouble((t) -> Util1.getDouble(t.getDrAmt())).sum();
         double crAmt = data.stream().mapToDouble((t) -> Util1.getDouble(t.getCrAmt())).sum();
-        double opening = accountRepo.getOpening(getOPFilter(coaCode)).block().getOpening();
+        double opening = accountRepo.getOpening(getOPFilter(coaCode, null)).block().getOpening();
         double closing = drAmt - crAmt + opening;
         Row row = sheet.createRow(data.size());
         row.createCell(8).setCellValue(drAmt);
@@ -219,7 +334,61 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
         for (Cell cell : row) {
             cell.setCellStyle(headerStyle);
         }
-        for (int i = 0; i < HEADERS.length; i++) {
+        for (int i = 0; i < HEADERS_COA.length; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+    }
+
+    private void createTraderSheet(Workbook workbook, List<Gl> data,
+            String coaCode, String traderCode, String sheetName,
+            CellStyle cellStyle) {
+        String uniqueSheetName = generateUniqueSheetName(workbook, sheetName);
+        Sheet sheet = workbook.createSheet(uniqueSheetName);
+        Row headerRow = sheet.createRow(0);
+        for (int i = 0; i < HEADERS_TRADER.length; i++) {
+            headerRow.createCell(i).setCellValue(HEADERS_TRADER[i]);
+        }
+        Font font = workbook.createFont();
+        font.setFontName("Pyidaungsu");
+        font.setFontHeightInPoints((short) 12);
+        font.setBold(true);
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFont(font);
+        for (Cell cell : headerRow) {
+            cell.setCellStyle(headerStyle);
+        }
+
+        int rowNum = 1;
+        for (Gl gl : data) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(Util1.toDateStr(gl.getGlDate(), Global.dateFormat));
+            row.createCell(1).setCellValue(gl.getDeptUsrCode());
+            row.createCell(2).setCellValue(gl.getDescription());
+            row.createCell(3).setCellValue(gl.getReference());
+            row.createCell(4).setCellValue(gl.getRefNo());
+            row.createCell(5).setCellValue(gl.getAccName());
+            row.createCell(6).setCellValue(gl.getCurCode());
+            row.createCell(7).setCellValue(Util1.getDouble(gl.getDrAmt()));
+            row.createCell(8).setCellValue(Util1.getDouble(gl.getCrAmt()));
+
+            for (Cell cell : row) {
+                cell.setCellStyle(cellStyle);
+            }
+        }
+        double drAmt = data.stream().mapToDouble((t) -> Util1.getDouble(t.getDrAmt())).sum();
+        double crAmt = data.stream().mapToDouble((t) -> Util1.getDouble(t.getCrAmt())).sum();
+        double opening = accountRepo.getOpening(getOPFilter(coaCode, traderCode)).block().getOpening();
+        double closing = drAmt - crAmt + opening;
+        Row row = sheet.createRow(data.size());
+        row.createCell(7).setCellValue(drAmt);
+        row.createCell(8).setCellValue(crAmt);
+        row.createCell(9).setCellValue(opening);
+        row.createCell(10).setCellValue(closing);
+        for (Cell cell : row) {
+            cell.setCellStyle(headerStyle);
+        }
+        for (int i = 0; i < HEADERS_TRADER.length; i++) {
             sheet.autoSizeColumn(i);
         }
 
@@ -238,25 +407,23 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
         return uniqueName;
     }
 
-    private void process() {
-        exportExcels(OUTPUT_FILE_PATH);
-    }
-
-    private ReportFilter getFilter(String srcAcc) {
+    private ReportFilter getFilter(String srcAcc, String traderCode) {
         ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setFromDate(dateAutoCompleter.getDateModel().getStartDate());
         filter.setToDate(dateAutoCompleter.getDateModel().getEndDate());
         filter.setSrcAcc(srcAcc);
         filter.setCurCode(getCurrency());
+        filter.setTraderCode(traderCode);
         return filter;
     }
 
-    private ReportFilter getOPFilter(String srcAcc) {
+    private ReportFilter getOPFilter(String srcAcc, String traderCode) {
         String clDate = dateAutoCompleter.getDateModel().getStartDate();
         ReportFilter filter = new ReportFilter(Global.macId, Global.compCode, Global.deptId);
         filter.setFromDate(clDate);
         filter.setCurCode(getCurrency());
         filter.setCoaCode(srcAcc);
+        filter.setTraderCode(traderCode);
         return filter;
     }
 
@@ -266,6 +433,16 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
 
     private void showInFolder() {
         Util1.openFolder(OUTPUT_FILE_PATH);
+    }
+
+    private void export() {
+        String name = tabMain.getTitleAt(tabMain.getSelectedIndex());
+        switch (name) {
+            case "COA" ->
+                exportCOAExcels();
+            case "Trader" ->
+                exportTraderExcels();
+        }
     }
 
     /**
@@ -286,6 +463,7 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
         jLabel3 = new javax.swing.JLabel();
         txtCurrency = new javax.swing.JTextField();
         jButton2 = new javax.swing.JButton();
+        tabMain = new javax.swing.JTabbedPane();
         jPanel2 = new javax.swing.JPanel();
         chkSelect = new javax.swing.JCheckBox();
         jSeparator1 = new javax.swing.JSeparator();
@@ -293,6 +471,17 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
         tblCOA = new javax.swing.JTable();
         txtSearch = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        lblCOARecord = new javax.swing.JLabel();
+        jPanel3 = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tblTrader = new javax.swing.JTable();
+        txtTraderSearch = new javax.swing.JTextField();
+        jLabel4 = new javax.swing.JLabel();
+        chkTraderSelect = new javax.swing.JCheckBox();
+        jSeparator2 = new javax.swing.JSeparator();
+        lblTraderRecord = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -392,8 +581,18 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
         ));
         jScrollPane1.setViewportView(tblCOA);
 
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtSearchKeyReleased(evt);
+            }
+        });
+
         jLabel2.setFont(Global.lableFont);
         jLabel2.setText("Search");
+
+        jLabel5.setText("Records : ");
+
+        lblCOARecord.setText("0");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -402,15 +601,19 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 361, Short.MAX_VALUE)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(chkSelect)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 485, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel2)
                         .addGap(12, 12, 12)
                         .addComponent(txtSearch))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(chkSelect)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblCOARecord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -425,9 +628,93 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
                     .addComponent(txtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 360, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 307, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(lblCOARecord))
                 .addContainerGap())
         );
+
+        tabMain.addTab("COA", jPanel2);
+
+        tblTrader.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane2.setViewportView(tblTrader);
+
+        txtTraderSearch.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtTraderSearchKeyReleased(evt);
+            }
+        });
+
+        jLabel4.setFont(Global.lableFont);
+        jLabel4.setText("Search");
+
+        chkTraderSelect.setFont(Global.lableFont);
+        chkTraderSelect.setText("Select All");
+        chkTraderSelect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkTraderSelectActionPerformed(evt);
+            }
+        });
+
+        lblTraderRecord.setText("0");
+
+        jLabel6.setText("Records : ");
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 487, Short.MAX_VALUE)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(chkTraderSelect)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addGap(12, 12, 12)
+                        .addComponent(txtTraderSearch))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblTraderRecord, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(chkTraderSelect)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtTraderSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 309, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel6)
+                    .addComponent(lblTraderRecord))
+                .addContainerGap())
+        );
+
+        tabMain.addTab("Trader", jPanel3);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -435,20 +722,17 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(tabMain, javax.swing.GroupLayout.PREFERRED_SIZE, 499, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-
-        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jPanel1, jPanel2});
-
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(tabMain)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -456,12 +740,12 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
 
     private void chkSelectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkSelectActionPerformed
         // TODO add your handling code here:
-        select();
+        selectCOA(cOATableModel.getListCOA());
     }//GEN-LAST:event_chkSelectActionPerformed
 
     private void btnExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportActionPerformed
         // TODO add your handling code here:
-        process();
+        export();
     }//GEN-LAST:event_btnExportActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -469,24 +753,59 @@ public class ExcelIndividualLedger extends javax.swing.JPanel implements Selecti
         showInFolder();
     }//GEN-LAST:event_jButton2ActionPerformed
 
+    private void txtSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSearchKeyReleased
+        // TODO add your handling code here:
+        if (txtSearch.getText().isEmpty()) {
+            sorterCOA.setRowFilter(null);
+        } else {
+            sorterCOA.setRowFilter(swrfCOA);
+        }
+    }//GEN-LAST:event_txtSearchKeyReleased
+
+    private void txtTraderSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtTraderSearchKeyReleased
+        // TODO add your handling code here:
+        if (txtTraderSearch.getText().isEmpty()) {
+            sorterTrader.setRowFilter(null);
+        } else {
+            sorterTrader.setRowFilter(swrfTrader);
+        }
+    }//GEN-LAST:event_txtTraderSearchKeyReleased
+
+    private void chkTraderSelectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkTraderSelectActionPerformed
+        // TODO add your handling code here:
+        selectTrader(traderTableModel.getListTrader());
+    }//GEN-LAST:event_chkTraderSelectActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnExport;
     private javax.swing.JCheckBox chkSelect;
+    private javax.swing.JCheckBox chkTraderSelect;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JLabel lblCOARecord;
     private javax.swing.JLabel lblMessage;
+    private javax.swing.JLabel lblTraderRecord;
     private javax.swing.JProgressBar progressExcel;
+    private javax.swing.JTabbedPane tabMain;
     private javax.swing.JTable tblCOA;
+    private javax.swing.JTable tblTrader;
     private javax.swing.JTextField txtCurrency;
     private javax.swing.JTextField txtDate;
     private javax.swing.JTextField txtSearch;
+    private javax.swing.JTextField txtTraderSearch;
     // End of variables declaration//GEN-END:variables
 
     @Override

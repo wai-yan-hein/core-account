@@ -44,7 +44,7 @@ import org.springframework.context.ApplicationContext;
 public class CoreAccountApplication {
 
     private static ApplicationContext context;
-    private static Tray tray;
+    public static Tray tray;
     private static final Image appIcon = new ImageIcon(CoreAccountApplication.class.getResource("/images/applogo.jpg")).getImage();
     private static ServerThread serverThread;
     private static Splash splash;

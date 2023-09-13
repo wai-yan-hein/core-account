@@ -19,6 +19,7 @@ import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.Location;
 import com.inventory.model.LocationKey;
+import com.inventory.model.MessageType;
 import com.repo.InventoryRepo;
 import com.inventory.ui.setup.dialog.common.LocationTableModel;
 import java.awt.Color;
@@ -168,9 +169,16 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
                     locationTableModel.addLocation(t);
                 }
                 clear();
+                sendMessage(t.getLocName());
             });
-
         }
+    }
+
+    private void sendMessage(String mes) {
+        inventoryRepo.sendDownloadMessage(MessageType.LOCATION, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     private void clear() {

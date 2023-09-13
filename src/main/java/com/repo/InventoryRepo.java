@@ -11,6 +11,7 @@ import com.inventory.model.CFont;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.ReportFilter;
+import com.common.ReturnObject;
 import com.common.Util1;
 import com.inventory.model.AccSetting;
 import com.inventory.model.Category;
@@ -23,6 +24,7 @@ import com.inventory.model.General;
 import com.inventory.model.Location;
 import com.inventory.model.LocationKey;
 import com.inventory.model.Message;
+import com.inventory.model.MessageType;
 import com.inventory.model.MillingExpense;
 import com.inventory.model.MillingHis;
 import com.inventory.model.MillingHisKey;
@@ -105,6 +107,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -487,7 +490,7 @@ public class InventoryRepo {
 
     public Mono<List<GRN>> getBatchList(String batchNo) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/grn/get-batch-list")
+                .uri(builder -> builder.path("/grn/getBatchList")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", ProUtil.getDepId())
                 .queryParam("batchNo", batchNo)
@@ -531,7 +534,7 @@ public class InventoryRepo {
 
     public Mono<List<Expense>> getExpense() {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/expense/get-expense")
+                .uri(builder -> builder.path("/expense/getExpense")
                 .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve().bodyToFlux(Expense.class)
@@ -759,7 +762,7 @@ public class InventoryRepo {
             return h2Repo.findProcess(key);
         }
         return inventoryApi.post()
-                .uri("/process/find-process")
+                .uri("/process/findProcess")
                 .body(Mono.just(key), ProcessHisKey.class)
                 .retrieve()
                 .bodyToMono(ProcessHis.class)
@@ -1083,7 +1086,7 @@ public class InventoryRepo {
 
     public Mono<Expense> saveExpense(Expense s) {
         return inventoryApi.post()
-                .uri("/expense/save-expense")
+                .uri("/expense/saveExpense")
                 .body(Mono.just(s), Expense.class)
                 .retrieve()
                 .bodyToMono(Expense.class)
@@ -1249,7 +1252,7 @@ public class InventoryRepo {
     public Mono<Boolean> deleteMilling(MillingHis his) {
         MillingHisKey key = his.getKey();
         return inventoryApi.post()
-                .uri("/milling/delete-milling")
+                .uri("/milling/deleteMilling")
                 .body(Mono.just(key), MillingHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -1309,7 +1312,7 @@ public class InventoryRepo {
             return Mono.justOrEmpty(general);
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-purchase-recent-price")
+                .uri(builder -> builder.path("/report/getPurchaseRecentPrice")
                 .queryParam("stockCode", stockCode)
                 .queryParam("vouDate", vouDate)
                 .queryParam("unit", unit)
@@ -1326,7 +1329,7 @@ public class InventoryRepo {
 
     public Mono<General> getWeightLossRecentPrice(String stockCode, String vouDate, String unit) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-weight-loss-recent-price")
+                .uri(builder -> builder.path("/report/getWeightLossRecentPrice")
                 .queryParam("stockCode", stockCode)
                 .queryParam("vouDate", vouDate)
                 .queryParam("unit", unit)
@@ -1342,7 +1345,7 @@ public class InventoryRepo {
 
     public Mono<General> getPurAvgPrice(String stockCode, String vouDate, String unit) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-purchase-avg-price")
+                .uri(builder -> builder.path("/report/getPurAvgPrice")
                 .queryParam("stockCode", stockCode)
                 .queryParam("vouDate", vouDate)
                 .queryParam("unit", unit)
@@ -1359,7 +1362,7 @@ public class InventoryRepo {
 
     public Mono<General> getProductionRecentPrice(String stockCode, String vouDate, String unit) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-production-recent-price")
+                .uri(builder -> builder.path("/report/getProductionRecentPrice")
                 .queryParam("stockCode", stockCode)
                 .queryParam("vouDate", vouDate)
                 .queryParam("unit", unit)
@@ -1376,7 +1379,7 @@ public class InventoryRepo {
 
     public Mono<General> getSaleRecentPrice(String stockCode, String vouDate, String unit) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-sale-recent-price")
+                .uri(builder -> builder.path("/report/getSaleRecentPrice")
                 .queryParam("stockCode", stockCode)
                 .queryParam("vouDate", vouDate)
                 .queryParam("unit", unit)
@@ -1392,7 +1395,7 @@ public class InventoryRepo {
 
     public Mono<General> getStockIORecentPrice(String stockCode, String vouDate, String unit) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-stock-io-recent-price")
+                .uri(builder -> builder.path("/report/getStockIORecentPrice")
                 .queryParam("stockCode", stockCode)
                 .queryParam("vouDate", vouDate)
                 .queryParam("unit", unit)
@@ -1504,12 +1507,8 @@ public class InventoryRepo {
         MillingHisKey key = new MillingHisKey();
         key.setVouNo(vouNo);
         key.setCompCode(Global.compCode);
-//        key.setDeptId(deptId);
-        if (local) {
-//            return h2Repo.findSale(key);
-        }
         return inventoryApi.post()
-                .uri("/milling/find-milling")
+                .uri("/milling/findMilling")
                 .body(Mono.just(key), MillingHisKey.class)
                 .retrieve()
                 .bodyToMono(MillingHis.class)
@@ -1558,7 +1557,7 @@ public class InventoryRepo {
             return h2Repo.findPurchase(key);
         }
         return inventoryApi.post()
-                .uri("/pur/find-pur")
+                .uri("/pur/findPur")
                 .body(Mono.just(key), PurHisKey.class)
                 .retrieve()
                 .bodyToMono(PurHis.class)
@@ -1577,7 +1576,7 @@ public class InventoryRepo {
             return h2Repo.findRetInHis(key);
         }
         return inventoryApi.post()
-                .uri("/retin/find-retin")
+                .uri("/retin/findReturnIn")
                 .body(Mono.just(key), RetInHisKey.class)
                 .retrieve()
                 .bodyToMono(RetInHis.class)
@@ -1593,7 +1592,7 @@ public class InventoryRepo {
         }
         return inventoryApi
                 .post()
-                .uri("/retin/get-retin")
+                .uri("/retin/getReturnIn")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(VReturnIn.class)
@@ -1609,7 +1608,7 @@ public class InventoryRepo {
             return h2Repo.searchReturnInDetail(vouNo, depId);
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/retin/get-retin-detail")
+                .uri(builder -> builder.path("/retin/getReturnInDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", depId)
@@ -1632,7 +1631,7 @@ public class InventoryRepo {
             return h2Repo.findRetOutHis(key);
         }
         return inventoryApi.post()
-                .uri("/retout/find-retout")
+                .uri("/retout/findReturnOut")
                 .body(Mono.just(key), RetOutHisKey.class)
                 .retrieve()
                 .bodyToMono(RetOutHis.class)
@@ -1647,7 +1646,7 @@ public class InventoryRepo {
             return h2Repo.searchReturnOutVoucher(filter);
         }
         return inventoryApi.post()
-                .uri("/retout/get-retout")
+                .uri("/retout/getReturnOut")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(VReturnOut.class)
@@ -1663,7 +1662,7 @@ public class InventoryRepo {
             return h2Repo.searchReturnOutDetail(vouNo, depId);
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/retout/get-retout-detail")
+                .uri(builder -> builder.path("/retout/getReturnOutDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", depId)
@@ -1682,7 +1681,7 @@ public class InventoryRepo {
             return h2Repo.getSmallQty(stockCode, unit, Global.compCode, Global.deptId);
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-smallest_qty")
+                .uri(builder -> builder.path("/report/getSmallQty")
                 .queryParam("stockCode", stockCode)
                 .queryParam("unit", unit)
                 .queryParam("compCode", Global.compCode)
@@ -1838,7 +1837,7 @@ public class InventoryRepo {
 //            return h2Repo.restoreSale(key);
         }
         return inventoryApi.post()
-                .uri("/milling/restore-milling")
+                .uri("/milling/restoreMilling")
                 .body(Mono.just(key), MillingHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -1862,7 +1861,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> restore(RetInHisKey key) {
         return inventoryApi.post()
-                .uri("/retin/restore-retin")
+                .uri("/retin/restoreReturnIn")
                 .body(Mono.just(key), RetInHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -1874,7 +1873,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> restore(RetOutHisKey key) {
         return inventoryApi.post()
-                .uri("/retout/restore-retout")
+                .uri("/retout/restoreReturnOut")
                 .body(Mono.just(key), RetOutHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -1886,7 +1885,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> delete(PurHisKey key) {
         return inventoryApi.post()
-                .uri("/pur/delete-pur")
+                .uri("/pur/deletePur")
                 .body(Mono.just(key), PurHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -1898,7 +1897,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> restore(PurHisKey key) {
         return inventoryApi.post()
-                .uri("/pur/restore-pur")
+                .uri("/pur/restorePur")
                 .body(Mono.just(key), PurHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -1910,7 +1909,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> delete(RetInHisKey key) {
         return inventoryApi.post()
-                .uri("/retin/delete-retin")
+                .uri("/retin/deleteReturnIn")
                 .body(Mono.just(key), RetInHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -1922,7 +1921,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> delete(RetOutHisKey key) {
         return inventoryApi.post()
-                .uri("/retout/delete-retout")
+                .uri("/retout/deleteReturnOut")
                 .body(Mono.just(key), RetOutHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -1982,7 +1981,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> delete(ProcessHisKey key) {
         return inventoryApi.post()
-                .uri("/process/delete-process")
+                .uri("/process/deleteProcess")
                 .body(Mono.just(key), StockIOKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class);
@@ -2002,7 +2001,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> restore(GRNKey key) {
         return inventoryApi.post()
-                .uri("/grn/restore-grn")
+                .uri("/grn/restoreGRN")
                 .body(Mono.just(key), GRNKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -2014,7 +2013,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> open(GRNKey key) {
         return inventoryApi.post()
-                .uri("/grn/open-grn")
+                .uri("/grn/openGRN")
                 .body(Mono.just(key), GRNKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -2026,7 +2025,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> delete(ProcessHisDetailKey key) {
         return inventoryApi.post()
-                .uri("/process/delete-process-detail")
+                .uri("/process/deleteProcessDetail")
                 .body(Mono.just(key), ProcessHisDetailKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -2038,7 +2037,7 @@ public class InventoryRepo {
 
     public Mono<Boolean> restore(ProcessHisKey key) {
         return inventoryApi.post()
-                .uri("/process/restore-process")
+                .uri("/process/restoreProcess")
                 .body(Mono.just(key), StockIOKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
@@ -2074,7 +2073,7 @@ public class InventoryRepo {
 
     public Mono<ProcessHis> saveProcess(ProcessHis his) {
         return inventoryApi.post()
-                .uri("/process/save-process")
+                .uri("/process/saveProcess")
                 .body(Mono.just(his), ProcessHis.class)
                 .retrieve()
                 .bodyToMono(ProcessHis.class)
@@ -2106,7 +2105,7 @@ public class InventoryRepo {
 
     public Mono<ProcessHisDetail> saveProcessDetail(ProcessHisDetail his) {
         return inventoryApi.post()
-                .uri("/process/save-process-detail")
+                .uri("/process/saveProcessDetail")
                 .body(Mono.just(his), ProcessHisDetail.class)
                 .retrieve()
                 .bodyToMono(ProcessHisDetail.class)
@@ -2121,7 +2120,7 @@ public class InventoryRepo {
             return h2Repo.getProcessDetail(vouNo, deptId);
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/process/get-process-detail")
+                .uri(builder -> builder.path("/process/getProcessDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", deptId)
@@ -2141,7 +2140,7 @@ public class InventoryRepo {
         }
         return inventoryApi
                 .post()
-                .uri("/process/get-process")
+                .uri("/process/getProcess")
                 .body(Mono.just(f), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(ProcessHis.class)
@@ -2157,7 +2156,7 @@ public class InventoryRepo {
             return h2Repo.searchPurchaseVoucher(filter);
         }
         return inventoryApi.post()
-                .uri("/pur/get-pur")
+                .uri("/pur/getPur")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(VPurchase.class)
@@ -2173,7 +2172,7 @@ public class InventoryRepo {
 //            return h2Repo.searchPurchaseVoucher(filter);
         }
         return inventoryApi.post()
-                .uri("/milling/get-milling")
+                .uri("/milling/getMilling")
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(MillingHis.class)
@@ -2189,7 +2188,7 @@ public class InventoryRepo {
             return h2Repo.searchPurchaseDetail(vouNo, deptId);
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/pur/get-pur-detail")
+                .uri(builder -> builder.path("/pur/getPurDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", deptId)
@@ -2205,7 +2204,7 @@ public class InventoryRepo {
 
     public Mono<General> getSaleVoucherInfo(String vouDate) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/sale/get-sale-voucher-info")
+                .uri(builder -> builder.path("/sale/getSaleVoucherInfo")
                 .queryParam("vouDate", vouDate)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", Global.deptId)
@@ -2255,7 +2254,7 @@ public class InventoryRepo {
 
     public Mono<List<SaleHisDetail>> getSaleByBatch(String batchNo, boolean detail) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/sale/get-sale-by-batch")
+                .uri(builder -> builder.path("/sale/getSaleByBatch")
                 .queryParam("batchNo", batchNo)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", Global.deptId)
@@ -2271,7 +2270,7 @@ public class InventoryRepo {
 
     public Mono<PurHis> save(PurHis ph) {
         return inventoryApi.post()
-                .uri("/pur/save-pur")
+                .uri("/pur/savePurchase")
                 .body(Mono.just(ph), PurHis.class)
                 .retrieve()
                 .bodyToMono(PurHis.class)
@@ -2292,7 +2291,7 @@ public class InventoryRepo {
 
     public Mono<MillingHis> save(MillingHis ph) {
         return inventoryApi.post()
-                .uri("/milling/save-milling")
+                .uri("/milling/saveMilling")
                 .body(Mono.just(ph), MillingHis.class)
                 .retrieve()
                 .bodyToMono(MillingHis.class)
@@ -2313,7 +2312,7 @@ public class InventoryRepo {
 
     public Mono<PurHis> uploadPurchase(PurHis ph) {
         return inventoryApi.post()
-                .uri("/pur/save-pur")
+                .uri("/pur/savePurchase")
                 .body(Mono.just(ph), PurHis.class)
                 .retrieve()
                 .bodyToMono(PurHis.class)
@@ -2324,7 +2323,7 @@ public class InventoryRepo {
 
     public Mono<RetInHis> save(RetInHis rh) {
         return inventoryApi.post()
-                .uri("/retin/save-retin")
+                .uri("/retin/saveReturnIn")
                 .body(Mono.just(rh), RetInHis.class)
                 .retrieve()
                 .bodyToMono(RetInHis.class)
@@ -2345,7 +2344,7 @@ public class InventoryRepo {
 
     public Mono<RetInHis> uploadRetIn(RetInHis rh) {
         return inventoryApi.post()
-                .uri("/retin/save-retin")
+                .uri("/retin/saveReturnIn")
                 .body(Mono.just(rh), RetInHis.class)
                 .retrieve()
                 .bodyToMono(RetInHis.class)
@@ -2356,7 +2355,7 @@ public class InventoryRepo {
 
     public Mono<RetOutHis> save(RetOutHis ro) {
         return inventoryApi.post()
-                .uri("/retout/save-retout")
+                .uri("/retout/saveReturnOut")
                 .body(Mono.just(ro), RetInHis.class)
                 .retrieve()
                 .bodyToMono(RetOutHis.class)
@@ -2623,7 +2622,7 @@ public class InventoryRepo {
 
     public Mono<List<VStockBalance>> getStockBalance(String stockCode, boolean summary) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-stock-balance")
+                .uri(builder -> builder.path("/report/getStockBalance")
                 .queryParam("stockCode", stockCode)
                 .queryParam("calSale", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.sale.stock")))
                 .queryParam("calPur", Util1.getBoolean(ProUtil.getProperty("disable.calcuate.purchase.stock")))
@@ -2665,7 +2664,7 @@ public class InventoryRepo {
 //            return h2Repo.getSaleDetail(vouNo, deptId);
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/milling/get-raw-detail")
+                .uri(builder -> builder.path("/milling/getRawDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", deptId)
@@ -2684,7 +2683,7 @@ public class InventoryRepo {
 //            return h2Repo.getSaleDetail(vouNo, deptId);
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/milling/get-expense-detail")
+                .uri(builder -> builder.path("/milling/getExpenseDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", deptId)
@@ -2703,7 +2702,7 @@ public class InventoryRepo {
 //            return h2Repo.getSaleDetail(vouNo, deptId);
         }
         return inventoryApi.get()
-                .uri(builder -> builder.path("/milling/get-output-detail")
+                .uri(builder -> builder.path("/milling/getOutputDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", deptId)
@@ -2735,7 +2734,7 @@ public class InventoryRepo {
 
     public Mono<byte[]> getSaleReport(String vouNo) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-sale-report")
+                .uri(builder -> builder.path("/report/getSaleReport")
                 .queryParam("vouNo", vouNo)
                 .queryParam("macId", Global.macId)
                 .build())
@@ -2746,6 +2745,18 @@ public class InventoryRepo {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
                 });
+    }
+
+    public Mono<byte[]> getReturnInReport(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/report/getReturnInReport")
+                .queryParam("vouNo", vouNo)
+                .queryParam("macId", Global.macId)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToMono(ByteArrayResource.class)
+                .map(ByteArrayResource::getByteArray);
     }
 
     public Mono<List<VSale>> getSaleByBatchReport(String vouNo, String grnVouNo) {
@@ -2766,7 +2777,7 @@ public class InventoryRepo {
 
     public Mono<byte[]> getOrderReport(String vouNo) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-order-report")
+                .uri(builder -> builder.path("/report/getOrderReport")
                 .queryParam("vouNo", vouNo)
                 .queryParam("macId", Global.macId)
                 .build())
@@ -2903,7 +2914,7 @@ public class InventoryRepo {
 
     public Mono<List<GRNDetail>> getGRNDetail(String vouNo, Integer deptId) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/grn/get-grn-detail")
+                .uri(builder -> builder.path("/grn/getGRNDetail")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", deptId)
@@ -2936,7 +2947,7 @@ public class InventoryRepo {
 
     public Mono<List<MillingExpense>> getMillingExpense(String vouNo) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/millingExpense/get-pur-expense")
+                .uri(builder -> builder.path("/millingExpense/getMillingExpense")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .build())
@@ -2947,7 +2958,7 @@ public class InventoryRepo {
 
     public Mono<List<VPurchase>> getPurchaseReport(String vouNo) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-purchase-report")
+                .uri(builder -> builder.path("/report/getPurchaseReport")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .build())
@@ -2958,7 +2969,7 @@ public class InventoryRepo {
 
     public Mono<byte[]> getGRNReport(String vouNo) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-grn-report")
+                .uri(builder -> builder.path("/report/getGRNReport")
                 .queryParam("vouNo", vouNo)
                 .queryParam("compCode", Global.compCode)
                 .build())
@@ -2973,7 +2984,7 @@ public class InventoryRepo {
 
     public Mono<List<VPurchase>> getPurchaseWeightReport(String vouNo, String batchNo) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-purchase-weight-report")
+                .uri(builder -> builder.path("/report/getPurWeightReport")
                 .queryParam("vouNo", vouNo)
                 .queryParam("batchNo", batchNo)
                 .queryParam("compCode", Global.compCode)
@@ -2985,7 +2996,7 @@ public class InventoryRepo {
 
     public Mono<List<GRNDetail>> getGRNDetailBatch(String batchNo, Integer deptId) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/grn/get-grn-detail-batch")
+                .uri(builder -> builder.path("/grn/getGRNDetailBatch")
                 .queryParam("batchNo", batchNo)
                 .queryParam("compCode", Global.compCode)
                 .queryParam("deptId", deptId)
@@ -2997,7 +3008,7 @@ public class InventoryRepo {
 
     public Mono<List<VDescription>> getDescription(String str, String tranType) {
         return inventoryApi.get()
-                .uri(builder -> builder.path("/pur/get-description")
+                .uri(builder -> builder.path("/pur/getDescription")
                 .queryParam("compCode", Global.compCode)
                 .queryParam("str", str)
                 .queryParam("tranType", tranType)
@@ -3007,10 +3018,14 @@ public class InventoryRepo {
                 .collectList();
     }
 
-    public Mono<String> sendMessage(Message message) {
+    public Mono<String> sendDownloadMessage(String entity, String message) {
+        Message mg = new Message();
+        mg.setHeader(MessageType.DOWNLOAD);
+        mg.setEntity(entity);
+        mg.setMessage(message);
         return inventoryApi.post()
                 .uri("/message/send")
-                .body(Mono.just(message), Message.class)
+                .body(Mono.just(mg), Message.class)
                 .retrieve()
                 .bodyToMono(String.class);
     }
@@ -3044,6 +3059,31 @@ public class InventoryRepo {
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(VStockIO.class)
+                .collectList();
+    }
+
+    public Flux<Message> receiveMessage() {
+        return inventoryApi.get().uri(builder -> builder.path("/message/receive")
+                .queryParam("messageId", Global.macId)
+                .build())
+                .retrieve()
+                .bodyToFlux(Message.class);
+    }
+
+    public Mono<ReturnObject> getReport(ReportFilter filter) {
+        return inventoryApi.post()
+                .uri("/report/getReport")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToMono(ReturnObject.class);
+    }
+
+    public Mono<List<ReorderLevel>> getReorderLevel(ReportFilter filter) {
+        return inventoryApi.post()
+                .uri("/report/getReorderLevel")
+                .body(Mono.just(filter), ReportFilter.class)
+                .retrieve()
+                .bodyToFlux(ReorderLevel.class)
                 .collectList();
     }
 }

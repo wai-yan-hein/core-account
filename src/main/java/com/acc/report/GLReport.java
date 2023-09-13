@@ -220,7 +220,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private List<String> getListDep() {
-        return departmentAutoCompleter == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
+        return departmentAutoCompleter.getDepartment() == null ? new ArrayList<>() : departmentAutoCompleter.getListOption();
     }
 
     private String getTranSource() {
@@ -327,15 +327,14 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
         projectAutoCompleter.setObserver(this);
         tranSourceAutoCompleter = new TranSourceAutoCompleter(txtOption, null, true);
         tranSourceAutoCompleter.setObserver(this);
-        accountRepo.getTranSource().subscribe((t) -> {
+        accountRepo.getTranSource().doOnSuccess((t) -> {
             tranSourceAutoCompleter.setListGl(t);
-        }, (e) -> {
-            log.error(e.getMessage());
-        });
-        accountRepo.getDepartment().subscribe((t) -> {
-            departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, t, null, true, true);
-            departmentAutoCompleter.setObserver(this);
-        });
+        }).subscribe();
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true, true);
+        departmentAutoCompleter.setObserver(this);
+        accountRepo.getDepartment().doOnSuccess((t) -> {
+            departmentAutoCompleter.setListDepartment(t);
+        }).subscribe();
         currencyAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
         currencyAutoCompleter.setObserver(this);
         userRepo.getCurrency().subscribe((t) -> {

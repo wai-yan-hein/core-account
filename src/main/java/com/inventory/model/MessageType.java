@@ -12,4 +12,13 @@ public class MessageType {
 
     public static final String DOWNLOAD = "DOWNLOAD";
     public static final String STOCK = "STOCK";
+    public static final String TRADER = "TRADER";
+    public static final String CATEGORY = "CATEGORY";
+    public static final String BRAND = "BRAND";
+    public static final String GROUP = "GROUP";
+    public static final String UNIT = "UNIT";
+    public static final String RELATION = "RELATION";
+    public static final String LOCATION = "LOCATION";
+    public static final String REGION = "REGION";
+    public static final String TRADER_GROUP = "TRADER_GROUP";
 }
