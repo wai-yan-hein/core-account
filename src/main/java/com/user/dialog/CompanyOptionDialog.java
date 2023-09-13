@@ -12,6 +12,7 @@ import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -20,32 +21,32 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class CompanyOptionDialog extends javax.swing.JDialog implements SelectionObserver {
-
+    
     private final VRoleCompanyTableModel companyTableModel = new VRoleCompanyTableModel();
     private SelectionObserver observer;
     private VRoleCompany companyInfo;
     private List<VRoleCompany> listCompany;
-
+    
     public List<VRoleCompany> getListCompany() {
         return listCompany;
     }
-
+    
     public void setListCompany(List<VRoleCompany> listCompany) {
         this.listCompany = listCompany;
     }
-
+    
     public VRoleCompany getCompanyInfo() {
         return companyInfo;
     }
-
+    
     public void setCompanyInfo(VRoleCompany companyInfo) {
         this.companyInfo = companyInfo;
     }
-
+    
     public SelectionObserver getObserver() {
         return observer;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -59,7 +60,7 @@ public class CompanyOptionDialog extends javax.swing.JDialog implements Selectio
         super(parent, true);
         initComponents();
     }
-
+    
     public void initMain() {
         panelCompany.setLayout(new BoxLayout(panelCompany, BoxLayout.Y_AXIS));
         companyTableModel.setListCompany(listCompany);
@@ -68,13 +69,13 @@ public class CompanyOptionDialog extends javax.swing.JDialog implements Selectio
             panelCompany.add(companyPanel);
         });
     }
-
+    
     private JPanel getCompanyPanel(VRoleCompany info) {
         CompanyPanel companyPanel = new CompanyPanel(info);
         companyPanel.setObserver(this);
         return companyPanel;
     }
-
+    
     public int getCompanyPanelIndex(JPanel companyPanel) {
         int index = panelCompany.getComponentZOrder(companyPanel);
         return index;
@@ -91,6 +92,7 @@ public class CompanyOptionDialog extends javax.swing.JDialog implements Selectio
 
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
         panelCompany = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -130,6 +132,8 @@ public class CompanyOptionDialog extends javax.swing.JDialog implements Selectio
             .addGap(0, 392, Short.MAX_VALUE)
         );
 
+        jScrollPane1.setViewportView(panelCompany);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -138,7 +142,7 @@ public class CompanyOptionDialog extends javax.swing.JDialog implements Selectio
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(panelCompany, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -147,8 +151,8 @@ public class CompanyOptionDialog extends javax.swing.JDialog implements Selectio
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(panelCompany, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jScrollPane1)
+                .addContainerGap())
         );
 
         pack();
@@ -161,6 +165,7 @@ public class CompanyOptionDialog extends javax.swing.JDialog implements Selectio
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JPanel panelCompany;
     // End of variables declaration//GEN-END:variables
 
