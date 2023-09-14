@@ -172,6 +172,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         exporter.setTaskExecutor(taskExecutor);
         //add report url 
         excelReport.add("StockInOutDetail");
+        excelReport.add("StockInOutSummary");
     }
 
     private void initDate() {
@@ -413,13 +414,17 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             VRoleMenu report = tableModel.getReport(row);
             String reportName = report.getMenuName();
             String reportUrl = report.getMenuUrl();
+            InputStream input = new ByteArrayInputStream(file);
             switch (reportUrl) {
                 case "StockInOutDetail" -> {
                     String stockName = stockAutoCompleter.getStock().getStockName();
-                    InputStream input = new ByteArrayInputStream(file);
                     List<ClosingBalance> list = Util1.readJsonToList(input, ClosingBalance.class);
                     exporter.exportStockInOutDetail(list, stockName);
                     // Use the TypeReference to specify the target type (List<Person>)
+                }
+                case "StockInOutSummary" -> {
+                    List<ClosingBalance> list = Util1.readJsonToList(input, ClosingBalance.class);
+                    exporter.exportStockInOutSummary(list, reportUrl);
                 }
                 default -> {
                     btnExcel.setEnabled(true);

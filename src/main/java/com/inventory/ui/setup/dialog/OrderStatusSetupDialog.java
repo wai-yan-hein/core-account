@@ -168,10 +168,10 @@ public class OrderStatusSetupDialog extends javax.swing.JDialog implements KeyLi
                 ord.setCreatedBy(Global.loginUser.getUserCode());
                 ord.setCreatedDate(LocalDateTime.now());
                 ord.setMacId(Global.macId);
-                ord.setOrderBy((Integer) spinnerOrderBy.getValue());
             } else {
                 ord.setUpdatedBy(Global.loginUser.getUserCode());
             }
+            ord.setOrderBy((Integer) spinnerOrderBy.getValue());
             ord.setUserCode(txtUserCode.getText());
             ord.setDescription(txtName.getText());
             ord.setActive(chkActive.isSelected());

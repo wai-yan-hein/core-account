@@ -48,6 +48,30 @@ public class ExcelExporter {
     public ExcelExporter() {
     }
 
+    public void exportStockInOutSummary(List<ClosingBalance> data, String reportName) {
+        observer.selected(MESSAGE, "ready to do." + data.size());
+        observer.selected(FINISH, "ready to do." + data.size());
+        String outputPath = OUTPUT_FILE_PATH + reportName.concat(".xlsx");
+        taskExecutor.execute(() -> {
+            try (SXSSFWorkbook workbook = new SXSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(outputPath)) {
+                workbook.setCompressTempFiles(true); // Enable temporary file compression for improved performance
+                Font font = workbook.createFont();
+                font.setFontName("Pyidaungsu");
+                font.setFontHeightInPoints((short) 12);
+                CellStyle cellStyle = workbook.createCellStyle();
+                cellStyle.setFont(font);
+                String sheetName = getSheetName(reportName);
+                createStockInOutSummary(workbook, data, sheetName, cellStyle);
+                observer.selected(MESSAGE, "Exporting File... Please wait.");
+                workbook.write(outputStream);
+                lastPath = outputPath;
+                observer.selected(FINISH, "complete.");
+            } catch (IOException e) {
+                observer.selected(ERROR, e.getMessage());
+            }
+        });
+    }
+
     public void exportStockInOutDetail(List<ClosingBalance> data, String stockName) {
         observer.selected(MESSAGE, "ready to do." + data.size());
         observer.selected(FINISH, "ready to do." + data.size());
@@ -60,8 +84,8 @@ public class ExcelExporter {
                 font.setFontHeightInPoints((short) 12);
                 CellStyle cellStyle = workbook.createCellStyle();
                 cellStyle.setFont(font);
-                String sheetName = Util1.replaceSpecialCharactersWithSpace(stockName);
-                createStockInOutDetail(workbook, data, Util1.autoCorrectSheetName(sheetName), cellStyle);
+                String sheetName = getSheetName(stockName);
+                createStockInOutDetail(workbook, data, sheetName, cellStyle);
                 observer.selected(MESSAGE, "Exporting File... Please wait.");
                 workbook.write(outputStream);
                 lastPath = outputPath;
@@ -70,7 +94,6 @@ public class ExcelExporter {
                 observer.selected(ERROR, e.getMessage());
             }
         });
-
     }
 
     private void createStockInOutDetail(Workbook workbook, List<ClosingBalance> data, String sheetName,
@@ -109,12 +132,43 @@ public class ExcelExporter {
                 cell.setCellStyle(cellStyle);
             }
         }
-        try {
-            for (int i = 0; i < HEADER.length; i++) {
-                sheet.autoSizeColumn(i);
+    }
+
+    private void createStockInOutSummary(Workbook workbook, List<ClosingBalance> data, String sheetName,
+            CellStyle cellStyle) {
+        String[] HEADER = {
+            "Stock Code", "Stock Name", "Opening", "Purhcase", "In", "Sale", "Out", "Closing"
+        };
+        String uniqueSheetName = generateUniqueSheetName(workbook, sheetName);
+        Sheet sheet = workbook.createSheet(uniqueSheetName);
+        Row headerRow = sheet.createRow(0);
+        for (int i = 0; i < HEADER.length; i++) {
+            headerRow.createCell(i).setCellValue(HEADER[i]);
+        }
+        Font font = workbook.createFont();
+        font.setFontName("Pyidaungsu");
+        font.setFontHeightInPoints((short) 12);
+        font.setBold(true);
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFont(font);
+        for (Cell cell : headerRow) {
+            cell.setCellStyle(headerStyle);
+        }
+
+        int rowNum = 1;
+        for (ClosingBalance d : data) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(d.getStockUsrCode());
+            row.createCell(1).setCellValue(d.getStockName());
+            row.createCell(2).setCellValue(Util1.getDouble(d.getOpenQty()));
+            row.createCell(3).setCellValue(Util1.getDouble(d.getPurQty()));
+            row.createCell(4).setCellValue(Util1.getDouble(d.getInQty()));
+            row.createCell(5).setCellValue(Util1.getDouble(d.getSaleQty()));
+            row.createCell(6).setCellValue(Util1.getDouble(d.getOutQty()));
+            row.createCell(7).setCellValue(Util1.getDouble(d.getBalQty()));
+            for (Cell cell : row) {
+                cell.setCellStyle(cellStyle);
             }
-        } catch (Exception e) {
-            log.info("autoResize ‌: " + e.getMessage());
         }
     }
 
@@ -129,6 +183,11 @@ public class ExcelExporter {
         }
 
         return uniqueName;
+    }
+
+    private String getSheetName(String name) {
+        String tmp = Util1.replaceSpecialCharactersWithSpace(name);
+        return Util1.autoCorrectSheetName(tmp);
     }
 
 }
