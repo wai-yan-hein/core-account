@@ -15,7 +15,6 @@ import com.common.ReportFilter;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventory.editor.BatchAutoCompeter;
 import com.inventory.editor.BrandAutoCompleter;
 import com.inventory.editor.CategoryAutoCompleter;
@@ -27,6 +26,7 @@ import com.inventory.editor.StockTypeAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.editor.VouStatusAutoCompleter;
 import com.inventory.model.ClosingBalance;
+import com.inventory.model.General;
 import com.inventory.model.VRoleMenu;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.ReportTableModel;
@@ -74,7 +74,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class Reports extends javax.swing.JPanel implements PanelControl, SelectionObserver {
-
+    
     private final ReportTableModel tableModel = new ReportTableModel("Inventory Report");
     @Autowired
     private InventoryRepo inventoryRepo;
@@ -106,19 +106,19 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private TableRowSorter<TableModel> sorter;
     private final ExcelExporter exporter = new ExcelExporter();
     private Set<String> excelReport = new HashSet<>();
-
+    
     public SelectionObserver getObserver() {
         return observer;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-
+    
     public JProgressBar getProgress() {
         return progress;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
@@ -140,7 +140,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         initComponents();
         initFocusAdapter();
     }
-
+    
     private void initFocusAdapter() {
         txtDate.addFocusListener(fa);
         txtFromDate.addFocusListener(fa);
@@ -159,29 +159,32 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         txtFromDueDate.addFocusListener(fa);
         txtToDueDate.addFocusListener(fa);
     }
-
+    
     public void initMain() {
         initExcel();
         initTableReport();
         initCombo();
         initDate();
     }
-
+    
     private void initExcel() {
         exporter.setObserver(this);
         exporter.setTaskExecutor(taskExecutor);
         //add report url 
         excelReport.add("StockInOutDetail");
         excelReport.add("StockInOutSummary");
+        excelReport.add("StockListByGroup");
+        excelReport.add("StockInOutSummaryByWeight");
+        excelReport.add("StockInOutDetailByWeight");
     }
-
+    
     private void initDate() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
         txtFromDueDate.setDate(Util1.getTodayDate());
         txtToDueDate.setDate(Util1.getTodayDate());
     }
-
+    
     private void initTableReport() {
         tableModel.setExcelReport(excelReport);
         tblReport.setModel(tableModel);
@@ -196,7 +199,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         tblReport.setRowSorter(sorter);
         getReport();
     }
-
+    
     private void getReport() {
         progress.setIndeterminate(true);
         userRepo.getReport("Inventory").doOnSuccess((t) -> {
@@ -208,7 +211,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             JOptionPane.showConfirmDialog(Global.parentForm, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }).subscribe();
     }
-
+    
     private void initCombo() {
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, true);
         locationAutoCompleter.setObserver(this);
@@ -255,7 +258,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
         projectAutoCompleter.setObserver(this);
     }
-
+    
     private void report(boolean excel) {
         int row = tblReport.getSelectedRow();
         if (row >= 0) {
@@ -323,14 +326,14 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             JOptionPane.showMessageDialog(Global.parentForm, "Choose Report.");
         }
     }
-
+    
     private String getCurCode() {
         if (currencyAutoCompleter == null || currencyAutoCompleter.getCurrency() == null) {
             return Global.currency;
         }
         return currencyAutoCompleter.getCurrency().getCurCode();
     }
-
+    
     private boolean isValidReport(String url) {
         if (url.equals("StockInOutDetail") || url.equals("StockInOutDetailByWeight")) {
             if (stockAutoCompleter.getStock().getKey().getStockCode().equals("-")) {
@@ -341,7 +344,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         }
         return true;
     }
-
+    
     private void printReport(String reportUrl, String reportName, Map<String, Object> param, boolean excel) {
         filter.setReportName(reportName);
         inventoryRepo.getReport(filter).doOnSuccess((t) -> {
@@ -397,7 +400,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             return tmp1.startsWith(text);
         }
     };
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", false);
@@ -406,7 +409,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         observer.selected("delete", false);
         observer.selected("refresh", true);
     }
-
+    
     private void excel(byte[] file) {
         int row = tblReport.convertRowIndexToModel(tblReport.getSelectedRow());
         if (row >= 0) {
@@ -416,15 +419,19 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             String reportUrl = report.getMenuUrl();
             InputStream input = new ByteArrayInputStream(file);
             switch (reportUrl) {
-                case "StockInOutDetail" -> {
+                case "StockInOutDetail", "StockInOutDetailByWeight" -> {
                     String stockName = stockAutoCompleter.getStock().getStockName();
                     List<ClosingBalance> list = Util1.readJsonToList(input, ClosingBalance.class);
                     exporter.exportStockInOutDetail(list, stockName);
                     // Use the TypeReference to specify the target type (List<Person>)
                 }
-                case "StockInOutSummary" -> {
+                case "StockInOutSummary", "StockInOutSummaryByWeight" -> {
                     List<ClosingBalance> list = Util1.readJsonToList(input, ClosingBalance.class);
                     exporter.exportStockInOutSummary(list, reportUrl);
+                }
+                case "StockListByGroup" -> {
+                    List<General> list = Util1.readJsonToList(input, General.class);
+                    exporter.exportStockListByGroup(list, reportUrl);
                 }
                 default -> {
                     btnExcel.setEnabled(true);
@@ -1130,38 +1137,38 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     @Override
     public void save() {
     }
-
+    
     @Override
     public void delete() {
     }
-
+    
     @Override
     public void newForm() {
     }
-
+    
     @Override
     public void history() {
     }
-
+    
     @Override
     public void print() {
         report(false);
     }
-
+    
     @Override
     public void refresh() {
         getReport();
     }
-
+    
     @Override
     public void filter() {
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();
     }
-
+    
     @Override
     public void selected(Object source, Object selectObj) {
         if (source.equals("Date")) {
@@ -1179,5 +1186,5 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             lblMessage.setText(selectObj.toString());
         }
     }
-
+    
 }
