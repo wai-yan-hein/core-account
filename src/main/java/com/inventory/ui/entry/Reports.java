@@ -15,7 +15,6 @@ import com.common.ReportFilter;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inventory.editor.BatchAutoCompeter;
 import com.inventory.editor.BrandAutoCompleter;
 import com.inventory.editor.CategoryAutoCompleter;
@@ -27,7 +26,10 @@ import com.inventory.editor.StockTypeAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.editor.VouStatusAutoCompleter;
 import com.inventory.model.ClosingBalance;
+import com.inventory.model.General;
+import com.inventory.model.VPurchase;
 import com.inventory.model.VRoleMenu;
+import com.inventory.model.VSale;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.ReportTableModel;
 import com.toedter.calendar.JTextFieldDateEditor;
@@ -169,6 +171,16 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         //add report url 
         excelReport.add("StockInOutDetail");
         excelReport.add("StockInOutSummary");
+        excelReport.add("StockListByGroup");
+        excelReport.add("StockInOutSummaryByWeight");
+        excelReport.add("StockInOutDetailByWeight");
+        excelReport.add("SaleByStockDetail");
+        excelReport.add("SaleByCustomerDetail");
+        excelReport.add("PurchaseBySupplierDetail");
+        excelReport.add("PurchaseByStockDetail");
+        excelReport.add("TopSaleByCustomer");
+        excelReport.add("TopSaleBySaleMan");
+        excelReport.add("TopSaleByStock");
     }
 
     private void initDate() {
@@ -423,21 +435,54 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             String reportUrl = report.getMenuUrl();
             InputStream input = new ByteArrayInputStream(file);
             switch (reportUrl) {
-                case "StockInOutDetail" -> {
+                case "StockInOutDetail", "StockInOutDetailByWeight" -> {
                     String stockName = stockAutoCompleter.getStock().getStockName();
                     List<ClosingBalance> list = Util1.readJsonToList(input, ClosingBalance.class);
                     exporter.exportStockInOutDetail(list, stockName);
                     // Use the TypeReference to specify the target type (List<Person>)
                 }
-                case "StockInOutSummary" -> {
+                case "StockInOutSummary", "StockInOutSummaryByWeight" -> {
                     List<ClosingBalance> list = Util1.readJsonToList(input, ClosingBalance.class);
                     exporter.exportStockInOutSummary(list, reportUrl);
+                }
+                case "StockListByGroup" -> {
+                    List<General> list = Util1.readJsonToList(input, General.class);
+                    exporter.exportStockListByGroup(list, reportUrl);
+                }
+                case "SaleByStockDetail" -> {
+                    List<VSale> list = Util1.readJsonToList(input, VSale.class);
+                    exporter.exportSaleByStockDeatail(list, reportUrl);
+                }
+                case "SaleByCustomerDetail" -> {
+                    List<VSale> list = Util1.readJsonToList(input, VSale.class);
+                    exporter.exportSaleByCustomerDeatail(list, reportUrl);
+                }
+                case "PurchaseBySupplierDetail" -> {
+                    List<VPurchase> list = Util1.readJsonToList(input, VPurchase.class);
+                    exporter.exportPurchaseBySupplierDeatail(list, reportUrl);
+                }
+                case "PurchaseByStockDetail" -> {
+                    List<VPurchase> list = Util1.readJsonToList(input, VPurchase.class);
+                    exporter.exportPurchaseByStockDeatail(list, reportUrl);
+                }
+                case "TopSaleByCustomer" -> {
+                    List<General> list = Util1.readJsonToList(input, General.class);
+                    exporter.exportTopSaleByCustomer(list, reportUrl);
+                }
+                case "TopSaleBySaleMan" -> {
+                    List<General> list = Util1.readJsonToList(input, General.class);
+                    exporter.exportTopSaleBySaleMan(list, reportUrl);
+                }
+                case "TopSaleByStock" -> {
+                    List<General> list = Util1.readJsonToList(input, General.class);
+                    exporter.exportTopSaleByStock(list, reportUrl);
                 }
                 default -> {
                     btnExcel.setEnabled(true);
                     JOptionPane.showMessageDialog(this, String.format("%s report can't export excel.",
                             reportName), "Excel Validation", JOptionPane.ERROR_MESSAGE);
                 }
+
             }
         } else {
             btnExcel.setEnabled(true);

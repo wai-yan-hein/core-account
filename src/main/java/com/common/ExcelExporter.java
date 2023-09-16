@@ -5,6 +5,9 @@
 package com.common;
 
 import com.inventory.model.ClosingBalance;
+import com.inventory.model.General;
+import com.inventory.model.VPurchase;
+import com.inventory.model.VSale;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
@@ -166,6 +169,492 @@ public class ExcelExporter {
             row.createCell(5).setCellValue(Util1.getDouble(d.getSaleQty()));
             row.createCell(6).setCellValue(Util1.getDouble(d.getOutQty()));
             row.createCell(7).setCellValue(Util1.getDouble(d.getBalQty()));
+            for (Cell cell : row) {
+                cell.setCellStyle(cellStyle);
+            }
+        }
+    }
+
+    public void exportStockListByGroup(List<General> data, String reportName) {
+        observer.selected(MESSAGE, "ready to do." + data.size());
+        observer.selected(FINISH, "ready to do." + data.size());
+        String outputPath = OUTPUT_FILE_PATH + reportName.concat(".xlsx");
+        taskExecutor.execute(() -> {
+            try (SXSSFWorkbook workbook = new SXSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(outputPath)) {
+                workbook.setCompressTempFiles(true); // Enable temporary file compression for improved performance
+                Font font = workbook.createFont();
+                font.setFontName("Pyidaungsu");
+                font.setFontHeightInPoints((short) 12);
+                CellStyle cellStyle = workbook.createCellStyle();
+                cellStyle.setFont(font);
+                String sheetName = getSheetName(reportName);
+                createStockListByGroup(workbook, data, sheetName, cellStyle);
+                observer.selected(MESSAGE, "Exporting File... Please wait.");
+                workbook.write(outputStream);
+                lastPath = outputPath;
+                observer.selected(FINISH, "complete.");
+            } catch (IOException e) {
+                observer.selected(ERROR, e.getMessage());
+            }
+        });
+    }
+
+    private void createStockListByGroup(Workbook workbook, List<General> data, String sheetName,
+            CellStyle cellStyle) {
+        String[] HEADER = {
+            "Group", "System Code", "Stock Code", "Stock Name", "Category", "Brand", "Unit Relation"
+        };
+        String uniqueSheetName = generateUniqueSheetName(workbook, sheetName);
+        Sheet sheet = workbook.createSheet(uniqueSheetName);
+        Row headerRow = sheet.createRow(0);
+        for (int i = 0; i < HEADER.length; i++) {
+            headerRow.createCell(i).setCellValue(HEADER[i]);
+        }
+        Font font = workbook.createFont();
+        font.setFontName("Pyidaungsu");
+        font.setFontHeightInPoints((short) 12);
+        font.setBold(true);
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFont(font);
+        for (Cell cell : headerRow) {
+            cell.setCellStyle(headerStyle);
+        }
+
+        int rowNum = 1;
+        for (General d : data) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(d.getStockTypeName());
+            row.createCell(1).setCellValue(d.getSysCode());
+            row.createCell(2).setCellValue(d.getStockCode());
+            row.createCell(3).setCellValue(d.getStockName());
+            row.createCell(4).setCellValue(d.getCategoryName());
+            row.createCell(5).setCellValue(d.getBrandName());
+            row.createCell(6).setCellValue(d.getQtyRel());
+            for (Cell cell : row) {
+                cell.setCellStyle(cellStyle);
+            }
+        }
+    }
+
+    public void exportSaleByStockDeatail(List<VSale> data, String reportName) {
+        observer.selected(MESSAGE, "ready to do." + data.size());
+        observer.selected(FINISH, "ready to do." + data.size());
+        String outputPath = OUTPUT_FILE_PATH + reportName.concat(".xlsx");
+        taskExecutor.execute(() -> {
+            try (SXSSFWorkbook workbook = new SXSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(outputPath)) {
+                workbook.setCompressTempFiles(true); // Enable temporary file compression for improved performance
+                Font font = workbook.createFont();
+                font.setFontName("Pyidaungsu");
+                font.setFontHeightInPoints((short) 12);
+                CellStyle cellStyle = workbook.createCellStyle();
+                cellStyle.setFont(font);
+                String sheetName = getSheetName(reportName);
+                createSaleByStockDeatail(workbook, data, sheetName, cellStyle);
+                observer.selected(MESSAGE, "Exporting File... Please wait.");
+                workbook.write(outputStream);
+                lastPath = outputPath;
+                observer.selected(FINISH, "complete.");
+            } catch (IOException e) {
+                observer.selected(ERROR, e.getMessage());
+            }
+        });
+    }
+
+    private void createSaleByStockDeatail(Workbook workbook, List<VSale> data, String sheetName,
+            CellStyle cellStyle) {
+        String[] HEADER = {
+            "Stock Name", "Date", "Voucher No", "Customer Name", "Unit", "Qty", "Price", "Amount"
+        };
+        String uniqueSheetName = generateUniqueSheetName(workbook, sheetName);
+        Sheet sheet = workbook.createSheet(uniqueSheetName);
+        Row headerRow = sheet.createRow(0);
+        for (int i = 0; i < HEADER.length; i++) {
+            headerRow.createCell(i).setCellValue(HEADER[i]);
+        }
+        Font font = workbook.createFont();
+        font.setFontName("Pyidaungsu");
+        font.setFontHeightInPoints((short) 12);
+        font.setBold(true);
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFont(font);
+        for (Cell cell : headerRow) {
+            cell.setCellStyle(headerStyle);
+        }
+
+        int rowNum = 1;
+        for (VSale d : data) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(d.getStockName());
+            row.createCell(1).setCellValue(d.getVouDate());
+            row.createCell(2).setCellValue(d.getVouNo());
+            row.createCell(3).setCellValue(d.getTraderName());
+            row.createCell(4).setCellValue(d.getSaleUnit());
+            row.createCell(5).setCellValue(Util1.getDouble(d.getQty()));
+            row.createCell(6).setCellValue(Util1.getDouble(d.getSalePrice()));
+            row.createCell(7).setCellValue(Util1.getDouble(d.getSaleAmount()));
+            for (Cell cell : row) {
+                cell.setCellStyle(cellStyle);
+            }
+        }
+    }
+
+    public void exportSaleByCustomerDeatail(List<VSale> data, String reportName) {
+        observer.selected(MESSAGE, "ready to do." + data.size());
+        observer.selected(FINISH, "ready to do." + data.size());
+        String outputPath = OUTPUT_FILE_PATH + reportName.concat(".xlsx");
+        taskExecutor.execute(() -> {
+            try (SXSSFWorkbook workbook = new SXSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(outputPath)) {
+                workbook.setCompressTempFiles(true); // Enable temporary file compression for improved performance
+                Font font = workbook.createFont();
+                font.setFontName("Pyidaungsu");
+                font.setFontHeightInPoints((short) 12);
+                CellStyle cellStyle = workbook.createCellStyle();
+                cellStyle.setFont(font);
+                String sheetName = getSheetName(reportName);
+                createSaleByCustomerDeatail(workbook, data, sheetName, cellStyle);
+                observer.selected(MESSAGE, "Exporting File... Please wait.");
+                workbook.write(outputStream);
+                lastPath = outputPath;
+                observer.selected(FINISH, "complete.");
+            } catch (IOException e) {
+                observer.selected(ERROR, e.getMessage());
+            }
+        });
+    }
+
+    private void createSaleByCustomerDeatail(Workbook workbook, List<VSale> data, String sheetName,
+            CellStyle cellStyle) {
+        String[] HEADER = {
+            "Customer Name", "Address", "Date", "Voucher No", "Stock Name", "Unit", "Qty", "Price", "Amount"
+        };
+        String uniqueSheetName = generateUniqueSheetName(workbook, sheetName);
+        Sheet sheet = workbook.createSheet(uniqueSheetName);
+        Row headerRow = sheet.createRow(0);
+        for (int i = 0; i < HEADER.length; i++) {
+            headerRow.createCell(i).setCellValue(HEADER[i]);
+        }
+        Font font = workbook.createFont();
+        font.setFontName("Pyidaungsu");
+        font.setFontHeightInPoints((short) 12);
+        font.setBold(true);
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFont(font);
+        for (Cell cell : headerRow) {
+            cell.setCellStyle(headerStyle);
+        }
+
+        int rowNum = 1;
+        for (VSale d : data) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(d.getTraderName());
+            row.createCell(1).setCellValue(d.getAddress());
+            row.createCell(2).setCellValue(d.getVouDate());
+            row.createCell(3).setCellValue(d.getVouNo());
+            row.createCell(4).setCellValue(d.getStockName());
+            row.createCell(5).setCellValue(d.getSaleUnit());
+            row.createCell(6).setCellValue(Util1.getDouble(d.getQty()));
+            row.createCell(7).setCellValue(Util1.getDouble(d.getSalePrice()));
+            row.createCell(8).setCellValue(Util1.getDouble(d.getSaleAmount()));
+            for (Cell cell : row) {
+                cell.setCellStyle(cellStyle);
+            }
+        }
+    }
+
+    public void exportPurchaseBySupplierDeatail(List<VPurchase> data, String reportName) {
+        observer.selected(MESSAGE, "ready to do." + data.size());
+        observer.selected(FINISH, "ready to do." + data.size());
+        String outputPath = OUTPUT_FILE_PATH + reportName.concat(".xlsx");
+        taskExecutor.execute(() -> {
+            try (SXSSFWorkbook workbook = new SXSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(outputPath)) {
+                workbook.setCompressTempFiles(true); // Enable temporary file compression for improved performance
+                Font font = workbook.createFont();
+                font.setFontName("Pyidaungsu");
+                font.setFontHeightInPoints((short) 12);
+                CellStyle cellStyle = workbook.createCellStyle();
+                cellStyle.setFont(font);
+                String sheetName = getSheetName(reportName);
+                createPurchaseBySupplierDeatail(workbook, data, sheetName, cellStyle);
+                observer.selected(MESSAGE, "Exporting File... Please wait.");
+                workbook.write(outputStream);
+                lastPath = outputPath;
+                observer.selected(FINISH, "complete.");
+            } catch (IOException e) {
+                observer.selected(ERROR, e.getMessage());
+            }
+        });
+    }
+
+    private void createPurchaseBySupplierDeatail(Workbook workbook, List<VPurchase> data, String sheetName,
+            CellStyle cellStyle) {
+        String[] HEADER = {
+            "Supplier Name", "Address", "Date", "Voucher No", "Stock Name", "Unit", "Qty", "Price", "Amount"
+        };
+        String uniqueSheetName = generateUniqueSheetName(workbook, sheetName);
+        Sheet sheet = workbook.createSheet(uniqueSheetName);
+        Row headerRow = sheet.createRow(0);
+        for (int i = 0; i < HEADER.length; i++) {
+            headerRow.createCell(i).setCellValue(HEADER[i]);
+        }
+        Font font = workbook.createFont();
+        font.setFontName("Pyidaungsu");
+        font.setFontHeightInPoints((short) 12);
+        font.setBold(true);
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFont(font);
+        for (Cell cell : headerRow) {
+            cell.setCellStyle(headerStyle);
+        }
+
+        int rowNum = 1;
+        for (VPurchase d : data) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(d.getTraderName());
+            row.createCell(1).setCellValue(d.getAddress());
+            row.createCell(2).setCellValue(d.getVouDate());
+            row.createCell(3).setCellValue(d.getVouNo());
+            row.createCell(4).setCellValue(d.getStockName());
+            row.createCell(5).setCellValue(d.getPurUnit());
+            row.createCell(6).setCellValue(Util1.getDouble(d.getQty()));
+            row.createCell(7).setCellValue(Util1.getDouble(d.getPurPrice()));
+            row.createCell(8).setCellValue(Util1.getDouble(d.getPurAmount()));
+            for (Cell cell : row) {
+                cell.setCellStyle(cellStyle);
+            }
+        }
+    }
+
+    public void exportPurchaseByStockDeatail(List<VPurchase> data, String reportName) {
+        observer.selected(MESSAGE, "ready to do." + data.size());
+        observer.selected(FINISH, "ready to do." + data.size());
+        String outputPath = OUTPUT_FILE_PATH + reportName.concat(".xlsx");
+        taskExecutor.execute(() -> {
+            try (SXSSFWorkbook workbook = new SXSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(outputPath)) {
+                workbook.setCompressTempFiles(true); // Enable temporary file compression for improved performance
+                Font font = workbook.createFont();
+                font.setFontName("Pyidaungsu");
+                font.setFontHeightInPoints((short) 12);
+                CellStyle cellStyle = workbook.createCellStyle();
+                cellStyle.setFont(font);
+                String sheetName = getSheetName(reportName);
+                createPurchaseByStockDeatail(workbook, data, sheetName, cellStyle);
+                observer.selected(MESSAGE, "Exporting File... Please wait.");
+                workbook.write(outputStream);
+                lastPath = outputPath;
+                observer.selected(FINISH, "complete.");
+            } catch (IOException e) {
+                observer.selected(ERROR, e.getMessage());
+            }
+        });
+    }
+
+    private void createPurchaseByStockDeatail(Workbook workbook, List<VPurchase> data, String sheetName,
+            CellStyle cellStyle) {
+        String[] HEADER = {
+            "Stock Name", "Date", "Voucher No", "Supplier Name", "Unit", "Qty", "Price", "Amount"
+        };
+        String uniqueSheetName = generateUniqueSheetName(workbook, sheetName);
+        Sheet sheet = workbook.createSheet(uniqueSheetName);
+        Row headerRow = sheet.createRow(0);
+        for (int i = 0; i < HEADER.length; i++) {
+            headerRow.createCell(i).setCellValue(HEADER[i]);
+        }
+        Font font = workbook.createFont();
+        font.setFontName("Pyidaungsu");
+        font.setFontHeightInPoints((short) 12);
+        font.setBold(true);
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFont(font);
+        for (Cell cell : headerRow) {
+            cell.setCellStyle(headerStyle);
+        }
+
+        int rowNum = 1;
+        for (VPurchase d : data) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(d.getStockName());
+            row.createCell(1).setCellValue(d.getVouDate());
+            row.createCell(2).setCellValue(d.getVouNo());
+            row.createCell(3).setCellValue(d.getTraderName());
+            row.createCell(4).setCellValue(d.getPurUnit());
+            row.createCell(5).setCellValue(Util1.getDouble(d.getQty()));
+            row.createCell(6).setCellValue(Util1.getDouble(d.getPurPrice()));
+            row.createCell(7).setCellValue(Util1.getDouble(d.getPurAmount()));
+            for (Cell cell : row) {
+                cell.setCellStyle(cellStyle);
+            }
+        }
+    }
+
+    public void exportTopSaleByCustomer(List<General> data, String reportName) {
+        observer.selected(MESSAGE, "ready to do." + data.size());
+        observer.selected(FINISH, "ready to do." + data.size());
+        String outputPath = OUTPUT_FILE_PATH + reportName.concat(".xlsx");
+        taskExecutor.execute(() -> {
+            try (SXSSFWorkbook workbook = new SXSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(outputPath)) {
+                workbook.setCompressTempFiles(true); // Enable temporary file compression for improved performance
+                Font font = workbook.createFont();
+                font.setFontName("Pyidaungsu");
+                font.setFontHeightInPoints((short) 12);
+                CellStyle cellStyle = workbook.createCellStyle();
+                cellStyle.setFont(font);
+                String sheetName = getSheetName(reportName);
+                createTopSaleByCustomer(workbook, data, sheetName, cellStyle);
+                observer.selected(MESSAGE, "Exporting File... Please wait.");
+                workbook.write(outputStream);
+                lastPath = outputPath;
+                observer.selected(FINISH, "complete.");
+            } catch (IOException e) {
+                observer.selected(ERROR, e.getMessage());
+            }
+        });
+    }
+
+    private void createTopSaleByCustomer(Workbook workbook, List<General> data, String sheetName,
+            CellStyle cellStyle) {
+        String[] HEADER = {
+            "Customer Code", "Customer Name", "Address", "Voucher Qty", "Amount"
+        };
+        String uniqueSheetName = generateUniqueSheetName(workbook, sheetName);
+        Sheet sheet = workbook.createSheet(uniqueSheetName);
+        Row headerRow = sheet.createRow(0);
+        for (int i = 0; i < HEADER.length; i++) {
+            headerRow.createCell(i).setCellValue(HEADER[i]);
+        }
+        Font font = workbook.createFont();
+        font.setFontName("Pyidaungsu");
+        font.setFontHeightInPoints((short) 12);
+        font.setBold(true);
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFont(font);
+        for (Cell cell : headerRow) {
+            cell.setCellStyle(headerStyle);
+        }
+
+        int rowNum = 1;
+        for (General d : data) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(d.getTraderCode());
+            row.createCell(1).setCellValue(d.getTraderName());
+            row.createCell(2).setCellValue(d.getAddress());
+            row.createCell(3).setCellValue(Util1.getDouble(d.getTotalQty()));
+            row.createCell(4).setCellValue(Util1.getDouble(d.getAmount()));
+            for (Cell cell : row) {
+                cell.setCellStyle(cellStyle);
+            }
+        }
+    }
+
+    public void exportTopSaleBySaleMan(List<General> data, String reportName) {
+        observer.selected(MESSAGE, "ready to do." + data.size());
+        observer.selected(FINISH, "ready to do." + data.size());
+        String outputPath = OUTPUT_FILE_PATH + reportName.concat(".xlsx");
+        taskExecutor.execute(() -> {
+            try (SXSSFWorkbook workbook = new SXSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(outputPath)) {
+                workbook.setCompressTempFiles(true); // Enable temporary file compression for improved performance
+                Font font = workbook.createFont();
+                font.setFontName("Pyidaungsu");
+                font.setFontHeightInPoints((short) 12);
+                CellStyle cellStyle = workbook.createCellStyle();
+                cellStyle.setFont(font);
+                String sheetName = getSheetName(reportName);
+                createTopSaleBySaleMan(workbook, data, sheetName, cellStyle);
+                observer.selected(MESSAGE, "Exporting File... Please wait.");
+                workbook.write(outputStream);
+                lastPath = outputPath;
+                observer.selected(FINISH, "complete.");
+            } catch (IOException e) {
+                observer.selected(ERROR, e.getMessage());
+            }
+        });
+    }
+
+    private void createTopSaleBySaleMan(Workbook workbook, List<General> data, String sheetName,
+            CellStyle cellStyle) {
+        String[] HEADER = {
+            "Saleman Code", "Saleman Name", "Voucher Qty", "Amount"
+        };
+        String uniqueSheetName = generateUniqueSheetName(workbook, sheetName);
+        Sheet sheet = workbook.createSheet(uniqueSheetName);
+        Row headerRow = sheet.createRow(0);
+        for (int i = 0; i < HEADER.length; i++) {
+            headerRow.createCell(i).setCellValue(HEADER[i]);
+        }
+        Font font = workbook.createFont();
+        font.setFontName("Pyidaungsu");
+        font.setFontHeightInPoints((short) 12);
+        font.setBold(true);
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFont(font);
+        for (Cell cell : headerRow) {
+            cell.setCellStyle(headerStyle);
+        }
+
+        int rowNum = 1;
+        for (General d : data) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(d.getSaleManCode());
+            row.createCell(1).setCellValue(d.getSaleManName());
+            row.createCell(2).setCellValue(Util1.getDouble(d.getTotalQty()));
+            row.createCell(3).setCellValue(Util1.getDouble(d.getAmount()));
+            for (Cell cell : row) {
+                cell.setCellStyle(cellStyle);
+            }
+        }
+    }
+
+    public void exportTopSaleByStock(List<General> data, String reportName) {
+        observer.selected(MESSAGE, "ready to do." + data.size());
+        observer.selected(FINISH, "ready to do." + data.size());
+        String outputPath = OUTPUT_FILE_PATH + reportName.concat(".xlsx");
+        taskExecutor.execute(() -> {
+            try (SXSSFWorkbook workbook = new SXSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(outputPath)) {
+                workbook.setCompressTempFiles(true); // Enable temporary file compression for improved performance
+                Font font = workbook.createFont();
+                font.setFontName("Pyidaungsu");
+                font.setFontHeightInPoints((short) 12);
+                CellStyle cellStyle = workbook.createCellStyle();
+                cellStyle.setFont(font);
+                String sheetName = getSheetName(reportName);
+                createTopSaleByStock(workbook, data, sheetName, cellStyle);
+                observer.selected(MESSAGE, "Exporting File... Please wait.");
+                workbook.write(outputStream);
+                lastPath = outputPath;
+                observer.selected(FINISH, "complete.");
+            } catch (IOException e) {
+                observer.selected(ERROR, e.getMessage());
+            }
+        });
+    }
+
+    private void createTopSaleByStock(Workbook workbook, List<General> data, String sheetName,
+            CellStyle cellStyle) {
+        String[] HEADER = {
+            "Stock Code", "Stock Name", "Qty", "Unit"
+        };
+        String uniqueSheetName = generateUniqueSheetName(workbook, sheetName);
+        Sheet sheet = workbook.createSheet(uniqueSheetName);
+        Row headerRow = sheet.createRow(0);
+        for (int i = 0; i < HEADER.length; i++) {
+            headerRow.createCell(i).setCellValue(HEADER[i]);
+        }
+        Font font = workbook.createFont();
+        font.setFontName("Pyidaungsu");
+        font.setFontHeightInPoints((short) 12);
+        font.setBold(true);
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFont(font);
+        for (Cell cell : headerRow) {
+            cell.setCellStyle(headerStyle);
+        }
+
+        int rowNum = 1;
+        for (General d : data) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(d.getStockCode());
+            row.createCell(1).setCellValue(d.getStockName());
+            row.createCell(2).setCellValue(Util1.getDouble(d.getSmallQty()));
+            row.createCell(3).setCellValue(d.getUnit());
             for (Cell cell : row) {
                 cell.setCellStyle(cellStyle);
             }

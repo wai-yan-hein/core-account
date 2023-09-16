@@ -6,7 +6,6 @@ package com.inventory.model;
 
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.persistence.Transient;
 import java.time.ZonedDateTime;
 
 /**
@@ -73,4 +72,5 @@ public class VPurchase {
     private String projectNo;
     private boolean local;
     private ZonedDateTime vouDateTime;
+    private String address;
 }
