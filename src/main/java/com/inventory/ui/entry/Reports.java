@@ -27,7 +27,9 @@ import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.editor.VouStatusAutoCompleter;
 import com.inventory.model.ClosingBalance;
 import com.inventory.model.General;
+import com.inventory.model.VPurchase;
 import com.inventory.model.VRoleMenu;
+import com.inventory.model.VSale;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.ReportTableModel;
 import com.toedter.calendar.JTextFieldDateEditor;
@@ -74,7 +76,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class Reports extends javax.swing.JPanel implements PanelControl, SelectionObserver {
-    
+
     private final ReportTableModel tableModel = new ReportTableModel("Inventory Report");
     @Autowired
     private InventoryRepo inventoryRepo;
@@ -106,19 +108,19 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private TableRowSorter<TableModel> sorter;
     private final ExcelExporter exporter = new ExcelExporter();
     private Set<String> excelReport = new HashSet<>();
-    
+
     public SelectionObserver getObserver() {
         return observer;
     }
-    
+
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-    
+
     public JProgressBar getProgress() {
         return progress;
     }
-    
+
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
@@ -140,7 +142,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         initComponents();
         initFocusAdapter();
     }
-    
+
     private void initFocusAdapter() {
         txtDate.addFocusListener(fa);
         txtFromDate.addFocusListener(fa);
@@ -159,14 +161,14 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         txtFromDueDate.addFocusListener(fa);
         txtToDueDate.addFocusListener(fa);
     }
-    
+
     public void initMain() {
         initExcel();
         initTableReport();
         initCombo();
         initDate();
     }
-    
+
     private void initExcel() {
         exporter.setObserver(this);
         exporter.setTaskExecutor(taskExecutor);
@@ -176,15 +178,22 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         excelReport.add("StockListByGroup");
         excelReport.add("StockInOutSummaryByWeight");
         excelReport.add("StockInOutDetailByWeight");
+        excelReport.add("SaleByStockDetail");
+        excelReport.add("SaleByCustomerDetail");
+        excelReport.add("PurchaseBySupplierDetail");
+        excelReport.add("PurchaseByStockDetail");
+        excelReport.add("TopSaleByCustomer");
+        excelReport.add("TopSaleBySaleMan");
+        excelReport.add("TopSaleByStock");
     }
-    
+
     private void initDate() {
         txtFromDate.setDate(Util1.getTodayDate());
         txtToDate.setDate(Util1.getTodayDate());
         txtFromDueDate.setDate(Util1.getTodayDate());
         txtToDueDate.setDate(Util1.getTodayDate());
     }
-    
+
     private void initTableReport() {
         tableModel.setExcelReport(excelReport);
         tblReport.setModel(tableModel);
@@ -199,7 +208,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         tblReport.setRowSorter(sorter);
         getReport();
     }
-    
+
     private void getReport() {
         progress.setIndeterminate(true);
         userRepo.getReport("Inventory").doOnSuccess((t) -> {
@@ -211,7 +220,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             JOptionPane.showConfirmDialog(Global.parentForm, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }).subscribe();
     }
-    
+
     private void initCombo() {
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, true, true);
         locationAutoCompleter.setObserver(this);
@@ -258,7 +267,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, true);
         projectAutoCompleter.setObserver(this);
     }
-    
+
     private void report(boolean excel) {
         int row = tblReport.getSelectedRow();
         if (row >= 0) {
@@ -326,14 +335,14 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             JOptionPane.showMessageDialog(Global.parentForm, "Choose Report.");
         }
     }
-    
+
     private String getCurCode() {
         if (currencyAutoCompleter == null || currencyAutoCompleter.getCurrency() == null) {
             return Global.currency;
         }
         return currencyAutoCompleter.getCurrency().getCurCode();
     }
-    
+
     private boolean isValidReport(String url) {
         if (url.equals("StockInOutDetail") || url.equals("StockInOutDetailByWeight")) {
             if (stockAutoCompleter.getStock().getKey().getStockCode().equals("-")) {
@@ -344,7 +353,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         }
         return true;
     }
-    
+
     private void printReport(String reportUrl, String reportName, Map<String, Object> param, boolean excel) {
         filter.setReportName(reportName);
         inventoryRepo.getReport(filter).doOnSuccess((t) -> {
@@ -400,7 +409,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             return tmp1.startsWith(text);
         }
     };
-    
+
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", false);
@@ -409,7 +418,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         observer.selected("delete", false);
         observer.selected("refresh", true);
     }
-    
+
     private void excel(byte[] file) {
         int row = tblReport.convertRowIndexToModel(tblReport.getSelectedRow());
         if (row >= 0) {
@@ -433,11 +442,40 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     List<General> list = Util1.readJsonToList(input, General.class);
                     exporter.exportStockListByGroup(list, reportUrl);
                 }
+                case "SaleByStockDetail" -> {
+                    List<VSale> list = Util1.readJsonToList(input, VSale.class);
+                    exporter.exportSaleByStockDeatail(list, reportUrl);
+                }
+                case "SaleByCustomerDetail" -> {
+                    List<VSale> list = Util1.readJsonToList(input, VSale.class);
+                    exporter.exportSaleByCustomerDeatail(list, reportUrl);
+                }
+                case "PurchaseBySupplierDetail" -> {
+                    List<VPurchase> list = Util1.readJsonToList(input, VPurchase.class);
+                    exporter.exportPurchaseBySupplierDeatail(list, reportUrl);
+                }
+                case "PurchaseByStockDetail" -> {
+                    List<VPurchase> list = Util1.readJsonToList(input, VPurchase.class);
+                    exporter.exportPurchaseByStockDeatail(list, reportUrl);
+                }
+                case "TopSaleByCustomer" -> {
+                    List<General> list = Util1.readJsonToList(input, General.class);
+                    exporter.exportTopSaleByCustomer(list, reportUrl);
+                }
+                case "TopSaleBySaleMan" -> {
+                    List<General> list = Util1.readJsonToList(input, General.class);
+                    exporter.exportTopSaleBySaleMan(list, reportUrl);
+                }
+                case "TopSaleByStock" -> {
+                    List<General> list = Util1.readJsonToList(input, General.class);
+                    exporter.exportTopSaleByStock(list, reportUrl);
+                }
                 default -> {
                     btnExcel.setEnabled(true);
                     JOptionPane.showMessageDialog(this, String.format("%s report can't export excel.",
                             reportName), "Excel Validation", JOptionPane.ERROR_MESSAGE);
                 }
+
             }
         } else {
             btnExcel.setEnabled(true);
@@ -1137,38 +1175,38 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     @Override
     public void save() {
     }
-    
+
     @Override
     public void delete() {
     }
-    
+
     @Override
     public void newForm() {
     }
-    
+
     @Override
     public void history() {
     }
-    
+
     @Override
     public void print() {
         report(false);
     }
-    
+
     @Override
     public void refresh() {
         getReport();
     }
-    
+
     @Override
     public void filter() {
     }
-    
+
     @Override
     public String panelName() {
         return this.getName();
     }
-    
+
     @Override
     public void selected(Object source, Object selectObj) {
         if (source.equals("Date")) {
@@ -1186,5 +1224,5 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
             lblMessage.setText(selectObj.toString());
         }
     }
-    
+
 }

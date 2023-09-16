@@ -31,5 +31,6 @@ public class General {
     private String saleManCode;
     private String qtyRel;
     private String message;
-
+    private String address;
+    private String unit;
 }
