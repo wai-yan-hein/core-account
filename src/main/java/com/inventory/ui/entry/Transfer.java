@@ -72,16 +72,8 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private SelectionObserver observer;
     private JProgressBar progress;
 
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
-    }
-
-    public JProgressBar getProgress() {
-        return progress;
     }
 
     public void setProgress(JProgressBar progress) {
@@ -108,7 +100,14 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     public void initMain() {
         initTable();
         initCombo();
+        initButttonGroup();
         clear();
+    }
+
+    private void initButttonGroup() {
+        chkGroupReport.add(rdoA4);
+        chkGroupReport.add(rdoA5);
+        rdoA5.setSelected(true);
     }
 
     private void initDateListner() {
@@ -341,12 +340,12 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         progress.setIndeterminate(true);
         io = s;
         Integer deptId = io.getDeptId();
-        inventoryRepo.findLocation(io.getLocCodeFrom()).subscribe((t) -> {
+        inventoryRepo.findLocation(io.getLocCodeFrom()).doOnSuccess((t) -> {
             fromLocaitonCompleter.setLocation(t);
-        });
-        inventoryRepo.findLocation(io.getLocCodeTo()).subscribe((t) -> {
+        }).subscribe();
+        inventoryRepo.findLocation(io.getLocCodeTo()).doOnSuccess((t) -> {
             toLocaitonCompleter.setLocation(t);
-        });
+        }).subscribe();
         inventoryRepo.findTrader(s.getTraderCode()).doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
         }).subscribe();
@@ -362,6 +361,11 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                 lblStatus.setText("Voucher is locked.");
                 lblStatus.setForeground(Color.RED);
                 disableForm(false);
+            } else if (!ProUtil.isTransferEdit()) {
+                lblStatus.setText("No Permission.");
+                lblStatus.setForeground(Color.RED);
+                disableForm(false);
+                observer.selected("print", true);
             } else if (Util1.getBoolean(io.isDeleted())) {
                 lblStatus.setText("DELETED");
                 lblStatus.setForeground(Color.red);
@@ -390,6 +394,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         tblTransfer.setEnabled(status);
         txtFrom.setEnabled(status);
         txtTo.setEnabled(status);
+        txtCustomer.setEnabled(status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
@@ -405,10 +410,10 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     }
 
     private void printVoucher(String vouNo) {
-        inventoryRepo.getTransferReport(vouNo).subscribe((t) -> {
+        inventoryRepo.getTransferReport(vouNo).doOnSuccess((t) -> {
             try {
                 if (t != null) {
-                    String reportName = "TransferVoucher";
+                    String reportName = rdoA4.isSelected() ? "TransferVoucher" : "TransferVoucherA5";
                     String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
                     Map<String, Object> param = new HashMap<>();
                     param.put("p_print_date", Util1.getTodayDateTime());
@@ -425,9 +430,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             } catch (JRException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage());
             }
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
+        }).subscribe();
     }
 
     /**
@@ -439,6 +442,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        chkGroupReport = new javax.swing.ButtonGroup();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblTransfer = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
@@ -458,6 +462,9 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         txtCustomer = new javax.swing.JTextField();
         lblStatus = new javax.swing.JLabel();
         lblRec = new javax.swing.JLabel();
+        jPanel2 = new javax.swing.JPanel();
+        rdoA5 = new javax.swing.JRadioButton();
+        rdoA4 = new javax.swing.JRadioButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -539,9 +546,9 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel6)
-                    .addComponent(jLabel3))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtVou, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -557,22 +564,21 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtTo, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel4)
-                    .addComponent(jLabel5))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(txtRefNo, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel8)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtCustomer, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(txtRemark, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(211, Short.MAX_VALUE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(txtRefNo, javax.swing.GroupLayout.DEFAULT_SIZE, 103, Short.MAX_VALUE)
+                    .addComponent(txtRemark))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtCustomer, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(154, Short.MAX_VALUE))
         );
 
-        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel3, jLabel4, jLabel5, jLabel6, jLabel7, jLabel8, jLabel9});
+        jPanel1Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel7, jLabel9});
 
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -613,6 +619,33 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         lblRec.setFont(Global.lableFont);
         lblRec.setText("Records");
 
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        rdoA5.setText("A5");
+
+        rdoA4.setText("A4");
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(rdoA5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(rdoA4)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(rdoA5)
+                    .addComponent(rdoA4))
+                .addContainerGap(35, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -620,25 +653,31 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(lblStatus)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(208, 208, 208))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 201, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 181, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblStatus)
-                    .addComponent(lblRec))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -654,6 +693,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup chkGroupReport;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -662,9 +702,12 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStatus;
+    private javax.swing.JRadioButton rdoA4;
+    private javax.swing.JRadioButton rdoA5;
     private javax.swing.JTable tblTransfer;
     private javax.swing.JTextField txtCustomer;
     private com.toedter.calendar.JDateChooser txtDate;

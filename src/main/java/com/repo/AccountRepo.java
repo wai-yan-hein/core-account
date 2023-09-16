@@ -29,6 +29,8 @@ import com.common.ProUtil;
 import com.common.ReportFilter;
 import com.common.ReturnObject;
 import com.common.Util1;
+import com.inventory.model.Message;
+import com.inventory.model.MessageType;
 import com.inventory.model.TraderGroup;
 import com.inventory.model.TraderGroupKey;
 import com.model.VoucherInfo;
@@ -796,6 +798,26 @@ public class AccountRepo {
         return accountApi.get()
                 .uri("/account/shootTri")
                 .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(String.class);
+    }
+
+    public Flux<Message> receiveMessage() {
+        return accountApi.get().uri(builder -> builder.path("/message/receive")
+                .queryParam("messageId", Global.macId)
+                .build())
+                .retrieve()
+                .bodyToFlux(Message.class);
+    }
+
+    public Mono<String> sendDownloadMessage(String entity, String message) {
+        Message mg = new Message();
+        mg.setHeader(MessageType.DOWNLOAD);
+        mg.setEntity(entity);
+        mg.setMessage(message);
+        return accountApi.post()
+                .uri("/message/send")
+                .body(Mono.just(mg), Message.class)
                 .retrieve()
                 .bodyToMono(String.class);
     }

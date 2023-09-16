@@ -8,7 +8,7 @@ package com.user.editor;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.model.MachineInfo;
+import com.user.model.MachineInfo;
 import com.user.common.MacInfoTableModel;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;

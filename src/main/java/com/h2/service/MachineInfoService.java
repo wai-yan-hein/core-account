@@ -4,7 +4,7 @@
  */
 package com.h2.service;
 
-import com.inventory.model.MachineInfo;
+import com.user.model.MachineInfo;
 import java.util.List;
 
 /**

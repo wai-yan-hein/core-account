@@ -553,7 +553,7 @@
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Component id="lblMessage" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="btnExcel1" min="-2" max="-2" attributes="0"/>
+                  <Component id="btnSIF" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="btnExcel" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
@@ -569,7 +569,7 @@
                       <Component id="lblRecord" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="btnExcel" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="lblMessage" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="btnExcel1" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnSIF" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -613,7 +613,7 @@
             <Property name="text" type="java.lang.String" value="-"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="btnExcel1">
+        <Component class="javax.swing.JButton" name="btnSIF">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.lableFont" type="code"/>
@@ -621,7 +621,7 @@
             <Property name="text" type="java.lang.String" value="Show In Folder"/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnExcel1ActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSIFActionPerformed"/>
           </Events>
         </Component>
       </SubComponents>

@@ -62,6 +62,10 @@ public class ProUtil {
     public static final String CHECK_SALE_VOUCHER = "check.sale.voucher";
     public static final String SALE_LAST_PRICE = "sale.last.price";
     public static final String STOCK_NAME_WITH_BRAND = "stock.name.with.brand";
+    public static final String SALE_EDIT = "sale.voucher.edit";
+    public static final String TRANSFER_EDIT = "transfer.voucher.edit";
+    public static final String TRANSFER_DELETE = "transfer.voucher.delete";
+
     public static String getFontPath() {
         return Global.hmRoleProperty.get("font.path");
     }
@@ -71,7 +75,11 @@ public class ProUtil {
     }
 
     public static boolean isSaleEdit() {
-        return Util1.getBoolean(Global.hmRoleProperty.get("sale.voucher.edit"));
+        return Util1.getBoolean(Global.hmRoleProperty.get(SALE_EDIT));
+    }
+
+    public static boolean isTransferEdit() {
+        return Util1.getBoolean(Global.hmRoleProperty.get(TRANSFER_EDIT));
     }
 
     public static boolean isPaymentEdit() {
@@ -109,7 +117,7 @@ public class ProUtil {
     public static boolean isUseWeight() {
         return Util1.getBoolean(Global.hmRoleProperty.get("stock.use.weight"));
     }
-    
+
     public static boolean isUseWeightPoint() {
         return Util1.getBoolean(Global.hmRoleProperty.get(WEIGHT_POINT));
     }

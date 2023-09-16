@@ -313,7 +313,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     }
 
     private void sendMessage(String mes) {
-        inventoryRepo.sendDownloadMessage(MessageType.TRADER, mes)
+        inventoryRepo.sendDownloadMessage(MessageType.TRADER_INV, mes)
                 .doOnSuccess((t) -> {
                     log.info(t);
                 }).subscribe();

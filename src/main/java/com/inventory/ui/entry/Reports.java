@@ -107,10 +107,6 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private final ExcelExporter exporter = new ExcelExporter();
     private Set<String> excelReport = new HashSet<>();
 
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -192,6 +188,12 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         tblReport.getColumnModel().getColumn(0).setCellRenderer(new FontCellRender());
         tblReport.getColumnModel().getColumn(0).setPreferredWidth(50);
         tblReport.getColumnModel().getColumn(1).setPreferredWidth(900);
+        tblReport.getSelectionModel().addListSelectionListener((e) -> {
+            if (e.getValueIsAdjusting()) {
+                int row = tblReport.convertRowIndexToModel(tblReport.getSelectedRow());
+                btnExcel.setEnabled(row > 0 ? excelReport.contains(tableModel.getReport(row).getMenuUrl()) : false);
+            }
+        });
         sorter = new TableRowSorter(tblReport.getModel());
         tblReport.setRowSorter(sorter);
         getReport();
@@ -365,14 +367,19 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                             jc.setProperty("net.sf.jasperreports.export.xlsx.ignore.graphics", "false");
                             InputStream input = new ByteArrayInputStream(t.getFile());
                             JsonDataSource ds = new JsonDataSource(input);
-                            JasperPrint js = JasperFillManager.fillReport(filePath, param, ds);
-                            JRViewer viwer = new JRViewer(js);
-                            JFrame frame = new JFrame("Core Value Report");
-                            frame.setIconImage(Global.parentForm.getIconImage());
-                            frame.getContentPane().add(viwer);
-                            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-                            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                            frame.setVisible(true);
+                            int dataCount = ds.recordCount();
+                            if (dataCount > 0) {
+                                JasperPrint js = JasperFillManager.fillReport(filePath, param, ds);
+                                JRViewer viwer = new JRViewer(js);
+                                JFrame frame = new JFrame("Core Value Report");
+                                frame.setIconImage(Global.parentForm.getIconImage());
+                                frame.getContentPane().add(viwer);
+                                frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                                frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                                frame.setVisible(true);
+                            } else {
+                                JOptionPane.showMessageDialog(this, "Sorry, there is no data available.");
+                            }
                         }
                     } else {
                         JOptionPane.showMessageDialog(this, "Report Does Not Exists.");
@@ -491,7 +498,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         lblRecord = new javax.swing.JLabel();
         btnExcel = new javax.swing.JButton();
         lblMessage = new javax.swing.JLabel();
-        btnExcel1 = new javax.swing.JButton();
+        btnSIF = new javax.swing.JButton();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -872,11 +879,11 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         lblMessage.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblMessage.setText("-");
 
-        btnExcel1.setFont(Global.lableFont);
-        btnExcel1.setText("Show In Folder");
-        btnExcel1.addActionListener(new java.awt.event.ActionListener() {
+        btnSIF.setFont(Global.lableFont);
+        btnSIF.setText("Show In Folder");
+        btnSIF.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnExcel1ActionPerformed(evt);
+                btnSIFActionPerformed(evt);
             }
         });
 
@@ -892,7 +899,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblMessage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnExcel1)
+                .addComponent(btnSIF)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnExcel)
                 .addContainerGap())
@@ -906,7 +913,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                     .addComponent(lblRecord)
                     .addComponent(btnExcel)
                     .addComponent(lblMessage)
-                    .addComponent(btnExcel1))
+                    .addComponent(btnSIF))
                 .addContainerGap())
         );
 
@@ -1073,15 +1080,15 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         report(true);
     }//GEN-LAST:event_btnExcelActionPerformed
 
-    private void btnExcel1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExcel1ActionPerformed
+    private void btnSIFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSIFActionPerformed
         // TODO add your handling code here:
         Util1.openFolder(exporter.getLastPath());
-    }//GEN-LAST:event_btnExcel1ActionPerformed
+    }//GEN-LAST:event_btnSIFActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnExcel;
-    private javax.swing.JButton btnExcel1;
+    private javax.swing.JButton btnSIF;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

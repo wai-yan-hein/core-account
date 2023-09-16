@@ -42,16 +42,8 @@ public class CurrencyExchange extends javax.swing.JPanel implements PanelControl
     @Autowired
     private UserRepo userRepo;
 
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {

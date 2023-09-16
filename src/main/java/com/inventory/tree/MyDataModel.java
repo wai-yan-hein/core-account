@@ -5,16 +5,14 @@
  */
 package com.inventory.tree;
 
-import com.common.Global;
 import com.common.SelectionObserver;
+import com.inventory.model.MessageType;
 import com.user.model.PrivilegeMenu;
 import com.user.model.PMKey;
 import com.inventory.model.VRoleMenu;
 import com.repo.UserRepo;
 import java.util.List;
-import javax.swing.JOptionPane;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -92,15 +90,13 @@ public class MyDataModel extends MyAbstractTreeTableModel {
             case 2 -> {
                 if (aValue != null) {
                     if (node instanceof VRoleMenu roleMenu) {
-                        if (roleMenu.getChild() != null) {
-                            setAllow(roleMenu.getChild(), (Boolean) aValue);
-                        }
                         roleMenu.setAllow((Boolean) aValue);
                         savePrivilege(roleMenu, (Boolean) aValue);
 
                     }
                 }
             }
+
         }
     }
 
@@ -125,16 +121,20 @@ public class MyDataModel extends MyAbstractTreeTableModel {
             PrivilegeMenu privilege = new PrivilegeMenu();
             privilege.setKey(key);
             privilege.setAllow(allow);
-            userRepo.savePrivilegeMenu(privilege).subscribe((t) -> {
+            userRepo.savePrivilegeMenu(privilege).doOnSuccess((t) -> {
                 if (observer != null) {
                     observer.selected("Menu-Change", "-");
                 }
-            }, (e) -> {
-                JOptionPane.showMessageDialog(Global.parentForm, e.getMessage(), "Permission Allow.", JOptionPane.ERROR_MESSAGE);
-            });
-
+                sendMessage("Menu Update.");
+            }).subscribe();
         }
 
+    }
+    private void sendMessage(String mes) {
+        userRepo.sendDownloadMessage(MessageType.PRIVILEGE_MENU, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
 }

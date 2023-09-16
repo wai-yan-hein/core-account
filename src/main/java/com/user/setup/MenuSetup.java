@@ -12,6 +12,7 @@ import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.inventory.model.MessageType;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import com.user.model.Menu;
@@ -34,6 +35,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,6 +43,7 @@ import org.springframework.stereotype.Component;
  *
  * @author Lenovo
  */
+@Slf4j
 @Component
 public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListener, PanelControl, SelectionObserver {
 
@@ -272,7 +275,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
             if (txtOrder.getValue() != null) {
                 menu.setOrderBy(Util1.getInteger(txtOrder.getText()));
             }
-            userRepo.save(menu).subscribe((t) -> {
+            userRepo.save(menu).doOnSuccess((t) -> {
                 observer.selected("menu", "menu");
                 selectedNode.setUserObject(t);
                 TreePath path = treeCOA.getSelectionPath();
@@ -280,11 +283,17 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
                 model.nodeChanged(selectedNode);
                 treeCOA.setSelectionPath(path);
                 clear();
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+                sendMessage(t.getMenuName());
+            }).subscribe();
         }
     }
+        private void sendMessage(String mes) {
+        userRepo.sendDownloadMessage(MessageType.MENU, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
+    }
+
 
     private void setMenu(Menu menu) {
         txtMenuName.setText(menu.getMenuName());

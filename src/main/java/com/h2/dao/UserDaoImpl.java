@@ -75,7 +75,7 @@ public class UserDaoImpl extends AbstractDao<String, AppUser> implements UserDao
             for (RoleProperty rp : roleProperty) {
                 String value = rp.getPropValue();
                 if (!Util1.isNullOrEmpty(value) || !value.equals("-")) {
-                    hm.put(rp.getKey().getPropKey(), rp.getPropValue());
+                    hm.put(rp.getKey().getPropKey(),value);
                 }
             }
         }
@@ -84,7 +84,7 @@ public class UserDaoImpl extends AbstractDao<String, AppUser> implements UserDao
             for (MachineProperty p : machineProperties) {
                 String value = p.getPropValue();
                 if (!Util1.isNullOrEmpty(value) || !value.equals("-")) {
-                    hm.put(p.getKey().getPropKey(), p.getPropValue());
+                    hm.put(p.getKey().getPropKey(),value);
                 }
             }
         }

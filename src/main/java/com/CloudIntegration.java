@@ -34,6 +34,7 @@ import com.h2.service.PrivilegeMenuService;
 import com.h2.service.ProcessHisService;
 import com.h2.service.ProjectService;
 import com.h2.service.PurHisService;
+import com.h2.service.RegionService;
 import com.h2.service.RetInService;
 import com.h2.service.RetOutService;
 import com.h2.service.RolePropertyService;
@@ -63,7 +64,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.TaskScheduler;
 
 /**
  *
@@ -81,7 +81,8 @@ public class CloudIntegration {
     private InventoryRepo inventoryRepo;
     @Autowired
     private AccountRepo accountRepo;
-
+    @Autowired
+    private RegionService regionService;
     @Autowired
     private StockService stockService;
     @Autowired
@@ -154,14 +155,11 @@ public class CloudIntegration {
     RetInService retInService;
     @Autowired
     RetOutService retOutService;
-    @Autowired
     private TransferHisService transferHisService;
     @Autowired
     private WeightLossService weightLossService;
     @Autowired
     private ProcessHisService processHisService;
-    @Autowired
-    private TaskScheduler taskScheduler;
     private SelectionObserver observer;
 
     public void setObserver(SelectionObserver observer) {
@@ -352,8 +350,7 @@ public class CloudIntegration {
         downloadChartofAccount();
     }
 
-    private void downloadChartofAccount() {
-        log.info(coaService.getMaxDate());
+    public void downloadChartofAccount() {
         accountRepo.getUpdateChartOfAccountByDate(coaService.getMaxDate()).subscribe((t) -> {
             observer.selected("download", "downloadChartOfAccount list : " + t.size());
             t.forEach((coa) -> {
@@ -365,7 +362,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadTraderAccount() {
+    public void downloadTraderAccount() {
         accountRepo.getUpdateTraderByDate(traderService.getMaxDate()).subscribe((t) -> {
             observer.selected("download", "downloadTrader list : " + t.size());
             t.forEach((tr) -> {
@@ -377,7 +374,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadDepartmentAccount() {
+    public void downloadDepartmentAccount() {
         accountRepo.getUpdateDepartmentAByDate(departmentAService.getMaxDate()).subscribe((d) -> {
             observer.selected("download", "downloadDepartmentAccount list : " + d.size());
             d.forEach((da) -> {
@@ -389,7 +386,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadAppUser() {
+    public void downloadAppUser() {
         userRepo.getAppUserByDate(userService.getMaxDate()).subscribe((u) -> {
             observer.selected("download", "downloadAppUser list : " + u.size());
             u.forEach((a) -> {
@@ -402,7 +399,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadBusinessType() {
+    public void downloadBusinessType() {
         userRepo.getBusinessTypeByDate(businessTypeService.getMaxDate()).subscribe((b) -> {
             observer.selected("download", "downloadAppUser list : " + b.size());
             b.forEach((a) -> {
@@ -415,7 +412,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadCompanyInfo() {
+    public void downloadCompanyInfo() {
         userRepo.getCompanyInfoByDate(companyInfoService.getMaxDate()).subscribe((c) -> {
             observer.selected("download", "downloadCompanyInfo list : " + c.size());
             c.forEach((a) -> {
@@ -428,7 +425,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadCurrency() {
+    public void downloadCurrency() {
         userRepo.getCurrencyByDate(currencyService.getMaxDate()).subscribe((c) -> {
             observer.selected("download", "downloadCurrency list : " + c.size());
             c.forEach((a) -> {
@@ -441,7 +438,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadDepartment() {
+    public void downloadDepartment() {
         userRepo.getDepartmentByDate(departmentService.getMaxDate()).subscribe((d) -> {
             observer.selected("download", "downloadDepartment list : " + d.size());
             d.forEach((a) -> {
@@ -454,7 +451,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadExchangeRate() {
+    public void downloadExchangeRate() {
         userRepo.getExchangeRateByDate(exchangeRateService.getMaxDate()).subscribe((ex) -> {
             observer.selected("download", "downloadExchangeRate list : " + ex.size());
             ex.forEach((a) -> {
@@ -467,7 +464,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadMachineInfo() {
+    public void downloadMachineInfo() {
         userRepo.getMachineInfoByDate(machineInfoService.getMaxDate()).subscribe((m) -> {
             observer.selected("download", "downloadMachineInfo list : " + m.size());
             m.forEach((a) -> {
@@ -480,7 +477,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadMacProperty() {
+    public void downloadMacProperty() {
         userRepo.getMacPropertyByDate(macPropertyService.getMaxDate()).subscribe((m) -> {
             observer.selected("download", "downloadMacProperty list : " + m.size());
             m.forEach((a) -> {
@@ -493,7 +490,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadMenu() {
+    public void downloadMenu() {
         userRepo.getMenuByDate(menuService.getMaxDate()).subscribe((m) -> {
             observer.selected("download", "downloadMenu list : " + m.size());
             m.forEach((a) -> {
@@ -506,7 +503,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadPC() {
+    public void downloadPC() {
         userRepo.getPCByDate(pcService.getMaxDate()).subscribe((p) -> {
             observer.selected("download", "downloadPC list : " + p.size());
             p.forEach((a) -> {
@@ -519,7 +516,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadPM() {
+    public void downloadPM() {
         userRepo.getPMByDate(pmService.getMaxDate()).subscribe((m) -> {
             observer.selected("download", "downloadPM list : " + m.size());
             m.forEach((a) -> {
@@ -532,7 +529,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadProject() {
+    public void downloadProject() {
         userRepo.getProjectByDate(pService.getMaxDate()).subscribe((p) -> {
             observer.selected("download", "downloadProject list : " + p.size());
             p.forEach((a) -> {
@@ -545,7 +542,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadRole() {
+    public void downloadRole() {
         userRepo.getRoleByDate(roleService.getMaxDate()).subscribe((r) -> {
             observer.selected("download", "downloadRole list : " + r.size());
             r.forEach((a) -> {
@@ -558,7 +555,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadRoleProperty() {
+    public void downloadRoleProperty() {
         userRepo.getRolePropByDate(rpService.getMaxDate()).subscribe((r) -> {
             observer.selected("download", "downloadRoleProperty list : " + r.size());
             r.forEach((a) -> {
@@ -571,7 +568,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadSystemProperty() {
+    public void downloadSystemProperty() {
         userRepo.getSystemPropertyByDate(sysPropertyService.getMaxDate()).subscribe((r) -> {
             observer.selected("download", "downloadSystemProperty list : " + r.size());
             r.forEach((a) -> {
@@ -599,7 +596,7 @@ public class CloudIntegration {
         downloadStock();
     }
 
-    private void downloadPriceOption() {
+    public void downloadPriceOption() {
         inventoryRepo.getUpdatePriceOption(priceOptionService.getMaxDate()).subscribe((t) -> {
             observer.selected("download", "downloadPriceOption list : " + t.size());
             t.forEach((s) -> {
@@ -611,7 +608,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadVouStatus() {
+    public void downloadVouStatus() {
         inventoryRepo.getUpdateVouStatus(vouStatusService.getMaxDate()).subscribe((t) -> {
             observer.selected("download", "downloadVouStatus list : " + t.size());
             t.forEach((s) -> {
@@ -623,10 +620,9 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadOrderStatus() {
+    public void downloadOrderStatus() {
         inventoryRepo.getUpdateOrderStatus(orderStatusService.getMaxDate()).subscribe((t) -> {
             observer.selected("download", "downloadOrderStatus list : " + t.size());
-            log.info("download orderstatus = " + t.size());
             t.forEach((s) -> {
                 orderStatusService.save(s);
             });
@@ -648,7 +644,7 @@ public class CloudIntegration {
         });
     }
 
-    private void downloadSaleMan() {
+    public void downloadSaleMan() {
         inventoryRepo.getUpdateSaleMan(saleManService.getMaxDate()).subscribe((t) -> {
             observer.selected("download", "downloadSaleMan list : " + t.size());
             t.forEach((s) -> {
@@ -740,6 +736,18 @@ public class CloudIntegration {
                 stockService.save(s);
             });
             observer.selected("download", "downloadStock done.");
+        }, (e) -> {
+            observer.selected("download", e.getMessage());
+        });
+    }
+    public void downloadRegion() {
+        String maxDate = regionService.getMaxDate();
+        inventoryRepo.getUpdateRegion(maxDate).subscribe((t) -> {
+            observer.selected("download", "downloadRegion list : " + t.size());
+            t.forEach((s) -> {
+                regionService.save(s);
+            });
+            observer.selected("download", "downloadRegion done.");
         }, (e) -> {
             observer.selected("download", e.getMessage());
         });

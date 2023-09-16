@@ -7,35 +7,51 @@ package com.inventory.model;
 
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
 /**
  *
  * @author wai yan
  */
-@Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Region implements java.io.Serializable {
+@Data
+@Entity
+@Table(name = "region")
+public class Region {
 
+    @EmbeddedId
     private RegionKey key;
+    @Column(name = "reg_name")
     private String regionName;
-    private String regionType;
-    private String parentRegion;
-
-    private Integer deptId;
+    @Column(name = "updated_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime updatedDate;
+    @Column(name = "updated_by")
     private String updatedBy;
+    @Column(name = "created_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime createdDate;
+    @Column(name = "created_by")
     private String createdBy;
+    @Column(name = "mac_id")
     private Integer macId;
+    @Column(name = "user_code")
     private String userCode;
-
-    public Region(String regCode, String regionName) {
-        this.key = new RegionKey();
-        this.key.setRegCode(regCode);
-        this.regionName = regionName;
-    }
+    @Column(name = "dept_id")
+    private Integer deptId;
+    @Column(name = "deleted")
+    private boolean deleted;
+    @Column(name = "active")
+    private boolean active;
 
     public Region() {
+    }
+
+    public Region(RegionKey key, String regionName) {
+        this.key = key;
+        this.regionName = regionName;
     }
 
 }

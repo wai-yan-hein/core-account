@@ -8,7 +8,7 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.model.MachineInfo;
+import com.user.model.MachineInfo;
 import com.inventory.ui.common.MachineInfoCompleterTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;

@@ -59,7 +59,7 @@ import com.inventory.model.Category;
 import com.inventory.model.CategoryKey;
 import com.inventory.model.Location;
 import com.inventory.model.LocationKey;
-import com.inventory.model.MachineInfo;
+import com.user.model.MachineInfo;
 import com.inventory.model.OrderHis;
 import com.inventory.model.PurHis;
 import com.inventory.model.RetInHis;
@@ -98,6 +98,7 @@ import com.h2.service.PrivilegeMenuService;
 import com.h2.service.ProcessHisDetailService;
 import com.h2.service.ProcessHisService;
 import com.h2.service.PurHisDetailService;
+import com.h2.service.RegionService;
 import com.h2.service.RelationService;
 import com.h2.service.ReportService;
 import com.h2.service.RetInDetailService;
@@ -156,7 +157,8 @@ import reactor.core.publisher.Mono;
  */
 @Component
 public class H2Repo {
-
+    @Autowired
+    private RegionService regionService;
     @Autowired
     private RelationService relationService;
     @Autowired
@@ -463,7 +465,7 @@ public class H2Repo {
     }
 
     public Region save(Region obj) {
-        return null;
+        return regionService.save(obj);
     }
 
     public SaleMan save(SaleMan obj) {
@@ -522,48 +524,47 @@ public class H2Repo {
         return Mono.justOrEmpty(vRoleCompanyService.getPrivilegeCompany(roleCode));
     }
 
-    public Mono<List<VRoleMenu>> getPRoleMenu(String roleCode, String compCode) {
-        List<VRoleMenu> menus = getRoleMenuTree(roleCode, compCode);
-        menus.removeIf(m -> !m.isAllow());
+    public Mono<List<VRoleMenu>> getPrivilegeMenu(String roleCode, String compCode) {
+        List<VRoleMenu> menus = getRoleMenuTree(roleCode, compCode, true);
         return Mono.justOrEmpty(menus);
     }
 
-    private List<VRoleMenu> getRoleMenuTree(String roleCode, String compCode) {
-        List<VRoleMenu> roles = vRoleMenuService.getMenuChild(roleCode, "1", compCode);
+    private List<VRoleMenu> getRoleMenuTree(String roleCode, String compCode, boolean privilege) {
+        List<VRoleMenu> roles = vRoleMenuService.getMenu(roleCode, "1", compCode, privilege);
         if (!roles.isEmpty()) {
             for (VRoleMenu role : roles) {
-                getRoleMenuChild(role);
+                getRoleMenuChild(role, false);
             }
         }
         return roles;
     }
 
-    private void getRoleMenuChild(VRoleMenu parent) {
-        List<VRoleMenu> roles = vRoleMenuService.getMenuChild(parent.getRoleCode(), parent.getMenuCode(), parent.getCompCode());
+    private void getRoleMenuChild(VRoleMenu parent, boolean privilege) {
+        List<VRoleMenu> roles = vRoleMenuService.getMenu(parent.getRoleCode(), parent.getMenuCode(), parent.getCompCode(), privilege);
         parent.setChild(roles);
         if (!roles.isEmpty()) {
             for (VRoleMenu role : roles) {
-                getRoleMenuChild(role);
+                getRoleMenuChild(role, privilege);
             }
         }
     }
 
     public Mono<List<VRoleMenu>> getRoleMenu(String roleCode, String compCode) {
-        List<VRoleMenu> roles = vRoleMenuService.getMenu(roleCode, "1", compCode);
+        List<VRoleMenu> roles = vRoleMenuService.getMenu(roleCode, "1", compCode, false);
         if (!roles.isEmpty()) {
             for (VRoleMenu role : roles) {
-                getMenuChild(role);
+                getMenuChild(role, false);
             }
         }
         return Mono.justOrEmpty(roles);
     }
 
-    private void getMenuChild(VRoleMenu parent) {
-        List<VRoleMenu> roles = vRoleMenuService.getMenu(parent.getRoleCode(), parent.getMenuCode(), parent.getCompCode());
+    private void getMenuChild(VRoleMenu parent, boolean privilege) {
+        List<VRoleMenu> roles = vRoleMenuService.getMenu(parent.getRoleCode(), parent.getMenuCode(), parent.getCompCode(), privilege);
         parent.setChild(roles);
         if (!roles.isEmpty()) {
             for (VRoleMenu role : roles) {
-                getMenuChild(role);
+                getMenuChild(role, privilege);
             }
         }
     }
@@ -734,6 +735,10 @@ public class H2Repo {
 
     public TraderA save(TraderA obj) {
         return traderAccService.save(obj);
+    }
+
+    public MachineInfo save(MachineInfo obj) {
+        return machineInfoService.save(obj);
     }
 
     public Mono<List<VPurchase>> searchPurchaseVoucher(FilterObject filter) {

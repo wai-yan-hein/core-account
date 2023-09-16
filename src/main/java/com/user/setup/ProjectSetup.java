@@ -9,6 +9,7 @@ import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.inventory.model.MessageType;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.user.common.ProjectTableModel;
 import com.repo.UserRepo;
@@ -43,16 +44,8 @@ public class ProjectSetup extends javax.swing.JPanel implements SelectionObserve
     private final ProjectTableModel projectTableModel = new ProjectTableModel();
     private Project p = new Project();
 
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
-    }
-
-    public JProgressBar getProgress() {
-        return progress;
     }
 
     public void setProgress(JProgressBar progress) {
@@ -147,17 +140,23 @@ public class ProjectSetup extends javax.swing.JPanel implements SelectionObserve
     private void saveProject() {
         if (isValidEntry()) {
             progress.setIndeterminate(true);
-            userRepo.save(p).subscribe((t) -> {
+            userRepo.save(p).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("NEW")) {
                     projectTableModel.add(t);
                 } else {
                     projectTableModel.set(tblProject.getSelectedRow(), t);
                 }
                 clear();
-            },(e)->{
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
+                sendMessage(t.getProjectName());
+            }).subscribe();
         }
+    }
+
+    private void sendMessage(String mes) {
+        userRepo.sendDownloadMessage(MessageType.PROJECT, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     private void clear() {

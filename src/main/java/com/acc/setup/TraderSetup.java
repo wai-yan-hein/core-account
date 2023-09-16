@@ -17,6 +17,7 @@ import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.inventory.model.MessageType;
 import com.inventory.model.TraderGroup;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -229,9 +230,17 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
                         traderATableModel.addTrader(t);
                     }
                     clear();
+                    sendMessage(t.getTraderName());
                 }
             });
         }
+    }
+
+    private void sendMessage(String mes) {
+        accountRepo.sendDownloadMessage(MessageType.TRADER_ACC, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     public void clear() {
@@ -255,8 +264,9 @@ public class TraderSetup extends javax.swing.JPanel implements KeyListener, Pane
         public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
             String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
             String tmp2 = entry.getStringValue(1).toUpperCase().replace(" ", "");
+            String tmp3 = entry.getStringValue(2).toUpperCase().replace(" ", "");
             String text = txtFilter.getText().toUpperCase().replace(" ", "");
-            return tmp1.startsWith(text) || tmp2.startsWith(text);
+            return tmp1.startsWith(text) || tmp2.startsWith(text) || tmp3.startsWith(text);
         }
     };
 

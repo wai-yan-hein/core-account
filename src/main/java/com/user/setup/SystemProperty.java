@@ -21,6 +21,7 @@ import com.inventory.editor.LocationAutoCompleter;
 import com.inventory.editor.StockAutoCompleter;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
+import com.inventory.model.MessageType;
 import com.inventory.model.Stock;
 import com.user.model.SysProperty;
 import com.inventory.model.Trader;
@@ -89,7 +90,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private String properyType = "System";
     private String roleCode;
     private Integer macId;
-    private WebClient accountApi;
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
@@ -103,52 +103,24 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         this.inventoryRepo = inventoryRepo;
     }
 
-    public String getRoleCode() {
-        return roleCode;
-    }
-
     public void setRoleCode(String roleCode) {
         this.roleCode = roleCode;
-    }
-
-    public Integer getMacId() {
-        return macId;
     }
 
     public void setMacId(Integer macId) {
         this.macId = macId;
     }
 
-    public String getProperyType() {
-        return properyType;
-    }
-
     public void setProperyType(String properyType) {
         this.properyType = properyType;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
 
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
-    }
-
-    public WebClient getAccountApi() {
-        return accountApi;
-    }
-
-    public void setAccountApi(WebClient accountApi) {
-        this.accountApi = accountApi;
     }
 
     private final ActionListener action = (ActionEvent e) -> {
@@ -190,6 +162,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtLocation.setName(ProUtil.DEFAULT_LOCATION);
         chkPrint.setName("printer.print");
         chkDisableDep.setName("disable.department");
+        chkSaleEdit.setName(ProUtil.SALE_EDIT);
         chkSWB.setName(ProUtil.STOCK_NAME_WITH_BRAND);
         chkSVou.setName(ProUtil.CHECK_SALE_VOUCHER);
         chkSLP.setName(ProUtil.SALE_LAST_PRICE);
@@ -207,6 +180,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkPaymentEdit.setName(ProUtil.PAYMENT_EDIT);
         chkAutoUpdate.setName(ProUtil.AUTO_UPDATE);
         chkWeightPoint.setName(ProUtil.WEIGHT_POINT);
+        chkTransferEdit.setName(ProUtil.TRANSFER_EDIT);
+        chkTransferDelete.setName(ProUtil.TRANSFER_DELETE);
         txtPlAcc.setName(ProUtil.PL);
         txtREAcc.setName(ProUtil.RE);
         txtFixed.setName(ProUtil.FIXED);
@@ -256,6 +231,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     }
 
     public void initMain() {
+        progress.setIndeterminate(true);
         initMac();
         initProperty();
         initCheckBox();
@@ -273,7 +249,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkPricePopup.addActionListener(action);
         chkCalStock.addActionListener(action);
         chkSalePaid.addActionListener(action);
-        chkVouEdit.addActionListener(action);
+        chkSaleEdit.addActionListener(action);
         chkPurVouEdit.addActionListener(action);
         chkBalance.addActionListener(action);
         chkWeight.addActionListener(action);
@@ -299,7 +275,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkPurGRNReport.addActionListener(action);
         chkPaymentEdit.addActionListener(action);
         chkAutoUpdate.addActionListener(action);
-        chkAutoUpdate.addActionListener(action);
+        chkTransferEdit.addActionListener(action);
+        chkTransferDelete.addActionListener(action);
         //txt
         txtA4Report.addActionListener(action);
         txtA5Report.addActionListener(action);
@@ -331,8 +308,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkCalStock.setSelected(Util1.getBoolean(hmProperty.get("calculate.stock")));
         chkSalePaid.setName("default.sale.paid");
         chkSalePaid.setSelected(Util1.getBoolean(hmProperty.get("default.sale.paid")));
-        chkVouEdit.setName("sale.voucher.edit");
-        chkVouEdit.setSelected(Util1.getBoolean(hmProperty.get("sale.voucher.edit")));
+        chkSaleEdit.setSelected(Util1.getBoolean(chkSaleEdit.getName()));
         chkPriceChange.setName("sale.price.change");
         chkPriceChange.setSelected(Util1.getBoolean(hmProperty.get("sale.price.change")));
         chkPurVouEdit.setName("purchase.voucher.edit");
@@ -364,6 +340,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkPaymentEdit.setSelected(Util1.getBoolean(hmProperty.get(chkPaymentEdit.getName())));
         chkAutoUpdate.setSelected(Util1.getBoolean(hmProperty.get(chkAutoUpdate.getName())));
         chkWeightPoint.setSelected(Util1.getBoolean(hmProperty.get(chkWeightPoint.getName())));
+        chkTransferEdit.setSelected(Util1.getBoolean(hmProperty.get(chkTransferEdit.getName())));
+        chkTransferDelete.setSelected(Util1.getBoolean(hmProperty.get(chkTransferDelete.getName())));
     }
 
     private void initTextBox() {
@@ -394,7 +372,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         inventoryRepo.findTrader(hmProperty.get(txtCustomer.getName())).doOnSuccess((t) -> {
             cusCompleter.setTrader(t);
         }).subscribe();
-
         supCompleter = new TraderAutoCompleter(txtSupplier, inventoryRepo, null, false, "SUP");
         supCompleter.setObserver(this);
         inventoryRepo.findTrader(hmProperty.get(txtSupplier.getName())).doOnSuccess((t) -> {
@@ -402,11 +379,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         }).subscribe();
         locCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
         locCompleter.setObserver(this);
-        inventoryRepo.getLocation().subscribe((t) -> {
+        inventoryRepo.getLocation().doOnSuccess((t) -> {
             locCompleter.setListLocation(t);
-        }, (e) -> {
-            log.error(e.getMessage());
-        });
+        }).subscribe();
         inventoryRepo.findLocation(hmProperty.get(txtLocation.getName())).doOnSuccess((t) -> {
             locCompleter.setLocation(t);
         }).subscribe();
@@ -415,13 +390,11 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         inventoryRepo.findStock(txtStock.getName()).doOnSuccess((t) -> {
             stockAutoCompleter.setStock(t);
         }).subscribe();
-        
         departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true, true);
         departmentAutoCompleter.setObserver(this);
         accountRepo.getDepartment().doOnSuccess((t) -> {
             departmentAutoCompleter.setListDepartment(t);
         }).subscribe();
-
         cashAutoCompleter = new COA3AutoCompleter(txtCash, accountRepo, null, false, 3);
         cashAutoCompleter.setObserver(this);
         accountRepo.findCOA(hmProperty.get(txtCash.getName())).doOnSuccess((t) -> {
@@ -453,7 +426,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         accountRepo.findCOA(hmProperty.get(txtBankGroup.getName())).doOnSuccess((t) -> {
             bankGroupAutoCompleter.setCoa(t);
         }).subscribe();
-
         fixedAutoCompleter = new COA3AutoCompleter(txtFixed, accountRepo, null, false, 1);
         fixedAutoCompleter.setObserver(this);
         accountRepo.findCOA(hmProperty.get(txtFixed.getName())).doOnSuccess((t) -> {
@@ -464,25 +436,21 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         accountRepo.findCOA(hmProperty.get(txtCurrent.getName())).doOnSuccess((t) -> {
             currentAutoCompleter.setCoa(t);
         }).subscribe();
-
         liaAutoCompleter = new COA3AutoCompleter(txtLiability, accountRepo, null, false, 1);
         liaAutoCompleter.setObserver(this);
         accountRepo.findCOA(hmProperty.get(txtLiability.getName())).doOnSuccess((t) -> {
             liaAutoCompleter.setCoa(t);
         }).subscribe();
-
         capitalAutoCompleter = new COA3AutoCompleter(txtCapital, accountRepo, null, false, 1);
         capitalAutoCompleter.setObserver(this);
         accountRepo.findCOA(hmProperty.get(txtCapital.getName())).doOnSuccess((t) -> {
             capitalAutoCompleter.setCoa(t);
         }).subscribe();
-
         incomeAutoCompleter = new COA3AutoCompleter(txtIncome, accountRepo, null, false, 1);
         incomeAutoCompleter.setObserver(this);
         accountRepo.findCOA(hmProperty.get(txtIncome.getName())).doOnSuccess((t) -> {
             incomeAutoCompleter.setCoa(t);
         }).subscribe();
-
         otherIncomeAutoCompleter = new COA3AutoCompleter(txtOtherIncome, accountRepo, null, false, 1);
         otherIncomeAutoCompleter.setObserver(this);
         accountRepo.findCOA(hmProperty.get(txtOtherIncome.getName())).doOnSuccess((t) -> {
@@ -522,8 +490,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         conversionAccAutoCompleter.setObserver(this);
         accountRepo.findCOA(hmProperty.get(txtConversionAcc.getName())).doOnSuccess((t) -> {
             conversionAccAutoCompleter.setCoa(t);
+            progress.setIndeterminate(false);
         }).subscribe();
-
     }
 
     private void save(String key, String value) {
@@ -545,10 +513,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         p.setKey(pKey);
         p.setPropValue(value);
         p.setUpdatedDate(LocalDateTime.now());
-        userRepo.saveSys(p).subscribe((t) -> {
+        userRepo.saveSys(p).doOnSuccess((t) -> {
             Global.hmRoleProperty.put(key, value);
-            log.info("save.");
-        });
+            sendMessage(MessageType.SYSTEM_PROPERTY, t.getKey().getPropKey());
+        }).subscribe();
     }
 
     private void saveRoleProp(String key, String value) {
@@ -560,11 +528,10 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         p.setKey(pKey);
         p.setPropValue(value);
         p.setUpdatedDate(LocalDateTime.now());
-        userRepo.saveRoleProperty(p).subscribe((t) -> {
+        userRepo.saveRoleProperty(p).doOnSuccess((t) -> {
             Global.hmRoleProperty.put(key, value);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
+            sendMessage(MessageType.ROLE_PROPERTY, t.getKey().getPropKey());
+        }).subscribe();
     }
 
     private void saveMacProp(String key, String value) {
@@ -575,9 +542,18 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         p.setKey(mKey);
         p.setPropValue(value);
         p.setUpdatedDate(LocalDateTime.now());
-        userRepo.saveMacProp(p).subscribe((t) -> {
+        userRepo.saveMacProp(p).doOnSuccess((t) -> {
             Global.hmRoleProperty.put(key, value);
-        });
+            sendMessage(MessageType.MACHINE_PROERTY, key);
+        }).subscribe();
+
+    }
+
+    private void sendMessage(String messageType, String mes) {
+        userRepo.sendDownloadMessage(messageType, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     private List<String> getPrinter() {
@@ -663,7 +639,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         txtA5Report = new javax.swing.JTextField();
         txtA4Report = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
-        chkVouEdit = new javax.swing.JCheckBox();
+        chkSaleEdit = new javax.swing.JCheckBox();
         chkPriceChange = new javax.swing.JCheckBox();
         chkBalance = new javax.swing.JCheckBox();
         chkPriceOption = new javax.swing.JCheckBox();
@@ -722,7 +698,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkBatchGRN = new javax.swing.JCheckBox();
         jPanel8 = new javax.swing.JPanel();
         chkPaymentEdit = new javax.swing.JCheckBox();
-        jPanel9 = new javax.swing.JPanel();
+        jPanel10 = new javax.swing.JPanel();
+        chkTransferEdit = new javax.swing.JCheckBox();
+        chkTransferDelete = new javax.swing.JCheckBox();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -1047,7 +1025,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         jLabel7.setText("A4 Report");
 
-        chkVouEdit.setText("Voucher Edit");
+        chkSaleEdit.setText(" Edit");
 
         chkPriceChange.setText("Price Change");
 
@@ -1074,13 +1052,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jSeparator7)
-                    .addComponent(chkSA5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkSVou, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkSLP, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jSeparator1)
-                    .addComponent(chkCalStock, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkPricePopup, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkSalePaid, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1089,18 +1061,36 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                             .addComponent(jLabel18, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtA5Report, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
+                            .addComponent(txtA5Report)
                             .addComponent(txtVouReport)
                             .addComponent(txtA4Report)
                             .addComponent(txtCreditAmt)))
-                    .addComponent(chkVouEdit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkPriceChange, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkPriceOption, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkBalance, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(chkSA4)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(chkPriceOption, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(chkCalStock, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(chkSaleExpenseShown)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(chkPriceChange, javax.swing.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
+                            .addComponent(chkPricePopup, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(chkSA5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(chkSA4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(chkSaleExpenseShown)
+                                    .addComponent(chkSaleEdit)))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(chkSVou)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(chkSalePaid))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(chkSLP, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(chkBalance)))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -1111,28 +1101,28 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(chkSA4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(chkSA5)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(chkSA5)
+                            .addComponent(chkSaleEdit))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(chkSVou)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(chkSVou)
+                            .addComponent(chkSalePaid))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(chkSLP)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(chkSLP)
+                            .addComponent(chkBalance))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(chkCalStock)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(chkCalStock)
+                            .addComponent(chkPriceChange))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(chkPriceOption)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(chkPricePopup)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(chkPriceChange)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(chkSalePaid)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(chkVouEdit)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(chkBalance)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(chkPriceOption)
+                            .addComponent(chkPricePopup)))
                     .addComponent(chkSaleExpenseShown))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel18)
@@ -1190,11 +1180,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(chkPurVouEdit, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jSeparator4)
-                    .addComponent(chkShowExpense, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkShowGRN, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkPurByBatchDetail, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1207,20 +1193,28 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                             .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addComponent(txtPurReport, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(chkPurGRNReport)))))
+                                .addComponent(chkPurGRNReport))))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(chkShowGRN)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(chkPurByBatchDetail, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(chkPurVouEdit)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(chkShowExpense, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(chkPurVouEdit)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkPurVouEdit)
+                    .addComponent(chkShowExpense))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkShowExpense)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkShowGRN)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkPurByBatchDetail)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkShowGRN)
+                    .addComponent(chkPurByBatchDetail))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1496,17 +1490,30 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addComponent(chkPaymentEdit))
         );
 
-        jPanel9.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+        jPanel10.setBorder(javax.swing.BorderFactory.createTitledBorder("Transfer"));
 
-        javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
-        jPanel9.setLayout(jPanel9Layout);
-        jPanel9Layout.setHorizontalGroup(
-            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+        chkTransferEdit.setText("Edit");
+
+        chkTransferDelete.setText("Delete");
+
+        javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
+        jPanel10.setLayout(jPanel10Layout);
+        jPanel10Layout.setHorizontalGroup(
+            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel10Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(chkTransferEdit)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkTransferDelete)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-        jPanel9Layout.setVerticalGroup(
-            jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 100, Short.MAX_VALUE)
+        jPanel10Layout.setVerticalGroup(
+            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel10Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(chkTransferEdit, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(chkTransferDelete, javax.swing.GroupLayout.Alignment.TRAILING)))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -1525,7 +1532,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                             .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jPanel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1550,12 +1557,12 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(59, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -1612,11 +1619,13 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JCheckBox chkSLP;
     private javax.swing.JCheckBox chkSVou;
     private javax.swing.JCheckBox chkSWB;
+    private javax.swing.JCheckBox chkSaleEdit;
     private javax.swing.JCheckBox chkSaleExpenseShown;
     private javax.swing.JCheckBox chkSalePaid;
     private javax.swing.JCheckBox chkShowExpense;
     private javax.swing.JCheckBox chkShowGRN;
-    private javax.swing.JCheckBox chkVouEdit;
+    private javax.swing.JCheckBox chkTransferDelete;
+    private javax.swing.JCheckBox chkTransferEdit;
     private javax.swing.JCheckBox chkWeight;
     private javax.swing.JCheckBox chkWeightPoint;
     private javax.swing.JLabel jLabel1;
@@ -1653,6 +1662,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
@@ -1660,7 +1670,6 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
-    private javax.swing.JPanel jPanel9;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
