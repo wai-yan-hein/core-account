@@ -152,10 +152,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         this.progress = progress;
     }
 
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }

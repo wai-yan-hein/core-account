@@ -51,10 +51,6 @@ public class COASetup extends javax.swing.JPanel implements KeyListener, PanelCo
         this.progress = progress;
     }
 
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }

@@ -5,6 +5,7 @@
 package com.user.common;
 
 import com.common.Global;
+import com.inventory.model.MessageType;
 import com.repo.UserRepo;
 import com.user.model.PrivilegeCompany;
 import java.util.ArrayList;
@@ -96,8 +97,15 @@ public class RoleCompanyTableModel extends AbstractTableModel {
 
     private void save(PrivilegeCompany property) {
         userRepo.savePrivilegeCompany(property).doOnSuccess((t) -> {
-            JOptionPane.showMessageDialog(Global.parentForm, "Updated : " + property.getCompName());
-        });
+            sendMessage(t.getCompName());
+        }).subscribe();
+    }
+
+    private void sendMessage(String mes) {
+        userRepo.sendDownloadMessage(MessageType.PRIVILEGE_COMPANY, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     @Override

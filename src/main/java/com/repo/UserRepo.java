@@ -13,8 +13,9 @@ import com.user.model.RoleProperty;
 import com.inventory.model.AppRole;
 import com.user.model.AppUser;
 import com.user.model.DepartmentUser;
-import com.inventory.model.MachineInfo;
+import com.user.model.MachineInfo;
 import com.inventory.model.Message;
+import com.inventory.model.MessageType;
 import com.inventory.model.VRoleMenu;
 import com.user.model.AuthenticationResponse;
 import com.user.model.SysProperty;
@@ -136,6 +137,19 @@ public class UserRepo {
                     return Mono.empty();
                 });
 
+    }
+
+    public Mono<MachineInfo> saveMachine(MachineInfo info) {
+        return userApi.post()
+                .uri("/user/saveMachine")
+                .body(Mono.just(info), MachineInfo.class)
+                .retrieve()
+                .bodyToMono(MachineInfo.class)
+                .doOnSuccess((t) -> {
+                    if (localdatabase) {
+                        h2Repo.save(t);
+                    }
+                });
     }
 
     public Mono<AuthenticationResponse> register(MachineInfo mac) {
@@ -827,9 +841,9 @@ public class UserRepo {
                 });
     }
 
-    public Mono<List<VRoleMenu>> getRoleMenu(String roleCode) {
+    public Mono<List<VRoleMenu>> getPrivilegeRoleMenuTree(String roleCode) {
         if (localdatabase) {
-            return h2Repo.getPRoleMenu(roleCode, Global.compCode);
+            return h2Repo.getPrivilegeMenu(roleCode, Global.compCode);
         }
         return userApi.get()
                 .uri(builder -> builder.path("/user/getPrivilegeRoleMenuTree")
@@ -907,6 +921,18 @@ public class UserRepo {
         return userApi.post()
                 .uri("/message/send")
                 .body(Mono.just(message), Message.class)
+                .retrieve()
+                .bodyToMono(String.class);
+    }
+
+    public Mono<String> sendDownloadMessage(String entity, String message) {
+        Message mg = new Message();
+        mg.setHeader(MessageType.DOWNLOAD);
+        mg.setEntity(entity);
+        mg.setMessage(message);
+        return userApi.post()
+                .uri("/message/send")
+                .body(Mono.just(mg), Message.class)
                 .retrieve()
                 .bodyToMono(String.class);
     }

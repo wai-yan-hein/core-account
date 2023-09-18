@@ -23,6 +23,7 @@ import com.common.Util1;
 import com.user.model.Menu;
 import com.inventory.editor.MenuAutoCompleter;
 import com.inventory.model.CFont;
+import com.inventory.model.MessageType;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.repo.UserRepo;
 import com.user.model.MenuKey;
@@ -100,16 +101,8 @@ public class COAManagment extends javax.swing.JPanel implements
     private JProgressBar progress;
     private StartWithRowFilter swrf;
 
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -250,6 +243,7 @@ public class COAManagment extends javax.swing.JPanel implements
                             treeCOA.setSelectionPath(path);
                             setEnabledControl(false);
                             clear();
+                            sendMessage(t.getCoaNameEng());
                         }
                     }
                 }, (e) -> {
@@ -263,7 +257,13 @@ public class COAManagment extends javax.swing.JPanel implements
         } else {
             JOptionPane.showMessageDialog(Global.parentForm, "Invalid Parent Tree.");
         }
+    }
 
+    private void sendMessage(String mes) {
+        accountRepo.sendDownloadMessage(MessageType.COA, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     private void deleteCOA() {

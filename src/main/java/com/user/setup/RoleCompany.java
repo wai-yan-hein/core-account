@@ -6,6 +6,7 @@
 package com.user.setup;
 
 import com.common.Global;
+import com.inventory.model.MessageType;
 import com.user.common.RoleCompanyTableModel;
 import com.repo.UserRepo;
 import com.user.model.PrivilegeCompany;
@@ -18,6 +19,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -27,12 +29,11 @@ import org.springframework.web.reactive.function.client.WebClient;
  * @author Lenovo
  */
 @Component
+@Slf4j
 public class RoleCompany extends javax.swing.JPanel {
 
     @Autowired
     private UserRepo userRepo;
-    @Autowired
-    private WebClient userApi;
     private final RoleCompanyTableModel tableModel = new RoleCompanyTableModel();
     private JProgressBar progress;
 
@@ -49,15 +50,6 @@ public class RoleCompany extends javax.swing.JPanel {
      */
     public RoleCompany() {
         initComponents();
-    }
-
-    private void focusTable() {
-        int row = tblSystem.getRowCount();
-        if (row >= 1) {
-            tblSystem.setColumnSelectionInterval(0, 0);
-            tblSystem.setRowSelectionInterval(row - 1, row - 1);
-        }
-        tblSystem.requestFocusInWindow();
     }
 
     public void initTable() {

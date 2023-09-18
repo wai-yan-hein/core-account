@@ -211,7 +211,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     }
 
     private String getUserCode() {
-        return appUserAutoCompleter == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
+        return appUserAutoCompleter.getAppUser() == null ? "-" : appUserAutoCompleter.getAppUser().getUserCode();
     }
 
     private String getSaleMancode() {

@@ -333,7 +333,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
         txtReference.setText(null);
         txtCus.requestFocus();
         projectAutoCompleter.setProject(null);
-//        txtOrderStatus.setText(null);
     }
 
     public void saveOrder(boolean print) {
@@ -353,7 +352,6 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                 progress.setIndeterminate(false);
                 observer.selected("save", true);
             }).subscribe();
-
         }
     }
 

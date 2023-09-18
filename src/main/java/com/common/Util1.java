@@ -949,7 +949,7 @@ public class Util1 {
 
         String os = System.getProperty("os.name").toLowerCase();
         try {
-            String command = "";
+            String command="";
             if (os.contains("win")) {
                 command = "wmic cpu get processorid";
             } else if (os.contains("nix") || os.contains("nux")) {

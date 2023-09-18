@@ -23,7 +23,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
@@ -39,8 +38,6 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl, Sel
     private RoleCompany roleCompany;
     private final UserRoleTableModel userRoleTableModel = new UserRoleTableModel();
     @Autowired
-    private WebClient accountApi;
-    @Autowired
     private UserRepo userRepo;
     @Autowired
     private InventoryRepo inventoryRepo;
@@ -51,16 +48,8 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl, Sel
     private int selectRow = -1;
     private AppRole role = new AppRole();
 
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -89,6 +78,7 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl, Sel
                     if (roleCode != null) {
                         sysProperty.setProperyType("Role");
                         sysProperty.setRoleCode(roleCode);
+                        sysProperty.setProgress(progress);
                         sysProperty.initMain();
                         roleMenuSetup.createMenuTree(roleCode);
                         roleCompany.searchCompany(roleCode);
@@ -106,7 +96,6 @@ public class RoleSetting extends javax.swing.JPanel implements PanelControl, Sel
         sysProperty.setUserRepo(userRepo);
         sysProperty.setInventoryRepo(inventoryRepo);
         sysProperty.setAccountRepo(accountRepo);
-        sysProperty.setAccountApi(accountApi);
         sysProperty.setProgress(progress);
         roleCompany.initTable();
         roleCompany.setProgress(progress);

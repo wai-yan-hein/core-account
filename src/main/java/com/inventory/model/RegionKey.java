@@ -5,16 +5,30 @@
 package com.inventory.model;
 
 import lombok.Data;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import java.io.Serializable;
 
 /**
  *
  * @author DELL
  */
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class RegionKey {
+@Embeddable
+public class RegionKey implements Serializable {
 
+    @Column(name = "reg_code")
     private String regCode;
+    @Column(name = "comp_code")
     private String compCode;
+
+    public RegionKey() {
+    }
+    
+
+    public RegionKey(String regCode, String compCode) {
+        this.regCode = regCode;
+        this.compCode = compCode;
+    }
+    
 }

@@ -10,6 +10,7 @@ import com.acc.model.BusinessType;
 import com.acc.model.COATemplate;
 import com.acc.model.COATemplateKey;
 import com.common.Util1;
+import com.inventory.model.MessageType;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;
@@ -121,7 +122,15 @@ public class BusinessTypeTableModel extends AbstractTableModel {
             table.setRowSelectionInterval(row + 1, row + 1);
             table.setColumnSelectionInterval(0, 0);
             table.requestFocus();
+            sendMessage(t.getBusName());
         });
+    }
+
+    private void sendMessage(String mes) {
+        userRepo.sendDownloadMessage(MessageType.BUSTYPE, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     private void saveCOAHead(Integer busId) {

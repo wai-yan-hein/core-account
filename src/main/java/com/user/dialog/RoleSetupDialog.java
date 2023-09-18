@@ -9,32 +9,27 @@ import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.AppRole;
+import com.inventory.model.MessageType;
 import com.inventory.ui.common.UserRoleTableModel;
 import com.repo.UserRepo;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author DELL
  */
+@Slf4j
 public class RoleSetupDialog extends javax.swing.JDialog {
 
     private final UserRoleTableModel userRoleTableModel = new UserRoleTableModel();
     private UserRepo userRepo;
     private SelectionObserver observer;
 
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
-    }
-
-    public UserRepo getUserRepo() {
-        return userRepo;
     }
 
     public void setUserRepo(UserRepo userRepo) {
@@ -75,13 +70,21 @@ public class RoleSetupDialog extends javax.swing.JDialog {
             AppRole role = new AppRole();
             role.setRoleName(txtRoleName.getText());
             role.setExampleRole(exRole.getRoleCode());
-            userRepo.saveAppRole(role).subscribe((t) -> {
+            userRepo.saveAppRole(role).doOnSuccess((t) -> {
                 observer.selected("Refresh", "Refresh");
+                sendMessage(t.getRoleName());
                 this.dispose();
-            });
+            }).subscribe();
         } else {
             JOptionPane.showMessageDialog(this, "Select Role.");
         }
+    }
+
+    private void sendMessage(String mes) {
+        userRepo.sendDownloadMessage(MessageType.ROLE, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     /**

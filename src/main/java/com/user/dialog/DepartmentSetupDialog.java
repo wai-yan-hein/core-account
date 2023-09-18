@@ -8,6 +8,7 @@ package com.user.dialog;
 import com.common.Global;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.inventory.model.MessageType;
 import com.user.common.DepartmentTableModel;
 import com.repo.UserRepo;
 import com.user.model.DepartmentUser;
@@ -126,12 +127,20 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
                     departmentTableModel.setDepartment(selectRow, t);
                 }
                 clear();
+                sendMessage(t.getDeptName());
             }, (e) -> {
                 progress.setIndeterminate(false);
                 btnSave.setEnabled(true);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             });
         }
+    }
+
+    private void sendMessage(String mes) {
+        userRepo.sendDownloadMessage(MessageType.DEPARTMENT_USER, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     private void setDepartment(DepartmentUser d) {

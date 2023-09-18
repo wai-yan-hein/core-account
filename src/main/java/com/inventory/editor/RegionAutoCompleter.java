@@ -10,6 +10,7 @@ import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.inventory.model.OptionModel;
 import com.inventory.model.Region;
+import com.inventory.model.RegionKey;
 import com.inventory.ui.setup.dialog.OptionDialog;
 import com.inventory.ui.setup.dialog.common.RegionTableModel;
 import java.awt.Color;
@@ -63,11 +64,11 @@ public final class RegionAutoCompleter implements KeyListener {
 
     public void setListRegion(List<Region> list) {
         if (filter) {
-            Region sm = new Region("-", "All");
+            Region sm = new Region(new RegionKey("-", Global.compCode), "All");
             list.add(0, sm);
             setRegion(sm);
         }
-        regionTableModel.setListRegion(list);;
+        regionTableModel.setListRegion(list);
         if (!list.isEmpty()) {
             table.setRowSelectionInterval(0, 0);
         }
@@ -83,7 +84,7 @@ public final class RegionAutoCompleter implements KeyListener {
         this.filter = filter;
         this.textComp.addKeyListener(this);
         if (this.filter) {
-            Region sm = new Region("-", "All");
+            Region sm = new Region(new RegionKey("-", Global.compCode), "All");
             setRegion(sm);
         }
         textComp.putClientProperty(AUTOCOMPLETER, this);

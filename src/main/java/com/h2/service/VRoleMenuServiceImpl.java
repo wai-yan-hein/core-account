@@ -14,13 +14,8 @@ public class VRoleMenuServiceImpl implements VRoleMenuService{
     @Autowired
     private VRoleMenuDao dao;
     @Override
-    public List<VRoleMenu> getMenu(String roleCode, String parentCode, String compCode) {
-        return dao.getMenu(roleCode, parentCode, compCode);
-    }
-
-    @Override
-    public List<VRoleMenu> getMenuChild(String roleCode, String parentCode, String compCode) {
-        return dao.getMenuChild(roleCode, parentCode, compCode);
+    public List<VRoleMenu> getMenu(String roleCode, String parentCode, String compCode,boolean privilege) {
+        return dao.getMenu(roleCode, parentCode, compCode,privilege);
     }
 
     @Override

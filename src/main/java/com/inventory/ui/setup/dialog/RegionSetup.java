@@ -50,10 +50,6 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
         this.listRegion = listRegion;
     }
 
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
@@ -142,10 +138,9 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
     }
 
     private void sendMessage(String mes) {
-        inventoryRepo.sendDownloadMessage(MessageType.REGION, mes)
-                .doOnSuccess((t) -> {
-                    log.info(t);
-                }).subscribe();
+        inventoryRepo.sendDownloadMessage(MessageType.REGION, mes).doOnSuccess((t) -> {
+            log.info(t);
+        }).subscribe();
     }
 
     private void clear() {

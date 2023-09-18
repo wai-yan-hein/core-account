@@ -10,9 +10,10 @@ package com.inventory.model;
  */
 public class MessageType {
 
+    //inventory
     public static final String DOWNLOAD = "DOWNLOAD";
     public static final String STOCK = "STOCK";
-    public static final String TRADER = "TRADER";
+    public static final String TRADER_INV = "TRADER_INV";
     public static final String CATEGORY = "CATEGORY";
     public static final String BRAND = "BRAND";
     public static final String GROUP = "GROUP";
@@ -21,4 +22,29 @@ public class MessageType {
     public static final String LOCATION = "LOCATION";
     public static final String REGION = "REGION";
     public static final String TRADER_GROUP = "TRADER_GROUP";
+    public static final String SALE_MAN = "SALE_MAN";
+    public static final String VOU_STATUS = "VOU_STATUS";
+    public static final String ORDER_STATUS = "ORDER_STATUS";
+    public static final String PRICE_OPTION = "PRICE_OPTION";
+    //account
+    public static final String DEPARTMENT_ACC = "DEPARTMENT_ACC";
+    public static final String TRADER_ACC = "TRADER_ACC";
+    public static final String COA = "COA";
+    //user
+    public static final String USER = "USER";
+    public static final String BUSTYPE = "BUSTYPE";
+    public static final String COMPANY = "COMPANY";
+    public static final String CURRENCY = "CURRENCY";
+    public static final String DEPARTMENT_USER = "DEPARTMENT_USER";
+    public static final String EXRATE = "EXRATE";
+    public static final String MACHINE = "MACHINE";
+    public static final String MACHINE_PROERTY = "MACHINE_PROERTY";
+    public static final String MENU = "MENU";
+    public static final String PRIVILEGE_COMPANY = "PRIVILEGE_COMPANY";
+    public static final String PRIVILEGE_MENU = "PRIVILEGE_MENU";
+    public static final String PROJECT = "PROJECT";
+    public static final String ROLE = "ROLE";
+    public static final String ROLE_PROPERTY = "ROLE_PROPERTY";
+    public static final String SYSTEM_PROPERTY = "SYSTEM_PROPERTY";
+
 }

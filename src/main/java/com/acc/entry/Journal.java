@@ -12,7 +12,6 @@ import com.acc.dialog.JournalEntryDialog;
 import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.model.DeleteObj;
-import com.acc.model.DepartmentA;
 import com.acc.model.Gl;
 import com.common.Global;
 import com.common.PanelControl;
@@ -48,7 +47,6 @@ import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -196,7 +194,6 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         }
         dialog.setStatus(status);
         dialog.searchJournalByVouId(glVou);
-        dialog.setVisible(true);
     }
 
     private void initCompleter() {
@@ -273,7 +270,8 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         String glVouNo = gl.getGlVouNo();
         accountRepo.getJournal(glVouNo).doOnSuccess((list) -> {
             try {
-                String rpPath = Global.accountRP + "JournalVoucher.jasper";
+                String name = chkPl.isSelected() ? "Profit&LossAppropriation.jasper" : "JournalVoucher.jasper";
+                String rpPath = Global.accountRP + name;
                 Map<String, Object> p = new HashMap();
                 p.put("p_report_name", "Journal Voucher");
                 p.put("p_date", String.format("Between %s and %s", dateAutoCompleter.getDateModel().getStartDate(), dateAutoCompleter.getDateModel().getEndDate()));
@@ -314,6 +312,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         jPanel2 = new javax.swing.JPanel();
         lblCount = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
+        chkPl = new javax.swing.JCheckBox();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblJournal = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
@@ -348,6 +347,9 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         jLabel5.setFont(Global.lableFont);
         jLabel5.setText("Records :");
 
+        chkPl.setFont(Global.lableFont);
+        chkPl.setText("P/L Acc");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -357,16 +359,22 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
                 .addComponent(jLabel5)
                 .addGap(18, 18, 18)
                 .addComponent(lblCount, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(chkPl)
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel5)
-                    .addComponent(lblCount))
-                .addContainerGap())
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel5)
+                            .addComponent(lblCount))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                    .addComponent(chkPl, javax.swing.GroupLayout.Alignment.TRAILING))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         tblJournal.setFont(Global.textFont);
@@ -557,7 +565,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 144, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -599,6 +607,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEntry;
     private javax.swing.JButton btnEntry1;
+    private javax.swing.JCheckBox chkPl;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

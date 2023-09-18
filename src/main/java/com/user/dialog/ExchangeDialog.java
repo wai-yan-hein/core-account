@@ -9,6 +9,7 @@ import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.inventory.model.MessageType;
 import com.user.common.CurrencyComboBoxModel;
 import com.repo.UserRepo;
 import com.user.model.Currency;
@@ -24,11 +25,13 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class ExchangeDialog extends javax.swing.JDialog {
 
     private String status;
@@ -38,16 +41,8 @@ public class ExchangeDialog extends javax.swing.JDialog {
     private CurrencyComboBoxModel targetComboBoxModel = new CurrencyComboBoxModel();
     private UserRepo userRepo;
 
-    public UserRepo getUserRepo() {
-        return userRepo;
-    }
-
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
-    }
-
-    public ExchangeRate getExchange() {
-        return exchange;
     }
 
     public void setExchange(ExchangeRate exchange) {
@@ -168,10 +163,18 @@ public class ExchangeDialog extends javax.swing.JDialog {
             userRepo.save(exchange).subscribe((t) -> {
                 observer.selected("exchange", t);
                 clear();
+                sendMessage(t.getTargetCur());
             }, (er) -> {
                 JOptionPane.showMessageDialog(this, er.getMessage());
             });
         }
+    }
+
+    private void sendMessage(String mes) {
+        userRepo.sendDownloadMessage(MessageType.EXRATE, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     private boolean isValidEntry() {

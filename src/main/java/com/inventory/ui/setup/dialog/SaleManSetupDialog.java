@@ -18,6 +18,7 @@ import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.inventory.model.MessageType;
 import com.inventory.model.SaleMan;
 import com.inventory.model.SaleManKey;
 import com.repo.InventoryRepo;
@@ -159,13 +160,19 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
                     listSaleMan.add(t);
                 }
                 clear();
+                sendMessage(t.getSaleManName());
             }, (e) -> {
                 progress.setIndeterminate(false);
                 btnSave.setEnabled(true);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             });
-
         }
+    }
+
+    private void sendMessage(String mes) {
+        inventoryRepo.sendDownloadMessage(MessageType.SALE_MAN, mes).doOnSuccess((t) -> {
+            log.info(t);
+        }).subscribe();
     }
 
     private void searchSaleMan() {
@@ -390,13 +397,7 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
-        try {
-            save();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-            log.error("Save SaleMan :" + e.getMessage());
-        }
-
+        save();
     }//GEN-LAST:event_btnSaveActionPerformed
 
     private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed

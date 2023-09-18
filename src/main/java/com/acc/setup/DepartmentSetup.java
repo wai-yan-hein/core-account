@@ -12,6 +12,7 @@ import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.inventory.model.MessageType;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -251,6 +252,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
                     treeDep.setSelectionPath(path);
                     setEnabledControl(false);
                     clear();
+                    sendMessage(dep.getDeptName());
                 }
             }, (e) -> {
                 progress.setIndeterminate(false);
@@ -259,6 +261,13 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
             });
 
         }
+    }
+
+    private void sendMessage(String mes) {
+        accountRepo.sendDownloadMessage(MessageType.DEPARTMENT_ACC, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     private boolean isValidDepartment(DepartmentA dept) {

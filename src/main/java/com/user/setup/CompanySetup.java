@@ -15,6 +15,7 @@ import com.common.SelectionObserver;
 import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.model.Message;
+import com.inventory.model.MessageType;
 import com.user.common.CompanyTableModel;
 import com.repo.UserRepo;
 import com.user.dialog.DepartmentSetupDialog;
@@ -59,16 +60,9 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
     private SelectionObserver observer;
     private JProgressBar progress;
 
-    public JProgressBar getProgress() {
-        return progress;
-    }
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -166,6 +160,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                                 } else {
                                     tableModel.setCompany(selectRow, c);
                                 }
+                                sendMessage(c.getCompName());
                                 updateCompany(c);
                                 return accountRepo.saveCOAFromTemplate(companyInfo.getBusId(), c.getCompCode())
                                         .doOnNext(t -> {
@@ -185,7 +180,12 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
             }
         }
     }
-
+    private void sendMessage(String mes) {
+        userRepo.sendDownloadMessage(MessageType.COMPANY, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
+    }
     private boolean isValidEntry() {
         boolean status = true;
         if (txtName.getText().isEmpty()) {

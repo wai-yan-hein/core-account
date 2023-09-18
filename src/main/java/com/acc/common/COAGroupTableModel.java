@@ -10,6 +10,7 @@ import com.acc.model.COAKey;
 import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.Util1;
+import com.inventory.model.MessageType;
 import java.awt.HeadlessException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -185,18 +186,26 @@ public class COAGroupTableModel extends AbstractTableModel {
     private void save(ChartOfAccount coa, int row) {
         if (isValidCOA(coa)) {
             progress.setIndeterminate(true);
-            accountRepo.saveCOA(coa).subscribe((t) -> {
+            accountRepo.saveCOA(coa).doOnSuccess((t) -> {
                 if (t.getKey().getCoaCode() != null) {
                     listCOA.set(row, t);
                     addEmptyRow();
                     parent.setRowSelectionInterval(row + 1, row + 1);
                     parent.setColumnSelectionInterval(1, 1);
+                    sendMessage(t.getCoaNameEng());
                 }
-            }, (e) -> {
+            }).doOnError((e) -> {
                 progress.setIndeterminate(false);
                 JOptionPane.showMessageDialog(parent, e.getMessage());
-            });
+            }).subscribe();
         }
+    }
+
+    private void sendMessage(String mes) {
+        accountRepo.sendDownloadMessage(MessageType.COA, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     @Override

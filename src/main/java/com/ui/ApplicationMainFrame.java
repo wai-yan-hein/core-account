@@ -72,7 +72,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.reactive.function.client.WebClient;
 import com.inventory.ui.entry.Reports;
 import com.inventory.ui.entry.MillingEntry;
 import com.inventory.ui.entry.SaleByBatch;
@@ -187,8 +186,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     @Autowired
     private TaskExecutor taskExecutor;
     @Autowired
-    private WebClient accountApi;
-    @Autowired
     private FinancialReport financialReport;
     @Autowired
     private Journal journal;
@@ -227,6 +224,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     @Autowired
     private SSEListener sseListener;
     private PanelControl control;
+    private ProgramDownloadDialog pdDialog;
     private final HashMap<String, JPanel> hmPanel = new HashMap<>();
     private final ActionListener menuListener = (java.awt.event.ActionEvent evt) -> {
         JMenuItem actionMenu = (JMenuItem) evt.getSource();
@@ -546,7 +544,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 systemProperty.setUserRepo(userRepo);
                 systemProperty.setInventoryRepo(inventoryRepo);
                 systemProperty.setAccountRepo(accounRepo);
-                systemProperty.setAccountApi(accountApi);
                 systemProperty.setName(menuName);
                 systemProperty.setObserver(this);
                 systemProperty.setProgress(progress);
@@ -559,7 +556,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 systemProperty.setUserRepo(userRepo);
                 systemProperty.setInventoryRepo(inventoryRepo);
                 systemProperty.setAccountRepo(accounRepo);
-                systemProperty.setAccountApi(accountApi);
                 systemProperty.setName(menuName);
                 systemProperty.setObserver(this);
                 systemProperty.setProgress(progress);
@@ -894,6 +890,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     public void initMain() {
         Global.parentForm = this;
         setTitle("Core Account Cloud : " + Global.version);
+        sseListener.setObserver(this);
         sseListener.start();
         scheduleNetwork();
         scheduleExit();
@@ -958,7 +955,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     public void initMenu() {
         progress.setIndeterminate(true);
         menuBar.removeAll();
-        userRepo.getRoleMenu(Global.roleCode).doOnSuccess((t) -> {
+        userRepo.getPrivilegeRoleMenuTree(Global.roleCode).doOnSuccess((t) -> {
             createMenu(t);
         }).doOnError((e) -> {
             progress.setIndeterminate(false);
@@ -1063,17 +1060,11 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
         boolean update = Util1.getBoolean(ProUtil.getProperty(ProUtil.AUTO_UPDATE));
         if (update) {
             log.info("auto update on.");
-            ProgramDownloadDialog d = new ProgramDownloadDialog(Global.parentForm);
-            d.setTaskScheduler(taskScheduler);
-            d.setUserRepo(userRepo);
-            d.setObserver(this);
-            d.start();
-            userRepo.receiveMessage().subscribe((message) -> {
-                log.info(message.getHeader());
-                if (message.getHeader().equals("PROGRAM_UPDATE")) {
-                    d.start();
-                }
-            });
+            pdDialog = new ProgramDownloadDialog(Global.parentForm);
+            pdDialog.setTaskScheduler(taskScheduler);
+            pdDialog.setUserRepo(userRepo);
+            pdDialog.setObserver(this);
+            pdDialog.start();
         }
     }
 
@@ -1159,6 +1150,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             case "message" -> {
                 lblLock.setForeground(Color.red);
                 lblLock.setText(selectObj.toString());
+            }
+            case "PROGRAM_UPDATE"->{
+                pdDialog.start();
             }
         }
     }

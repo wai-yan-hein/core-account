@@ -8,6 +8,7 @@ package com.inventory.ui.setup.dialog;
 import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
+import com.inventory.model.MessageType;
 import com.inventory.model.OrderStatus;
 import com.inventory.model.OrderStatusKey;
 import com.inventory.ui.setup.dialog.common.OrderStatusTableModel;
@@ -26,11 +27,13 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author Lenovo
  */
+@Slf4j
 public class OrderStatusSetupDialog extends javax.swing.JDialog implements KeyListener {
 
     private int selectRow = - 1;
@@ -129,12 +132,20 @@ public class OrderStatusSetupDialog extends javax.swing.JDialog implements KeyLi
                     listVou.add(t);
                 }
                 clear();
+                sendMessage(t.getDescription());
             }).doOnError((e) -> {
                 progress.setIndeterminate(false);
                 btnSave.setEnabled(true);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             }).subscribe();
         }
+    }
+
+    private void sendMessage(String mes) {
+        inventoryRepo.sendDownloadMessage(MessageType.ORDER_STATUS, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     private void clear() {

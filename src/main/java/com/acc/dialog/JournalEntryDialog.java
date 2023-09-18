@@ -185,20 +185,17 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
     }
 
     public void searchJournalByVouId(String vouNo) {
-        journalTablModel.clear();
         lblStatus.setText(status);
         lblStatus.setForeground(status.equals("NEW") ? Color.GREEN : Color.BLUE);
         if (status.equals("EDIT")) {
             progress.setIndeterminate(true);
-            accountRepo.getJournal(vouNo).subscribe((t) -> {
+            accountRepo.getJournal(vouNo).doOnSuccess((t) -> {
                 LocalDateTime glDate = t.get(0).getGlDate();
                 String ref = t.get(0).getReference();
                 String projectNo = t.get(0).getProjectNo();
-                userRepo.find(new ProjectKey(projectNo, Global.compCode)).subscribe((p) -> {
+                userRepo.find(new ProjectKey(projectNo, Global.compCode)).doOnSuccess((p) -> {
                     projectAutoCompleter.setProject(p);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                });
+                }).subscribe();
                 txtVouDate.setDate(Util1.convertToDate(glDate));
                 txtRefrence.setText(ref);
                 txtVouNo.setText(vouNo);
@@ -206,14 +203,14 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
                 journalTablModel.addEmptyRow();
                 focusOnTable();
                 progress.setIndeterminate(false);
-            }, (e) -> {
-                progress.setIndeterminate(false);
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
-
+            }).doOnTerminate(() -> {
+                setVisible(true);
+            }).subscribe();
         } else {
+            clear();
             journalTablModel.addEmptyRow();
             focusOnTable();
+            setVisible(true);
         }
 
     }

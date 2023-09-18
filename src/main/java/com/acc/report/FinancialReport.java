@@ -73,16 +73,8 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
     private JProgressBar progress;
     private TableRowSorter<TableModel> sorter;
 
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
-    }
-
-    public JProgressBar getProgress() {
-        return progress;
     }
 
     public void setProgress(JProgressBar progress) {
@@ -128,6 +120,10 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
         tblReport.getColumnModel().getColumn(0).setPreferredWidth(30);
         tblReport.getColumnModel().getColumn(1).setPreferredWidth(900);
         tblReport.getColumnModel().getColumn(0).setCellRenderer(new FontCellRender());
+        tblReport.getSelectionModel().addListSelectionListener((e) -> {
+            if (e.getValueIsAdjusting()) {
+            }
+        });
         sorter = new TableRowSorter(tblReport.getModel());
         tblReport.setRowSorter(sorter);
         getReport();
@@ -190,7 +186,6 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                     filter.setExpenseAcc(ProUtil.getProperty(ProUtil.EXPENSE));
                     filter.setPlAcc(ProUtil.getProperty(ProUtil.PL));
                     filter.setReAcc(ProUtil.getProperty(ProUtil.RE));
-
                     filter.setInvGroup(ProUtil.getInvGroup());
                     filter.setCoaCode(traderAutoCompleter.getTrader().getAccount());
                     filter.setSrcAcc(cOA3AutoCompleter.getCOA().getKey().getCoaCode());
@@ -247,29 +242,35 @@ public class FinancialReport extends javax.swing.JPanel implements PanelControl,
                 .doOnSuccess((t) -> {
                     try {
                         if (t != null) {
-                            String filePath = String.format("%s%s%s", Global.accountRP, File.separator, reportUrl.concat(".jasper"));
+                            String filePath = String.format("%s%s%s", Global.accountRP,
+                                    File.separator, reportUrl.concat(".jasper"));
                             if (t.getFile() != null) {
                                 long end = new GregorianCalendar().getTimeInMillis();
                                 long pt = end - start;
                                 lblTime.setText(pt / 1000 + " s");
                                 InputStream input = new ByteArrayInputStream(t.getFile());
                                 JsonDataSource ds = new JsonDataSource(input);
-                                param.put("p_gross_profit", t.getGrossProfit());
-                                param.put("p_profit", t.getNetProfit());
-                                param.put("p_cos_pc", t.getCosPercent());
-                                param.put("p_gp_pc", t.getGpPercent());
-                                param.put("p_np_pc", t.getNpPercent());
-                                param.put("p_opening", t.getOpAmt());
-                                param.put("p_closing", t.getClAmt());
-                                param.put("p_op_date", t.getOpDate());
-                                JasperPrint js = JasperFillManager.fillReport(filePath, param, ds);
-                                JRViewer viwer = new JRViewer(js);
-                                JFrame frame = new JFrame("Core Value Report");
-                                frame.setIconImage(Global.parentForm.getIconImage());
-                                frame.getContentPane().add(viwer);
-                                frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-                                frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                                frame.setVisible(true);
+                                int dataCount = ds.recordCount();
+                                if (dataCount > 0) {
+                                    param.put("p_gross_profit", t.getGrossProfit());
+                                    param.put("p_profit", t.getNetProfit());
+                                    param.put("p_cos_pc", t.getCosPercent());
+                                    param.put("p_gp_pc", t.getGpPercent());
+                                    param.put("p_np_pc", t.getNpPercent());
+                                    param.put("p_opening", t.getOpAmt());
+                                    param.put("p_closing", t.getClAmt());
+                                    param.put("p_op_date", t.getOpDate());
+                                    JasperPrint js = JasperFillManager.fillReport(filePath, param, ds);
+                                    JRViewer viwer = new JRViewer(js);
+                                    JFrame frame = new JFrame("Core Value Report");
+                                    frame.setIconImage(Global.parentForm.getIconImage());
+                                    frame.getContentPane().add(viwer);
+                                    frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                                    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                                    frame.setVisible(true);
+                                } else {
+                                    JOptionPane.showMessageDialog(this, "Sorry, there is no data available.");
+                                }
                             } else {
                                 JOptionPane.showMessageDialog(this, "Report Does Not Exists.");
                             }

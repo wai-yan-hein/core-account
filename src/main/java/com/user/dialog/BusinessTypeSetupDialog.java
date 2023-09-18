@@ -26,21 +26,12 @@ import javax.swing.ListSelectionModel;
 public class BusinessTypeSetupDialog extends javax.swing.JDialog {
 
     private final BusinessTypeTableModel businessTypeTableModel = new BusinessTypeTableModel(true);
-    private SelectionObserver observer;
     private BusinessType businessType;
     private UserRepo userRepo;
     private AccountRepo accountRepo;
 
-    public AccountRepo getAccountRepo() {
-        return accountRepo;
-    }
-
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
-    }
-
-    public UserRepo getUserRepo() {
-        return userRepo;
     }
 
     public void setUserRepo(UserRepo userRepo) {
@@ -55,13 +46,6 @@ public class BusinessTypeSetupDialog extends javax.swing.JDialog {
         this.businessType = businessType;
     }
 
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
-    public void setObserver(SelectionObserver observer) {
-        this.observer = observer;
-    }
 
     /**
      * Creates new form RoleSetupDialog

@@ -5,7 +5,7 @@
 package com.h2.dao;
 
 import com.common.Util1;
-import com.inventory.model.MachineInfo;
+import com.user.model.MachineInfo;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;

@@ -8,6 +8,7 @@ package com.user.dialog;
 import com.common.Global;
 import com.common.TableCellRender;
 import com.common.Util1;
+import com.inventory.model.MessageType;
 import com.user.model.Currency;
 import com.inventory.ui.setup.common.CurrencyTabelModel;
 import com.repo.UserRepo;
@@ -103,7 +104,6 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
             if (e.getValueIsAdjusting()) {
                 if (tblCurrency.getSelectedRow() >= 0) {
                     selectRow = tblCurrency.convertRowIndexToModel(tblCurrency.getSelectedRow());
-
                     if (selectRow >= 0) {
                         Currency c = currencyTabelModel.getCurrency(selectRow);
                         setCurrency(c);
@@ -127,12 +127,20 @@ public class CurrencySetupDialog extends javax.swing.JDialog implements KeyListe
                     currencyTabelModel.setCurrency(selectRow, currency);
                 }
                 clear();
+                sendMessage(t.getCurrencyName());
             }, (e) -> {
                 progress.setIndeterminate(false);
                 btnSave.setEnabled(true);
                 JOptionPane.showMessageDialog(this, e.getMessage());
             });
         }
+    }
+
+    private void sendMessage(String mes) {
+        userRepo.sendDownloadMessage(MessageType.CURRENCY, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     private void setCurrency(Currency currency) {

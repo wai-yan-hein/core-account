@@ -4,7 +4,7 @@
  */
 package com.user.common;
 
-import com.inventory.model.MachineInfo;
+import com.user.model.MachineInfo;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;

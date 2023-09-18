@@ -5,7 +5,7 @@
 package com.h2.service;
 
 import com.h2.dao.MachineInfoDao;
-import com.inventory.model.MachineInfo;
+import com.user.model.MachineInfo;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;

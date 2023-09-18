@@ -14,7 +14,7 @@ import com.common.TokenFile;
 import com.repo.UserRepo;
 import com.common.Util1;
 import com.user.model.AppUser;
-import com.inventory.model.MachineInfo;
+import com.user.model.MachineInfo;
 import com.user.model.AuthenticationResponse;
 import java.awt.Image;
 import java.awt.event.FocusAdapter;
@@ -39,6 +39,7 @@ import reactor.core.publisher.Mono;
 @Component
 @Slf4j
 public class LoginDialog extends javax.swing.JDialog implements KeyListener, SelectionObserver {
+
     private int loginAttempt = 0;
     private int enableCount = 0;
     private String APP_NAME = "Core Account";
@@ -129,6 +130,7 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
             }
         } else {
             Global.macId = t.getMacId();
+            saveMachine(t);
             enableForm(false);
             taskExecutor.execute(() -> {
                 setLocationRelativeTo(null);
@@ -137,7 +139,6 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
             lblStatus.setText("downloading...");
             integration.setObserver(this);
             integration.start();
-
         }
     }
 
@@ -151,6 +152,25 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
 
     private void logout() {
         CoreAccountApplication.restart();
+    }
+
+    private void saveMachine(MachineInfo info) {
+        String machineName = Util1.getComputerName();
+        String ipAddress = Util1.getIPAddress();
+        String macAddress = Util1.getMacAddress();
+        String osName = System.getProperty("os.name");
+        String osVersion = System.getProperty("os.version");
+        String osArch = System.getProperty("os.arch");
+        info.setMachineIp(ipAddress);
+        info.setMachineName(machineName);
+        info.setMacAddress(macAddress);
+        info.setOsName(osName);
+        info.setOsVersion(osVersion);
+        info.setOsArch(osArch);
+        userRepo.saveMachine(info).doOnSuccess((t) -> {
+            log.info("machine info update.");
+        }).subscribe();
+
     }
 
     private Mono<AuthenticationResponse> register(String serialNo) {

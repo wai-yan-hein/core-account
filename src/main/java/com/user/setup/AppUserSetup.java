@@ -12,6 +12,7 @@ import com.common.TableCellRender;
 import com.repo.UserRepo;
 import com.common.Util1;
 import com.inventory.model.Location;
+import com.inventory.model.MessageType;
 import com.inventory.ui.setup.common.LocationComboModel;
 import com.repo.InventoryRepo;
 import com.user.common.DepartmentComboBoxModel;
@@ -169,9 +170,17 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
                     userTableModel.setUser(selectRow, t);
                 }
                 clear();
+                sendMessage(t.getUserName());
             });
 
         }
+    }
+
+    private void sendMessage(String mes) {
+        userRepo.sendDownloadMessage(MessageType.USER, mes)
+                .doOnSuccess((t) -> {
+                    log.info(t);
+                }).subscribe();
     }
 
     private boolean isValidEntry() {
@@ -195,7 +204,7 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
             if (cboDep.getSelectedItem() instanceof DepartmentUser dep) {
                 if (dep.getKey() != null) {
                     appUser.setDeptId(dep.getKey().getDeptId());
-                }else{
+                } else {
                     appUser.setDeptId(null);
                 }
             }

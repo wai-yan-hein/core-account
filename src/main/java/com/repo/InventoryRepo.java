@@ -426,6 +426,20 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<List<Region>> getUpdateRegion(String updatedDate) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getUpdateRegion")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve()
+                .bodyToFlux(Region.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<List<Trader>> getCustomer() {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getCustomer")
@@ -1172,7 +1186,6 @@ public class InventoryRepo {
                     return Mono.empty();
                 });
     }
-
 
     public Mono<Category> saveCategory(Category category) {
         return inventoryApi.post()

@@ -19,7 +19,6 @@ import javax.swing.JProgressBar;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
@@ -34,16 +33,8 @@ public class RoleMenuSetup extends javax.swing.JPanel implements KeyListener, Se
     @Autowired
     private UserRepo userRepo;
 
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -58,13 +49,16 @@ public class RoleMenuSetup extends javax.swing.JPanel implements KeyListener, Se
     }
 
     public void createMenuTree(String roleCode) {
+        progress.setIndeterminate(true);
         userRepo.getRoleMenuTree(roleCode)
                 .subscribe((t) -> {
                     VRoleMenu vRoleMenu = new VRoleMenu("Best-System", "System", true, t);
                     MyAbstractTreeTableModel treeTableModel = new MyDataModel(vRoleMenu, userRepo, this);
                     MyTreeTable treeTable = new MyTreeTable(treeTableModel);
                     scrollPane.getViewport().add(treeTable);
+                    progress.setIndeterminate(false);
                 }, (e) -> {
+                    progress.setIndeterminate(false);
                     JOptionPane.showMessageDialog(Global.parentForm, e.getMessage());
                 });
     }
