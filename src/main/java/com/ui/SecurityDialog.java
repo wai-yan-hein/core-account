@@ -5,8 +5,7 @@
  */
 package com.ui;
 
-import com.common.Global;
-
+import javax.swing.JFrame;
 
 /**
  *
@@ -27,8 +26,8 @@ public class SecurityDialog extends javax.swing.JDialog {
         this.key = key;
     }
 
-    public SecurityDialog() {
-        super(Global.parentForm, true);
+    public SecurityDialog(JFrame frame) {
+        super(frame, true);
         initComponents();
     }
 
@@ -83,15 +82,16 @@ public class SecurityDialog extends javax.swing.JDialog {
 
     private void txtKeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtKeyActionPerformed
         // TODO add your handling code here:
-        if(txtKey.getPassword().length>0){
+        if (txtKey.getPassword().length > 0) {
             key = new String(txtKey.getPassword());
             this.dispose();
         }
-        
+
     }//GEN-LAST:event_txtKeyActionPerformed
 
-    /**-
-     * 
+    /**
+     * -
+     *
      * @param args the command line arguments
      */
 

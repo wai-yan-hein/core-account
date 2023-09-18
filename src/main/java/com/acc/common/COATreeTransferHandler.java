@@ -3,9 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.common;
+package com.acc.common;
 
 import com.acc.model.ChartOfAccount;
+import com.common.Global;
+import com.common.ReturnObject;
+import com.repo.AccountRepo;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -29,17 +32,17 @@ import reactor.core.publisher.Mono;
  *
  * @author Lenovo
  */
-public class TreeTransferHandler extends TransferHandler {
+public class COATreeTransferHandler extends TransferHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(TreeTransferHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(COATreeTransferHandler.class);
     private DefaultMutableTreeNode parent;
-    private WebClient accountApi;
+    private AccountRepo accountRepo;
     DataFlavor nodesFlavor;
     DataFlavor[] flavors = new DataFlavor[1];
     DefaultMutableTreeNode[] nodesToRemove;
 
-    public TreeTransferHandler(WebClient accountApi) {
-        this.accountApi = accountApi;
+    public COATreeTransferHandler(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
         try {
             String mimeType = DataFlavor.javaJVMLocalObjectMimeType
                     + ";class=\""
@@ -148,9 +151,9 @@ public class TreeTransferHandler extends TransferHandler {
                 }
             }
             DefaultMutableTreeNode[] nodes
-                    = copies.toArray(new DefaultMutableTreeNode[copies.size()]);
+                    = copies.toArray(DefaultMutableTreeNode[]::new);
             nodesToRemove
-                    = toRemove.toArray(new DefaultMutableTreeNode[toRemove.size()]);
+                    = toRemove.toArray(DefaultMutableTreeNode[]::new);
             return new NodesTransferable(nodes);
         }
         return null;
@@ -169,7 +172,6 @@ public class TreeTransferHandler extends TransferHandler {
             try {
                 ChartOfAccount coaParent = (ChartOfAccount) parent.getUserObject();
                 String parentCode = coaParent.getKey().getCoaCode();
-                String parentName = coaParent.getCoaNameEng();
                 JTree tree = (JTree) source;
                 DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
                 // Remove nodes saved in nodesToRemove in createTransferable.
@@ -182,18 +184,14 @@ public class TreeTransferHandler extends TransferHandler {
                 }
             } catch (Exception e) {
                 log.error("exportDone event : " + e.getMessage());
-
             }
         }
     }
 
     private void saveCOA(ChartOfAccount coa) {
-        Mono<ReturnObject> result = accountApi.post()
-                .uri("/account/save-coa")
-                .body(Mono.just(coa), ChartOfAccount.class)
-                .retrieve()
-                .bodyToMono(ReturnObject.class);
-        result.block();
+        accountRepo.saveCOA(coa).doOnSuccess((t) -> {
+            log.info(t.getCoaNameEng());
+        }).subscribe();
     }
 
     @Override

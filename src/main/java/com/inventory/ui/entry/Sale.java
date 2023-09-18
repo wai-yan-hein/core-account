@@ -203,6 +203,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     saleTableModel.addSale(sd);
                 });
                 saleTableModel.addNewRow();
+                calculateTotalAmount(false);
                 focusTable();
                 progress.setIndeterminate(false);
             }).subscribe();

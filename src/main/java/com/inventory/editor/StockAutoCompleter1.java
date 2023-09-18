@@ -16,6 +16,7 @@ import com.inventory.ui.common.StockCompleterTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
@@ -35,7 +36,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
-import javax.swing.table.TableRowSorter;
 import javax.swing.text.JTextComponent;
 import lombok.extern.slf4j.Slf4j;
 
@@ -131,7 +131,7 @@ public class StockAutoCompleter1 implements KeyListener, SelectionObserver {
             });
         } else {
             textComp.registerKeyboardAction(showAction, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE,
-                    KeyEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
+                    InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);
         }
 
         textComp.registerKeyboardAction(upAction, KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),

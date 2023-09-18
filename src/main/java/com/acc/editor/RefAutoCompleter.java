@@ -14,6 +14,7 @@ import com.common.TableCellRender;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
@@ -125,7 +126,7 @@ public final class RefAutoCompleter implements KeyListener {
             textComp.getDocument().addDocumentListener(documentListener);
         } else {
             textComp.registerKeyboardAction(showAction, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE,
-                    KeyEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
+                    InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);
         }
 
         textComp.registerKeyboardAction(upAction, KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),

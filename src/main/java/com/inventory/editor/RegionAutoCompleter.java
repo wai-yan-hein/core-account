@@ -8,19 +8,17 @@ package com.inventory.editor;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
-import com.inventory.model.OptionModel;
 import com.inventory.model.Region;
 import com.inventory.model.RegionKey;
-import com.inventory.ui.setup.dialog.OptionDialog;
 import com.inventory.ui.setup.dialog.common.RegionTableModel;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.AbstractCellEditor;
@@ -130,7 +128,7 @@ public final class RegionAutoCompleter implements KeyListener {
             });
         } else {
             textComp.registerKeyboardAction(showAction, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE,
-                    KeyEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
+                    InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);
         }
 
         textComp.registerKeyboardAction(upAction, KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
