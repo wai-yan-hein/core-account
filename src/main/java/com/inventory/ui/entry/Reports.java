@@ -27,9 +27,11 @@ import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.editor.VouStatusAutoCompleter;
 import com.inventory.model.ClosingBalance;
 import com.inventory.model.General;
+import com.inventory.model.VOpening;
 import com.inventory.model.VPurchase;
 import com.inventory.model.VRoleMenu;
 import com.inventory.model.VSale;
+import com.inventory.model.VStockIO;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.ReportTableModel;
 import com.toedter.calendar.JTextFieldDateEditor;
@@ -181,6 +183,18 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         excelReport.add("TopSaleByCustomer");
         excelReport.add("TopSaleBySaleMan");
         excelReport.add("TopSaleByStock");
+        excelReport.add("SaleByStockSummary");
+        excelReport.add("SaleByCustomerSummary");
+        excelReport.add("PurchaseBySupplierSummary");
+        excelReport.add("PurchaseByStockSummary");
+        excelReport.add("OpeningByGroup");
+        excelReport.add("OpeningByLocation");
+        excelReport.add("StockOutByVoucherTypeDetail");
+        excelReport.add("StockInOutPriceCalender");
+        excelReport.add("SaleBySaleManSummary");
+        excelReport.add("SaleBySaleManDetail");
+        excelReport.add("SalePriceCalender");
+        excelReport.add("PurchasePriceCalender");
     }
 
     private void initDate() {
@@ -476,6 +490,54 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                 case "TopSaleByStock" -> {
                     List<General> list = Util1.readJsonToList(input, General.class);
                     exporter.exportTopSaleByStock(list, reportUrl);
+                }
+                case "SaleByStockSummary" -> {
+                    List<VSale> list = Util1.readJsonToList(input, VSale.class);
+                    exporter.exportSaleByStockSummary(list, reportUrl);
+                }
+                case "SaleByCustomerSummary" -> {
+                    List<VSale> list = Util1.readJsonToList(input, VSale.class);
+                    exporter.exportSaleByCustomerSummary(list, reportUrl);
+                }
+                case "PurchaseBySupplierSummary" -> {
+                    List<VPurchase> list = Util1.readJsonToList(input, VPurchase.class);
+                    exporter.exportPurchaseBySupplierSummary(list, reportUrl);
+                }
+                case "PurchaseByStockSummary" -> {
+                    List<VPurchase> list = Util1.readJsonToList(input, VPurchase.class);
+                    exporter.exportPurchaseByStockSummary(list, reportUrl);
+                }
+                case "OpeningByGroup" -> {
+                    List<VOpening> list = Util1.readJsonToList(input, VOpening.class);
+                    exporter.exportOpeningByGroup(list, reportUrl);
+                }
+                case "OpeningByLocation" -> {
+                    List<VOpening> list = Util1.readJsonToList(input, VOpening.class);
+                    exporter.exportOpeningByLocation(list, reportUrl);
+                }
+                case "StockOutByVoucherTypeDetail" -> {
+                    List<VStockIO> list = Util1.readJsonToList(input, VStockIO.class);
+                    exporter.exportStockOutByVoucherTypeDetail(list, reportUrl);
+                }
+                case "StockInOutPriceCalender" -> {
+                    List<VStockIO> list = Util1.readJsonToList(input, VStockIO.class);
+                    exporter.exportStockInOutPriceCalender(list, reportUrl);
+                }
+                case "SaleBySaleManDetail" -> {
+                    List<VSale> list = Util1.readJsonToList(input, VSale.class);
+                    exporter.exportSaleBySaleManDetail(list, reportUrl);
+                }
+                case "SaleBySaleManSummary" -> {
+                    List<VSale> list = Util1.readJsonToList(input, VSale.class);
+                    exporter.exportSaleBySaleManSummary(list, reportUrl);
+                }
+                case "SalePriceCalender" -> {
+                    List<VSale> list = Util1.readJsonToList(input, VSale.class);
+                    exporter.exportSalePriceCalender(list, reportUrl);
+                }
+                case "PurchasePriceCalender" -> {
+                    List<VPurchase> list = Util1.readJsonToList(input, VPurchase.class);
+                    exporter.exportPurchasePriceCalender(list, reportUrl);
                 }
                 default -> {
                     btnExcel.setEnabled(true);
