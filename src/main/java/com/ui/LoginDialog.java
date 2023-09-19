@@ -111,7 +111,9 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
         }
         d.setVisible(false);
         if (t.getMacId() == null) {
-            SecurityDialog dialog = new SecurityDialog();
+            JFrame frame = new JFrame();
+            frame.setIconImage(appIcon);
+            SecurityDialog dialog = new SecurityDialog(frame);
             dialog.setLocationRelativeTo(null);
             dialog.setVisible(true);
             String inputKey = dialog.getKey();

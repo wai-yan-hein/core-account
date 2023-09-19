@@ -11,10 +11,12 @@ import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
+import com.acc.common.COATreeTransferHandler;
 import com.common.Util1;
 import com.inventory.model.MessageType;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
+import com.user.common.MenuTreeTrasnferHandler;
 import com.user.model.Menu;
 import com.user.model.MenuKey;
 import java.awt.event.ActionEvent;
@@ -24,6 +26,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import javax.swing.DropMode;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -35,6 +38,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -193,6 +197,11 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
 
     private void initTree() {
         treeModel = (DefaultTreeModel) treeCOA.getModel();
+        treeCOA.setDragEnabled(true);
+        treeCOA.setDropMode(DropMode.ON_OR_INSERT);
+        treeCOA.setTransferHandler(new MenuTreeTrasnferHandler(userRepo));
+        treeCOA.getSelectionModel().setSelectionMode(
+                TreeSelectionModel.CONTIGUOUS_TREE_SELECTION);
         treeModel.setRoot(null);
         treeRoot = new DefaultMutableTreeNode(parentRootName);
         getMenu();
@@ -287,13 +296,13 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
             }).subscribe();
         }
     }
-        private void sendMessage(String mes) {
+
+    private void sendMessage(String mes) {
         userRepo.sendDownloadMessage(MessageType.MENU, mes)
                 .doOnSuccess((t) -> {
                     log.info(t);
                 }).subscribe();
     }
-
 
     private void setMenu(Menu menu) {
         txtMenuName.setText(menu.getMenuName());

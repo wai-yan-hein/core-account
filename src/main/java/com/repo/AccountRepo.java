@@ -99,6 +99,10 @@ public class AccountRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(DepartmentA.class)
+                .onErrorResume((e) -> {
+                    log.error("getDepartment : " + e.getMessage());
+                    return Mono.empty();
+                })
                 .collectList();
     }
 

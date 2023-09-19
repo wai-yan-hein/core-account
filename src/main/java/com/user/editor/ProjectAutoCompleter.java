@@ -5,10 +5,6 @@
  */
 package com.user.editor;
 
-import com.acc.editor.*;
-import com.repo.AccountRepo;
-import com.acc.common.DespTableModel;
-import com.acc.model.VDescription;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
@@ -19,6 +15,7 @@ import com.user.model.ProjectKey;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
@@ -130,7 +127,7 @@ public final class ProjectAutoCompleter implements KeyListener {
             textComp.getDocument().addDocumentListener(documentListener);
         } else {
             textComp.registerKeyboardAction(showAction, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE,
-                    KeyEvent.CTRL_MASK), JComponent.WHEN_FOCUSED);
+                    InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);
         }
 
         textComp.registerKeyboardAction(upAction, KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),

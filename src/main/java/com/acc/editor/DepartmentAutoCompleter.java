@@ -10,6 +10,7 @@ import com.acc.model.DepartmentA;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.TableCellRender;
+import com.common.Util1;
 import com.inventory.model.OptionModel;
 import com.inventory.ui.setup.dialog.OptionDialog;
 import java.awt.Color;
@@ -85,7 +86,9 @@ public final class DepartmentAutoCompleter implements KeyListener {
     private void initOption() {
         listOption.clear();
         listDepartment.forEach(t -> {
-            listOption.add(t.getKey().getDeptCode());
+            if (!Util1.isNullOrEmpty(t.getKey().getCompCode())) {
+                listOption.add(t.getKey().getDeptCode());
+            }
         });
     }
 
@@ -199,7 +202,7 @@ public final class DepartmentAutoCompleter implements KeyListener {
         if (table.getSelectedRow() != -1) {
             department = depTableModel.getDepatment(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            ((JTextField) textComp).setText(department.getDeptName());
+            textComp.setText(department.getDeptName());
             if (custom) {
                 switch (department.getKey().getDeptCode()) {
                     case "C" -> {

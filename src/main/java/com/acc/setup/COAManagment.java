@@ -18,7 +18,7 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
-import com.common.TreeTransferHandler;
+import com.acc.common.COATreeTransferHandler;
 import com.common.Util1;
 import com.user.model.Menu;
 import com.inventory.editor.MenuAutoCompleter;
@@ -64,7 +64,6 @@ import javax.swing.tree.TreeSelectionModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  *
@@ -85,8 +84,6 @@ public class COAManagment extends javax.swing.JPanel implements
     private final StandardCOATableModel standardCOATableModel = new StandardCOATableModel();
     private final COAUnusedDailog unusedDailog = new COAUnusedDailog();
     private final COAViewTableModel cOAViewTableModel = new COAViewTableModel();
-    @Autowired
-    private WebClient accountApi;
     @Autowired
     private UserRepo userRepo;
     @Autowired
@@ -324,7 +321,7 @@ public class COAManagment extends javax.swing.JPanel implements
         treeModel = (DefaultTreeModel) treeCOA.getModel();
         treeCOA.setDragEnabled(true);
         treeCOA.setDropMode(DropMode.ON_OR_INSERT);
-        treeCOA.setTransferHandler(new TreeTransferHandler(accountApi));
+        treeCOA.setTransferHandler(new COATreeTransferHandler(accountRepo));
         treeCOA.getSelectionModel().setSelectionMode(
                 TreeSelectionModel.CONTIGUOUS_TREE_SELECTION);
         treeRoot = new DefaultMutableTreeNode(parentRootName);
