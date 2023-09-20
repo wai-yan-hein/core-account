@@ -61,7 +61,8 @@ public class StockUnitEditor extends AbstractCellEditor implements TableCellEdit
         if (value != null) {
             jtf.setText(value.toString());
         }
-        completer = new UnitAutoCompleter(jtf, listUnit, this);
+        completer = new UnitAutoCompleter(jtf, this);
+        completer.setListUnit(listUnit);
         return component;
     }
 

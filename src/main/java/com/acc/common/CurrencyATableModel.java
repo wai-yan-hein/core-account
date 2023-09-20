@@ -21,7 +21,7 @@ public class CurrencyATableModel extends AbstractTableModel {
 
     private static final Logger log = LoggerFactory.getLogger(CurrencyATableModel.class);
     private List<Currency> listCurrency = new ArrayList<>();
-    private final String[] columnNames = {"Code", "Name"};
+    private final String[] columnNames = {"Currency"};
     private JTable table;
 
     public JTable getTable() {
@@ -66,8 +66,6 @@ public class CurrencyATableModel extends AbstractTableModel {
             Currency cur = listCurrency.get(row);
             return switch (column) {
                 case 0 ->
-                    cur.getCurCode();
-                case 1 ->
                     cur.getCurrencyName();
                 default ->
                     null;

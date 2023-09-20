@@ -5,7 +5,6 @@
  */
 package com.inventory.ui.entry;
 
-import com.repo.AccountRepo;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.KeyPropagate;
@@ -33,10 +32,10 @@ import com.inventory.model.PurHisKey;
 import com.inventory.model.Trader;
 import com.inventory.model.VPurchase;
 import com.inventory.ui.common.PurchaseExportTableModel;
+import com.inventory.ui.common.StockInfoPanel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.dialog.PurchaseAvgPriceDialog;
 import com.inventory.ui.entry.dialog.PurchaseHistoryDialog;
-import com.inventory.ui.setup.dialog.ExpenseSetupDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
@@ -45,6 +44,7 @@ import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
 import com.user.model.ProjectKey;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -97,8 +97,6 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
     private InventoryRepo inventoryRepo;
     @Autowired
     private UserRepo userRepo;
-    @Autowired
-    private AccountRepo accountRepo;
     private CurrencyAutoCompleter currAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
     private LocationAutoCompleter locationAutoCompleter;
@@ -109,6 +107,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
     private Mono<List<Location>> monoLoc;
     private ProjectAutoCompleter projectAutoCompleter;
     private CarNoAutoCompleter carNoAutoCompleter;
+    private final StockInfoPanel stockInfoPanel = new StockInfoPanel();
 
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;
@@ -200,8 +199,16 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
     public void initMain() {
         initCombo();
         initPurTable();
+        initStockInfo();
         assignDefaultValue();
         txtCus.requestFocus();
+    }
+
+    private void initStockInfo() {
+        stockInfoPanel.setUserRepo(userRepo);
+        stockInfoPanel.setInventoryRepo(inventoryRepo);
+        panelStockInfo.setLayout(new BorderLayout());
+        panelStockInfo.add(stockInfoPanel, BorderLayout.NORTH);
     }
 
     private void initDateListner() {
@@ -242,39 +249,33 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         tblPur.setCellSelectionEnabled(true);
         tblPur.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
         tblPur.getColumnModel().getColumn(1).setPreferredWidth(200);//Name
-        tblPur.getColumnModel().getColumn(2).setPreferredWidth(80);//rel
+        tblPur.getColumnModel().getColumn(2).setPreferredWidth(80);//Loc
         tblPur.getColumnModel().getColumn(3).setPreferredWidth(30);//length
         tblPur.getColumnModel().getColumn(4).setPreferredWidth(30);//width
         tblPur.getColumnModel().getColumn(5).setPreferredWidth(30);//moisturizer
-
-        tblPur.getColumnModel().getColumn(6).setPreferredWidth(50);//Location
-        tblPur.getColumnModel().getColumn(7).setPreferredWidth(50);//weight
-        tblPur.getColumnModel().getColumn(8).setPreferredWidth(30);// weight unit
-        tblPur.getColumnModel().getColumn(9).setPreferredWidth(30);//qty
-        tblPur.getColumnModel().getColumn(10).setPreferredWidth(30);//unit        
-        tblPur.getColumnModel().getColumn(11).setPreferredWidth(30);//std weight
-        tblPur.getColumnModel().getColumn(12).setPreferredWidth(30);//total qty
-        tblPur.getColumnModel().getColumn(13).setPreferredWidth(50);//price
-        tblPur.getColumnModel().getColumn(14).setPreferredWidth(70);//amount
+        tblPur.getColumnModel().getColumn(6).setPreferredWidth(50);//weight
+        tblPur.getColumnModel().getColumn(7).setPreferredWidth(30);// weight unit
+        tblPur.getColumnModel().getColumn(8).setPreferredWidth(30);//qty
+        tblPur.getColumnModel().getColumn(9).setPreferredWidth(30);//unit        
+        tblPur.getColumnModel().getColumn(10).setPreferredWidth(30);//total qty
+        tblPur.getColumnModel().getColumn(11).setPreferredWidth(50);//price
+        tblPur.getColumnModel().getColumn(12).setPreferredWidth(70);//amount
         tblPur.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblPur.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        monoLoc.subscribe((t) -> {
+            tblPur.getColumnModel().getColumn(2).setCellEditor(new LocationCellEditor(t));
+        });
         tblPur.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
         tblPur.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
-        monoLoc.subscribe((t) -> {
-            tblPur.getColumnModel().getColumn(6).setCellEditor(new LocationCellEditor(t));
-        });
-        tblPur.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());//weight
+        tblPur.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
         inventoryRepo.getStockUnit().subscribe((t) -> {
-            tblPur.getColumnModel().getColumn(8).setCellEditor(new StockUnitEditor(t));//unit
+            tblPur.getColumnModel().getColumn(7).setCellEditor(new StockUnitEditor(t));//unit
+            tblPur.getColumnModel().getColumn(9).setCellEditor(new StockUnitEditor(t));//weight
         });
-        tblPur.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());// qty
-        inventoryRepo.getStockUnit().subscribe((t) -> {
-            tblPur.getColumnModel().getColumn(10).setCellEditor(new StockUnitEditor(t));
-        });
-        tblPur.getColumnModel().getColumn(11).setCellEditor(new AutoClearEditor());//std weight
-        tblPur.getColumnModel().getColumn(12).setCellEditor(new AutoClearEditor());
-        tblPur.getColumnModel().getColumn(13).setCellEditor(new AutoClearEditor());
+        tblPur.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());//qty
+        tblPur.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());// total wt
+        tblPur.getColumnModel().getColumn(11).setCellEditor(new AutoClearEditor());// price
         tblPur.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblPur.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblPur.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -287,17 +288,17 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         traderAutoCompleter.setObserver(this);
         monoLoc = inventoryRepo.getLocation();
         currAutoCompleter = new CurrencyAutoCompleter(txtCurrency, null);
-        userRepo.getCurrency().subscribe((t) -> {
-            currAutoCompleter.setListCurrency(t);
-        });
-        userRepo.getDefaultCurrency().subscribe((c) -> {
+        userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currAutoCompleter.setCurrency(c);
-        });
+        }).subscribe();
+        userRepo.getCurrency().doOnSuccess((t) -> {
+            currAutoCompleter.setListCurrency(t);
+        }).subscribe();
         locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
         locationAutoCompleter.setObserver(this);
-        monoLoc.subscribe((t) -> {
+        monoLoc.doOnSuccess((t) -> {
             locationAutoCompleter.setListLocation(t);
-        });
+        }).subscribe();
         batchAutoCompeter = new BatchAutoCompeter(txtBatchNo, inventoryRepo, null, false);
         batchAutoCompeter.setObserver(this);
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
@@ -402,7 +403,6 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
             progress.setIndeterminate(true);
             observer.selected("save", false);
             ph.setListPD(purExportTableModel.getListDetail());
-//            ph.setListExpense(expenseTableModel.getListDetail());
             ph.setListDel(purExportTableModel.getDelList());
             inventoryRepo.save(ph).subscribe((t) -> {
                 clear();
@@ -600,11 +600,10 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
             dialog.setIconImage(searchIcon);
             dialog.setObserver(this);
             dialog.initMain();
-            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setSize(Global.width - 20, Global.height - 20);
             dialog.setLocationRelativeTo(null);
         }
         dialog.search();
-        dialog.setVisible(true);
     }
 
     public void setVoucher(PurHis pur, boolean local) {
@@ -831,10 +830,9 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
 
     private void setVoucherDetail(GRN g) {
         purExportTableModel.clear();
-        Mono<Trader> trader = inventoryRepo.findTrader(g.getTraderCode());
-        trader.subscribe((t) -> {
+        inventoryRepo.findTrader(g.getTraderCode()).doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
-        });
+        }).subscribe();
         txtRemark.setText(g.getRemark());
         String vouNo = g.getKey().getVouNo();
         Integer deptId = g.getDeptId();
@@ -865,15 +863,6 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         });
     }
 
-    private void expenseDialog() {
-        ExpenseSetupDialog d = new ExpenseSetupDialog(Global.parentForm, true);
-        d.setInventoryRepo(inventoryRepo);
-        d.setAccountRepo(accountRepo);
-        d.initMain();
-        d.setLocationRelativeTo(null);
-        d.setVisible(true);
-    }
-
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -881,6 +870,14 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         observer.selected("history", true);
         observer.selected("delete", true);
         observer.selected("refresh", false);
+    }
+
+    private void setStockInfo() {
+        int row = tblPur.convertRowIndexToModel(tblPur.getSelectedRow());
+        if (row >= 0) {
+            PurHisDetail phd = purExportTableModel.getObject(row);
+            stockInfoPanel.setStock(phd.getStockCode());
+        }
     }
 
     /**
@@ -949,6 +946,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         txtQty = new javax.swing.JFormattedTextField();
         txtWeight = new javax.swing.JFormattedTextField();
         jLabel3 = new javax.swing.JLabel();
+        panelStockInfo = new javax.swing.JPanel();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -1185,10 +1183,12 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(lblRec, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 101, Short.MAX_VALUE))
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1196,7 +1196,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
                 .addContainerGap()
                 .addComponent(lblRec)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 201, Short.MAX_VALUE)
+                .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1436,7 +1436,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel8)
                     .addComponent(txtVouBalance, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(21, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         tblPur.setFont(Global.textFont);
@@ -1508,7 +1508,20 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(txtWeight, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(179, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        panelStockInfo.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        javax.swing.GroupLayout panelStockInfoLayout = new javax.swing.GroupLayout(panelStockInfo);
+        panelStockInfo.setLayout(panelStockInfoLayout);
+        panelStockInfoLayout.setHorizontalGroup(
+            panelStockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        panelStockInfoLayout.setVerticalGroup(
+            panelStockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -1520,7 +1533,9 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(panelStockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1536,10 +1551,11 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 20, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(panelStockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -1568,6 +1584,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
 
     private void tblPurMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblPurMouseClicked
         // TODO add your handling code here:
+        setStockInfo();
     }//GEN-LAST:event_tblPurMouseClicked
 
     private void tblPurKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblPurKeyReleased
@@ -1672,7 +1689,8 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
                 calculateTotalAmount(false);
             case "Location" ->
                 setAllLocation();
-            case "ORDER" -> {
+            case "STOCK-INFO" -> {
+                setStockInfo();
             }
             case "PUR-HISTORY" -> {
                 if (selectObj instanceof VPurchase v) {
@@ -1868,6 +1886,7 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JLabel lblRec;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelPur;
+    private javax.swing.JPanel panelStockInfo;
     private javax.swing.JTable tblPur;
     private javax.swing.JTextField txtBatchNo;
     private javax.swing.JTextField txtCarNo;

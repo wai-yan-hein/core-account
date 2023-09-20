@@ -66,7 +66,6 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         this.integration = integration;
     }
 
-
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
@@ -133,7 +132,7 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         tblVoucher.setModel(tableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
-        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(40);
+        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(50);
         tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(80);
         tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(180);
         tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(180);
@@ -190,16 +189,13 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         filter.setCurCode(getCurCode());
         tableModel.clear();
         inventoryRepo.getPurchaseVoucher(filter)
-                .subscribe((t) -> {
+                .doOnSuccess((t) -> {
                     tableModel.setListDetail(t);
                     calAmount();
                     progess.setIndeterminate(false);
-                }, (e) -> {
-                    progess.setIndeterminate(false);
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                }, () -> {
-                    setVisible(true);
-                });
+                }).doOnTerminate(() -> {
+            setVisible(true);
+        }).subscribe();
     }
 
     private void calAmount() {

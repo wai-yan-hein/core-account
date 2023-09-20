@@ -52,38 +52,41 @@ public final class UnitAutoCompleter implements KeyListener {
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
     private final StockUnitTableModel unitTableModel = new StockUnitTableModel();
     private StockUnit stockUnit;
-    private List<StockUnit> listUnit;
     public AbstractCellEditor editor;
     private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
     private SelectionObserver observer;
+    private List<StockUnit> listUnit;
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
 
-    public void setListUnit(List<StockUnit> listUnit) {
-        this.listUnit = listUnit;
+    public void setListUnit(List<StockUnit> list) {
+        unitTableModel.setListUnit(list);
+        if (!list.isEmpty()) {
+            table.setRowSelectionInterval(0, 0);
+        }
+        this.listUnit = list;
     }
 
     public List<StockUnit> getListUnit() {
         return listUnit;
     }
+    
 
     public UnitAutoCompleter() {
     }
 
-    public UnitAutoCompleter(JTextComponent comp, List<StockUnit> list,
+    public UnitAutoCompleter(JTextComponent comp,
             AbstractCellEditor editor) {
         this.textComp = comp;
         this.editor = editor;
-        this.listUnit = list;
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
         textComp.getDocument().addDocumentListener(documentListener);
-        unitTableModel.setListUnit(this.listUnit);
         table.setModel(unitTableModel);
         table.setSize(50, 50);
         table.setFont(Global.textFont); // NOI18N
@@ -96,7 +99,6 @@ public final class UnitAutoCompleter implements KeyListener {
         JScrollPane scroll = new JScrollPane(table);
         table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(40);//Code
-
         table.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -149,12 +151,7 @@ public final class UnitAutoCompleter implements KeyListener {
             public void popupMenuCanceled(PopupMenuEvent e) {
             }
         });
-
         table.setRequestFocusEnabled(false);
-
-        if (!list.isEmpty()) {
-            table.setRowSelectionInterval(0, 0);
-        }
     }
     private final DocumentListener documentListener = new DocumentListener() {
         @Override

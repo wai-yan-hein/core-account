@@ -101,6 +101,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     private final DepartmentComboBoxModel departmentComboBoxModel1 = new DepartmentComboBoxModel();
     @Autowired
     private UserRepo userRepo;
+    private RelationSetupDialog relationSetupDialog;
 
     public enum StockHeader {
         UserCode,
@@ -324,14 +325,17 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             List<StockBrand> bList = new ArrayList<>(t);
             brandAutoCompleterF.setListStockBrand(bList);
         });
-        inventoryRepo.getStockUnit().subscribe((t) -> {
-            purUnitCompleter = new UnitAutoCompleter(txtPurUnit, t, null);
-            purUnitCompleter.setStockUnit(null);
-            saleUnitCompleter = new UnitAutoCompleter(txtSaleUnit, t, null);
-            saleUnitCompleter.setStockUnit(null);
-            wlUnitCompleter = new UnitAutoCompleter(txtWeightUnit, t, null);
-            wlUnitCompleter.setStockUnit(null);
-        });
+        purUnitCompleter = new UnitAutoCompleter(txtPurUnit, null);
+        purUnitCompleter.setStockUnit(null);
+        saleUnitCompleter = new UnitAutoCompleter(txtSaleUnit, null);
+        saleUnitCompleter.setStockUnit(null);
+        wlUnitCompleter = new UnitAutoCompleter(txtWeightUnit, null);
+        wlUnitCompleter.setStockUnit(null);
+        inventoryRepo.getStockUnit().doOnSuccess((t) -> {
+            purUnitCompleter.setListUnit(t);
+            saleUnitCompleter.setListUnit(t);
+            wlUnitCompleter.setListUnit(t);
+        }).subscribe();
         relationAutoCompleter = new UnitRelationAutoCompleter(txtRelation, null, false);
         relationAutoCompleter.setRelation(null);
         inventoryRepo.getUnitRelation().subscribe((t) -> {
@@ -487,7 +491,6 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         purUnitCompleter.setStockUnit(null);
         saleUnitCompleter.setStockUnit(null);
         wlUnitCompleter.setStockUnit(null);
-        typeAutoCompleter.setStockType(null);
         txtStockCode.setText(null);
         txtBarCode.setText(null);
         txtUserCode.setText(null);
@@ -537,16 +540,15 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
     }
 
     private void relationSetup() {
-        inventoryRepo.getUnitRelation().subscribe((t) -> {
-            RelationSetupDialog relationSetupDialog = new RelationSetupDialog();
+        if (relationSetupDialog == null) {
+            relationSetupDialog = new RelationSetupDialog(Global.parentForm);
             relationSetupDialog.setInventoryRepo(inventoryRepo);
-            relationSetupDialog.setListUnitRelation(t);
             relationSetupDialog.initMain();
             relationSetupDialog.setSize(Global.width / 2, Global.height / 2);
             relationSetupDialog.setLocationRelativeTo(null);
-            relationSetupDialog.setVisible(true);
-        });
-
+        }
+        relationSetupDialog.setListUnitRelation(relationAutoCompleter.getListRelation());
+        relationSetupDialog.setVisible(true);
     }
 
     private void printFile() {
@@ -604,11 +606,11 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
                 itemUnitSetupDailog.setSize(Global.width / 2, Global.height / 2);
                 itemUnitSetupDailog.setLocationRelativeTo(null);
             }
-            itemUnitSetupDailog.setListStockUnit(purUnitCompleter.getListUnit());
+            List<StockUnit> listUnit = purUnitCompleter.getListUnit();
+            itemUnitSetupDailog.setListStockUnit(listUnit);
+            saleUnitCompleter.setListUnit(listUnit);
+            wlUnitCompleter.setListUnit(listUnit);
             itemUnitSetupDailog.setVisible(true);
-            saleUnitCompleter.setListUnit(purUnitCompleter.getListUnit());
-            wlUnitCompleter.setListUnit(purUnitCompleter.getListUnit());
-
         }
     }
 

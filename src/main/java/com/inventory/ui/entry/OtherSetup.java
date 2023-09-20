@@ -51,80 +51,96 @@ public class OtherSetup extends javax.swing.JPanel {
     }
 
     private void regionSetup() {
-        inventoryRepo.getRegion().subscribe((t) -> {
+        if (regionSetup == null) {
             regionSetup = new RegionSetup(Global.parentForm);
             regionSetup.setInventoryRepo(inventoryRepo);
-            regionSetup.setListRegion(t);
             regionSetup.initMain();
             regionSetup.setSize(Global.width / 2, Global.height / 2);
             regionSetup.setLocationRelativeTo(null);
+        }
+        inventoryRepo.getRegion().doOnSuccess((t) -> {
+            regionSetup.setListRegion(t);
+        }).doOnTerminate(() -> {
             regionSetup.setVisible(true);
-        });
+        }).subscribe();
+
     }
 
     private void locationSetup() {
-        locationSetup = new LocationSetupDialog(Global.parentForm);
-        locationSetup.setInventoryRepo(inventoryRepo);
-        locationSetup.setAccountRepo(accountRepo);
-        locationSetup.initMain();
-        locationSetup.setSize(Global.width / 2, Global.height / 2);
-        locationSetup.setLocationRelativeTo(null);
+        if (locationSetup == null) {
+            locationSetup = new LocationSetupDialog(Global.parentForm);
+            locationSetup.setInventoryRepo(inventoryRepo);
+            locationSetup.setAccountRepo(accountRepo);
+            locationSetup.initMain();
+            locationSetup.setSize(Global.width / 2, Global.height / 2);
+            locationSetup.setLocationRelativeTo(null);
+        }
         locationSetup.setVisible(true);
     }
 
     private void saleManSetup() {
-        inventoryRepo.getSaleMan().subscribe((t) -> {
+        if (smDialog == null) {
             smDialog = new SaleManSetupDialog();
             smDialog.setIconImage(icon);
             smDialog.setInventoryRepo(inventoryRepo);
-            smDialog.setListSaleMan(t);
             smDialog.initMain();
             smDialog.setSize(Global.width / 2, Global.height / 2);
             smDialog.setLocationRelativeTo(null);
+        }
+        inventoryRepo.getSaleMan().doOnSuccess((t) -> {
+            smDialog.setListSaleMan(t);
+        }).doOnTerminate(() -> {
             smDialog.setVisible(true);
-        });
+        }).subscribe();
     }
 
     private void vouStatusSetup() {
-        inventoryRepo.getVoucherStatus().subscribe((t) -> {
+        if (vsDialog == null) {
             vsDialog = new VouStatusSetupDialog();
             vsDialog.setIconImage(icon);
             vsDialog.setInventoryRepo(inventoryRepo);
-            vsDialog.setListVou(t);
             vsDialog.initMain();
             vsDialog.setSize(Global.width / 2, Global.height / 2);
             vsDialog.setLocationRelativeTo(null);
+        }
+        inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
+            vsDialog.setListVou(t);
+        }).doOnTerminate(() -> {
             vsDialog.setVisible(true);
-        });
+        }).subscribe();
 
     }
 
     private void orderStatusSetup() {
-        inventoryRepo.getOrderStatus().subscribe((t) -> {
+        if (osDialog == null) {
             osDialog = new OrderStatusSetupDialog();
             osDialog.setIconImage(icon);
             osDialog.setInventoryRepo(inventoryRepo);
-            osDialog.setListVou(t);
             osDialog.initMain();
             osDialog.setSize(Global.width / 2, Global.height / 2);
             osDialog.setLocationRelativeTo(null);
+        }
+        inventoryRepo.getOrderStatus().doOnSuccess((t) -> {
+            osDialog.setListVou(t);
+        }).doOnTerminate(() -> {
             osDialog.setVisible(true);
-        });
+        }).subscribe();
 
     }
 
     private void relationSetup() {
-        inventoryRepo.getUnitRelation().subscribe((t) -> {
-            relationSetupDialog = new RelationSetupDialog();
-            relationSetupDialog.setIconImage(icon);
+        if (relationSetupDialog == null) {
+            relationSetupDialog = new RelationSetupDialog(Global.parentForm);
             relationSetupDialog.setInventoryRepo(inventoryRepo);
-            relationSetupDialog.setListUnitRelation(t);
             relationSetupDialog.initMain();
             relationSetupDialog.setSize(Global.width / 2, Global.height / 2);
             relationSetupDialog.setLocationRelativeTo(null);
+        }
+        inventoryRepo.getUnitRelation().doOnSuccess((t) -> {
+            relationSetupDialog.setListUnitRelation(t);
+        }).doOnTerminate(() -> {
             relationSetupDialog.setVisible(true);
-        });
-
+        }).subscribe();
     }
 
     /**
