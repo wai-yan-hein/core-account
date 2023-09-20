@@ -39,6 +39,7 @@ import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
+import cv.api.common.StockValue;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
@@ -195,6 +196,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         excelReport.add("SaleBySaleManDetail");
         excelReport.add("SalePriceCalender");
         excelReport.add("PurchasePriceCalender");
+        excelReport.add("StockValue");
     }
 
     private void initDate() {
@@ -538,6 +540,10 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                 case "PurchasePriceCalender" -> {
                     List<VPurchase> list = Util1.readJsonToList(input, VPurchase.class);
                     exporter.exportPurchasePriceCalender(list, reportUrl);
+                }
+                case "StockValue" -> {
+                    List<StockValue> list = Util1.readJsonToList(input, StockValue.class);
+                    exporter.exportStockValue(list, reportUrl);
                 }
                 default -> {
                     btnExcel.setEnabled(true);
