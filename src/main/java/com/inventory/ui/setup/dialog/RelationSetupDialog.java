@@ -23,6 +23,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.List;
 import java.util.Objects;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
@@ -49,47 +50,36 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
     private StartWithRowFilter swrf;
     private List<UnitRelation> listUnitRelation;
 
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
 
-    public List<UnitRelation> getListUnitRelation() {
-        return listUnitRelation;
-    }
-
     public void setListUnitRelation(List<UnitRelation> listUnitRelation) {
+        relationTableModel.setListRelation(listUnitRelation);
         this.listUnitRelation = listUnitRelation;
     }
 
     /**
      * Creates new form ItemTypeSetupDialog
+     *
+     * @param frame
      */
-    public RelationSetupDialog() {
-        super(Global.parentForm, false);
+    public RelationSetupDialog(JFrame frame) {
+        super(frame, false);
         initComponents();
         initKeyListener();
         lblStatus.setForeground(Color.green);
     }
 
     public void initMain() {
-        swrf = new StartWithRowFilter(txtFilter);
         initTable();
         initTableRelD();
-        searchCategory();
     }
 
     private void initKeyListener() {
         btnClear.addKeyListener(this);
         btnSave.addKeyListener(this);
         tblRel.addKeyListener(this);
-    }
-
-    private void searchCategory() {
-        relationTableModel.setListRelation(listUnitRelation);
     }
 
     private void initTable() {
@@ -122,6 +112,7 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
                 }
             }
         });
+        swrf = new StartWithRowFilter(txtFilter);
     }
 
     private void initTableRelD() {
@@ -132,9 +123,9 @@ public class RelationSetupDialog extends javax.swing.JDialog implements KeyListe
         tblRelD.setDefaultRenderer(Float.class, new UnitFormatRender());
         tblRel.setRowHeight(Global.tblRowHeight);
         tblRelD.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
-        inventoryRepo.getStockUnit().subscribe((t) -> {
+        inventoryRepo.getStockUnit().doOnSuccess((t) -> {
             tblRelD.getColumnModel().getColumn(1).setCellEditor(new StockUnitEditor(t));
-        });
+        }).subscribe();
         relationDetailTableModel.addEmptyRow();
         tblRelD.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");

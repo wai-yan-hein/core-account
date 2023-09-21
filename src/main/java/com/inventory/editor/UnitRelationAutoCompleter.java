@@ -56,7 +56,6 @@ public final class UnitRelationAutoCompleter implements KeyListener {
     private int y = 0;
     private List<String> listOption = new ArrayList<>();
     private SelectionObserver observer;
-    private boolean filter;
     private List<UnitRelation> listRelation;
 
     public List<UnitRelation> getListRelation() {
@@ -94,7 +93,6 @@ public final class UnitRelationAutoCompleter implements KeyListener {
             AbstractCellEditor editor, boolean filter) {
         this.textComp = comp;
         this.editor = editor;
-        this.filter = filter;
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);

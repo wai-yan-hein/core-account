@@ -113,18 +113,19 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
     }
 
     private void initCompleter() {
-        locationAutoCompleter = new LocationAutoCompleter(txtLocation,null, false, false);
+        locationAutoCompleter = new LocationAutoCompleter(txtLocation, null, false, false);
         locationAutoCompleter.setObserver(this);
         inventoryRepo.getLocation().subscribe((t) -> {
             locationAutoCompleter.setListLocation(t);
         });
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, false);
         stockAutoCompleter.setObserver(this);
-        inventoryRepo.getStockUnit().subscribe((t) -> {
-            unitAutoCompleter = new UnitAutoCompleter(txtUnit, t, null);
-            unitAutoCompleter.setObserver(this);
-        });
-        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtPt,  null, false);
+        unitAutoCompleter = new UnitAutoCompleter(txtUnit, null);
+        unitAutoCompleter.setObserver(this);
+        inventoryRepo.getStockUnit().doOnSuccess((t) -> {
+            unitAutoCompleter.setListUnit(t);
+        }).subscribe();
+        vouStatusAutoCompleter = new VouStatusAutoCompleter(txtPt, null, false);
         vouStatusAutoCompleter.setObserver(this);
         inventoryRepo.getVoucherStatus().doOnSuccess((t) -> {
             vouStatusAutoCompleter.setListVouStatus(t);

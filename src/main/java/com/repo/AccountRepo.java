@@ -102,8 +102,7 @@ public class AccountRepo {
                 .onErrorResume((e) -> {
                     log.error("getDepartment : " + e.getMessage());
                     return Mono.empty();
-                })
-                .collectList();
+                }).collectList();
     }
 
     public Mono<List<TraderA>> getTrader() {
@@ -381,8 +380,8 @@ public class AccountRepo {
                 .queryParam("coaCode", coaCode)
                 .queryParam("busId", busId)
                 .build())
-                .retrieve().bodyToFlux(COATemplate.class
-                );
+                .retrieve()
+                .bodyToFlux(COATemplate.class);
     }
 
     public Flux<ChartOfAccount> getCOAChild(String coaCode) {

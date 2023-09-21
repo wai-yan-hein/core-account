@@ -41,4 +41,5 @@ database.trace.db
 log.txt
 secret.json
 **/log.txt
+/config/
 

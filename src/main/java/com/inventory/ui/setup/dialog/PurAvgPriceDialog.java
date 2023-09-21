@@ -100,8 +100,10 @@ public class PurAvgPriceDialog extends javax.swing.JDialog {
     }
 
     private void initCombo() {
-        unitAutoCompleter = new UnitAutoCompleter(txtUnit, listUnit, null);
-        avgunitAutoCompleter = new UnitAutoCompleter(txtAvgUnit, listUnit, null);
+        unitAutoCompleter = new UnitAutoCompleter(txtUnit, null);
+        unitAutoCompleter.setListUnit(listUnit);
+        avgunitAutoCompleter = new UnitAutoCompleter(txtAvgUnit, null);
+        avgunitAutoCompleter.setListUnit(listUnit);
     }
 
     private void initTextBox() {
