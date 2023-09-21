@@ -27,8 +27,6 @@ import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
@@ -320,13 +318,9 @@ public class COATemplateSetup extends javax.swing.JPanel implements KeyListener,
     private void exportCOATemplate() {
         if (cboBusType.getSelectedItem() instanceof BusinessType bus) {
             progress.setIndeterminate(true);
-            accountRepo.getCOATemplateTree(bus.getBusId())
+            accountRepo.getCOATemplate(bus.getBusId())
                     .subscribe(list -> {
-                        try {
-                            Util1.writeJsonFile(list, "coa_template.json");
-                        } catch (IOException ex) {
-                            Logger.getLogger(COATemplateSetup.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+                        Util1.writeJsonFile(list, "coa.json");
                         progress.setIndeterminate(false);
                     }, (error) -> {
                         progress.setIndeterminate(false);

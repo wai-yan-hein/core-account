@@ -1,0 +1,23 @@
+{
+	"debtor.group": "604",
+	"default.cash": "600001",
+	"default.currency": "MMK",
+	"income.account": "04",
+	"default.department": "0001",
+	"otherincome.account": "08",
+	"capital.account": "02",
+	"creditor.group": "300",
+	"default.customer": "CUS001",
+	"inventory.group": "602",
+	"default.location": "0001",
+	"liability.account": "03",
+	"purchase.account": "07",
+	"debtor.account": "604001",
+	"cash.group": "600",
+	"bank.group": "601",
+	"expense.account": "05",
+	"fixed.account": "01",
+	"current.account": "06",
+	"calculate.stock": "true",
+	"creditor.account": "300001"
+}

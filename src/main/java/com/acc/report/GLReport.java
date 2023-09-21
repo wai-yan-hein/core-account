@@ -370,8 +370,6 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             progress.setIndeterminate(false);
             JOptionPane.showMessageDialog(Global.parentForm, "Report", ex.getMessage(), JOptionPane.ERROR_MESSAGE);
             log.error("printGLListing : " + ex.getMessage());
-        } catch (IOException ex) {
-            log.error("printGLListing : " + ex.getMessage());
         }
     }
 

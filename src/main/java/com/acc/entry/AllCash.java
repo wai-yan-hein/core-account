@@ -623,11 +623,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                     enableToolBar(true);
                     JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
                     log.error("printVoucher : " + ex.getMessage());
-                } catch (JsonProcessingException ex) {
-                    Logger.getLogger(AllCash.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (FileNotFoundException ex) {
-                    Logger.getLogger(AllCash.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IOException ex) {
                     Logger.getLogger(AllCash.class.getName()).log(Level.SEVERE, null, ex);
                 }
             });

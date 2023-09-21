@@ -10,6 +10,7 @@ import com.acc.editor.DepartmentAutoCompleter;
 import com.common.Global;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
+import com.common.Util1;
 import com.inventory.model.AccKey;
 import com.inventory.model.AccSetting;
 import com.inventory.model.AccType;
@@ -240,6 +241,10 @@ public class AccountSettingEntry extends javax.swing.JPanel {
         return status;
     }
 
+    private void export() {
+        Util1.writeJsonFile(settingTableModel.getListSetting(), "acc_setting.json");
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -272,6 +277,7 @@ public class AccountSettingEntry extends javax.swing.JPanel {
         jLabel8 = new javax.swing.JLabel();
         txtDep = new javax.swing.JTextField();
         cboType = new javax.swing.JComboBox<>(AccType.values());
+        jButton1 = new javax.swing.JButton();
 
         tblSetting.setFont(Global.textFont);
         tblSetting.setModel(new javax.swing.table.DefaultTableModel(
@@ -415,6 +421,14 @@ public class AccountSettingEntry extends javax.swing.JPanel {
 
         cboType.setFont(Global.textFont);
 
+        jButton1.setFont(Global.lableFont);
+        jButton1.setText("Export");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -443,7 +457,9 @@ public class AccountSettingEntry extends javax.swing.JPanel {
                             .addComponent(cboType, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 46, Short.MAX_VALUE)
-                        .addGap(111, 111, 111)
+                        .addGap(30, 30, 30)
+                        .addComponent(jButton1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnClear)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnSave)))
@@ -486,7 +502,8 @@ public class AccountSettingEntry extends javax.swing.JPanel {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblStatus)
                     .addComponent(btnSave)
-                    .addComponent(btnClear))
+                    .addComponent(btnClear)
+                    .addComponent(jButton1))
                 .addContainerGap(133, Short.MAX_VALUE))
         );
 
@@ -604,11 +621,17 @@ public class AccountSettingEntry extends javax.swing.JPanel {
         clearSetting();
     }//GEN-LAST:event_btnClearActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        export();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnSave;
     private javax.swing.JComboBox<AccType> cboType;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;

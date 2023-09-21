@@ -13,6 +13,7 @@ import com.common.Util1;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.repo.UserRepo;
+import com.user.common.MenuTemplateTreeTrasnferHandler;
 import com.user.dialog.FileOptionDialog;
 import com.user.model.MenuTemplate;
 import com.user.model.MenuTemplateKey;
@@ -23,10 +24,8 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javax.swing.DropMode;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -37,6 +36,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.task.TaskExecutor;
 
@@ -88,8 +88,8 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
             switch (menuName) {
                 case "New Menu" ->
                     newMenu("Menu");
-                case "New Function" ->
-                    newMenu("Function");
+                case "Delete" ->
+                    deleteMenu();
                 case "New Report" ->
                     newMenu("Report");
             }
@@ -109,15 +109,26 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
         initTree();
     }
 
+    private void deleteMenu() {
+        if (selectedNode.getUserObject() != null) {
+            MenuTemplate menu = (MenuTemplate) selectedNode.getUserObject();
+            userRepo.delete(menu.getKey()).subscribe((t) -> {
+                if (t) {
+                    treeModel.removeNodeFromParent(selectedNode);
+                }
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            });
+        } else {
+            JOptionPane.showMessageDialog(this, "Select Menu.");
+        }
+    }
+
     private void exportMenu() {
         if (busType.getSelectedItem() instanceof BusinessType type) {
             progress.setIndeterminate(true);
             userRepo.getMenuTemplate(type.getBusId()).subscribe(mList -> {
-                try {
-                    Util1.writeJsonFile(mList, "menu.json");
-                } catch (IOException ex) {
-                    Logger.getLogger(MenuTemplateSetup.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                Util1.writeJsonFile(mList, "menu.json");
                 progress.setIndeterminate(false);
             }, error -> {
                 progress.setIndeterminate(false);
@@ -177,7 +188,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
     private void searchMenu() {
         if (busType.getSelectedItem() instanceof BusinessType type) {
             progress.setIndeterminate(true);
-            userRepo.getMenuTemplate(type.getBusId())
+            userRepo.getMenuTreeTemplate(type.getBusId())
                     .subscribe((menus) -> {
                         if (!menus.isEmpty()) {
                             menus.forEach((menu) -> {
@@ -240,6 +251,11 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
 
     private void initTree() {
         treeModel = (DefaultTreeModel) treeCOA.getModel();
+        treeCOA.setDragEnabled(true);
+        treeCOA.setDropMode(DropMode.ON_OR_INSERT);
+        treeCOA.setTransferHandler(new MenuTemplateTreeTrasnferHandler(userRepo));
+        treeCOA.getSelectionModel().setSelectionMode(
+                TreeSelectionModel.CONTIGUOUS_TREE_SELECTION);
         treeModel.setRoot(null);
         MenuTemplate root = new MenuTemplate();
         root.setMenuName(rootName);
