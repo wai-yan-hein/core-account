@@ -94,7 +94,7 @@
                       <Component id="txtOrder" alignment="0" max="32767" attributes="0"/>
                       <Component id="txtAccount" pref="207" max="32767" attributes="0"/>
                       <Component id="txtMenuType" pref="207" max="32767" attributes="0"/>
-                      <Component id="txtClass" pref="207" max="32767" attributes="0"/>
+                      <Component id="txtMenuClass" pref="207" max="32767" attributes="0"/>
                       <Component id="txtMenuMM" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -132,7 +132,7 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="jLabel6" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="txtClass" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtMenuClass" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
@@ -245,14 +245,14 @@
             <Property name="text" type="java.lang.String" value="Menu Class"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JTextField" name="txtClass">
+        <Component class="javax.swing.JTextField" name="txtMenuClass">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.textFont" type="code"/>
             </Property>
           </Properties>
           <Events>
-            <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtClassFocusGained"/>
+            <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="txtMenuClassFocusGained"/>
           </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel7">

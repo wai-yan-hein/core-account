@@ -8,7 +8,6 @@ import com.common.Util1;
 import com.user.model.Menu;
 import com.user.model.MenuKey;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 
@@ -34,7 +33,7 @@ public class MenuDaoImpl extends AbstractDao<MenuKey, Menu> implements MenuDao {
 
     @Override
     public List<Menu> getMenuTree(String compCode) {
-        List<Menu> menus = getMenuChild("1", compCode);
+        List<Menu> menus = getMenuChild("#", compCode);
         if (!menus.isEmpty()) {
             for (Menu m : menus) {
                 getMenu(m);

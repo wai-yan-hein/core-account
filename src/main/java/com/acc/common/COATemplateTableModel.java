@@ -92,7 +92,6 @@ public class COATemplateTableModel extends AbstractTableModel {
             //Name
             //Active
         } catch (Exception ex) {
-            log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
 
         return null;

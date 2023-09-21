@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
 import java.util.Date;
 import lombok.Data;
@@ -62,6 +63,8 @@ public class CompanyInfo {
     private LocalDateTime updatedDate;
     @Column(name = "security_code")
     private String securityCode;
+    @Transient
+    private Boolean updateMenu;
 
     @Override
     public String toString() {

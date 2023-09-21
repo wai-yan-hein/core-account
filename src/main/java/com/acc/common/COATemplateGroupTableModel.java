@@ -34,25 +34,15 @@ public class COATemplateGroupTableModel extends AbstractTableModel {
     private JLabel paretnDesp;
     private AccountRepo accountRepo;
 
-    public Integer getBusId() {
-        return busId;
-    }
-
     public void setBusId(Integer busId) {
         this.busId = busId;
     }
 
-    public AccountRepo getAccountRepo() {
-        return accountRepo;
-    }
 
     public void setAccountRepo(AccountRepo accountRepo) {
         this.accountRepo = accountRepo;
     }
 
-    public JLabel getParetnDesp() {
-        return paretnDesp;
-    }
 
     public void setParetnDesp(JLabel paretnDesp) {
         this.paretnDesp = paretnDesp;
@@ -104,7 +94,6 @@ public class COATemplateGroupTableModel extends AbstractTableModel {
         } catch (Exception ex) {
             log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
-
         return null;
     }
 

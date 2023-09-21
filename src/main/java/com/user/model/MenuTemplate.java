@@ -20,7 +20,7 @@ public class MenuTemplate {
     private String menuClass;
     private String menuName;
     private String menuUrl;
-    private String parentMenuId;
+    private Integer parentMenuId;
     private String menuType;
     private String account;
     private Integer orderBy;

@@ -260,7 +260,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         if (parentNode != null) {
             Object userObject = parentNode.getUserObject();
             if (userObject.toString().equals(parentRootName)) {
-                parentCode = "1";
+                parentCode = "#";
             } else {
                 Menu menu = (Menu) parentNode.getUserObject();
                 parentCode = menu.getKey().getMenuCode();
@@ -279,20 +279,21 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
                 menu.setAccount(coa.getKey().getCoaCode());
             }
             menu.setMenuType(txtMenuType.getText().trim());
-            menu.setMenuClass(txtClass.getText());
+            menu.setMenuClass(txtMenuClass.getText());
             menu.setOrderBy(Integer.valueOf(Util1.isNull(txtOrder.getText(), "0")));
             if (txtOrder.getValue() != null) {
                 menu.setOrderBy(Util1.getInteger(txtOrder.getText()));
             }
             userRepo.save(menu).doOnSuccess((t) -> {
-                observer.selected("menu", "menu");
                 selectedNode.setUserObject(t);
                 TreePath path = treeCOA.getSelectionPath();
                 DefaultTreeModel model = (DefaultTreeModel) treeCOA.getModel();
                 model.nodeChanged(selectedNode);
                 treeCOA.setSelectionPath(path);
-                clear();
                 sendMessage(t.getMenuName());
+            }).doOnTerminate(() -> {
+                observer.selected("menu", "menu");
+                clear();
             }).subscribe();
         }
     }
@@ -312,7 +313,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
             cOA3AutoCompleter.setCoa(t);
         }).subscribe();
         txtMenuType.setText(menu.getMenuType());
-        txtClass.setText(menu.getMenuClass());
+        txtMenuClass.setText(menu.getMenuClass());
         enableControl(true);
     }
 
@@ -322,7 +323,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         txtOrder.setText(null);
         txtAccount.setText(null);
         txtMenuType.setText(null);
-        txtClass.setText(null);
+        txtMenuClass.setText(null);
         txtMenuMM.setText(null);
         enableControl(false);
     }
@@ -333,6 +334,8 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         txtOrder.setEditable(status);
         txtAccount.setEditable(status);
         txtMenuType.setEditable(status);
+        txtMenuMM.setEditable(status);
+        txtMenuClass.setEditable(status);
     }
 
     private void removeSpace() {
@@ -343,7 +346,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         txtMenuName.addFocusListener(fa);
         txtMenuMM.addFocusListener(fa);
         txtAccount.addFocusListener(fa);
-        txtClass.addFocusListener(fa);
+        txtMenuClass.addFocusListener(fa);
         txtMenuType.addFocusListener(fa);
         txtMenuUrl.addFocusListener(fa);
         txtOrder.addFocusListener(fa);
@@ -391,7 +394,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         jLabel5 = new javax.swing.JLabel();
         txtMenuType = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
-        txtClass = new javax.swing.JTextField();
+        txtMenuClass = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
         txtMenuMM = new javax.swing.JTextField();
 
@@ -468,10 +471,10 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         jLabel6.setFont(Global.lableFont);
         jLabel6.setText("Menu Class");
 
-        txtClass.setFont(Global.textFont);
-        txtClass.addFocusListener(new java.awt.event.FocusAdapter() {
+        txtMenuClass.setFont(Global.textFont);
+        txtMenuClass.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
-                txtClassFocusGained(evt);
+                txtMenuClassFocusGained(evt);
             }
         });
 
@@ -506,7 +509,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
                     .addComponent(txtOrder)
                     .addComponent(txtAccount, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
                     .addComponent(txtMenuType, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
-                    .addComponent(txtClass, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
+                    .addComponent(txtMenuClass, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
                     .addComponent(txtMenuMM))
                 .addContainerGap())
         );
@@ -536,7 +539,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
-                    .addComponent(txtClass, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtMenuClass, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel3)
@@ -591,9 +594,9 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
         // TODO add your handling code here:
     }//GEN-LAST:event_txtMenuTypeFocusGained
 
-    private void txtClassFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtClassFocusGained
+    private void txtMenuClassFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtMenuClassFocusGained
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtClassFocusGained
+    }//GEN-LAST:event_txtMenuClassFocusGained
 
     private void txtMenuMMFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtMenuMMFocusGained
         // TODO add your handling code here:
@@ -617,7 +620,7 @@ public class MenuSetup extends javax.swing.JPanel implements TreeSelectionListen
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTree treeCOA;
     private javax.swing.JTextField txtAccount;
-    private javax.swing.JTextField txtClass;
+    private javax.swing.JTextField txtMenuClass;
     private javax.swing.JTextField txtMenuMM;
     private javax.swing.JTextField txtMenuName;
     private javax.swing.JTextField txtMenuType;
