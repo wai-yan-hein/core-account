@@ -29,12 +29,6 @@ import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.repo.UserRepo;
 import com.common.Util1;
-import com.formdev.flatlaf.FlatLaf;
-import com.formdev.flatlaf.icons.FlatAnimatedIcon;
-import com.formdev.flatlaf.icons.FlatMenuArrowIcon;
-import com.formdev.flatlaf.ui.FlatArrowButton;
-import com.formdev.flatlaf.ui.FlatUIUtils;
-import com.formdev.flatlaf.util.AnimatedIcon;
 import com.h2.dao.DateFilterRepo;
 import com.user.setup.MenuSetup;
 import com.user.model.DepartmentUser;
@@ -96,7 +90,6 @@ import com.user.setup.CompanyTemplate;
 import com.user.setup.CurrencyExchange;
 import com.user.setup.HMSIntegration;
 import com.user.setup.ProjectSetup;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -107,11 +100,8 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
@@ -821,6 +811,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                         db.setUserRepo(userRepo);
                         db.initMain();
                         return db;
+                    } default -> {
+                        JOptionPane.showMessageDialog(this, "Invalid Menu.");
                     }
                 }
 

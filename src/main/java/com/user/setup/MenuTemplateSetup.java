@@ -13,6 +13,7 @@ import com.common.Util1;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.repo.UserRepo;
+import com.user.dialog.FileOptionDialog;
 import com.user.model.MenuTemplate;
 import com.user.model.MenuTemplateKey;
 import java.awt.event.ActionEvent;
@@ -37,6 +38,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.task.TaskExecutor;
 
 /**
  *
@@ -44,7 +46,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelectionListener, PanelControl {
-    
+
     private DefaultMutableTreeNode treeRoot;
     private UserRepo userRepo;
     private DefaultTreeModel treeModel;
@@ -54,39 +56,32 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
     private JProgressBar progress;
     private JComboBox<BusinessType> busType;
     private JPopupMenu popupmenu;
-    
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-    
+    private TaskExecutor taskExecutor;
+
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
-    
-    public JProgressBar getProgress() {
-        return progress;
-    }
-    
+
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-    
+
     public JComboBox<BusinessType> getBusType() {
         return busType;
     }
-    
+
     public void setBusType(JComboBox<BusinessType> busType) {
         this.busType = busType;
     }
-    
-    public UserRepo getUserRepo() {
-        return userRepo;
-    }
-    
+
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
-    
+
+    public void setTaskExecutor(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
+    }
+
     private final ActionListener menuListener = (ActionEvent evt) -> {
         if (evt.getSource() instanceof JMenuItem actionMenu) {
             String menuName = actionMenu.getText();
@@ -109,11 +104,11 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
         initKeyListener();
         initPopup();
     }
-    
+
     public void initMain() {
         initTree();
     }
-    
+
     private void exportMenu() {
         if (busType.getSelectedItem() instanceof BusinessType type) {
             progress.setIndeterminate(true);
@@ -129,19 +124,22 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
             });
         }
     }
-    
+
     private void importMenu(List<MenuTemplate> menuList) {
-        log.info("Start import");
+        lblMessage.setText("importing...");
         progress.setIndeterminate(true);
-        processMenu(menuList);
+        taskExecutor.execute(() -> {
+            processMenu(menuList);
+        });
         progress.setIndeterminate(false);
-        log.info("End import");
+        lblMessage.setText("importing end.");
     }
-    
+
     private void processMenu(List<MenuTemplate> listMenu) {
         if (busType.getSelectedItem() instanceof BusinessType type) {
             if (!listMenu.isEmpty()) {
                 listMenu.forEach((menu) -> {
+                    menu.getKey().setBusId(type.getBusId());
                     if (menu.getChild() != null) {
                         if (!menu.getChild().isEmpty()) {
                             userRepo.save(menu).block();
@@ -156,26 +154,26 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
             }
         }
     }
-    
+
     private void chooseFile() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Choose json file");
-        
-        int userSelection = fileChooser.showOpenDialog(null);
-        
-        if (userSelection == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
+        FileOptionDialog d = new FileOptionDialog(Global.parentForm);
+        d.initMain();
+        d.setLocationRelativeTo(null);
+        d.setVisible(true);
+        File selectedFile = d.getSelectdFile();
+        if (selectedFile != null) {
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 List<MenuTemplate> menuList = mapper.readValue(selectedFile, new TypeReference<List<MenuTemplate>>() {
                 });
                 importMenu(menuList);
-            } catch (IOException io) {
-                io.printStackTrace();
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Incorrect File.");
+                log.error("chooseFile : " + e.getMessage());
             }
         }
     }
-    
+
     private void searchMenu() {
         if (busType.getSelectedItem() instanceof BusinessType type) {
             progress.setIndeterminate(true);
@@ -196,7 +194,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
                                     DefaultMutableTreeNode parent = new DefaultMutableTreeNode(menu);
                                     treeRoot.add(parent);
                                 }
-                                
+
                             });
                         }
                         treeModel.setRoot(treeRoot);
@@ -206,9 +204,9 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
                         progress.setIndeterminate(false);
                     });
         }
-        
+
     }
-    
+
     private void addChildMenu(DefaultMutableTreeNode parent, List<MenuTemplate> listVRM) {
         listVRM.forEach((menu) -> {
             if (menu.getChild() != null) {
@@ -226,7 +224,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
             }
         });
     }
-    
+
     private void initKeyListener() {
         treeCOA.addTreeSelectionListener(this);
         treeCOA.addMouseListener(new MouseAdapter() {
@@ -236,10 +234,10 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
                     popupmenu.show(treeCOA, e.getX(), e.getY());
                 }
             }
-            
+
         });
     }
-    
+
     private void initTree() {
         treeModel = (DefaultTreeModel) treeCOA.getModel();
         treeModel.setRoot(null);
@@ -248,7 +246,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
         treeRoot = new DefaultMutableTreeNode(root);
         searchMenu();
     }
-    
+
     private void initPopup() {
         popupmenu = new JPopupMenu("Edit");
         popupmenu.setFont(Global.textFont);
@@ -262,7 +260,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
         popupmenu.add(newReport);
         popupmenu.add(delete);
     }
-    
+
     private void newMenu(String menuType) {
         if (selectedNode.getUserObject() instanceof MenuTemplate obj) {
             if (busType.getSelectedItem() instanceof BusinessType type) {
@@ -275,7 +273,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
                     case "Menu" -> {
                         menu.setMenuName("New Menu");
                         menu.setMenuType("Menu");
-                        
+
                     }
                     case "Report" -> {
                         menu.setMenuName("New Report");
@@ -292,11 +290,11 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
                 txtMenuName.requestFocus();
             }
         }
-        
+
     }
-    
+
     private void saveMenu() {
-        String parentId = "0";
+        Integer parentId = 0;
         DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) selectedNode.getParent();
         if (parentNode.getUserObject() instanceof MenuTemplate tmp) {
             if (!tmp.getMenuName().equals(rootName)) {
@@ -330,7 +328,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
             });
         }
     }
-    
+
     private void setMenu(MenuTemplate menu) {
         txtMenuName.setText(menu.getMenuName());
         txtMenuUrl.setText(menu.getMenuUrl());
@@ -340,7 +338,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
         txtClass.setText(menu.getMenuClass());
         enableControl(true);
     }
-    
+
     private void clear() {
         txtMenuName.setText(null);
         txtMenuUrl.setText(null);
@@ -351,7 +349,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
         txtMenuMM.setText(null);
         enableControl(false);
     }
-    
+
     private void enableControl(boolean status) {
         txtMenuName.setEditable(status);
         txtMenuUrl.setEditable(status);
@@ -359,7 +357,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
         txtAccount.setEditable(status);
         txtMenuType.setEditable(status);
     }
-    
+
     private void removeSpace() {
         txtMenuUrl.setText(txtMenuUrl.getText().replaceAll(" ", ""));
     }
@@ -392,6 +390,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
         jLabel11 = new javax.swing.JLabel();
         btnExport = new javax.swing.JButton();
         btnImport = new javax.swing.JButton();
+        lblMessage = new javax.swing.JLabel();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -497,6 +496,9 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
             }
         });
 
+        lblMessage.setFont(Global.lableFont);
+        lblMessage.setText("-");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -515,15 +517,16 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
                             .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtMenuUrl, javax.swing.GroupLayout.DEFAULT_SIZE, 197, Short.MAX_VALUE)
+                            .addComponent(txtMenuUrl, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
                             .addComponent(txtMenuName)
                             .addComponent(txtOrder)
-                            .addComponent(txtAccount, javax.swing.GroupLayout.DEFAULT_SIZE, 197, Short.MAX_VALUE)
-                            .addComponent(txtMenuType, javax.swing.GroupLayout.DEFAULT_SIZE, 197, Short.MAX_VALUE)
-                            .addComponent(txtClass, javax.swing.GroupLayout.DEFAULT_SIZE, 197, Short.MAX_VALUE)
+                            .addComponent(txtAccount, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
+                            .addComponent(txtMenuType, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
+                            .addComponent(txtClass, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
                             .addComponent(txtMenuMM)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(lblMessage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnExport)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnImport)))
@@ -563,7 +566,8 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 53, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnExport)
-                    .addComponent(btnImport))
+                    .addComponent(btnImport)
+                    .addComponent(lblMessage))
                 .addContainerGap())
         );
 
@@ -573,7 +577,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 229, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -652,6 +656,7 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lblMessage;
     private javax.swing.JTree treeCOA;
     private javax.swing.JTextField txtAccount;
     private javax.swing.JTextField txtClass;
@@ -675,37 +680,37 @@ public class MenuTemplateSetup extends javax.swing.JPanel implements TreeSelecti
             }
         }
     }
-    
+
     @Override
     public void save() {
         saveMenu();
     }
-    
+
     @Override
     public void newForm() {
     }
-    
+
     @Override
     public void history() {
     }
-    
+
     @Override
     public void print() {
     }
-    
+
     @Override
     public void delete() {
     }
-    
+
     @Override
     public void refresh() {
         initTree();
     }
-    
+
     @Override
     public void filter() {
     }
-    
+
     @Override
     public String panelName() {
         return this.getName();

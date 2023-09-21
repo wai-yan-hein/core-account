@@ -21,7 +21,7 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jScrollPane1" pref="230" max="32767" attributes="0"/>
+              <Component id="jScrollPane1" pref="229" max="32767" attributes="0"/>
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Component id="jPanel1" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
@@ -91,17 +91,18 @@
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="txtMenuUrl" pref="197" max="32767" attributes="0"/>
+                              <Component id="txtMenuUrl" pref="198" max="32767" attributes="0"/>
                               <Component id="txtMenuName" max="32767" attributes="0"/>
                               <Component id="txtOrder" alignment="0" max="32767" attributes="0"/>
-                              <Component id="txtAccount" pref="197" max="32767" attributes="0"/>
-                              <Component id="txtMenuType" pref="197" max="32767" attributes="0"/>
-                              <Component id="txtClass" pref="197" max="32767" attributes="0"/>
+                              <Component id="txtAccount" pref="198" max="32767" attributes="0"/>
+                              <Component id="txtMenuType" pref="198" max="32767" attributes="0"/>
+                              <Component id="txtClass" pref="198" max="32767" attributes="0"/>
                               <Component id="txtMenuMM" max="32767" attributes="0"/>
                           </Group>
                       </Group>
-                      <Group type="102" alignment="1" attributes="0">
-                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                      <Group type="102" attributes="0">
+                          <Component id="lblMessage" max="32767" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
                           <Component id="btnExport" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="btnImport" min="-2" max="-2" attributes="0"/>
@@ -153,6 +154,7 @@
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="btnExport" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="btnImport" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="lblMessage" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -303,6 +305,14 @@
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnImportActionPerformed"/>
           </Events>
+        </Component>
+        <Component class="javax.swing.JLabel" name="lblMessage">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="Global.lableFont" type="code"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="-"/>
+          </Properties>
         </Component>
       </SubComponents>
     </Container>

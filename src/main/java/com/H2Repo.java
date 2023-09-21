@@ -530,7 +530,7 @@ public class H2Repo {
     }
 
     private List<VRoleMenu> getRoleMenuTree(String roleCode, String compCode, boolean privilege) {
-        List<VRoleMenu> roles = vRoleMenuService.getMenu(roleCode, "1", compCode, privilege);
+        List<VRoleMenu> roles = vRoleMenuService.getMenu(roleCode, "#", compCode, privilege);
         if (!roles.isEmpty()) {
             for (VRoleMenu role : roles) {
                 getRoleMenuChild(role, false);
@@ -550,7 +550,7 @@ public class H2Repo {
     }
 
     public Mono<List<VRoleMenu>> getRoleMenu(String roleCode, String compCode) {
-        List<VRoleMenu> roles = vRoleMenuService.getMenu(roleCode, "1", compCode, false);
+        List<VRoleMenu> roles = vRoleMenuService.getMenu(roleCode, "#", compCode, false);
         if (!roles.isEmpty()) {
             for (VRoleMenu role : roles) {
                 getMenuChild(role, false);

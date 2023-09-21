@@ -16,6 +16,7 @@ import com.user.dialog.BusinessTypeSetupDialog;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
 /**
@@ -28,9 +29,9 @@ public class CompanyTemplate extends javax.swing.JPanel {
     @Autowired
     private UserRepo userRepo;
     @Autowired
-    private InventoryRepo inventoryRepo;
-    @Autowired
     private AccountRepo accountRepo;
+    @Autowired
+    private TaskExecutor taskExecutor;
     private SelectionObserver observer;
     private JProgressBar progress;
     private BusinessTypeSetupDialog dialog;
@@ -38,16 +39,8 @@ public class CompanyTemplate extends javax.swing.JPanel {
     private final MenuTemplateSetup menuTemplateSetup = new MenuTemplateSetup();
     private final COATemplateSetup cOATemplateSetup = new COATemplateSetup();
 
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
-    }
-
-    public JProgressBar getProgress() {
-        return progress;
     }
 
     public void setProgress(JProgressBar progress) {
@@ -71,6 +64,8 @@ public class CompanyTemplate extends javax.swing.JPanel {
     }
 
     private void search() {
+        menuTemplateSetup.setTaskExecutor(taskExecutor);
+        cOATemplateSetup.setTaskExecutor(taskExecutor);
         menuTemplateSetup.initMain();
         cOATemplateSetup.initMain();
     }

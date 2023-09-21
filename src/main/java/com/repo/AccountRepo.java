@@ -158,10 +158,9 @@ public class AccountRepo {
                 .collectList();
     }
 
-    public Mono<List<COATemplate>> getCOATemplateTree(Integer busId, String compCode) {
+    public Mono<List<COATemplate>> getCOATemplateTree(Integer busId) {
         return accountApi.get()
                 .uri(builder -> builder.path("/template/getCOATemplateTree")
-                .queryParam("coaCode", compCode)
                 .queryParam("busId", busId)
                 .build())
                 .retrieve()
@@ -374,14 +373,15 @@ public class AccountRepo {
         return 0.0;
     }
 
-    public Flux<COATemplate> getCOAChildTemplate(String coaCode, Integer busId) {
+    public Mono<List<COATemplate>> getCOAChildTemplate(String coaCode, Integer busId) {
         return accountApi.get()
                 .uri(builder -> builder.path("/template/getCOAChild")
                 .queryParam("coaCode", coaCode)
                 .queryParam("busId", busId)
                 .build())
                 .retrieve()
-                .bodyToFlux(COATemplate.class);
+                .bodyToFlux(COATemplate.class)
+                .collectList();
     }
 
     public Flux<ChartOfAccount> getCOAChild(String coaCode) {

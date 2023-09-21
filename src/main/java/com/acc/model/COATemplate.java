@@ -6,6 +6,7 @@ package com.acc.model;
 
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.List;
 
 /**
  *
@@ -25,4 +26,5 @@ public class COATemplate {
     private String curCode;
     private String deptCode;
     private boolean credit;
+    private List<COATemplate> child;
 }
