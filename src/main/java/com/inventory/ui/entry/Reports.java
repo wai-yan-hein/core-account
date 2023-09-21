@@ -467,7 +467,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
                 }
                 case "SaleByStockDetail" -> {
                     List<VSale> list = Util1.readJsonToList(input, VSale.class);
-                    exporter.exportSaleByStockDeatail(list, reportUrl);
+                    exporter.exportSaleByStockDetail(list, reportUrl);
                 }
                 case "SaleByCustomerDetail" -> {
                     List<VSale> list = Util1.readJsonToList(input, VSale.class);
