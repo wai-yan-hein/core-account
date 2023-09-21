@@ -656,7 +656,7 @@ public class ExcelExporter {
             Row row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(d.getStockCode());
             row.createCell(1).setCellValue(d.getStockName());
-            row.createCell(2).setCellValue(d.getUnit());
+            row.createCell(2).setCellValue(d.getRelation());
             row.createCell(3).setCellValue(Util1.getDouble(d.getSmallQty()));
             for (Cell cell : row) {
                 cell.setCellStyle(cellStyle);
@@ -751,7 +751,7 @@ public class ExcelExporter {
     private void createSaleByCustomerSummary(Workbook workbook, List<VSale> data, String sheetName,
             CellStyle cellStyle) {
         String[] HEADER = {
-            "Customer Name", "Address", "Stock Code", "Stock Name", "Relation", "Unit", "Total Qty", "Total Amount"
+            "Customer Name", "Address", "Stock Code", "Stock Name", "Relation", "Total Qty", "Total Amount"
         };
         String uniqueSheetName = generateUniqueSheetName(workbook, sheetName);
         Sheet sheet = workbook.createSheet(uniqueSheetName);
@@ -777,9 +777,8 @@ public class ExcelExporter {
             row.createCell(2).setCellValue(d.getStockCode());
             row.createCell(3).setCellValue(d.getStockName());
             row.createCell(4).setCellValue(d.getRelName());
-            row.createCell(5).setCellValue(d.getSaleUnit());
-            row.createCell(6).setCellValue(Util1.getDouble(d.getTotalQty()));
-            row.createCell(7).setCellValue(Util1.getDouble(d.getSaleAmount()));
+            row.createCell(5).setCellValue(Util1.getDouble(d.getTotalQty()));
+            row.createCell(6).setCellValue(Util1.getDouble(d.getSaleAmount()));
             for (Cell cell : row) {
                 cell.setCellStyle(cellStyle);
             }
@@ -813,7 +812,7 @@ public class ExcelExporter {
     private void createPurchaseBySupplierSummary(Workbook workbook, List<VPurchase> data, String sheetName,
             CellStyle cellStyle) {
         String[] HEADER = {
-            "Supplier Name", "Address", "Stock Code", "Stock Name", "Relation", "Unit", "Total Qty", "Total Amount"
+            "Supplier Name", "Address", "Stock Code", "Stock Name", "Relation", "Total Qty", "Total Amount"
         };
         String uniqueSheetName = generateUniqueSheetName(workbook, sheetName);
         Sheet sheet = workbook.createSheet(uniqueSheetName);
@@ -839,9 +838,8 @@ public class ExcelExporter {
             row.createCell(2).setCellValue(d.getStockCode());
             row.createCell(3).setCellValue(d.getStockName());
             row.createCell(4).setCellValue(d.getRelName());
-            row.createCell(5).setCellValue(d.getPurUnit());
-            row.createCell(6).setCellValue(Util1.getDouble(d.getTotalQty()));
-            row.createCell(7).setCellValue(Util1.getDouble(d.getPurAmount()));
+            row.createCell(5).setCellValue(Util1.getDouble(d.getTotalQty()));
+            row.createCell(6).setCellValue(Util1.getDouble(d.getPurAmount()));
             for (Cell cell : row) {
                 cell.setCellStyle(cellStyle);
             }
@@ -875,7 +873,7 @@ public class ExcelExporter {
     private void createPurchaseByStockSummary(Workbook workbook, List<VPurchase> data, String sheetName,
             CellStyle cellStyle) {
         String[] HEADER = {
-            "Stock Code", "Stock Name", "Relation", "Unit", "Total Qty", "Total Amount"
+            "Stock Code", "Stock Name", "Relation", "Total Qty", "Total Amount"
         };
         String uniqueSheetName = generateUniqueSheetName(workbook, sheetName);
         Sheet sheet = workbook.createSheet(uniqueSheetName);
@@ -899,9 +897,8 @@ public class ExcelExporter {
             row.createCell(0).setCellValue(d.getStockCode());
             row.createCell(1).setCellValue(d.getStockName());
             row.createCell(2).setCellValue(d.getRelName());
-            row.createCell(3).setCellValue(d.getPurUnit());
-            row.createCell(4).setCellValue(Util1.getDouble(d.getTotalQty()));
-            row.createCell(5).setCellValue(Util1.getDouble(d.getPurAmount()));
+            row.createCell(3).setCellValue(Util1.getDouble(d.getTotalQty()));
+            row.createCell(4).setCellValue(Util1.getDouble(d.getPurAmount()));
             for (Cell cell : row) {
                 cell.setCellStyle(cellStyle);
             }

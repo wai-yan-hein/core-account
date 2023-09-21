@@ -32,5 +32,5 @@ public class General {
     private String qtyRel;
     private String message;
     private String address;
-    private String unit;
+    private String relation;
 }
