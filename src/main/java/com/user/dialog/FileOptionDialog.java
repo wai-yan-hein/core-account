@@ -45,8 +45,7 @@ public class FileOptionDialog extends javax.swing.JDialog {
     }
 
     public List<File> getTemplateFiles() {
-        URL url = this.getClass().getResource("/template");
-        File file = new File(url.getFile());
+        File file = new File("template");
         return Arrays.asList(file.listFiles());
     }
 
