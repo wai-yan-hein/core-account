@@ -25,17 +25,16 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author wai yan
  */
-public class SaleByWeightTableModel extends AbstractTableModel {
+@Slf4j
+public class SaleExportTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(SaleByWeightTableModel.class);
-    private String[] columnNames = {"Code", "Description", "Relation", "Location", "Weight", "Weight Unit", "Qty", "Unit", "Std-Weight", "Total Qty", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Description", "Relation", "Location", "Weight", "Weight Unit", "Qty", "Unit", "Total Qty", "Price", "Amount"};
     private JTable parent;
     private List<SaleHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
@@ -93,7 +92,6 @@ public class SaleByWeightTableModel extends AbstractTableModel {
         this.observer = observer;
     }
 
-   
     @Override
     public String getColumnName(int column) {
         return columnNames[column];
@@ -130,7 +128,7 @@ public class SaleByWeightTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         switch (column) {
-            case 2, 9, 11 -> {
+            case 2, 8, 10 -> {
                 return false;
             }
         }
@@ -179,16 +177,13 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                     return sd.getUnitCode();
                 }
                 case 8 -> {
-                    return sd.getStdWeight();
-                }
-                case 9 -> {
                     return Util1.getDouble(sd.getTotalWeight()) == 0 ? null : sd.getTotalWeight();
                 }
-                case 10 -> {
+                case 9 -> {
                     //price
                     return sd.getPrice();
                 }
-                case 11 -> {
+                case 10 -> {
                     //amount
                     return sd.getAmount();
                 }
@@ -268,11 +263,8 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                             sd.setUnitCode(stockUnit.getKey().getUnitCode());
                         }
                     }
-                    case 8 -> {
-                        sd.setStdWeight(Util1.getDouble(value));
-                    }
 
-                    case 10 -> {
+                    case 9 -> {
                         //price
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
@@ -288,14 +280,14 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                             parent.setColumnSelectionInterval(column, column);
                         }
                     }
-                    case 11 -> {
+                    case 10 -> {
                         //amt
                         sd.setAmount(Util1.getDouble(value));
 
                     }
 
                 }
-                if (column != 10) {
+                if (column != 9) {
                     if (Util1.getFloat(sd.getPrice()) == 0) {
                         if (ProUtil.isSaleLastPrice()) {
                             if (sd.getStockCode() != null && sd.getUnitCode() != null) {
@@ -312,7 +304,6 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                 calculateAmount(sd);
                 fireTableRowsUpdated(row, row);
                 setRecord(listDetail.size() - 1);
-                observer.selected("SALE-TOTAL", "SALE-TOTAL");
                 parent.requestFocusInWindow();
             }
         } catch (Exception ex) {
@@ -376,16 +367,15 @@ public class SaleByWeightTableModel extends AbstractTableModel {
 
     private void calculateAmount(SaleHisDetail s) {
         double price = Util1.getDouble(s.getPrice());
-        double stdWt = Util1.getDouble(s.getStdWeight());
-        double wt = Util1.getDouble(s.getWeight());
         double qty = Util1.getDouble(s.getQty());
         if (s.getStockCode() != null) {
-            double amount = (qty * wt * price) / stdWt;
+            double amount = qty * price;
             s.setAmount(amount);
         }
         if (s.getQty() != null && s.getWeight() != null) {
             s.setTotalWeight(Util1.getDouble(s.getQty()) * Util1.getDouble(s.getWeight()));
         }
+        observer.selected("SALE-TOTAL", "SALE-TOTAL");
     }
 
     private void showMessageBox(String text) {

@@ -144,13 +144,14 @@ public class CurrencyConversionDialog extends javax.swing.JDialog {
             cboSource.setModel(srcComboBoxModel);
             cboTarget.setModel(targetComboBoxModel);
         }).subscribe();
-        accountRepo.getDepartment().doOnSuccess((t) -> {
-            departmentAccComboBoxModel.setData(t);
-        }).subscribe();
         accountRepo.getDefaultDepartment().doOnSuccess((t) -> {
             departmentAccComboBoxModel.setSelectedItem(t);
             cboDepartment.repaint();
         }).subscribe();
+        accountRepo.getDepartment().doOnSuccess((t) -> {
+            departmentAccComboBoxModel.setData(t);
+        }).subscribe();
+
     }
 
     private void enableForm(boolean status) {
@@ -202,6 +203,10 @@ public class CurrencyConversionDialog extends javax.swing.JDialog {
         } else if (cboConversion.getSelectedItem() == null) {
             JOptionPane.showMessageDialog(this, "Please select Exchange.");
             cboConversion.requestFocus();
+            return false;
+        } else if (cboDepartment.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(this, "Please select Department.");
+            cboDepartment.requestFocus();
             return false;
         }
         return true;

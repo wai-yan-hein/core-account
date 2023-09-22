@@ -139,7 +139,7 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
     }
 
     private void initCombo() {
-        regionAutoCompleter = new RegionAutoCompleter(txtRegion, null, true);
+        regionAutoCompleter = new RegionAutoCompleter(txtRegion, null, false);
         inventoryRepo.getRegion().subscribe((t) -> {
             regionAutoCompleter.setListRegion(t);
         });
@@ -165,8 +165,8 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
         tblCustomer.setModel(customerTabelModel);
         tblCustomer.getTableHeader().setFont(Global.textFont);
         tblCustomer.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblCustomer.getColumnModel().getColumn(0).setPreferredWidth(1);// Code
-        tblCustomer.getColumnModel().getColumn(1).setPreferredWidth(40);// Code
+        tblCustomer.getColumnModel().getColumn(0).setPreferredWidth(5);// Code
+        tblCustomer.getColumnModel().getColumn(1).setPreferredWidth(80);// Code
         tblCustomer.getColumnModel().getColumn(2).setPreferredWidth(320);// Name
         tblCustomer.getColumnModel().getColumn(3).setPreferredWidth(40);// Active   
         tblCustomer.setDefaultRenderer(Boolean.class, new TableCellRender());
@@ -535,7 +535,6 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
 
         txtSysCode.setEditable(false);
         txtSysCode.setFont(Global.textFont);
-        txtSysCode.setDisabledTextColor(new java.awt.Color(0, 0, 0));
         txtSysCode.setName("txtCusCode"); // NOI18N
         txtSysCode.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
@@ -832,9 +831,8 @@ public class CustomerSetup extends javax.swing.JPanel implements KeyListener, Pa
                         .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(lblRecord, javax.swing.GroupLayout.DEFAULT_SIZE, 447, Short.MAX_VALUE))
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 502, Short.MAX_VALUE)
-                        .addComponent(txtFilter)))
+                    .addComponent(txtFilter)
+                    .addComponent(jScrollPane2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panelEntry, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())

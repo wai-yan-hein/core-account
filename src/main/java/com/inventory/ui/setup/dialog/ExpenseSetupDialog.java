@@ -205,9 +205,12 @@ public class ExpenseSetupDialog extends javax.swing.JDialog implements KeyListen
             key.setCompCode(Global.compCode);
             exp.setKey(key);
         }
-        ChartOfAccount c = (ChartOfAccount) cboAccount.getSelectedItem();
-        exp.setUserCode(txtUserCode.getText());
-        exp.setAccountCode(c.getKey().getCoaCode());
+        if (cboAccount.getSelectedItem() instanceof ChartOfAccount c) {
+            if (c != null) {
+                exp.setUserCode(txtUserCode.getText());
+                exp.setAccountCode(c.getKey().getCoaCode());
+            }
+        }
         exp.setExpenseName(txtName.getText());
         exp.setPercent(Util1.getFloat(spPercent.getValue()));
     }

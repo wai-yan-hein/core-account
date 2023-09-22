@@ -22,6 +22,7 @@ import com.inventory.editor.SaleManAutoCompleter;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.TraderAutoCompleter;
 import com.inventory.model.Location;
+import com.inventory.model.SaleDetailKey;
 import com.inventory.model.SaleHis;
 import com.inventory.model.SaleHisDetail;
 import com.inventory.model.SaleHisKey;
@@ -31,6 +32,7 @@ import com.inventory.model.Trader;
 import com.inventory.model.VSale;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.SaleByWeightTableModel;
+import com.inventory.ui.common.SaleExportTableModel;
 import com.inventory.ui.common.StockBalanceTableModel;
 import com.inventory.ui.entry.dialog.SaleHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
@@ -68,32 +70,24 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 /**
  *
  * @author wai yan
  */
-@Component
 @Slf4j
 public class SaleByWeight extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
 
+    public static final int WEIGHT = 1;
+    public static final int EXPORT = 2;
     private List<SaleHisDetail> listDetail = new ArrayList();
     private final SaleByWeightTableModel saleTableModel = new SaleByWeightTableModel();
+    private final SaleExportTableModel saleExportTableModel = new SaleExportTableModel();
     private SaleHistoryDialog dialog;
     private final StockBalanceTableModel stockBalanceTableModel = new StockBalanceTableModel();
-    @Autowired
-    private WebClient inventoryApi;
-    @Autowired
     private InventoryRepo inventoryRepo;
-    @Autowired
     private AccountRepo accountRepo;
-    @Autowired
     private UserRepo userRepo;
     private CurrencyAutoCompleter currAutoCompleter;
     private TraderAutoCompleter traderAutoCompleter;
@@ -107,6 +101,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
     private double balance = 0;
     private CarNoAutoCompleter carNoAutoCompleter;
     private ProjectAutoCompleter projectAutoCompleter;
+    private int type;
 
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;
@@ -120,13 +115,27 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         this.observer = observer;
     }
 
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
+    }
+
+    public void setUserRepo(UserRepo userRepo) {
+        this.userRepo = userRepo;
+    }
+
     /**
      * Creates new form SaleEntry1
+     *
+     * @param type
      */
-    public SaleByWeight() {
+    public SaleByWeight(int type) {
+        this.type = type;
         initComponents();
         initButtonGroup();
-        lblStatus.setForeground(Color.GREEN);
         initKeyListener();
         initTextBoxFormat();
         initTextBoxValue();
@@ -185,13 +194,25 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
     public void initMain() {
         initCombo();
         initStockBalanceTable();
-        initSaleTable();
+        initTable();
+        initModel();
         assignDefaultValue();
         txtSaleDate.setDate(Util1.getTodayDate());
         txtCus.requestFocus();
     }
 
-    private void initSaleTable() {
+    private void initModel() {
+        switch (type) {
+            case WEIGHT -> {
+                initWeight();
+            }
+            case EXPORT -> {
+                initExport();
+            }
+        }
+    }
+
+    private void initWeight() {
         tblSale.setModel(saleTableModel);
         saleTableModel.setLblRecord(lblRec);
         saleTableModel.setParent(tblSale);
@@ -231,6 +252,51 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         });
         tblSale.getColumnModel().getColumn(8).setCellEditor(new AutoClearEditor());//wt
         tblSale.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());//
+    }
+
+    private void initExport() {
+        tblSale.setModel(saleExportTableModel);
+        saleExportTableModel.setLblRecord(lblRec);
+        saleExportTableModel.setParent(tblSale);
+        saleExportTableModel.setSale(this);
+        saleExportTableModel.addNewRow();
+        saleExportTableModel.setObserver(this);
+        saleExportTableModel.setVouDate(txtSaleDate);
+        saleExportTableModel.setInventoryRepo(inventoryRepo);
+        saleExportTableModel.setSbTableModel(stockBalanceTableModel);
+        saleExportTableModel.setObserver(this);
+        tblSale.getColumnModel().getColumn(0).setPreferredWidth(50);//Code
+        tblSale.getColumnModel().getColumn(1).setPreferredWidth(450);//Name
+        tblSale.getColumnModel().getColumn(2).setPreferredWidth(60);//Rel
+        tblSale.getColumnModel().getColumn(3).setPreferredWidth(60);//Location
+        tblSale.getColumnModel().getColumn(4).setPreferredWidth(50);//weight
+        tblSale.getColumnModel().getColumn(5).setPreferredWidth(30);//unit
+        tblSale.getColumnModel().getColumn(6).setPreferredWidth(50);//qty
+        tblSale.getColumnModel().getColumn(7).setPreferredWidth(30);//unit
+        tblSale.getColumnModel().getColumn(8).setPreferredWidth(50);//total
+        tblSale.getColumnModel().getColumn(9).setPreferredWidth(50);//price
+        tblSale.getColumnModel().getColumn(10).setPreferredWidth(60);//amt
+        tblSale.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblSale.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        monoLoc.subscribe((t) -> {
+            tblSale.getColumnModel().getColumn(3).setCellEditor(new LocationCellEditor(t));
+        });
+        Mono<List<StockUnit>> monoUnit = inventoryRepo.getStockUnit();
+        tblSale.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());//weight
+        monoUnit.subscribe((t) -> {
+            tblSale.getColumnModel().getColumn(5).setCellEditor(new StockUnitEditor(t));//unit
+        });
+        tblSale.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//qty
+        monoUnit.subscribe((t) -> {
+            tblSale.getColumnModel().getColumn(7).setCellEditor(new StockUnitEditor(t));//unit
+        });
+        tblSale.getColumnModel().getColumn(9).setCellEditor(new AutoClearEditor());//wt
+        tblSale.getColumnModel().getColumn(10).setCellEditor(new AutoClearEditor());//
+    }
+
+    private void initTable() {
+        tblSale.getTableHeader().setFont(Global.tblHeaderFont);
+        tblSale.setCellSelectionEnabled(true);
         tblSale.setDefaultRenderer(Object.class, new DecimalFormatRender());
         tblSale.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblSale.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -356,16 +422,30 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         }
     }
 
+    private void clearList() {
+        switch (type) {
+            case WEIGHT -> {
+                saleTableModel.removeListDetail();
+                saleTableModel.clearDelList();
+                saleTableModel.setChange(false);
+                stockBalanceTableModel.clearList();
+            }
+            case EXPORT -> {
+                saleExportTableModel.removeListDetail();
+                saleExportTableModel.clearDelList();
+                saleExportTableModel.setChange(false);
+                stockBalanceTableModel.clearList();
+            }
+        }
+
+    }
+
     private void clear() {
         disableForm(true);
-        saleTableModel.removeListDetail();
-        saleTableModel.clearDelList();
-        saleTableModel.setChange(false);
-        stockBalanceTableModel.clearList();
+        clearList();
         initTextBoxValue();
         assignDefaultValue();
         saleHis = new SaleHis();
-
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.GREEN);
         progress.setIndeterminate(false);
@@ -376,8 +456,20 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         projectAutoCompleter.setProject(null);
     }
 
+    private boolean isValidDetail() {
+        switch (type) {
+            case WEIGHT -> {
+                return saleTableModel.isValidEntry();
+            }
+            case EXPORT -> {
+                return saleExportTableModel.isValidEntry();
+            }
+        }
+        return false;
+    }
+
     public void saveSale(boolean print) {
-        if (isValidEntry() && saleTableModel.isValidEntry()) {
+        if (isValidEntry() && isValidDetail()) {
             observer.selected("save", false);
             if (Util1.getBoolean(ProUtil.getProperty("trader.balance"))) {
                 String date = Util1.toDateStr(txtSaleDate.getDate(), "yyyy-MM-dd");
@@ -388,9 +480,8 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                 }
             }
             progress.setIndeterminate(true);
-            saleHis.setListSH(saleTableModel.getListDetail());
-            saleHis.setListDel(saleTableModel.getDelList());
-            saleHis.setBackup(saleTableModel.isChange());
+            saleHis.setListSH(getListDetail());
+            saleHis.setListDel(getListDel());
             inventoryRepo.save(saleHis).subscribe((t) -> {
                 progress.setIndeterminate(false);
                 clear();
@@ -519,19 +610,53 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             int yes_no = JOptionPane.showConfirmDialog(this,
                     "Are you sure to delete?", "Sale Transaction delete.", JOptionPane.YES_NO_OPTION);
             if (yes_no == 0) {
-                saleTableModel.delete(row);
+                deleteDetail(row);
                 calculateTotalAmount(false);
             }
         }
     }
 
+    private void deleteDetail(int row) {
+        switch (type) {
+            case WEIGHT ->
+                saleTableModel.delete(row);
+            case EXPORT ->
+                saleExportTableModel.delete(row);
+
+        }
+    }
+
+    private List<SaleHisDetail> getListDetail() {
+        switch (type) {
+            case WEIGHT -> {
+                return saleTableModel.getListDetail();
+            }
+            case EXPORT -> {
+                return saleExportTableModel.getListDetail();
+            }
+            default ->
+                throw new AssertionError();
+        }
+    }
+
+    private List<SaleDetailKey> getListDel() {
+        switch (type) {
+            case WEIGHT -> {
+                return saleTableModel.getDelList();
+            }
+            case EXPORT -> {
+                return saleExportTableModel.getDelList();
+            }
+        }
+        return null;
+    }
+
     private void calculateTotalAmount(boolean partial) {
         double totalVouBalance;
         double totalAmount = 0.0f;
-        listDetail = saleTableModel.getListDetail();
+        listDetail = getListDetail();
         totalAmount = listDetail.stream().map(sdh -> Util1.getDouble(sdh.getAmount())).reduce(totalAmount, (accumulator, _item) -> accumulator + _item);
         txtVouTotal.setValue(totalAmount);
-
         //cal discAmt
         double discp = Util1.getDouble(txtVouDiscP.getValue());
         if (discp > 0) {
@@ -581,7 +706,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             dialog.setUserRepo(userRepo);
             dialog.setObserver(this);
             dialog.initMain();
-            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setSize(Global.width - 20, Global.height - 20);
             dialog.setLocationRelativeTo(null);
         }
         dialog.search();
@@ -614,8 +739,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             }
             String vouNo = sh.getKey().getVouNo();
             inventoryRepo.getSaleDetail(vouNo, saleHis.getDeptId(), saleHis.isLocal()).subscribe((t) -> {
-                saleTableModel.setListDetail(t);
-                saleTableModel.addNewRow();
+                setListDetail(t);
                 if (sh.isVouLock()) {
                     lblStatus.setText("Voucher is locked.");
                     lblStatus.setForeground(Color.RED);
@@ -659,6 +783,19 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         }
     }
 
+    private void setListDetail(List<SaleHisDetail> list) {
+        switch (type) {
+            case WEIGHT -> {
+                saleTableModel.setListDetail(list);
+                saleTableModel.addNewRow();
+            }
+            case EXPORT -> {
+                saleExportTableModel.setListDetail(list);
+                saleExportTableModel.addNewRow();
+            }
+        }
+    }
+
     private void disableForm(boolean status) {
         tblSale.setEnabled(status);
         panelSale.setEnabled(status);
@@ -683,7 +820,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
     }
 
     private void setAllLocation() {
-        List<SaleHisDetail> listSaleDetail = saleTableModel.getListDetail();
+        List<SaleHisDetail> listSaleDetail = getListDetail();
         Location loc = locationAutoCompleter.getLocation();
         if (listSaleDetail != null) {
             listSaleDetail.forEach(sd -> {
@@ -691,20 +828,12 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                 sd.setLocName(loc.getLocName());
             });
         }
-        saleTableModel.setListDetail(listSaleDetail);
+        setListDetail(listSaleDetail);
     }
 
     private void printVoucher(String vouNo, String reportName, boolean print) {
         clear();
-        Mono<byte[]> result = inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-sale-report")
-                .queryParam("vouNo", vouNo)
-                .queryParam("macId", Global.macId)
-                .build())
-                .retrieve()
-                .bodyToMono(ByteArrayResource.class)
-                .map(ByteArrayResource::getByteArray);
-        result.subscribe((t) -> {
+        inventoryRepo.getSaleReport(vouNo).subscribe((t) -> {
             try {
                 if (t != null) {
                     viewReport(t, reportName, print);
@@ -1128,6 +1257,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
         lblStatus.setFont(new java.awt.Font("Tahoma", 0, 30)); // NOI18N
+        lblStatus.setForeground(Color.green);
         lblStatus.setText("NEW");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Report Type", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, Global.lableFont));

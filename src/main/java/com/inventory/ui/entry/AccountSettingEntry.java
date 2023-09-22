@@ -98,7 +98,7 @@ public class AccountSettingEntry extends javax.swing.JPanel {
         disCompleter = new COA3AutoCompleter(txtDiscount, accountRepo, null, false, 3);
         taxCompleter = new COA3AutoCompleter(txtTax, accountRepo, null, false, 3);
         balCompleter = new COA3AutoCompleter(txtBal, accountRepo, null, false, 3);
-        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true, true);
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, false, false);
         accountRepo.getDepartment().doOnSuccess((t) -> {
             departmentAutoCompleter.setListDepartment(t);
         }).subscribe();
@@ -389,6 +389,7 @@ public class AccountSettingEntry extends javax.swing.JPanel {
         jLabel7.setFont(Global.lableFont);
         jLabel7.setText("Balance");
 
+        btnSave.setFont(Global.lableFont);
         btnSave.setText("Save");
         btnSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -396,6 +397,7 @@ public class AccountSettingEntry extends javax.swing.JPanel {
             }
         });
 
+        btnClear.setFont(Global.lableFont);
         btnClear.setText("Clear");
         btnClear.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

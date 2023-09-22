@@ -244,9 +244,6 @@ public class PurchaseExportTableModel extends AbstractTableModel {
                     //Qty
                     if (Util1.isNumber(value)) {
                         record.setQty(Util1.getDouble(value));
-                        if (record.getQty() != null && record.getWeight() != null) {
-                            record.setTotalWeight(Util1.getDouble(record.getQty()) * Util1.getDouble(record.getWeight()));
-                        }
                         parent.setRowSelectionInterval(row, row);
                     }
                 }

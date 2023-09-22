@@ -22,7 +22,6 @@ import com.inventory.model.MillingHis;
 import com.user.model.AppUser;
 import com.inventory.model.Stock;
 import com.inventory.model.Trader;
-import com.inventory.model.VPurchase;
 import com.inventory.ui.entry.dialog.common.MillingSearchTableModel;
 import com.repo.InventoryRepo;
 import com.user.editor.CurrencyAutoCompleter;
@@ -67,7 +66,6 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         this.integration = integration;
     }
 
-
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
@@ -105,6 +103,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
             appUserAutoCompleter.setListUser(t);
         }).subscribe();
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
+        departmentAutoCompleter = new DepartmentAutoCompleter(txtDep, null, true);
         userRepo.getDeparment(true).doOnSuccess((t) -> {
             departmentAutoCompleter.setListDepartment(t);
         }).subscribe();
@@ -132,7 +131,7 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         tblVoucher.setModel(tableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
-        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(40);
+        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(50);
         tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(80);
         tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(180);
         tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(180);
@@ -187,18 +186,14 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
         filter.setDeptId(getDepId());
         filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
         filter.setCurCode(getCurCode());
-        tableModel.clear();
-        inventoryRepo.getMillingVoucher(filter)
-                .subscribe((t) -> {
-                    tableModel.setListDetail(t);
-                    calAmount();
-                    progess.setIndeterminate(false);
-                }, (e) -> {
-                    progess.setIndeterminate(false);
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                }, () -> {
-                    setVisible(true);
-                });
+        inventoryRepo.getMillingVoucher(filter).doOnSuccess((t) -> {
+            tableModel.setListDetail(t);
+        }).doOnTerminate(() -> {
+            calAmount();
+            progess.setIndeterminate(false);
+            setVisible(true);
+        }).subscribe();
+
     }
 
     private void calAmount() {

@@ -274,7 +274,6 @@ public class MilingRawTableModel extends AbstractTableModel {
                                     sd.setQty(Util1.getFloat(value));
                                     sd.setTotalWeight(Util1.getTotalWeight(wt, str));
                                 } else {
-                                    float wt = Util1.getFloat(sd.getWeight());
                                     sd.setQty(Util1.getFloat(value));
                                     sd.setTotalWeight(Util1.getFloat(sd.getQty()) * Util1.getFloat(sd.getWeight()));
                                 }

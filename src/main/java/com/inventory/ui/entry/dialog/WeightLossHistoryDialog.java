@@ -166,16 +166,13 @@ public class WeightLossHistoryDialog extends javax.swing.JDialog implements KeyL
         filter.setDeleted(chkDel.isSelected());
         filter.setDeptId(getDepId());
         //
-        inventoryRepo.getWeightLoss(filter).subscribe((t) -> {
+        inventoryRepo.getWeightLoss(filter).doOnSuccess((t) -> {
             tableModel.setListDetail(t);
+        }).doOnTerminate(() -> {
             progess.setIndeterminate(false);
             calAmount();
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-            progess.setIndeterminate(false);
-        }, () -> {
             setVisible(true);
-        });
+        }).subscribe();
 
     }
 

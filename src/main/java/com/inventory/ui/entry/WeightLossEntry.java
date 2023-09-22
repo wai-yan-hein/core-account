@@ -56,17 +56,10 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
     private JProgressBar progress;
     private WeightLossHis his = new WeightLossHis();
 
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
 
-    public JProgressBar getProgress() {
-        return progress;
-    }
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
@@ -234,9 +227,9 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
     }
 
     private void assignDefault() {
-        inventoryRepo.getDefaultLocation().subscribe((t) -> {
+        inventoryRepo.getDefaultLocation().doOnSuccess((t) -> {
             tableModel.setLocation(t);
-        });
+        }).subscribe();
     }
 
     private boolean isValidEntry() {

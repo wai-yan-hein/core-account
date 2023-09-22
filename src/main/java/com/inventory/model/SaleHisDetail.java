@@ -53,6 +53,8 @@ public class SaleHisDetail {
     private String weightUnit;
     @Column(name = "std_weight")
     private Double stdWeight;
+    @Column(name = "total_weight")
+    private Double totalWeight;
     @Transient
     private String userCode;
     @Transient

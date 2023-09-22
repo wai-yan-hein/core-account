@@ -129,8 +129,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     @Autowired
     private SaleByBatch saleByBatch;
     @Autowired
-    private SaleByWeight saleByWeight;
-    @Autowired
     private RFID rfid;
     @Autowired
     private Purchase purchase;
@@ -435,12 +433,17 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 saleByBatch.initMain();
                 return saleByBatch;
             }
-            case "Sale By Weight" -> {
-                saleByWeight.setName(menuName);
-                saleByWeight.setObserver(this);
-                saleByWeight.setProgress(progress);
-                saleByWeight.initMain();
-                return saleByWeight;
+            case "Sale By Weight", "Sale Export" -> {
+                int type = menuName.equals("Sale Export") ? SaleByWeight.EXPORT :SaleByWeight.WEIGHT;
+                SaleByWeight s = new SaleByWeight(type);
+                s.setUserRepo(userRepo);
+                s.setInventoryRepo(inventoryRepo);
+                s.setAccountRepo(accounRepo);
+                s.setName(menuName);
+                s.setObserver(this);
+                s.setProgress(progress);
+                s.initMain();
+                return s;
             }
             case "RFID" -> {
                 rfid.setName(menuName);
@@ -811,7 +814,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                         db.setUserRepo(userRepo);
                         db.initMain();
                         return db;
-                    } default -> {
+                    }
+                    default -> {
                         JOptionPane.showMessageDialog(this, "Invalid Menu.");
                     }
                 }

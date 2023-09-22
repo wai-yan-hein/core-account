@@ -27,10 +27,8 @@
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="lblRecord" pref="447" max="32767" attributes="0"/>
                   </Group>
-                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                      <Component id="jScrollPane2" pref="502" max="32767" attributes="0"/>
-                      <Component id="txtFilter" max="32767" attributes="0"/>
-                  </Group>
+                  <Component id="txtFilter" max="32767" attributes="0"/>
+                  <Component id="jScrollPane2" alignment="0" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="panelEntry" max="32767" attributes="0"/>
@@ -467,9 +465,6 @@
             <Property name="editable" type="boolean" value="false"/>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Global.textFont" type="code"/>
-            </Property>
-            <Property name="disabledTextColor" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="0" green="0" red="0" type="rgb"/>
             </Property>
             <Property name="name" type="java.lang.String" value="txtCusCode" noResource="true"/>
           </Properties>

@@ -188,7 +188,7 @@ public class SaleHistoryDialog extends javax.swing.JDialog implements KeyListene
     private void initTableVoucher() {
         tblVoucher.setModel(saleVouTableModel);
         tblVoucher.getTableHeader().setFont(Global.tblHeaderFont);
-        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(40);
+        tblVoucher.getColumnModel().getColumn(0).setPreferredWidth(50);
         tblVoucher.getColumnModel().getColumn(1).setPreferredWidth(50);
         tblVoucher.getColumnModel().getColumn(2).setPreferredWidth(180);
         tblVoucher.getColumnModel().getColumn(3).setPreferredWidth(180);
