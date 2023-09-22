@@ -9,7 +9,6 @@ import com.common.Global;
 import com.common.TableCellRender;
 import com.user.common.FileTableModel;
 import java.io.File;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import javax.swing.JFrame;

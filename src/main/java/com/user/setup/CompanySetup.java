@@ -24,10 +24,8 @@ import com.user.dialog.YearEndProcessingDailog;
 import com.user.editor.BusinessTypeAutoCompleter;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.model.CompanyInfo;
-import java.awt.HeadlessException;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.net.URL;
 import java.time.LocalDateTime;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -37,7 +35,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -53,6 +50,8 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
     private AccountRepo accountRepo;
     @Autowired
     private Environment environment;
+    @Autowired
+    private String getToken;
     private int selectRow = -1;
     private CompanyInfo companyInfo = new CompanyInfo();
     private CurrencyAutoCompleter currencyAutoCompleter;
@@ -80,8 +79,8 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         initCombo();
         initKeyListener();
         initTable();
+        assignDefault();
     }
-
 
     private void initTable() {
         tblCompany.setModel(tableModel);
@@ -121,6 +120,11 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         });
     }
 
+    private void assignDefault() {
+        txtFromDate.setDate(Util1.getTodayDate());
+        txtToDate.setDate(Util1.getTodayDate());
+    }
+
     private void setCompanyInfo(CompanyInfo cInfo) {
         companyInfo = cInfo;
         userRepo.findCurrency(companyInfo.getCurCode()).subscribe((t) -> {
@@ -148,37 +152,24 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
 
     private void saveCompany() {
         if (isValidEntry()) {
-            try {
-                progress.setIndeterminate(true);
-                String status = lblStatus.getText();
-                userRepo.saveCompany(companyInfo)
-                        .flatMap(c -> {
-                            if (c == null) {
-                                return Mono.just(Boolean.FALSE);
-                            } else {
-                                if (status.equals("NEW")) {
-                                    tableModel.addCompany(c);
-                                } else {
-                                    tableModel.setCompany(selectRow, c);
-                                }
-                                sendMessage(c.getCompName());
-                                updateCompany(c);
-                                return accountRepo.saveCOAFromTemplate(companyInfo.getBusId(), c.getCompCode())
-                                        .doOnNext(t -> {
-                                            clear();
-                                            progress.setIndeterminate(false);
-                                        })
-                                        .thenReturn(Boolean.TRUE);
-                            }
-                        }).subscribe(sta -> {
-                }, err -> {
-                    JOptionPane.showMessageDialog(this, err.getMessage());
-                    progress.setIndeterminate(false);
-                });
-            } catch (HeadlessException e) {
-                log.error("Save Company :" + e.getMessage());
+            progress.setIndeterminate(true);
+            observer.selected("save", false);
+            String status = lblStatus.getText();
+            userRepo.saveCompany(companyInfo).doOnSuccess((t) -> {
+                if (status.equals("NEW")) {
+                    tableModel.addCompany(t);
+                } else {
+                    tableModel.setCompany(selectRow, t);
+                }
+                updateCompany(t);
+                clear();
+                sendMessage(t.getCompName());
+            }).doOnError((e) -> {
+                log.error("saveCompany : " + e.getMessage());
+                progress.setIndeterminate(false);
+                observer.selected("save", true);
                 JOptionPane.showMessageDialog(Global.parentForm, "Could'nt saved.");
-            }
+            }).subscribe();
         }
     }
 
@@ -223,6 +214,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
             companyInfo.setActive(chkActive.isSelected());
             companyInfo.setCurCode(currencyAutoCompleter.getCurrency().getCurCode());
             companyInfo.setUpdateMenu(chkMenuUpdate.isSelected());
+            companyInfo.setToken(getToken);
         }
         return status;
 
@@ -246,6 +238,8 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         txtSecurity.setText(null);
         currencyAutoCompleter.setCurrency(null);
         businessTypeAutoCompleter.setObject(null);
+        progress.setIndeterminate(false);
+        assignDefault();
         observeMain();
     }
 
@@ -369,6 +363,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         txtBusType = new javax.swing.JTextField();
         txtSecurity = new javax.swing.JPasswordField();
         chkMenuUpdate = new javax.swing.JCheckBox();
+        lblMessage = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
@@ -487,6 +482,9 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         chkMenuUpdate.setFont(Global.lableFont);
         chkMenuUpdate.setText("Update Menu From Template (Notice)");
 
+        lblMessage.setFont(Global.lableFont);
+        lblMessage.setText("-");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -511,10 +509,10 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                             .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtEmail, javax.swing.GroupLayout.DEFAULT_SIZE, 344, Short.MAX_VALUE)
-                            .addComponent(txtPhone, javax.swing.GroupLayout.DEFAULT_SIZE, 344, Short.MAX_VALUE)
-                            .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 344, Short.MAX_VALUE)
-                            .addComponent(txtAddress, javax.swing.GroupLayout.DEFAULT_SIZE, 344, Short.MAX_VALUE)
+                            .addComponent(txtEmail, javax.swing.GroupLayout.DEFAULT_SIZE, 346, Short.MAX_VALUE)
+                            .addComponent(txtPhone, javax.swing.GroupLayout.DEFAULT_SIZE, 346, Short.MAX_VALUE)
+                            .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 346, Short.MAX_VALUE)
+                            .addComponent(txtAddress, javax.swing.GroupLayout.DEFAULT_SIZE, 346, Short.MAX_VALUE)
                             .addComponent(txtSecurity)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -541,7 +539,8 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                                 .addComponent(lblStatus))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(chkMenuUpdate)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(lblMessage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -595,6 +594,8 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(chkActive, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblMessage)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(chkMenuUpdate)
                 .addContainerGap())
@@ -654,7 +655,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                     .addComponent(jButton3)
                     .addComponent(jButton4)
                     .addComponent(jButton5))
-                .addContainerGap(94, Short.MAX_VALUE))
+                .addContainerGap(90, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -760,6 +761,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lblMessage;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JTable tblCompany;
     private javax.swing.JTextField txtAddress;

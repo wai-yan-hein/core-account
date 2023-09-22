@@ -380,8 +380,6 @@ public class TrialBalanceDetailDialog extends javax.swing.JDialog implements Sel
             } catch (JRException | FileNotFoundException ex) {
                 JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
                 log.error("printVoucher : " + ex.getMessage());
-            } catch (IOException ex) {
-                Logger.getLogger(TrialBalanceDetailDialog.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
             JOptionPane.showMessageDialog(this, "Select Currency.");

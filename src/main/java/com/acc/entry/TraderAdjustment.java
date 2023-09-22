@@ -450,8 +450,6 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
 
                 } catch (FileNotFoundException ex) {
                     log.error(ex.getMessage());
-                } catch (IOException ex) {
-                    Logger.getLogger(TraderAdjustment.class.getName()).log(Level.SEVERE, null, ex);
                 }
             });
         } else {

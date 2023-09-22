@@ -64,6 +64,8 @@ public class CompanyInfo {
     @Column(name = "security_code")
     private String securityCode;
     @Transient
+    private String token;
+    @Transient
     private Boolean updateMenu;
 
     @Override

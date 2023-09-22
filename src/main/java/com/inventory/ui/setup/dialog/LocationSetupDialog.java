@@ -129,6 +129,7 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
         location = loc;
         txtName.setText(location.getLocName());
         txtUserCode.setText(location.getUserCode());
+        chkActive.setSelected(loc.isActive());
         txtName.requestFocus();
         lblStatus.setText("EDIT");
         lblStatus.setForeground(Color.BLUE);
@@ -185,6 +186,7 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
         txtUserCode.setText(null);
         txtFilter.setText(null);
         txtName.setText(null);
+        chkActive.setSelected(true);
         departmentComboBoxModel.setSelectedItem(null);
         cboDepartment.repaint();
         cOAComboBoxModel.setSelectedItem(null);
@@ -214,6 +216,7 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
             location.setUserCode(txtUserCode.getText());
             location.setLocName(txtName.getText());
             location.setDeptId(Global.deptId);
+            location.setActive(chkActive.isSelected());
             if (lblStatus.getText().equals("NEW")) {
                 LocationKey key = new LocationKey();
                 key.setCompCode(Global.compCode);
@@ -227,6 +230,10 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
             }
         }
         return status;
+    }
+
+    private void export() {
+        Util1.writeJsonFile(locationTableModel.getListLocation(), "location.json");
     }
 
     /**
@@ -254,6 +261,8 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
         jLabel5 = new javax.swing.JLabel();
         cboCash = new javax.swing.JComboBox<>();
         jSeparator1 = new javax.swing.JSeparator();
+        btnSave1 = new javax.swing.JButton();
+        chkActive = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Location Setup");
@@ -348,6 +357,21 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
 
         cboCash.setFont(Global.textFont);
 
+        btnSave1.setBackground(Global.selectionColor);
+        btnSave1.setFont(Global.lableFont);
+        btnSave1.setForeground(new java.awt.Color(255, 255, 255));
+        btnSave1.setText("Export");
+        btnSave1.setName("btnSave"); // NOI18N
+        btnSave1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSave1ActionPerformed(evt);
+            }
+        });
+
+        chkActive.setFont(Global.lableFont);
+        chkActive.setSelected(true);
+        chkActive.setText("Active");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -367,13 +391,16 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtName)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addGap(0, 76, Short.MAX_VALUE)
+                                .addGap(0, 37, Short.MAX_VALUE)
+                                .addComponent(btnSave1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnSave)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnClear))
                             .addComponent(txtUserCode)
                             .addComponent(cboDepartment, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(cboCash, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(cboCash, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(chkActive, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -399,11 +426,15 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
                     .addComponent(cboCash, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnClear)
-                        .addComponent(btnSave))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(chkActive)
+                        .addGap(9, 9, 9)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnClear)
+                            .addComponent(btnSave)
+                            .addComponent(btnSave1)))
                     .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(210, Short.MAX_VALUE))
+                .addContainerGap(181, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -413,8 +444,8 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE))
+                    .addComponent(txtFilter, javax.swing.GroupLayout.DEFAULT_SIZE, 263, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 263, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -476,6 +507,11 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
         // TODO add your handling code here:
     }//GEN-LAST:event_txtUserCodeActionPerformed
 
+    private void btnSave1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSave1ActionPerformed
+        // TODO add your handling code here:
+        export();
+    }//GEN-LAST:event_btnSave1ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -483,8 +519,10 @@ public class LocationSetupDialog extends javax.swing.JDialog implements KeyListe
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnSave;
+    private javax.swing.JButton btnSave1;
     private javax.swing.JComboBox<ChartOfAccount> cboCash;
     private javax.swing.JComboBox<DepartmentA> cboDepartment;
+    private javax.swing.JCheckBox chkActive;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;

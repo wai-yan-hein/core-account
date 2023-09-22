@@ -199,6 +199,9 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
         }
         return true;
     }
+    private void export(){
+        Util1.writeJsonFile(departmentTableModel.getListDepartment(), "department.json");
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -227,6 +230,7 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
         txtAddress = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
         txtEmail = new javax.swing.JTextField();
+        btnSave1 = new javax.swing.JButton();
         progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -309,6 +313,17 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
         txtEmail.setFont(Global.textFont);
         txtEmail.setName("txtCurrSymbol"); // NOI18N
 
+        btnSave1.setBackground(Global.selectionColor);
+        btnSave1.setFont(Global.lableFont);
+        btnSave1.setForeground(new java.awt.Color(255, 255, 255));
+        btnSave1.setText("Export");
+        btnSave1.setName("btnSave"); // NOI18N
+        btnSave1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSave1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -342,6 +357,8 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
                                 .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnSave1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnClear)))
@@ -382,7 +399,8 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnClear)
-                    .addComponent(btnSave))
+                    .addComponent(btnSave)
+                    .addComponent(btnSave1))
                 .addContainerGap(176, Short.MAX_VALUE))
         );
 
@@ -425,6 +443,11 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
         saveDepartment();
     }//GEN-LAST:event_btnSaveActionPerformed
 
+    private void btnSave1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSave1ActionPerformed
+        // TODO add your handling code here:
+        export();
+    }//GEN-LAST:event_btnSave1ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -432,6 +455,7 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnSave;
+    private javax.swing.JButton btnSave1;
     private javax.swing.JCheckBox chkActive;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

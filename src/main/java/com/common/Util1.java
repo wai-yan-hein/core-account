@@ -43,6 +43,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.ImageIcon;
@@ -862,9 +864,11 @@ public class Util1 {
         return str;
     }
 
-    public static void writeJsonFile(Object data, String exportPath) throws IOException {
+    public static void writeJsonFile(Object data, String exportPath) {
         try (Writer writer = new FileWriter(exportPath, StandardCharsets.UTF_8)) {
             gson.toJson(data, writer);
+        } catch (IOException ex) {
+            log.error("writeJsonFile : " + ex.getMessage());
         }
     }
 
@@ -949,7 +953,7 @@ public class Util1 {
 
         String os = System.getProperty("os.name").toLowerCase();
         try {
-            String command="";
+            String command = "";
             if (os.contains("win")) {
                 command = "wmic cpu get processorid";
             } else if (os.contains("nix") || os.contains("nux")) {
@@ -1118,7 +1122,7 @@ public class Util1 {
             // Use the TypeReference to specify the target type (List<T>)
             return objectMapper.readValue(inputStream, objectMapper.getTypeFactory().constructCollectionType(List.class, targetType));
         } catch (IOException e) {
-            log.error("readJsonToList : "+e.getMessage());
+            log.error("readJsonToList : " + e.getMessage());
             return null; // Handle the exception or return an appropriate value
         }
     }

@@ -27,6 +27,7 @@ import com.user.model.ExchangeRate;
 import com.user.model.MachineProperty;
 import com.user.model.Menu;
 import com.user.model.MenuTemplate;
+import com.user.model.MenuTemplateKey;
 import com.user.model.PrivilegeCompany;
 import com.user.model.PrivilegeMenu;
 import com.user.model.Project;
@@ -543,6 +544,16 @@ public class UserRepo {
                 .collectList();
     }
 
+    public Mono<List<MenuTemplate>> getMenuTreeTemplate(Integer busId) {
+        return userApi.get()
+                .uri(builder -> builder.path("/template/getMenuTree")
+                .queryParam("busId", busId)
+                .build())
+                .retrieve()
+                .bodyToFlux(MenuTemplate.class)
+                .collectList();
+    }
+
     public Mono<List<MenuTemplate>> getMenuTemplate(Integer busId) {
         return userApi.get()
                 .uri(builder -> builder.path("/template/getMenu")
@@ -551,6 +562,14 @@ public class UserRepo {
                 .retrieve()
                 .bodyToFlux(MenuTemplate.class)
                 .collectList();
+    }
+
+    public Mono<Boolean> delete(MenuTemplateKey key) {
+        return userApi.post()
+                .uri("/template/deleteMenu")
+                .body(Mono.just(key), MenuTemplate.class)
+                .retrieve()
+                .bodyToMono(Boolean.class);
     }
 
     public Mono<MenuTemplate> save(MenuTemplate type) {

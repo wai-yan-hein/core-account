@@ -168,6 +168,16 @@ public class AccountRepo {
                 .collectList();
     }
 
+    public Mono<List<COATemplate>> getCOATemplate(Integer busId) {
+        return accountApi.get()
+                .uri(builder -> builder.path("/template/getCOATemplate")
+                .queryParam("busId", busId)
+                .build())
+                .retrieve()
+                .bodyToFlux(COATemplate.class)
+                .collectList();
+    }
+
     public Flux<ChartOfAccount> getTraderAccount() {
         if (localDatabase) {
             return h2Repo.getTraderCOA();
