@@ -253,6 +253,7 @@ public class SaleTableModel extends AbstractTableModel {
                             sd.setWeightUnit(s.getWeightUnit());
                             parent.setColumnSelectionInterval(4, 4);
                             addNewRow();
+                            selectionObserver.selected("STOCK-INFO", "STOCK-INFO");
                         }
                     }
                     case 3 -> {

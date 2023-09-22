@@ -34,6 +34,7 @@ public class ProUtil {
     public static final String CREDITOR_GROUP = "creditor.group";
     public static final String CREDITOR_ACC = "creditor.account";
     public static final String P_SHOW_EXPENSE = "purchase.show.expense";
+    public static final String P_SHOW_STOCKINFO = "purchase.show.stockinfo";
     public static final String P_SHOW_GRN = "purchase.show.grn";
     public static final String P_BATCH_DETAIL = "purchase.batch.detail";
     public static final String P_COM_AMT = "purchase.commission.amount";
@@ -51,6 +52,7 @@ public class ProUtil {
     public static final String DEFAULT_SALEMAN = "default.saleman";
     public static final String DIVIDER = "divider";
     public static final String SALE_EXPENSE_SHOW = "sale.expense.show";
+    public static final String SALE_STOCKINFO_SHOW = "sale.stockI.info.show";
     public static final String BATCH_SALE = "batch.sale";
     public static final String BATCH_GRN = "batch.grn";
     public static final String P_GRN_REPORT = "purchase.grn.report";
