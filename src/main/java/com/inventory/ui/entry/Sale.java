@@ -45,6 +45,7 @@ import com.inventory.ui.common.SaleExpenseTableModel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.SaleTableModel;
 import com.inventory.ui.common.StockBalanceTableModel;
+import com.inventory.ui.common.StockInfoPanel;
 import com.inventory.ui.entry.dialog.BatchSearchDialog;
 import com.inventory.ui.entry.dialog.GRNDetailDialog;
 import com.inventory.ui.entry.dialog.OrderDetailDialog;
@@ -59,6 +60,7 @@ import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
 import com.user.model.ProjectKey;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
@@ -100,7 +102,7 @@ import reactor.core.publisher.Mono;
 @Component
 @Slf4j
 public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyListener, KeyPropagate, PanelControl {
-
+    
     private List<SaleHisDetail> listDetail = new ArrayList();
     private final SaleTableModel saleTableModel = new SaleTableModel();
     private SaleHistoryDialog dialog;
@@ -135,23 +137,24 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private GRNDetailDialog grnDialog;
     private OrderDetailDialog orderDetailDialog;
     private COAComboBoxModel coaComboModel = new COAComboBoxModel();
-
+    private final StockInfoPanel stockInfoPanel = new StockInfoPanel();
+    
     public TraderAutoCompleter getTraderAutoCompleter() {
         return traderAutoCompleter;
     }
-
+    
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;
     }
-
+    
     public JProgressBar getProgress() {
         return progress;
     }
-
+    
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
-
+    
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -169,7 +172,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         initDateListner();
         actionMapping();
     }
-
+    
     private void actionMapping() {
         String solve = "delete";
         KeyStroke delete = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
@@ -177,9 +180,9 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         tblSale.getActionMap().put(solve, new DeleteSale());
         tblExpense.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(delete, solve);
         tblExpense.getActionMap().put(solve, new DeleteExpense());
-
+        
     }
-
+    
     private void setSaleVoucherDetail(OrderHis oh, boolean local) {
         saleTableModel.clear();
         if (oh != null) {
@@ -229,25 +232,25 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             txtVouTotal.setValue(Util1.getDouble(oh.getVouTotal()));
             txtOrderNo.setText(oh.getKey().getVouNo());
         }
-
+        
     }
-
+    
     private class DeleteSale extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTranSale();
         }
     }
-
+    
     private class DeleteExpense extends AbstractAction {
-
+        
         @Override
         public void actionPerformed(ActionEvent e) {
             deleteTranExpense();
         }
     }
-
+    
     private void initDateListner() {
         txtSaleDate.getDateEditor().getUiComponent().setName("txtSaleDate");
         txtSaleDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -273,24 +276,45 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
         }
     };
-
+    
     private void initButtonGroup() {
         ButtonGroup g = new ButtonGroup();
         g.add(chkVou);
         g.add(chkA4);
         g.add(chkA5);
     }
-
+    
     public void initMain() {
         initCombo();
         initStockBalanceTable();
         initSaleTable();
         initPanelExpesne();
+        initStockInfo();
         assignDefaultValue();
         txtSaleDate.setDate(Util1.getTodayDate());
         txtCus.requestFocus();
     }
-
+    
+    private void initStockInfo() {
+        if (Util1.getBoolean(ProUtil.getProperty(ProUtil.SALE_STOCKINFO_SHOW))) {
+            stockInfoPanel.setUserRepo(userRepo);
+            stockInfoPanel.setInventoryRepo(inventoryRepo);
+            panelStockInfo.setLayout(new BorderLayout());
+            panelStockInfo.add(stockInfoPanel, BorderLayout.NORTH);
+        } else {
+            panelStockInfo.setVisible(false);
+        }
+        
+    }
+    
+    private void setStockInfo() {
+        int row = tblSale.convertRowIndexToModel(tblSale.getSelectedRow());
+        if (row >= 0) {
+            SaleHisDetail shd = saleTableModel.getSale(row);
+            stockInfoPanel.setStock(shd.getStockCode());
+        }
+    }
+    
     private void initSaleTable() {
         tblSale.setModel(saleTableModel);
         saleTableModel.setLblRecord(lblRec);
@@ -327,7 +351,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             } else {
                 tblSale.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//price
             }
-
+            
         } else {
             tblSale.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());//price
         }
@@ -337,7 +361,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblSale.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
-
+    
     private void initCombo() {
         traderAutoCompleter = new TraderAutoCompleter(txtCus, inventoryRepo, null, false, "CUS");
         traderAutoCompleter.setObserver(this);
@@ -369,7 +393,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             cboAccount.setModel(coaComboModel);
         });
     }
-
+    
     private void initKeyListener() {
         txtSaleDate.getDateEditor().getUiComponent().setName("txtSaleDate");
         txtSaleDate.getDateEditor().getUiComponent().addKeyListener(this);
@@ -389,7 +413,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtVouPaid.addKeyListener(this);
         txtProjectNo.addKeyListener(this);
     }
-
+    
     private void initTextBoxValue() {
         txtVouTotal.setValue(0);
         txtVouDiscount.setValue(0);
@@ -401,7 +425,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtGrandTotal.setValue(0);
         txtExpense.setValue(0);
     }
-
+    
     private void initTextBoxFormat() {
         txtVouBalance.setFormatterFactory(Util1.getDecimalFormat());
         txtVouDiscount.setFormatterFactory(Util1.getDecimalFormat());
@@ -412,7 +436,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtGrandTotal.setFormatterFactory(Util1.getDecimalFormat());
         txtTax.setFormatterFactory(Util1.getDecimalFormat());
     }
-
+    
     private void initStockBalanceTable() {
         if (ProUtil.isCalStock()) {
             stockBalanceTableModel.setInventoryRepo(inventoryRepo);
@@ -428,7 +452,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         }
         sbPanel.setVisible(ProUtil.isCalStock());
     }
-
+    
     private void assignDefaultValue() {
         userRepo.getDefaultCurrency().doOnSuccess((t) -> {
             currAutoCompleter.setCurrency(t);
@@ -459,7 +483,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             txtSaleDate.setDate(Util1.getTodayDate());
         }
     }
-
+    
     private void clear() {
         disableForm(true);
         saleTableModel.removeListDetail();
@@ -481,7 +505,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtCus.requestFocus();
         projectAutoCompleter.setProject(null);
     }
-
+    
     private void orderDialog() {
         String status = btnOrder.getText();
         if (status.equals("Order")) {
@@ -507,7 +531,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             orderDetailDialog.searchOrderDetail(txtOrderNo.getText(), saleHis.getDeptId());
         }
     }
-
+    
     public void saveSale(boolean print) {
         if (isValidEntry() && saleTableModel.isValidEntry()) {
             saleHis.setListSH(saleTableModel.getListDetail());
@@ -541,7 +565,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             });
         }
     }
-
+    
     private boolean isValidEntry() {
         boolean status = true;
         if (lblStatus.getText().equals("DELETED")) {
@@ -620,7 +644,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         }
         return status;
     }
-
+    
     private void deleteSale() {
         String status = lblStatus.getText();
         switch (status) {
@@ -649,7 +673,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 JOptionPane.showMessageDialog(this, "Voucher can't delete.");
         }
     }
-
+    
     private void deleteTranSale() {
         int row = tblSale.convertRowIndexToModel(tblSale.getSelectedRow());
         if (row >= 0) {
@@ -664,7 +688,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
         }
     }
-
+    
     private void deleteTranExpense() {
         int row = tblExpense.convertRowIndexToModel(tblExpense.getSelectedRow());
         if (row >= 0) {
@@ -676,14 +700,14 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
         }
     }
-
+    
     private void calExpense() {
         double ttlExp = expenseTableModel.getListDetail().stream()
                 .mapToDouble(e -> Util1.getDouble(e.getAmount()))
                 .sum();
         txtExpense.setValue(ttlExp);
     }
-
+    
     private void calculateTotalAmount(boolean partial) {
         calExpense();
         double totalVouBalance;
@@ -735,7 +759,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         totalVouBalance = grandTotal - paid;
         txtVouBalance.setValue(Util1.getDouble(totalVouBalance));
     }
-
+    
     public void historySale() {
         if (dialog == null) {
             dialog = new SaleHistoryDialog(Global.parentForm);
@@ -750,7 +774,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         }
         dialog.search();
     }
-
+    
     public void setSaleVoucher(SaleHis sh) {
         if (sh != null) {
             progress.setIndeterminate(true);
@@ -827,7 +851,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             searchExpense(vouNo);
         }
     }
-
+    
     private void searchExpense(String vouNo) {
         if (panelExpense.isVisible()) {
             expProgress.setIndeterminate(true);
@@ -841,7 +865,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             });
         }
     }
-
+    
     private void disableForm(boolean status) {
         tblSale.setEnabled(status);
         panelSale.setEnabled(status);
@@ -863,9 +887,9 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
-
+        
     }
-
+    
     private void setAllLocation() {
         List<SaleHisDetail> listSaleDetail = saleTableModel.getListDetail();
         Location loc = locationAutoCompleter.getLocation();
@@ -877,7 +901,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         }
         saleTableModel.setListDetail(listSaleDetail);
     }
-
+    
     private void printVoucher(SaleHis sh) {
         String reportName = getReportName();
         String vouNo = sh.getKey().getVouNo();
@@ -912,7 +936,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         log.error("printVoucher : " + e.getMessage());
                     }
                 }).subscribe();
-
+                
             } else {
                 inventoryRepo.getSaleReport(vouNo).subscribe((t) -> {
                     viewReport(t, sh, reportName);
@@ -922,7 +946,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
         }
     }
-
+    
     private Map<String, Object> getDefaultParam(SaleHis sh) {
         String logoPath = String.format("images%s%s", File.separator, ProUtil.getProperty("logo.name"));
         Map<String, Object> param = new HashMap<>();
@@ -943,7 +967,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         param.put("p_vou_date", Util1.toDateStr(sh.getVouDate(), Global.dateFormat));
         return param;
     }
-
+    
     private void viewReport(byte[] t, SaleHis sh, String reportName) {
         if (reportName != null) {
             try {
@@ -964,7 +988,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             chkVou.requestFocus();
         }
     }
-
+    
     private String getReportName() {
         String name = null;
         if (chkVou.isSelected()) {
@@ -978,7 +1002,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         }
         return name;
     }
-
+    
     private void focusTable() {
         int rc = tblSale.getRowCount();
         if (rc >= 1) {
@@ -989,15 +1013,15 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             txtCus.requestFocus();
         }
     }
-
+    
     public void addTrader(Trader t) {
         traderAutoCompleter.addTrader(t);
     }
-
+    
     public void setTrader(Trader t, int row) {
         traderAutoCompleter.setTrader(t, row);
     }
-
+    
     private void calDueDate(Integer day) {
         Date vouDate = txtSaleDate.getDate();
         Calendar calendar = Calendar.getInstance();
@@ -1006,7 +1030,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         Date dueDate = calendar.getTime();
         txtDueDate.setDate(dueDate);
     }
-
+    
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -1015,7 +1039,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         observer.selected("delete", true);
         observer.selected("refresh", false);
     }
-
+    
     private void expenseDialog() {
         ExpenseSetupDialog d = new ExpenseSetupDialog(Global.parentForm, true);
         d.setInventoryRepo(inventoryRepo);
@@ -1024,7 +1048,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         d.setLocationRelativeTo(null);
         d.setVisible(true);
     }
-
+    
     private void initPanelExpesne() {
         if (Util1.getBoolean(ProUtil.getProperty(ProUtil.SALE_EXPENSE_SHOW))) {
             expenseTableModel.addNewRow();
@@ -1052,7 +1076,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             panelExpense.setVisible(false);
         }
     }
-
+    
     private void batchDialog() {
         String text = btnBatch.getText();
         if (text.equals("Batch")) {
@@ -1156,6 +1180,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         jLabel1 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         expProgress = new javax.swing.JProgressBar();
+        panelStockInfo = new javax.swing.JPanel();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -1514,34 +1539,31 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(btnOrder, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(btnBatch, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGap(0, 12, Short.MAX_VALUE))))
-                    .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addComponent(btnOrder)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnBatch)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(lblRec)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnOrder)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnBatch))
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 46, Short.MAX_VALUE)
-                .addComponent(lblStatus)
-                .addContainerGap())
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblRec)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnOrder)
+                    .addComponent(btnBatch))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 11, Short.MAX_VALUE)
+                .addComponent(lblStatus))
         );
 
         jLabel13.setFont(Global.lableFont);
@@ -1798,7 +1820,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 .addContainerGap()
                 .addGroup(sbPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(sbProgress, javax.swing.GroupLayout.DEFAULT_SIZE, 299, Short.MAX_VALUE)
+                    .addComponent(sbProgress, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE)
                     .addGroup(sbPanelLayout.createSequentialGroup()
                         .addComponent(chkSummary)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -1902,6 +1924,17 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 .addContainerGap())
         );
 
+        javax.swing.GroupLayout panelStockInfoLayout = new javax.swing.GroupLayout(panelStockInfo);
+        panelStockInfo.setLayout(panelStockInfoLayout);
+        panelStockInfoLayout.setHorizontalGroup(
+            panelStockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 320, Short.MAX_VALUE)
+        );
+        panelStockInfoLayout.setVerticalGroup(
+            panelStockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -1910,8 +1943,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(panelStockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(panelExpense, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(sbPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1927,13 +1962,14 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 .addContainerGap()
                 .addComponent(panelSale, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 315, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 303, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(panelExpense, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(sbPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(panelExpense, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(panelStockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -1966,7 +2002,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }//GEN-LAST:event_txtLocationFocusGained
 
     private void tblSaleMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblSaleMouseClicked
-        // TODO add your handling code here:
+        setStockInfo();        // TODO add your handling code here:
     }//GEN-LAST:event_tblSaleMouseClicked
 
     private void tblSaleKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblSaleKeyReleased
@@ -2075,7 +2111,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }//GEN-LAST:event_txtCusMouseExited
 
     private void txtSaleDatePropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_txtSaleDatePropertyChange
-
+        
         Trader t = traderAutoCompleter.getTrader();
         if (t != null) {
             calDueDate(Util1.getInteger(t.getCreditDays()));
@@ -2099,12 +2135,12 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private void txtOrderNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtOrderNoActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtOrderNoActionPerformed
-
+    
     @Override
     public void keyEvent(KeyEvent e) {
-
+        
     }
-
+    
     @Override
     public void selected(Object source, Object selectObj) {
         switch (source.toString()) {
@@ -2118,6 +2154,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 calculateTotalAmount(false);
             case "Location" ->
                 setAllLocation();
+            case "STOCK-INFO" ->
+                setStockInfo();
             case "SALE-HISTORY" -> {
                 if (selectObj instanceof VSale s) {
                     boolean local = s.isLocal();
@@ -2155,24 +2193,24 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                         batchAutoCompeter.setBatch(t);
                         btnBatch.setText("Batch:View");
                     });
-
+                    
                 }
             }
         }
     }
-
+    
     @Override
     public void keyTyped(KeyEvent e
     ) {
-
+        
     }
-
+    
     @Override
     public void keyPressed(KeyEvent e
     ) {
-
+        
     }
-
+    
     @Override
     public void keyReleased(KeyEvent e
     ) {
@@ -2192,7 +2230,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             case "txtCus" -> {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     txtLocation.requestFocus();
-
+                    
                 }
             }
             case "txtLocation" -> {
@@ -2276,7 +2314,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             }
         }
     }
-
+    
     public String addCreditDay(String date, Integer dCount) {
         return LocalDateTime
                 .parse(date)
@@ -2330,6 +2368,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelExpense;
     private javax.swing.JPanel panelSale;
+    private javax.swing.JPanel panelStockInfo;
     private javax.swing.JPanel sbPanel;
     private javax.swing.JProgressBar sbProgress;
     private javax.swing.JTable tblExpense;
@@ -2362,35 +2401,35 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     public void delete() {
         deleteSale();
     }
-
+    
     @Override
     public void print() {
         saveSale(true);
     }
-
+    
     @Override
     public void save() {
         saveSale(false);
     }
-
+    
     @Override
     public void newForm() {
         clear();
     }
-
+    
     @Override
     public void history() {
         historySale();
     }
-
+    
     @Override
     public void refresh() {
     }
-
+    
     @Override
     public void filter() {
     }
-
+    
     @Override
     public String panelName() {
         return this.getName();

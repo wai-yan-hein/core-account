@@ -40,6 +40,7 @@ import com.inventory.ui.common.GRNTableModel;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.PurExpenseTableModel;
 import com.inventory.ui.common.PurchaseTableModel;
+import com.inventory.ui.common.StockInfoPanel;
 import com.inventory.ui.entry.dialog.BatchSearchDialog;
 import com.inventory.ui.entry.dialog.GRNDetailDialog;
 import com.inventory.ui.entry.dialog.PurchaseAvgPriceDialog;
@@ -53,6 +54,7 @@ import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.model.Project;
 import com.user.model.ProjectKey;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -124,6 +126,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     private final GRNTableModel grnTableModel = new GRNTableModel();
     private BatchSearchDialog batchDialog;
     private GRNDetailDialog grnDialog;
+    private final StockInfoPanel stockInfoPanel = new StockInfoPanel();
 
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;
@@ -214,8 +217,29 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         initCombo();
         initPurTable();
         initPanelExpesne();
+        initStockInfo();
         assignDefaultValue();
         txtCus.requestFocus();
+    }
+
+    private void initStockInfo() {
+        if (Util1.getBoolean(ProUtil.getProperty(ProUtil.P_SHOW_STOCKINFO))) {
+            stockInfoPanel.setUserRepo(userRepo);
+            stockInfoPanel.setInventoryRepo(inventoryRepo);
+            panelStockInfo.setLayout(new BorderLayout());
+            panelStockInfo.add(stockInfoPanel, BorderLayout.NORTH);
+        } else {
+            panelStockInfo.setVisible(false);
+        }
+
+    }
+
+    private void setStockInfo() {
+        int row = tblPur.convertRowIndexToModel(tblPur.getSelectedRow());
+        if (row >= 0) {
+            PurHisDetail phd = purTableModel.getObject(row);
+            stockInfoPanel.setStock(phd.getStockCode());
+        }
     }
 
     private void initDateListener() {
@@ -1082,6 +1106,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         jButton2 = new javax.swing.JButton();
         expProgress = new javax.swing.JProgressBar();
         jLabel11 = new javax.swing.JLabel();
+        panelStockInfo = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         jLabel13 = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
@@ -1249,7 +1274,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                             .addComponent(jLabel4))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtPurDate, javax.swing.GroupLayout.DEFAULT_SIZE, 190, Short.MAX_VALUE)
+                            .addComponent(txtPurDate, javax.swing.GroupLayout.DEFAULT_SIZE, 259, Short.MAX_VALUE)
                             .addComponent(txtVouNo)))
                     .addGroup(panelPurLayout.createSequentialGroup()
                         .addComponent(jLabel2)
@@ -1263,7 +1288,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                     .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 168, Short.MAX_VALUE)
+                    .addComponent(txtRemark, javax.swing.GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE)
                     .addComponent(txtLocation)
                     .addComponent(txtCurrency))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1273,13 +1298,13 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                     .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelPurLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE)
+                    .addComponent(txtDueDate, javax.swing.GroupLayout.DEFAULT_SIZE, 257, Short.MAX_VALUE)
                     .addComponent(txtReference)
                     .addComponent(txtBatchNo))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtProjectNo, javax.swing.GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
+                .addComponent(txtProjectNo, javax.swing.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -1411,6 +1436,17 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 .addContainerGap())
         );
 
+        javax.swing.GroupLayout panelStockInfoLayout = new javax.swing.GroupLayout(panelStockInfo);
+        panelStockInfo.setLayout(panelStockInfoLayout);
+        panelStockInfoLayout.setHorizontalGroup(
+            panelStockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        panelStockInfoLayout.setVerticalGroup(
+            panelStockInfoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -1422,7 +1458,9 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                         .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(btnBatch))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(panelStockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(panelExpense, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -1437,7 +1475,8 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                         .addComponent(btnBatch)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(panelExpense, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(panelExpense, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(panelStockInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -1771,7 +1810,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     }//GEN-LAST:event_txtLocationFocusGained
 
     private void tblPurMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblPurMouseClicked
-        // TODO add your handling code here:
+        setStockInfo();        // TODO add your handling code here:
     }//GEN-LAST:event_tblPurMouseClicked
 
     private void tblPurKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblPurKeyReleased
@@ -1893,6 +1932,9 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                 calculateTotalAmount(false);
             case "Location" ->
                 setAllLocation();
+            case "STOCK-INFO" -> {
+                setStockInfo();
+            }
             case "ORDER" -> {
             }
             case "Select" -> {
@@ -2108,6 +2150,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     private javax.swing.JLabel lblStatus;
     private javax.swing.JPanel panelExpense;
     private javax.swing.JPanel panelPur;
+    private javax.swing.JPanel panelStockInfo;
     private javax.swing.JTable tblExpense;
     private javax.swing.JTable tblPur;
     private javax.swing.JTextField txtBatchNo;

@@ -441,6 +441,10 @@ public class SaleExportTableModel extends AbstractTableModel {
         }
     }
 
+    public SaleHisDetail getSale(int row) {
+        return listDetail.get(row);
+    }
+
     public void clear() {
         if (listDetail != null) {
             listDetail.clear();

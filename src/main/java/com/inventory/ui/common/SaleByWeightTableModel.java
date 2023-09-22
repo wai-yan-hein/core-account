@@ -225,6 +225,7 @@ public class SaleByWeightTableModel extends AbstractTableModel {
                             sd.setPrice(Util1.getFloat(sd.getPrice()) == 0 ? s.getSalePriceN() : sd.getPrice());
                             parent.setColumnSelectionInterval(4, 4);
                             addNewRow();
+                            observer.selected("STOCK-INFO", "STOCK-INFO");
                         }
                     }
                     case 3 -> {
@@ -449,6 +450,10 @@ public class SaleByWeightTableModel extends AbstractTableModel {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
         }
+    }
+
+    public SaleHisDetail getSale(int row) {
+        return listDetail.get(row);
     }
 
     public void clear() {

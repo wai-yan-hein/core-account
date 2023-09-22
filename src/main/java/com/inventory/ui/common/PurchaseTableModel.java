@@ -211,6 +211,7 @@ public class PurchaseTableModel extends AbstractTableModel {
                             record.setQty(1.0);
                             record.setUnitCode(s.getPurUnitCode());
                             addNewRow();
+                            selectionObserver.selected("STOCK-INFO", "STOCK-INFO");
                         }
                     }
                     parent.setColumnSelectionInterval(4, 4);
