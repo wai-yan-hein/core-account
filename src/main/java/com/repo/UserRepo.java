@@ -11,6 +11,7 @@ import com.common.Global;
 import com.common.ReturnObject;
 import com.user.model.RoleProperty;
 import com.inventory.model.AppRole;
+import com.inventory.model.Country;
 import com.user.model.AppUser;
 import com.user.model.DepartmentUser;
 import com.user.model.MachineInfo;
@@ -521,6 +522,28 @@ public class UserRepo {
                 .retrieve()
                 .bodyToFlux(Menu.class)
                 .collectList();
+    }
+
+    public Mono<Country> findCountry(String code) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/findCountry")
+                .queryParam("id", code)
+                .build())
+                .retrieve()
+                .bodyToMono(Country.class);
+    }
+
+    public Mono<List<Country>> getCountry() {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getCountry")
+                .build())
+                .retrieve()
+                .bodyToFlux(Country.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
     }
 
     public Mono<Boolean> delete(Menu menu) {

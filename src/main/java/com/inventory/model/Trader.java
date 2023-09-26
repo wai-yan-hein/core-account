@@ -32,6 +32,8 @@ public class Trader {
     private String address;
     @Column(name = "reg_code")
     private String regCode;
+    @Column(name = "country_code")
+    private String countryCode;
     @Column(name = "phone")
     private String phone;
     @Column(name = "email")
