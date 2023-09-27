@@ -11,7 +11,6 @@ import com.acc.model.ChartOfAccount;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
-import com.acc.common.COATreeTransferHandler;
 import com.common.Util1;
 import com.inventory.model.MessageType;
 import com.toedter.calendar.JTextFieldDateEditor;

@@ -71,7 +71,7 @@ public class Util1 {
      */
     public static final String DECIMAL_FORMAT = "###,###.###;(###,###.###)";
     public static final String DECIMAL_FORMAT1 = "###,##0;(###,##0)";
-    public static final String DECIMAL_FORMAT2 = "###,###.#;(###,###.#)";
+    public static final String DECIMAL_FORMAT2 = "###,###.##;(###,###.##)";
     public static final String DECIMAL_FORMAT3 = "###,###.000;(###,###.000)";
 
     private static final DecimalFormat df2 = new DecimalFormat("0");
@@ -571,6 +571,10 @@ public class Util1 {
 
     public static DefaultFormatterFactory getDecimalFormat1() {
         return new DefaultFormatterFactory(new NumberFormatter(new DecimalFormat(DECIMAL_FORMAT1)));
+    }
+
+    public static DefaultFormatterFactory getDecimalFormat2() {
+        return new DefaultFormatterFactory(new NumberFormatter(new DecimalFormat(DECIMAL_FORMAT2)));
     }
 
     public static int getCurrentMonth() {

@@ -44,7 +44,7 @@ public class UserTableModel extends AbstractTableModel {
 
             return switch (column) {
                 case 0 -> user.getUserShortName();
-                case 1 -> user.getUserName();
+                case 1 -> user.getUserLongName();
                 default -> null;
             }; //user short
             //Name

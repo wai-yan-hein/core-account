@@ -51,6 +51,7 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
     }
 
     public void setListVou(List<VouStatus> listVou) {
+        vouTableModel.setListVou(listVou);
         this.listVou = listVou;
     }
 
@@ -75,7 +76,6 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
     public void initMain() {
         swrf = new StartWithRowFilter(txtFilter);
         initTable();
-        searchCategory();
         txtUserCode.requestFocus();
     }
 
@@ -87,9 +87,6 @@ public class VouStatusSetupDialog extends javax.swing.JDialog implements KeyList
         tblVou.addKeyListener(this);
     }
 
-    private void searchCategory() {
-        vouTableModel.setListVou(listVou);
-    }
 
     private void initTable() {
         tblVou.setModel(vouTableModel);

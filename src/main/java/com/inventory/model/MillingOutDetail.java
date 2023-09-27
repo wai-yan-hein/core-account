@@ -20,7 +20,7 @@ import lombok.Data;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
-@Table(name = "milling_out")
+@Table(name = "milling_output")
 public class MillingOutDetail {
 
     @EmbeddedId
@@ -30,23 +30,25 @@ public class MillingOutDetail {
     @Column(name = "dept_id")
     private Integer deptId;
     @Column(name = "qty", nullable = false)
-    private Float qty;
+    private double qty;
     @Column(name = "unit")
     private String unitCode;
     @Column(name = "price", nullable = false)
-    private Float price;
+    private double price;
     @Column(name = "amt", nullable = false)
-    private Float amount;
+    private double amount;
     @Column(name = "loc_code")
     private String locCode;
     @Column(name = "weight")
-    private Float weight;
+    private double weight;
     @Column(name = "weight_unit")
     private String weightUnit;
     @Column(name = "percent")
-    private Float percent;
+    private double percent;
+    @Column(name = "percent_qty")
+    private double percentQty;
     @Column(name = "tot_weight")
-    private Float totalWeight;
+    private double totalWeight;
     @Transient
     private String userCode;
     @Transient
@@ -65,4 +67,6 @@ public class MillingOutDetail {
     private String traderName;
     @Transient
     private Stock stock;
+    @Transient
+    private String qtyStr;
 }

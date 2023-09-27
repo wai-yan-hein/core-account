@@ -70,7 +70,7 @@ public class UserDaoImpl extends AbstractDao<String, AppUser> implements UserDao
             }
         }
 
-        List<RoleProperty> roleProperty = rpService.getRoleProperty(roleCode);
+        List<RoleProperty> roleProperty = rpService.getRoleProperty(roleCode,compCode);
         if (!roleProperty.isEmpty()) {
             for (RoleProperty rp : roleProperty) {
                 String value = rp.getPropValue();

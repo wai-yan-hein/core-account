@@ -47,6 +47,7 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
     }
 
     public void setListRegion(List<Region> listRegion) {
+        regionTableModel.setListRegion(listRegion);
         this.listRegion = listRegion;
     }
 
@@ -72,7 +73,6 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
     public void initMain() {
         swrf = new StartWithRowFilter(txtFilter);
         initTable();
-        searchCategory();
         txtUserCode.requestFocus();
     }
 
@@ -82,10 +82,6 @@ public class RegionSetup extends javax.swing.JDialog implements KeyListener {
         btnClear.addKeyListener(this);
         btnSave.addKeyListener(this);
         tblLocation.addKeyListener(this);
-    }
-
-    private void searchCategory() {
-        regionTableModel.setListRegion(listRegion);
     }
 
     private void initTable() {

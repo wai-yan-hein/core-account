@@ -428,8 +428,9 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
         @Override
         public boolean include(RowFilter.Entry<? extends Object, ? extends Object> entry) {
             String tmp1 = entry.getStringValue(0).toUpperCase().replace(" ", "");
+            String tmp2 = entry.getStringValue(1).toUpperCase().replace(" ", "");
             String text = txtFilter.getText().toUpperCase().replace(" ", "");
-            return tmp1.startsWith(text);
+            return tmp1.startsWith(text) || tmp2.startsWith(text);
         }
     };
 
@@ -1173,11 +1174,7 @@ public class Reports extends javax.swing.JPanel implements PanelControl, Selecti
     private void txtFilterKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFilterKeyReleased
         // TODO add your handling code here:
         String f = txtFilter.getText();
-        if (f.length() == 0) {
-            sorter.setRowFilter(null);
-        } else {
-            sorter.setRowFilter(startsWithFilter);
-        }
+        sorter.setRowFilter(f.isBlank() ? null : startsWithFilter);;
     }//GEN-LAST:event_txtFilterKeyReleased
 
     private void txtBatchNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtBatchNoFocusGained

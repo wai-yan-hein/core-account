@@ -65,23 +65,29 @@ public class MillingHis {
     @Column(name = "vou_status_id")
     private String vouStatusId;
     @Column(name = "load_qty")
-    private Float loadQty;
+    private double loadQty;
     @Column(name = "load_weight")
-    private Float loadWeight;
+    private double loadWeight;
     @Column(name = "load_amount")
-    private Float loadAmount;
+    private double loadAmount;
     @Column(name = "load_expense")
-    private Float loadExpense;
+    private double loadExpense;
     @Column(name = "load_cost")
-    private Float loadCost;
+    private double loadCost;
     @Column(name = "output_qty")
-    private Float outputQty;
+    private double outputQty;
     @Column(name = "output_weight")
-    private Float outputWeight;
+    private double outputWeight;
     @Column(name = "output_amount")
-    private Float outputAmount;
+    private double outputAmount;
     @Column(name = "diff_weight")
-    private Float diffWeight;
+    private double diffWeight;
+    @Column(name = "diff_qty")
+    private double diffQty;
+    @Column(name = "percent_weight")
+    private double percentWeight;
+    @Column(name = "percent_qty")
+    private double percentQty;
     @Transient
     private String localVouNo;
     private transient String status = "STATUS";

@@ -255,23 +255,18 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
                     "Authentication error.", JOptionPane.ERROR_MESSAGE);
             loginAttempt++;
         } else {
-            Mono<AppUser> user = userRepo.login(userName, password);
-            user.hasElement().subscribe((status) -> {
-                if (status) {
-                    userRepo.login(userName, password).subscribe((t) -> {
-                        Global.loginUser = t;
-                        Global.roleCode = t.getRoleCode();
-                        taskExecutor.execute(() -> {
-                            mainFrame.setName(APP_NAME);
-                            mainFrame.setIconImage(appIcon);
-                            mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-                            mainFrame.initMain();
-                            mainFrame.setVisible(true);
-                        });
-                        setVisible(false);
-                    }, (e) -> {
-                        JOptionPane.showMessageDialog(this, e.getMessage());
+            userRepo.login(userName, password).doOnSuccess((t) -> {
+                if (t != null) {
+                    Global.loginUser = t;
+                    Global.roleCode = t.getRoleCode();
+                    taskExecutor.execute(() -> {
+                        mainFrame.setName(APP_NAME);
+                        mainFrame.setIconImage(appIcon);
+                        mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                        mainFrame.initMain();
+                        mainFrame.setVisible(true);
                     });
+                    setVisible(false);
                 } else {
                     JOptionPane.showMessageDialog(this, "Invalid user name or password.",
                             "Authentication error.", JOptionPane.ERROR_MESSAGE);
@@ -280,10 +275,8 @@ public class LoginDialog extends javax.swing.JDialog implements KeyListener, Sel
                 if (loginAttempt >= 3) {
                     this.dispose();
                 }
-            });
-
+            }).subscribe();
         }
-
     }
 
     public void clear() {

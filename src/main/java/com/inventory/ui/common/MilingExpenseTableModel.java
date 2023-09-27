@@ -11,7 +11,6 @@ import com.common.Util1;
 import com.inventory.model.Expense;
 import com.inventory.model.MillingExpense;
 import com.inventory.model.MillingExpenseKey;
-import com.repo.InventoryRepo;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -30,13 +29,8 @@ public class MilingExpenseTableModel extends AbstractTableModel {
     private final List<MillingExpenseKey> deleteList = new ArrayList();
     private final String[] columnNames = {"Code", "Name", "Qty", "Price", "Amount"};
     private JTable parent;
-    private SelectionObserver selectionObserver;
+    private SelectionObserver observer;
     private boolean change = false;
-    private InventoryRepo inventoryRepo;
-
-    public JTable getTable() {
-        return parent;
-    }
 
     public void setTable(JTable parent) {
         this.parent = parent;
@@ -53,21 +47,10 @@ public class MilingExpenseTableModel extends AbstractTableModel {
         this.change = change;
     }
 
-    public SelectionObserver getSelectionObserver() {
-        return selectionObserver;
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
     }
 
-    public void setObserver(SelectionObserver selectionObserver) {
-        this.selectionObserver = selectionObserver;
-    }
-
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
-    public void setInventoryRepo(InventoryRepo inventoryRepo) {
-        this.inventoryRepo = inventoryRepo;
-    }
 
     @Override
     public String getColumnName(int column) {
@@ -144,11 +127,11 @@ public class MilingExpenseTableModel extends AbstractTableModel {
                 case 1 ->
                     b.getExpenseName();
                 case 2 ->
-                    b.getQty();
+                    Util1.toNull(b.getQty());
                 case 3 ->
-                    b.getPrice();
+                    Util1.toNull(b.getPrice());
                 case 4 ->
-                    b.getAmount();
+                    Util1.toNull(b.getAmount());
                 default ->
                     null;
             }; //Code
@@ -173,36 +156,29 @@ public class MilingExpenseTableModel extends AbstractTableModel {
                             key.setExpenseCode(ex.getKey().getExpenseCode());
                             b.setKey(key);
                             b.setExpenseName(ex.getExpenseName());
-                            b.setQty(1.0f);
+                            b.setQty(1.0);
                             addNewRow();
-                            parent.setColumnSelectionInterval(2, 2);
+                            setSelection(row, 2);
                         }
                     }
-
                     case 2 -> {
                         if (Util1.isNumber(value)) {
-                            if (Util1.isPositive(Util1.getFloat(value))) {
-                                b.setQty(Util1.getFloat(value));
-                            } else {
-                                showMessageBox("Input value must be positive");
-                                parent.setColumnSelectionInterval(column, column);
-                            }
+                            b.setQty(Util1.getFloat(value));
+                            setSelection(row, column);
                         }
                     }
-
                     case 3 -> {
                         if (Util1.isNumber(value)) {
                             if (Util1.isPositive(Util1.getFloat(value))) {
                                 b.setPrice(Util1.getFloat(value));
-                                parent.setColumnSelectionInterval(0, 0);
-                                parent.setRowSelectionInterval(row + 1, row + 1);
+                                setSelection(row+1, column);
                             } else {
                                 showMessageBox("Input value must be positive");
-                                parent.setColumnSelectionInterval(column, column);
+                                setSelection(row, column);
                             }
                         } else {
                             showMessageBox("Input value must be positive");
-                            parent.setColumnSelectionInterval(column, column);
+                            setSelection(row, column);
                         }
                     }
                     case 4 ->
@@ -210,14 +186,18 @@ public class MilingExpenseTableModel extends AbstractTableModel {
                 }
             }
             change = true;
-//            assignLocation(b);
             calculateAmount(b);
             fireTableRowsUpdated(row, row);
-            selectionObserver.selected("EXPENSE", "EXPENSE");
+            observer.selected("EXPENSE", "EXPENSE");
             parent.requestFocusInWindow();
         } catch (Exception ex) {
             log.error("getValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
+    }
+
+    private void setSelection(int row, int column) {
+        parent.setRowSelectionInterval(row, row);
+        parent.setColumnSelectionInterval(column, column);
     }
 
     private void showMessageBox(String text) {

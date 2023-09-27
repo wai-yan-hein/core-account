@@ -68,7 +68,7 @@
                   <Component id="jPanel2" alignment="0" min="-2" max="-2" attributes="0"/>
                   <Component id="jPanel1" alignment="0" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace pref="33" max="32767" attributes="0"/>
+              <EmptySpace pref="79" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -102,7 +102,7 @@
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="txtCustomer" pref="136" max="32767" attributes="0"/>
+                              <Component id="txtCustomer" pref="134" max="32767" attributes="0"/>
                               <Component id="txtSupplier" max="32767" attributes="0"/>
                               <Component id="txtLocation" max="32767" attributes="0"/>
                               <Component id="txtDep" max="32767" attributes="0"/>
@@ -410,23 +410,22 @@
                       <Component id="chkDisableRI" max="32767" attributes="0"/>
                       <Component id="chkDisableRO" max="32767" attributes="0"/>
                       <Component id="chkDisableStockIO" max="32767" attributes="0"/>
-                      <Component id="chkDepFilter" alignment="1" max="32767" attributes="0"/>
                       <Component id="chkDepOption" alignment="1" max="32767" attributes="0"/>
-                      <Component id="chkMulti" alignment="1" max="32767" attributes="0"/>
-                      <Group type="102" attributes="0">
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="chkPrint" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                  <Component id="chkAutoUpdate" min="-2" max="-2" attributes="0"/>
-                              </Group>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="chkWeight" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="chkWeightPoint" min="-2" max="-2" attributes="0"/>
-                              </Group>
-                          </Group>
-                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="chkPrint" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Component id="chkAutoUpdate" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="chkWeight" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="chkWeightPoint" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <Component id="chkMulti" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="chkDepFilter" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="chkDepLock" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -461,7 +460,10 @@
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Component id="jSeparator2" min="-2" pref="4" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="chkDepFilter" min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="chkDepFilter" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="chkDepLock" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="chkDepOption" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
@@ -588,6 +590,11 @@
         <Component class="javax.swing.JCheckBox" name="chkWeightPoint">
           <Properties>
             <Property name="text" type="java.lang.String" value="Weight Point"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="chkDepLock">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Department Lock"/>
           </Properties>
         </Component>
       </SubComponents>
@@ -1127,13 +1134,11 @@
                                   </Group>
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="1" attributes="0">
-                                      <Group type="103" groupAlignment="0" attributes="0">
-                                          <Component id="txtInvGroup" max="32767" attributes="0"/>
-                                          <Component id="txtPlAcc" max="32767" attributes="0"/>
-                                          <Component id="txtREAcc" max="32767" attributes="0"/>
-                                          <Component id="txtCashGroup" max="32767" attributes="0"/>
-                                          <Component id="txtBankGroup" max="32767" attributes="0"/>
-                                      </Group>
+                                      <Component id="txtInvGroup" alignment="0" max="32767" attributes="0"/>
+                                      <Component id="txtPlAcc" alignment="0" max="32767" attributes="0"/>
+                                      <Component id="txtREAcc" alignment="0" max="32767" attributes="0"/>
+                                      <Component id="txtCashGroup" alignment="0" max="32767" attributes="0"/>
+                                      <Component id="txtBankGroup" alignment="0" max="32767" attributes="0"/>
                                       <Component id="txtConversionAcc" max="32767" attributes="0"/>
                                       <Component id="txtCash" alignment="1" max="32767" attributes="0"/>
                                   </Group>

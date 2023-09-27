@@ -17,5 +17,5 @@ public interface RolePropertyDao {
 
     String getMaxDate();
 
-    List<RoleProperty> getRoleProperty(String roleCode);
+    List<RoleProperty> getRoleProperty(String roleCode, String compCode);
 }

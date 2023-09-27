@@ -11,6 +11,7 @@ import com.common.Util1;
 import com.inventory.model.MessageType;
 import com.user.common.DepartmentTableModel;
 import com.repo.UserRepo;
+import com.user.model.DepartmentKey;
 import com.user.model.DepartmentUser;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -189,6 +190,11 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
             JOptionPane.showMessageDialog(this, "Invalid department name.");
             return false;
         } else {
+            if (lblStatus.getText().equals("NEW")) {
+                DepartmentKey key = new DepartmentKey();
+                key.setCompCode(Global.compCode);
+                department.setKey(key);
+            }
             department.setUserCode(code);
             department.setDeptName(name);
             department.setActive(chkActive.isSelected());
@@ -199,7 +205,8 @@ public class DepartmentSetupDialog extends javax.swing.JDialog implements KeyLis
         }
         return true;
     }
-    private void export(){
+
+    private void export() {
         Util1.writeJsonFile(departmentTableModel.getListDepartment(), "department.json");
     }
 

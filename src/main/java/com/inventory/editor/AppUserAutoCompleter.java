@@ -148,7 +148,7 @@ public final class AppUserAutoCompleter implements KeyListener {
         if (table.getSelectedRow() != -1) {
             appUser = userTableModel.getUser(table.convertRowIndexToModel(
                     table.getSelectedRow()));
-            textComp.setText(appUser.getUserName());
+            textComp.setText(appUser.getUserLongName());
         }
 
         popup.setVisible(false);
@@ -166,7 +166,7 @@ public final class AppUserAutoCompleter implements KeyListener {
             if (completer.table.getSelectedRow() != -1) {
                 appUser = userTableModel.getUser(completer.table.convertRowIndexToModel(
                         completer.table.getSelectedRow()));
-                completer.textComp.setText(appUser.getUserName());
+                completer.textComp.setText(appUser.getUserLongName());
             }
 
             completer.popup.setVisible(false);
@@ -275,7 +275,7 @@ public final class AppUserAutoCompleter implements KeyListener {
     public void setAppUser(AppUser appUser) {
         this.appUser = appUser;
         if (appUser != null) {
-            this.textComp.setText(appUser.getUserName());
+            this.textComp.setText(appUser.getUserLongName());
         }
     }
 

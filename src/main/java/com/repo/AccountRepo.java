@@ -257,6 +257,14 @@ public class AccountRepo {
                 .bodyToMono(Boolean.class);
     }
 
+    public Mono<Boolean> delete(DepartmentAKey key) {
+        return accountApi.post()
+                .uri("/account/deleteDepartment")
+                .body(Mono.just(key), COATemplateKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class);
+    }
+
     public Mono<Boolean> delete(DeleteObj obj) {
         return accountApi.post()
                 .uri("/account/deleteGl")

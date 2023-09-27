@@ -27,7 +27,7 @@ public class AppUser {
     @Column(name = "user_code")
     private String userCode;
     @Column(name = "user_name")
-    private String userName;
+    private String userLongName;
     @Column(name = "user_short_name")
     private String userShortName;
     @Column(name = "email")
@@ -47,9 +47,9 @@ public class AppUser {
     @Column(name = "loc_code")
     private String locCode;
 
-    public AppUser(String userCode, String userName) {
+    public AppUser(String userCode, String userLongName) {
         this.userCode = userCode;
-        this.userName = userName;
+        this.userLongName = userLongName;
     }
 
     public AppUser() {

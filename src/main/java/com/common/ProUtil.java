@@ -67,9 +67,14 @@ public class ProUtil {
     public static final String SALE_EDIT = "sale.voucher.edit";
     public static final String TRANSFER_EDIT = "transfer.voucher.edit";
     public static final String TRANSFER_DELETE = "transfer.voucher.delete";
+    public static final String DEPARTMENT_LOCK = "department.lock";
 
     public static String getFontPath() {
         return Global.hmRoleProperty.get("font.path");
+    }
+
+    public static boolean isDepartmentLock() {
+        return Util1.getBoolean(Global.hmRoleProperty.get(DEPARTMENT_LOCK));
     }
 
     public static boolean isSalePaid() {

@@ -69,24 +69,13 @@ public class GRNHistoryDialog extends javax.swing.JDialog implements KeyListener
     private StartWithRowFilter tblFilter;
     private LocationAutoCompleter locationAutoCompleter;
 
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
-
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
     }
 
-    public UserRepo getUserRepo() {
-        return userRepo;
-    }
 
     public void setUserRepo(UserRepo userRepo) {
         this.userRepo = userRepo;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {

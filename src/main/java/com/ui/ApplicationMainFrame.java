@@ -659,7 +659,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 departmentSetup.initMain();
                 return departmentSetup;
             }
-            case "COA Managment" -> {
+            case "COA Management" -> {
                 cOAManagment.setName(menuName);
                 cOAManagment.setObserver(this);
                 cOAManagment.setProgress(progress);
@@ -856,7 +856,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             departmentAssign();
             initMenu();
             lblCompName.setText(Global.companyName);
-            lblUserName.setText(Global.loginUser.getUserName());
+            lblUserName.setText(Global.loginUser.getUserLongName());
             userRepo.setupProperty().doOnSuccess((u) -> {
                 Global.hmRoleProperty = u;
                 scheduleProgramUpdate();

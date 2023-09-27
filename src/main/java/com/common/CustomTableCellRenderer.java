@@ -7,11 +7,12 @@ import java.text.DecimalFormat;
 
 public class CustomTableCellRenderer extends DefaultTableCellRenderer {
 
-    private final DecimalFormat formatter = new DecimalFormat(Util1.DECIMAL_FORMAT);
+    private final DecimalFormat formatter = new DecimalFormat(Util1.DECIMAL_FORMAT2);
     private int targetRow;
     private int targetColumn;
     private Color targetColor;
     private boolean hasFocus;
+    private boolean darkMode = Util1.DARK_MODE;
 
     public CustomTableCellRenderer(int targetRow, int targetColumn, Color targetColor, boolean hasFocus) {
         this.targetRow = targetRow;
@@ -28,13 +29,18 @@ public class CustomTableCellRenderer extends DefaultTableCellRenderer {
         if (isSelected) {
             component.setBackground(Global.selectionColor);
         } else if (row == targetRow && column == targetColumn) {
-            component.setForeground(Color.BLACK);
+            component.setForeground(Color.black);
             component.setBackground(targetColor);
         } else {
             component.setBackground(table.getBackground());
-            component.setForeground(Color.BLACK);
+            component.setForeground(darkMode ? Color.white : Color.black);
         }
         if (value instanceof Float d) {
+            String s = formatter.format(d);
+            component = getTableCellRendererComponent(table, s,
+                    isSelected, hasFocus, row, column);
+            ((JLabel) component).setHorizontalAlignment(SwingConstants.RIGHT);
+        } else if (value instanceof Double d) {
             String s = formatter.format(d);
             component = getTableCellRendererComponent(table, s,
                     isSelected, hasFocus, row, column);

@@ -26,12 +26,18 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 @Conditional(H2DBCondition.class)
 @PropertySource("classpath:application.properties") // Use the same properties file as your main configuration
 public class H2DBConfig {
+
     @Lazy
     @Bean
     public DataSource dataSource() {
-        return new EmbeddedDatabaseBuilder()
-                .setType(EmbeddedDatabaseType.H2)
-                .build();
+        try {
+            return new EmbeddedDatabaseBuilder()
+                    .setType(EmbeddedDatabaseType.H2)
+                    .build();
+        } catch (Exception e) {
+            log.error("Failed to create the H2 DataSource: " + e.getMessage());
+        }
+        return null;
     }
 
     @Bean

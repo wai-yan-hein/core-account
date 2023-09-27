@@ -9,6 +9,7 @@ import com.CloudIntegration;
 import com.user.editor.DepartmentAutoCompleter;
 import com.common.FilterObject;
 import com.common.Global;
+import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
@@ -30,6 +31,7 @@ import java.awt.HeadlessException;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.List;
+import java.util.Objects;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
@@ -218,6 +220,9 @@ public class MillingHistoryDialog extends javax.swing.JDialog implements KeyList
             int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
             if (row >= 0) {
                 MillingHis v = tableModel.getSelectVou(row);
+                if (ProUtil.isDepartmentLock()) {
+                    v.setVouLock(!Objects.equals(Global.deptId, v.getDeptId()));
+                }
                 v.setLocal(chkLocal.isSelected());
                 observer.selected("MILLING-HISTORY", v);
                 setVisible(false);

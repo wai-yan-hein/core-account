@@ -7,6 +7,7 @@ package com;
 import com.common.Global;
 import java.awt.EventQueue;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -32,8 +33,13 @@ public class ServerThread extends Thread {
         try {
             server = new ServerSocket(port);
             while (!isInterrupted()) {
-                log.info("inter : " + isInterrupted());
-                try (Socket client = server.accept(); OutputStream out = client.getOutputStream()) {
+                try (Socket client = server.accept(); OutputStream out = client.getOutputStream(); InputStream in = client.getInputStream();) {
+                    byte[] buffer = new byte[1024];  // Adjust the buffer size as needed
+                    int bytesRead = in.read(buffer);
+                    if (bytesRead != -1) {
+                        String messageFromClient = new String(buffer, 0, bytesRead);
+                        log.info(messageFromClient);
+                    }
                     out.write("ok\n".getBytes());
                     out.flush();
                 }

@@ -26,9 +26,9 @@ public class MillingExpense {
     @Column(name = "expense_name")
     private String expenseName;
     @Column(name = "qty")
-    private Float qty;
+    private double qty;
     @Column(name = "price")
-    private Float price;
+    private double price;
     @Column(name = "amount")
-    private Float amount;
+    private double amount;
 }

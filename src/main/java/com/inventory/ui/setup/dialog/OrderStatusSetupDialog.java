@@ -50,12 +50,11 @@ public class OrderStatusSetupDialog extends javax.swing.JDialog implements KeyLi
     }
 
     public void setListVou(List<OrderStatus> listVou) {
+        orderStatusTableModel.setListVou(listVou);
         this.listVou = listVou;
+        
     }
 
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;

@@ -55,16 +55,8 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
     private SelectionObserver observer;
     private JProgressBar progress;
 
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -83,6 +75,8 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
         switch (menuName) {
             case "New" ->
                 newDepartment();
+            case "Delete" ->
+                delete();
         }
 
     };
@@ -177,6 +171,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
         txtName.setText(dep.getDeptName());
         chkActive.setSelected(Util1.getBoolean(dep.isActive()));
         labelStatus.setText("EDIT");
+        enableForm(true);
     }
 
     public void clear() {
@@ -187,7 +182,12 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
         txtName.setText(null);
         chkActive.setSelected(true);
         labelStatus.setText("NEW");
+        enableForm(false);
         txtUserCode.requestFocus();
+    }
+    private void enableForm(boolean status){
+        txtUserCode.setEditable(status);
+        txtName.setEditable(status);
     }
 
     private void initPopup() {
@@ -220,6 +220,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
         key.setCompCode(Global.compCode);
         dep.setKey(key);
         dep.setDeptName("New Department");
+        dep.setActive(true);
         DefaultTreeModel model = (DefaultTreeModel) treeDep.getModel();
         DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(dep);
         DefaultMutableTreeNode selectNode = (DefaultMutableTreeNode) treeDep.getLastSelectedPathComponent();
@@ -304,6 +305,20 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
         }).subscribe();
     }
 
+    private void deleteDepartment() {
+        if (selectedNode.getUserObject() instanceof DepartmentA dep) {
+            accountRepo.delete(dep.getKey()).subscribe((t) -> {
+                if (t) {
+                    treeModel.removeNodeFromParent(selectedNode);
+                }
+            }, (e) -> {
+                JOptionPane.showMessageDialog(this, e.getMessage());
+            });
+        } else {
+            JOptionPane.showMessageDialog(this, "Select Department.");
+        }
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -326,6 +341,8 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
         jButton1 = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         treeDep = new javax.swing.JTree();
+        jPanel2 = new javax.swing.JPanel();
+        jLabel5 = new javax.swing.JLabel();
 
         jLabel4.setText("jLabel4");
 
@@ -383,7 +400,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -392,11 +409,11 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
                     .addComponent(labelStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, 243, Short.MAX_VALUE)
+                    .addComponent(txtName)
                     .addComponent(txtUserCode)
                     .addComponent(txtSystemCode)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(chkActive, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(chkActive, javax.swing.GroupLayout.DEFAULT_SIZE, 127, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton1)))
                 .addContainerGap())
@@ -431,24 +448,49 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
         treeDep.setName("treeDep"); // NOI18N
         jScrollPane2.setViewportView(treeDep);
 
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel5.setFont(Global.lableFont);
+        jLabel5.setText("To create a new department, please right-click on \"department\" and select \"New.\"");
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, 576, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel5)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 246, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 407, Short.MAX_VALUE))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 407, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -477,7 +519,9 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel labelStatus;
     private javax.swing.JTree treeDep;
@@ -627,6 +671,7 @@ public class DepartmentSetup extends javax.swing.JPanel implements TreeSelection
 
     @Override
     public void delete() {
+        deleteDepartment();
     }
 
     @Override

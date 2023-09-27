@@ -140,7 +140,7 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
     private void setUser(AppUser user) {
         appUser = user;
         txtUserCode.setText(appUser.getUserCode());
-        txtUserName.setText(appUser.getUserName());
+        txtUserName.setText(appUser.getUserLongName());
         txtUserShort.setText(appUser.getUserShortName());
         txtEmail.setText(appUser.getEmail());
         txtPassword.setText(appUser.getPassword());
@@ -170,7 +170,7 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
                     userTableModel.setUser(selectRow, t);
                 }
                 clear();
-                sendMessage(t.getUserName());
+                sendMessage(t.getUserLongName());
             });
 
         }
@@ -212,7 +212,7 @@ public class AppUserSetup extends javax.swing.JPanel implements KeyListener, Pan
                 appUser.setLocCode(loc.getKey().getLocCode());
             }
             appUser.setUserCode(txtUserCode.getText());
-            appUser.setUserName(txtUserName.getText());
+            appUser.setUserLongName(txtUserName.getText());
             appUser.setUserShortName(txtUserShort.getText());
             appUser.setEmail(txtEmail.getText());
             appUser.setPassword(String.valueOf(txtPassword.getPassword()));

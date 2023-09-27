@@ -190,7 +190,6 @@ public class LocationAutoCompleter implements KeyListener, SelectionObserver {
             public void popupMenuCanceled(PopupMenuEvent e) {
             }
         });
-        setListLocation(new ArrayList<>());
     }
 
     public Location getLocation() {

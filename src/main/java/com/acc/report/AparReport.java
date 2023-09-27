@@ -88,16 +88,8 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     private TrialBalanceDetailDialog dialog;
     private DateTableDecorator decorator;
 
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -237,10 +229,7 @@ public class AparReport extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private String getCurCode() {
-        if (currencyAutoCompleter == null || currencyAutoCompleter.getCurrency() == null) {
-            return Global.currency;
-        }
-        return currencyAutoCompleter.getCurrency().getCurCode();
+        return currencyAutoCompleter.getCurrency() == null ? Global.currency : currencyAutoCompleter.getCurrency().getCurCode();
     }
 
     private void searchAPAR() {

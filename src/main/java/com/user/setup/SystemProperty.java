@@ -182,6 +182,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkWeightPoint.setName(ProUtil.WEIGHT_POINT);
         chkTransferEdit.setName(ProUtil.TRANSFER_EDIT);
         chkTransferDelete.setName(ProUtil.TRANSFER_DELETE);
+        chkDepLock.setName(ProUtil.DEPARTMENT_LOCK);
         txtPlAcc.setName(ProUtil.PL);
         txtREAcc.setName(ProUtil.RE);
         txtFixed.setName(ProUtil.FIXED);
@@ -279,6 +280,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkAutoUpdate.addActionListener(action);
         chkTransferEdit.addActionListener(action);
         chkTransferDelete.addActionListener(action);
+        chkDepLock.addActionListener(action);
         //txt
         txtA4Report.addActionListener(action);
         txtA5Report.addActionListener(action);
@@ -346,6 +348,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkWeightPoint.setSelected(Util1.getBoolean(hmProperty.get(chkWeightPoint.getName())));
         chkTransferEdit.setSelected(Util1.getBoolean(hmProperty.get(chkTransferEdit.getName())));
         chkTransferDelete.setSelected(Util1.getBoolean(hmProperty.get(chkTransferDelete.getName())));
+        chkDepLock.setSelected(Util1.getBoolean(hmProperty.get(chkDepLock.getName())));
     }
 
     private void initTextBox() {
@@ -631,6 +634,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
         chkMulti = new javax.swing.JCheckBox();
         chkAutoUpdate = new javax.swing.JCheckBox();
         chkWeightPoint = new javax.swing.JCheckBox();
+        chkDepLock = new javax.swing.JCheckBox();
         jPanel1 = new javax.swing.JPanel();
         chkSA4 = new javax.swing.JCheckBox();
         chkSA5 = new javax.swing.JCheckBox();
@@ -788,7 +792,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                             .addComponent(jLabel22, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtCustomer, javax.swing.GroupLayout.DEFAULT_SIZE, 136, Short.MAX_VALUE)
+                            .addComponent(txtCustomer, javax.swing.GroupLayout.DEFAULT_SIZE, 134, Short.MAX_VALUE)
                             .addComponent(txtSupplier)
                             .addComponent(txtLocation)
                             .addComponent(txtDep)
@@ -915,6 +919,8 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
 
         chkWeightPoint.setText("Weight Point");
 
+        chkDepLock.setText("Department Lock");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -939,20 +945,20 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     .addComponent(chkDisableRI, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkDisableRO, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkDisableStockIO, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkDepFilter, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(chkDepOption, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(chkMulti, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(chkPrint)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(chkAutoUpdate))
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(chkWeight)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(chkWeightPoint)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(chkPrint)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(chkAutoUpdate))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(chkWeight)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(chkWeightPoint))
+                    .addComponent(chkMulti)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(chkDepFilter)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(chkDepLock)))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -981,7 +987,9 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 4, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(chkDepFilter)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(chkDepFilter)
+                    .addComponent(chkDepLock))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(chkDepOption)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1380,12 +1388,11 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                                     .addComponent(jLabel25, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(txtInvGroup)
-                                        .addComponent(txtPlAcc)
-                                        .addComponent(txtREAcc)
-                                        .addComponent(txtCashGroup)
-                                        .addComponent(txtBankGroup))
+                                    .addComponent(txtInvGroup, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtPlAcc, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtREAcc, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtCashGroup, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtBankGroup, javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(txtConversionAcc)
                                     .addComponent(txtCash)))))
                     .addComponent(chkDisableAll, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1594,7 +1601,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
                     .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(33, Short.MAX_VALUE))
+                .addContainerGap(79, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -1637,6 +1644,7 @@ public class SystemProperty extends javax.swing.JPanel implements SelectionObser
     private javax.swing.JCheckBox chkBatchSale;
     private javax.swing.JCheckBox chkCalStock;
     private javax.swing.JCheckBox chkDepFilter;
+    private javax.swing.JCheckBox chkDepLock;
     private javax.swing.JCheckBox chkDepOption;
     private javax.swing.JCheckBox chkDisableAll;
     private javax.swing.JCheckBox chkDisableDep;

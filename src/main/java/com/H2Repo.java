@@ -621,8 +621,8 @@ public class H2Repo {
         return Mono.justOrEmpty(pcService.getPC(roleCode));
     }
 
-    public List<RoleProperty> getRoleProperty(String roleCode) {
-        return rolePropertyService.getRoleProperty(roleCode);
+    public List<RoleProperty> getRoleProperty(String roleCode,String compCode) {
+        return rolePropertyService.getRoleProperty(roleCode,compCode);
     }
 
     public List<MachineProperty> getMacProperty(Integer macId) {

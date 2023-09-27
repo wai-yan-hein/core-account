@@ -57,6 +57,7 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
     }
 
     public void setListSaleMan(List<SaleMan> listSaleMan) {
+        saleManTableModel.setListSaleMan(listSaleMan);
         this.listSaleMan = listSaleMan;
     }
 
@@ -69,7 +70,6 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
 
     public void initMain() {
         initTable();
-        searchSaleMan();
         txtId.requestFocus();
     }
 
@@ -173,10 +173,6 @@ public class SaleManSetupDialog extends javax.swing.JDialog implements KeyListen
         inventoryRepo.sendDownloadMessage(MessageType.SALE_MAN, mes).doOnSuccess((t) -> {
             log.info(t);
         }).subscribe();
-    }
-
-    private void searchSaleMan() {
-        saleManTableModel.setListSaleMan(listSaleMan);
     }
 
     private void initKeyListener() {

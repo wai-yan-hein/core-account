@@ -35,8 +35,8 @@ public class RolePropertyServiceImpl implements RolePropertyService {
     }
 
     @Override
-    public List<RoleProperty> getRoleProperty(String roleCode) {
-        return dao.getRoleProperty(roleCode);
+    public List<RoleProperty> getRoleProperty(String roleCode, String compCode) {
+        return dao.getRoleProperty(roleCode, compCode);
     }
 
 }

@@ -346,11 +346,12 @@ public class UserRepo {
         HashMap<String, String> hm = new HashMap<>();
         List<RoleProperty> prop;
         if (localdatabase) {
-            prop = h2Repo.getRoleProperty(roleCode);
+            prop = h2Repo.getRoleProperty(roleCode,Global.compCode);
         } else {
             Mono<ResponseEntity<List<RoleProperty>>> result = userApi.get()
                     .uri(builder -> builder.path("/user/getRoleProperty")
                     .queryParam("roleCode", roleCode)
+                    .queryParam("compCode", Global.compCode)
                     .build())
                     .retrieve().toEntityList(RoleProperty.class);
             prop = result.block().getBody();

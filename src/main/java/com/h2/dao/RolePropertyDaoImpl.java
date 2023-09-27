@@ -33,8 +33,8 @@ public class RolePropertyDaoImpl extends AbstractDao<RolePropertyKey, RoleProper
     }
 
     @Override
-    public List<RoleProperty> getRoleProperty(String roleCode) {
-        String sql = "select o from RoleProperty o where o.key.roleCode = '" + roleCode + "'";
+    public List<RoleProperty> getRoleProperty(String roleCode, String compCode) {
+        String sql = "select o from RoleProperty o where o.key.roleCode = '" + roleCode + "' and o.key.compCode ='" + compCode + "'";
         return findHSQL(sql);
     }
 
