@@ -126,13 +126,13 @@ public class TransferTableModel extends AbstractTableModel {
                 }
 
                 case 3 -> {
-                    return io.getQty();
+                    return Util1.toNull(io.getQty());
                 }
                 case 4 -> {
                     return io.getUnitCode();
                 }
                 case 5 -> {
-                    return Util1.getFloat(io.getWeight()) == 0 ? null : io.getWeight();
+                    return Util1.toNull(io.getWeight());
                 }
                 case 6 -> {
                     return io.getWeightUnit();

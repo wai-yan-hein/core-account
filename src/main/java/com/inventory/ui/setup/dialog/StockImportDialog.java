@@ -57,16 +57,9 @@ public class StockImportDialog extends javax.swing.JDialog {
     private final HashMap<String, String> hmCat = new HashMap<>();
     private final HashMap<String, String> hmBrand = new HashMap<>();
 
-    public InventoryRepo getInventoryRepo() {
-        return inventoryRepo;
-    }
 
     public void setInventoryRepo(InventoryRepo inventoryRepo) {
         this.inventoryRepo = inventoryRepo;
-    }
-
-    public TaskExecutor getTaskExecutor() {
-        return taskExecutor;
     }
 
     public void setTaskExecutor(TaskExecutor taskExecutor) {

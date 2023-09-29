@@ -33,21 +33,21 @@ public class StockInOutDetail implements Serializable {
     @Column(name = "loc_code")
     private String locCode;
     @Column(name = "in_qty")
-    private Float inQty;
+    private double inQty;
     @Column(name = "in_unit")
     private String inUnitCode;
     @Column(name = "out_qty")
-    private Float outQty;
+    private double outQty;
     @Column(name = "out_unit")
     private String outUnitCode;
     @Column(name = "cost_price")
-    private Float costPrice;
+    private double costPrice;
     @Column(name = "weight")
-    private Float weight;
+    private double weight;
     @Column(name = "weight_unit")
     private String weightUnit;
     @Column(name = "total_weight")
-    private Float totalWegiht;
+    private double totalWegiht;
     @Transient
     private String userCode;
     @Transient

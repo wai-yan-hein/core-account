@@ -173,6 +173,7 @@ public class COAGroupChildTableModel extends AbstractTableModel {
 
     private void save(ChartOfAccount coa, int row) {
         if (isValidCOA(coa)) {
+            coa.setCoaNameEng(Util1.convertToUniCode(coa.getCoaNameEng()));
             progress.setIndeterminate(true);
             accountRepo.saveCOA(coa).subscribe((t) -> {
                 if (t.getKey().getCoaCode() != null) {

@@ -190,9 +190,11 @@ public class PurchaseHistoryDialog extends javax.swing.JDialog implements KeyLis
         tableModel.clear();
         inventoryRepo.getPurchaseVoucher(filter)
                 .doOnSuccess((t) -> {
-                    tableModel.setListDetail(t);
-                    calAmount();
-                    progess.setIndeterminate(false);
+                    if (t != null) {
+                        tableModel.setListDetail(t);
+                        calAmount();
+                        progess.setIndeterminate(false);
+                    }
                 }).doOnTerminate(() -> {
             setVisible(true);
         }).subscribe();

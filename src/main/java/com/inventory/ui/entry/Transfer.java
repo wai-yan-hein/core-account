@@ -742,7 +742,7 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             dialog.setIconImage(new ImageIcon(getClass().getResource("/images/search.png")).getImage());
             dialog.setObserver(this);
             dialog.initMain();
-            dialog.setSize(Global.width - 50, Global.height - 50);
+            dialog.setSize(Global.width - 20, Global.height - 20);
             dialog.setLocationRelativeTo(null);
         }
         dialog.search();

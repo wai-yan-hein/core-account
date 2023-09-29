@@ -49,7 +49,6 @@ import com.inventory.ui.entry.ReturnIn;
 import com.inventory.ui.entry.ReturnOut;
 import com.user.setup.RoleSetting;
 import com.inventory.ui.entry.Sale;
-import com.inventory.ui.entry.StockInOutEntry;
 import com.inventory.ui.setup.CustomerSetup;
 import com.inventory.ui.setup.StockSetup;
 import com.inventory.ui.setup.SupplierSetup;
@@ -76,6 +75,7 @@ import com.inventory.ui.entry.Reports;
 import com.inventory.ui.entry.MillingEntry;
 import com.inventory.ui.entry.SaleByBatch;
 import com.inventory.ui.entry.SaleByWeight;
+import com.inventory.ui.entry.StockInOutEntry;
 import com.inventory.ui.entry.Transfer;
 import com.inventory.ui.entry.WeightLossEntry;
 import com.inventory.ui.setup.OpeningSetup;
@@ -140,8 +140,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private ReturnIn retIn;
     @Autowired
     private ReturnOut retOut;
-    @Autowired
-    private StockInOutEntry stockInOut;
     @Autowired
     private CustomerSetup customerSetup;
     @Autowired
@@ -434,7 +432,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return saleByBatch;
             }
             case "Sale By Weight", "Sale Export" -> {
-                int type = menuName.equals("Sale Export") ? SaleByWeight.EXPORT :SaleByWeight.WEIGHT;
+                int type = menuName.equals("Sale Export") ? SaleByWeight.EXPORT : SaleByWeight.WEIGHT;
                 SaleByWeight s = new SaleByWeight(type);
                 s.setUserRepo(userRepo);
                 s.setInventoryRepo(inventoryRepo);
@@ -487,12 +485,16 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 retOut.initMain();
                 return retOut;
             }
-            case "Stock In/Out" -> {
-                stockInOut.setName(menuName);
-                stockInOut.setObserver(this);
-                stockInOut.setProgress(progress);
-                stockInOut.initMain();
-                return stockInOut;
+            case "Stock In/Out", "Stock In/Out By Weight" -> {
+                int type = menuName.equals("Stock In/Out") ? StockInOutEntry.IO : StockInOutEntry.IO_W;
+                StockInOutEntry io = new StockInOutEntry(type);
+                io.setName(menuName);
+                io.setObserver(this);
+                io.setProgress(progress);
+                io.setUserRepo(userRepo);
+                io.setInventoryRepo(inventoryRepo);
+                io.initMain();
+                return io;
             }
             case "Stock" -> {
                 stockSetup.setName(menuName);

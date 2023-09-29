@@ -664,7 +664,7 @@ public class InventoryRepo {
                 });
     }
 
-    public Mono<List<StockInOutDetail>> searchStkIODetail(String vouNo, boolean local) {
+    public Mono<List<StockInOutDetail>> getStockIODetail(String vouNo, boolean local) {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/stockio/getStockIODetail")
                 .queryParam("vouNo", vouNo)

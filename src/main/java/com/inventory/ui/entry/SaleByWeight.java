@@ -29,7 +29,9 @@ import com.inventory.model.SaleHisKey;
 import com.inventory.model.SaleMan;
 import com.inventory.model.StockUnit;
 import com.inventory.model.Trader;
+import com.inventory.model.TransferHis;
 import com.inventory.model.VSale;
+import com.inventory.model.VTransfer;
 import com.repo.InventoryRepo;
 import com.inventory.ui.common.SaleByWeightTableModel;
 import com.inventory.ui.common.SaleExportTableModel;
@@ -333,12 +335,8 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
     private void initTable() {
         tblSale.getTableHeader().setFont(Global.tblHeaderFont);
         tblSale.setCellSelectionEnabled(true);
-        tblSale
-                .setDefaultRenderer(Object.class,
-                        new DecimalFormatRender());
-        tblSale
-                .setDefaultRenderer(Double.class,
-                        new DecimalFormatRender());
+        tblSale.setDefaultRenderer(Object.class, new DecimalFormatRender());
+        tblSale.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblSale.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblSale.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -959,6 +957,37 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         observer.selected("history", true);
         observer.selected("delete", true);
         observer.selected("refresh", false);
+    }
+
+    private void setTransferVoucher(TransferHis s, boolean local) {
+        progress.setIndeterminate(true);
+        Integer deptId = s.getDeptId();
+        inventoryRepo.findTrader(s.getTraderCode()).doOnSuccess((t) -> {
+            traderAutoCompleter.setTrader(t);
+        }).subscribe();
+        String vouNo = s.getKey().getVouNo();
+        inventoryRepo.getTransferDetail(vouNo, deptId, local).subscribe((t) -> {
+            t.forEach((od) -> {
+                SaleHisDetail sd = new SaleHisDetail();
+                sd.setStockCode(od.getStockCode());
+                sd.setUserCode(od.getUserCode());
+                sd.setStockName(od.getStockName());
+                sd.setRelName(od.getRelName());
+                sd.setQty(Util1.getDouble(od.getQty()));
+                sd.setUnitCode(od.getUnitCode());
+                saleTableModel.addSale(sd);
+            });
+            inventoryRepo.findLocation(s.getLocCodeTo()).doOnSuccess((l) -> {
+                locationAutoCompleter.setLocation(l);
+                setAllLocation();
+            }).subscribe();
+            saleTableModel.addNewRow();
+            progress.setIndeterminate(false);
+        }, (e) -> {
+            progress.setIndeterminate(false);
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        });
+
     }
 
     /**
@@ -1863,6 +1892,13 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                     inventoryRepo.findSale(s.getVouNo(), s.getDeptId(), local).subscribe((t) -> {
                         t.setLocal(local);
                         setSaleVoucher(t);
+                    });
+                }
+            }
+            case "TR-HISTORY" -> {
+                if (selectObj instanceof VTransfer v) {
+                    inventoryRepo.findTransfer(v.getVouNo(), v.getDeptId(), v.isLocal()).subscribe((t) -> {
+                        setTransferVoucher(t, v.isLocal());
                     });
                 }
             }

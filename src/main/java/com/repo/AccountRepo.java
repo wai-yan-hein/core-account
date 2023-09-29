@@ -63,7 +63,8 @@ public class AccountRepo {
 
     public Mono<DepartmentA> getDefaultDepartment() {
         String deptCode = Global.hmRoleProperty.get("default.department");
-        return findDepartment(Util1.isNull(deptCode, "-"));
+        String depByUser = Global.loginUser.getDeptCode();
+        return findDepartment(Util1.isNull(depByUser, deptCode));
     }
 
     public Mono<ChartOfAccount> getDefaultCash() {
