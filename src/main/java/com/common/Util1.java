@@ -44,8 +44,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.ImageIcon;
@@ -1149,6 +1147,19 @@ public class Util1 {
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             LocalDate inputLocalDate = toLocalDate(inputDate);
+            LocalDate startLocalDate = LocalDate.parse(Global.startDate, formatter);
+            LocalDate endLocalDate = LocalDate.parse(Global.endate, formatter);
+            return !inputLocalDate.isBefore(startLocalDate) && !inputLocalDate.isAfter(endLocalDate);
+        } catch (DateTimeParseException e) {
+            log.error("isDateBetween : " + e.getMessage());
+            return false;
+        }
+    }
+
+    public static boolean isDateBetween(LocalDateTime inputDate) {
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            LocalDate inputLocalDate = inputDate.toLocalDate();
             LocalDate startLocalDate = LocalDate.parse(Global.startDate, formatter);
             LocalDate endLocalDate = LocalDate.parse(Global.endate, formatter);
             return !inputLocalDate.isBefore(startLocalDate) && !inputLocalDate.isAfter(endLocalDate);

@@ -237,6 +237,11 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
             JOptionPane.showMessageDialog(this, "Invalid Date.");
             txtDate.requestFocusInWindow();
             return false;
+        } else if (!Util1.isDateBetween(txtDate.getDate())) {
+            JOptionPane.showMessageDialog(this, "Invalid Date.",
+                    "Validation.", JOptionPane.ERROR_MESSAGE);
+            txtDate.requestFocus();
+            return false;
         } else {
             String userCode = Global.loginUser.getUserCode();
             if (lblStatus.getText().equals("NEW")) {

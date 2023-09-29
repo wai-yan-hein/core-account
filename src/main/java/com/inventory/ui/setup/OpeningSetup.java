@@ -232,6 +232,11 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
             status = false;
             JOptionPane.showMessageDialog(this, "Invalid Currency.");
             txtCurrency.requestFocus();
+        } else if (!Util1.isDateBetween(txtOPDate.getDate())) {
+            JOptionPane.showMessageDialog(this, "Invalid Date.",
+                    "Validation.", JOptionPane.ERROR_MESSAGE);
+            status = false;
+            txtOPDate.requestFocus();
         }
         return status;
     }

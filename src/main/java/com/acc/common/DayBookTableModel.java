@@ -356,6 +356,12 @@ public class DayBookTableModel extends AbstractTableModel {
         } else if (gl.getSrcAccCode().equals(gl.getAccCode())) {
             JOptionPane.showMessageDialog(parent, "Invalid Account.");
             status = false;
+        } else if (!Util1.isDateBetween(gl.getGlDate())) {
+            JOptionPane.showMessageDialog(Global.parentForm, "Invalid Date.",
+                    "Validation.", JOptionPane.ERROR_MESSAGE);
+            parent.setColumnSelectionInterval(0, 0);
+            parent.setRowSelectionInterval(row, row);
+            status = false;
         } else {
             gl.setCreatedBy(Global.loginUser.getUserCode());
         }

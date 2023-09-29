@@ -490,6 +490,16 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                     "Validation.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtOutputAmt.requestFocus();
+        } else if (!Util1.isDateBetween(txtSaleDate.getDate())) {
+            JOptionPane.showMessageDialog(this, "Invalid Date.",
+                    "Validation.", JOptionPane.ERROR_MESSAGE);
+            txtSaleDate.requestFocus();
+            status = false;
+        } else if (!Util1.isDateBetween(txtSaleDate.getDate())) {
+            JOptionPane.showMessageDialog(this, "Invalid Date.",
+                    "Validation.", JOptionPane.ERROR_MESSAGE);
+            txtSaleDate.requestFocus();
+            status = false;
         } else {
             milling.setRemark(txtRemark.getText());
             milling.setReference(txtReference.getText());

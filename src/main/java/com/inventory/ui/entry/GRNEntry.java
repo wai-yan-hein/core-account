@@ -274,6 +274,11 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         } else if (tableModel.getListDetail().size() == 1) {
             JOptionPane.showMessageDialog(Global.parentForm, "No Stock Records.");
             status = false;
+        } else if (!Util1.isDateBetween(txtDate.getDate())) {
+            JOptionPane.showMessageDialog(this, "Invalid Date.",
+                    "Validation.", JOptionPane.ERROR_MESSAGE);
+            txtDate.requestFocus();
+            status = false;
         } else {
             grn.setMacId(Global.macId);
             grn.setVouDate(Util1.convertToLocalDateTime(txtDate.getDate()));

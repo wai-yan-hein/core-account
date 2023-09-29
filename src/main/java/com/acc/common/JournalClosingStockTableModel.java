@@ -262,6 +262,10 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
             return false;
         } else if (Util1.getDouble(op.getClAmt()) <= 0) {
             return false;
+        } else if (!Util1.isDateBetween(op.getTranDate())) {
+            JOptionPane.showMessageDialog(Global.parentForm, "Invalid Date.",
+                    "Validation.", JOptionPane.ERROR_MESSAGE);
+            return false;
         }
         return true;
     }

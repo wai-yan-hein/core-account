@@ -270,6 +270,11 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
         if (lblStatus.getText().equals("DELETED")) {
             status = false;
             clear();
+        } else if (!Util1.isDateBetween(txtSaleDate.getDate())) {
+            JOptionPane.showMessageDialog(this, "Invalid Date.",
+                    "Validation.", JOptionPane.ERROR_MESSAGE);
+            status = false;
+            txtSaleDate.requestFocus();
         } else {
             saleHis.setDeleted(Util1.getNullTo(saleHis.isDeleted()));
             saleHis.setTraderCode(traderAutoCompleter.getTrader().getKey().getCode());

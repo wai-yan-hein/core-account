@@ -564,6 +564,11 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                     "No Sale Record.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtLocation.requestFocus();
+        } else if (!Util1.isDateBetween(txtSaleDate.getDate())) {
+            JOptionPane.showMessageDialog(this, "Invalid Date.",
+                    "Validation.", JOptionPane.ERROR_MESSAGE);
+            status = false;
+            txtSaleDate.requestFocus();
         } else {
             saleHis.setCreditTerm(Util1.convertToLocalDateTime(txtDueDate.getDate()));
             SaleMan sm = saleManCompleter.getSaleMan();

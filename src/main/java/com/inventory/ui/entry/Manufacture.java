@@ -368,6 +368,16 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             JOptionPane.showMessageDialog(this, "Invalid Qty.");
             txtQty.requestFocus();
             return false;
+        } else if (!Util1.isDateBetween(txtStartDate.getDate())) {
+            JOptionPane.showMessageDialog(this, "Invalid Start Date.",
+                    "Validation.", JOptionPane.ERROR_MESSAGE);
+            txtStartDate.requestFocus();
+            return false;
+        } else if (!Util1.isDateBetween(txtEndDate.getDate())) {
+            JOptionPane.showMessageDialog(this, "Invalid End Date.",
+                    "Validation.", JOptionPane.ERROR_MESSAGE);
+            txtEndDate.requestFocus();
+            return false;
         } else {
             if (chkFinish.isSelected()) {
                 int s = JOptionPane.showConfirmDialog(this,

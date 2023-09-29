@@ -335,6 +335,16 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
             JOptionPane.showMessageDialog(this, "Invalid Currency.");
             txtCurrency.requestFocus();
             return false;
+        } else if (!Util1.isDateBetween(txtVouDate.getDate())) {
+            JOptionPane.showMessageDialog(this, "Invalid Date.",
+                    "Validation.", JOptionPane.ERROR_MESSAGE);
+            txtVouDate.requestFocus();
+            return false;
+        } else if (!Util1.isDateBetween(txtVouDate.getDate())) {
+            JOptionPane.showMessageDialog(this, "Invalid Date.",
+                    "Validation.", JOptionPane.ERROR_MESSAGE);
+            txtVouDate.requestFocus();
+            return false;
         } else {
             if (cboCash.getSelectedItem() instanceof ChartOfAccount coa) {
                 if (coa.getKey() != null) {
