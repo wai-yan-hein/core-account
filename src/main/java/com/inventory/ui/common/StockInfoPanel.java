@@ -41,33 +41,35 @@ public class StockInfoPanel extends javax.swing.JPanel {
     public void setStock(String stockCode) {
         if (stockCode != null) {
             log.info("stock info.");
-            inventoryRepo.findStock(stockCode).doOnSuccess((s) -> {
-                if (s != null) {
-                    txtSalePrice.setText(String.valueOf(s.getSalePriceN()));
-                    if (s.isSaleClosed()) {
-                        txtStatus.setForeground(Color.red);
-                        txtStatus.setText("sale closed.");
-                    } else {
-                        txtStatus.setForeground(Color.green);
-                        txtStatus.setText("sale opened.");
+            if (inventoryRepo != null) {
+                inventoryRepo.findStock(stockCode).doOnSuccess((s) -> {
+                    if (s != null) {
+                        txtSalePrice.setText(String.valueOf(s.getSalePriceN()));
+                        if (s.isSaleClosed()) {
+                            txtStatus.setForeground(Color.red);
+                            txtStatus.setText("sale closed.");
+                        } else {
+                            txtStatus.setForeground(Color.green);
+                            txtStatus.setText("sale opened.");
+                        }
+                        inventoryRepo.findRelation(s.getRelCode()).doOnSuccess((t) -> {
+                            txtRelName.setText(t == null ? null : t.getRelName());
+                        }).subscribe();
+                        inventoryRepo.findGroup(s.getTypeCode()).doOnSuccess((t) -> {
+                            txtGroup.setText(t == null ? null : t.getStockTypeName());
+                        }).subscribe();
+                        inventoryRepo.findBrand(s.getBrandCode()).doOnSuccess((t) -> {
+                            txtBrand.setText(t == null ? null : t.getBrandName());
+                        }).subscribe();
+                        inventoryRepo.findCategory(s.getCatCode()).doOnSuccess((t) -> {
+                            txtCategory.setText(t == null ? null : t.getCatName());
+                        }).subscribe();
+                        userRepo.findDepartment(s.getDeptId()).doOnSuccess((t) -> {
+                            txtDep.setText(t == null ? null : t.getDeptName());
+                        }).subscribe();
                     }
-                    inventoryRepo.findRelation(s.getRelCode()).doOnSuccess((t) -> {
-                        txtRelName.setText(t == null ? null : t.getRelName());
-                    }).subscribe();
-                    inventoryRepo.findGroup(s.getTypeCode()).doOnSuccess((t) -> {
-                        txtGroup.setText(t == null ? null : t.getStockTypeName());
-                    }).subscribe();
-                    inventoryRepo.findBrand(s.getBrandCode()).doOnSuccess((t) -> {
-                        txtBrand.setText(t == null ? null : t.getBrandName());
-                    }).subscribe();
-                    inventoryRepo.findCategory(s.getCatCode()).doOnSuccess((t) -> {
-                        txtCategory.setText(t == null ? null : t.getCatName());
-                    }).subscribe();
-                    userRepo.findDepartment(s.getDeptId()).doOnSuccess((t) -> {
-                        txtDep.setText(t == null ? null : t.getDeptName());
-                    }).subscribe();
-                }
-            }).subscribe();
+                }).subscribe();
+            }
 
         }
     }

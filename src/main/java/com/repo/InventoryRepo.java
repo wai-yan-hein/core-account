@@ -2587,7 +2587,7 @@ public class InventoryRepo {
                 .bodyToMono(Boolean.class)
                 .onErrorResume((e) -> {
                     log.error("checkPaymentExist :" + e.getMessage());
-                    return Mono.empty();
+                    return Mono.just(false);
                 });
     }
 

@@ -42,6 +42,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -1129,5 +1130,37 @@ public class Util1 {
             log.error("readJsonToList : " + e.getMessage());
             return null; // Handle the exception or return an appropriate value
         }
+    }
+
+    public static boolean isDateBetween(String inputDate) {
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            LocalDate inputLocalDate = LocalDate.parse(inputDate, formatter);
+            LocalDate startLocalDate = LocalDate.parse(Global.startDate, formatter);
+            LocalDate endLocalDate = LocalDate.parse(Global.endate, formatter);
+            return !inputLocalDate.isBefore(startLocalDate) && !inputLocalDate.isAfter(endLocalDate);
+        } catch (DateTimeParseException e) {
+            log.error("isDateBetween : " + e.getMessage());
+            return false;
+        }
+    }
+
+    public static boolean isDateBetween(Date inputDate) {
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            LocalDate inputLocalDate = toLocalDate(inputDate);
+            LocalDate startLocalDate = LocalDate.parse(Global.startDate, formatter);
+            LocalDate endLocalDate = LocalDate.parse(Global.endate, formatter);
+            return !inputLocalDate.isBefore(startLocalDate) && !inputLocalDate.isAfter(endLocalDate);
+        } catch (DateTimeParseException e) {
+            log.error("isDateBetween : " + e.getMessage());
+            return false;
+        }
+    }
+
+    public static LocalDate toLocalDate(Date date) {
+        Instant instant = date.toInstant();
+        ZoneId zoneId = ZoneId.systemDefault();
+        return instant.atZone(zoneId).toLocalDate();
     }
 }
