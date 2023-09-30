@@ -6,6 +6,7 @@ package com.common;
 
 import com.inventory.model.ClosingBalance;
 import com.inventory.model.General;
+import com.inventory.model.Stock;
 import com.inventory.model.VOpening;
 import com.inventory.model.VPurchase;
 import com.inventory.model.VSale;
@@ -1465,6 +1466,71 @@ public class ExcelExporter {
             row.createCell(11).setCellValue(Util1.getDouble(d.getIoRecentAmt()));
             row.createCell(12).setCellValue(Util1.getDouble(d.getFifoPrice()));
             row.createCell(13).setCellValue(Util1.getDouble(d.getFifoAmt()));
+
+            for (Cell cell : row) {
+                cell.setCellStyle(cellStyle);
+            }
+        }
+    }
+
+    public void exportOpeningTemplate(List<Stock> data, String reportName) {
+        observer.selected(MESSAGE, "ready to do." + data.size());
+        observer.selected(FINISH, "ready to do." + data.size());
+        String outputPath = OUTPUT_FILE_PATH + reportName.concat(".csv");
+        taskExecutor.execute(() -> {
+            try (SXSSFWorkbook workbook = new SXSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(outputPath)) {
+                workbook.setCompressTempFiles(true); // Enable temporary file compression for improved performance
+                Font font = workbook.createFont();
+                font.setFontName("Pyidaungsu");
+                font.setFontHeightInPoints((short) 12);
+                CellStyle cellStyle = workbook.createCellStyle();
+                cellStyle.setFont(font);
+                String sheetName = getSheetName(reportName);
+                createOpeningTemplate(workbook, data, sheetName, cellStyle);
+                observer.selected(MESSAGE, "Exporting File... Please wait.");
+                workbook.write(outputStream);
+                lastPath = outputPath;
+                observer.selected(FINISH, "complete.");
+            } catch (IOException e) {
+                observer.selected(ERROR, e.getMessage());
+            }
+        });
+    }
+
+    private void createOpeningTemplate(Workbook workbook, List<Stock> data, String sheetName,
+            CellStyle cellStyle) {
+        String[] HEADER = {
+            "", "SystemCode", "UserCode", "StockName",
+            "Weight", "WeightUnit", "Qty", "Unit", "Price"
+        };
+        String uniqueSheetName = generateUniqueSheetName(workbook, sheetName);
+        Sheet sheet = workbook.createSheet(uniqueSheetName);
+        Row headerRow = sheet.createRow(0);
+        for (int i = 0; i < HEADER.length; i++) {
+            headerRow.createCell(i).setCellValue(HEADER[i]);
+        }
+        Font font = workbook.createFont();
+        font.setFontName("Pyidaungsu");
+        font.setFontHeightInPoints((short) 12);
+        font.setBold(true);
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFont(font);
+        for (Cell cell : headerRow) {
+            cell.setCellStyle(headerStyle);
+        }
+
+        int rowNum = 1;
+        for (Stock d : data) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue("");
+            row.createCell(1).setCellValue(d.getKey().getStockCode());
+            row.createCell(2).setCellValue(d.getUserCode());
+            row.createCell(3).setCellValue(d.getStockName());
+            row.createCell(4).setCellValue(Util1.getDouble(d.getWeight()));
+            row.createCell(5).setCellValue(d.getWeightUnit());
+            row.createCell(6).setCellValue(Util1.getDouble(0.0));
+            row.createCell(7).setCellValue(d.getPurUnitCode());
+            row.createCell(8).setCellValue(Util1.getDouble(d.getPurPrice()));
 
             for (Cell cell : row) {
                 cell.setCellStyle(cellStyle);
