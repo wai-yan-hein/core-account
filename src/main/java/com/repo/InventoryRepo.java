@@ -2730,6 +2730,7 @@ public class InventoryRepo {
                 .uri(builder -> builder.path("/report/getSaleReport")
                 .queryParam("vouNo", vouNo)
                 .queryParam("macId", Global.macId)
+                .queryParam("compCode", Global.compCode)
                 .build())
                 .retrieve()
                 .bodyToMono(ByteArrayResource.class)

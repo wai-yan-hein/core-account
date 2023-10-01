@@ -62,7 +62,6 @@ import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;
 import com.user.editor.ProjectAutoCompleter;
-import com.user.model.DateLock;
 import com.user.model.Project;
 import com.user.model.ProjectKey;
 import java.awt.BorderLayout;
@@ -540,6 +539,11 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
 
     public void saveSale(boolean print) {
         if (isValidEntry() && saleTableModel.isValidEntry()) {
+            if (DateLockUtil.isLockDate(txtSaleDate.getDate())) {
+                DateLockUtil.showMessage(this);
+                txtSaleDate.requestFocus();
+                return;
+            }
             saleHis.setListSH(saleTableModel.getListDetail());
             saleHis.setListDel(saleTableModel.getDelList());
             saleHis.setListExpense(expenseTableModel.getListDetail());
@@ -827,6 +831,10 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 lblStatus.setForeground(Color.RED);
                 disableForm(false);
                 observer.selected("delete", true);
+            } else if (DateLockUtil.isLockDate(saleHis.getVouDate())) {
+                lblStatus.setText(DateLockUtil.MESSAGE);
+                lblStatus.setForeground(Color.RED);
+                disableForm(false);
             } else {
                 lblStatus.setText("EDIT");
                 lblStatus.setForeground(Color.blue);
@@ -895,6 +903,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtGrandTotal.setEnabled(status);
         txtReference.setEnabled(status);
         txtExpense.setEnabled(status);
+        cboAccount.setEnabled(status);
         observer.selected("save", status);
         observer.selected("delete", status);
         observer.selected("print", status);
