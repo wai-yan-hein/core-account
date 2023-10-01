@@ -380,9 +380,9 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
             if (lblStatus.getText().equals("NEW")) {
                 RetInHisKey key = new RetInHisKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 key.setVouNo(null);
                 ri.setKey(key);
+                ri.setDeptId(Global.deptId);
                 ri.setCreatedDate(LocalDateTime.now());
                 ri.setCreatedBy(Global.loginUser.getUserCode());
                 ri.setSession(Global.sessionId);
@@ -469,27 +469,21 @@ public class ReturnIn extends javax.swing.JPanel implements SelectionObserver, K
         if (retin != null) {
             progress.setIndeterminate(true);
             ri = retin;
-            Integer deptId = ri.getKey().getDeptId();
-            inventoryRepo.findLocation(ri.getLocCode()).subscribe((t) -> {
+            inventoryRepo.findLocation(ri.getLocCode()).doOnSuccess((t) -> {
                 locationAutoCompleter.setLocation(t);
-            });
-            Mono<Trader> trader = inventoryRepo.findTrader(ri.getTraderCode());
-            trader.subscribe((t) -> {
+            }).subscribe();
+            inventoryRepo.findTrader(ri.getTraderCode()).doOnSuccess((t) -> {
                 traderAutoCompleter.setTrader(t);
-            });
-            userRepo.findCurrency(ri.getCurCode()).subscribe((t) -> {
+            }).subscribe();
+            userRepo.findCurrency(ri.getCurCode()).doOnSuccess((t) -> {
                 currAutoCompleter.setCurrency(t);
-            });
-            if (retin.getProjectNo() != null) {
-                userRepo.find(new ProjectKey(retin.getProjectNo(), Global.compCode)).subscribe(t -> {
-                    projectAutoCompleter.setProject(t);
-                }, (err) -> {
-                    JOptionPane.showMessageDialog(this, err.getMessage());
-                });
-            } else {
-                projectAutoCompleter.setProject(null);
-            }
+            }).subscribe();
+            userRepo.find(new ProjectKey(retin.getProjectNo(), Global.compCode)).doOnSuccess(t -> {
+                projectAutoCompleter.setProject(t);
+            }).subscribe();
             String vouNo = ri.getKey().getVouNo();
+            Integer deptId = ri.getDeptId();
+            ri.setVouLock(!deptId.equals(Global.deptId));
             inventoryRepo.getReturnInDetail(vouNo, deptId, local)
                     .subscribe((t) -> {
                         retInTableModel.setListDetail(t);

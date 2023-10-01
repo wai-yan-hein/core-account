@@ -9,11 +9,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import lombok.Data;
 
@@ -29,6 +26,8 @@ public class RetOutHis {
 
     @EmbeddedId
     private RetOutHisKey key;
+    @Column(name = "dept_id")
+    private Integer deptId;
     @Column(name = "trader_code")
     private String traderCode;
     @Column(name = "vou_date", columnDefinition = "TIMESTAMP")

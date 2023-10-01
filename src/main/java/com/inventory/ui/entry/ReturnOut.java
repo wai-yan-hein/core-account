@@ -403,9 +403,9 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             if (lblStatus.getText().equals("NEW")) {
                 RetOutHisKey key = new RetOutHisKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 key.setVouNo(null);
                 ri.setKey(key);
+                ri.setDeptId(Global.deptId);
                 ri.setCreatedDate(LocalDateTime.now());
                 ri.setCreatedBy(Global.loginUser.getUserCode());
                 ri.setSession(Global.sessionId);
@@ -508,7 +508,6 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
         if (ro != null) {
             progress.setIndeterminate(true);
             ri = ro;
-            Integer deptId = ri.getKey().getDeptId();
             inventoryRepo.findLocation(ri.getLocCode()).subscribe((t) -> {
                 locationAutoCompleter.setLocation(t);
             });
@@ -529,6 +528,8 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                 projectAutoCompleter.setProject(null);
             }
             String vouNo = ri.getKey().getVouNo();
+            Integer deptId = ri.getDeptId();
+            ri.setVouLock(!deptId.equals(Global.deptId));
             inventoryRepo.getReturnOutDetail(vouNo, deptId, local)
                     .subscribe((t) -> {
                         roTableModel.setListDetail(t);

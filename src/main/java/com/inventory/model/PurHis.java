@@ -29,6 +29,8 @@ public class PurHis implements java.io.Serializable {
 
     @EmbeddedId
     private PurHisKey key;
+    @Column(name = "dept_id")
+    private Integer deptId;
     @Column(name = "trader_code")
     private String traderCode;
     @Temporal(TemporalType.TIMESTAMP)

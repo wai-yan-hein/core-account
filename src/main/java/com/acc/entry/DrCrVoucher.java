@@ -17,8 +17,8 @@ import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.DespAutoCompleter;
 import com.acc.editor.RefAutoCompleter;
 import com.acc.model.DeleteObj;
-import com.acc.model.DepartmentA;
 import com.acc.model.TmpOpening;
+import com.common.DateLockUtil;
 import com.common.ProUtil;
 import com.common.ReportFilter;
 import com.common.Util1;
@@ -198,12 +198,21 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
             filter.setGlVouNo(txtVouNo.getText());
             filter.setReference(txtRef.getText());
             accountRepo.searchVoucher(filter).subscribe((t) -> {
+                checkDateLock(t);
                 voucherTableModel.setListGV(t);
                 lblRecord.setText(voucherTableModel.getListSize() + "");
                 calAmt();
                 progress.setIndeterminate(false);
             });
         }
+    }
+
+    private void checkDateLock(List<Gl> list) {
+        list.forEach((t) -> {
+            if (DateLockUtil.isLockDate(t.getGlDate())) {
+                t.setTranLock(true);
+            }
+        });
     }
 
     private void calAmt() {
@@ -263,12 +272,15 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
 
     private void deleteVoucher() {
         int row = tblVoucher.convertRowIndexToModel(tblVoucher.getSelectedRow());
-        int yes_no;
         if (row >= 0) {
             Gl gl = voucherTableModel.getVGl(row);
+            if(gl.isTranLock()){
+                DateLockUtil.showMessage(this);
+                return;
+            }
             String glVouNo = gl.getGlVouNo();
             if (glVouNo != null) {
-                yes_no = JOptionPane.showConfirmDialog(Global.parentForm, "Are you sure to delete voucher?",
+                int yes_no = JOptionPane.showConfirmDialog(Global.parentForm, "Are you sure to delete voucher?",
                         "Delete", JOptionPane.YES_NO_OPTION);
                 if (yes_no == 0) {
                     DeleteObj obj = new DeleteObj();

@@ -51,7 +51,7 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
     @Override
     public List<Stock> getStock(String str, String compCode, Integer deptId) {
         str = Util1.cleanStr(str);
-        str = str + "%";
+        str += "%";
         return getStockList(str, compCode, deptId);
     }
 
@@ -61,10 +61,15 @@ public class StockDaoImpl extends AbstractDao<StockKey, Stock> implements StockD
                 select s.*,rel.rel_name,st.stock_type_name,cat.cat_name,b.brand_name
                 from stock s
                 join unit_relation rel on s.rel_code= rel.rel_code
+                and s.comp_code = rel.comp_code
                 left join stock_type st on s.stock_type_code = st.stock_type_code
+                and s.comp_code = st.comp_code
                 left join category cat  on s.category_code = cat.cat_code
+                and s.comp_code = cat.comp_code
                 left join stock_brand b on s.brand_code  = b.brand_code
-                where s.deleted = false and s.comp_code =?
+                and s.comp_code = b.comp_code
+                where s.deleted = false 
+                and s.comp_code =?
                 and s.active = true
                 and (s.dept_id = ? or 0 =?)
                 and (LOWER(REPLACE(s.user_code, ' ', '')) like ? or LOWER(REPLACE(s.stock_name, ' ', '')) like ?)

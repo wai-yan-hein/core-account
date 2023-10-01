@@ -23,6 +23,4 @@ public class RetOutHisKey implements Serializable {
     private String vouNo;
     @Column(name = "comp_code")
     private String compCode;
-    @Column(name = "dept_id")
-    private Integer deptId;
 }

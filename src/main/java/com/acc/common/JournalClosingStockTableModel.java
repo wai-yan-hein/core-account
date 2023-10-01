@@ -10,6 +10,7 @@ import com.acc.model.ChartOfAccount;
 import com.acc.model.DepartmentA;
 import com.acc.model.StockOP;
 import com.acc.model.StockOPKey;
+import com.common.DateLockUtil;
 import com.common.Global;
 import com.common.Util1;
 import com.user.model.Currency;
@@ -190,7 +191,8 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return true;
+        StockOP op = listGV.get(row);
+        return !op.isTranLock();
 
     }
 
@@ -228,6 +230,10 @@ public class JournalClosingStockTableModel extends AbstractTableModel {
     private void save(StockOP op, int row, int column) {
         op.setUpdatedDate(LocalDateTime.now());
         if (isValidEntry(op, column)) {
+            if (DateLockUtil.isLockDate(op.getTranDate())) {
+                DateLockUtil.showMessage(parent);
+                return;
+            }
             progress.setIndeterminate(true);
             if (op.getKey().getTranCode() == null) {
                 op.setCreatedBy(Global.loginUser.getUserCode());

@@ -22,6 +22,7 @@ import com.user.model.AuthenticationResponse;
 import com.user.model.SysProperty;
 import com.user.model.CompanyInfo;
 import com.user.model.Currency;
+import com.user.model.DateLock;
 import com.user.model.DepartmentKey;
 import com.user.model.ExchangeKey;
 import com.user.model.ExchangeRate;
@@ -347,7 +348,7 @@ public class UserRepo {
         HashMap<String, String> hm = new HashMap<>();
         List<RoleProperty> prop;
         if (localdatabase) {
-            prop = h2Repo.getRoleProperty(roleCode,Global.compCode);
+            prop = h2Repo.getRoleProperty(roleCode, Global.compCode);
         } else {
             Mono<ResponseEntity<List<RoleProperty>>> result = userApi.get()
                     .uri(builder -> builder.path("/user/getRoleProperty")
@@ -477,6 +478,32 @@ public class UserRepo {
                         h2Repo.save(t);
                     }
                 });
+    }
+
+    public Mono<DateLock> save(DateLock type) {
+        return userApi.post()
+                .uri("/user/saveDateLock")
+                .body(Mono.just(type), DateLock.class)
+                .retrieve()
+                .bodyToMono(DateLock.class)
+                .doOnSuccess((t) -> {
+                    if (localdatabase) {
+                        h2Repo.save(t);
+                    }
+                });
+    }
+
+    public Mono<List<DateLock>> getDateLock() {
+        if (localdatabase) {
+            return h2Repo.getDateLock();
+        }
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getDateLock")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(DateLock.class)
+                .collectList();
     }
 
     public Mono<BusinessType> find(Integer id) {
@@ -849,6 +876,14 @@ public class UserRepo {
                 .queryParam("updatedDate", updatedDate)
                 .build())
                 .retrieve().bodyToFlux(SysProperty.class)
+                .collectList();
+    }
+    public Mono<List<DateLock>> getDateLockByDate(String updatedDate) {
+        return userApi.get()
+                .uri(builder -> builder.path("/user/getDateLockByDate")
+                .queryParam("updatedDate", updatedDate)
+                .build())
+                .retrieve().bodyToFlux(DateLock.class)
                 .collectList();
     }
 

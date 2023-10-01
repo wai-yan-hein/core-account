@@ -18,6 +18,7 @@ import com.inventory.model.Message;
 import com.inventory.model.MessageType;
 import com.user.common.CompanyTableModel;
 import com.repo.UserRepo;
+import com.user.dialog.DateLockDialog;
 import com.user.dialog.DepartmentSetupDialog;
 import com.user.dialog.QRDialog;
 import com.user.dialog.YearEndProcessingDailog;
@@ -59,6 +60,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
     private final CompanyTableModel tableModel = new CompanyTableModel();
     private SelectionObserver observer;
     private JProgressBar progress;
+    private DateLockDialog dateLockDialog;
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
@@ -324,6 +326,17 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
                 JOptionPane.showMessageDialog(this, t);
             }).subscribe();
         }
+    }
+
+    private void dateLockDialog() {
+        if (dateLockDialog == null) {
+            dateLockDialog = new DateLockDialog(Global.parentForm);
+            dateLockDialog.setUserRepo(userRepo);
+            dateLockDialog.initMain();
+            dateLockDialog.setSize(Global.width - 400, Global.height - 200);
+            dateLockDialog.setLocationRelativeTo(null);
+        }
+        dateLockDialog.search();
     }
 
     /**
@@ -645,7 +658,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
         });
 
         jButton6.setFont(Global.lableFont);
-        jButton6.setText("Batch Lock");
+        jButton6.setText("Date Lock");
         jButton6.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton6ActionPerformed(evt);
@@ -752,6 +765,7 @@ public class CompanySetup extends javax.swing.JPanel implements KeyListener, Pan
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
         // TODO add your handling code here:
+        dateLockDialog();
     }//GEN-LAST:event_jButton6ActionPerformed
 
 

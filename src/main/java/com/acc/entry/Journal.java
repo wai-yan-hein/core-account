@@ -13,6 +13,7 @@ import com.acc.editor.COA3AutoCompleter;
 import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.model.DeleteObj;
 import com.acc.model.Gl;
+import com.common.DateLockUtil;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -24,6 +25,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.repo.UserRepo;
+import com.toedter.calendar.DateUtil;
 import com.user.editor.ProjectAutoCompleter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -75,10 +77,6 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         this.progress = progress;
     }
 
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
@@ -99,12 +97,15 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
 
     private void deleteVoucher() {
         selectRow = tblJournal.convertRowIndexToModel(tblJournal.getSelectedRow());
-        int yes_no;
-        if (tblJournal.getSelectedRow() >= 0) {
+        if (selectRow >= 0) {
             Gl gl = tableModel.getGl(selectRow);
+            if (gl.isTranLock()) {
+                DateLockUtil.showMessage(this);
+                return;
+            }
             String glVouNo = gl.getGlVouNo();
             if (glVouNo != null) {
-                yes_no = JOptionPane.showConfirmDialog(Global.parentForm, "Are you sure to delete journal?",
+                int yes_no = JOptionPane.showConfirmDialog(Global.parentForm, "Are you sure to delete journal?",
                         "Delete", JOptionPane.YES_NO_OPTION);
                 if (yes_no == 0) {
                     DeleteObj obj = new DeleteObj();
@@ -175,9 +176,18 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
         filter.setProjectNo(getProjectNo());
         filter.setCoaCode(cOA3AutoCompleter.getCOA().getKey().getCoaCode());
         accountRepo.searchJournal(filter).subscribe((t) -> {
+            checkDateLock(t);
             tableModel.setListGV(t);
             lblCount.setText(tableModel.getListSize() + "");
             progress.setIndeterminate(false);
+        });
+    }
+
+    private void checkDateLock(List<Gl> list) {
+        list.forEach((t) -> {
+            if (DateLockUtil.isLockDate(t.getGlDate())) {
+                t.setTranLock(true);
+            }
         });
     }
 
@@ -188,7 +198,7 @@ public class Journal extends javax.swing.JPanel implements SelectionObserver, Pa
             dialog.setUserRepo(userRepo);
             dialog.setObserver(this);
             dialog.initMain();
-            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setSize(Global.width - 30, Global.height - 30);
             dialog.setIconImage(Global.parentForm.getIconImage());
             dialog.setLocationRelativeTo(null);
         }

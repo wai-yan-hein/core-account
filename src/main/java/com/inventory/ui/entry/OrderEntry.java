@@ -495,6 +495,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             inventoryRepo.findOrderStatus(orderHis.getOrderStatus()).doOnSuccess((o) -> {
                 orderStatusComboModel.setSelectedItem(o);
             }).subscribe();
+            sh.setVouLock(!sh.getDeptId().equals(Global.deptId));
             inventoryRepo.getOrderDetail(vouNo, sh.getDeptId(), local)
                     .subscribe((t) -> {
                         orderTableModel.setListDetail(t);

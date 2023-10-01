@@ -180,9 +180,9 @@ public class WebFlexConfig {
     public ConnectionProvider connectionProvider() {
         return ConnectionProvider.builder("custom-provider")
                 .maxConnections(10) // maximum number of connections
-                .maxIdleTime(Duration.ofSeconds(10)) // maximum idle time
+                .maxIdleTime(Duration.ofSeconds(15)) // maximum idle time
                 .maxLifeTime(Duration.ofSeconds(60)) // maximum life time
-                .pendingAcquireTimeout(Duration.ofSeconds(5)) // pending acquire timeout
+                .pendingAcquireTimeout(Duration.ofSeconds(15)) // pending acquire timeout
                 .evictInBackground(Duration.ofSeconds(30)) // eviction interval
                 .build();
     }

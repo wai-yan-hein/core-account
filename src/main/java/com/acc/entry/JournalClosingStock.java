@@ -14,6 +14,7 @@ import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.DepartmentCellEditor;
 import com.acc.model.DepartmentA;
 import com.acc.model.StockOP;
+import com.common.DateLockUtil;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ReportFilter;
@@ -62,16 +63,8 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
     private Mono<List<Currency>> monoCur;
     private Mono<List<DepartmentA>> monoDep;
 
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -128,23 +121,24 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
             deleteVoucher();
         }
     };
-
     private void deleteVoucher() {
         int selectRow = tblJournal.convertRowIndexToModel(tblJournal.getSelectedRow());
-        int yes_no;
-        if (tblJournal.getSelectedRow() >= 0) {
+        if (selectRow >= 0) {
             StockOP op = tableModel.getGl(selectRow);
+            if (op.isTranLock()) {
+                DateLockUtil.showMessage(this);
+                return;
+            }
             if (op.getKey().getTranCode() != null) {
-                yes_no = JOptionPane.showConfirmDialog(Global.parentForm, "Are you sure to delete?",
+                int yn = JOptionPane.showConfirmDialog(this, "Are you sure to delete?",
                         "Delete", JOptionPane.YES_NO_OPTION);
-                if (yes_no == 0) {
+                if (yn == 0) {
                     accountRepo.delete(op.getKey()).subscribe((t) -> {
                         if (t) {
                             tableModel.delete(selectRow);
                             focusOnTable();
                         }
                     });
-
                 }
             }
         }
@@ -171,11 +165,20 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         filter.setCurCode(getCurCode());
         filter.setProjectNo(projectAutoCompleter.getProject().getKey().getProjectNo());
         accountRepo.searchOP(filter).subscribe((t) -> {
+            checkDateLock(t);
             tableModel.setListGV(t);
             tableModel.addNewRow();
             lblCount.setText(tableModel.getListSize() + "");
             progress.setIndeterminate(false);
             focusOnTable();
+        });
+    }
+
+    private void checkDateLock(List<StockOP> list) {
+        list.forEach((t) -> {
+            if (DateLockUtil.isLockDate(t.getTranDate())) {
+                t.setTranLock(true);
+            }
         });
     }
 
@@ -196,9 +199,9 @@ public class JournalClosingStock extends javax.swing.JPanel implements Selection
         monoCur.subscribe((t) -> {
             currencyAAutoCompleter.setListCurrency(t);
         });
-        userRepo.getDefaultCurrency().subscribe((c) -> {
+        userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currencyAAutoCompleter.setCurrency(c);
-        });
+        }).subscribe();
 
     }
 

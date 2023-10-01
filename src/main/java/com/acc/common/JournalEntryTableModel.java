@@ -255,11 +255,14 @@ public class JournalEntryTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
+        Gl gl = listGV.get(row);
+        if (gl.isTranLock()) {
+            return false;
+        }
         if (column == 4) {
             return ProUtil.isMultiCur();
         }
         return true;
-
     }
 
     public Gl getChartOfAccount(int row) {

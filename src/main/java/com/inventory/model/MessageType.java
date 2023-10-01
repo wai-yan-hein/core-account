@@ -32,6 +32,7 @@ public class MessageType {
     public static final String COA = "COA";
     //user
     public static final String USER = "USER";
+    public static final String DATE_LOCK = "DATE_LOCK";
     public static final String BUSTYPE = "BUSTYPE";
     public static final String COMPANY = "COMPANY";
     public static final String CURRENCY = "CURRENCY";

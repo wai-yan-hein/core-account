@@ -12,6 +12,7 @@ import com.acc.editor.DepartmentCellEditor;
 import com.acc.editor.TraderCellEditor;
 import com.acc.model.DepartmentA;
 import com.acc.model.Gl;
+import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.ProUtil;
@@ -106,7 +107,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         txtVouDate.setEnabled(lock);
         txtRefrence.setEnabled(lock);
         btnSave.setEnabled(lock);
-        btnSave2.setEnabled(lock);
+        btnPrint.setEnabled(lock);
         txtNa.setEnabled(lock);
         txtFor.setEnabled(lock);
         txtFrom.setEnabled(lock);
@@ -191,6 +192,13 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
     private void searchDetail() {
         if (listVGl != null && !listVGl.isEmpty()) {
             Gl vgl = listVGl.get(0);
+            if (DateLockUtil.isLockDate(vgl.getGlDate())) {
+                enableForm(false);
+                lblMessage.setText(DateLockUtil.MESSAGE);
+            } else {
+                enableForm(true);
+                lblMessage.setText("");
+            }
             txtVouDate.setDate(Util1.convertToDate(vgl.getGlDate()));
             txtRefrence.setText(vgl.getReference());
             txtVouNo.setText(vgl.getGlVouNo());
@@ -211,8 +219,23 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         }
     }
 
+    private void enableForm(boolean status) {
+        txtVouDate.setEnabled(status);
+        txtRefrence.setEditable(status);
+        tblJournal.setEnabled(status);
+        btnSave.setEnabled(status);
+        btnPrint.setEnabled(status);
+        txtFor.setEnabled(status);
+        txtFrom.setEnabled(status);
+        txtNa.setEnabled(status);
+    }
+
     private boolean saveVoucher(boolean print) {
         if (isValidEntry() && isValidData()) {
+            if (DateLockUtil.isLockDate(txtVouDate.getDate())) {
+                DateLockUtil.showMessage(this);
+                return false;
+            }
             progress.setIndeterminate(true);
             btnSave.setEnabled(false);
             List<Gl> list = tableModel.getListVGl();
@@ -349,7 +372,8 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
         txtAmt = new javax.swing.JFormattedTextField();
         lblStatus = new javax.swing.JLabel();
         btnSave = new javax.swing.JButton();
-        btnSave2 = new javax.swing.JButton();
+        btnPrint = new javax.swing.JButton();
+        lblMessage = new javax.swing.JLabel();
         progress = new javax.swing.JProgressBar();
 
         jLabel3.setText("jLabel3");
@@ -466,14 +490,14 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtVouNo)
-                    .addComponent(txtVouDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(txtVouDate, javax.swing.GroupLayout.DEFAULT_SIZE, 323, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(lable1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFor)
+                    .addComponent(txtFor, javax.swing.GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE)
                     .addComponent(txtFrom))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -481,7 +505,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
                     .addComponent(jLabel5))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtRefrence)
+                    .addComponent(txtRefrence, javax.swing.GroupLayout.DEFAULT_SIZE, 286, Short.MAX_VALUE)
                     .addComponent(txtNa))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblCash, javax.swing.GroupLayout.PREFERRED_SIZE, 258, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -569,14 +593,18 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
             }
         });
 
-        btnSave2.setFont(Global.lableFont);
-        btnSave2.setText("Print");
-        btnSave2.setName("btnSave"); // NOI18N
-        btnSave2.addActionListener(new java.awt.event.ActionListener() {
+        btnPrint.setFont(Global.lableFont);
+        btnPrint.setText("Print");
+        btnPrint.setName("btnSave"); // NOI18N
+        btnPrint.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSave2ActionPerformed(evt);
+                btnPrintActionPerformed(evt);
             }
         });
+
+        lblMessage.setFont(Global.lableFont);
+        lblMessage.setForeground(Color.red);
+        lblMessage.setText("jLabel6");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -584,11 +612,13 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 405, Short.MAX_VALUE)
-                .addGap(613, 613, 613)
+                .addComponent(lblStatus)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lblMessage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnSave)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnSave2)
+                .addComponent(btnPrint)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(txtAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -601,7 +631,8 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
                     .addComponent(txtAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnSave, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnSave2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btnPrint, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblMessage))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -695,10 +726,10 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
 
     }//GEN-LAST:event_txtNaActionPerformed
 
-    private void btnSave2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSave2ActionPerformed
+    private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
         // TODO add your handling code here:
         saveVoucher(true);
-    }//GEN-LAST:event_btnSave2ActionPerformed
+    }//GEN-LAST:event_btnPrintActionPerformed
 
     private void txtFromActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFromActionPerformed
         // TODO add your handling code here:
@@ -712,8 +743,8 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
      * @param args the command line arguments
      */
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnPrint;
     private javax.swing.JButton btnSave;
-    private javax.swing.JButton btnSave2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -725,6 +756,7 @@ public class VoucherEntryDailog extends javax.swing.JDialog implements KeyListen
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lable1;
     private javax.swing.JLabel lblCash;
+    private javax.swing.JLabel lblMessage;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JProgressBar progress;
     private javax.swing.JTable tblJournal;

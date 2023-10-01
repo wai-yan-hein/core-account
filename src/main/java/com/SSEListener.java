@@ -143,6 +143,10 @@ public class SSEListener {
                             integration.downloadRoleProperty();
                         case MessageType.SYSTEM_PROPERTY ->
                             integration.downloadSystemProperty();
+                        case MessageType.DATE_LOCK ->{
+                            integration.downloadDateLock();
+                        }
+                            
                     }
                     showMessage(t.getMessage());
                 }

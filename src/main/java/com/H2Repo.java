@@ -24,6 +24,7 @@ import com.h2.service.COAService;
 import com.h2.service.CategoryService;
 import com.h2.service.CompanyInfoService;
 import com.h2.service.CurrencyService;
+import com.h2.service.DateLockService;
 import com.h2.service.DepartmentUserService;
 import com.h2.service.DepartmentAccService;
 import com.h2.service.ExchangeRateService;
@@ -142,6 +143,7 @@ import com.inventory.model.VReturnIn;
 import com.inventory.model.VReturnOut;
 import com.inventory.model.VTransfer;
 import com.inventory.model.WeightLossHis;
+import com.user.model.DateLock;
 import com.user.model.DepartmentKey;
 import com.user.model.PrivilegeMenu;
 import java.util.HashMap;
@@ -157,6 +159,7 @@ import reactor.core.publisher.Mono;
  */
 @Component
 public class H2Repo {
+
     @Autowired
     private RegionService regionService;
     @Autowired
@@ -263,6 +266,8 @@ public class H2Repo {
     private OrderDetailService orderDetailService;
     @Autowired
     private DateFilterRepo dateFilterRepo;
+    @Autowired
+    private DateLockService dateLockService;
 
     public Mono<List<Location>> getLocation() {
         return Mono.justOrEmpty(locationService.findAll(Global.compCode));
@@ -593,6 +598,10 @@ public class H2Repo {
         return Mono.justOrEmpty(businessTypeService.findAll());
     }
 
+    public Mono<List<DateLock>> getDateLock() {
+        return Mono.justOrEmpty(dateLockService.findAll(Global.compCode));
+    }
+
     public Mono<List<Currency>> getCurrency() {
         return Mono.justOrEmpty(currencyService.findAll());
     }
@@ -621,8 +630,8 @@ public class H2Repo {
         return Mono.justOrEmpty(pcService.getPC(roleCode));
     }
 
-    public List<RoleProperty> getRoleProperty(String roleCode,String compCode) {
-        return rolePropertyService.getRoleProperty(roleCode,compCode);
+    public List<RoleProperty> getRoleProperty(String roleCode, String compCode) {
+        return rolePropertyService.getRoleProperty(roleCode, compCode);
     }
 
     public List<MachineProperty> getMacProperty(Integer macId) {
@@ -739,6 +748,10 @@ public class H2Repo {
 
     public MachineInfo save(MachineInfo obj) {
         return machineInfoService.save(obj);
+    }
+
+    public DateLock save(DateLock obj) {
+        return dateLockService.save(obj);
     }
 
     public Mono<List<VPurchase>> searchPurchaseVoucher(FilterObject filter) {

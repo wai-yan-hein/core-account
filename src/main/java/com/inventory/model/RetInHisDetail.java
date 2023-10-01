@@ -24,6 +24,8 @@ public class RetInHisDetail {
 
     @EmbeddedId
     private RetInKey key;
+    @Column(name = "dept_id")
+    private Integer deptId;
     @Column(name = "stock_code")
     private String stockCode;
     @Column(name = "qty", nullable = false)

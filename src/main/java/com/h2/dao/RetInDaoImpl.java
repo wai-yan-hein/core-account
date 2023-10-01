@@ -86,20 +86,12 @@ public class RetInDaoImpl extends AbstractDao<RetInHisKey, RetInHis> implements 
 
     @Override
     public void delete(RetInHisKey key) throws Exception {
-        String vouNo = key.getVouNo();
-        String compCode = key.getCompCode();
-        Integer deptId = key.getDeptId();
-        String sql = "update ret_in_his set deleted =1,intg_upd_status = null where vou_no ='" + vouNo + "' and comp_code='" + compCode + "' and dept_id =" + deptId + "";
-        execSql(sql);
+
     }
 
     @Override
     public void restore(RetInHisKey key) throws Exception {
-        String vouNo = key.getVouNo();
-        String compCode = key.getCompCode();
-        Integer deptId = key.getDeptId();
-        String sql = "update ret_in_his set deleted =0,intg_upd_status = null where vou_no ='" + vouNo + "' and comp_code='" + compCode + "' and dept_id =" + deptId + "";
-        execSql(sql);
+
     }
 
     @Override
@@ -108,7 +100,7 @@ public class RetInDaoImpl extends AbstractDao<RetInHisKey, RetInHis> implements 
         List<RetInHis> list = findHSQL(hsql);
         list.forEach((s) -> {
             s.setListRD(dao.search(s.getKey().getVouNo(),
-                    s.getKey().getCompCode(), s.getKey().getDeptId()));
+                    s.getKey().getCompCode(), s.getDeptId()));
         });
         return list;
     }
@@ -125,7 +117,7 @@ public class RetInDaoImpl extends AbstractDao<RetInHisKey, RetInHis> implements 
         list.forEach(o -> {
             String vouNo = o.getKey().getVouNo();
             String compCode = o.getKey().getCompCode();
-            Integer deptId = o.getKey().getDeptId();
+            Integer deptId = o.getDeptId();
             o.setListRD(dao.search(vouNo, compCode, deptId));
         });
         return list;
@@ -133,12 +125,7 @@ public class RetInDaoImpl extends AbstractDao<RetInHisKey, RetInHis> implements 
 
     @Override
     public void truncate(RetInHisKey key) {
-        String vouNo = key.getVouNo();
-        String compCode = key.getCompCode();
-        Integer deptId = key.getDeptId();
-        String sql1 = "delete from ret_in_his where vou_no ='" + vouNo + "' and comp_code ='" + compCode + "' and " + deptId + "";
-        String sql2 = "delete from ret_in_his_detail where vou_no ='" + vouNo + "' and comp_code ='" + compCode + "' and " + deptId + "";
-        execSql(sql1, sql2);
+
     }
 
     @Override

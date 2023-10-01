@@ -11,6 +11,7 @@ import com.acc.model.TraderA;
 import com.acc.model.VDescription;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
+import com.common.DateLockUtil;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
@@ -25,16 +26,15 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  * @author wai yan
  */
+@Slf4j
 public class AllCashTableModel extends AbstractTableModel {
 
-    private static final Logger log = LoggerFactory.getLogger(AllCashTableModel.class);
     private List<Gl> listVGl = new ArrayList();
     private String[] columnNames = {"Date", "Dept:", "Description", "Ref :", "No :", "Batch No", "Project No", "Person", "Account", "Curr", "Cash In / Dr", "Cash Out / Cr"};
     private String sourceAccId;
@@ -90,6 +90,9 @@ public class AllCashTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         Gl gl = listVGl.get(row);
+        if (gl.isTranLock()) {
+            return false;
+        }
         if (column == 1) {
             if (gl.getKey().getGlCode() != null) {
                 return !ProUtil.isDisableDep();
@@ -303,20 +306,30 @@ public class AllCashTableModel extends AbstractTableModel {
 
     private void save(Gl gl, int row, int column) {
         if (isValidEntry(gl, row, column)) {
+            if (DateLockUtil.isLockDate(gl.getGlDate())) {
+                DateLockUtil.showMessage(parent);
+                setSelection(row, 0);
+                return;
+            }
             progress.setIndeterminate(true);
-            accountRepo.save(gl).subscribe((t) -> {
+            accountRepo.save(gl).doOnSuccess((t) -> {
                 if (t != null) {
                     listVGl.set(row, t);
-                    addNewRow();
-                    parent.setRowSelectionInterval(row + 1, row + 1);
-                    parent.setColumnSelectionInterval(0, 0);
-                    observer.selected("CAL-TOTAL", "-");
                 }
-            }, (err) -> {
-                JOptionPane.showMessageDialog(parent, err.getMessage());
+            }).doOnError((e) -> {
+                JOptionPane.showMessageDialog(parent, e.getMessage());
                 progress.setIndeterminate(false);
-            });
+            }).doOnTerminate(() -> {
+                addNewRow();
+                setSelection(row + 1, 0);
+                observer.selected("CAL-TOTAL", "-");
+            }).subscribe();
         }
+    }
+
+    private void setSelection(int row, int column) {
+        parent.setRowSelectionInterval(row, row);
+        parent.setColumnSelectionInterval(column, column);
     }
 
     private boolean isValidEntry(Gl gl, int row, int column) {

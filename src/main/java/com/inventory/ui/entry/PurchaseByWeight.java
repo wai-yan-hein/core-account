@@ -117,20 +117,12 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         return locationAutoCompleter;
     }
 
-    public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
-        this.locationAutoCompleter = locationAutoCompleter;
-    }
-
     public JProgressBar getProgress() {
         return progress;
     }
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -395,21 +387,15 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
     }
 
     private void assignDefaultValue() {
-        if (currAutoCompleter != null) {
-            userRepo.getDefaultCurrency().subscribe((t) -> {
-                currAutoCompleter.setCurrency(t);
-            });
-        }
-        if (locationAutoCompleter != null) {
-            inventoryRepo.getDefaultLocation().subscribe((tt) -> {
-                locationAutoCompleter.setLocation(tt);
-            }, (e) -> {
-                log.error(e.getMessage());
-            });
-        }
-        inventoryRepo.getDefaultSupplier().subscribe((t) -> {
+        userRepo.getDefaultCurrency().doOnSuccess((t) -> {
+            currAutoCompleter.setCurrency(t);
+        }).subscribe();
+        inventoryRepo.getDefaultLocation().doOnSuccess((tt) -> {
+            locationAutoCompleter.setLocation(tt);
+        }).subscribe();
+        inventoryRepo.getDefaultSupplier().doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
-        });
+        }).subscribe();
         txtPurDate.setDate(Util1.getTodayDate());
         txtDueDate.setDate(null);
         progress.setIndeterminate(false);
@@ -507,9 +493,9 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
             if (lblStatus.getText().equals("NEW")) {
                 PurHisKey key = new PurHisKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 key.setVouNo(null);
                 ph.setKey(key);
+                ph.setDeptId(Global.deptId);
                 ph.setCreatedDate(LocalDateTime.now());
                 ph.setCreatedBy(Global.loginUser.getUserCode());
                 ph.setSession(Global.sessionId);
@@ -657,18 +643,18 @@ public class PurchaseByWeight extends javax.swing.JPanel implements SelectionObs
         if (pur != null) {
             progress.setIndeterminate(true);
             ph = pur;
-            userRepo.findCurrency(ph.getCurCode()).subscribe((t) -> {
+            userRepo.findCurrency(ph.getCurCode()).doOnSuccess((t) -> {
                 currAutoCompleter.setCurrency(t);
-            });
-            inventoryRepo.findLocation(ph.getLocCode()).subscribe((t) -> {
+            }).subscribe();
+            inventoryRepo.findLocation(ph.getLocCode()).doOnSuccess((t) -> {
                 locationAutoCompleter.setLocation(t);
-            });
-            Mono<Trader> trader = inventoryRepo.findTrader(ph.getTraderCode());
-            trader.subscribe((t) -> {
+            }).subscribe();
+            inventoryRepo.findTrader(ph.getTraderCode()).doOnSuccess((t) -> {
                 traderAutoCompleter.setTrader(t);
-            });
+            }).subscribe();
             String vouNo = ph.getKey().getVouNo();
-            Integer deptId = ph.getKey().getDeptId();
+            Integer deptId = ph.getDeptId();
+            ph.setVouLock(!deptId.equals(Global.deptId));
             inventoryRepo.getPurDetail(vouNo, deptId, local)
                     .subscribe((t) -> {
                         purTableModel.setListDetail(t);

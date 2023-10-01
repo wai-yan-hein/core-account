@@ -7,6 +7,7 @@ package com;
 import com.repo.AccountRepo;
 import com.acc.model.Gl;
 import com.acc.model.GlKey;
+import com.common.DateLockUtil;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.h2.service.BrandService;
@@ -15,6 +16,7 @@ import com.h2.service.COAService;
 import com.h2.service.CategoryService;
 import com.h2.service.CompanyInfoService;
 import com.h2.service.CurrencyService;
+import com.h2.service.DateLockService;
 import com.h2.service.DepartmentAccService;
 import com.h2.service.DepartmentUserService;
 import com.h2.service.LocationService;
@@ -140,6 +142,8 @@ public class CloudIntegration {
     @Autowired
     private SystemPropertyService sysPropertyService;
     @Autowired
+    private DateLockService dateLockService;
+    @Autowired
     private COAService coaService;
     @Autowired
     private TraderAService traderService;
@@ -160,6 +164,8 @@ public class CloudIntegration {
     private WeightLossService weightLossService;
     @Autowired
     private ProcessHisService processHisService;
+    @Autowired
+    private DateLockUtil dateLockUtil;
     private SelectionObserver observer;
 
     public void setObserver(SelectionObserver observer) {
@@ -342,6 +348,7 @@ public class CloudIntegration {
         downloadRole();
         downloadRoleProperty();
         downloadSystemProperty();
+        downloadDateLock();
     }
 
     private void downloadAccount() {
@@ -581,6 +588,21 @@ public class CloudIntegration {
         });
     }
 
+    public void downloadDateLock() {
+        log.info("date lock time : " + dateLockService.getMaxDate());
+        userRepo.getDateLockByDate(dateLockService.getMaxDate()).subscribe((r) -> {
+            observer.selected("download", "downloadDateLock list : " + r.size());
+            r.forEach((a) -> {
+                dateLockService.save(a);
+            });
+            dateLockUtil.initLockDate();
+            observer.selected("download", "downloadDateLock done.");
+        }, (err) -> {
+            observer.selected("download", "offline.");
+            observer.selected("download", err.getMessage());
+        });
+    }
+
     private void downloadInventory() {
         downloadPriceOption();
         downloadVouStatus();
@@ -740,6 +762,7 @@ public class CloudIntegration {
             observer.selected("download", e.getMessage());
         });
     }
+
     public void downloadRegion() {
         String maxDate = regionService.getMaxDate();
         inventoryRepo.getUpdateRegion(maxDate).subscribe((t) -> {

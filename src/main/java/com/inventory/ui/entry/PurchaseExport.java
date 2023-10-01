@@ -470,9 +470,9 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
             if (lblStatus.getText().equals("NEW")) {
                 PurHisKey key = new PurHisKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 key.setVouNo(null);
                 ph.setKey(key);
+                ph.setDeptId(Global.deptId);
                 ph.setCreatedDate(LocalDateTime.now());
                 ph.setCreatedBy(Global.loginUser.getUserCode());
                 ph.setSession(Global.sessionId);
@@ -606,101 +606,81 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
         dialog.search();
     }
 
+    private void setCompeter(PurHis ph) {
+        userRepo.findCurrency(ph.getCurCode()).doOnSuccess((t) -> {
+            currAutoCompleter.setCurrency(t);
+        }).subscribe();
+        inventoryRepo.findLocation(ph.getLocCode()).doOnSuccess((t) -> {
+            locationAutoCompleter.setLocation(t);
+        }).subscribe();
+        inventoryRepo.findTrader(ph.getTraderCode()).doOnSuccess((t) -> {
+            traderAutoCompleter.setTrader(t);
+        }).subscribe();
+        userRepo.find(new ProjectKey(ph.getProjectNo(), Global.compCode)).doOnSuccess(t -> {
+            projectAutoCompleter.setProject(t);
+        }).subscribe();
+    }
+
+    private void setTextBox(PurHis ph) {
+        if (ph.isVouLock()) {
+            lblStatus.setText("Voucher is locked.");
+            lblStatus.setForeground(Color.RED);
+            disableForm(false);
+        } else if (!ProUtil.isPurchaseEdit()) {
+            lblStatus.setText("No Permission.");
+            lblStatus.setForeground(Color.RED);
+            disableForm(false);
+        } else if (ph.isDeleted()) {
+            lblStatus.setText("DELETED");
+            lblStatus.setForeground(Color.RED);
+            disableForm(false);
+        } else {
+            lblStatus.setText("EDIT");
+            lblStatus.setForeground(Color.blue);
+            disableForm(true);
+        }
+        txtVouNo.setText(ph.getKey().getVouNo());
+        txtDueDate.setDate(ph.getDueDate());
+        txtRemark.setText(ph.getRemark());
+        txtPurDate.setDate(Util1.convertToDate(ph.getVouDate()));
+        txtVouTotal.setValue(Util1.getFloat(ph.getVouTotal()));
+        txtVouDiscP.setValue(Util1.getFloat(ph.getDiscP()));
+        txtVouDiscount.setValue(Util1.getFloat(ph.getDiscount()));
+        txtVouTaxP.setValue(Util1.getFloat(ph.getTaxP()));
+        txtTax.setValue(Util1.getFloat(ph.getTaxAmt()));
+        txtVouPaid.setValue(Util1.getFloat(ph.getPaid()));
+        txtVouBalance.setValue(Util1.getFloat(ph.getBalance()));
+        txtGrandTotal.setValue(Util1.getFloat(txtGrandTotal.getValue()));
+        chkPaid.setSelected(Util1.getFloat(ph.getPaid()) > 0);
+        txtReference.setText(ph.getReference());
+        txtBatchNo.setText(ph.getBatchNo());
+        txtComPercent.setValue(Util1.getFloat(ph.getCommP()));
+        txtComAmt.setValue(Util1.getFloat(ph.getCommAmt()));
+        txtCarNo.setText(ph.getCarNo());
+        txtProjectNo.setText(ph.getProjectNo());
+    }
+
     public void setVoucher(PurHis pur, boolean local) {
         if (pur != null) {
-            try {
-                purExportTableModel.clear();
-                progress.setIndeterminate(true);
-                ph = pur;
-                Integer deptId = ph.getKey().getDeptId();
-                userRepo.findCurrency(ph.getCurCode()).subscribe((t) -> {
-                    currAutoCompleter.setCurrency(t);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                });
-                inventoryRepo.findLocation(ph.getLocCode()).subscribe((t) -> {
-                    locationAutoCompleter.setLocation(t);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                });
-                Mono<Trader> trader = inventoryRepo.findTrader(ph.getTraderCode());
-                trader.subscribe((t) -> {
-                    traderAutoCompleter.setTrader(t);
-                }, (e) -> {
-                    JOptionPane.showMessageDialog(this, e.getMessage());
-                });
-                if (pur.getProjectNo() != null) {
-                    userRepo.find(new ProjectKey(pur.getProjectNo(), Global.compCode)).subscribe(t -> {
-                        projectAutoCompleter.setProject(t);
+            purExportTableModel.clear();
+            progress.setIndeterminate(true);
+            ph = pur;
+            setCompeter(ph);
+            setTextBox(ph);
+            Integer deptId = ph.getDeptId();
+            String vouNo = ph.getKey().getVouNo();
+            ph.setVouLock(!deptId.equals(Global.deptId));
+            inventoryRepo.getPurDetail(vouNo, deptId, local)
+                    .subscribe((t) -> {
+                        purExportTableModel.setListDetail(t);
+                        purExportTableModel.addNewRow();
+                        calQty(t);
+                        focusTable();
+                        progress.setIndeterminate(false);
                     }, (e) -> {
                         JOptionPane.showMessageDialog(this, e.getMessage());
+                        progress.setIndeterminate(false);
                     });
-                } else {
-                    projectAutoCompleter.setProject(null);
-                }
-
-                String vouNo = ph.getKey().getVouNo();
-
-                inventoryRepo.getPurDetail(vouNo, deptId, local)
-                        .subscribe((t) -> {
-                            purExportTableModel.setListDetail(t);
-                            purExportTableModel.addNewRow();
-                            if (ph.isVouLock()) {
-                                lblStatus.setText("Voucher is locked.");
-                                lblStatus.setForeground(Color.RED);
-                                disableForm(false);
-                            } else if (!ProUtil.isPurchaseEdit()) {
-                                lblStatus.setText("No Permission.");
-                                lblStatus.setForeground(Color.RED);
-                                disableForm(false);
-                            } else if (ph.isDeleted()) {
-                                lblStatus.setText("DELETED");
-                                lblStatus.setForeground(Color.RED);
-                                disableForm(false);
-                            } else {
-                                lblStatus.setText("EDIT");
-                                lblStatus.setForeground(Color.blue);
-                                disableForm(true);
-//                                btnBatch.setEnabled(false);
-                            }
-                            txtVouNo.setText(ph.getKey().getVouNo());
-                            txtDueDate.setDate(ph.getDueDate());
-                            txtRemark.setText(ph.getRemark());
-//                            txtPurDate.setDate(Util1.convertToDate(ph.getVouDate()));
-                            txtVouTotal.setValue(Util1.getFloat(ph.getVouTotal()));
-                            txtVouDiscP.setValue(Util1.getFloat(ph.getDiscP()));
-                            txtVouDiscount.setValue(Util1.getFloat(ph.getDiscount()));
-                            txtVouTaxP.setValue(Util1.getFloat(ph.getTaxP()));
-                            txtTax.setValue(Util1.getFloat(ph.getTaxAmt()));
-                            txtVouPaid.setValue(Util1.getFloat(ph.getPaid()));
-                            txtVouBalance.setValue(Util1.getFloat(ph.getBalance()));
-                            txtGrandTotal.setValue(Util1.getFloat(txtGrandTotal.getValue()));
-                            chkPaid.setSelected(Util1.getFloat(ph.getPaid()) > 0);
-                            txtReference.setText(ph.getReference());
-                            txtBatchNo.setText(ph.getBatchNo());
-                            txtComPercent.setValue(Util1.getFloat(ph.getCommP()));
-                            txtComAmt.setValue(Util1.getFloat(ph.getCommAmt()));
-                            txtCarNo.setText(ph.getCarNo());
-                            txtProjectNo.setText(ph.getProjectNo());
-                            calQty(t);
-                            focusTable();
-                            progress.setIndeterminate(false);
-                        }, (e) -> {
-                            JOptionPane.showMessageDialog(this, e.getMessage());
-                            progress.setIndeterminate(false);
-                        }, () -> {
-//                            if (pur.getProjectNo() != null) {
-//                                userRepo.find(new ProjectKey(pur.getProjectNo(), Global.compCode)).subscribe(t1 -> {
-//                                    projectAutoCompleter.setProject(t1);
-//                                });
-//                            } else {
-//                                projectAutoCompleter.setProject(null);
-//                            }
-                        });
-            } catch (Exception e) {
-                log.error(e.getMessage());
-            }
-
         }
     }
 

@@ -32,6 +32,7 @@ import com.acc.model.DepartmentA;
 import com.acc.model.TmpOpening;
 import com.acc.model.Gl;
 import com.acc.model.TraderA;
+import com.common.DateLockUtil;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -50,15 +51,12 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -382,8 +380,8 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
                 return;
             }
             if (!force) {
-                if (!vgl.getTranSource().equals("CB")) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "delete in original voucher.");
+                if (vgl.isTranLock()) {
+                    DateLockUtil.showMessage(this);
                     return;
                 }
             }
@@ -525,6 +523,7 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
                     TmpOpening op = t.getT1();
                     opening = op == null ? 0 : op.getOpening();
                     List<Gl> list = t.getT2();
+                    checkDateLock(list);
                     setData(list, filter.getFromDate());
                     calDebitCredit();
                     requestFoucsTable();
@@ -540,6 +539,14 @@ public class TraderAdjustment extends javax.swing.JPanel implements SelectionObs
                 requestFoucsTable();
                 decorator.refreshButton(filter.getFromDate());
                 progress.setIndeterminate(false);
+            }
+        });
+    }
+
+    private void checkDateLock(List<Gl> list) {
+        list.forEach((t) -> {
+            if (DateLockUtil.isLockDate(t.getGlDate())) {
+                t.setTranLock(true);
             }
         });
     }

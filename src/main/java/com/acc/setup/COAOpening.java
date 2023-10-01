@@ -16,6 +16,7 @@ import com.acc.editor.DepartmentAutoCompleter;
 import com.acc.editor.TraderAAutoCompleter;
 import com.user.editor.CurrencyAutoCompleter;
 import com.acc.model.OpeningKey;
+import com.common.DateLockUtil;
 import com.common.SelectionObserver;
 import com.common.PanelControl;
 import com.common.Global;
@@ -28,6 +29,7 @@ import com.repo.UserRepo;
 import com.user.editor.CurrencyEditor;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.editor.ProjectCellEditor;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
@@ -283,6 +285,13 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         } else {
             filter.setTraderType("-");
         }
+        if (DateLockUtil.isLockDate(txtDate.getDate())) {
+            enableForm(false);
+            lblMessage.setText(DateLockUtil.MESSAGE);
+        } else {
+            enableForm(true);
+            lblMessage.setText("");
+        }
         openingTableModel.clear();
         accountRepo.getOpeningBalance(filter).subscribe((t) -> {
             openingTableModel.setListOpening(t);
@@ -294,7 +303,10 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
+    }
 
+    private void enableForm(boolean status) {
+        tblOpening.setEnabled(status);
     }
 
     private void focusOnTable() {
@@ -446,6 +458,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         lblCount = new javax.swing.JLabel();
         txtFDrAmt = new javax.swing.JFormattedTextField();
         jLabel9 = new javax.swing.JLabel();
+        lblMessage = new javax.swing.JLabel();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -607,19 +620,26 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
         jLabel9.setFont(Global.lableFont);
         jLabel9.setText("Out Of Balance");
 
+        lblMessage.setFont(Global.lableFont);
+        lblMessage.setForeground(Color.red);
+        lblMessage.setText(".");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel4)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lblCount, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel7)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtFDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(lblCount, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 523, Short.MAX_VALUE)
+                        .addComponent(jLabel7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtFDrAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(lblMessage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -644,7 +664,8 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
-                    .addComponent(txtFOB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtFOB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblMessage))
                 .addContainerGap())
         );
 
@@ -710,6 +731,7 @@ public class COAOpening extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblCount;
+    private javax.swing.JLabel lblMessage;
     private javax.swing.JTable tblOpening;
     private javax.swing.JTextField txtCOA;
     private javax.swing.JTextField txtCurrency;

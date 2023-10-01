@@ -60,7 +60,6 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
         this.observer = observer;
     }
 
-
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
     }
@@ -275,6 +274,7 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
         this.his = his;
         String vouNo = his.getKey().getVouNo();
         Integer deptId = his.getDeptId();
+        his.setVouLock(deptId.equals(Global.deptId));
         inventoryRepo.getWeightLossDetail(vouNo, deptId).subscribe((t) -> {
             lblRecord.setText("Records : " + t.size());
             tableModel.setListDetail(t);
@@ -285,6 +285,10 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
             txtRemark.setText(his.getRefNo());
             if (his.isDeleted()) {
                 lblStatus.setText("DELETED");
+                lblStatus.setForeground(Color.red);
+                enableControl(false);
+            } else if (his.isDeleted()) {
+                lblStatus.setText("Voucher is Locked.");
                 lblStatus.setForeground(Color.red);
                 enableControl(false);
             } else {

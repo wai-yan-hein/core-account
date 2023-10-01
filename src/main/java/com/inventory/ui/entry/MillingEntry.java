@@ -718,6 +718,7 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
             userRepo.findCurrency(milling.getCurCode()).doOnSuccess((t) -> {
                 currAutoCompleter.setCurrency(t);
             }).subscribe();
+            sh.setVouLock(!sh.getDeptId().equals(Global.deptId));
             if (sh.isVouLock()) {
                 lblStatus.setText("Voucher is locked.");
                 lblStatus.setForeground(Color.RED);

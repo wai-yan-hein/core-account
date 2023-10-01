@@ -53,4 +53,6 @@ public class WeightLossHis {
     private List<WeightLossDetailKey> delKeys;
     @Transient
     private ZonedDateTime vouDateTime;
+    @Transient
+    private boolean vouLock;
 }

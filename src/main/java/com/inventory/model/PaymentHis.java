@@ -58,4 +58,6 @@ public class PaymentHis {
     private String traderName;
     @Transient
     private ZonedDateTime vouDateTime;
+    @Transient
+    private boolean vouLock;
 }

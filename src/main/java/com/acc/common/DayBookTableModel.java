@@ -95,6 +95,9 @@ public class DayBookTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         Gl gl = listVGl.get(row);
+        if (gl.isTranLock()) {
+            return false;
+        }
         return Util1.isNull(gl.getTranSource(), "CB").equals("CB");
     }
 

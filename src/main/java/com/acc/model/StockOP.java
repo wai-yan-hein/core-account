@@ -33,4 +33,5 @@ public class StockOP {
     private String coaNameEng;
     private String deptUsrCode;
     private String projectNo;
+    private boolean tranLock;
 }

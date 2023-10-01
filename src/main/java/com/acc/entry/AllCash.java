@@ -36,18 +36,19 @@ import com.acc.model.DepartmentA;
 import com.acc.model.TmpOpening;
 import com.acc.model.Gl;
 import com.common.ComponentUtil;
+import com.common.DateLockUtil;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
 import com.common.ReportFilter;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyEditor;
 import com.user.editor.ProjectAutoCompleter;
 import com.user.editor.ProjectCellEditor;
+import com.user.model.DateLock;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -57,7 +58,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -78,6 +78,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableColumn;
 import lombok.extern.slf4j.Slf4j;
 import net.coderazzi.filters.gui.AutoChoices;
@@ -360,7 +361,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     }
 
     private void initTableCB() {
-
         tblCash.getTableHeader().setFont(Global.tblHeaderFont);
         tblCash.getTableHeader().setPreferredSize(new Dimension(25, 25));
         tblCash.setCellSelectionEnabled(true);
@@ -397,6 +397,16 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         }
         tblCash.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
+        tblCash.getSelectionModel().addListSelectionListener((ListSelectionEvent e) -> {
+            if (e.getValueIsAdjusting()) {
+                if (tblCash.getSelectedRow() >= 0) {
+                    selectRow = tblCash.convertRowIndexToModel(tblCash.getSelectedRow());
+                    Gl gl = getGl(selectRow);
+                    setGl(gl);
+                }
+
+            }
+        });
         filterHeader = new TableFilterHeader(tblCash, AutoChoices.ENABLED);
         filterHeader.setPosition(TableFilterHeader.Position.TOP);
         filterHeader.setFont(Global.textFont);
@@ -433,6 +443,14 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 popupMenu.show(tblCash, centerX, centerY);
             }
         });
+    }
+
+    private void setGl(Gl gl) {
+        if (gl.isTranLock()) {
+            lblInfo.setText(DateLockUtil.MESSAGE);
+        } else {
+            lblInfo.setText("");
+        }
     }
 
     private double sumColumn(JTable table, int columnIndex) {
@@ -541,24 +559,30 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         }
     }
 
+    private boolean isEditable(int row) {
+        return single ? dayBookTableModel.isCellEditable(row, 0) : allCashTableModel.isCellEditable(row, 0);
+    }
+
+    private Gl getGl(int row) {
+        if (single) {
+            return dayBookTableModel.getVGl(row);
+        } else {
+            return allCashTableModel.getVGl(row);
+        }
+    }
+
     private void deleteVoucher(boolean force) {
         closeCellEditor();
-        selectRow = tblCash.getSelectedRow();
+        int row = tblCash.convertRowIndexToModel(tblCash.getSelectedRow());
         int yes_no;
-        if (selectRow >= 0) {
-            selectRow = tblCash.convertRowIndexToModel(selectRow);
-            Gl vgl;
-            if (single) {
-                vgl = dayBookTableModel.getVGl(selectRow);
-            } else {
-                vgl = allCashTableModel.getVGl(selectRow);
-            }
+        if (row >= 0) {
+            Gl vgl = getGl(row);
             if (vgl.getTranSource().equals("Report")) {
                 return;
             }
             if (!force) {
-                if (!vgl.getTranSource().equals("CB")) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "delete in original voucher.");
+                if (vgl.isTranLock()) {
+                    DateLockUtil.showMessage(this);
                     return;
                 }
             }
@@ -570,14 +594,14 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 obj.setDeptId(vgl.getKey().getDeptId());
                 obj.setModifyBy(Global.loginUser.getUserCode());
                 yes_no = JOptionPane.showConfirmDialog(Global.parentForm, "Are you sure to delete?",
-                        "Delete", JOptionPane.YES_NO_OPTION);
+                        "Delete", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (yes_no == 0) {
                     accountRepo.delete(obj).subscribe((t) -> {
                         if (t) {
                             if (single) {
-                                dayBookTableModel.deleteVGl(selectRow);
+                                dayBookTableModel.deleteVGl(row);
                             } else {
-                                allCashTableModel.deleteVGl(selectRow);
+                                allCashTableModel.deleteVGl(row);
                             }
                         }
                         calDebitCredit();
@@ -665,6 +689,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                     TmpOpening op = t.getT1();
                     opening = op == null ? 0 : op.getOpening();
                     List<Gl> list = t.getT2();
+                    checkDateLock(list);
                     setData(list, filter.getFromDate());
                     calDebitCredit();
                     requestFoucsTable();
@@ -680,6 +705,14 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 requestFoucsTable();
                 decorator.refreshButton(filter.getFromDate());
                 enableToolBar(true);
+            }
+        });
+    }
+
+    private void checkDateLock(List<Gl> list) {
+        list.forEach((t) -> {
+            if (DateLockUtil.isLockDate(t.getGlDate())) {
+                t.setTranLock(true);
             }
         });
     }
@@ -760,7 +793,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         vgl.setCrAmt(closing);
         opTableModel.addVGl(vgl);
         inOutTableModel.addVGl(new Gl(getCurCode(), drAmt, crAmt));
-        txtRecord.setValue(listVGl.size() - 1);
+        lblRecord.setValue(listVGl.size() - 1);
     }
 
     private void clearModel() {
@@ -769,7 +802,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         } else {
             allCashTableModel.clear();
         }
-        txtRecord.setValue(0);
+        lblRecord.setValue(0);
     }
 
     private void setData(List<Gl> list, String fromDate) {
@@ -831,9 +864,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         panelOption = new javax.swing.JPanel();
         jLabel9 = new javax.swing.JLabel();
         chkSummary = new javax.swing.JCheckBox();
-        txtRecord = new javax.swing.JFormattedTextField();
+        lblRecord = new javax.swing.JFormattedTextField();
         chkAdjust = new javax.swing.JCheckBox();
         chkLocal = new javax.swing.JCheckBox();
+        lblInfo = new javax.swing.JLabel();
 
         jMenuItem1.setText("jMenuItem1");
 
@@ -1164,7 +1198,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
         panelDate.setLayout(panelDateLayout);
         panelDateLayout.setHorizontalGroup(
             panelDateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 569, Short.MAX_VALUE)
+            .addGap(0, 571, Short.MAX_VALUE)
         );
         panelDateLayout.setVerticalGroup(
             panelDateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1182,10 +1216,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             }
         });
 
-        txtRecord.setEditable(false);
-        txtRecord.setBorder(null);
-        txtRecord.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
-        txtRecord.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+        lblRecord.setEditable(false);
+        lblRecord.setBorder(null);
+        lblRecord.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
+        lblRecord.setHorizontalAlignment(javax.swing.JTextField.LEFT);
 
         chkAdjust.setText("Adjust Column");
         chkAdjust.addActionListener(new java.awt.event.ActionListener() {
@@ -1201,6 +1235,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
             }
         });
 
+        lblInfo.setFont(Global.lableFont);
+        lblInfo.setForeground(Color.RED);
+        lblInfo.setText("-");
+
         javax.swing.GroupLayout panelOptionLayout = new javax.swing.GroupLayout(panelOption);
         panelOption.setLayout(panelOptionLayout);
         panelOptionLayout.setHorizontalGroup(
@@ -1215,8 +1253,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel9)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblInfo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
         panelOptionLayout.setVerticalGroup(
             panelOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1225,9 +1265,10 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                 .addGroup(panelOptionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(chkSummary)
                     .addComponent(jLabel9)
-                    .addComponent(txtRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblRecord, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(chkAdjust)
-                    .addComponent(chkLocal))
+                    .addComponent(chkLocal)
+                    .addComponent(lblInfo))
                 .addContainerGap())
         );
 
@@ -1246,7 +1287,7 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
                             .addComponent(panelDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(panelOption, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 559, Short.MAX_VALUE))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 557, Short.MAX_VALUE))
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -1430,6 +1471,8 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JLabel lblInfo;
+    private javax.swing.JFormattedTextField lblRecord;
     private javax.swing.JPanel panelDate;
     private javax.swing.JPanel panelOption;
     private javax.swing.JTable tblCIO;
@@ -1445,7 +1488,6 @@ public class AllCash extends javax.swing.JPanel implements SelectionObserver,
     private javax.swing.JTextField txtOption;
     private javax.swing.JTextField txtPerson;
     private javax.swing.JTextField txtProjectNo;
-    private javax.swing.JFormattedTextField txtRecord;
     private javax.swing.JTextField txtRefrence;
     // End of variables declaration//GEN-END:variables
 

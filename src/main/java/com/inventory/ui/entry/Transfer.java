@@ -80,10 +80,6 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
         this.progress = progress;
     }
 
-    public TraderAutoCompleter getTraderAutoCompleter() {
-        return traderAutoCompleter;
-    }
-
     public void setTraderAutoCompleter(TraderAutoCompleter traderAutoCompleter) {
         this.traderAutoCompleter = traderAutoCompleter;
     }

@@ -38,6 +38,7 @@ import com.inventory.ui.common.SaleExportTableModel;
 import com.inventory.ui.common.StockBalanceTableModel;
 import com.inventory.ui.common.StockInfoPanel;
 import com.inventory.ui.entry.dialog.SaleHistoryDialog;
+import com.inventory.ui.entry.dialog.TransferHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.inventory.ui.setup.dialog.common.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
@@ -107,6 +108,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
     private ProjectAutoCompleter projectAutoCompleter;
     private final StockInfoPanel stockInfoPanel = new StockInfoPanel();
     private int type;
+    private TransferHistoryDialog transferHistoryDialog;
 
     public LocationAutoCompleter getLocationAutoCompleter() {
         return locationAutoCompleter;
@@ -780,6 +782,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                 projectAutoCompleter.setProject(null);
             }
             String vouNo = sh.getKey().getVouNo();
+            sh.setVouLock(!sh.getDeptId().equals(Global.deptId));
             inventoryRepo.getSaleDetail(vouNo, saleHis.getDeptId(), saleHis.isLocal()).subscribe((t) -> {
                 setListDetail(t);
                 if (sh.isVouLock()) {
@@ -961,12 +964,14 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
 
     private void setTransferVoucher(TransferHis s, boolean local) {
         progress.setIndeterminate(true);
+        saleTableModel.clear();
         Integer deptId = s.getDeptId();
         inventoryRepo.findTrader(s.getTraderCode()).doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
         }).subscribe();
         String vouNo = s.getKey().getVouNo();
         inventoryRepo.getTransferDetail(vouNo, deptId, local).subscribe((t) -> {
+            List<SaleHisDetail> list = new ArrayList<>();
             t.forEach((od) -> {
                 SaleHisDetail sd = new SaleHisDetail();
                 sd.setStockCode(od.getStockCode());
@@ -975,19 +980,33 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                 sd.setRelName(od.getRelName());
                 sd.setQty(Util1.getDouble(od.getQty()));
                 sd.setUnitCode(od.getUnitCode());
-                saleTableModel.addSale(sd);
+                sd.setWeight(od.getWeight());
+                sd.setWeightUnit(od.getWeightUnit());
+                list.add(sd);
             });
+            setListDetail(list);
             inventoryRepo.findLocation(s.getLocCodeTo()).doOnSuccess((l) -> {
                 locationAutoCompleter.setLocation(l);
                 setAllLocation();
             }).subscribe();
-            saleTableModel.addNewRow();
             progress.setIndeterminate(false);
         }, (e) -> {
             progress.setIndeterminate(false);
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
+    }
 
+    private void trasnferDialog() {
+        if (transferHistoryDialog == null) {
+            transferHistoryDialog = new TransferHistoryDialog(Global.parentForm);
+            transferHistoryDialog.setInventoryRepo(inventoryRepo);
+            transferHistoryDialog.setUserRepo(userRepo);
+            transferHistoryDialog.setObserver(this);
+            transferHistoryDialog.initMain();
+            transferHistoryDialog.setSize(Global.width - 20, Global.height - 20);
+            transferHistoryDialog.setLocationRelativeTo(null);
+        }
+        transferHistoryDialog.search();
     }
 
     /**
@@ -1031,6 +1050,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         chkVou = new javax.swing.JCheckBox();
         chkA4 = new javax.swing.JCheckBox();
         lblRec = new javax.swing.JLabel();
+        btnBatch1 = new javax.swing.JButton();
         jScrollPane3 = new javax.swing.JScrollPane();
         jPanel3 = new javax.swing.JPanel();
         jLabel13 = new javax.swing.JLabel();
@@ -1385,6 +1405,14 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         lblRec.setFont(Global.lableFont);
         lblRec.setText("Records");
 
+        btnBatch1.setFont(Global.lableFont);
+        btnBatch1.setText("Transfer");
+        btnBatch1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBatch1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -1397,6 +1425,8 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(lblRec, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnBatch1)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -1404,7 +1434,9 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnBatch1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(lblRec)
                 .addGap(18, 18, 18)
@@ -1862,6 +1894,11 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
         // TODO add your handling code here:
     }//GEN-LAST:event_txtProjectNoActionPerformed
 
+    private void btnBatch1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBatch1ActionPerformed
+        // TODO add your handling code here:
+        trasnferDialog();
+    }//GEN-LAST:event_btnBatch1ActionPerformed
+
     @Override
     public void keyEvent(KeyEvent e) {
 
@@ -2021,6 +2058,7 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnBatch1;
     private javax.swing.JLabel carNoLabel;
     private javax.swing.JLabel carNoLabel1;
     private javax.swing.JCheckBox chkA4;

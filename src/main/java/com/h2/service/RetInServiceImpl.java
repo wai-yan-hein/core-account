@@ -41,7 +41,7 @@ public class RetInServiceImpl implements RetInService {
     public RetInHis save(RetInHis rin) {
         rin.setVouDate(Util1.toDateTime(rin.getVouDate()));
         if (Util1.isNullOrEmpty(rin.getKey().getVouNo())) {
-            rin.getKey().setVouNo(getVoucherNo(rin.getKey().getDeptId(), rin.getMacId(), rin.getKey().getCompCode()));
+            rin.getKey().setVouNo(getVoucherNo(rin.getDeptId(), rin.getMacId(), rin.getKey().getCompCode()));
         }
         List<RetInHisDetail> listSD = rin.getListRD();
         List<RetInKey> listDel = rin.getListDel();
@@ -53,10 +53,10 @@ public class RetInServiceImpl implements RetInService {
             RetInHisDetail cSd = listSD.get(i);
             if (Util1.isNullOrEmpty(cSd.getKey())) {
                 RetInKey key = new RetInKey();
-                key.setDeptId(rin.getKey().getDeptId());
                 key.setCompCode(rin.getKey().getCompCode());
                 key.setVouNo(vouNo);
                 key.setUniqueId(0);
+                cSd.setDeptId(rin.getDeptId());
                 cSd.setKey(key);
             }
             if (cSd.getStockCode() != null) {
@@ -112,7 +112,6 @@ public class RetInServiceImpl implements RetInService {
     public List<RetInHis> unUploadVoucher(String syncDate) {
         return rDao.unUploadVoucher(syncDate);
     }
-
 
     @Override
     public List<RetInHis> search(String updatedDate, List<String> keys) {

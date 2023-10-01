@@ -499,6 +499,7 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         if (s != null) {
             progress.setIndeterminate(true);
             io = s;
+            io.setVouLock(!Global.deptId.equals(io.getDeptId()));
             inventoryRepo.findVouStatus(io.getVouStatusCode()).doOnSuccess((t) -> {
                 vouStatusAutoCompleter.setVoucher(t);
             }).subscribe();
@@ -507,7 +508,11 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             txtDate.setDate(Util1.convertToDate(io.getVouDate()));
             txtRemark.setText(io.getRemark());
             txtDesp.setText(io.getDescription());
-            if (Util1.getBoolean(io.getDeleted())) {
+            if (Util1.getBoolean(io.isVouLock())) {
+                lblStatus.setText("Voucher Locked.");
+                lblStatus.setForeground(Color.red);
+                disableForm(false);
+            } else if (Util1.getBoolean(io.getDeleted())) {
                 lblStatus.setText("DELETED");
                 lblStatus.setForeground(Color.red);
                 disableForm(false);

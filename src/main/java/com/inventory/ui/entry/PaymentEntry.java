@@ -424,12 +424,18 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
         txtVouDate.setDate(Util1.convertToDate(ph.getVouDate()));
         txtRemark.setText(ph.getRemark());
         txtAmount.setValue(Util1.getFloat(ph.getAmount()));
+        ph.setVouLock(!ph.getDeptId().equals(Global.deptId));
         if (ph.isDeleted()) {
             lblStatus.setText("DELETED");
             lblStatus.setForeground(Color.red);
             enableForm(false);
         } else if (!ProUtil.isPaymentEdit()) {
             lblStatus.setText("No Permission.");
+            lblStatus.setForeground(Color.RED);
+            enableForm(false);
+            observer.selected("print", true);
+        } else if (ph.isVouLock()) {
+            lblStatus.setText("Voucher is Lock.");
             lblStatus.setForeground(Color.RED);
             enableForm(false);
             observer.selected("print", true);

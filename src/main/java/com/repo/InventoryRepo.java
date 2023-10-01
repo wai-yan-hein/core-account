@@ -16,7 +16,6 @@ import com.common.Util1;
 import com.inventory.model.AccSetting;
 import com.inventory.model.Category;
 import com.inventory.model.CategoryKey;
-import com.inventory.model.Country;
 import com.inventory.model.Expense;
 import com.inventory.model.GRN;
 import com.inventory.model.GRNDetail;
@@ -1548,7 +1547,6 @@ public class InventoryRepo {
     public Mono<PurHis> findPurchase(String vouNo, Integer deptId, boolean local) {
         PurHisKey key = new PurHisKey();
         key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
         key.setVouNo(vouNo);
         if (local) {
             return h2Repo.findPurchase(key);
@@ -1567,7 +1565,6 @@ public class InventoryRepo {
     public Mono<RetInHis> findReturnIn(String vouNo, Integer deptId, boolean local) {
         RetInHisKey key = new RetInHisKey();
         key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
         key.setVouNo(vouNo);
         if (local) {
             return h2Repo.findRetInHis(key);
@@ -1622,7 +1619,6 @@ public class InventoryRepo {
     public Mono<RetOutHis> findReturnOut(String vouNo, Integer deptId, boolean local) {
         RetOutHisKey key = new RetOutHisKey();
         key.setCompCode(Global.compCode);
-        key.setDeptId(deptId);
         key.setVouNo(vouNo);
         if (local) {
             return h2Repo.findRetOutHis(key);

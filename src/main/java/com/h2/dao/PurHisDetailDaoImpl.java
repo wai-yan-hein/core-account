@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 package com.h2.dao;
+
 import com.inventory.model.PurDetailKey;
 import com.inventory.model.PurHisDetail;
 import java.sql.ResultSet;
@@ -19,7 +20,6 @@ import java.util.List;
 @Slf4j
 public class PurHisDetailDaoImpl extends AbstractDao<PurDetailKey, PurHisDetail> implements PurHisDetailDao {
 
-
     @Override
     public PurHisDetail save(PurHisDetail pd) {
         saveOrUpdate(pd, pd.getKey());
@@ -30,27 +30,27 @@ public class PurHisDetailDaoImpl extends AbstractDao<PurDetailKey, PurHisDetail>
     public List<PurHisDetail> search(String vouNo, String compCode, Integer deptId) {
         List<PurHisDetail> listOP = new ArrayList<>();
         String sql = "select op.*,s.user_code,s.stock_name,cat.cat_name,st.stock_type_name,sb.brand_name,rel.rel_name,l.loc_name\n"
-                + "from pur_his_detail op\n" 
+                + "from pur_his_detail op\n"
                 + "join location l on op.loc_code = l.loc_code\n"
-                + "and op.comp_code =l.comp_code\n" 
+                + "and op.comp_code =l.comp_code\n"
                 + "and op.dept_id = l.dept_id\n"
-                + "join stock s on op.stock_code = s.stock_code\n" 
+                + "join stock s on op.stock_code = s.stock_code\n"
                 + "and op.comp_code =s.comp_code\n"
                 + "and op.dept_id = s.dept_id\n"
-                + "join unit_relation rel on s.rel_code = rel.rel_code\n" 
-                + "and op.comp_code =rel.comp_code\n" 
-                + "and op.dept_id = rel.dept_id\n" 
-                + "left join stock_type st  on s.stock_type_code = st.stock_type_code\n" 
-                + "and op.comp_code =st.comp_code\n" + "and op.dept_id = st.dept_id\n" 
+                + "join unit_relation rel on s.rel_code = rel.rel_code\n"
+                + "and op.comp_code =rel.comp_code\n"
+                + "and op.dept_id = rel.dept_id\n"
+                + "left join stock_type st  on s.stock_type_code = st.stock_type_code\n"
+                + "and op.comp_code =st.comp_code\n" + "and op.dept_id = st.dept_id\n"
                 + "left join category cat on s.category_code = cat.cat_code\n"
                 + "and op.comp_code =cat.comp_code\n"
                 + "and op.dept_id = cat.dept_id\n"
-                + "left join stock_brand sb on s.brand_code = sb.brand_code\n" 
-                + "and op.comp_code =sb.comp_code\n" 
+                + "left join stock_brand sb on s.brand_code = sb.brand_code\n"
+                + "and op.comp_code =sb.comp_code\n"
                 + "and op.dept_id = sb.dept_id\n"
-                + "where op.vou_no ='" + vouNo + "'\n" 
+                + "where op.vou_no ='" + vouNo + "'\n"
                 + "and op.comp_code ='" + compCode + "'\n"
-                + "and op.dept_id = " + deptId + "\n" 
+                + "and op.dept_id = " + deptId + "\n"
                 + "order by unique_id;\n";
         ResultSet rs = getResult(sql);
         if (rs != null) {
@@ -60,10 +60,10 @@ public class PurHisDetailDaoImpl extends AbstractDao<PurDetailKey, PurHisDetail>
                     PurHisDetail op = new PurHisDetail();
                     PurDetailKey key = new PurDetailKey();
                     key.setVouNo(rs.getString("vou_no"));
-                    key.setDeptId(rs.getInt("dept_id"));
                     key.setCompCode(rs.getString("comp_code"));
                     key.setUniqueId(rs.getInt("unique_id"));
                     op.setKey(key);
+                    op.setDeptId(rs.getInt("dept_id"));
                     op.setStockCode(rs.getString("stock_code"));
                     op.setQty(rs.getDouble("qty"));
                     op.setAvgQty(rs.getDouble("avg_qty"));

@@ -23,6 +23,7 @@ import com.acc.setup.COASetup;
 import com.acc.setup.DepartmentSetup;
 import com.acc.setup.TraderSetup;
 import com.common.ComponentUtil;
+import com.common.DateLockUtil;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -219,6 +220,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private TaskScheduler taskScheduler;
     @Autowired
     private SSEListener sseListener;
+    @Autowired
+    private DateLockUtil dateLockUtil;
     private PanelControl control;
     private ProgramDownloadDialog pdDialog;
     private final HashMap<String, JPanel> hmPanel = new HashMap<>();
@@ -857,6 +860,8 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             initDate();
             departmentAssign();
             initMenu();
+            sseListener();
+            
             lblCompName.setText(Global.companyName);
             lblUserName.setText(Global.loginUser.getUserLongName());
             userRepo.setupProperty().doOnSuccess((u) -> {
@@ -864,7 +869,12 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 scheduleProgramUpdate();
             }).subscribe();
         }).subscribe();
+    }
 
+    private void sseListener() {
+        sseListener.setObserver(this);
+        sseListener.start();
+        dateLockUtil.initLockDate();
     }
 
     private void initDate() {
@@ -899,8 +909,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     public void initMain() {
         Global.parentForm = this;
         setTitle("Core Account Cloud : " + Global.version);
-        sseListener.setObserver(this);
-        sseListener.start();
         scheduleNetwork();
         scheduleExit();
         initUser();

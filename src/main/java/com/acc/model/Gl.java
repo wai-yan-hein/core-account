@@ -112,6 +112,8 @@ public class Gl {
     private Double amount;
     @Transient
     private String event;
+    @Transient
+    private boolean tranLock;
 
     public Gl(String curCode, Double drAmt, Double crAmt) {
         this.curCode = curCode;

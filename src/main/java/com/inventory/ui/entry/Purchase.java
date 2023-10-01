@@ -132,20 +132,8 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         return locationAutoCompleter;
     }
 
-    public void setLocationAutoCompleter(LocationAutoCompleter locationAutoCompleter) {
-        this.locationAutoCompleter = locationAutoCompleter;
-    }
-
-    public JProgressBar getProgress() {
-        return progress;
-    }
-
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
-    }
-
-    public SelectionObserver getObserver() {
-        return observer;
     }
 
     public void setObserver(SelectionObserver observer) {
@@ -375,7 +363,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
         monoLoc.subscribe((t) -> {
             locationAutoCompleter.setListLocation(t);
         });
-
         projectAutoCompleter = new ProjectAutoCompleter(txtProjectNo, userRepo, null, false);
         projectAutoCompleter.setObserver(this);
         batchAutoCompeter = new BatchAutoCompeter(txtBatchNo, inventoryRepo, null, false);
@@ -556,9 +543,9 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             if (lblStatus.getText().equals("NEW")) {
                 PurHisKey key = new PurHisKey();
                 key.setCompCode(Global.compCode);
-                key.setDeptId(Global.deptId);
                 key.setVouNo(null);
                 ph.setKey(key);
+                ph.setDeptId(Global.deptId);
                 ph.setCreatedDate(LocalDateTime.now());
                 ph.setCreatedBy(Global.loginUser.getUserCode());
                 ph.setSession(Global.sessionId);
@@ -733,7 +720,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
 
     private void searchVoucherDetail(PurHis ph, boolean local) {
         String vouNo = ph.getKey().getVouNo();
-        inventoryRepo.getPurDetail(vouNo, ph.getKey().getDeptId(), local)
+        inventoryRepo.getPurDetail(vouNo, ph.getDeptId(), local)
                 .subscribe((t) -> {
                     purTableModel.setListDetail(t);
                     purTableModel.addNewRow();
@@ -750,6 +737,7 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
 
     private void searchVoucher(PurHis ph) {
         String vouNo = ph.getKey().getVouNo();
+        ph.setVouLock(!ph.getDeptId().equals(Global.deptId));
         if (ph.isVouLock()) {
             lblStatus.setText("Voucher is locked.");
             lblStatus.setForeground(Color.RED);
@@ -797,31 +785,18 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     }
 
     private void setCompeter(PurHis ph) {
-        userRepo.findCurrency(ph.getCurCode()).subscribe((t) -> {
+        userRepo.findCurrency(ph.getCurCode()).doOnSuccess((t) -> {
             currAutoCompleter.setCurrency(t);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
-        inventoryRepo.findLocation(ph.getLocCode()).subscribe((t) -> {
+        }).subscribe();
+        inventoryRepo.findLocation(ph.getLocCode()).doOnSuccess((t) -> {
             locationAutoCompleter.setLocation(t);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
-        Mono<Trader> trader = inventoryRepo.findTrader(ph.getTraderCode());
-        trader.subscribe((t) -> {
+        }).subscribe();
+        inventoryRepo.findTrader(ph.getTraderCode()).doOnSuccess((t) -> {
             traderAutoCompleter.setTrader(t);
-        }, (e) -> {
-            JOptionPane.showMessageDialog(this, e.getMessage());
-        });
-        if (ph.getProjectNo() != null) {
-            userRepo.find(new ProjectKey(ph.getProjectNo(), Global.compCode)).subscribe(t -> {
-                projectAutoCompleter.setProject(t);
-            }, (e) -> {
-                JOptionPane.showMessageDialog(this, e.getMessage());
-            });
-        } else {
-            projectAutoCompleter.setProject(null);
-        }
+        }).subscribe();
+        userRepo.find(new ProjectKey(ph.getProjectNo(), Global.compCode)).doOnSuccess(t -> {
+            projectAutoCompleter.setProject(t);
+        }).subscribe();
     }
 
     private void searchExpense(String vouNo) {

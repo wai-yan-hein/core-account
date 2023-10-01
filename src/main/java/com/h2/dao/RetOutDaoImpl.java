@@ -86,20 +86,12 @@ public class RetOutDaoImpl extends AbstractDao<RetOutHisKey, RetOutHis> implemen
 
     @Override
     public void delete(RetOutHisKey key) throws Exception {
-        String vouNo = key.getVouNo();
-        String compCode = key.getCompCode();
-        Integer deptId = key.getDeptId();
-        String sql = "update ret_out_his set deleted =1,intg_upd_status = null where vou_no ='" + vouNo + "' and comp_code='" + compCode + "' and dept_id =" + deptId + "";
-        execSql(sql);
+
     }
 
     @Override
     public void restore(RetOutHisKey key) throws Exception {
-        String vouNo = key.getVouNo();
-        String compCode = key.getCompCode();
-        Integer deptId = key.getDeptId();
-        String sql = "update ret_out_his set deleted =0,intg_upd_status = null where vou_no ='" + vouNo + "' and comp_code='" + compCode + "' and dept_id =" + deptId + "";
-        execSql(sql);
+
     }
 
     @Override
@@ -108,7 +100,7 @@ public class RetOutDaoImpl extends AbstractDao<RetOutHisKey, RetOutHis> implemen
         List<RetOutHis> list = findHSQL(hsql);
         list.forEach((s) -> {
             s.setListRD(dao.search(s.getKey().getVouNo(),
-                    s.getKey().getCompCode(), s.getKey().getDeptId()));
+                    s.getKey().getCompCode(), s.getDeptId()));
         });
         return list;
     }
@@ -127,7 +119,7 @@ public class RetOutDaoImpl extends AbstractDao<RetOutHisKey, RetOutHis> implemen
         list.forEach(o -> {
             String vouNo = o.getKey().getVouNo();
             String compCode = o.getKey().getCompCode();
-            Integer deptId = o.getKey().getDeptId();
+            Integer deptId = o.getDeptId();
             o.setListRD(dao.search(vouNo, compCode, deptId));
         });
         return list;

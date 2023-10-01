@@ -44,7 +44,7 @@ public class PurHisServiceImpl implements PurHisService {
     public PurHis save(PurHis ph) {
         ph.setVouDate(Util1.toDateTime(ph.getVouDate()));
         if (Util1.isNullOrEmpty(ph.getKey().getVouNo())) {
-            ph.getKey().setVouNo(getVoucherNo(ph.getKey().getDeptId(), ph.getMacId(), ph.getKey().getCompCode()));
+            ph.getKey().setVouNo(getVoucherNo(ph.getDeptId(), ph.getMacId(), ph.getKey().getCompCode()));
         }
         List<PurHisDetail> listSD = ph.getListPD();
         List<PurDetailKey> listDel = ph.getListDel();
@@ -76,10 +76,10 @@ public class PurHisServiceImpl implements PurHisService {
             PurHisDetail cSd = listSD.get(i);
             if (Util1.isNullOrEmpty(cSd.getKey())) {
                 PurDetailKey key = new PurDetailKey();
-                key.setDeptId(ph.getKey().getDeptId());
                 key.setCompCode(ph.getKey().getCompCode());
                 key.setVouNo(vouNo);
                 key.setUniqueId(0);
+                cSd.setDeptId(ph.getDeptId());
                 cSd.setKey(key);
             }
             if (cSd.getStockCode() != null) {
@@ -129,7 +129,6 @@ public class PurHisServiceImpl implements PurHisService {
     public List<PurHis> unUploadVoucher(String syncDate) {
         return phDao.unUploadVoucher(syncDate);
     }
-
 
     @Override
     public List<PurHis> search(String updatedDate, List<String> keys) {

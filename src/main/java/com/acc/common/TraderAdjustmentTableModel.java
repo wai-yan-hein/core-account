@@ -13,6 +13,7 @@ import com.acc.model.Gl;
 import com.acc.model.GlKey;
 import com.acc.model.TraderA;
 import com.acc.model.VDescription;
+import com.common.DateLockUtil;
 import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
@@ -120,6 +121,9 @@ public class TraderAdjustmentTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         Gl gl = listVGl.get(row);
+        if (gl.isTranLock()) {
+            return false;
+        }
         if (column == 1) {
             if (gl.getKey().getGlCode() != null) {
                 return !ProUtil.isDisableDep();
@@ -328,6 +332,10 @@ public class TraderAdjustmentTableModel extends AbstractTableModel {
 
     private void save(Gl gl, int row, int column) {
         if (isValidEntry(gl, row, column)) {
+            if (DateLockUtil.isLockDate(gl.getGlDate())) {
+                DateLockUtil.showMessage(parent);
+                return;
+            }
             try {
                 accountRepo.save(gl).subscribe((t) -> {
                     if (t != null) {

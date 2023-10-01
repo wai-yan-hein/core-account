@@ -41,7 +41,7 @@ public class RetOutServiceImpl implements RetOutService {
     public RetOutHis save(RetOutHis rin) {
         rin.setVouDate(Util1.toDateTime(rin.getVouDate()));
         if (Util1.isNullOrEmpty(rin.getKey().getVouNo())) {
-            rin.getKey().setVouNo(getVoucherNo(rin.getKey().getDeptId(), rin.getMacId(), rin.getKey().getCompCode()));
+            rin.getKey().setVouNo(getVoucherNo(rin.getDeptId(), rin.getMacId(), rin.getKey().getCompCode()));
         }
         List<RetOutHisDetail> listSD = rin.getListRD();
         List<RetOutKey> listDel = rin.getListDel();
@@ -53,10 +53,10 @@ public class RetOutServiceImpl implements RetOutService {
             RetOutHisDetail cSd = listSD.get(i);
             if (Util1.isNullOrEmpty(cSd.getKey())) {
                 RetOutKey key = new RetOutKey();
-                key.setDeptId(rin.getKey().getDeptId());
                 key.setCompCode(rin.getKey().getCompCode());
                 key.setVouNo(vouNo);
                 key.setUniqueId(0);
+                cSd.setDeptId(rin.getDeptId());
                 cSd.setKey(key);
             }
             if (cSd.getStockCode() != null) {
