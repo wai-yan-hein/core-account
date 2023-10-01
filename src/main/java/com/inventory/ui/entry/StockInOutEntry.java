@@ -470,6 +470,11 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
         } else if (Util1.getDouble(txtInQty.getValue()) + Util1.getDouble(txtOutQty.getValue()) <= 0) {
             status = false;
             JOptionPane.showMessageDialog(this, "No records.");
+        } else if (!Util1.isDateBetween(txtDate.getDate())) {
+            JOptionPane.showMessageDialog(this, "Invalid Date.",
+                    "Validation.", JOptionPane.ERROR_MESSAGE);
+            status = false;
+            txtDate.requestFocus();
         } else {
             io.setDescription(txtDesp.getText());
             io.setRemark(txtRemark.getText());

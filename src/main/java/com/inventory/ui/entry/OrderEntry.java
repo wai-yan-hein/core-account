@@ -374,6 +374,11 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                     "No Trader.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtLocation.requestFocus();
+        } else if (!Util1.isDateBetween(txtOrderDate.getDate())) {
+            JOptionPane.showMessageDialog(this, "Invalid Date.",
+                    "Validation.", JOptionPane.ERROR_MESSAGE);
+            status = false;
+            txtOrderDate.requestFocus();
         } else {
             orderHis.setCreditTerm(Util1.convertToLocalDateTime(txtDueDate.getDate()));
             SaleMan sm = saleManCompleter.getSaleMan();

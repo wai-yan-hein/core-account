@@ -177,6 +177,16 @@ public class ProjectSetup extends javax.swing.JPanel implements SelectionObserve
         } else if (txtProjectName.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Invalid Project Name.");
             return false;
+        } else if (!Util1.isDateBetween(txtStartDate.getDate())) {
+            JOptionPane.showMessageDialog(this, "Invalid Start Date.",
+                    "Validation.", JOptionPane.ERROR_MESSAGE);
+            txtStartDate.requestFocus();
+            return false;
+        } else if (!Util1.isDateBetween(txtEndDate.getDate())) {
+            JOptionPane.showMessageDialog(this, "Invalid End Date.",
+                    "Validation.", JOptionPane.ERROR_MESSAGE);
+            txtEndDate.requestFocus();
+            return false;
         } else {
             ProjectKey key = new ProjectKey();
             key.setCompCode(Global.compCode);

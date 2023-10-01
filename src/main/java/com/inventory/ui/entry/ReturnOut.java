@@ -385,6 +385,11 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                     "No RetIn Record.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtLocation.requestFocus();
+        } else if (!Util1.isDateBetween(txtVouDate.getDate())) {
+            JOptionPane.showMessageDialog(this, "Invalid Date.",
+                    "Validation.", JOptionPane.ERROR_MESSAGE);
+            status = false;
+            txtVouDate.requestFocus();
         } else {
             ri.setRemark(txtRemark.getText());
             ri.setDiscP(Util1.getFloat(txtVouDiscP.getValue()));

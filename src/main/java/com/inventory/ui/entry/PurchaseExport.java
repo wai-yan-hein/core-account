@@ -443,6 +443,11 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
                     "Choose Supplier.", JOptionPane.ERROR_MESSAGE);
             status = false;
             txtCus.requestFocus();
+        } else if (!Util1.isDateBetween(txtPurDate.getDate())) {
+            JOptionPane.showMessageDialog(this, "Invalid Date.",
+                    "Validation.", JOptionPane.ERROR_MESSAGE);
+            status = false;
+            txtPurDate.requestFocus();
         } else {
             String traderCode = traderAutoCompleter.getTrader().getKey().getCode();
             ph.setRemark(txtRemark.getText());

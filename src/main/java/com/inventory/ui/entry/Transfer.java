@@ -303,6 +303,11 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             status = false;
             JOptionPane.showMessageDialog(this, "Can't transfer the same location.");
             txtTo.requestFocus();
+        } else if (!Util1.isDateBetween(txtDate.getDate())) {
+            JOptionPane.showMessageDialog(this, "Invalid Date.",
+                    "Validation.", JOptionPane.ERROR_MESSAGE);
+            txtDate.requestFocus();
+            status = false;
         } else {
             io.setRefNo(txtRefNo.getText());
             io.setRemark(txtRemark.getText());

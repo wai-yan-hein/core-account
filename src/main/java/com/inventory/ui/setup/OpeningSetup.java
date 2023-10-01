@@ -6,6 +6,7 @@
 package com.inventory.ui.setup;
 
 import com.common.DecimalFormatRender;
+import com.common.ExcelExporter;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -28,7 +29,11 @@ import java.awt.Color;
 import java.awt.FileDialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
@@ -37,7 +42,10 @@ import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -61,6 +69,9 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     private JProgressBar progress;
     private SelectionObserver observer;
     private Mono<List<Location>> monoLoc;
+    private final ExcelExporter exporter = new ExcelExporter();
+    @Autowired
+    private TaskExecutor taskExecutor;
 
     public JProgressBar getProgress() {
         return progress;
@@ -130,6 +141,8 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         userRepo.getDefaultCurrency().doOnSuccess((c) -> {
             currencyAAutoCompleter.setCurrency(c);
         }).subscribe();
+        exporter.setObserver(this);
+        exporter.setTaskExecutor(taskExecutor);
     }
 
     private void initTable() {
@@ -232,6 +245,11 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
             status = false;
             JOptionPane.showMessageDialog(this, "Invalid Currency.");
             txtCurrency.requestFocus();
+        } else if (!Util1.isDateBetween(txtOPDate.getDate())) {
+            JOptionPane.showMessageDialog(this, "Invalid Date.",
+                    "Validation.", JOptionPane.ERROR_MESSAGE);
+            status = false;
+            txtOPDate.requestFocus();
         }
         return status;
     }
@@ -371,6 +389,12 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         lblRecord.setText(String.valueOf(listDetail.size() - 1));
     }
 
+    private void exportTemplate() {
+        inventoryRepo.getStock(true).subscribe((st) -> {
+            exporter.exportOpeningTemplate(st, "Opening Template");
+        });
+    }
+
     private void chooseFile() {
         FileDialog d = new FileDialog(Global.parentForm, "CSV FIle", FileDialog.LOAD);
         d.setDirectory("D:\\");
@@ -384,59 +408,87 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     }
 
     private void readFile(String path) {
-        /*HashMap<String, Stock> hm = new HashMap<>();
-        listStock = inventoryRepo.getStock(false);
-        if (!listStock.isEmpty()) {
-        for (Stock s : listStock) {
-        hm.put(s.getUserCode().toLowerCase(), s);
-        }
-        }
-        String line;
-        String splitBy = ",";
-        int lineCount = 0;
         List<OPHisDetail> listOP = new ArrayList<>();
         try {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(
-        new FileInputStream(path), "UTF8"))) {
-        while ((line = br.readLine()) != null) //returns a Boolean value
-        {
-        OPHisDetail op = new OPHisDetail();
-        String[] data = line.split(splitBy);    // use comma as separator
-        String stockCode = null;
-        String qty = null;
-        String price = null;
-        lineCount++;
-        try {
-        stockCode = data[0];
-        qty = data[1].replace("\"", "");
-        price = data[2].replace("\"", "");
-        
-        } catch (IndexOutOfBoundsException e) {
-        //JOptionPane.showMessageDialog(Global.parentForm, "FORMAT ERROR IN LINE:" + lineCount + e.getMessage());
-        }
-        Stock s = hm.get(stockCode.toLowerCase());
-        if (s != null) {
-        op.setStockCode(s.getKey().getStockCode());
-        op.setQty(Util1.getFloat(qty));
-        op.setPrice(Util1.getFloat(price));
-        op.setAmount(op.getQty() * op.getPrice());
-        op.setUnitCode("pcs");
-        if (op.getQty() != 0) {
-        listOP.add(op);
-        }
-        } else {
-        log.info(stockCode + "\n");
-        }
-        }
-        openingTableModel.setListDetail(listOP);
-        calculatAmount();
-        }
+            progress.setIndeterminate(true);
+            Reader in = new FileReader(path);
+            CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
+                    .setHeader()
+                    .setSkipHeaderRecord(true)
+                    .setAllowMissingColumnNames(true)
+                    .setIgnoreEmptyLines(true)
+                    .setIgnoreHeaderCase(true)
+                    .build();
+            Iterable<CSVRecord> records = csvFormat.parse(in);
+            records.forEach((row) -> {
+                OPHisDetail op = new OPHisDetail();
+                op.setStockCode(row.isMapped("SystemCode") ? Util1.convertToUniCode(row.get("SystemCode")) : "");
+                op.setStockName(row.isMapped("StockName") ? Util1.convertToUniCode(row.get("StockName")) : "");
+                op.setWeight(row.isMapped("Weight") ? Float.valueOf(row.get("Weight")) : 0.0f);
+                op.setWeightUnit(row.isMapped("WeightUnit") ? Util1.convertToUniCode(row.get("WeightUnit")) : "");
+                op.setQty(row.isMapped("Qty") ? Float.valueOf(row.get("Qty")) : 0.0f);
+                op.setUnitCode(row.isMapped("Unit") ? Util1.convertToUniCode(row.get("Unit")) : "");
+                op.setPrice(row.isMapped("Price") ? Float.valueOf(row.get("Price")) : 0.0f);
+                op.setAmount(op.getQty() * op.getPrice());
+                listOP.add(op);
+
+            });
+            openingTableModel.setListDetail(listOP);
+            calculatAmount();
+            progress.setIndeterminate(false);
         } catch (IOException e) {
-        log.error("Read CSV File :" + e.getMessage());
-        
-        }*/
+            progress.setIndeterminate(false);
+            log.error("readFile : " + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Invalid Format.");
+        }
     }
 
+//    private void readFile(String path) {
+//        String line;
+//        String splitBy = ",";
+//        int lineCount = 0;
+//        List<OPHisDetail> listOP = new ArrayList<>();
+//        try {
+//            try (BufferedReader br = new BufferedReader(new InputStreamReader(
+//                    new FileInputStream(path), "UTF8"))) {
+//                while ((line = br.readLine()) != null) //returns a Boolean value
+//                {
+//                    OPHisDetail op = new OPHisDetail();
+//                    String[] data = line.split(splitBy);    // use comma as separator
+//                    String stockCode = null;
+//                    String qty = null;
+//                    String price = null;
+//                    lineCount++;
+//                    try {
+//                        stockCode = data[0];
+//                        qty = data[1].replace("\"", "");
+//                        price = data[2].replace("\"", "");
+//
+//                    } catch (IndexOutOfBoundsException e) {
+//                        //JOptionPane.showMessageDialog(Global.parentForm, "FORMAT ERROR IN LINE:" + lineCount + e.getMessage());
+//                    }
+//                    Stock s = hm.get(stockCode.toLowerCase());
+//                    if (s != null) {
+//                        op.setStockCode(s.getKey().getStockCode());
+//                        op.setQty(Util1.getFloat(qty));
+//                        op.setPrice(Util1.getFloat(price));
+//                        op.setAmount(op.getQty() * op.getPrice());
+//                        op.setUnitCode("pcs");
+//                        if (op.getQty() != 0) {
+//                            listOP.add(op);
+//                        }
+//                    } else {
+//                        log.info(stockCode + "\n");
+//                    }
+//                }
+//                openingTableModel.setListDetail(listOP);
+//                calculatAmount();
+//            }
+//        } catch (IOException e) {
+//            log.error("Read CSV File :" + e.getMessage());
+//
+//        }
+//    }
     private void observeMain() {
         observer.selected("control", this);
         observer.selected("save", true);
@@ -475,7 +527,9 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         lblRecord = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        btnImport = new javax.swing.JButton();
+        btnExport = new javax.swing.JButton();
+        lblMessage = new javax.swing.JLabel();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -543,7 +597,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                         .addComponent(jLabel8)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(txtCurrency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 327, Short.MAX_VALUE)
                 .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -632,13 +686,24 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         lblRecord.setFont(Global.lableFont);
         lblRecord.setText("0");
 
-        jButton1.setFont(Global.lableFont);
-        jButton1.setText("Import");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnImport.setFont(Global.lableFont);
+        btnImport.setText("Import");
+        btnImport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnImportActionPerformed(evt);
             }
         });
+
+        btnExport.setFont(Global.lableFont);
+        btnExport.setText("Export");
+        btnExport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportActionPerformed(evt);
+            }
+        });
+
+        lblMessage.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblMessage.setText("-");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -652,9 +717,13 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jLabel7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblRecord, javax.swing.GroupLayout.DEFAULT_SIZE, 296, Short.MAX_VALUE)
-                        .addGap(329, 329, 329)
-                        .addComponent(jButton1)
+                        .addComponent(lblRecord, javax.swing.GroupLayout.DEFAULT_SIZE, 411, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblMessage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnExport)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnImport)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -680,7 +749,9 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                     .addComponent(jLabel6)
                     .addComponent(jLabel7)
                     .addComponent(lblRecord)
-                    .addComponent(jButton1))
+                    .addComponent(btnImport)
+                    .addComponent(btnExport)
+                    .addComponent(lblMessage))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -703,14 +774,19 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
         // TODO add your handling code here:
     }//GEN-LAST:event_txtQtyActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnImportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImportActionPerformed
         // TODO add your handling code here:
         chooseFile();
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnImportActionPerformed
+
+    private void btnExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportActionPerformed
+        exportTemplate();        // TODO add your handling code here:
+    }//GEN-LAST:event_btnExportActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton btnExport;
+    private javax.swing.JButton btnImport;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -721,6 +797,7 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel lblMessage;
     private javax.swing.JLabel lblRecord;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JTable tblOpening;
@@ -778,6 +855,14 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                     setVoucher(t);
                 }).subscribe();
             }
+        } else if (source.equals(ExcelExporter.MESSAGE)) {
+            lblMessage.setText(selectObj.toString());
+        } else if (source.equals(ExcelExporter.FINISH)) {
+            btnExport.setEnabled(true);
+            lblMessage.setText(selectObj.toString());
+        } else if (source.equals(ExcelExporter.ERROR)) {
+            btnExport.setEnabled(true);
+            lblMessage.setText(selectObj.toString());
         }
         if (source.toString().equals("CAL-TOTAL")) {
             calculatAmount();
