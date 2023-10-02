@@ -7,6 +7,7 @@ package com.inventory.ui.entry;
 
 import com.common.ColumnColorCellRenderer;
 import com.common.CustomTableCellRenderer;
+import com.common.DateLockUtil;
 import com.repo.AccountRepo;
 import com.common.DecimalFormatRender;
 import com.common.Global;
@@ -441,6 +442,11 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
     public void saveSale(boolean print) {
         if (isValidEntry() && milingRawTableModel.isValidEntry()
                 && milingOutTableModel.isValidEntry() && milingExpenseTableModel.isValidEntry()) {
+            if (DateLockUtil.isLockDate(txtSaleDate.getDate())) {
+                DateLockUtil.showMessage(this);
+                txtSaleDate.requestFocus();
+                return;
+            }
             milling.setListRaw(milingRawTableModel.getListDetail());
             milling.setListRawDel(milingRawTableModel.getDelList());
             milling.setListOutput(milingOutTableModel.getListDetail());
@@ -743,6 +749,10 @@ public class MillingEntry extends javax.swing.JPanel implements SelectionObserve
                 lblStatus.setForeground(Color.RED);
                 disableForm(false);
                 observer.selected("delete", true);
+            } else if (DateLockUtil.isLockDate(sh.getVouDate())) {
+                lblStatus.setText(DateLockUtil.MESSAGE);
+                lblStatus.setForeground(Color.RED);
+                disableForm(false);
             } else {
                 lblStatus.setText("EDIT");
                 lblStatus.setForeground(Color.blue);

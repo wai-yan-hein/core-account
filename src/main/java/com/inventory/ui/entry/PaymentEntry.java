@@ -7,6 +7,7 @@ package com.inventory.ui.entry;
 import com.repo.AccountRepo;
 import com.acc.common.COAComboBoxModel;
 import com.acc.model.ChartOfAccount;
+import com.common.DateLockUtil;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ProUtil;
@@ -52,8 +53,6 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -264,6 +263,11 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
 
     private void savePayment(boolean print) {
         if (isValidEntry() && tableModel.isValidEntry()) {
+            if (DateLockUtil.isLockDate(txtVouDate.getDate())) {
+                DateLockUtil.showMessage(this);
+                txtVouDate.requestFocus();
+                return;
+            }
             observer.selected("save", false);
             progress.setIndeterminate(true);
             ph.setListDetail(tableModel.getPaymentList());
@@ -446,6 +450,11 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
             observer.selected("print", true);
         } else if (ph.isVouLock()) {
             lblStatus.setText("Voucher is Lock.");
+            lblStatus.setForeground(Color.RED);
+            enableForm(false);
+            observer.selected("print", true);
+        } else if (DateLockUtil.isLockDate(ph.getVouDate())) {
+            lblStatus.setText(DateLockUtil.MESSAGE);
             lblStatus.setForeground(Color.RED);
             enableForm(false);
             observer.selected("print", true);

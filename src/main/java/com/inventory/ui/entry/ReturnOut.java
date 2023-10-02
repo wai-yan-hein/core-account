@@ -6,6 +6,7 @@
 package com.inventory.ui.entry;
 
 import com.CloudIntegration;
+import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.KeyPropagate;
@@ -305,6 +306,11 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
 
     public void saveRetIn(boolean print) {
         if (isValidEntry() && roTableModel.isValidEntry()) {
+            if (DateLockUtil.isLockDate(txtVouDate.getDate())) {
+                DateLockUtil.showMessage(this);
+                txtVouDate.requestFocus();
+                return;
+            }
             progress.setIndeterminate(true);
             observer.selected("save", false);
             ri.setListRD(roTableModel.getListDetail());
@@ -545,6 +551,10 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
                             disableForm(false);
                         } else if (Util1.getBoolean(ri.getDeleted())) {
                             lblStatus.setText("DELETED");
+                            lblStatus.setForeground(Color.RED);
+                            disableForm(false);
+                        } else if (DateLockUtil.isLockDate(ri.getVouDate())) {
+                            lblStatus.setText(DateLockUtil.MESSAGE);
                             lblStatus.setForeground(Color.RED);
                             disableForm(false);
                         } else {

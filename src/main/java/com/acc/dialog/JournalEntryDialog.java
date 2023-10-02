@@ -227,6 +227,7 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         if (isValidEntry() && isValidData()) {
             if (DateLockUtil.isLockDate(txtVouDate.getDate())) {
                 DateLockUtil.showMessage(this);
+                txtVouDate.requestFocus();
                 return false;
             }
             List<Gl> list = journalTablModel.getListGV();
@@ -289,9 +290,6 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
             return false;
         } else if (!ProUtil.isValidDate(txtVouDate.getDate())) {
             return false;
-        } else if (DateLockUtil.isLockDate(txtVouDate.getDate())) {
-            DateLockUtil.showMessage(this);
-            return false;
         }
         return true;
     }
@@ -319,6 +317,8 @@ public class JournalEntryDialog extends javax.swing.JDialog implements KeyListen
         txtVouNo.setEditable(false);
         journalTablModel.clear();
         journalTablModel.addEmptyRow();
+        lblMessage.setText(null);
+        enableForm(true);
         if (projectAutoCompleter != null) {
             projectAutoCompleter.setProject(null);
         }

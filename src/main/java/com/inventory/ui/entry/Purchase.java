@@ -6,6 +6,7 @@
 package com.inventory.ui.entry;
 
 import com.CloudIntegration;
+import com.common.DateLockUtil;
 import com.repo.AccountRepo;
 import com.common.DecimalFormatRender;
 import com.common.Global;
@@ -472,6 +473,11 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
 
     public void savePur(boolean print) {
         if (isValidEntry() && purTableModel.isValidEntry()) {
+            if (DateLockUtil.isLockDate(txtPurDate.getDate())) {
+                DateLockUtil.showMessage(this);
+                txtPurDate.requestFocus();
+                return;
+            }
             progress.setIndeterminate(true);
             observer.selected("save", false);
             ph.setListPD(purTableModel.getListDetail());
@@ -753,6 +759,10 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
             disableForm(false);
         } else if (ph.isDeleted()) {
             lblStatus.setText("DELETED");
+            lblStatus.setForeground(Color.RED);
+            disableForm(false);
+        } else if (DateLockUtil.isLockDate(ph.getVouDate())) {
+            lblStatus.setText(DateLockUtil.MESSAGE);
             lblStatus.setForeground(Color.RED);
             disableForm(false);
         } else {

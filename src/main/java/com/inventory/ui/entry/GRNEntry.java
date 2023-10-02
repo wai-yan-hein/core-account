@@ -4,6 +4,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.PanelControl;
@@ -232,6 +233,11 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
         boolean status = false;
         try {
             if (isValidEntry() && tableModel.isValidEntry()) {
+                if (DateLockUtil.isLockDate(txtDate.getDate())) {
+                    DateLockUtil.showMessage(this);
+                    txtDate.requestFocus();
+                    return false;
+                }
                 progress.setIndeterminate(true);
                 observer.selected("save", false);
                 grn.setListDetail(tableModel.getListDetail());
@@ -456,6 +462,10 @@ public class GRNEntry extends javax.swing.JPanel implements SelectionObserver, P
                     lblStatus.setForeground(Color.RED);
                     disableForm(false);
                     observer.selected("delete", true);
+                } else if (DateLockUtil.isLockDate(grn.getVouDate())) {
+                    lblStatus.setText(DateLockUtil.MESSAGE);
+                    lblStatus.setForeground(Color.RED);
+                    disableForm(false);
                 } else {
                     lblStatus.setText("EDIT");
                     lblStatus.setForeground(Color.blue);

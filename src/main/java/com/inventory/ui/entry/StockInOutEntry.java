@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import java.awt.event.KeyEvent;
 import javax.swing.JTable;
@@ -304,6 +305,11 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
 
     public void saveVoucher(boolean print) {
         if (isValidEntry() && isValidDetail()) {
+            if (DateLockUtil.isLockDate(txtDate.getDate())) {
+                DateLockUtil.showMessage(this);
+                txtDate.requestFocus();
+                return;
+            }
             observer.selected("save", true);
             progress.setIndeterminate(true);
             io.setListSH(getListDetail());
@@ -520,6 +526,10 @@ public class StockInOutEntry extends javax.swing.JPanel implements PanelControl,
             } else if (Util1.getBoolean(io.getDeleted())) {
                 lblStatus.setText("DELETED");
                 lblStatus.setForeground(Color.red);
+                disableForm(false);
+            } else if (DateLockUtil.isLockDate(io.getVouDate())) {
+                lblStatus.setText(DateLockUtil.MESSAGE);
+                lblStatus.setForeground(Color.RED);
                 disableForm(false);
             } else {
                 lblStatus.setText("EDIT");

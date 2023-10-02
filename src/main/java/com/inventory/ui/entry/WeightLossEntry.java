@@ -4,6 +4,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.PanelControl;
@@ -157,6 +158,11 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
 
     private void saveVoucher() {
         if (isValidEntry() && tableModel.isValidEntry()) {
+            if (DateLockUtil.isLockDate(txtDate.getDate())) {
+                DateLockUtil.showMessage(this);
+                txtDate.requestFocus();
+                return;
+            }
             progress.setIndeterminate(true);
             observer.selected("save", false);
             his.setListDetail(tableModel.getListDetail());
@@ -295,6 +301,10 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
             } else if (his.isDeleted()) {
                 lblStatus.setText("Voucher is Locked.");
                 lblStatus.setForeground(Color.red);
+                enableControl(false);
+            } else if (DateLockUtil.isLockDate(his.getVouDate())) {
+                lblStatus.setText(DateLockUtil.MESSAGE);
+                lblStatus.setForeground(Color.RED);
                 enableControl(false);
             } else {
                 lblStatus.setText("EDIT");

@@ -9,6 +9,7 @@ import com.user.model.DateLock;
 import java.awt.Component;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -39,10 +40,13 @@ public class DateLockUtil {
     public static boolean isLockDate(Date date) {
         if (listLock != null) {
             for (DateLock dateLock : listLock) {
-                Date startDate = dateLock.getStartDate();
-                Date endDate = dateLock.getEndDate();
-                if ((date.equals(startDate) || date.equals(endDate))
-                        || (date.after(startDate) && date.before(endDate))) {
+                LocalDate startDate = dateLock.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                LocalDate endDate = dateLock.getEndDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                LocalDate checkDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+                // Compare only the date portion (ignoring time)
+                if (checkDate.isEqual(startDate) || checkDate.isEqual(endDate)
+                        || (checkDate.isAfter(startDate) && checkDate.isBefore(endDate))) {
                     return true;
                 }
             }

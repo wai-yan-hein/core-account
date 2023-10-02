@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.KeyPropagate;
@@ -400,6 +401,11 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
 
     public void savePur(boolean print) {
         if (isValidEntry() && purExportTableModel.isValidEntry()) {
+            if (DateLockUtil.isLockDate(txtPurDate.getDate())) {
+                DateLockUtil.showMessage(this);
+                txtPurDate.requestFocus();
+                return;
+            }
             progress.setIndeterminate(true);
             observer.selected("save", false);
             ph.setListPD(purExportTableModel.getListDetail());
@@ -675,6 +681,29 @@ public class PurchaseExport extends javax.swing.JPanel implements SelectionObser
             Integer deptId = ph.getDeptId();
             String vouNo = ph.getKey().getVouNo();
             ph.setVouLock(!deptId.equals(Global.deptId));
+            if (ph.isVouLock()) {
+                lblStatus.setText("Voucher is locked.");
+                lblStatus.setForeground(Color.RED);
+                disableForm(false);
+            } else if (!ProUtil.isSaleEdit()) {
+                lblStatus.setText("No Permission.");
+                lblStatus.setForeground(Color.RED);
+                disableForm(false);
+                observer.selected("print", true);
+            } else if (ph.isDeleted()) {
+                lblStatus.setText("DELETED");
+                lblStatus.setForeground(Color.RED);
+                disableForm(false);
+                observer.selected("delete", true);
+            } else if (DateLockUtil.isLockDate(ph.getVouDate())) {
+                lblStatus.setText(DateLockUtil.MESSAGE);
+                lblStatus.setForeground(Color.RED);
+                disableForm(false);
+            } else {
+                lblStatus.setText("EDIT");
+                lblStatus.setForeground(Color.blue);
+                disableForm(true);
+            }
             inventoryRepo.getPurDetail(vouNo, deptId, local)
                     .subscribe((t) -> {
                         purExportTableModel.setListDetail(t);
