@@ -1476,7 +1476,7 @@ public class ExcelExporter {
     public void exportOpeningTemplate(List<Stock> data, String reportName) {
         observer.selected(MESSAGE, "ready to do." + data.size());
         observer.selected(FINISH, "ready to do." + data.size());
-        String outputPath = OUTPUT_FILE_PATH + reportName.concat(".csv");
+        String outputPath = OUTPUT_FILE_PATH + reportName.concat(".xlsx");
         taskExecutor.execute(() -> {
             try (SXSSFWorkbook workbook = new SXSSFWorkbook(); FileOutputStream outputStream = new FileOutputStream(outputPath)) {
                 workbook.setCompressTempFiles(true); // Enable temporary file compression for improved performance
