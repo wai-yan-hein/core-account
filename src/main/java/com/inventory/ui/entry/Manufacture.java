@@ -5,6 +5,7 @@
 package com.inventory.ui.entry;
 
 import com.CloudIntegration;
+import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.PanelControl;
@@ -268,6 +269,14 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             enableProcess(false);
             lblStatus.setText("DELETED");
             lblStatus.setForeground(Color.red);
+        } else if (DateLockUtil.isLockDate(p.getVouDate())) {
+            lblStatus.setText(DateLockUtil.MESSAGE);
+            lblStatus.setForeground(Color.RED);
+            enableProcess(false);
+        } else if (DateLockUtil.isLockDate(p.getEndDate())) {
+            lblStatus.setText(DateLockUtil.MESSAGE);
+            lblStatus.setForeground(Color.RED);
+            enableProcess(false);
         } else {
             enableProcess(true);
             lblStatus.setText("EDIT");
@@ -313,6 +322,15 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
 
     private void saveProcess() {
         if (isValidProcess() && processHisDetailTableModel.validEntry()) {
+            if (DateLockUtil.isLockDate(txtStartDate.getDate())) {
+                DateLockUtil.showMessage(this);
+                txtStartDate.requestFocus();
+                return;
+            } else if (DateLockUtil.isLockDate(txtEndDate.getDate())) {
+                DateLockUtil.showMessage(this);
+                txtEndDate.requestFocus();
+                return;
+            }
             ph.setListDetail(processHisDetailTableModel.getListDetail());
             progress.setIndeterminate(true);
             observer.selected("save", false);

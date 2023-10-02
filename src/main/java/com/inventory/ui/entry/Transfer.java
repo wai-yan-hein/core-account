@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import java.awt.event.KeyEvent;
 import javax.swing.JTable;
@@ -230,6 +231,11 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
     public boolean saveVoucher(boolean print) {
         boolean status = false;
         if (isValidEntry() && tranTableModel.isValidEntry()) {
+            if (DateLockUtil.isLockDate(txtDate.getDate())) {
+                DateLockUtil.showMessage(this);
+                txtDate.requestFocus();
+                return false;
+            }
             observer.selected("save", false);
             progress.setIndeterminate(true);
             io.setListTD(tranTableModel.getListTransfer());
@@ -370,6 +376,10 @@ public class Transfer extends javax.swing.JPanel implements PanelControl, Select
             } else if (Util1.getBoolean(io.isDeleted())) {
                 lblStatus.setText("DELETED");
                 lblStatus.setForeground(Color.red);
+                disableForm(false);
+            } else if (DateLockUtil.isLockDate(io.getVouDate())) {
+                lblStatus.setText(DateLockUtil.MESSAGE);
+                lblStatus.setForeground(Color.RED);
                 disableForm(false);
             } else {
                 lblStatus.setText("EDIT");

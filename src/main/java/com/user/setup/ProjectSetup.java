@@ -4,6 +4,7 @@
  */
 package com.user.setup;
 
+import com.common.DateLockUtil;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
@@ -16,6 +17,7 @@ import com.repo.UserRepo;
 import com.user.model.Project;
 import com.user.model.ProjectKey;
 import com.user.model.ProjectStatus;
+import java.awt.Color;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
@@ -134,11 +136,37 @@ public class ProjectSetup extends javax.swing.JPanel implements SelectionObserve
         txtStartDate.setDate(p.getStartDate());
         txtEndDate.setDate(p.getEndDate());
         cboStatus.setSelectedIndex(ProjectStatus.valueOf(p.getProjectStatus()).ordinal());
+        if (DateLockUtil.isLockDate(p.getStartDate()) || DateLockUtil.isLockDate(p.getStartDate())) {
+            lblStatus.setText(DateLockUtil.MESSAGE);
+            lblStatus.setForeground(Color.RED);
+            disableForm(false);
+        }
         lblStatus.setText("EDIT");
+    }
+
+    private void disableForm(boolean status) {
+        txtProjectNo.setEnabled(status);
+        txtProjectName.setEnabled(status);
+        txtBudget.setEnabled(status);
+        txtStartDate.setEnabled(status);
+        txtEndDate.setEnabled(status);
+        observer.selected("save", status);
+        observer.selected("delete", status);
+        observer.selected("print", status);
+
     }
 
     private void saveProject() {
         if (isValidEntry()) {
+            if (DateLockUtil.isLockDate(txtStartDate.getDate())) {
+                DateLockUtil.showMessage(this);
+                txtStartDate.requestFocus();
+                return;
+            } else if (DateLockUtil.isLockDate(txtEndDate.getDate())) {
+                DateLockUtil.showMessage(this);
+                txtEndDate.requestFocus();
+                return;
+            }
             progress.setIndeterminate(true);
             userRepo.save(p).doOnSuccess((t) -> {
                 if (lblStatus.getText().equals("NEW")) {

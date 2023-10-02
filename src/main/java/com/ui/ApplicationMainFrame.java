@@ -643,7 +643,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 payment.initMain();
                 return payment;
             }
-            case "Milling Entry" -> {
+            case "Milling Entry", "Milling" -> {
                 millingEntry.setName(menuName);
                 millingEntry.setObserver(this);
                 millingEntry.setProgress(progress);
@@ -769,13 +769,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 traderSetup.initMain();
                 return traderSetup;
             }
-            case "Milling" -> {
-                milingEntry.setName(menuName);
-                milingEntry.setObserver(this);
-                milingEntry.setProgress(progress);
-                milingEntry.initMain();
-                return milingEntry;
-            }
             case "Trader Adjustment" -> {
                 TraderAdjustment adj = new TraderAdjustment();
                 adj.setName(menuName);
@@ -861,7 +854,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             departmentAssign();
             initMenu();
             sseListener();
-            
+
             lblCompName.setText(Global.companyName);
             lblUserName.setText(Global.loginUser.getUserLongName());
             userRepo.setupProperty().doOnSuccess((u) -> {

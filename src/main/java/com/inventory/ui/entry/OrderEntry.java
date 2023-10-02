@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.JasperReportUtil;
@@ -336,6 +337,11 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
 
     public void saveOrder(boolean print) {
         if (isValidEntry() && orderTableModel.isValidEntry()) {
+            if (DateLockUtil.isLockDate(txtOrderDate.getDate())) {
+                DateLockUtil.showMessage(this);
+                txtOrderDate.requestFocus();
+                return;
+            }
             progress.setIndeterminate(true);
             orderHis.setListSH(orderTableModel.getListDetail());
             orderHis.setListDel(orderTableModel.getDelList());
@@ -519,6 +525,10 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
                             lblStatus.setForeground(Color.RED);
                             disableForm(false);
                             observer.selected("delete", true);
+                        } else if (DateLockUtil.isLockDate(orderHis.getVouDate())) {
+                            lblStatus.setText(DateLockUtil.MESSAGE);
+                            lblStatus.setForeground(Color.RED);
+                            disableForm(false);
                         } else {
                             lblStatus.setText("EDIT");
                             lblStatus.setForeground(Color.blue);

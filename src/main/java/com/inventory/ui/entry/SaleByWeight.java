@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.common.DateLockUtil;
 import com.repo.AccountRepo;
 import com.common.DecimalFormatRender;
 import com.common.Global;
@@ -514,6 +515,11 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
 
     public void saveSale(boolean print) {
         if (isValidEntry() && isValidDetail()) {
+            if (DateLockUtil.isLockDate(txtSaleDate.getDate())) {
+                DateLockUtil.showMessage(this);
+                txtSaleDate.requestFocus();
+                return;
+            }
             observer.selected("save", false);
             if (Util1.getBoolean(ProUtil.getProperty("trader.balance"))) {
                 String date = Util1.toDateStr(txtSaleDate.getDate(), "yyyy-MM-dd");
@@ -804,6 +810,10 @@ public class SaleByWeight extends javax.swing.JPanel implements SelectionObserve
                     lblStatus.setForeground(Color.RED);
                     disableForm(false);
                     observer.selected("delete", true);
+                } else if (DateLockUtil.isLockDate(saleHis.getVouDate())) {
+                    lblStatus.setText(DateLockUtil.MESSAGE);
+                    lblStatus.setForeground(Color.RED);
+                    disableForm(false);
                 } else {
                     lblStatus.setText("EDIT");
                     lblStatus.setForeground(Color.blue);

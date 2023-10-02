@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.setup;
 
+import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.ExcelExporter;
 import com.common.Global;
@@ -197,6 +198,11 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
 
     private void saveOpening() {
         if (isValidEntry() && openingTableModel.isValidEntry()) {
+            if (DateLockUtil.isLockDate(txtOPDate.getDate())) {
+                DateLockUtil.showMessage(this);
+                txtOPDate.requestFocus();
+                return;
+            }
             progress.setIndeterminate(true);
             observer.selected("save", false);
             if (lblStatus.getText().equals("NEW")) {
@@ -301,6 +307,10 @@ public class OpeningSetup extends javax.swing.JPanel implements PanelControl, Se
                 txtRemark.setText(oPHis.getRemark());
                 if (oPHis.isDeleted()) {
                     lblStatus.setText("DELETED");
+                    lblStatus.setForeground(Color.RED);
+                    disableForm(false);
+                } else if (DateLockUtil.isLockDate(oPHis.getVouDate())) {
+                    lblStatus.setText(DateLockUtil.MESSAGE);
                     lblStatus.setForeground(Color.RED);
                     disableForm(false);
                 } else {

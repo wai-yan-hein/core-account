@@ -5,6 +5,7 @@
  */
 package com.inventory.ui.entry;
 
+import com.common.DateLockUtil;
 import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.JasperReportUtil;
@@ -243,6 +244,11 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
     public void saveSale(boolean print) {
         try {
             if (isValidEntry() && tableModel.isValidEntry()) {
+                if (DateLockUtil.isLockDate(txtSaleDate.getDate())) {
+                    DateLockUtil.showMessage(this);
+                    txtSaleDate.requestFocus();
+                    return;
+                }
                 saleHis.setListSH(tableModel.getListDetail());
                 saleHis.setListDel(tableModel.getDelList());
                 observer.selected("save", false);
@@ -392,6 +398,10 @@ public class RFID extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     observer.selected("print", true);
                 } else if (Util1.getBoolean(sh.isDeleted())) {
                     lblStatus.setText("DELETED");
+                    lblStatus.setForeground(Color.RED);
+                    disableForm(false);
+                } else if (DateLockUtil.isLockDate(saleHis.getVouDate())) {
+                    lblStatus.setText(DateLockUtil.MESSAGE);
                     lblStatus.setForeground(Color.RED);
                     disableForm(false);
                 } else {
