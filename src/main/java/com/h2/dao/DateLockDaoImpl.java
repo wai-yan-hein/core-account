@@ -18,7 +18,7 @@ public class DateLockDaoImpl extends AbstractDao<DateLockKey, DateLock> implemen
 
     @Override
     public List<DateLock> findAll(String compCode) {
-        String hsql = "select o from DateLock o where o.compCode ='" + compCode + "'";
+        String hsql = "select o from DateLock o where o.key.compCode ='" + compCode + "'";
         return findHSQL(hsql);
     }
 
