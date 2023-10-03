@@ -327,7 +327,7 @@ public class DrCrVoucher extends javax.swing.JPanel implements SelectionObserver
                 p.put("p_vou_type", gl.getTranSource());
                 Util1.initJasperContext();
                 ObjectMapper mapper = new ObjectMapper();
-                JsonNode node = mapper.readTree(ProUtil.gson.toJson(list));
+                JsonNode node = mapper.readTree(Util1.gson.toJson(list));
                 JsonDataSource ds = new JsonDataSource(node, null) {
                 };
                 JasperPrint js = JasperFillManager.fillReport(rpPath, p, ds);

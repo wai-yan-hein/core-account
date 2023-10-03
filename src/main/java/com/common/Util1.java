@@ -77,6 +77,7 @@ public class Util1 {
     public static String SYNC_DATE;
     public static final Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+            .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeAdapter())
             .create();
     public static HashMap<String, String> hmSysProp = new HashMap<>();
     public static boolean DARK_MODE = false;
@@ -1173,5 +1174,12 @@ public class Util1 {
         Instant instant = date.toInstant();
         ZoneId zoneId = ZoneId.systemDefault();
         return instant.atZone(zoneId).toLocalDate();
+    }
+
+    public static ZonedDateTime toZonedDateTime(LocalDateTime ldt) {
+        if (ldt != null) {
+            return ldt.atZone(ZoneId.systemDefault());
+        }
+        return null;
     }
 }

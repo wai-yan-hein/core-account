@@ -4,8 +4,6 @@
  */
 package com.inventory.ui.setup;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.ReportFilter;
@@ -30,7 +28,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
-import java.text.DateFormat;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
@@ -41,8 +38,6 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -51,7 +46,6 @@ import reactor.core.publisher.Mono;
 @Component
 public class PatternSetup extends javax.swing.JPanel implements PanelControl, SelectionObserver {
 
-    public static final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     private final StockCompleterTableModel stockTableModel = new StockCompleterTableModel();
     private final PatternTableModel patternTableModel = new PatternTableModel();
     private SelectionObserver observer;

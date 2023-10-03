@@ -18,7 +18,6 @@ import com.common.Global;
 import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.google.gson.JsonSyntaxException;
 import com.user.model.Currency;
 import java.awt.HeadlessException;
 import java.time.LocalDateTime;
@@ -336,21 +335,18 @@ public class TraderAdjustmentTableModel extends AbstractTableModel {
                 DateLockUtil.showMessage(parent);
                 return;
             }
-            try {
-                accountRepo.save(gl).subscribe((t) -> {
-                    if (t != null) {
-                        listVGl.set(row, t);
-                        addNewRow();
-                        parent.setRowSelectionInterval(row + 1, row + 1);
-                        parent.setColumnSelectionInterval(0, 0);
-                        observer.selected("CAL-TOTAL", "-");
-                    }
-                });
-
-            } catch (JsonSyntaxException ex) {
-                JOptionPane.showMessageDialog(Global.parentForm, ex.getMessage());
-                log.error("Save Gl :" + ex.getMessage());
-            }
+            accountRepo.save(gl).subscribe((t) -> {
+                if (t != null) {
+                    listVGl.set(row, t);
+                    addNewRow();
+                    parent.setRowSelectionInterval(row + 1, row + 1);
+                    parent.setColumnSelectionInterval(0, 0);
+                    observer.selected("CAL-TOTAL", "-");
+                }
+            }, (e) -> {
+                JOptionPane.showMessageDialog(parent, e.getMessage());
+                log.error("saveGl : " + e.getMessage());
+            });
         }
     }
 

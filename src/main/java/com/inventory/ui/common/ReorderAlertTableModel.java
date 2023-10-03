@@ -5,10 +5,7 @@
  */
 package com.inventory.ui.common;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.inventory.model.ReorderLevel;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;
@@ -23,7 +20,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Slf4j
 public class ReorderAlertTableModel extends AbstractTableModel {
 
-    public static final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     private final String[] columnNames = {"Stock Code", "Stock Name", "Min Qty", "Min Unit", "Bal Qty", "Bal Unit", "Reorder Qty", "Reorder Unit"};
     private List<ReorderLevel> listReorder = new ArrayList<>();
     private WebClient inventoryApi;

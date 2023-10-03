@@ -599,7 +599,11 @@ public class H2Repo {
     }
 
     public Mono<List<DateLock>> getDateLock() {
-        return Mono.justOrEmpty(dateLockService.findAll(Global.compCode));
+        return Flux.fromIterable(dateLockService.findAll(Global.compCode)).map(dateLock -> {
+            dateLock.setCreatedDateTime(Util1.toZonedDateTime(dateLock.getCreatedDate()));
+            dateLock.setUpdatedDateTime(Util1.toZonedDateTime(dateLock.getUpdatedDate()));
+            return dateLock;
+        }).collectList();
     }
 
     public Mono<List<Currency>> getCurrency() {

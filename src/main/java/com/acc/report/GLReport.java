@@ -284,7 +284,7 @@ public class GLReport extends javax.swing.JPanel implements SelectionObserver,
             dialog.setAccountRepo(accountRepo);
             dialog.setUserRepo(userRepo);
             dialog.initMain();
-            dialog.setSize(Global.width - 50, Global.height - 50);
+            dialog.setSize(Global.width - 20, Global.height - 20);
             dialog.setLocationRelativeTo(null);
         }
         dialog.setCoaCode(coaCode);

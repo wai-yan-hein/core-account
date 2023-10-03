@@ -4,11 +4,11 @@
  */
 package com.inventory.ui.entry.dialog;
 
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.common.Global;
 import com.common.TableCellRender;
+import com.common.Util1;
 import com.inventory.model.ReorderLevel;
 import com.inventory.ui.common.ReorderTableModel;
 import java.io.File;
@@ -30,7 +30,6 @@ import lombok.extern.slf4j.Slf4j;
 public class ReorderAlertDialog extends javax.swing.JDialog {
 
     private final ReorderTableModel tableModel = new ReorderTableModel();
-    private final Gson gson = new Gson();
 
     /**
      * Creates new form ReorderAlertDialog
@@ -71,7 +70,7 @@ public class ReorderAlertDialog extends javax.swing.JDialog {
             java.lang.reflect.Type listType = new TypeToken<ArrayList<ReorderLevel>>() {
             }.getType();
             JsonReader reader = new JsonReader(new FileReader(fileName, Charset.forName("UTF-8")));
-            List<ReorderLevel> listReoder = gson.fromJson(reader, listType);
+            List<ReorderLevel> listReoder = Util1.gson.fromJson(reader, listType);
             tableModel.setListPattern(listReoder);
         } catch (IOException e) {
             log.error(e.getMessage());

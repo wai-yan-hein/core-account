@@ -202,6 +202,8 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                     sd.setStockName(od.getStockName());
                     sd.setTraderName(od.getTraderName());
                     sd.setRelName(od.getRelName());
+                    sd.setWeight(od.getWeight());
+                    sd.setWeightUnit(od.getWeightUnit());
                     sd.setQty(Util1.getDouble(od.getQty()));
                     sd.setAmount(Util1.getDouble(od.getAmount()));
                     sd.setUnitCode(od.getUnitCode());
@@ -520,7 +522,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
                 orderDialog.setUserRepo(userRepo);
                 orderDialog.setObserver(this);
                 orderDialog.initMain();
-                orderDialog.setSize(Global.width - 50, Global.height - 50);
+                orderDialog.setSize(Global.width - 20, Global.height - 20);
                 orderDialog.setLocationRelativeTo(null);
             }
             orderDialog.search();
@@ -784,7 +786,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
             dialog.setTaskExecutor(taskExecutor);
             dialog.setObserver(this);
             dialog.initMain();
-            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setSize(Global.width - 20, Global.height - 20);
             dialog.setLocationRelativeTo(null);
         }
         dialog.search();
@@ -1416,7 +1418,6 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
         txtOrderNo.setEditable(false);
         txtOrderNo.setFont(Global.textFont);
         txtOrderNo.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-        txtOrderNo.setEnabled(false);
         txtOrderNo.setName("txtCurrency"); // NOI18N
         txtOrderNo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

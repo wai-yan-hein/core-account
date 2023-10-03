@@ -6,17 +6,12 @@
 package com.acc.common;
 
 import com.acc.model.ChartOfAccount;
-import com.common.ReturnObject;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import java.text.DateFormat;
+import com.repo.AccountRepo;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 /**
  *
@@ -25,19 +20,13 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class StandardCOATableModel extends AbstractTableModel {
 
-    private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     private List<ChartOfAccount> listCOA = new ArrayList();
-    String status = "NEW";
     String[] columnNames = {"System Code", "User Code", "Name", "COA-Level", "Mark"};
     private JTable parent;
-    private WebClient inventoryApi;
+    private AccountRepo accountRepo;
 
-    public WebClient getWebClient() {
-        return inventoryApi;
-    }
-
-    public void setWebClient(WebClient inventoryApi) {
-        this.inventoryApi = inventoryApi;
+    public void setAccountRepo(AccountRepo accountRepo) {
+        this.accountRepo = accountRepo;
     }
 
     @Override
@@ -124,13 +113,7 @@ public class StandardCOATableModel extends AbstractTableModel {
     }
 
     private ChartOfAccount save(ChartOfAccount coa) {
-        Mono<ReturnObject> result = inventoryApi.post()
-                .uri("/account/save-coa")
-                .body(Mono.just(coa), ChartOfAccount.class)
-                .retrieve()
-                .bodyToMono(ReturnObject.class);
-        ReturnObject block = result.block();
-        return gson.fromJson(gson.toJson(block.getData()), ChartOfAccount.class);
+        return accountRepo.saveCOA(coa).block();
     }
 
     @Override

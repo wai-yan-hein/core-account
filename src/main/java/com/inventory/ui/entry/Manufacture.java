@@ -243,7 +243,6 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
 
     private void setProcess(ProcessHis p, boolean local) {
         ph = p;
-        Integer deptId = ph.getKey().getDeptId();
         txtVouNo.setText(ph.getKey().getVouNo());
         txtStartDate.setDate(Util1.convertToDate(ph.getVouDate()));
         txtEndDate.setDate(Util1.convertToDate(ph.getEndDate()));

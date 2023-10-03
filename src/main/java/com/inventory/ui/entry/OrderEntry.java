@@ -477,7 +477,7 @@ public class OrderEntry extends javax.swing.JPanel implements SelectionObserver,
             dialog.setUserRepo(userRepo);
             dialog.setObserver(this);
             dialog.initMain();
-            dialog.setSize(Global.width - 50, Global.height - 50);
+            dialog.setSize(Global.width - 20, Global.height - 20);
             dialog.setLocationRelativeTo(null);
         }
         dialog.search();

@@ -18,8 +18,6 @@ import com.common.Util1;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.inventory.editor.BatchAutoCompeter;
 import com.inventory.editor.ExpenseEditor;
 import com.inventory.editor.LocationAutoCompleter;
@@ -66,7 +64,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
-import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
@@ -103,7 +100,6 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
     private final Image searchIcon = new ImageIcon(this.getClass().getResource("/images/search.png")).getImage();
     private final PurchaseTableModel purTableModel = new PurchaseTableModel();
     private PurchaseHistoryDialog dialog;
-    private final Gson gson = new GsonBuilder().setDateFormat(DateFormat.FULL, DateFormat.FULL).create();
     @Autowired
     private InventoryRepo inventoryRepo;
     @Autowired
@@ -906,11 +902,11 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                         param.put("SUBREPORT_DIR", "report/");
                         String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
                         ObjectMapper mapper = new ObjectMapper();
-                        JsonNode n1 = mapper.readTree(gson.toJson(list));
+                        JsonNode n1 = mapper.readTree(Util1.gson.toJson(list));
                         JsonDataSource d1 = new JsonDataSource(n1, null) {
                         };
                         ObjectMapper m2 = new ObjectMapper();
-                        JsonNode n2 = m2.readTree(gson.toJson(listEx));
+                        JsonNode n2 = m2.readTree(Util1.gson.toJson(listEx));
                         JsonDataSource d2 = new JsonDataSource(n2, null) {
                         };
                         param.put("p_sub_data", d2);

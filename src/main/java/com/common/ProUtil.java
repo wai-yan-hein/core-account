@@ -5,9 +5,6 @@
  */
 package com.common;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import java.time.LocalDateTime;
 import java.util.Date;
 import javax.swing.JOptionPane;
 
@@ -17,7 +14,6 @@ import javax.swing.JOptionPane;
  */
 public class ProUtil {
 
-    public static final Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter()).create();
     public static final String FIXED = "fixed.account";
     public static final String CURRENT = "current.account";
     public static final String CAPITAL = "capital.account";
