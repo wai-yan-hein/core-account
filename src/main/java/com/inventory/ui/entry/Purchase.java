@@ -66,6 +66,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.time.LocalDateTime;
 import java.util.Calendar;
@@ -906,7 +907,14 @@ public class Purchase extends javax.swing.JPanel implements SelectionObserver, K
                         param.put("SUBREPORT_DIR", "report/");
                         String reportPath = String.format("report%s%s", File.separator, reportName.concat(".jasper"));
                         ObjectMapper mapper = new ObjectMapper();
-                        JsonNode n1 = mapper.readTree(gson.toJson(list));
+//                        JsonNode n1 = mapper.readTree(gson.toJson(list));
+                        JsonNode n1 = null;
+                        try {
+                            n1 = mapper.readTree(gson.toJson(list));
+                        } catch (IOException e) {
+                            // Handle the exception (e.g., log it or throw a custom exception)
+                            e.printStackTrace();
+                        }
                         JsonDataSource d1 = new JsonDataSource(n1, null) {
                         };
                         ObjectMapper m2 = new ObjectMapper();

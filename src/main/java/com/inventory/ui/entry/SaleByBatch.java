@@ -66,7 +66,6 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JsonDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -698,15 +697,7 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
 
     private void printVoucher(String vouNo, String reportName, boolean print) {
         clear();
-        Mono<byte[]> result = inventoryApi.get()
-                .uri(builder -> builder.path("/report/get-sale-report")
-                .queryParam("vouNo", vouNo)
-                .queryParam("macId", Global.macId)
-                .build())
-                .retrieve()
-                .bodyToMono(ByteArrayResource.class)
-                .map(ByteArrayResource::getByteArray);
-        result.subscribe((t) -> {
+        inventoryRepo.getSaleReport(vouNo).subscribe((t) -> {
             try {
                 if (t != null) {
                     viewReport(t, reportName, print);
@@ -718,6 +709,26 @@ public class SaleByBatch extends javax.swing.JPanel implements SelectionObserver
         }, (e) -> {
             JOptionPane.showMessageDialog(this, e.getMessage());
         });
+//        Mono<byte[]> result = inventoryApi.get()
+//                .uri(builder -> builder.path("/report/getSaleReport")
+//                .queryParam("vouNo", vouNo)
+//                .queryParam("macId", Global.macId)
+//                .build())
+//                .retrieve()
+//                .bodyToMono(ByteArrayResource.class)
+//                .map(ByteArrayResource::getByteArray);
+//        result.subscribe((t) -> {
+//            try {
+//                if (t != null) {
+//                    viewReport(t, reportName, print);
+//                }
+//            } catch (JRException ex) {
+//                log.error("printVoucher : " + ex.getMessage());
+//                JOptionPane.showMessageDialog(this, ex.getMessage());
+//            }
+//        }, (e) -> {
+//            JOptionPane.showMessageDialog(this, e.getMessage());
+//        });
 
     }
 
