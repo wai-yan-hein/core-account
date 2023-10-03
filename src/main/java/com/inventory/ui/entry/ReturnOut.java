@@ -509,7 +509,7 @@ public class ReturnOut extends javax.swing.JPanel implements SelectionObserver, 
             dialog.setCloudIntegration(integration);
             dialog.setObserver(this);
             dialog.initMain();
-            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setSize(Global.width - 20, Global.height - 20);
             dialog.setLocationRelativeTo(null);
         }
         dialog.search();

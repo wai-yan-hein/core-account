@@ -411,7 +411,7 @@ public class PaymentEntry extends javax.swing.JPanel implements SelectionObserve
             dialog.setAccountRepo(accountRepo);
             dialog.setTitle(String.format("%s Payment History Dialog", tranOption.equals("C") ? "Customer" : "Supplier"));
             dialog.initMain();
-            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setSize(Global.width - 20, Global.height - 20);
             dialog.setLocationRelativeTo(null);
         }
         dialog.search();

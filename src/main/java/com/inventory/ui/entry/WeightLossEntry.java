@@ -275,7 +275,7 @@ public class WeightLossEntry extends javax.swing.JPanel implements SelectionObse
             dialog.setIconImage(searchIcon);
             dialog.setObserver(this);
             dialog.initMain();
-            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setSize(Global.width - 20, Global.height - 20);
             dialog.setLocationRelativeTo(null);
         }
         dialog.search();

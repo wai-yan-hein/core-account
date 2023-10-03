@@ -464,7 +464,7 @@ public class Manufacture extends javax.swing.JPanel implements PanelControl, Sel
             dialog.setIntegration(integration);
             dialog.setUserRepo(userRepo);
             dialog.initMain();
-            dialog.setSize(Global.width - 100, Global.height - 100);
+            dialog.setSize(Global.width - 20, Global.height - 20);
             dialog.setLocationRelativeTo(null);
         }
         dialog.searchProcess();
