@@ -18,6 +18,9 @@ public interface MenuDao {
     String getMaxDate();
 
     List<Menu> getMenuTree(String compCode);
-    
+
     List<Menu> getMenuDynamic(String compCode);
+
+    boolean delete(Menu obj);
+
 }

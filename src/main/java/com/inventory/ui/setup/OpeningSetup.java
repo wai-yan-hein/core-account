@@ -24,7 +24,7 @@ import com.repo.InventoryRepo;
 import com.inventory.ui.common.OpeningTableModel;
 import com.inventory.ui.entry.dialog.OPHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
-import com.inventory.ui.setup.dialog.common.StockUnitEditor;
+import com.inventory.editor.StockUnitEditor;
 import com.user.editor.CurrencyAutoCompleter;
 import java.awt.Color;
 import java.awt.FileDialog;

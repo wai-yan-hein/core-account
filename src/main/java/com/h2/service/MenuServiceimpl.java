@@ -44,4 +44,9 @@ public class MenuServiceimpl implements MenuService {
         return dao.getMenuDynamic(compCode);
     }
 
+    @Override
+    public boolean delete(Menu obj) {
+        return dao.delete(obj);
+    }
+
 }

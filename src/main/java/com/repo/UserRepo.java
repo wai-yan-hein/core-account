@@ -579,7 +579,12 @@ public class UserRepo {
                 .uri("/user/deleteMenu")
                 .body(Mono.just(menu), Menu.class)
                 .retrieve()
-                .bodyToMono(Boolean.class);
+                .bodyToMono(Boolean.class)
+                .doOnSuccess((t) -> {
+                    if (localdatabase && t) {
+                        h2Repo.delete(menu);
+                    }
+                });
     }
 
     public Mono<List<Menu>> getMenuParent() {
@@ -878,6 +883,7 @@ public class UserRepo {
                 .retrieve().bodyToFlux(SysProperty.class)
                 .collectList();
     }
+
     public Mono<List<DateLock>> getDateLockByDate(String updatedDate) {
         return userApi.get()
                 .uri(builder -> builder.path("/user/getDateLockByDate")

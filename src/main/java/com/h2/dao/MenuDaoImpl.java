@@ -65,4 +65,10 @@ public class MenuDaoImpl extends AbstractDao<MenuKey, Menu> implements MenuDao {
         return findHSQL(sql);
     }
 
+    @Override
+    public boolean delete(Menu obj) {
+        remove(obj.getKey());
+        return true;
+    }
+
 }

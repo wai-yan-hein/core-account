@@ -4,7 +4,6 @@
  */
 package com.h2.service;
 
-import com.inventory.model.VRoleMenu;
 import com.user.model.Menu;
 import java.util.List;
 
@@ -21,4 +20,6 @@ public interface MenuService {
     List<Menu> getMenuTree(String compCode);
 
     List<Menu> getMenuDynamic(String compCode);
+
+    boolean delete(Menu obj);
 }

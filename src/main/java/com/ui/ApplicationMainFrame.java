@@ -36,6 +36,7 @@ import com.user.model.DepartmentUser;
 import com.inventory.model.VRoleMenu;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.GRNEntry;
+import com.inventory.ui.entry.GradeManagement;
 import com.inventory.ui.entry.Manufacture;
 import com.inventory.ui.entry.OrderEntry;
 import com.user.model.VRoleCompany;
@@ -178,8 +179,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private AparReport aparReport;
     @Autowired
     private TraderSetup traderSetup;
-    @Autowired
-    private MillingEntry milingEntry;
     @Autowired
     private TaskExecutor taskExecutor;
     @Autowired
@@ -649,6 +648,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 millingEntry.setProgress(progress);
                 millingEntry.initMain();
                 return millingEntry;
+            }
+            case "Grade Management" -> {
+                GradeManagement g = new GradeManagement();
+                g.setInventoryRepo(inventoryRepo);
+                g.setProgress(progress);
+                g.initMain();
+                return g;
             }
             case "Menu" -> {
                 menuSetup.setName(menuName);

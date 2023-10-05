@@ -23,7 +23,7 @@ import com.repo.InventoryRepo;
 import com.inventory.ui.common.PatternTableModel;
 import com.inventory.ui.common.StockCompleterTableModel;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
-import com.inventory.ui.setup.dialog.common.StockUnitEditor;
+import com.inventory.editor.StockUnitEditor;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
