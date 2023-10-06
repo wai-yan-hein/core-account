@@ -30,7 +30,7 @@ import com.repo.InventoryRepo;
 import com.inventory.ui.common.TransferTableModel;
 import com.inventory.ui.entry.dialog.TransferHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
-import com.inventory.ui.setup.dialog.common.StockUnitEditor;
+import com.inventory.editor.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
 import java.awt.Color;
 import java.awt.event.ActionEvent;

@@ -34,7 +34,7 @@ import com.inventory.ui.common.SaleByBatchTableModel;
 import com.inventory.ui.common.StockBalanceTableModel;
 import com.inventory.ui.entry.dialog.SaleHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
-import com.inventory.ui.setup.dialog.common.StockUnitEditor;
+import com.inventory.editor.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;

@@ -29,7 +29,7 @@ import com.repo.InventoryRepo;
 import com.inventory.ui.common.ReturnOutTableModel;
 import com.inventory.ui.entry.dialog.RetOutHistoryDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
-import com.inventory.ui.setup.dialog.common.StockUnitEditor;
+import com.inventory.editor.StockUnitEditor;
 import com.toedter.calendar.JTextFieldDateEditor;
 import com.repo.UserRepo;
 import com.user.editor.CurrencyAutoCompleter;

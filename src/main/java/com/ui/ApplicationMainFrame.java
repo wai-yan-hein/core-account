@@ -31,11 +31,13 @@ import com.common.SelectionObserver;
 import com.repo.UserRepo;
 import com.common.Util1;
 import com.h2.dao.DateFilterRepo;
+import com.inventory.model.StockFormula;
 import com.user.setup.MenuSetup;
 import com.user.model.DepartmentUser;
 import com.inventory.model.VRoleMenu;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.GRNEntry;
+import com.inventory.ui.entry.GradeManagement;
 import com.inventory.ui.entry.Manufacture;
 import com.inventory.ui.entry.OrderEntry;
 import com.user.model.VRoleCompany;
@@ -81,6 +83,7 @@ import com.inventory.ui.entry.Transfer;
 import com.inventory.ui.entry.WeightLossEntry;
 import com.inventory.ui.setup.OpeningSetup;
 import com.inventory.ui.setup.PatternSetup;
+import com.inventory.ui.setup.StockFormulaSetup;
 import com.user.dialog.CompanyOptionDialog;
 import com.user.dialog.DepartmentDialog;
 import com.user.dialog.ProgramDownloadDialog;
@@ -119,8 +122,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private AccountRepo accounRepo;
     @Autowired
     private UserRepo userRepo;
-    @Autowired
-    private StockSetup stockSetup;
     @Autowired
     private OpeningSetup openingSetup;
     @Autowired
@@ -178,8 +179,6 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
     private AparReport aparReport;
     @Autowired
     private TraderSetup traderSetup;
-    @Autowired
-    private MillingEntry milingEntry;
     @Autowired
     private TaskExecutor taskExecutor;
     @Autowired
@@ -500,11 +499,23 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return io;
             }
             case "Stock" -> {
-                stockSetup.setName(menuName);
-                stockSetup.setObserver(this);
-                stockSetup.setProgress(progress);
-                stockSetup.initMain();
-                return stockSetup;
+                StockSetup setup = new StockSetup();
+                setup.setName(menuName);
+                setup.setUserRepo(userRepo);
+                setup.setInventoryRepo(inventoryRepo);
+                setup.setObserver(this);
+                setup.setProgress(progress);
+                setup.initMain();
+                return setup;
+            }
+            case "Stock Formula" -> {
+                StockFormulaSetup setup = new StockFormulaSetup();
+                setup.setName(menuName);
+                setup.setInventoryRepo(inventoryRepo);
+                setup.setObserver(this);
+                setup.setProgress(progress);
+                setup.initMain();
+                return setup;
             }
             case "Opening" -> {
                 openingSetup.setName(menuName);
@@ -649,6 +660,13 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 millingEntry.setProgress(progress);
                 millingEntry.initMain();
                 return millingEntry;
+            }
+            case "Grade Management" -> {
+                GradeManagement g = new GradeManagement();
+                g.setInventoryRepo(inventoryRepo);
+                g.setProgress(progress);
+                g.initMain();
+                return g;
             }
             case "Menu" -> {
                 menuSetup.setName(menuName);

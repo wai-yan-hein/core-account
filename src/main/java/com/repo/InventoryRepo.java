@@ -70,6 +70,8 @@ import com.inventory.model.SaleManKey;
 import com.inventory.model.Stock;
 import com.inventory.model.StockBrand;
 import com.inventory.model.StockBrandKey;
+import com.inventory.model.StockCriteria;
+import com.inventory.model.StockFormula;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
@@ -192,6 +194,23 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(Category.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<StockFormula>> getStockFormula() {
+        if (localDatabase) {
+            //return h2Repo.getCategory();
+        }
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getStockFormula")
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(StockFormula.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
@@ -885,6 +904,42 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<List<StockCriteria>> searchStockCriteria(String str) {
+        if (localDatabase) {
+            //return h2Repo.getStock(str);
+        }
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/searchStockCriteria")
+                .queryParam("text", str)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(StockCriteria.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<StockCriteria>> getStockCriteria(boolean active) {
+        if (localDatabase) {
+            //return h2Repo.getStock(str);
+        }
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getStockCriteria")
+                .queryParam("active", active)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(StockCriteria.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<List<Stock>> getService() {
         return inventoryApi.get()
                 .uri(builder -> builder.path("/setup/getService")
@@ -1209,6 +1264,30 @@ public class InventoryRepo {
                 .body(Mono.just(pattern), Pattern.class)
                 .retrieve()
                 .bodyToMono(Pattern.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<StockCriteria> saveStockCriteria(StockCriteria s) {
+        return inventoryApi.post()
+                .uri("/setup/saveStockCriteria")
+                .body(Mono.just(s), StockCriteria.class)
+                .retrieve()
+                .bodyToMono(StockCriteria.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<StockFormula> saveStockFormula(StockFormula s) {
+        return inventoryApi.post()
+                .uri("/setup/saveStockFormula")
+                .body(Mono.just(s), StockFormula.class)
+                .retrieve()
+                .bodyToMono(StockFormula.class)
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();

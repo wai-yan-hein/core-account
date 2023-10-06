@@ -912,6 +912,10 @@ public class H2Repo {
         return Mono.just(true);
     }
 
+    public boolean delete(Menu obj) {
+        return menuService.delete(obj);
+    }
+
     public Mono<Boolean> restoreSale(SaleHisKey key) {
         saleHisService.restore(key);
         return Mono.just(true);
