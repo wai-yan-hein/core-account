@@ -275,11 +275,11 @@ public final class StockCriteriaCompleter implements KeyListener {
         table.scrollRectToVisible(rect);
     }
 
-    public StockCriteria getStockUnit() {
+    public StockCriteria getStockCriteria() {
         return stockUnit;
     }
 
-    public void setStockUnit(StockCriteria stockUnit) {
+    public void setStockCriteria(StockCriteria stockUnit) {
         this.stockUnit = stockUnit;
         this.textComp.setText(this.stockUnit == null ? null : this.stockUnit.getCriteriaName());
     }

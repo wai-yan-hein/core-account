@@ -31,8 +31,8 @@ public class StockFormulaDetailTableModel extends AbstractTableModel {
     private String[] columnNames = {"Code", "Crieria Name", "Percent", "Price"};
     private JTable parent;
     private List<StockFormulaDetail> listDetail = new ArrayList();
-    private SelectionObserver observer;
     private List<StockFormulaDetailKey> listDel = new ArrayList();
+    private SelectionObserver observer;
     private JLabel lblRec;
     private boolean editable = true;
     private String formulaCode;
@@ -127,11 +127,11 @@ public class StockFormulaDetailTableModel extends AbstractTableModel {
                 switch (column) {
                     case 0 -> {
                         //code
-                        record.getCriteriaCode();
+                        return record.getUserCode();
                     }
                     case 1 -> {
                         //code
-                        record.getCriteriaName();
+                        return record.getCriteriaName();
                     }
                     case 2 -> {
                         //percent
@@ -152,52 +152,62 @@ public class StockFormulaDetailTableModel extends AbstractTableModel {
     public void setValueAt(Object value, int row, int column) {
         try {
             StockFormulaDetail record = listDetail.get(row);
-            switch (column) {
-                case 0, 1 -> {
-                    //Code
-                    if (value != null) {
+            if (value != null) {
+                switch (column) {
+                    case 0, 1 -> {
+                        //Code
                         if (value instanceof StockCriteria s) {
+                            record.setUserCode(s.getUserCode());
                             record.setCriteriaCode(s.getKey().getCriteriaCode());
                             record.setCriteriaName(s.getCriteriaName());
                             addNewRow();
+                            setSelection(row, 2);
                         }
                     }
-                }
-                case 2 -> {
-                    //percent
-                    if (Util1.getDouble(value) > 0) {
-                        record.setPercent(Util1.getDouble(value));
-                        setSelection(row, 3);
+                    case 2 -> {
+                        //percent
+                        if (Util1.getDouble(value) > 0) {
+                            record.setPercent(Util1.getDouble(value));
+                            setSelection(row, 3);
+                        }
+                    }
+                    //price
+                    case 3 -> {
+                        record.setPrice(Util1.getDouble(value));
+                        setSelection(row + 1, 0);
                     }
                 }
-                //price
-                case 3 -> {
-                    record.setPrice(Util1.getDouble(value));
-                    setSelection(row, 4);
+                record.getKey().setFormulaCode(formulaCode);
+                if (record.getKey().getUniqueId() == 0) {
+                    record.getKey().setUniqueId(row + 1);
                 }
+                save(record, row);
+                setRecord(listDetail.size() - 1);
+                fireTableRowsUpdated(row, row);
+                parent.requestFocusInWindow();
             }
-            record.getKey().setFormulaCode(formulaCode);
-            if (record.getKey().getUniqueId() == 0) {
-                record.getKey().setUniqueId(row + 1);
-            }
-            save(record, row);
-            setRecord(listDetail.size() - 1);
-            fireTableRowsUpdated(row, row);
-            parent.requestFocusInWindow();
         } catch (HeadlessException ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
     }
 
     private void save(StockFormulaDetail sf, int row) {
-        inventoryRepo.saveStockFormulaDetail(sf).doOnSuccess((t) -> {
-            if (t != null) {
-                listDetail.set(row, t);
-            }
-        }).doOnTerminate(() -> {
-            addNewRow();
-            setSelection(row + 1, 0);
-        }).subscribe();
+        if (isValidEntry(sf)) {
+            inventoryRepo.saveStockFormulaDetail(sf).doOnSuccess((t) -> {
+                if (t != null) {
+                    listDetail.set(row, t);
+                }
+            }).subscribe();
+        }
+    }
+
+    private boolean isValidEntry(StockFormulaDetail sf) {
+        if (sf.getCriteriaCode() == null) {
+            return false;
+        } else if (sf.getPercent() == 0) {
+            return false;
+        }
+        return true;
     }
 
     private void setSelection(int row, int column) {
@@ -244,29 +254,12 @@ public class StockFormulaDetailTableModel extends AbstractTableModel {
     }
 
     public void setListDetail(List<StockFormulaDetail> listDetail) {
-        if (listDetail != null) {
-            this.listDetail = listDetail;
-            setRecord(listDetail.size());
-            fireTableDataChanged();
-        }
+        this.listDetail = listDetail;
+        fireTableDataChanged();
     }
 
     private void showMessageBox(String text) {
         JOptionPane.showMessageDialog(parent, text);
-    }
-
-    public boolean isValidEntry() {
-        boolean status = true;
-        for (StockFormulaDetail sdh : listDetail) {
-            if (sdh.getCriteriaCode() != null) {
-                if (sdh.getPrice() == 0) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.");
-                    parent.requestFocus();
-                    return false;
-                }
-            }
-        }
-        return status;
     }
 
     public void clearDelList() {

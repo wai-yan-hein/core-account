@@ -8,8 +8,8 @@ package com.inventory.ui.common;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.model.GradeDetailCriteria;
-import com.inventory.model.GradeDetailCriteriaKey;
+import com.inventory.model.LandingDetailCriteria;
+import com.inventory.model.LandingDetailCriteriaKey;
 import com.inventory.model.StockCriteria;
 import java.awt.HeadlessException;
 import java.util.ArrayList;
@@ -29,9 +29,9 @@ public class GradeCriteriaTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Description", "Percent", "Price", "Amount"};
     private JTable parent;
-    private List<GradeDetailCriteria> listDetail = new ArrayList();
+    private List<LandingDetailCriteria> listDetail = new ArrayList();
     private SelectionObserver observer;
-    private List<GradeDetailCriteriaKey> listDel = new ArrayList();
+    private List<LandingDetailCriteriaKey> listDel = new ArrayList();
     private JLabel lblRec;
     private boolean editable = true;
 
@@ -120,7 +120,7 @@ public class GradeCriteriaTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
         try {
             if (!listDetail.isEmpty()) {
-                GradeDetailCriteria record = listDetail.get(row);
+                LandingDetailCriteria record = listDetail.get(row);
                 switch (column) {
                     case 0 -> {
                         //Name
@@ -147,7 +147,7 @@ public class GradeCriteriaTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object value, int row, int column) {
         try {
-            GradeDetailCriteria record = listDetail.get(row);
+            LandingDetailCriteria record = listDetail.get(row);
             switch (column) {
                 case 0, 1 -> {
                     //Code
@@ -194,7 +194,7 @@ public class GradeCriteriaTableModel extends AbstractTableModel {
     public void addNewRow() {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
-                GradeDetailCriteria pd = new GradeDetailCriteria();
+                LandingDetailCriteria pd = new LandingDetailCriteria();
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }
@@ -204,7 +204,7 @@ public class GradeCriteriaTableModel extends AbstractTableModel {
     private boolean hasEmptyRow() {
         boolean status = false;
         if (listDetail.size() >= 1) {
-            GradeDetailCriteria get = listDetail.get(listDetail.size() - 1);
+            LandingDetailCriteria get = listDetail.get(listDetail.size() - 1);
             if (get.getCriteiaCode() == null) {
                 status = true;
             }
@@ -212,11 +212,11 @@ public class GradeCriteriaTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<GradeDetailCriteria> getListDetail() {
+    public List<LandingDetailCriteria> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<GradeDetailCriteria> listDetail) {
+    public void setListDetail(List<LandingDetailCriteria> listDetail) {
         this.listDetail = listDetail;
         setRecord(listDetail.size());
         fireTableDataChanged();
@@ -228,7 +228,7 @@ public class GradeCriteriaTableModel extends AbstractTableModel {
 
     public boolean isValidEntry() {
         boolean status = true;
-        for (GradeDetailCriteria sdh : listDetail) {
+        for (LandingDetailCriteria sdh : listDetail) {
             if (sdh.getCriteiaCode() != null) {
                 if (sdh.getAmount() == 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.");
@@ -247,7 +247,7 @@ public class GradeCriteriaTableModel extends AbstractTableModel {
     }
 
     public void delete(int row) {
-        GradeDetailCriteria sdh = listDetail.get(row);
+        LandingDetailCriteria sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
             listDel.add(sdh.getKey());
         }
@@ -262,14 +262,14 @@ public class GradeCriteriaTableModel extends AbstractTableModel {
         parent.requestFocus();
     }
 
-    public void addObject(GradeDetailCriteria sd) {
+    public void addObject(LandingDetailCriteria sd) {
         if (listDetail != null) {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
         }
     }
 
-    public GradeDetailCriteria getObject(int row) {
+    public LandingDetailCriteria getObject(int row) {
         return listDetail.get(row);
     }
 

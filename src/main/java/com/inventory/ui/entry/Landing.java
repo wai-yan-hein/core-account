@@ -10,7 +10,7 @@ import com.common.Util1;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.editor.TraderAutoCompleter;
-import com.inventory.model.GradeHisDetail;
+import com.inventory.model.LandingHisDetail;
 import com.inventory.ui.common.GradeCriteriaTableModel;
 import com.inventory.ui.common.GradeStockTableModel;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
@@ -28,7 +28,7 @@ import javax.swing.ListSelectionModel;
  *
  * @author Lenovo
  */
-public class GradeManagement extends javax.swing.JPanel implements SelectionObserver {
+public class Landing extends javax.swing.JPanel implements SelectionObserver {
 
     private GradeStockTableModel gradeStockTableModel = new GradeStockTableModel();
     private GradeCriteriaTableModel gradeCriteriaTableModel = new GradeCriteriaTableModel();
@@ -47,7 +47,7 @@ public class GradeManagement extends javax.swing.JPanel implements SelectionObse
     /**
      * Creates new form GradeManagement
      */
-    public GradeManagement() {
+    public Landing() {
         initComponents();
     }
 
@@ -122,7 +122,7 @@ public class GradeManagement extends javax.swing.JPanel implements SelectionObse
     }
 
     private void calTotal() {
-        List<GradeHisDetail> list = gradeStockTableModel.getListDetail();
+        List<LandingHisDetail> list = gradeStockTableModel.getListDetail();
         double ttlAmt = list.stream().mapToDouble((t) -> t.getAmount()).sum();
         txtStock.setValue(ttlAmt);
     }

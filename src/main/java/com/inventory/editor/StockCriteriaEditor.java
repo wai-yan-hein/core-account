@@ -78,7 +78,7 @@ public class StockCriteriaEditor extends AbstractCellEditor implements TableCell
     @Override
     public Object getCellEditorValue() {
         Object obj;
-        StockCriteria stock = completer.getStockUnit();
+        StockCriteria stock = completer.getStockCriteria();
         if (stock != null) {
             obj = stock;
         } else {

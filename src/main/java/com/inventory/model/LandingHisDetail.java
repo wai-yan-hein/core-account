@@ -20,10 +20,10 @@ import jakarta.persistence.Transient;
 @Entity
 @Table(name = "grade_his_detail")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class GradeHisDetail {
+public class LandingHisDetail {
 
     @EmbeddedId
-    private GradeHisDetailKey key;
+    private LandingHisDetailKey key;
     @Column(name = "dept_id")
     private int deptId;
     @Column(name = "stock_code")

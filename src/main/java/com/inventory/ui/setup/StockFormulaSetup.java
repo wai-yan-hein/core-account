@@ -103,6 +103,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
         tblCriteria.setFont(Global.textFont);
         tblCriteria.setRowHeight(Global.tblRowHeight);
         tblCriteria.setShowGrid(true);
+        tblCriteria.setCellSelectionEnabled(true);
         tblCriteria.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblCriteria.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -132,11 +133,24 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
             if (!Util1.isNullOrEmpty(formulaCode)) {
                 inventoryRepo.getStockFormulaDetail(formulaCode).doOnSuccess((t) -> {
                     stockFormulaDetailTableModel.setListDetail(t);
-                }).doOnTerminate(() -> {
                     stockFormulaDetailTableModel.setFormulaCode(formulaCode);
                     stockFormulaDetailTableModel.addNewRow();
+                    focusOnTable();
+                }).doOnTerminate(() -> {
+
                 }).subscribe();
             }
+        }
+    }
+
+    private void focusOnTable() {
+        int rc = tblCriteria.getRowCount();
+        if (rc > 1) {
+            tblCriteria.setRowSelectionInterval(rc - 1, rc - 1);
+            tblCriteria.setColumnSelectionInterval(0, 0);
+            tblCriteria.requestFocus();
+        } else {
+            tblCriteria.requestFocus();
         }
     }
 

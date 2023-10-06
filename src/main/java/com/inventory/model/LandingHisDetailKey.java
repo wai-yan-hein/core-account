@@ -17,7 +17,7 @@ import java.io.Serializable;
 @Data
 @Embeddable
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class GradeHisDetailKey implements Serializable {
+public class LandingHisDetailKey implements Serializable {
 
     @Column(name = "vou_no")
     private String vouNo;

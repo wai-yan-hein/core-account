@@ -8,8 +8,8 @@ package com.inventory.ui.common;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.model.GradeHisDetail;
-import com.inventory.model.GradeHisDetailKey;
+import com.inventory.model.LandingHisDetail;
+import com.inventory.model.LandingHisDetailKey;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
 import java.awt.HeadlessException;
@@ -30,9 +30,9 @@ public class GradeStockTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Code", "Description", "Weight Total", "Weight", "Weight Unit", "Qty", "Unit", "Price", "Amount"};
     private JTable parent;
-    private List<GradeHisDetail> listDetail = new ArrayList();
+    private List<LandingHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
-    private List<GradeHisDetailKey> listDel = new ArrayList();
+    private List<LandingHisDetailKey> listDel = new ArrayList();
     private JLabel lblRec;
     private boolean editable = true;
 
@@ -113,7 +113,7 @@ public class GradeStockTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
         try {
             if (!listDetail.isEmpty()) {
-                GradeHisDetail record = listDetail.get(row);
+                LandingHisDetail record = listDetail.get(row);
                 switch (column) {
                     case 0 -> {
                         //code
@@ -161,7 +161,7 @@ public class GradeStockTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object value, int row, int column) {
         try {
-            GradeHisDetail record = listDetail.get(row);
+            LandingHisDetail record = listDetail.get(row);
             switch (column) {
                 case 0, 1 -> {
                     //Code
@@ -228,7 +228,7 @@ public class GradeStockTableModel extends AbstractTableModel {
         }
     }
 
-    private void calAmount(GradeHisDetail g) {
+    private void calAmount(LandingHisDetail g) {
         double totalWt = g.getTotalWeight();
         double weight = g.getWeight();
         double price = g.getPrice();
@@ -254,7 +254,7 @@ public class GradeStockTableModel extends AbstractTableModel {
     public void addNewRow() {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
-                GradeHisDetail pd = new GradeHisDetail();
+                LandingHisDetail pd = new LandingHisDetail();
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }
@@ -264,7 +264,7 @@ public class GradeStockTableModel extends AbstractTableModel {
     private boolean hasEmptyRow() {
         boolean status = false;
         if (listDetail.size() >= 1) {
-            GradeHisDetail get = listDetail.get(listDetail.size() - 1);
+            LandingHisDetail get = listDetail.get(listDetail.size() - 1);
             if (get.getStockCode() == null) {
                 status = true;
             }
@@ -272,11 +272,11 @@ public class GradeStockTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<GradeHisDetail> getListDetail() {
+    public List<LandingHisDetail> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<GradeHisDetail> listDetail) {
+    public void setListDetail(List<LandingHisDetail> listDetail) {
         this.listDetail = listDetail;
         setRecord(listDetail.size());
         fireTableDataChanged();
@@ -288,7 +288,7 @@ public class GradeStockTableModel extends AbstractTableModel {
 
     public boolean isValidEntry() {
         boolean status = true;
-        for (GradeHisDetail sdh : listDetail) {
+        for (LandingHisDetail sdh : listDetail) {
             if (sdh.getStockCode() != null) {
                 if (sdh.getUnit() == null || sdh.getWeightUnit() == null) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Unit.");
@@ -307,7 +307,7 @@ public class GradeStockTableModel extends AbstractTableModel {
     }
 
     public void delete(int row) {
-        GradeHisDetail sdh = listDetail.get(row);
+        LandingHisDetail sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
             listDel.add(sdh.getKey());
         }
@@ -322,14 +322,14 @@ public class GradeStockTableModel extends AbstractTableModel {
         parent.requestFocus();
     }
 
-    public void addObject(GradeHisDetail sd) {
+    public void addObject(LandingHisDetail sd) {
         if (listDetail != null) {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
         }
     }
 
-    public GradeHisDetail getObject(int row) {
+    public LandingHisDetail getObject(int row) {
         return listDetail.get(row);
     }
 

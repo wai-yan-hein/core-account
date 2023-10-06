@@ -9,10 +9,10 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "grade_detail_criteria")
-public class GradeDetailCriteria {
+public class LandingDetailCriteria {
 
     @EmbeddedId
-    private GradeDetailCriteriaKey key;
+    private LandingDetailCriteriaKey key;
     @Column(name = "criteria_code")
     private String criteiaCode;
     @Column(name = "percent")

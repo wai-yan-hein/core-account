@@ -37,7 +37,7 @@ import com.user.model.DepartmentUser;
 import com.inventory.model.VRoleMenu;
 import com.repo.InventoryRepo;
 import com.inventory.ui.entry.GRNEntry;
-import com.inventory.ui.entry.GradeManagement;
+import com.inventory.ui.entry.Landing;
 import com.inventory.ui.entry.Manufacture;
 import com.inventory.ui.entry.OrderEntry;
 import com.user.model.VRoleCompany;
@@ -662,7 +662,7 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
                 return millingEntry;
             }
             case "Grade Management" -> {
-                GradeManagement g = new GradeManagement();
+                Landing g = new Landing();
                 g.setInventoryRepo(inventoryRepo);
                 g.setProgress(progress);
                 g.initMain();
