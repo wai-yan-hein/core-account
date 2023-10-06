@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "grade_detail_criteria")
+@Table(name = "landing_detail_criteria")
 public class LandingDetailCriteria {
 
     @EmbeddedId

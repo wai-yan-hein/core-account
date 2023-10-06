@@ -21,7 +21,7 @@ import lombok.Data;
  */
 @Data
 @Entity
-@Table(name = "grade_his")
+@Table(name = "landing_his")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LandingHis {
 

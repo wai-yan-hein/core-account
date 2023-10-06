@@ -18,7 +18,7 @@ import jakarta.persistence.Transient;
  */
 @Data
 @Entity
-@Table(name = "grade_his_detail")
+@Table(name = "landing_his_detail")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LandingHisDetail {
 
