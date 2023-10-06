@@ -103,6 +103,7 @@ public class StockCriteriaSetupDialog extends javax.swing.JDialog implements Key
         criteria = cat;
         txtName.setText(criteria.getCriteriaName());
         txtUserCode.setText(criteria.getUserCode());
+        chkActive.setSelected(chkActive.isSelected());
         txtName.requestFocus();
         lblStatus.setText("EDIT");
         lblStatus.setForeground(Color.blue);
@@ -141,6 +142,7 @@ public class StockCriteriaSetupDialog extends javax.swing.JDialog implements Key
         txtUserCode.setText(null);
         txtFilter.setText(null);
         txtName.setText(null);
+        chkActive.setSelected(true);
         lblStatus.setText("NEW");
         lblStatus.setForeground(Color.green);
         criteria = new StockCriteria();
@@ -158,7 +160,6 @@ public class StockCriteriaSetupDialog extends javax.swing.JDialog implements Key
             JOptionPane.showMessageDialog(this, "Invalid Name");
             txtName.requestFocus();
         } else {
-
             if (lblStatus.getText().equals("NEW")) {
                 StockCriteriaKey key = new StockCriteriaKey();
                 key.setCriteriaCode(null);
@@ -169,10 +170,19 @@ public class StockCriteriaSetupDialog extends javax.swing.JDialog implements Key
             } else {
                 criteria.setUpdatedBy(Global.loginUser.getUserCode());
             }
+            criteria.setActive(chkActive.isSelected());
             criteria.setUserCode(txtUserCode.getText());
             criteria.setCriteriaName(txtName.getText());
         }
         return status;
+    }
+
+    public void search() {
+        inventoryRepo.getStockCriteria(false).doOnSuccess((t) -> {
+            criteriaTableModel.setListDetail(t);
+        }).doOnTerminate(() -> {
+            setVisible(true);
+        });
     }
 
     /**
@@ -196,10 +206,11 @@ public class StockCriteriaSetupDialog extends javax.swing.JDialog implements Key
         jLabel3 = new javax.swing.JLabel();
         txtUserCode = new javax.swing.JTextField();
         jSeparator1 = new javax.swing.JSeparator();
+        chkActive = new javax.swing.JCheckBox();
         progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("StockCriteria Setup");
+        setTitle("Category Setup");
         setModalityType(java.awt.Dialog.ModalityType.TOOLKIT_MODAL);
 
         tblStockCriteria.setFont(Global.textFont);
@@ -281,6 +292,8 @@ public class StockCriteriaSetupDialog extends javax.swing.JDialog implements Key
             }
         });
 
+        chkActive.setText("Active");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -288,21 +301,24 @@ public class StockCriteriaSetupDialog extends javax.swing.JDialog implements Key
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jSeparator1)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(txtName, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtUserCode, javax.swing.GroupLayout.Alignment.LEADING)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(lblStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
                         .addGap(18, 18, 18)
                         .addComponent(btnSave)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnClear)))
+                        .addComponent(btnClear))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jSeparator1)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(chkActive, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(txtName)
+                            .addComponent(txtUserCode))))
                 .addContainerGap())
         );
 
@@ -320,13 +336,15 @@ public class StockCriteriaSetupDialog extends javax.swing.JDialog implements Key
                     .addComponent(jLabel2)
                     .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 3, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chkActive)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnClear)
                     .addComponent(btnSave)
                     .addComponent(lblStatus))
-                .addContainerGap(235, Short.MAX_VALUE))
+                .addContainerGap(209, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -371,12 +389,7 @@ public class StockCriteriaSetupDialog extends javax.swing.JDialog implements Key
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         // TODO add your handling code here:
-        try {
-            save();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Save StockCriteria", JOptionPane.ERROR_MESSAGE);
-            log.error("Save Categor :" + e.getMessage());
-        }
+        save();
     }//GEN-LAST:event_btnSaveActionPerformed
 
     private void btnClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearActionPerformed
@@ -413,6 +426,7 @@ public class StockCriteriaSetupDialog extends javax.swing.JDialog implements Key
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClear;
     private javax.swing.JButton btnSave;
+    private javax.swing.JCheckBox chkActive;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
@@ -481,4 +495,5 @@ public class StockCriteriaSetupDialog extends javax.swing.JDialog implements Key
             }
         }
     }
+
 }

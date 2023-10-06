@@ -4,8 +4,8 @@
  */
 package com.common;
 
-import javax.swing.JTextField;
 import javax.swing.RowFilter;
+import javax.swing.text.JTextComponent;
 
 /**
  *
@@ -13,9 +13,9 @@ import javax.swing.RowFilter;
  */
 public class StartWithRowFilter extends RowFilter<Object, Object> {
 
-    private final JTextField jtf;
+    private final JTextComponent jtf;
 
-    public StartWithRowFilter(JTextField jtf) {
+    public StartWithRowFilter(JTextComponent jtf) {
         this.jtf = jtf;
     }
 

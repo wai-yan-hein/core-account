@@ -7,13 +7,17 @@ package com.inventory.editor;
 
 import com.common.Global;
 import com.common.SelectionObserver;
+import com.common.StartWithRowFilter;
 import com.common.TableCellRender;
-import com.inventory.model.StockCriteria;
-import com.inventory.ui.common.StockCriteriaTableModel;
+import com.inventory.model.StockFormula;
+import com.inventory.ui.common.StockFormulaTableModel;
+import com.inventory.ui.common.StockFormulaTableModel;
 import com.repo.InventoryRepo;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -43,29 +47,30 @@ import lombok.extern.slf4j.Slf4j;
  * @author Lenovo
  */
 @Slf4j
-public final class StockCriteriaCompleter implements KeyListener {
+public final class StockFormulaCompleter implements KeyListener, FocusListener {
 
     private final JTable table = new JTable();
     private final JPopupMenu popup = new JPopupMenu();
     private JTextComponent textComp;
     private static final String AUTOCOMPLETER = "AUTOCOMPLETER"; //NOI18N
-    private final StockCriteriaTableModel tableModel = new StockCriteriaTableModel();
-    private StockCriteria stockUnit;
+    private final StockFormulaTableModel tableModel = new StockFormulaTableModel();
+    private StockFormula object;
     public AbstractCellEditor editor;
-    private TableRowSorter<TableModel> sorter;
     private int x = 0;
     private int y = 0;
     private SelectionObserver observer;
     private InventoryRepo inventoryRepo;
+    private StartWithRowFilter swrf;
+    private TableRowSorter<TableModel> sorter;
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
 
-    public StockCriteriaCompleter() {
+    public StockFormulaCompleter() {
     }
 
-    public StockCriteriaCompleter(JTextComponent comp, InventoryRepo inventoryRepo,
+    public StockFormulaCompleter(JTextComponent comp, InventoryRepo inventoryRepo,
             AbstractCellEditor editor) {
         this.textComp = comp;
         this.editor = editor;
@@ -73,6 +78,7 @@ public final class StockCriteriaCompleter implements KeyListener {
         textComp.putClientProperty(AUTOCOMPLETER, this);
         textComp.setFont(Global.textFont);
         textComp.addKeyListener(this);
+        textComp.addFocusListener(this);
         textComp.getDocument().addDocumentListener(documentListener);
         table.setModel(tableModel);
         table.setSize(50, 50);
@@ -81,8 +87,9 @@ public final class StockCriteriaCompleter implements KeyListener {
         table.getTableHeader().setFont(Global.tblHeaderFont);
         table.setDefaultRenderer(Object.class, new TableCellRender());
         table.setSelectionForeground(Color.WHITE);
-        sorter = new TableRowSorter(table.getModel());
+        sorter = new TableRowSorter<>(table.getModel());
         table.setRowSorter(sorter);
+        swrf = new StartWithRowFilter(textComp);
         JScrollPane scroll = new JScrollPane(table);
         table.setFocusable(false);
         table.getColumnModel().getColumn(0).setPreferredWidth(40);//Code
@@ -162,8 +169,8 @@ public final class StockCriteriaCompleter implements KeyListener {
 
     public void mouseSelect() {
         if (table.getSelectedRow() != -1) {
-            stockUnit = tableModel.getObject(table.convertRowIndexToModel(table.getSelectedRow()));
-            textComp.setText(stockUnit.getCriteriaName());
+            object = tableModel.getObject(table.convertRowIndexToModel(table.getSelectedRow()));
+            textComp.setText(object.getFormulaName());
             if (observer != null) {
                 observer.selected("Unit", "Unit");
             }
@@ -209,7 +216,7 @@ public final class StockCriteriaCompleter implements KeyListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            StockCriteriaCompleter completer = (StockCriteriaCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            StockFormulaCompleter completer = (StockFormulaCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 if (completer.popup.isVisible()) {
                     completer.selectNextPossibleValue();
@@ -223,7 +230,7 @@ public final class StockCriteriaCompleter implements KeyListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            StockCriteriaCompleter completer = (StockCriteriaCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            StockFormulaCompleter completer = (StockFormulaCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 if (completer.popup.isVisible()) {
                     completer.selectPreviousPossibleValue();
@@ -235,7 +242,7 @@ public final class StockCriteriaCompleter implements KeyListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             JComponent tf = (JComponent) e.getSource();
-            StockCriteriaCompleter completer = (StockCriteriaCompleter) tf.getClientProperty(AUTOCOMPLETER);
+            StockFormulaCompleter completer = (StockFormulaCompleter) tf.getClientProperty(AUTOCOMPLETER);
             if (tf.isEnabled()) {
                 completer.popup.setVisible(false);
             }
@@ -275,13 +282,13 @@ public final class StockCriteriaCompleter implements KeyListener {
         table.scrollRectToVisible(rect);
     }
 
-    public StockCriteria getStockUnit() {
-        return stockUnit;
+    public StockFormula getStockUnit() {
+        return object;
     }
 
-    public void setStockUnit(StockCriteria stockUnit) {
-        this.stockUnit = stockUnit;
-        this.textComp.setText(this.stockUnit == null ? null : this.stockUnit.getCriteriaName());
+    public void setStockUnit(StockFormula object) {
+        this.object = object;
+        this.textComp.setText(this.object == null ? null : this.object.getFormulaName());
     }
 
     /*
@@ -310,21 +317,29 @@ public final class StockCriteriaCompleter implements KeyListener {
      */
     @Override
     public void keyReleased(KeyEvent e) {
-        String str = textComp.getText();
-        if (!str.isEmpty()) {
-            if (!containKey(e)) {
-                inventoryRepo.searchStockCriteria(str).subscribe((t) -> {
-                    tableModel.setListDetail(t);
-                    if (!t.isEmpty()) {
-                        table.setRowSelectionInterval(0, 0);
-                    }
-                });
+        String text = textComp.getText();
+        if (!containKey(e)) {
+            if (text.isEmpty()) {
+                sorter.setRowFilter(null);
+            } else {
+                sorter.setRowFilter(swrf);
             }
         }
-
     }
 
     private boolean containKey(KeyEvent e) {
         return e.getKeyCode() == KeyEvent.VK_DOWN || e.getKeyCode() == KeyEvent.VK_UP;
+    }
+
+    @Override
+    public void focusGained(FocusEvent e) {
+        inventoryRepo.getStockFormula().doOnSuccess((t) -> {
+            tableModel.setListDetail(t);
+        }).subscribe();
+    }
+
+    @Override
+    public void focusLost(FocusEvent e) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

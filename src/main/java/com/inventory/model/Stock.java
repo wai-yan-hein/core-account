@@ -99,6 +99,8 @@ public class Stock {
     private boolean saleClosed;
     @Column(name = "deleted")
     private boolean deleted;
+    @Column(name = "formula_code")
+    private String formulaCode;
     private transient String relName;
     private transient String groupName;
     private transient String brandName;
