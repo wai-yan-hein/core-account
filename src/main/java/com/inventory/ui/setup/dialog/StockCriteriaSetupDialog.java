@@ -17,6 +17,7 @@ import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -42,7 +43,7 @@ public class StockCriteriaSetupDialog extends javax.swing.JDialog implements Key
     private InventoryRepo inventoryRepo;
     private TableRowSorter<TableModel> sorter;
     private StartWithRowFilter swrf;
-    private List<StockCriteria> listStockCriteria;
+    private List<StockCriteria> listStockCriteria = new ArrayList<>();
 
     public void setListStockCriteria(List<StockCriteria> listStockCriteria) {
         criteriaTableModel.setListDetail(listStockCriteria);
@@ -103,7 +104,7 @@ public class StockCriteriaSetupDialog extends javax.swing.JDialog implements Key
         criteria = cat;
         txtName.setText(criteria.getCriteriaName());
         txtUserCode.setText(criteria.getUserCode());
-        chkActive.setSelected(chkActive.isSelected());
+        chkActive.setSelected(cat.isActive());
         txtName.requestFocus();
         lblStatus.setText("EDIT");
         lblStatus.setForeground(Color.blue);
@@ -115,10 +116,11 @@ public class StockCriteriaSetupDialog extends javax.swing.JDialog implements Key
         btnSave.setEnabled(false);
         if (isValidEntry()) {
             inventoryRepo.saveStockCriteria(criteria).subscribe((t) -> {
-                if (lblStatus.getText().equals("EDIT")) {
-                    listStockCriteria.set(selectRow, t);
+                if (lblStatus.getText().equals("NEW")) {
+                    criteriaTableModel.addObject(t);
                 } else {
-                    listStockCriteria.add(t);
+                    int row = tblStockCriteria.convertRowIndexToModel(tblStockCriteria.getSelectedRow());
+                    criteriaTableModel.setObject(row, t);
                 }
                 clear();
                 sendMessage(t.getCriteriaName());
@@ -178,9 +180,11 @@ public class StockCriteriaSetupDialog extends javax.swing.JDialog implements Key
     }
 
     public void search() {
-        inventoryRepo.getStockCriteria(false).doOnSuccess((t) -> {
+        inventoryRepo.getStockCriteria(false).subscribe((t) -> {
             criteriaTableModel.setListDetail(t);
-        }).doOnTerminate(() -> {
+        }, (e) -> {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }, () -> {
             setVisible(true);
         });
     }
@@ -253,9 +257,7 @@ public class StockCriteriaSetupDialog extends javax.swing.JDialog implements Key
             }
         });
 
-        btnSave.setBackground(Global.selectionColor);
         btnSave.setFont(Global.lableFont);
-        btnSave.setForeground(new java.awt.Color(255, 255, 255));
         btnSave.setText("Save");
         btnSave.setName("btnSave"); // NOI18N
         btnSave.addActionListener(new java.awt.event.ActionListener() {

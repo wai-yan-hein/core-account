@@ -85,6 +85,13 @@ public class StockCriteriaTableModel extends AbstractTableModel {
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
         }
     }
+    
+    public void setObject(int row, StockCriteria info) {
+        if (!listDetail.isEmpty()) {
+            listDetail.set(row, info);
+            fireTableRowsUpdated(row, row);
+        }
+    }
 
     public void refresh() {
         fireTableDataChanged();
