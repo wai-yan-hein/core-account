@@ -122,7 +122,6 @@ public class PatternSetup extends javax.swing.JPanel implements PanelControl, Se
         inventoryRepo.getStockBrand().subscribe((t) -> {
             brandAutoCompleter.setListStockBrand(t);
         });
-
         stockAutoCompleter = new StockAutoCompleter(txtStock, inventoryRepo, null, true);
         stockAutoCompleter.setObserver(this);
     }

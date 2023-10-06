@@ -282,11 +282,11 @@ public final class StockFormulaCompleter implements KeyListener, FocusListener {
         table.scrollRectToVisible(rect);
     }
 
-    public StockFormula getStockUnit() {
+    public StockFormula getStockFormula() {
         return object;
     }
 
-    public void setStockUnit(StockFormula object) {
+    public void setStockFormula(StockFormula object) {
         this.object = object;
         this.textComp.setText(this.object == null ? null : this.object.getFormulaName());
     }

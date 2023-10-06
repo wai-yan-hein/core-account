@@ -72,6 +72,8 @@ import com.inventory.model.StockBrand;
 import com.inventory.model.StockBrandKey;
 import com.inventory.model.StockCriteria;
 import com.inventory.model.StockFormula;
+import com.inventory.model.StockFormulaDetail;
+import com.inventory.model.StockFormulaKey;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
@@ -211,6 +213,24 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(StockFormula.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<StockFormulaDetail>> getStockFormulaDetail(String formulaCode) {
+        if (localDatabase) {
+            //return h2Repo.getCategory();
+        }
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/setup/getStockFormulaDetail")
+                .queryParam("compCode", Global.compCode)
+                .queryParam("formulaCode", formulaCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(StockFormulaDetail.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
@@ -720,6 +740,24 @@ public class InventoryRepo {
                 .body(Mono.just(key), RelationKey.class)
                 .retrieve()
                 .bodyToMono(UnitRelation.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<StockFormula> findStockFormula(String formualCode) {
+        if (localDatabase) {
+
+        }
+        StockFormulaKey key = new StockFormulaKey();
+        key.setCompCode(Global.compCode);
+        key.setFormulaCode(formualCode);
+        return inventoryApi.post()
+                .uri("/setup/findStockFormula")
+                .body(Mono.just(key), StockFormulaKey.class)
+                .retrieve()
+                .bodyToMono(StockFormula.class)
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -1288,6 +1326,18 @@ public class InventoryRepo {
                 .body(Mono.just(s), StockFormula.class)
                 .retrieve()
                 .bodyToMono(StockFormula.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<StockFormulaDetail> saveStockFormulaDetail(StockFormulaDetail s) {
+        return inventoryApi.post()
+                .uri("/setup/saveStockFormulaDetail")
+                .body(Mono.just(s), StockFormulaDetail.class)
+                .retrieve()
+                .bodyToMono(StockFormulaDetail.class)
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();

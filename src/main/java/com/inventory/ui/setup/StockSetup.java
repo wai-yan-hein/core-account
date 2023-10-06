@@ -24,6 +24,7 @@ import com.inventory.model.Category;
 import com.inventory.model.MessageType;
 import com.inventory.model.Stock;
 import com.inventory.model.StockBrand;
+import com.inventory.model.StockFormula;
 import com.inventory.model.StockKey;
 import com.inventory.model.StockType;
 import com.inventory.model.StockUnit;
@@ -222,27 +223,30 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         txtStockName.setText(stock.getStockName());
         chkActive.setSelected(stock.isActive());
         chkEx.setSelected(stock.isExplode());
-        inventoryRepo.findBrand(stock.getBrandCode()).subscribe((t) -> {
+        inventoryRepo.findBrand(stock.getBrandCode()).doOnSuccess((t) -> {
             brandAutoCompleter.setBrand(t);
-        });
-        inventoryRepo.findCategory(stock.getCatCode()).subscribe((t) -> {
+        }).subscribe();
+        inventoryRepo.findCategory(stock.getCatCode()).doOnSuccess((t) -> {
             categoryAutoCompleter.setCategory(t);
-        });
-        inventoryRepo.findUnit(stock.getSaleUnitCode()).subscribe((t) -> {
+        }).subscribe();
+        inventoryRepo.findUnit(stock.getSaleUnitCode()).doOnSuccess((t) -> {
             saleUnitCompleter.setStockUnit(t);
-        });
-        inventoryRepo.findGroup(stock.getTypeCode()).subscribe((t) -> {
+        }).subscribe();
+        inventoryRepo.findGroup(stock.getTypeCode()).doOnSuccess((t) -> {
             typeAutoCompleter.setStockType(t);
-        });
-        inventoryRepo.findUnit(stock.getPurUnitCode()).subscribe((t) -> {
+        }).subscribe();
+        inventoryRepo.findUnit(stock.getPurUnitCode()).doOnSuccess((t) -> {
             purUnitCompleter.setStockUnit(t);
-        });
-        inventoryRepo.findUnit(stock.getWeightUnit()).subscribe((t) -> {
+        }).subscribe();
+        inventoryRepo.findUnit(stock.getWeightUnit()).doOnSuccess((t) -> {
             wlUnitCompleter.setStockUnit(t);
-        });
-        inventoryRepo.findRelation(stock.getRelCode()).subscribe((t) -> {
+        }).subscribe();
+        inventoryRepo.findRelation(stock.getRelCode()).doOnSuccess((t) -> {
             relationAutoCompleter.setRelation(t);
-        });
+        }).subscribe();
+        inventoryRepo.findStockFormula(stock.getFormulaCode()).doOnSuccess((t) -> {
+            stockFormulaCompleter.setStockFormula(t);
+        }).subscribe();
         Integer deptId = stock.getDeptId();
         if (!Util1.isNullOrEmpty(deptId)) {
             userRepo.findDepartment(deptId).subscribe((t) -> {
@@ -431,6 +435,10 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
             if (unit != null) {
                 stock.setWeightUnit(unit.getKey().getUnitCode());
             }
+            StockFormula f = stockFormulaCompleter.getStockFormula();
+            if (f != null) {
+                stock.setFormulaCode(f.getKey().getFormulaCode());
+            }
             stock.setPurPrice(Util1.getFloat(txtPurPrice.getText()));
             stock.setSalePriceN(Util1.getFloat(txtSalePrice.getText()));
             stock.setSalePriceA(Util1.getFloat(txtSalePriceA.getText()));
@@ -497,6 +505,7 @@ public class StockSetup extends javax.swing.JPanel implements KeyListener, Panel
         purUnitCompleter.setStockUnit(null);
         saleUnitCompleter.setStockUnit(null);
         wlUnitCompleter.setStockUnit(null);
+        stockFormulaCompleter.setStockFormula(null);
         txtStockCode.setText(null);
         txtBarCode.setText(null);
         txtUserCode.setText(null);

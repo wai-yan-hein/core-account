@@ -6,15 +6,12 @@
 package com.inventory.ui.common;
 
 import com.common.Global;
-import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.model.GRNDetailKey;
-import com.inventory.model.GradeHisDetail;
-import com.inventory.model.GradeHisDetailKey;
-import com.inventory.model.Stock;
-import com.inventory.model.StockUnit;
-import com.inventory.ui.entry.GRNEntry;
+import com.inventory.model.StockCriteria;
+import com.inventory.model.StockFormulaDetail;
+import com.inventory.model.StockFormulaDetailKey;
+import com.repo.InventoryRepo;
 import java.awt.HeadlessException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,15 +26,25 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class GradeStockTableModel extends AbstractTableModel {
+public class StockFormulaDetailTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Description", "Weight Total", "Weight", "Weight Unit", "Qty", "Unit"};
+    private String[] columnNames = {"Code", "Crieria Name", "Percent", "Price"};
     private JTable parent;
-    private List<GradeHisDetail> listDetail = new ArrayList();
+    private List<StockFormulaDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
-    private List<GradeHisDetailKey> listDel = new ArrayList();
+    private List<StockFormulaDetailKey> listDel = new ArrayList();
     private JLabel lblRec;
     private boolean editable = true;
+    private String formulaCode;
+    private InventoryRepo inventoryRepo;
+
+    public void setInventoryRepo(InventoryRepo inventoryRepo) {
+        this.inventoryRepo = inventoryRepo;
+    }
+
+    public void setFormulaCode(String formulaCode) {
+        this.formulaCode = formulaCode;
+    }
 
     public boolean isEditable() {
         return editable;
@@ -100,7 +107,7 @@ public class GradeStockTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 2, 3, 5 ->
+            case 3, 4 ->
                 Double.class;
             default ->
                 String.class;
@@ -116,36 +123,22 @@ public class GradeStockTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
         try {
             if (!listDetail.isEmpty()) {
-                GradeHisDetail record = listDetail.get(row);
+                StockFormulaDetail record = listDetail.get(row);
                 switch (column) {
                     case 0 -> {
                         //code
-                        return record.getUserCode() == null ? record.getStockCode() : record.getUserCode();
+                        record.getCriteriaCode();
                     }
                     case 1 -> {
-                        //Name
-                        String stockName = null;
-                        if (record.getStockCode() != null) {
-                            stockName = record.getStockName();
-                        }
-                        return stockName;
+                        //code
+                        record.getCriteriaName();
                     }
                     case 2 -> {
-                        return Util1.toNull(record.getTotalWeight());
+                        //percent
+                        return Util1.toNull(record.getPercent());
                     }
                     case 3 -> {
-                        return Util1.toNull(record.getWeight());
-                    }
-                    case 4 -> {
-                        return record.getWeightUnit();
-                    }
-                    case 5 -> {
-                        //qty
-                        return Util1.toNull(record.getQty());
-                    }
-                    case 6 -> {
-                        //unit
-                        return record.getUnit();
+                        return Util1.toNull(record.getPrice());
                     }
                 }
             }
@@ -158,59 +151,36 @@ public class GradeStockTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object value, int row, int column) {
         try {
-            GradeHisDetail record = listDetail.get(row);
+            StockFormulaDetail record = listDetail.get(row);
             switch (column) {
                 case 0, 1 -> {
                     //Code
                     if (value != null) {
-                        if (value instanceof Stock s) {
-                            record.setStockCode(s.getKey().getStockCode());
-                            record.setStockName(s.getStockName());
-                            record.setUserCode(s.getUserCode());
-                            record.setRelName(s.getRelName());
-                            record.setQty(1);
-                            record.setUnit(s.getPurUnitCode());
-                            record.setWeight(s.getWeight());
-                            record.setWeightUnit(s.getWeightUnit());
-                            record.setStock(s);
+                        if (value instanceof StockCriteria s) {
+                            record.setCriteriaCode(s.getKey().getCriteriaCode());
+                            record.setCriteriaName(s.getCriteriaName());
                             addNewRow();
-                            setSelection(row, 2);
                         }
                     }
                 }
                 case 2 -> {
-                    //total weight
+                    //percent
                     if (Util1.getDouble(value) > 0) {
-                        record.setTotalWeight(Util1.getDouble(value));
-                        setSelection(row + 1, 0);
+                        record.setPercent(Util1.getDouble(value));
+                        setSelection(row, 3);
                     }
                 }
+                //price
                 case 3 -> {
-                    record.setWeight(Util1.getDouble(value));
+                    record.setPrice(Util1.getDouble(value));
                     setSelection(row, 4);
                 }
-                case 4 -> {
-                    if (value instanceof StockUnit u) {
-                        record.setWeightUnit(u.getKey().getUnitCode());
-                    }
-                }
-                case 5 -> {
-                    //Qty
-                    if (Util1.getDouble(value) > 0) {
-                        record.setQty(Util1.getDouble(value));
-                        setSelection(row + 1, 0);
-                    }
-
-                }
-                case 6 -> {
-                    //Unit
-                    if (value instanceof StockUnit u) {
-                        record.setUnit(u.getKey().getUnitCode());
-                        setSelection(row + 1, 0);
-                    }
-                }
-
             }
+            record.getKey().setFormulaCode(formulaCode);
+            if (record.getKey().getUniqueId() == 0) {
+                record.getKey().setUniqueId(row + 1);
+            }
+            save(record, row);
             setRecord(listDetail.size() - 1);
             fireTableRowsUpdated(row, row);
             parent.requestFocusInWindow();
@@ -219,7 +189,15 @@ public class GradeStockTableModel extends AbstractTableModel {
         }
     }
 
-    private void calAmount(GradeHisDetail g) {
+    private void save(StockFormulaDetail sf, int row) {
+        inventoryRepo.saveStockFormulaDetail(sf).doOnSuccess((t) -> {
+            if (t != null) {
+                listDetail.set(row, t);
+            }
+        }).doOnTerminate(() -> {
+            addNewRow();
+            setSelection(row + 1, 0);
+        }).subscribe();
     }
 
     private void setSelection(int row, int column) {
@@ -236,7 +214,11 @@ public class GradeStockTableModel extends AbstractTableModel {
     public void addNewRow() {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
-                GradeHisDetail pd = new GradeHisDetail();
+                StockFormulaDetail pd = new StockFormulaDetail();
+                StockFormulaDetailKey key = new StockFormulaDetailKey();
+                key.setCompCode(Global.compCode);
+                key.setFormulaCode(formulaCode);
+                pd.setKey(key);
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }
@@ -246,19 +228,19 @@ public class GradeStockTableModel extends AbstractTableModel {
     private boolean hasEmptyRow() {
         boolean status = false;
         if (listDetail.size() >= 1) {
-            GradeHisDetail get = listDetail.get(listDetail.size() - 1);
-            if (get.getStockCode() == null) {
+            StockFormulaDetail get = listDetail.get(listDetail.size() - 1);
+            if (get.getCriteriaCode() == null) {
                 status = true;
             }
         }
         return status;
     }
 
-    public List<GradeHisDetail> getListDetail() {
+    public List<StockFormulaDetail> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<GradeHisDetail> listDetail) {
+    public void setListDetail(List<StockFormulaDetail> listDetail) {
         this.listDetail = listDetail;
         setRecord(listDetail.size());
         fireTableDataChanged();
@@ -270,12 +252,12 @@ public class GradeStockTableModel extends AbstractTableModel {
 
     public boolean isValidEntry() {
         boolean status = true;
-        for (GradeHisDetail sdh : listDetail) {
-            if (sdh.getStockCode() != null) {
-                if (sdh.getUnit() == null || sdh.getWeightUnit() == null) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Unit.");
-                    status = false;
+        for (StockFormulaDetail sdh : listDetail) {
+            if (sdh.getCriteriaCode() != null) {
+                if (sdh.getPrice() == 0) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.");
                     parent.requestFocus();
+                    return false;
                 }
             }
         }
@@ -289,7 +271,7 @@ public class GradeStockTableModel extends AbstractTableModel {
     }
 
     public void delete(int row) {
-        GradeHisDetail sdh = listDetail.get(row);
+        StockFormulaDetail sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
             listDel.add(sdh.getKey());
         }
@@ -304,14 +286,14 @@ public class GradeStockTableModel extends AbstractTableModel {
         parent.requestFocus();
     }
 
-    public void addObject(GradeHisDetail sd) {
+    public void addObject(StockFormulaDetail sd) {
         if (listDetail != null) {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
         }
     }
 
-    public GradeHisDetail getObject(int row) {
+    public StockFormulaDetail getObject(int row) {
         return listDetail.get(row);
     }
 
