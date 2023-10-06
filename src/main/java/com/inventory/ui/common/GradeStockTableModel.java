@@ -6,15 +6,12 @@
 package com.inventory.ui.common;
 
 import com.common.Global;
-import com.common.ProUtil;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.model.GRNDetailKey;
 import com.inventory.model.GradeHisDetail;
 import com.inventory.model.GradeHisDetailKey;
 import com.inventory.model.Stock;
 import com.inventory.model.StockUnit;
-import com.inventory.ui.entry.GRNEntry;
 import java.awt.HeadlessException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GradeStockTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Description", "Weight Total", "Weight", "Weight Unit", "Qty", "Unit"};
+    private String[] columnNames = {"Code", "Description", "Weight Total", "Weight", "Weight Unit", "Qty", "Unit", "Price", "Amount"};
     private JTable parent;
     private List<GradeHisDetail> listDetail = new ArrayList();
     private SelectionObserver observer;
@@ -100,7 +97,7 @@ public class GradeStockTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 2, 3, 5 ->
+            case 2, 3, 5, 7, 8 ->
                 Double.class;
             default ->
                 String.class;
@@ -109,7 +106,7 @@ public class GradeStockTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        return true;
+        return column != 8;
     }
 
     @Override
@@ -147,6 +144,12 @@ public class GradeStockTableModel extends AbstractTableModel {
                         //unit
                         return record.getUnit();
                     }
+                    case 7 -> {
+                        return Util1.toNull(record.getPrice());
+                    }
+                    case 8 -> {
+                        return Util1.toNull(record.getAmount());
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -182,7 +185,7 @@ public class GradeStockTableModel extends AbstractTableModel {
                     //total weight
                     if (Util1.getDouble(value) > 0) {
                         record.setTotalWeight(Util1.getDouble(value));
-                        setSelection(row + 1, 0);
+                        setSelection(row, 7);
                     }
                 }
                 case 3 -> {
@@ -209,9 +212,15 @@ public class GradeStockTableModel extends AbstractTableModel {
                         setSelection(row + 1, 0);
                     }
                 }
+                case 7 -> {
+                    if (Util1.getDouble(value) > 0) {
+                        record.setPrice(Util1.getDouble(value));
+                    }
+                }
 
             }
             setRecord(listDetail.size() - 1);
+            calAmount(record);
             fireTableRowsUpdated(row, row);
             parent.requestFocusInWindow();
         } catch (HeadlessException ex) {
@@ -220,6 +229,15 @@ public class GradeStockTableModel extends AbstractTableModel {
     }
 
     private void calAmount(GradeHisDetail g) {
+        double totalWt = g.getTotalWeight();
+        double weight = g.getWeight();
+        double price = g.getPrice();
+        if (totalWt > 0) {
+            double qty = totalWt / weight;
+            g.setQty(qty);
+            g.setAmount(qty * price);
+        }
+        observer.selected("CAL_TOTAL", "CAL_TOTAL");
     }
 
     private void setSelection(int row, int column) {

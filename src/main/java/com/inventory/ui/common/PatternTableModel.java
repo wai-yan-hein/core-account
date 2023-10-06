@@ -149,7 +149,7 @@ public class PatternTableModel extends AbstractTableModel {
                 return Util1.toNull(p.getPrice());
             }
             case 6 -> {
-                return p.getAmount();
+                return Util1.toNull(p.getAmount());
             }
             case 7 -> {
                 return p.getPriceTypeName();

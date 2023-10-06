@@ -4,20 +4,20 @@
  */
 package com.inventory.ui.entry;
 
-import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.SelectionObserver;
-import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.editor.TraderAutoCompleter;
+import com.inventory.model.GradeHisDetail;
 import com.inventory.ui.common.GradeCriteriaTableModel;
 import com.inventory.ui.common.GradeStockTableModel;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.repo.InventoryRepo;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
+import java.util.List;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -60,6 +60,7 @@ public class GradeManagement extends javax.swing.JPanel implements SelectionObse
     }
 
     private void initTableStock() {
+        gradeStockTableModel.setObserver(this);
         gradeStockTableModel.setParent(tblStock);
         gradeStockTableModel.addNewRow();
         tblStock.setModel(gradeStockTableModel);
@@ -69,8 +70,6 @@ public class GradeManagement extends javax.swing.JPanel implements SelectionObse
         tblStock.setRowHeight(Global.tblRowHeight);
         tblStock.setShowGrid(true);
         tblStock.setCellSelectionEnabled(true);
-        tblStock.setDefaultRenderer(Object.class, new TableCellRender());
-        tblStock.setDefaultRenderer(Double.class, new TableCellRender());
         tblStock.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblStock.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -91,10 +90,7 @@ public class GradeManagement extends javax.swing.JPanel implements SelectionObse
         tblCriteria.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCriteria.setFont(Global.textFont);
         tblCriteria.setRowHeight(Global.tblRowHeight);
-        tblCriteria.setShowGrid(true);
         tblCriteria.setCellSelectionEnabled(true);
-        tblCriteria.setDefaultRenderer(Object.class, new DecimalFormatRender());
-        tblCriteria.setDefaultRenderer(Double.class, new DecimalFormatRender());
         tblCriteria.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblCriteria.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -123,6 +119,12 @@ public class GradeManagement extends javax.swing.JPanel implements SelectionObse
     private void initCompleter() {
         traderAutoCompleter = new TraderAutoCompleter(txtTrader, inventoryRepo, null, false, "C");
         traderAutoCompleter.setObserver(this);
+    }
+
+    private void calTotal() {
+        List<GradeHisDetail> list = gradeStockTableModel.getListDetail();
+        double ttlAmt = list.stream().mapToDouble((t) -> t.getAmount()).sum();
+        txtStock.setValue(ttlAmt);
     }
 
     /**
@@ -484,5 +486,10 @@ public class GradeManagement extends javax.swing.JPanel implements SelectionObse
 
     @Override
     public void selected(Object source, Object selectObj) {
+        String src = source.toString();
+        switch (src) {
+            case "CAL_TOTAL" ->
+                calTotal();
+        }
     }
 }
