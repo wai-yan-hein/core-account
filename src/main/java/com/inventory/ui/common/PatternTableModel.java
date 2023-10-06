@@ -140,13 +140,13 @@ public class PatternTableModel extends AbstractTableModel {
                 return p.getLocName();
             }
             case 3 -> {
-                return p.getQty();
+                return Util1.toNull(p.getQty());
             }
             case 4 -> {
                 return p.getUnitCode();
             }
             case 5 -> {
-                return p.getPrice();
+                return Util1.toNull(p.getPrice());
             }
             case 6 -> {
                 return p.getAmount();

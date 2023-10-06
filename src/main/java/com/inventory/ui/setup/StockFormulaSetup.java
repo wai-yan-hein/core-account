@@ -95,6 +95,8 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
     }
 
     private void initTableCriteria() {
+        stockFormulaDetailTableModel.setInventoryRepo(inventoryRepo);
+        stockFormulaDetailTableModel.setParent(tblCriteria);
         tblCriteria.setModel(stockFormulaDetailTableModel);
         tblCriteria.getTableHeader().setFont(Global.tblHeaderFont);
         tblCriteria.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
