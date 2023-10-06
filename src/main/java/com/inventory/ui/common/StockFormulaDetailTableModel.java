@@ -212,21 +212,24 @@ public class StockFormulaDetailTableModel extends AbstractTableModel {
     }
 
     public void addNewRow() {
-        if (listDetail != null) {
-            if (!hasEmptyRow()) {
-                StockFormulaDetail pd = new StockFormulaDetail();
-                StockFormulaDetailKey key = new StockFormulaDetailKey();
-                key.setCompCode(Global.compCode);
-                key.setFormulaCode(formulaCode);
-                pd.setKey(key);
-                listDetail.add(pd);
-                fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
-            }
+//        if (listDetail != null) {
+        if (!hasEmptyRow()) {
+            StockFormulaDetail pd = new StockFormulaDetail();
+            StockFormulaDetailKey key = new StockFormulaDetailKey();
+            key.setCompCode(Global.compCode);
+            key.setFormulaCode(formulaCode);
+            pd.setKey(key);
+            listDetail.add(pd);
+            fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
         }
+//        }
     }
 
     private boolean hasEmptyRow() {
         boolean status = false;
+        if (this.listDetail == null) {
+            return true;
+        }
         if (listDetail.size() >= 1) {
             StockFormulaDetail get = listDetail.get(listDetail.size() - 1);
             if (get.getCriteriaCode() == null) {
@@ -241,9 +244,11 @@ public class StockFormulaDetailTableModel extends AbstractTableModel {
     }
 
     public void setListDetail(List<StockFormulaDetail> listDetail) {
-        this.listDetail = listDetail;
-        setRecord(listDetail.size());
-        fireTableDataChanged();
+        if (listDetail != null) {
+            this.listDetail = listDetail;
+            setRecord(listDetail.size());
+            fireTableDataChanged();
+        }
     }
 
     private void showMessageBox(String text) {
