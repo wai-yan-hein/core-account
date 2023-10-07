@@ -25,9 +25,9 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class GradeCriteriaTableModel extends AbstractTableModel {
+public class LandingCriteriaTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Description", "Percent", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Description", "Percent", "Price", "Amount"};
     private JTable parent;
     private List<LandingDetailCriteria> listDetail = new ArrayList();
     private SelectionObserver observer;
@@ -43,28 +43,20 @@ public class GradeCriteriaTableModel extends AbstractTableModel {
         this.editable = editable;
     }
 
-    public JLabel getLblRec() {
-        return lblRec;
-    }
-
     public void setLblRec(JLabel lblRec) {
         this.lblRec = lblRec;
-    }
-
-    public JTable getParent() {
-        return parent;
     }
 
     public void setParent(JTable parent) {
         this.parent = parent;
     }
 
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
+    }
+
+    public List<LandingDetailCriteriaKey> getListDel() {
+        return listDel;
     }
 
     @Override
@@ -96,7 +88,7 @@ public class GradeCriteriaTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 4, 5, 6, 8 ->
+            case 2, 3, 5 ->
                 Double.class;
             default ->
                 String.class;
@@ -105,15 +97,7 @@ public class GradeCriteriaTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
-        if (editable) {
-            return switch (column) {
-                case 2, 8 ->
-                    false;
-                default ->
-                    true;
-            };
-        }
-        return false;
+        return true;
     }
 
     @Override
@@ -124,16 +108,20 @@ public class GradeCriteriaTableModel extends AbstractTableModel {
                 switch (column) {
                     case 0 -> {
                         //Name
-                        record.getCriteriaName();
+                        return record.getCriteriaUserCode();
                     }
                     case 1 -> {
+                        //Name
+                        return record.getCriteriaName();
+                    }
+                    case 2 -> {
                         //percent
                         return Util1.toNull(record.getPercent());
                     }
-                    case 2 -> {
+                    case 3 -> {
                         return Util1.toNull(record.getPrice());
                     }
-                    case 3 -> {
+                    case 4 -> {
                         return record.getAmount();
                     }
                 }
@@ -147,37 +135,46 @@ public class GradeCriteriaTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object value, int row, int column) {
         try {
-            LandingDetailCriteria record = listDetail.get(row);
-            switch (column) {
-                case 0, 1 -> {
-                    //Code
-                    if (value != null) {
+            if (value != null) {
+                LandingDetailCriteria record = listDetail.get(row);
+                switch (column) {
+                    case 0, 1 -> {
+                        //Code
                         if (value instanceof StockCriteria s) {
-                            record.setCriteiaCode(s.getKey().getCriteriaCode());
+                            record.setCriteriaCode(s.getKey().getCriteriaCode());
                             record.setCriteriaName(s.getCriteriaName());
                             addNewRow();
                         }
                     }
-                }
-                case 2 -> {
-                    //percent
-                    if (Util1.getDouble(value) > 0) {
-                        record.setPercent(Util1.getDouble(value));
-                        setSelection(row, 3);
+                    case 2 -> {
+                        //percent
+                        if (Util1.getDouble(value) > 0) {
+                            record.setPercent(Util1.getDouble(value));
+                            setSelection(row, 3);
+                        }
+                    }
+                    //price
+                    case 3 -> {
+                        record.setPrice(Util1.getDouble(value));
+                        setSelection(row, 4);
                     }
                 }
-                //price
-                case 3 -> {
-                    record.setPrice(Util1.getDouble(value));
-                    setSelection(row, 4);
-                }
+                setRecord(listDetail.size() - 1);
+                calAmount(record);
+                fireTableRowsUpdated(row, row);
+                parent.requestFocusInWindow();
             }
-            setRecord(listDetail.size() - 1);
-            fireTableRowsUpdated(row, row);
-            parent.requestFocusInWindow();
         } catch (HeadlessException ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
         }
+    }
+
+    private void calAmount(LandingDetailCriteria l) {
+        double percent = l.getPercent();
+        double price = l.getPrice();
+        double amt = percent * price;
+        l.setAmount(amt);
+        observer.selected("CAL_TOTAL", "CAL_TOTAL");
     }
 
     private void setSelection(int row, int column) {
@@ -205,7 +202,7 @@ public class GradeCriteriaTableModel extends AbstractTableModel {
         boolean status = false;
         if (listDetail.size() >= 1) {
             LandingDetailCriteria get = listDetail.get(listDetail.size() - 1);
-            if (get.getCriteiaCode() == null) {
+            if (get.getCriteriaCode() == null) {
                 status = true;
             }
         }
@@ -229,7 +226,7 @@ public class GradeCriteriaTableModel extends AbstractTableModel {
     public boolean isValidEntry() {
         boolean status = true;
         for (LandingDetailCriteria sdh : listDetail) {
-            if (sdh.getCriteiaCode() != null) {
+            if (sdh.getCriteriaCode() != null) {
                 if (sdh.getAmount() == 0) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.");
                     parent.requestFocus();

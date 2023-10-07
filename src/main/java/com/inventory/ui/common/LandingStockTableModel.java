@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class GradeStockTableModel extends AbstractTableModel {
+public class LandingStockTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Code", "Description", "Weight Total", "Weight", "Weight Unit", "Qty", "Unit", "Price", "Amount"};
     private JTable parent;
@@ -44,29 +44,22 @@ public class GradeStockTableModel extends AbstractTableModel {
         this.editable = editable;
     }
 
-    public JLabel getLblRec() {
-        return lblRec;
-    }
-
     public void setLblRec(JLabel lblRec) {
         this.lblRec = lblRec;
-    }
-
-    public JTable getParent() {
-        return parent;
     }
 
     public void setParent(JTable parent) {
         this.parent = parent;
     }
 
-    public SelectionObserver getObserver() {
-        return observer;
-    }
-
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
     }
+
+    public List<LandingHisDetailKey> getListDel() {
+        return listDel;
+    }
+
 
     @Override
     public String getColumnName(int column) {
@@ -175,9 +168,11 @@ public class GradeStockTableModel extends AbstractTableModel {
                             record.setUnit(s.getPurUnitCode());
                             record.setWeight(s.getWeight());
                             record.setWeightUnit(s.getWeightUnit());
+                            record.setFormulaCode(s.getFormulaCode());
                             record.setStock(s);
                             addNewRow();
                             setSelection(row, 2);
+                            observer.selected("CRITERIA", "CRITERIA");
                         }
                     }
                 }

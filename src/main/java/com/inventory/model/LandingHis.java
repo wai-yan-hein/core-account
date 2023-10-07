@@ -52,6 +52,10 @@ public class LandingHis {
     @Transient
     private List<LandingHisDetailKey> listDel;
     @Transient
+    private List<LandingDetailCriteria> listCriteria;
+     @Transient
+    private List<LandingDetailCriteriaKey> listDelCriteria;
+    @Transient
     private String traderName;
     @Transient
     private String traderUserCode;

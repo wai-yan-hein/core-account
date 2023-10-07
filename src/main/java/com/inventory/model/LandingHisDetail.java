@@ -51,5 +51,7 @@ public class LandingHisDetail {
     @Transient
     private String locName;
     @Transient
+    private String formulaCode;
+    @Transient
     private Stock stock;
 }
