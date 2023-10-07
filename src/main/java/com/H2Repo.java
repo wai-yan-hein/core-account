@@ -105,6 +105,8 @@ import com.h2.service.ReportService;
 import com.h2.service.RetInDetailService;
 import com.h2.service.RetOutDetailService;
 import com.h2.service.SaleHisDetailService;
+import com.h2.service.StockCriteriaService;
+import com.h2.service.StockFormulaService;
 import com.h2.service.StockInOutDetailService;
 import com.h2.service.StockInOutService;
 import com.h2.service.TransferHisDetailService;
@@ -129,6 +131,9 @@ import com.inventory.model.RetInHisDetail;
 import com.inventory.model.RetInHisKey;
 import com.inventory.model.RetOutHisDetail;
 import com.inventory.model.RetOutHisKey;
+import com.inventory.model.StockCriteria;
+import com.inventory.model.StockFormula;
+import com.inventory.model.StockFormulaDetail;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
@@ -268,6 +273,10 @@ public class H2Repo {
     private DateFilterRepo dateFilterRepo;
     @Autowired
     private DateLockService dateLockService;
+    @Autowired
+    private StockFormulaService stockFormulaService;
+    @Autowired
+    private StockCriteriaService stockCriteriaService;
 
     public Mono<List<Location>> getLocation() {
         return Mono.justOrEmpty(locationService.findAll(Global.compCode));
@@ -335,6 +344,10 @@ public class H2Repo {
 
     public Mono<List<Trader>> searchTrader(String str, String type, String compCode, Integer deptId) {
         return Mono.justOrEmpty(traderInvService.searchTrader(str, type, compCode, deptId));
+    }
+    
+    public Mono<List<StockFormula>> getStockFormula(String compCode) {
+        return Mono.justOrEmpty(stockFormulaService.getFormula(compCode));
     }
 
     public Mono<List<VouStatus>> getVouStatus() {
@@ -503,6 +516,18 @@ public class H2Repo {
 
     public UnitRelation save(UnitRelation obj) {
         return relationService.save(obj);
+    }
+
+    public StockFormula save(StockFormula obj) {
+        return stockFormulaService.save(obj);
+    }
+
+    public StockFormulaDetail save(StockFormulaDetail obj) {
+        return stockFormulaService.save(obj);
+    }
+
+    public StockCriteria save(StockCriteria obj) {
+        return stockCriteriaService.save(obj);
     }
 
     public Mono<General> getPurRecentPrice(String stockCode, String vouDate, String unit, String compCode, Integer deptId) {
