@@ -14,7 +14,7 @@ public class LandingDetailCriteria {
     @EmbeddedId
     private LandingDetailCriteriaKey key;
     @Column(name = "criteria_code")
-    private String criteiaCode;
+    private String criteriaCode;
     @Column(name = "percent")
     private double percent;
     @Column(name = "price")

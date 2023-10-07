@@ -21,6 +21,7 @@ import com.inventory.model.GRN;
 import com.inventory.model.GRNDetail;
 import com.inventory.model.GRNKey;
 import com.inventory.model.General;
+import com.inventory.model.LandingHis;
 import com.inventory.model.Location;
 import com.inventory.model.LocationKey;
 import com.inventory.model.Message;
@@ -2428,6 +2429,17 @@ public class InventoryRepo {
                         }
                         return Mono.error(new RuntimeException(e.getMessage()));
                     }
+                    return Mono.error(new RuntimeException(e.getMessage()));
+                });
+    }
+
+    public Mono<LandingHis> save(LandingHis ph) {
+        return inventoryApi.post()
+                .uri("/landing/saveLanding")
+                .body(Mono.just(ph), LandingHis.class)
+                .retrieve()
+                .bodyToMono(LandingHis.class)
+                .onErrorResume((e) -> {
                     return Mono.error(new RuntimeException(e.getMessage()));
                 });
     }

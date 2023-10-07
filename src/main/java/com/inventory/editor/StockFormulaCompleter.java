@@ -340,6 +340,5 @@ public final class StockFormulaCompleter implements KeyListener, FocusListener {
 
     @Override
     public void focusLost(FocusEvent e) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

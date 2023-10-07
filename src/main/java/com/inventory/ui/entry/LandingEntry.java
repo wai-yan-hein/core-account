@@ -4,20 +4,28 @@
  */
 package com.inventory.ui.entry;
 
+import com.common.DateLockUtil;
 import com.common.Global;
+import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.StockUnitEditor;
 import com.inventory.editor.TraderAutoCompleter;
+import com.inventory.model.LandingDetailCriteria;
+import com.inventory.model.LandingHis;
 import com.inventory.model.LandingHisDetail;
-import com.inventory.ui.common.GradeCriteriaTableModel;
-import com.inventory.ui.common.GradeStockTableModel;
+import com.inventory.ui.common.LandingCriteriaTableModel;
+import com.inventory.ui.common.LandingStockTableModel;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.repo.InventoryRepo;
 import java.awt.Color;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
+import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -28,13 +36,19 @@ import javax.swing.ListSelectionModel;
  *
  * @author Lenovo
  */
-public class Landing extends javax.swing.JPanel implements SelectionObserver {
+public class LandingEntry extends javax.swing.JPanel implements SelectionObserver, PanelControl {
 
-    private GradeStockTableModel gradeStockTableModel = new GradeStockTableModel();
-    private GradeCriteriaTableModel gradeCriteriaTableModel = new GradeCriteriaTableModel();
+    private LandingStockTableModel landingStockTableModel = new LandingStockTableModel();
+    private LandingCriteriaTableModel landingCriteriaTableModel = new LandingCriteriaTableModel();
     private InventoryRepo inventoryRepo;
     private TraderAutoCompleter traderAutoCompleter;
     private JProgressBar progress;
+    private SelectionObserver observer;
+    private LandingHis landing = new LandingHis();
+
+    public void setObserver(SelectionObserver observer) {
+        this.observer = observer;
+    }
 
     public void setProgress(JProgressBar progress) {
         this.progress = progress;
@@ -47,7 +61,7 @@ public class Landing extends javax.swing.JPanel implements SelectionObserver {
     /**
      * Creates new form GradeManagement
      */
-    public Landing() {
+    public LandingEntry() {
         initComponents();
     }
 
@@ -60,10 +74,11 @@ public class Landing extends javax.swing.JPanel implements SelectionObserver {
     }
 
     private void initTableStock() {
-        gradeStockTableModel.setObserver(this);
-        gradeStockTableModel.setParent(tblStock);
-        gradeStockTableModel.addNewRow();
-        tblStock.setModel(gradeStockTableModel);
+        landingStockTableModel.setLblRec(lblRS);
+        landingStockTableModel.setObserver(this);
+        landingStockTableModel.setParent(tblStock);
+        landingStockTableModel.addNewRow();
+        tblStock.setModel(landingStockTableModel);
         tblStock.getTableHeader().setFont(Global.tblHeaderFont);
         tblStock.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblStock.setFont(Global.textFont);
@@ -76,24 +91,65 @@ public class Landing extends javax.swing.JPanel implements SelectionObserver {
         tblStock.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
         tblStock.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
         tblStock.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());//total
-        tblStock.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//total
-        tblStock.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());//total
+        tblStock.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());//weight
+        tblStock.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
+        tblStock.getColumnModel().getColumn(6).setCellEditor(new AutoClearEditor());
+        tblStock.getColumnModel().getColumn(7).setCellEditor(new AutoClearEditor());
+        tblStock.getColumnModel().getColumn(0).setPreferredWidth(30);//code
+        tblStock.getColumnModel().getColumn(1).setPreferredWidth(150);//name
+        tblStock.getColumnModel().getColumn(2).setPreferredWidth(50);//total
+        tblStock.getColumnModel().getColumn(3).setPreferredWidth(50);//weight
+        tblStock.getColumnModel().getColumn(4).setPreferredWidth(20);//unit
+        tblStock.getColumnModel().getColumn(5).setPreferredWidth(50);//qty
+        tblStock.getColumnModel().getColumn(6).setPreferredWidth(20);//unit
+        tblStock.getColumnModel().getColumn(7).setPreferredWidth(80);//price
+        tblStock.getColumnModel().getColumn(8).setPreferredWidth(100);//amount
         inventoryRepo.getStockUnit().doOnSuccess((t) -> {
             tblStock.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));
             tblStock.getColumnModel().getColumn(6).setCellEditor(new StockUnitEditor(t));
         }).subscribe();
+        tblStock.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                setListDetail();
+            }
+        });
+        tblStock.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) {
+                    setListDetail();
+                }
+            }
+        });
+
     }
 
     private void initTableCriteria() {
-        tblCriteria.setModel(gradeCriteriaTableModel);
+        landingCriteriaTableModel.setLblRec(lblRC);
+        landingCriteriaTableModel.setObserver(this);
+        landingCriteriaTableModel.setParent(tblStock);
+        tblCriteria.setModel(landingCriteriaTableModel);
         tblCriteria.getTableHeader().setFont(Global.tblHeaderFont);
         tblCriteria.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblCriteria.setFont(Global.textFont);
         tblCriteria.setRowHeight(Global.tblRowHeight);
+        tblCriteria.setShowGrid(true);
         tblCriteria.setCellSelectionEnabled(true);
         tblCriteria.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
         tblCriteria.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblCriteria.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblCriteria.getColumnModel().getColumn(1).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblCriteria.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
+        tblCriteria.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
+        tblCriteria.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
+        tblCriteria.getColumnModel().getColumn(0).setPreferredWidth(50);
+        tblCriteria.getColumnModel().getColumn(1).setPreferredWidth(150);
+        tblCriteria.getColumnModel().getColumn(2).setPreferredWidth(5);
+        tblCriteria.getColumnModel().getColumn(3).setPreferredWidth(100);
+        tblCriteria.getColumnModel().getColumn(4).setPreferredWidth(150);
+
     }
 
     private void assignDefaultValue() {
@@ -122,9 +178,76 @@ public class Landing extends javax.swing.JPanel implements SelectionObserver {
     }
 
     private void calTotal() {
-        List<LandingHisDetail> list = gradeStockTableModel.getListDetail();
+        List<LandingHisDetail> list = landingStockTableModel.getListDetail();
         double ttlAmt = list.stream().mapToDouble((t) -> t.getAmount()).sum();
         txtStock.setValue(ttlAmt);
+    }
+
+    private void setListDetail() {
+        int row = tblStock.convertRowIndexToModel(tblStock.getSelectedRow());
+        if (row >= 0) {
+            LandingHisDetail h = landingStockTableModel.getObject(row);
+            String formulaCode = h.getFormulaCode();
+            if (formulaCode != null) {
+                inventoryRepo.getStockFormulaDetail(formulaCode).doOnSuccess((list) -> {
+                    if (list != null) {
+                        landingCriteriaTableModel.clear();
+                        list.forEach((t) -> {
+                            LandingDetailCriteria ld = new LandingDetailCriteria();
+                            ld.setCriteriaCode(t.getCriteriaCode());
+                            ld.setCriteriaName(t.getCriteriaName());
+                            ld.setCriteriaUserCode(t.getUserCode());
+                            ld.setPercent(t.getPercent());
+                            ld.setPrice(t.getPrice());
+                            ld.setAmount(t.getPercent() * t.getPrice());
+                            landingCriteriaTableModel.addObject(ld);
+                        });
+                        landingCriteriaTableModel.addNewRow();
+                    }
+                }).subscribe();
+            }
+        }
+    }
+
+    private boolean isValidEntry() {
+        return true;
+    }
+
+    private void saveLanding() {
+        if (isValidEntry()) {
+            if (DateLockUtil.isLockDate(txtVouDate.getDate())) {
+                DateLockUtil.showMessage(this);
+                txtVouDate.requestFocus();
+                return;
+            }
+            observer.selected("save", false);
+            progress.setIndeterminate(true);
+            landing.setListDel(landingStockTableModel.getListDel());
+            landing.setListDetail(landingStockTableModel.getListDetail());
+            landing.setListCriteria(landingCriteriaTableModel.getListDetail());
+            landing.setListDelCriteria(landingCriteriaTableModel.getListDel());
+            inventoryRepo.save(landing).doOnSuccess((t) -> {
+                progress.setIndeterminate(false);
+                clear();
+            }).doOnError((e) -> {
+                observer.selected("save", true);
+                JOptionPane.showMessageDialog(this, e.getMessage());
+                progress.setIndeterminate(false);
+            }).subscribe();
+        }
+    }
+
+    private void clear() {
+
+    }
+
+    private void observeMain() {
+        observer.selected("control", this);
+        observer.selected("save", true);
+        observer.selected("print", true);
+        observer.selected("history", true);
+        observer.selected("delete", true);
+        observer.selected("refresh", false);
     }
 
     /**
@@ -157,16 +280,22 @@ public class Landing extends javax.swing.JPanel implements SelectionObserver {
         lblStatus = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         lblStock = new javax.swing.JLabel();
-        jLabel9 = new javax.swing.JLabel();
+        lblRS = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblStock = new javax.swing.JTable();
         jPanel4 = new javax.swing.JPanel();
         lblCriteria = new javax.swing.JLabel();
-        jLabel11 = new javax.swing.JLabel();
+        lblRC = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblCriteria = new javax.swing.JTable();
+
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentShown(java.awt.event.ComponentEvent evt) {
+                formComponentShown(evt);
+            }
+        });
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
@@ -236,10 +365,12 @@ public class Landing extends javax.swing.JPanel implements SelectionObserver {
 
         txtTrader.setFont(Global.textFont);
 
+        jLabel2.setFont(Global.lableFont);
         jLabel2.setText("Trader");
 
         txtVouDate.setFont(Global.textFont);
 
+        jLabel3.setFont(Global.lableFont);
         jLabel3.setText("Vou No");
 
         txtRemark.setFont(Global.textFont);
@@ -247,8 +378,10 @@ public class Landing extends javax.swing.JPanel implements SelectionObserver {
         txtVouNo.setEditable(false);
         txtVouNo.setFont(Global.textFont);
 
+        jLabel1.setFont(Global.lableFont);
         jLabel1.setText("Date");
 
+        jLabel13.setFont(Global.lableFont);
         jLabel13.setText("Remark");
 
         lblStatus.setText("NEW");
@@ -314,9 +447,9 @@ public class Landing extends javax.swing.JPanel implements SelectionObserver {
         lblStock.setFont(Global.lableFont);
         lblStock.setText("Stock");
 
-        jLabel9.setFont(Global.lableFont);
-        jLabel9.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel9.setText("0");
+        lblRS.setFont(Global.lableFont);
+        lblRS.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblRS.setText("0");
 
         jLabel10.setFont(Global.lableFont);
         jLabel10.setText("Records :");
@@ -346,7 +479,7 @@ public class Landing extends javax.swing.JPanel implements SelectionObserver {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel10)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(lblRS, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 402, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -356,7 +489,7 @@ public class Landing extends javax.swing.JPanel implements SelectionObserver {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblStock)
-                    .addComponent(jLabel9)
+                    .addComponent(lblRS)
                     .addComponent(jLabel10))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
@@ -368,9 +501,9 @@ public class Landing extends javax.swing.JPanel implements SelectionObserver {
         lblCriteria.setFont(Global.lableFont);
         lblCriteria.setText("Criteria");
 
-        jLabel11.setFont(Global.lableFont);
-        jLabel11.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel11.setText("0");
+        lblRC.setFont(Global.lableFont);
+        lblRC.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblRC.setText("0");
 
         jLabel12.setFont(Global.lableFont);
         jLabel12.setText("Records :");
@@ -400,7 +533,7 @@ public class Landing extends javax.swing.JPanel implements SelectionObserver {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel12)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(lblRC, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 402, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -410,7 +543,7 @@ public class Landing extends javax.swing.JPanel implements SelectionObserver {
                 .addContainerGap()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblCriteria)
-                    .addComponent(jLabel11)
+                    .addComponent(lblRC)
                     .addComponent(jLabel12))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
@@ -449,11 +582,15 @@ public class Landing extends javax.swing.JPanel implements SelectionObserver {
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void formComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
+        // TODO add your handling code here:
+        observeMain();
+    }//GEN-LAST:event_formComponentShown
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel2;
@@ -462,7 +599,6 @@ public class Landing extends javax.swing.JPanel implements SelectionObserver {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -470,6 +606,8 @@ public class Landing extends javax.swing.JPanel implements SelectionObserver {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lblCriteria;
+    private javax.swing.JLabel lblRC;
+    private javax.swing.JLabel lblRS;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JLabel lblStock;
     private javax.swing.JTable tblCriteria;
@@ -490,6 +628,42 @@ public class Landing extends javax.swing.JPanel implements SelectionObserver {
         switch (src) {
             case "CAL_TOTAL" ->
                 calTotal();
+            case "CRITERIA" ->
+                setListDetail();
         }
+    }
+
+    @Override
+    public void save() {
+        saveLanding();
+    }
+
+    @Override
+    public void delete() {
+    }
+
+    @Override
+    public void newForm() {
+    }
+
+    @Override
+    public void history() {
+    }
+
+    @Override
+    public void print() {
+    }
+
+    @Override
+    public void refresh() {
+    }
+
+    @Override
+    public void filter() {
+    }
+
+    @Override
+    public String panelName() {
+        return this.getName();
     }
 }
