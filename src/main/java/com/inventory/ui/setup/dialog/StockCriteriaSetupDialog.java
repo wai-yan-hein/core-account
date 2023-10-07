@@ -214,7 +214,7 @@ public class StockCriteriaSetupDialog extends javax.swing.JDialog implements Key
         progress = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Category Setup");
+        setTitle("Stock Criteria Setup");
         setModalityType(java.awt.Dialog.ModalityType.TOOLKIT_MODAL);
 
         tblStockCriteria.setFont(Global.textFont);
@@ -294,6 +294,8 @@ public class StockCriteriaSetupDialog extends javax.swing.JDialog implements Key
             }
         });
 
+        chkActive.setFont(Global.lableFont);
+        chkActive.setSelected(true);
         chkActive.setText("Active");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
