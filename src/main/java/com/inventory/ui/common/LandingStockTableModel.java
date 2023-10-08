@@ -60,7 +60,6 @@ public class LandingStockTableModel extends AbstractTableModel {
         return listDel;
     }
 
-
     @Override
     public String getColumnName(int column) {
         return columnNames[column];
@@ -164,11 +163,12 @@ public class LandingStockTableModel extends AbstractTableModel {
                             record.setStockName(s.getStockName());
                             record.setUserCode(s.getUserCode());
                             record.setRelName(s.getRelName());
-                            record.setQty(1);
+                            record.setQty(0);
                             record.setUnit(s.getPurUnitCode());
                             record.setWeight(s.getWeight());
                             record.setWeightUnit(s.getWeightUnit());
                             record.setFormulaCode(s.getFormulaCode());
+                            record.setPrice(s.getPurPrice());
                             record.setStock(s);
                             addNewRow();
                             setSelection(row, 2);
@@ -179,7 +179,10 @@ public class LandingStockTableModel extends AbstractTableModel {
                 case 2 -> {
                     //total weight
                     if (Util1.getDouble(value) > 0) {
-                        record.setTotalWeight(Util1.getDouble(value));
+                        double ttlWt = Util1.getDouble(value);
+                        record.setTotalWeight(ttlWt);
+                        double qty = ttlWt / record.getWeight();
+                        record.setQty(qty);
                         setSelection(row, 7);
                     }
                 }
@@ -212,7 +215,14 @@ public class LandingStockTableModel extends AbstractTableModel {
                         record.setPrice(Util1.getDouble(value));
                     }
                 }
-
+                case 8 -> {
+                    if (Util1.getDouble(value) > 0) {
+                        double amt = Util1.getDouble(value);
+                        double price = amt / record.getQty();
+                        record.setPrice(price);
+                        record.setAmount(Util1.getDouble(value));
+                    }
+                }
             }
             setRecord(listDetail.size() - 1);
             calAmount(record);
@@ -225,13 +235,10 @@ public class LandingStockTableModel extends AbstractTableModel {
 
     private void calAmount(LandingHisDetail g) {
         double totalWt = g.getTotalWeight();
-        double weight = g.getWeight();
         double price = g.getPrice();
-        if (totalWt > 0) {
-            double qty = totalWt / weight;
-            g.setQty(qty);
-            g.setAmount(qty * price);
-        }
+        double qty = g.getQty();
+        g.setTotalWeight(totalWt * qty);
+        g.setAmount(qty * price);
         observer.selected("CAL_TOTAL", "CAL_TOTAL");
     }
 
@@ -250,6 +257,9 @@ public class LandingStockTableModel extends AbstractTableModel {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
                 LandingHisDetail pd = new LandingHisDetail();
+                LandingHisDetailKey key = new LandingHisDetailKey();
+                key.setCompCode(Global.compCode);
+                pd.setKey(key);
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }
@@ -276,23 +286,25 @@ public class LandingStockTableModel extends AbstractTableModel {
         setRecord(listDetail.size());
         fireTableDataChanged();
     }
-
-    private void showMessageBox(String text) {
-        JOptionPane.showMessageDialog(parent, text);
-    }
-
     public boolean isValidEntry() {
-        boolean status = true;
         for (LandingHisDetail sdh : listDetail) {
             if (sdh.getStockCode() != null) {
                 if (sdh.getUnit() == null || sdh.getWeightUnit() == null) {
                     JOptionPane.showMessageDialog(Global.parentForm, "Invalid Unit.");
-                    status = false;
                     parent.requestFocus();
+                    return false;
+                } else if (sdh.getQty() == 0) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Qty.");
+                    parent.requestFocus();
+                    return false;
+                } else if (sdh.getPrice() == 0) {
+                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Price.");
+                    parent.requestFocus();
+                    return false;
                 }
             }
         }
-        return status;
+        return true;
     }
 
     public void clearDelList() {

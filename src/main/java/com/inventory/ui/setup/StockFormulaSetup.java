@@ -8,16 +8,18 @@ import com.common.DecimalFormatRender;
 import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
-import com.common.TableCellRender;
 import com.common.Util1;
 import com.inventory.editor.StockCriteriaEditor;
 import com.inventory.model.StockFormula;
+import com.inventory.model.StockFormulaDetail;
 import com.inventory.ui.common.StockFormulaDetailTableModel;
 import com.inventory.ui.common.StockFormulaTableModel;
 import com.inventory.ui.setup.dialog.StockCriteriaSetupDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
 import com.repo.InventoryRepo;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -54,12 +56,49 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
      */
     public StockFormulaSetup() {
         initComponents();
+        actionMapping();
     }
 
     public void initMain() {
         initTableFormula();
         initTableCriteria();
         searchFormual();
+    }
+
+    private void actionMapping() {
+        String solve = "delete";
+        KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
+        tblCriteria.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
+        tblCriteria.getActionMap().put(solve, new DeleteAction());
+    }
+
+    private class DeleteAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            deleteTran();
+        }
+    }
+
+    private void deleteTran() {
+        int row = tblCriteria.convertRowIndexToModel(tblCriteria.getSelectedRow());
+        if (row >= 0) {
+            if (tblCriteria.getCellEditor() != null) {
+                tblCriteria.getCellEditor().stopCellEditing();
+            }
+            int yes_no = JOptionPane.showConfirmDialog(this,
+                    "Are you sure to delete?", "Criteria Transaction delete.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (yes_no == 0) {
+                StockFormulaDetail d = stockFormulaDetailTableModel.getObject(row);
+                if (d != null) {
+                    inventoryRepo.delete(d.getKey()).doOnSuccess((t) -> {
+                        if (t) {
+                            stockFormulaDetailTableModel.delete(row);
+                        }
+                    }).subscribe();
+                }
+            }
+        }
     }
 
     private void stockCriteriaDialog() {
@@ -111,6 +150,9 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
         tblCriteria.getColumnModel().getColumn(1).setCellEditor(new StockCriteriaEditor(inventoryRepo));
         tblCriteria.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
         tblCriteria.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
+        tblCriteria.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
+        tblCriteria.setDefaultRenderer(Object.class, new DecimalFormatRender());
+        tblCriteria.setDefaultRenderer(Double.class, new DecimalFormatRender());
     }
 
     private void searchFormual() {

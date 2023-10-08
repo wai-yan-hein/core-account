@@ -11,6 +11,7 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import java.util.List;
 
 /**
  *
@@ -42,6 +43,10 @@ public class LandingHisDetail {
     private double price;
     @Column(name = "amount")
     private double amount;
+    @Transient
+    private List<LandingHisCriteria> listCriteria;
+    @Transient
+    private List<LandingHisCriteriaKey> listDelCriteria;
     @Transient
     private String userCode;
     @Transient

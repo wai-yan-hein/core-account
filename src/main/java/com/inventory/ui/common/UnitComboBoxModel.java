@@ -22,6 +22,17 @@ public class UnitComboBoxModel implements ComboBoxModel<StockUnit> {
         this.data = data;
     }
 
+    public UnitComboBoxModel() {
+    }
+
+    public List<StockUnit> getData() {
+        return data;
+    }
+
+    public void setData(List<StockUnit> data) {
+        this.data = data;
+    }
+
     @Override
     public void setSelectedItem(Object anItem) {
         selected = (StockUnit) anItem;
@@ -32,14 +43,18 @@ public class UnitComboBoxModel implements ComboBoxModel<StockUnit> {
         return selected;
     }
 
+    public StockUnit getSelectedObject() {
+        return selected;
+    }
+
     @Override
     public int getSize() {
-        return data.size();
+        return data == null ? 0 : data.size();
     }
 
     @Override
     public StockUnit getElementAt(int index) {
-        return data.get(index);
+        return data == null ? null : data.get(index);
     }
 
     @Override

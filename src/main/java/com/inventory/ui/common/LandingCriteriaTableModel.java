@@ -8,8 +8,9 @@ package com.inventory.ui.common;
 import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.model.LandingDetailCriteria;
-import com.inventory.model.LandingDetailCriteriaKey;
+import com.inventory.model.LandingHisCriteria;
+import com.inventory.model.LandingHisCriteriaKey;
+import com.inventory.model.LandingHisDetail;
 import com.inventory.model.StockCriteria;
 import java.awt.HeadlessException;
 import java.util.ArrayList;
@@ -27,13 +28,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class LandingCriteriaTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Description", "Percent", "Price", "Amount"};
+    private String[] columnNames = {"Code", "Description", "Percent", "Percent Allowed", "Price", "Amount"};
     private JTable parent;
-    private List<LandingDetailCriteria> listDetail = new ArrayList();
+    private List<LandingHisCriteria> listDetail = new ArrayList();
     private SelectionObserver observer;
-    private List<LandingDetailCriteriaKey> listDel = new ArrayList();
+    private List<LandingHisCriteriaKey> listDel = new ArrayList();
     private JLabel lblRec;
     private boolean editable = true;
+    private LandingHisDetail landingHisDetail;
 
     public boolean isEditable() {
         return editable;
@@ -55,7 +57,7 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
         this.observer = observer;
     }
 
-    public List<LandingDetailCriteriaKey> getListDel() {
+    public List<LandingHisCriteriaKey> getListDel() {
         return listDel;
     }
 
@@ -88,7 +90,7 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 2, 3, 5 ->
+            case 2, 3, 4, 5 ->
                 Double.class;
             default ->
                 String.class;
@@ -97,6 +99,11 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int row, int column) {
+        switch (column) {
+            case 0, 1 -> {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -104,7 +111,7 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
         try {
             if (!listDetail.isEmpty()) {
-                LandingDetailCriteria record = listDetail.get(row);
+                LandingHisCriteria record = listDetail.get(row);
                 switch (column) {
                     case 0 -> {
                         //Name
@@ -119,10 +126,14 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
                         return Util1.toNull(record.getPercent());
                     }
                     case 3 -> {
-                        return Util1.toNull(record.getPrice());
+                        //percent
+                        return Util1.toNull(record.getPercentAllow());
                     }
                     case 4 -> {
-                        return record.getAmount();
+                        return Util1.toNull(record.getPrice());
+                    }
+                    case 5 -> {
+                        return Util1.toNull(record.getAmount());
                     }
                 }
             }
@@ -136,7 +147,7 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
     public void setValueAt(Object value, int row, int column) {
         try {
             if (value != null) {
-                LandingDetailCriteria record = listDetail.get(row);
+                LandingHisCriteria record = listDetail.get(row);
                 switch (column) {
                     case 0, 1 -> {
                         //Code
@@ -169,12 +180,19 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
         }
     }
 
-    private void calAmount(LandingDetailCriteria l) {
+    private void calAmount(LandingHisCriteria l) {
+        double percentAllow = l.getPercentAllow();
         double percent = l.getPercent();
         double price = l.getPrice();
-        double amt = percent * price;
-        l.setAmount(amt);
-        observer.selected("CAL_TOTAL", "CAL_TOTAL");
+        if (percentAllow > 0) {
+            if (percent <= percentAllow) {
+                double diff = percentAllow - percent;
+                l.setAmount(diff * price);
+            }
+        } else {
+            l.setAmount(percent * price);
+        }
+        observer.selected("CAL_CRITERIA", "CAL_CRITERIA");
     }
 
     private void setSelection(int row, int column) {
@@ -184,14 +202,14 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
 
     private void setRecord(int size) {
         if (lblRec != null) {
-            lblRec.setText("Records : " + size);
+            lblRec.setText(String.valueOf(size));
         }
     }
 
     public void addNewRow() {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
-                LandingDetailCriteria pd = new LandingDetailCriteria();
+                LandingHisCriteria pd = new LandingHisCriteria();
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }
@@ -201,7 +219,7 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
     private boolean hasEmptyRow() {
         boolean status = false;
         if (listDetail.size() >= 1) {
-            LandingDetailCriteria get = listDetail.get(listDetail.size() - 1);
+            LandingHisCriteria get = listDetail.get(listDetail.size() - 1);
             if (get.getCriteriaCode() == null) {
                 status = true;
             }
@@ -209,11 +227,11 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<LandingDetailCriteria> getListDetail() {
+    public List<LandingHisCriteria> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<LandingDetailCriteria> listDetail) {
+    public void setListDetail(List<LandingHisCriteria> listDetail) {
         this.listDetail = listDetail;
         setRecord(listDetail.size());
         fireTableDataChanged();
@@ -224,17 +242,7 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
     }
 
     public boolean isValidEntry() {
-        boolean status = true;
-        for (LandingDetailCriteria sdh : listDetail) {
-            if (sdh.getCriteriaCode() != null) {
-                if (sdh.getAmount() == 0) {
-                    JOptionPane.showMessageDialog(Global.parentForm, "Invalid Amount.");
-                    parent.requestFocus();
-                    return false;
-                }
-            }
-        }
-        return status;
+        return true;
     }
 
     public void clearDelList() {
@@ -244,7 +252,7 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
     }
 
     public void delete(int row) {
-        LandingDetailCriteria sdh = listDetail.get(row);
+        LandingHisCriteria sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
             listDel.add(sdh.getKey());
         }
@@ -259,14 +267,14 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
         parent.requestFocus();
     }
 
-    public void addObject(LandingDetailCriteria sd) {
+    public void addObject(LandingHisCriteria sd) {
         if (listDetail != null) {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
         }
     }
 
-    public LandingDetailCriteria getObject(int row) {
+    public LandingHisCriteria getObject(int row) {
         return listDetail.get(row);
     }
 

@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class StockFormulaDetailTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Crieria Name", "Percent", "Price"};
+    private String[] columnNames = {"Code", "Crieria Name", "Percent (%)", "Price", "Percent Allowed"};
     private JTable parent;
     private List<StockFormulaDetail> listDetail = new ArrayList();
     private List<StockFormulaDetailKey> listDel = new ArrayList();
@@ -107,7 +107,7 @@ public class StockFormulaDetailTableModel extends AbstractTableModel {
     @Override
     public Class getColumnClass(int column) {
         return switch (column) {
-            case 3, 4 ->
+            case 2, 3, 4 ->
                 Double.class;
             default ->
                 String.class;
@@ -140,6 +140,9 @@ public class StockFormulaDetailTableModel extends AbstractTableModel {
                     case 3 -> {
                         return Util1.toNull(record.getPrice());
                     }
+                    case 4 -> {
+                        return Util1.toNull(record.getPercentAllow());
+                    }
                 }
             }
         } catch (Exception ex) {
@@ -160,8 +163,9 @@ public class StockFormulaDetailTableModel extends AbstractTableModel {
                             record.setUserCode(s.getUserCode());
                             record.setCriteriaCode(s.getKey().getCriteriaCode());
                             record.setCriteriaName(s.getCriteriaName());
+                            record.setPercent(1);
                             addNewRow();
-                            setSelection(row, 2);
+                            setSelection(row, 3);
                         }
                     }
                     case 2 -> {
@@ -176,11 +180,13 @@ public class StockFormulaDetailTableModel extends AbstractTableModel {
                         record.setPrice(Util1.getDouble(value));
                         setSelection(row + 1, 0);
                     }
+                    case 4 -> {
+                        record.setPercentAllow(Util1.getDouble(value));
+                        setSelection(row + 1, 0);
+                    }
                 }
                 record.getKey().setFormulaCode(formulaCode);
-                if (record.getKey().getUniqueId() == 0) {
-                    record.getKey().setUniqueId(row + 1);
-                }
+                setUniqueId(record, row);
                 save(record, row);
                 setRecord(listDetail.size() - 1);
                 fireTableRowsUpdated(row, row);
@@ -188,6 +194,18 @@ public class StockFormulaDetailTableModel extends AbstractTableModel {
             }
         } catch (HeadlessException ex) {
             log.error("setValueAt : " + ex.getStackTrace()[0].getLineNumber() + " - " + ex.getMessage());
+        }
+    }
+
+    private void setUniqueId(StockFormulaDetail s, int row) {
+        int uniqueId = s.getKey().getUniqueId();
+        if (uniqueId == 0) {
+            if (row == 0) {
+                s.getKey().setUniqueId(1);
+            } else {
+                StockFormulaDetail u = listDetail.get(row - 1);
+                s.getKey().setUniqueId(u.getKey().getUniqueId() + 1);
+            }
         }
     }
 

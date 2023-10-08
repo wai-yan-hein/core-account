@@ -47,20 +47,50 @@ public class LandingHis {
     private Integer macId;
     @Column(name = "remark")
     private String remark;
+    @Column(name = "loc_code")
+    private String locCode;
+    @Column(name = "stock_code")
+    private String stockCode;
+    @Column(name = "qty")
+    private double qty;
+    @Column(name = "unit")
+    private String unit;
+    @Column(name = "weight")
+    private double weight;
+    @Column(name = "weight_unit")
+    private String weightUnit;
+    @Column(name = "total_weight")
+    private double totalWeight;
+    @Column(name = "price")
+    private double price;
+    @Column(name = "amount")
+    private double amount;
+    @Column(name = "criteria_amt")
+    private double criteriaAmt;
+    @Column(name = "pur_amount")
+    private double purAmt;
+    @Column(name = "pur_price")
+    private double purPrice;
+    @Column(name = "cargo")
+    private String cargo;
+    @Column(name = "vou_paid")
+    private double vouPaid;
+    @Column(name = "vou_balance")
+    private double vouBalance;
+    @Column(name = "purchase")
+    private boolean purchase;
     @Transient
-    private List<LandingHisDetail> listDetail;
+    private List<LandingHisCriteria> listDetail;
     @Transient
-    private List<LandingHisDetailKey> listDel;
-    @Transient
-    private List<LandingDetailCriteria> listCriteria;
-     @Transient
-    private List<LandingDetailCriteriaKey> listDelCriteria;
+    private List<LandingHisCriteriaKey> listDel;
     @Transient
     private String traderName;
     @Transient
     private String traderUserCode;
     @Transient
     private ZonedDateTime vouDateTime;
+    @Transient
+    private String stockName;
 
     public LandingHis() {
     }

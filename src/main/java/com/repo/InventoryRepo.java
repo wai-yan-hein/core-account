@@ -21,7 +21,10 @@ import com.inventory.model.GRN;
 import com.inventory.model.GRNDetail;
 import com.inventory.model.GRNKey;
 import com.inventory.model.General;
+import com.inventory.model.LandingHisCriteria;
 import com.inventory.model.LandingHis;
+import com.inventory.model.LandingHisDetail;
+import com.inventory.model.LandingHisKey;
 import com.inventory.model.Location;
 import com.inventory.model.LocationKey;
 import com.inventory.model.Message;
@@ -74,6 +77,7 @@ import com.inventory.model.StockBrandKey;
 import com.inventory.model.StockCriteria;
 import com.inventory.model.StockFormula;
 import com.inventory.model.StockFormulaDetail;
+import com.inventory.model.StockFormulaDetailKey;
 import com.inventory.model.StockFormulaKey;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
@@ -232,6 +236,36 @@ public class InventoryRepo {
                 .build())
                 .retrieve()
                 .bodyToFlux(StockFormulaDetail.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<LandingHisCriteria>> getLandingCriteria(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/landing/getLandingCriteria")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(LandingHisCriteria.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<LandingHisDetail>> getLandingHisDetail(String vouNo) {
+        return inventoryApi.get()
+                .uri(builder -> builder.path("/landing/getLandingHisDetail")
+                .queryParam("vouNo", vouNo)
+                .queryParam("compCode", Global.compCode)
+                .build())
+                .retrieve()
+                .bodyToFlux(LandingHisDetail.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
@@ -1389,11 +1423,45 @@ public class InventoryRepo {
                 });
     }
 
+    public Mono<Boolean> delete(StockFormulaDetailKey p) {
+        return inventoryApi.post()
+                .uri("/setup/deleteStockFormulaDetail")
+                .body(Mono.just(p), StockFormulaDetailKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
     public Mono<Boolean> deleteMilling(MillingHis his) {
         MillingHisKey key = his.getKey();
         return inventoryApi.post()
                 .uri("/milling/deleteMilling")
                 .body(Mono.just(key), MillingHisKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+    public Mono<Boolean> delete(LandingHisKey key) {
+        return inventoryApi.post()
+                .uri("/landing/deleteLanding")
+                .body(Mono.just(key), LandingHisKey.class)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+    public Mono<Boolean> restore(LandingHisKey key) {
+        return inventoryApi.post()
+                .uri("/landing/restoreLanding")
+                .body(Mono.just(key), LandingHisKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
                 .onErrorResume((e) -> {
@@ -1638,6 +1706,21 @@ public class InventoryRepo {
                 .body(Mono.just(key), MillingHisKey.class)
                 .retrieve()
                 .bodyToMono(MillingHis.class)
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<LandingHis> findLanding(String vouNo) {
+        LandingHisKey key = new LandingHisKey();
+        key.setVouNo(vouNo);
+        key.setCompCode(Global.compCode);
+        return inventoryApi.post()
+                .uri("/landing/findLanding")
+                .body(Mono.just(key), LandingHisKey.class)
+                .retrieve()
+                .bodyToMono(LandingHis.class)
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -2358,6 +2441,20 @@ public class InventoryRepo {
                 .body(Mono.just(filter), FilterObject.class)
                 .retrieve()
                 .bodyToFlux(GRN.class)
+                .collectList()
+                .onErrorResume((e) -> {
+                    log.error("error :" + e.getMessage());
+                    return Mono.empty();
+                });
+    }
+
+    public Mono<List<LandingHis>> getLandingHistory(FilterObject filter) {
+        return inventoryApi
+                .post()
+                .uri("/landing/history")
+                .body(Mono.just(filter), FilterObject.class)
+                .retrieve()
+                .bodyToFlux(LandingHis.class)
                 .collectList()
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
@@ -3222,4 +3319,5 @@ public class InventoryRepo {
                 .bodyToFlux(ReorderLevel.class)
                 .collectList();
     }
+
 }

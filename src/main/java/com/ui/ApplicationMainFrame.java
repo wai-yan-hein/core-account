@@ -664,7 +664,9 @@ public class ApplicationMainFrame extends javax.swing.JFrame implements Selectio
             case "Landing" -> {
                 LandingEntry g = new LandingEntry();
                 g.setInventoryRepo(inventoryRepo);
+                g.setUserRepo(userRepo);
                 g.setProgress(progress);
+                g.setObserver(this);
                 g.initMain();
                 return g;
             }

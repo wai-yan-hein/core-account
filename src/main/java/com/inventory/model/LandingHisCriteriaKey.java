@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 @Data
 @Embeddable
-public class LandingDetailCriteriaKey implements Serializable {
+public class LandingHisCriteriaKey implements Serializable {
 
     @Column(name = "vou_no")
     private String vouNo;

@@ -2305,8 +2305,7 @@ public class Sale extends javax.swing.JPanel implements SelectionObserver, KeyLi
     }
 
     @Override
-    public void keyReleased(KeyEvent e
-    ) {
+    public void keyReleased(KeyEvent e) {
         Object sourceObj = e.getSource();
         String ctrlName = "-";
         if (sourceObj instanceof JTextField jTextField) {
