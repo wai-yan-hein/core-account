@@ -4,12 +4,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.io.Serializable;
 import lombok.Data;
 
 @Data
 @Entity
 @Table(name = "stock_formula_detail")
-public class StockFormulaDetail {
+public class StockFormulaDetail implements Serializable{
 
     @EmbeddedId
     private StockFormulaDetailKey key;

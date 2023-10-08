@@ -1182,4 +1182,9 @@ public class Util1 {
         }
         return null;
     }
+    
+    public static LocalDateTime getOldLocalDateTime() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return LocalDateTime.parse(LocalDateTime.now().toString(), formatter);
+    }
 }
