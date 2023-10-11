@@ -80,9 +80,15 @@ public class LandingHis {
     @Column(name = "purchase")
     private boolean purchase;
     @Transient
-    private List<LandingHisCriteria> listDetail;
+    private List<LandingHisPrice> listPrice;
     @Transient
-    private List<LandingHisCriteriaKey> listDel;
+    private List<LandingHisPriceKey> listDelPrice;
+    @Transient
+    private List<LandingHisQty> listQty;
+    @Transient
+    private List<LandingHisQtyKey> listDelQty;
+    @Transient
+    private List<LandingHisGrade> listGrade;
     @Transient
     private String traderName;
     @Transient

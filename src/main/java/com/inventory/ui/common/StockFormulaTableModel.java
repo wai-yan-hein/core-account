@@ -108,7 +108,7 @@ public class StockFormulaTableModel extends AbstractTableModel {
     }
 
     private boolean isValidEntry(StockFormula f) {
-        if (f.getKey().getFormulaCode()!= null) {
+        if (f.getKey().getFormulaCode() != null) {
             f.setUpdatedBy(Global.loginUser.getUserCode());
         }
         f.setActive(true);

@@ -133,7 +133,7 @@ import com.inventory.model.RetOutHisDetail;
 import com.inventory.model.RetOutHisKey;
 import com.inventory.model.StockCriteria;
 import com.inventory.model.StockFormula;
-import com.inventory.model.StockFormulaDetail;
+import com.inventory.model.StockFormulaPrice;
 import com.inventory.model.StockIOKey;
 import com.inventory.model.StockInOut;
 import com.inventory.model.StockInOutDetail;
@@ -522,7 +522,7 @@ public class H2Repo {
         return stockFormulaService.save(obj);
     }
 
-    public StockFormulaDetail save(StockFormulaDetail obj) {
+    public StockFormulaPrice save(StockFormulaPrice obj) {
         return stockFormulaService.save(obj);
     }
 

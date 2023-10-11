@@ -5,11 +5,10 @@
  */
 package com.inventory.ui.common;
 
-import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.Util1;
-import com.inventory.model.LandingHisCriteria;
-import com.inventory.model.LandingHisCriteriaKey;
+import com.inventory.model.LandingHisPrice;
+import com.inventory.model.LandingHisPriceKey;
 import com.inventory.model.LandingHisDetail;
 import com.inventory.model.StockCriteria;
 import java.awt.HeadlessException;
@@ -26,13 +25,13 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class LandingCriteriaTableModel extends AbstractTableModel {
+public class LandingPriceTableModel extends AbstractTableModel {
 
     private String[] columnNames = {"Code", "Description", "Percent", "Percent Allowed", "Price", "Amount"};
     private JTable parent;
-    private List<LandingHisCriteria> listDetail = new ArrayList();
+    private List<LandingHisPrice> listDetail = new ArrayList();
     private SelectionObserver observer;
-    private List<LandingHisCriteriaKey> listDel = new ArrayList();
+    private List<LandingHisPriceKey> listDel = new ArrayList();
     private JLabel lblRec;
     private boolean editable = true;
     private LandingHisDetail landingHisDetail;
@@ -57,7 +56,7 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
         this.observer = observer;
     }
 
-    public List<LandingHisCriteriaKey> getListDel() {
+    public List<LandingHisPriceKey> getListDel() {
         return listDel;
     }
 
@@ -111,7 +110,7 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
         try {
             if (!listDetail.isEmpty()) {
-                LandingHisCriteria record = listDetail.get(row);
+                LandingHisPrice record = listDetail.get(row);
                 switch (column) {
                     case 0 -> {
                         //Name
@@ -123,7 +122,7 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
                     }
                     case 2 -> {
                         //percent
-                        return Util1.toNull(record.getPercent());
+                        return record.getPercent();
                     }
                     case 3 -> {
                         //percent
@@ -147,7 +146,7 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
     public void setValueAt(Object value, int row, int column) {
         try {
             if (value != null) {
-                LandingHisCriteria record = listDetail.get(row);
+                LandingHisPrice record = listDetail.get(row);
                 switch (column) {
                     case 0, 1 -> {
                         //Code
@@ -159,9 +158,13 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
                     }
                     case 2 -> {
                         //percent
-                        if (Util1.getDouble(value) > 0) {
+                        if (Util1.getDouble(value) >= 0) {
                             record.setPercent(Util1.getDouble(value));
-                            setSelection(row, 3);
+                            if (row == listDetail.size() - 1) {
+                                setSelection(row, 3);
+                            } else {
+                                setSelection(row + 1, 2);
+                            }
                         }
                     }
                     //price
@@ -180,7 +183,7 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
         }
     }
 
-    private void calAmount(LandingHisCriteria l) {
+    private void calAmount(LandingHisPrice l) {
         double percentAllow = l.getPercentAllow();
         double percent = l.getPercent();
         double price = l.getPrice();
@@ -209,7 +212,7 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
     public void addNewRow() {
         if (listDetail != null) {
             if (!hasEmptyRow()) {
-                LandingHisCriteria pd = new LandingHisCriteria();
+                LandingHisPrice pd = new LandingHisPrice();
                 listDetail.add(pd);
                 fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
             }
@@ -219,7 +222,7 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
     private boolean hasEmptyRow() {
         boolean status = false;
         if (listDetail.size() >= 1) {
-            LandingHisCriteria get = listDetail.get(listDetail.size() - 1);
+            LandingHisPrice get = listDetail.get(listDetail.size() - 1);
             if (get.getCriteriaCode() == null) {
                 status = true;
             }
@@ -227,11 +230,11 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<LandingHisCriteria> getListDetail() {
+    public List<LandingHisPrice> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<LandingHisCriteria> listDetail) {
+    public void setListDetail(List<LandingHisPrice> listDetail) {
         this.listDetail = listDetail;
         setRecord(listDetail.size());
         fireTableDataChanged();
@@ -252,7 +255,7 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
     }
 
     public void delete(int row) {
-        LandingHisCriteria sdh = listDetail.get(row);
+        LandingHisPrice sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
             listDel.add(sdh.getKey());
         }
@@ -267,14 +270,14 @@ public class LandingCriteriaTableModel extends AbstractTableModel {
         parent.requestFocus();
     }
 
-    public void addObject(LandingHisCriteria sd) {
+    public void addObject(LandingHisPrice sd) {
         if (listDetail != null) {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
         }
     }
 
-    public LandingHisCriteria getObject(int row) {
+    public LandingHisPrice getObject(int row) {
         return listDetail.get(row);
     }
 

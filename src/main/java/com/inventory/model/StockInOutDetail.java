@@ -47,7 +47,7 @@ public class StockInOutDetail implements Serializable {
     @Column(name = "weight_unit")
     private String weightUnit;
     @Column(name = "total_weight")
-    private double totalWegiht;
+    private double totalWeight;
     @Transient
     private String userCode;
     @Transient

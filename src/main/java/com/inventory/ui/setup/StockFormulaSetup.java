@@ -9,10 +9,15 @@ import com.common.Global;
 import com.common.PanelControl;
 import com.common.SelectionObserver;
 import com.common.Util1;
+import com.inventory.editor.StockCellEditor;
 import com.inventory.editor.StockCriteriaEditor;
+import com.inventory.editor.StockUnitEditor;
+import com.inventory.model.GradeDetail;
 import com.inventory.model.StockFormula;
-import com.inventory.model.StockFormulaDetail;
-import com.inventory.ui.common.StockFormulaDetailTableModel;
+import com.inventory.model.StockFormulaPrice;
+import com.inventory.ui.common.GradeDetailTableModel;
+import com.inventory.ui.common.StockFormulaPriceTableModel;
+import com.inventory.ui.common.StockFormulaQtyTableModel;
 import com.inventory.ui.common.StockFormulaTableModel;
 import com.inventory.ui.setup.dialog.StockCriteriaSetupDialog;
 import com.inventory.ui.setup.dialog.common.AutoClearEditor;
@@ -37,7 +42,9 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
     private SelectionObserver observer;
     private JProgressBar progress;
     private StockFormulaTableModel stockFormulaTableModel = new StockFormulaTableModel();
-    private StockFormulaDetailTableModel stockFormulaDetailTableModel = new StockFormulaDetailTableModel();
+    private StockFormulaPriceTableModel stockFormulaPriceTableModel = new StockFormulaPriceTableModel();
+    private StockFormulaQtyTableModel stockFormulaQtyTableModel = new StockFormulaQtyTableModel();
+    private GradeDetailTableModel gradeDetailTableModel = new GradeDetailTableModel();
 
     public void setObserver(SelectionObserver observer) {
         this.observer = observer;
@@ -61,39 +68,75 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
 
     public void initMain() {
         initTableFormula();
-        initTableCriteria();
+        initTablePrice();
+        initTableGrade();
+        initTableQty();
         searchFormual();
     }
 
     private void actionMapping() {
         String solve = "delete";
         KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0);
-        tblCriteria.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
-        tblCriteria.getActionMap().put(solve, new DeleteAction());
+        tblPrice.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
+        tblPrice.getActionMap().put(solve, new DeleteAction("Formula"));
+        tblGrade.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(enter, solve);
+        tblGrade.getActionMap().put(solve, new DeleteAction("Grade"));
     }
 
     private class DeleteAction extends AbstractAction {
 
+        private String option;
+
+        public DeleteAction(String option) {
+            this.option = option;
+        }
+
         @Override
         public void actionPerformed(ActionEvent e) {
-            deleteTran();
+            switch (option) {
+                case "Formula" ->
+                    deleteTranFormula();
+                case "Grade" ->
+                    deleteTranGrade();
+            }
         }
     }
 
-    private void deleteTran() {
-        int row = tblCriteria.convertRowIndexToModel(tblCriteria.getSelectedRow());
+    private void deleteTranFormula() {
+        int row = tblPrice.convertRowIndexToModel(tblPrice.getSelectedRow());
         if (row >= 0) {
-            if (tblCriteria.getCellEditor() != null) {
-                tblCriteria.getCellEditor().stopCellEditing();
+            if (tblPrice.getCellEditor() != null) {
+                tblPrice.getCellEditor().stopCellEditing();
             }
             int yes_no = JOptionPane.showConfirmDialog(this,
                     "Are you sure to delete?", "Criteria Transaction delete.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
             if (yes_no == 0) {
-                StockFormulaDetail d = stockFormulaDetailTableModel.getObject(row);
+                StockFormulaPrice d = stockFormulaPriceTableModel.getObject(row);
                 if (d != null) {
                     inventoryRepo.delete(d.getKey()).doOnSuccess((t) -> {
                         if (t) {
-                            stockFormulaDetailTableModel.delete(row);
+                            stockFormulaPriceTableModel.delete(row);
+                        }
+                    }).subscribe();
+                }
+            }
+        }
+    }
+
+    private void deleteTranGrade() {
+        int row = tblGrade.convertRowIndexToModel(tblGrade.getSelectedRow());
+        if (row >= 0) {
+            if (tblGrade.getCellEditor() != null) {
+                tblGrade.getCellEditor().stopCellEditing();
+            }
+            int yes_no = JOptionPane.showConfirmDialog(this,
+                    "Are you sure to delete?", "Criteria Transaction delete.", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (yes_no == 0) {
+                GradeDetail d = gradeDetailTableModel.getObject(row);
+                if (d != null) {
+                    inventoryRepo.delete(d.getKey()).doOnSuccess((t) -> {
+                        if (t) {
+                            gradeDetailTableModel.delete(row);
                         }
                     }).subscribe();
                 }
@@ -126,33 +169,101 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
         tblStock.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tblStock.getColumnModel().getColumn(0).setCellEditor(new AutoClearEditor());
         tblStock.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
+        tblStock.getColumnModel().getColumn(0).setPreferredWidth(50);
+        tblStock.getColumnModel().getColumn(1).setPreferredWidth(200);
+        tblStock.getColumnModel().getColumn(2).setPreferredWidth(10);
         tblStock.getSelectionModel().addListSelectionListener((e) -> {
             if (e.getValueIsAdjusting()) {
-                searchFormualDetail();
+                searchFormulaPrice();
+                searchFormulaQty();
             }
         });
     }
 
-    private void initTableCriteria() {
-        stockFormulaDetailTableModel.setInventoryRepo(inventoryRepo);
-        stockFormulaDetailTableModel.setParent(tblCriteria);
-        tblCriteria.setModel(stockFormulaDetailTableModel);
-        tblCriteria.getTableHeader().setFont(Global.tblHeaderFont);
-        tblCriteria.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblCriteria.setFont(Global.textFont);
-        tblCriteria.setRowHeight(Global.tblRowHeight);
-        tblCriteria.setShowGrid(true);
-        tblCriteria.setCellSelectionEnabled(true);
-        tblCriteria.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+    private void initTablePrice() {
+        stockFormulaPriceTableModel.setInventoryRepo(inventoryRepo);
+        stockFormulaPriceTableModel.setParent(tblPrice);
+        tblPrice.setModel(stockFormulaPriceTableModel);
+        tblPrice.getTableHeader().setFont(Global.tblHeaderFont);
+        tblPrice.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblPrice.setFont(Global.textFont);
+        tblPrice.setRowHeight(Global.tblRowHeight);
+        tblPrice.setShowGrid(true);
+        tblPrice.setCellSelectionEnabled(true);
+        tblPrice.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
-        tblCriteria.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblCriteria.getColumnModel().getColumn(0).setCellEditor(new StockCriteriaEditor(inventoryRepo));
-        tblCriteria.getColumnModel().getColumn(1).setCellEditor(new StockCriteriaEditor(inventoryRepo));
-        tblCriteria.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
-        tblCriteria.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
-        tblCriteria.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
-        tblCriteria.setDefaultRenderer(Object.class, new DecimalFormatRender());
-        tblCriteria.setDefaultRenderer(Double.class, new DecimalFormatRender());
+        tblPrice.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblPrice.getColumnModel().getColumn(0).setCellEditor(new StockCriteriaEditor(inventoryRepo));
+        tblPrice.getColumnModel().getColumn(1).setCellEditor(new StockCriteriaEditor(inventoryRepo));
+        tblPrice.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
+        tblPrice.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
+        tblPrice.getColumnModel().getColumn(4).setCellEditor(new AutoClearEditor());
+        tblPrice.setDefaultRenderer(Object.class, new DecimalFormatRender(2));
+        tblPrice.setDefaultRenderer(Double.class, new DecimalFormatRender(2));
+        tblPrice.getColumnModel().getColumn(0).setPreferredWidth(20);//code
+        tblPrice.getColumnModel().getColumn(1).setPreferredWidth(100);//name
+        tblPrice.getColumnModel().getColumn(2).setPreferredWidth(5);//percent
+        tblPrice.getColumnModel().getColumn(3).setPreferredWidth(20);//price
+        tblPrice.getColumnModel().getColumn(4).setPreferredWidth(5);//percent
+        tblPrice.getSelectionModel().addListSelectionListener((e) -> {
+            if (e.getValueIsAdjusting()) {
+                searchGradeDetail();
+            }
+        });
+    }
+
+    private void initTableGrade() {
+        gradeDetailTableModel.setInventoryRepo(inventoryRepo);
+        gradeDetailTableModel.setParent(tblGrade);
+        tblGrade.setModel(gradeDetailTableModel);
+        tblGrade.getTableHeader().setFont(Global.tblHeaderFont);
+        tblGrade.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblGrade.setFont(Global.textFont);
+        tblGrade.setRowHeight(Global.tblRowHeight);
+        tblGrade.setShowGrid(true);
+        tblGrade.setCellSelectionEnabled(true);
+        tblGrade.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
+        tblGrade.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblGrade.getColumnModel().getColumn(0).setCellEditor(new StockCellEditor(inventoryRepo));
+        tblGrade.getColumnModel().getColumn(1).setCellEditor(new AutoClearEditor());
+        tblGrade.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
+        tblGrade.getColumnModel().getColumn(0).setPreferredWidth(200);
+        tblGrade.getColumnModel().getColumn(1).setPreferredWidth(50);
+        tblGrade.getColumnModel().getColumn(2).setPreferredWidth(50);
+        tblGrade.setDefaultRenderer(Object.class, new DecimalFormatRender(2));
+        tblGrade.setDefaultRenderer(Double.class, new DecimalFormatRender(2));
+    }
+
+    private void initTableQty() {
+        stockFormulaQtyTableModel.setInventoryRepo(inventoryRepo);
+        stockFormulaQtyTableModel.setParent(tblQty);
+        tblQty.setModel(stockFormulaQtyTableModel);
+        tblQty.getTableHeader().setFont(Global.tblHeaderFont);
+        tblQty.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblQty.setFont(Global.textFont);
+        tblQty.setRowHeight(Global.tblRowHeight);
+        tblQty.setShowGrid(true);
+        tblQty.setCellSelectionEnabled(true);
+        tblQty.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
+        tblQty.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblQty.getColumnModel().getColumn(0).setCellEditor(new StockCriteriaEditor(inventoryRepo));
+        tblQty.getColumnModel().getColumn(1).setCellEditor(new StockCriteriaEditor(inventoryRepo));
+        tblQty.getColumnModel().getColumn(2).setCellEditor(new AutoClearEditor());
+        tblQty.getColumnModel().getColumn(3).setCellEditor(new AutoClearEditor());
+        inventoryRepo.getStockUnit().doOnSuccess((t) -> {
+            tblQty.getColumnModel().getColumn(4).setCellEditor(new StockUnitEditor(t));
+        }).subscribe();
+        tblQty.getColumnModel().getColumn(5).setCellEditor(new AutoClearEditor());
+        tblQty.setDefaultRenderer(Object.class, new DecimalFormatRender(2));
+        tblQty.setDefaultRenderer(Double.class, new DecimalFormatRender(2));
+        tblQty.getColumnModel().getColumn(0).setPreferredWidth(20);//code
+        tblQty.getColumnModel().getColumn(1).setPreferredWidth(100);//name
+        tblQty.getColumnModel().getColumn(2).setPreferredWidth(5);//percent
+        tblQty.getColumnModel().getColumn(3).setPreferredWidth(20);//qty
+        tblQty.getColumnModel().getColumn(4).setPreferredWidth(20);//unit
+        tblQty.getColumnModel().getColumn(5).setPreferredWidth(5);//percent
     }
 
     private void searchFormual() {
@@ -167,32 +278,81 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
         }).subscribe();
     }
 
-    private void searchFormualDetail() {
+    private void searchFormulaPrice() {
         int row = tblStock.convertRowIndexToModel(tblStock.getSelectedRow());
         if (row >= 0) {
             StockFormula f = stockFormulaTableModel.getObject(row);
             String formulaCode = f.getKey().getFormulaCode();
             if (!Util1.isNullOrEmpty(formulaCode)) {
-                inventoryRepo.getStockFormulaDetail(formulaCode).doOnSuccess((t) -> {
-                    stockFormulaDetailTableModel.setListDetail(t);
-                    stockFormulaDetailTableModel.setFormulaCode(formulaCode);
-                    stockFormulaDetailTableModel.addNewRow();
-                    focusOnTable();
-                }).doOnTerminate(() -> {
-
+                inventoryRepo.getStockFormulaPrice(formulaCode).doOnSuccess((t) -> {
+                    stockFormulaPriceTableModel.setListDetail(t);
+                    stockFormulaPriceTableModel.setFormulaCode(formulaCode);
+                    stockFormulaPriceTableModel.addNewRow();
+                    gradeDetailTableModel.clear();
+                    focusOnTablePrice();
                 }).subscribe();
+            } else {
+                stockFormulaPriceTableModel.clear();
             }
         }
     }
 
-    private void focusOnTable() {
-        int rc = tblCriteria.getRowCount();
+    private void searchFormulaQty() {
+        int row = tblStock.convertRowIndexToModel(tblStock.getSelectedRow());
+        if (row >= 0) {
+            StockFormula f = stockFormulaTableModel.getObject(row);
+            String formulaCode = f.getKey().getFormulaCode();
+            if (!Util1.isNullOrEmpty(formulaCode)) {
+                inventoryRepo.getStockFormulaQty(formulaCode).doOnSuccess((t) -> {
+                    stockFormulaQtyTableModel.setListDetail(t);
+                    stockFormulaQtyTableModel.setFormulaCode(formulaCode);
+                    stockFormulaQtyTableModel.addNewRow();
+                }).subscribe();
+            } else {
+                stockFormulaPriceTableModel.clear();
+            }
+        }
+    }
+
+    private void searchGradeDetail() {
+        int row = tblPrice.convertRowIndexToModel(tblPrice.getSelectedRow());
+        if (row >= 0) {
+            StockFormulaPrice f = stockFormulaPriceTableModel.getObject(row);
+            String formulaCode = f.getKey().getFormulaCode();
+            String criteraCode = f.getCriteriaCode();
+            if (!Util1.isNullOrEmpty(formulaCode)) {
+                inventoryRepo.getGradeDetail(formulaCode, criteraCode).doOnSuccess((t) -> {
+                    gradeDetailTableModel.setListDetail(t);
+                    gradeDetailTableModel.setFormulaCode(formulaCode);
+                    gradeDetailTableModel.setCriteriaCode(criteraCode);
+                    gradeDetailTableModel.addNewRow();
+                    focusOnTableGrade();
+                }).subscribe();
+            } else {
+                gradeDetailTableModel.clear();
+            }
+        }
+    }
+
+    private void focusOnTablePrice() {
+        int rc = tblPrice.getRowCount();
         if (rc > 1) {
-            tblCriteria.setRowSelectionInterval(rc - 1, rc - 1);
-            tblCriteria.setColumnSelectionInterval(0, 0);
-            tblCriteria.requestFocus();
+            tblPrice.setRowSelectionInterval(rc - 1, rc - 1);
+            tblPrice.setColumnSelectionInterval(0, 0);
+            tblPrice.requestFocus();
         } else {
-            tblCriteria.requestFocus();
+            tblPrice.requestFocus();
+        }
+    }
+
+    private void focusOnTableGrade() {
+        int rc = tblGrade.getRowCount();
+        if (rc > 1) {
+            tblGrade.setRowSelectionInterval(rc - 1, rc - 1);
+            tblGrade.setColumnSelectionInterval(0, 0);
+            tblGrade.requestFocus();
+        } else {
+            tblGrade.requestFocus();
         }
     }
 
@@ -215,14 +375,22 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        tblGrade = new javax.swing.JTable();
+        jPanel5 = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tblPrice = new javax.swing.JTable();
+        jPanel4 = new javax.swing.JPanel();
+        jButton3 = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblStock = new javax.swing.JTable();
-        jLabel2 = new javax.swing.JLabel();
-        jPanel2 = new javax.swing.JPanel();
-        jButton3 = new javax.swing.JButton();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        tblCriteria = new javax.swing.JTable();
-        jLabel1 = new javax.swing.JLabel();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        tblQty = new javax.swing.JTable();
+        jPanel6 = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentShown(java.awt.event.ComponentEvent evt) {
@@ -231,6 +399,113 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
         });
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel2.setFont(Global.menuFont);
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel2.setText("Formula List");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel2)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        tblGrade.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane3.setViewportView(tblGrade);
+
+        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jLabel3.setFont(Global.menuFont);
+        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel3.setText("Grade");
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel3)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        tblPrice.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane2.setViewportView(tblPrice);
+
+        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+
+        jButton3.setBackground(Global.selectionColor);
+        jButton3.setFont(Global.lableFont);
+        jButton3.setForeground(new java.awt.Color(255, 255, 255));
+        jButton3.setText("New Criteria");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setFont(Global.menuFont);
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel1.setText("Formula Price");
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton3)
+                .addContainerGap())
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton3)
+                    .addComponent(jLabel1))
+                .addContainerGap())
+        );
 
         tblStock.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -245,42 +520,7 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
         ));
         jScrollPane1.setViewportView(tblStock);
 
-        jLabel2.setFont(Global.menuFont);
-        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setText("Formula List");
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 427, Short.MAX_VALUE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
-
-        jButton3.setFont(Global.lableFont);
-        jButton3.setText("New Criteria");
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
-            }
-        });
-
-        tblCriteria.setModel(new javax.swing.table.DefaultTableModel(
+        tblQty.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -291,35 +531,28 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane2.setViewportView(tblCriteria);
+        jScrollPane4.setViewportView(tblQty);
 
-        jLabel1.setFont(Global.menuFont);
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Formula Detail");
+        jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
+        jLabel4.setFont(Global.menuFont);
+        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel4.setText("Formula Qty");
+
+        javax.swing.GroupLayout jPanel6Layout = new javax.swing.GroupLayout(jPanel6);
+        jPanel6.setLayout(jPanel6Layout);
+        jPanel6Layout.setHorizontalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton3)))
+                .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
+        jPanel6Layout.setVerticalGroup(
+            jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel6Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton3)
-                    .addComponent(jLabel1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 327, Short.MAX_VALUE)
+                .addComponent(jLabel4)
                 .addContainerGap())
         );
 
@@ -328,18 +561,41 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane4)
+                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 598, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -359,11 +615,19 @@ public class StockFormulaSetup extends javax.swing.JPanel implements SelectionOb
     private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable tblCriteria;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JTable tblGrade;
+    private javax.swing.JTable tblPrice;
+    private javax.swing.JTable tblQty;
     private javax.swing.JTable tblStock;
     // End of variables declaration//GEN-END:variables
 

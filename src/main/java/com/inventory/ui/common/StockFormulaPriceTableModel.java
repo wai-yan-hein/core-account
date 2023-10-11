@@ -9,12 +9,14 @@ import com.common.Global;
 import com.common.SelectionObserver;
 import com.common.Util1;
 import com.inventory.model.StockCriteria;
-import com.inventory.model.StockFormulaDetail;
-import com.inventory.model.StockFormulaDetailKey;
+import com.inventory.model.StockFormulaPrice;
+import com.inventory.model.StockFormulaPriceKey;
 import com.repo.InventoryRepo;
 import java.awt.HeadlessException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -26,12 +28,12 @@ import lombok.extern.slf4j.Slf4j;
  * @author wai yan
  */
 @Slf4j
-public class StockFormulaDetailTableModel extends AbstractTableModel {
+public class StockFormulaPriceTableModel extends AbstractTableModel {
 
-    private String[] columnNames = {"Code", "Crieria Name", "Percent (%)", "Price", "Percent Allowed"};
+    private String[] columnNames = {"Code", "Criteria Name", "Percent (%)", "Price", "Percent Allowed"};
     private JTable parent;
-    private List<StockFormulaDetail> listDetail = new ArrayList();
-    private List<StockFormulaDetailKey> listDel = new ArrayList();
+    private List<StockFormulaPrice> listDetail = new ArrayList();
+    private List<StockFormulaPriceKey> listDel = new ArrayList();
     private SelectionObserver observer;
     private JLabel lblRec;
     private boolean editable = true;
@@ -123,7 +125,7 @@ public class StockFormulaDetailTableModel extends AbstractTableModel {
     public Object getValueAt(int row, int column) {
         try {
             if (!listDetail.isEmpty()) {
-                StockFormulaDetail record = listDetail.get(row);
+                StockFormulaPrice record = listDetail.get(row);
                 switch (column) {
                     case 0 -> {
                         //code
@@ -154,7 +156,7 @@ public class StockFormulaDetailTableModel extends AbstractTableModel {
     @Override
     public void setValueAt(Object value, int row, int column) {
         try {
-            StockFormulaDetail record = listDetail.get(row);
+            StockFormulaPrice record = listDetail.get(row);
             if (value != null) {
                 switch (column) {
                     case 0, 1 -> {
@@ -197,21 +199,21 @@ public class StockFormulaDetailTableModel extends AbstractTableModel {
         }
     }
 
-    private void setUniqueId(StockFormulaDetail s, int row) {
+    private void setUniqueId(StockFormulaPrice s, int row) {
         int uniqueId = s.getKey().getUniqueId();
         if (uniqueId == 0) {
             if (row == 0) {
                 s.getKey().setUniqueId(1);
             } else {
-                StockFormulaDetail u = listDetail.get(row - 1);
+                StockFormulaPrice u = listDetail.get(row - 1);
                 s.getKey().setUniqueId(u.getKey().getUniqueId() + 1);
             }
         }
     }
 
-    private void save(StockFormulaDetail sf, int row) {
+    private void save(StockFormulaPrice sf, int row) {
         if (isValidEntry(sf)) {
-            inventoryRepo.saveStockFormulaDetail(sf).doOnSuccess((t) -> {
+            inventoryRepo.saveStockFormulaPrice(sf).doOnSuccess((t) -> {
                 if (t != null) {
                     listDetail.set(row, t);
                 }
@@ -219,13 +221,32 @@ public class StockFormulaDetailTableModel extends AbstractTableModel {
         }
     }
 
-    private boolean isValidEntry(StockFormulaDetail sf) {
+    private boolean isValidEntry(StockFormulaPrice sf) {
         if (sf.getCriteriaCode() == null) {
             return false;
         } else if (sf.getPercent() == 0) {
             return false;
+        } else if (isDuplicate()) {
+            JOptionPane.showMessageDialog(parent, "Duplicate Criteria.");
+            return false;
         }
         return true;
+    }
+
+    private boolean isDuplicate() {
+        Map<String, Integer> stockCodeCountMap = new HashMap<>();
+        for (StockFormulaPrice detail : listDetail) {
+            String code = detail.getCriteriaCode();
+            stockCodeCountMap.put(code, stockCodeCountMap.getOrDefault(code, 0) + 1);
+
+            // If the count is 2, return true indicating duplicate stockCode
+            if (stockCodeCountMap.get(code) == 2) {
+                return true;
+            }
+        }
+
+        // No duplicates found
+        return false;
     }
 
     private void setSelection(int row, int column) {
@@ -242,8 +263,8 @@ public class StockFormulaDetailTableModel extends AbstractTableModel {
     public void addNewRow() {
 //        if (listDetail != null) {
         if (!hasEmptyRow()) {
-            StockFormulaDetail pd = new StockFormulaDetail();
-            StockFormulaDetailKey key = new StockFormulaDetailKey();
+            StockFormulaPrice pd = new StockFormulaPrice();
+            StockFormulaPriceKey key = new StockFormulaPriceKey();
             key.setCompCode(Global.compCode);
             key.setFormulaCode(formulaCode);
             pd.setKey(key);
@@ -259,7 +280,7 @@ public class StockFormulaDetailTableModel extends AbstractTableModel {
             return true;
         }
         if (listDetail.size() >= 1) {
-            StockFormulaDetail get = listDetail.get(listDetail.size() - 1);
+            StockFormulaPrice get = listDetail.get(listDetail.size() - 1);
             if (get.getCriteriaCode() == null) {
                 status = true;
             }
@@ -267,11 +288,11 @@ public class StockFormulaDetailTableModel extends AbstractTableModel {
         return status;
     }
 
-    public List<StockFormulaDetail> getListDetail() {
+    public List<StockFormulaPrice> getListDetail() {
         return listDetail;
     }
 
-    public void setListDetail(List<StockFormulaDetail> listDetail) {
+    public void setListDetail(List<StockFormulaPrice> listDetail) {
         this.listDetail = listDetail;
         fireTableDataChanged();
     }
@@ -287,7 +308,7 @@ public class StockFormulaDetailTableModel extends AbstractTableModel {
     }
 
     public void delete(int row) {
-        StockFormulaDetail sdh = listDetail.get(row);
+        StockFormulaPrice sdh = listDetail.get(row);
         if (sdh.getKey() != null) {
             listDel.add(sdh.getKey());
         }
@@ -302,14 +323,14 @@ public class StockFormulaDetailTableModel extends AbstractTableModel {
         parent.requestFocus();
     }
 
-    public void addObject(StockFormulaDetail sd) {
+    public void addObject(StockFormulaPrice sd) {
         if (listDetail != null) {
             listDetail.add(sd);
             fireTableRowsInserted(listDetail.size() - 1, listDetail.size() - 1);
         }
     }
 
-    public StockFormulaDetail getObject(int row) {
+    public StockFormulaPrice getObject(int row) {
         return listDetail.get(row);
     }
 

@@ -157,7 +157,8 @@ public class COADaoImpl extends AbstractDao<COAKey, ChartOfAccount> implements C
                      and a.comp_code = c1.comp_code
                      left join chart_of_account c2
                      on c1.coa_parent = c2.coa_code
-                     and c1.comp_code = c2.comp_code""";
+                     and c1.comp_code = c2.comp_code
+                     order by coa_code_usr,coa_name_eng""";
         ResultSet rs = getResult(sql, level, level, compCode, str, str);
         try {
             while (rs.next()) {

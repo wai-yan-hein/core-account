@@ -28,11 +28,11 @@ public class ProcessHisDetail {
     @Column(name = "vou_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime vouDate;
     @Column(name = "qty")
-    private float qty;
+    private double qty;
     @Column(name = "unit")
     private String unit;
     @Column(name = "price")
-    private Float price;
+    private double price;
     @Transient
     private String locName;
     @Transient

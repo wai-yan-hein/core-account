@@ -1,8 +1,8 @@
 package com.h2.service;
 
 import com.inventory.model.StockFormula;
-import com.inventory.model.StockFormulaDetail;
-import com.inventory.model.StockFormulaDetailKey;
+import com.inventory.model.StockFormulaPrice;
+import com.inventory.model.StockFormulaPriceKey;
 import com.inventory.model.StockFormulaKey;
 import java.util.List;
 
@@ -14,11 +14,11 @@ public interface StockFormulaService {
 
     List<StockFormula> getFormula(String compCode);
 
-    StockFormulaDetail save(StockFormulaDetail s);
+    StockFormulaPrice save(StockFormulaPrice s);
 
-    boolean delete(StockFormulaDetailKey key);
+    boolean delete(StockFormulaPriceKey key);
 
-    List<StockFormulaDetail> getFormulaDetail(String code, String compCode);
+    List<StockFormulaPrice> getFormulaDetail(String code, String compCode);
 
     String getMaxDate();
 }

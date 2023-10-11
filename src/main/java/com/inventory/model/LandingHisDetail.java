@@ -44,9 +44,9 @@ public class LandingHisDetail {
     @Column(name = "amount")
     private double amount;
     @Transient
-    private List<LandingHisCriteria> listCriteria;
+    private List<LandingHisPrice> listCriteria;
     @Transient
-    private List<LandingHisCriteriaKey> listDelCriteria;
+    private List<LandingHisPriceKey> listDelCriteria;
     @Transient
     private String userCode;
     @Transient
