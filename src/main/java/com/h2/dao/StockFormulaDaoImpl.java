@@ -41,4 +41,9 @@ public class StockFormulaDaoImpl extends AbstractDao<StockFormulaKey, StockFormu
         LocalDateTime date = getDate(jpql);
         return date == null ? Util1.getOldDate() : Util1.toDateTimeStrMYSQL(date);
     }
+    
+    @Override
+    public StockFormula find(StockFormulaKey key) {
+        return getByKey(key);
+    }
 }

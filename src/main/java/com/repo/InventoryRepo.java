@@ -851,6 +851,9 @@ public class InventoryRepo {
         StockFormulaKey key = new StockFormulaKey();
         key.setCompCode(Global.compCode);
         key.setFormulaCode(formualCode);
+        if (localDatabase) {
+            return h2Repo.findStockFormula(key);
+        }
         return inventoryApi.post()
                 .uri("/setup/findStockFormula")
                 .body(Mono.just(key), StockFormulaKey.class)
@@ -1440,6 +1443,11 @@ public class InventoryRepo {
                 .body(Mono.just(s), StockCriteria.class)
                 .retrieve()
                 .bodyToMono(StockCriteria.class)
+                .doOnSuccess((s1) -> {
+                    if (localDatabase) {
+                        h2Repo.save(s1);
+                    }
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();
@@ -1454,7 +1462,7 @@ public class InventoryRepo {
                 .bodyToMono(StockFormula.class)
                 .doOnSuccess((s1) -> {
                     if (localDatabase) {
-                        h2Repo.save(s);
+                        h2Repo.save(s1);
                     }
                 })
                 .onErrorResume((e) -> {
@@ -1561,6 +1569,11 @@ public class InventoryRepo {
                 .body(Mono.just(p), GradeDetailKey.class)
                 .retrieve()
                 .bodyToMono(Boolean.class)
+                .doOnSuccess((s1) -> {
+                    if (localDatabase) {
+                        h2Repo.delete(p);
+                    }
+                })
                 .onErrorResume((e) -> {
                     log.error("error :" + e.getMessage());
                     return Mono.empty();

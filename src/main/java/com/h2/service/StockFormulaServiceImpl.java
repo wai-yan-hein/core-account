@@ -1,8 +1,10 @@
 package com.h2.service;
 
 import com.common.Util1;
+import com.h2.dao.GradeDetailDao;
 import com.h2.dao.StockFormulaDao;
 import com.h2.dao.StockFormulaDetailDao;
+import com.inventory.model.GradeDetailKey;
 import com.inventory.model.StockFormula;
 import com.inventory.model.StockFormulaPrice;
 import com.inventory.model.StockFormulaPriceKey;
@@ -21,6 +23,7 @@ public class StockFormulaServiceImpl implements StockFormulaService {
 
     private final StockFormulaDao formulaDao;
     private final StockFormulaDetailDao formulaDetailDao;
+    private final GradeDetailDao gradeDetailDao;
     @Autowired
     private SeqService seqService;
 
@@ -62,6 +65,11 @@ public class StockFormulaServiceImpl implements StockFormulaService {
     }
 
     @Override
+    public boolean delete(GradeDetailKey key) {
+        return gradeDetailDao.delete(key);
+    }
+
+    @Override
     public List<StockFormulaPrice> getFormulaDetail(String code, String compCode) {
         return formulaDetailDao.getFormulaDetail(code, compCode);
     }
@@ -69,5 +77,10 @@ public class StockFormulaServiceImpl implements StockFormulaService {
     @Override
     public String getMaxDate() {
         return formulaDao.getMaxDate();
+    }
+
+    @Override
+    public StockFormula find(StockFormulaKey key) {
+        return formulaDao.find(key);
     }
 }

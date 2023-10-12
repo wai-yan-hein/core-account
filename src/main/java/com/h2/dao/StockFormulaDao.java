@@ -12,4 +12,6 @@ public interface StockFormulaDao {
     List<StockFormula> getFormula(String compCode);
     
     String getMaxDate();
+    
+    StockFormula find(StockFormulaKey key);
 }
